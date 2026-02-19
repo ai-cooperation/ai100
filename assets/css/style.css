@@ -617,6 +617,83 @@ a:hover { color: var(--teal); }
   margin-bottom: 0.6rem;
 }
 
+/* Answer Cards */
+.answer-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--cyan);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.2rem;
+  margin: 1rem 0;
+}
+
+.answer-card h4 {
+  color: var(--cyan);
+  font-size: 0.95rem;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.answer-card table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin: 0.5rem 0;
+}
+
+.answer-card th {
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--cyan);
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.answer-card td {
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.answer-card tr:last-child td {
+  border-bottom: none;
+}
+
+.answer-card strong {
+  color: var(--text);
+}
+
+.answer-card ul, .answer-card ol {
+  padding-left: 1.2rem;
+  margin: 0.5rem 0;
+}
+
+.answer-card li {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin-bottom: 0.3rem;
+}
+
+.answer-card blockquote {
+  background: rgba(6, 182, 212, 0.06);
+  border-left: 3px solid var(--purple);
+  padding: 0.6rem 1rem;
+  margin: 0.8rem 0 0.3rem;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.answer-card blockquote strong {
+  color: var(--purple);
+}
+
 /* === Keywords Check === */
 .keywords-check {
   margin: 2.5rem 0;
