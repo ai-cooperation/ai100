@@ -1,4 +1,4 @@
-<a href="{{ include.lecture.url | relative_url }}" class="lecture-card" data-module="{{ include.lecture.module }}">
+<a href="{{ include.lecture.url | relative_url }}" class="lecture-card" data-module="{{ include.lecture.module }}" data-dol-areas="{% if include.lecture.dol_areas %}{{ include.lecture.dol_areas | join: ' ' }}{% endif %}" data-dol-principles="{% if include.lecture.dol_principles %}{{ include.lecture.dol_principles | join: ' ' }}{% endif %}">
   <div class="card-image">
     {% if include.lecture.image %}
     <img src="{{ '/assets/images/lectures/' | append: include.lecture.image | relative_url }}" alt="{{ include.lecture.title }}" loading="lazy" onerror="this.parentElement.classList.add('no-img')">

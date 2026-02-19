@@ -15,14 +15,30 @@ layout: default
   </div>
 </div>
 
-<div class="filter-bar">
+<!-- Dual Track Toggle -->
+<div class="track-toggle">
+  <button class="track-btn active" data-track="module">🇹🇼 iPAS 模組</button>
+  <button class="track-btn" data-track="dol">🇺🇸 DOL AI Literacy</button>
+</div>
+
+<!-- Track 1: iPAS Module Filter -->
+<div class="filter-bar" id="module-filter">
   <button class="filter-btn active" data-module="all">全部</button>
   {% for m in site.data.modules %}
   <button class="filter-btn" data-module="{{ m.id }}">{{ m.id }}</button>
   {% endfor %}
 </div>
 
-<section class="modules-overview">
+<!-- Track 2: DOL Framework Filter -->
+<div class="filter-bar dol-filter-bar" id="dol-filter" style="display:none;">
+  <button class="filter-btn dol active" data-dol="all">全部</button>
+  {% for area in site.data.dol_framework.areas %}
+  <button class="filter-btn dol" data-dol="{{ area.id }}">{{ area.icon }} {{ area.name_zh }}</button>
+  {% endfor %}
+</div>
+
+<!-- Track 1: Module Overview (shown in module mode) -->
+<section class="modules-overview" id="modules-section">
   <h2 class="section-title">10 大模組</h2>
   <div class="modules-grid">
     {% for m in site.data.modules %}
@@ -40,6 +56,35 @@ layout: default
       </div>
     </div>
     {% endfor %}
+  </div>
+</section>
+
+<!-- Track 2: DOL Areas Overview (shown in DOL mode) -->
+<section class="dol-overview" id="dol-section" style="display:none;">
+  <h2 class="section-title">🇺🇸 DOL AI 素養框架 — 5 大內容領域</h2>
+  <div class="dol-areas-grid">
+    {% for area in site.data.dol_framework.areas %}
+    <div class="dol-area-card" data-dol="{{ area.id }}">
+      <div class="dol-area-card-header" style="border-left: 4px solid {{ area.color }}">
+        <span class="dol-area-card-icon">{{ area.icon }}</span>
+        <div>
+          <h3>{{ area.name_zh }}</h3>
+          <span class="dol-area-card-en">{{ area.name_en }}</span>
+        </div>
+      </div>
+      <p>{{ area.description }}</p>
+      {% assign matched = 0 %}
+      {% for lec in site.lectures %}
+        {% if lec.dol_areas contains area.id %}
+          {% assign matched = matched | plus: 1 %}
+        {% endif %}
+      {% endfor %}
+      <span class="dol-area-card-count">{{ matched }} 講對應</span>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="dol-framework-link">
+    <a href="{{ '/dol-framework' | relative_url }}">查看完整 DOL 框架對照分析 &rarr;</a>
   </div>
 </section>
 

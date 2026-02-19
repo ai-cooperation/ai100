@@ -1,0 +1,155 @@
+---
+layout: default
+---
+<div class="dol-page">
+  <div class="dol-hero">
+    <a href="{{ '/' | relative_url }}" class="back-link">&larr; 回首頁</a>
+    <div class="dol-hero-badge">🇺🇸 U.S. Department of Labor</div>
+    <h1>AI Literacy Framework</h1>
+    <p class="dol-hero-sub">美國勞工部 AI 素養框架 — TEN 07-25（2026.02.13 發布）</p>
+    <p class="dol-hero-desc">本頁將勞工部的 5 大內容領域 + 7 項實施原則，完整對照到 AI 100 講的課程，幫助你同時掌握國際 AI 素養標準與 iPAS 證照考試重點。</p>
+    <div class="dol-source">
+      📄 原始文件：<a href="https://www.dol.gov/agencies/eta/advisories/ten-07-25" target="_blank">Training and Employment Notice No. 07-25</a>
+    </div>
+  </div>
+
+  <!-- Dual Track Comparison -->
+  <section class="dol-comparison">
+    <h2 class="section-title">雙軌對照：DOL 框架 × iPAS 體系</h2>
+    <div class="comparison-grid">
+      <div class="comparison-card">
+        <div class="comparison-header dol-side">
+          <span>🇺🇸</span>
+          <h3>DOL AI Literacy Framework</h3>
+        </div>
+        <ul>
+          <li>5 大內容領域（Content Areas）</li>
+          <li>7 項實施原則（Delivery Principles）</li>
+          <li>目標：全國勞動力 AI 素養</li>
+          <li>性質：自願性指引</li>
+          <li>適用：職訓機構、社區大學、企業</li>
+        </ul>
+      </div>
+      <div class="comparison-card">
+        <div class="comparison-header ipas-side">
+          <span>🇹🇼</span>
+          <h3>iPAS AI 應用規劃師</h3>
+        </div>
+        <ul>
+          <li>2 級 4 科評鑑碼體系</li>
+          <li>L1 初級：基礎知識 + 應用規劃</li>
+          <li>L2 中級：技術應用 + 系統部署</li>
+          <li>性質：經濟部能力認證</li>
+          <li>適用：AI 從業者、轉職者</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 Content Areas -->
+  <section class="dol-areas-section">
+    <h2 class="section-title">5 大內容領域（Foundational Content Areas）</h2>
+    {% for area in site.data.dol_framework.areas %}
+    <div class="dol-area-block" id="{{ area.id }}">
+      <div class="dol-area-header" style="border-left-color: {{ area.color }}">
+        <span class="dol-area-icon">{{ area.icon }}</span>
+        <div>
+          <h3>{{ area.id }}｜{{ area.name_zh }}</h3>
+          <span class="dol-area-en">{{ area.name_en }}</span>
+        </div>
+      </div>
+      <p class="dol-area-desc">{{ area.description }}</p>
+      <div class="dol-subtopics">
+        <h4>核心子題</h4>
+        <ul>
+          {% for sub in area.subtopics %}
+          <li>{{ sub }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="dol-mapped-lectures">
+        <h4>對應講座</h4>
+        <div class="mapped-lectures-grid">
+          {% assign sorted_lectures = site.lectures | sort: "number" %}
+          {% for lec in sorted_lectures %}
+            {% if lec.dol_areas contains area.id %}
+            <a href="{{ lec.url | relative_url }}" class="mapped-lecture-card">
+              <span class="mapped-badge">{{ lec.lecture_id }}</span>
+              <span class="mapped-title">{{ lec.title }}</span>
+            </a>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </section>
+
+  <!-- 7 Delivery Principles -->
+  <section class="dol-principles-section">
+    <h2 class="section-title">7 項實施原則（Delivery Principles）</h2>
+    <div class="dol-principles-grid">
+      {% for dp in site.data.dol_framework.principles %}
+      <div class="dol-principle-block" id="{{ dp.id }}">
+        <div class="dol-principle-header">
+          <span class="dol-principle-icon">{{ dp.icon }}</span>
+          <h3>{{ dp.id }}｜{{ dp.name_zh }}</h3>
+        </div>
+        <span class="dol-principle-en">{{ dp.name_en }}</span>
+        <p>{{ dp.description }}</p>
+        <div class="dol-principle-lectures">
+          {% assign sorted_lectures = site.lectures | sort: "number" %}
+          {% for lec in sorted_lectures %}
+            {% if lec.dol_principles contains dp.id %}
+            <a href="{{ lec.url | relative_url }}" class="mapped-lecture-mini">{{ lec.lecture_id }} {{ lec.title }}</a>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Coverage Matrix -->
+  <section class="dol-matrix-section">
+    <h2 class="section-title">覆蓋率矩陣</h2>
+    <p class="matrix-desc">AI 100 講各模組對 DOL 五大領域的覆蓋情況（目前已上線模組）</p>
+    <div class="matrix-table-wrapper">
+      <table class="coverage-matrix">
+        <thead>
+          <tr>
+            <th>模組</th>
+            {% for area in site.data.dol_framework.areas %}
+            <th>{{ area.icon }}<br><small>{{ area.name_zh }}</small></th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in site.data.modules %}
+          {% assign mod_lectures = site.lectures | where: "module", m.id %}
+          {% if mod_lectures.size > 0 %}
+          <tr>
+            <td><strong>{{ m.id }}</strong> {{ m.name }}</td>
+            {% for area in site.data.dol_framework.areas %}
+            <td class="matrix-cell">
+              {% assign count = 0 %}
+              {% for lec in mod_lectures %}
+                {% if lec.dol_areas contains area.id %}
+                  {% assign count = count | plus: 1 %}
+                {% endif %}
+              {% endfor %}
+              {% if count > 0 %}
+              <span class="matrix-dot filled" title="{{ count }} 講">{{ count }}</span>
+              {% else %}
+              <span class="matrix-dot empty">-</span>
+              {% endif %}
+            </td>
+            {% endfor %}
+          </tr>
+          {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

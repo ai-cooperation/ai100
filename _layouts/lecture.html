@@ -20,6 +20,25 @@ layout: default
       {% endfor %}
     </div>
     {% endif %}
+    {% if page.dol_areas and page.dol_areas.size > 0 %}
+    <div class="dol-tags">
+      <span class="dol-label">🇺🇸 DOL AI Literacy</span>
+      {% for area_id in page.dol_areas %}
+        {% for area in site.data.dol_framework.areas %}
+          {% if area.id == area_id %}
+          <a href="{{ '/dol-framework' | relative_url }}#{{ area.id }}" class="dol-area-tag" data-dol="{{ area.id }}">{{ area.icon }} {{ area.name_zh }}</a>
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+      {% for dp_id in page.dol_principles %}
+        {% for dp in site.data.dol_framework.principles %}
+          {% if dp.id == dp_id %}
+          <a href="{{ '/dol-framework' | relative_url }}#{{ dp.id }}" class="dol-principle-tag" data-dp="{{ dp.id }}">{{ dp.icon }} {{ dp.name_zh }}</a>
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+    </div>
+    {% endif %}
     {% if page.tags and page.tags.size > 0 %}
     <div class="tag-list">
       {% for tag in page.tags %}

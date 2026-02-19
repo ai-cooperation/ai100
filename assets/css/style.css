@@ -670,6 +670,510 @@ a:hover { color: var(--teal); }
 
 .nav-next { text-align: right; margin-left: auto; }
 
+/* === Track Toggle (Dual Navigation) === */
+.track-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  margin: 1.5rem auto 0;
+  max-width: 400px;
+  border-radius: 25px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+}
+
+.track-btn {
+  flex: 1;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  transition: all 0.25s;
+}
+
+.track-btn:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.track-btn.active {
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  color: #fff;
+}
+
+/* === DOL Filter Bar === */
+.dol-filter-bar .filter-btn.dol {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+}
+
+.dol-filter-bar .filter-btn.dol.active {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+}
+
+/* === DOL Tags (Lecture Detail) === */
+.dol-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+
+.dol-label {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 10px;
+}
+
+.dol-area-tag, .dol-principle-tag {
+  font-size: 0.72rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 10px;
+  font-weight: 500;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.dol-area-tag {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.dol-area-tag:hover {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  text-decoration: none;
+}
+
+.dol-principle-tag {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.dol-principle-tag:hover {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  text-decoration: none;
+}
+
+/* === DOL Homepage Overview === */
+.dol-overview { margin-bottom: 3rem; }
+
+.dol-areas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.2rem;
+}
+
+.dol-area-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 1.2rem;
+  border: 1px solid var(--border);
+  transition: all 0.25s;
+}
+
+.dol-area-card:hover {
+  border-color: rgba(245, 158, 11, 0.3);
+  box-shadow: 0 0 30px rgba(245, 158, 11, 0.06);
+  transform: translateY(-2px);
+}
+
+.dol-area-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding-left: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.dol-area-card-icon { font-size: 1.8rem; }
+
+.dol-area-card-header h3 {
+  font-size: 1rem;
+  color: #f59e0b;
+  margin: 0;
+}
+
+.dol-area-card-en {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.dol-area-card p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 0.6rem;
+}
+
+.dol-area-card-count {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  background: rgba(245, 158, 11, 0.1);
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+}
+
+.dol-framework-link {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.dol-framework-link a {
+  color: #f59e0b;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.dol-framework-link a:hover { color: #fbbf24; }
+
+/* === DOL Framework Page === */
+.dol-page { padding: 2rem 0 3rem; max-width: 900px; margin: 0 auto; }
+
+.dol-hero { text-align: center; margin-bottom: 3rem; }
+
+.dol-hero-badge {
+  display: inline-block;
+  padding: 0.3rem 1rem;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 20px;
+  color: #f59e0b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}
+
+.dol-hero h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+.dol-hero-sub {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.dol-hero-desc {
+  color: var(--text-dim);
+  font-size: 0.88rem;
+  max-width: 700px;
+  margin: 0 auto 1rem;
+  line-height: 1.7;
+}
+
+.dol-source {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+}
+
+.dol-source a { color: #f59e0b; }
+
+/* DOL Comparison */
+.dol-comparison { margin-bottom: 3rem; }
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+}
+
+.comparison-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.comparison-header {
+  padding: 0.8rem 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.comparison-header.dol-side {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(239, 68, 68, 0.08));
+}
+
+.comparison-header.ipas-side {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(139, 92, 246, 0.08));
+}
+
+.comparison-header h3 {
+  font-size: 0.9rem;
+  color: var(--text);
+  margin: 0;
+}
+
+.comparison-card ul {
+  list-style: none;
+  padding: 1rem 1.2rem;
+}
+
+.comparison-card li {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  padding: 0.3rem 0;
+  border-bottom: 1px solid var(--border);
+  line-height: 1.6;
+}
+
+.comparison-card li:last-child { border-bottom: none; }
+
+/* DOL Area Blocks */
+.dol-areas-section, .dol-principles-section, .dol-matrix-section { margin-bottom: 3rem; }
+
+.dol-area-block {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border);
+}
+
+.dol-area-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding-left: 0.8rem;
+  border-left: 4px solid;
+  margin-bottom: 0.8rem;
+}
+
+.dol-area-icon { font-size: 1.5rem; }
+
+.dol-area-header h3 {
+  font-size: 1.1rem;
+  color: var(--text);
+  margin: 0;
+}
+
+.dol-area-en {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.dol-area-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.dol-subtopics h4, .dol-mapped-lectures h4 {
+  font-size: 0.88rem;
+  color: var(--cyan);
+  margin-bottom: 0.5rem;
+}
+
+.dol-subtopics ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.dol-subtopics li {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.3rem;
+  line-height: 1.6;
+}
+
+.mapped-lectures-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mapped-lecture-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.mapped-lecture-card:hover {
+  border-color: var(--cyan);
+  text-decoration: none;
+}
+
+.mapped-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--cyan);
+}
+
+.mapped-title {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* DOL Principles */
+.dol-principles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1rem;
+}
+
+.dol-principle-block {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 1.2rem;
+  border: 1px solid var(--border);
+}
+
+.dol-principle-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.dol-principle-icon { font-size: 1.3rem; }
+
+.dol-principle-header h3 {
+  font-size: 0.95rem;
+  color: #10b981;
+  margin: 0;
+}
+
+.dol-principle-en {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-style: italic;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.dol-principle-block p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 0.6rem;
+}
+
+.dol-principle-lectures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.mapped-lecture-mini {
+  font-size: 0.72rem;
+  padding: 0.15rem 0.5rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.mapped-lecture-mini:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  text-decoration: none;
+}
+
+/* Coverage Matrix */
+.matrix-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.matrix-table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.coverage-matrix {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.coverage-matrix th {
+  background: var(--bg-card);
+  padding: 0.6rem 0.8rem;
+  text-align: center;
+  border-bottom: 2px solid var(--border-glow);
+  white-space: nowrap;
+}
+
+.coverage-matrix th small {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  font-weight: normal;
+}
+
+.coverage-matrix td {
+  padding: 0.5rem 0.8rem;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.coverage-matrix td:first-child {
+  text-align: left;
+  white-space: nowrap;
+}
+
+.matrix-cell { vertical-align: middle; }
+
+.matrix-dot {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.matrix-dot.filled {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(239, 68, 68, 0.15));
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.matrix-dot.empty {
+  color: var(--text-dim);
+  opacity: 0.3;
+}
+
 /* === Footer === */
 .site-footer {
   border-top: 1px solid var(--border);
@@ -688,6 +1192,7 @@ a:hover { color: var(--teal); }
   .hero h1 { font-size: 2rem; }
   .hero-subtitle { font-size: 0.92rem; }
   .modules-grid { grid-template-columns: 1fr; }
+  .dol-areas-grid { grid-template-columns: 1fr; }
   .lectures-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
   .lecture-detail { padding: 1rem 0 2rem; }
   .lecture-header h1 { font-size: 1.3rem; }
@@ -698,6 +1203,11 @@ a:hover { color: var(--teal); }
   .cornell-body { grid-template-columns: 1fr; }
   .cornell-cue { border-right: none; border-bottom: 1px solid var(--border-glow); display: flex; flex-wrap: wrap; gap: 0.4rem; }
   .cornell-cue-item { margin-bottom: 0; }
+  .comparison-grid { grid-template-columns: 1fr; }
+  .dol-principles-grid { grid-template-columns: 1fr; }
+  .dol-hero h1 { font-size: 1.6rem; }
+  .track-toggle { max-width: 100%; margin: 1rem 0.5rem 0; }
+  .track-btn { font-size: 0.82rem; padding: 0.5rem 0.8rem; }
 }
 
 @media (max-width: 480px) {

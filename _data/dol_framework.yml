@@ -1,0 +1,118 @@
+# U.S. Department of Labor AI Literacy Framework (TEN 07-25)
+# Published: 2026-02-13
+# Source: https://www.dol.gov/agencies/eta/advisories/ten-07-25
+
+# === 5 Foundational Content Areas ===
+areas:
+  - id: "DOL-1"
+    name_en: "Understand AI Principles"
+    name_zh: "理解 AI 原理"
+    icon: "🧠"
+    color: "#06b6d4"
+    description: "AI 的核心概念、運作方式、能力與限制的基礎知識"
+    subtopics:
+      - "AI 產出的是機率性結果，不是確定性答案"
+      - "AI 系統可能生成錯誤或不準確的資訊（幻覺）"
+      - "AI 能處理多種格式（文字、圖片、音訊）"
+      - "每個 AI 系統都反映了人類對資料、目標和參數的設計選擇"
+      - "理解 AI 的能力範圍與限制"
+
+  - id: "DOL-2"
+    name_en: "Explore AI Uses"
+    name_zh: "探索 AI 應用"
+    icon: "🔍"
+    color: "#8b5cf6"
+    description: "AI 在職場中的實際應用，以及如何輔助而非取代人類專業"
+    subtopics:
+      - "AI 如何支援草擬、資料分析、創意生成、決策輔助與任務自動化"
+      - "辨識何時適合使用 AI、何時應由人類判斷主導"
+      - "展示 AI 如何「輔助」人類專業能力"
+
+  - id: "DOL-3"
+    name_en: "Direct AI Effectively"
+    name_zh: "有效指揮 AI"
+    icon: "🎯"
+    color: "#f59e0b"
+    description: "被定位為「溝通技能」而非技術專長，涵蓋提示工程基礎"
+    subtopics:
+      - "情境框架 — 提供正確的背景脈絡給 AI"
+      - "清晰的指令結構 — 撰寫結構明確的提示詞"
+      - "迭代精煉 — 透過反覆試驗來優化提示詞"
+      - "提供相關範例和資料給 AI 系統"
+
+  - id: "DOL-4"
+    name_en: "Evaluate AI Outputs"
+    name_zh: "評估 AI 產出"
+    icon: "🔎"
+    color: "#ef4444"
+    description: "關鍵驗證技能，核心原則：「工作者必須保持主控權」"
+    subtopics:
+      - "驗證 AI 生成內容的事實準確性"
+      - "評估產出的完整度"
+      - "識別 AI 推理中的邏輯漏洞"
+      - "運用領域專業知識來決定如何使用、修改或拒絕 AI 產出"
+
+  - id: "DOL-5"
+    name_en: "Use AI Responsibly"
+    name_zh: "負責任地使用 AI"
+    icon: "⚖️"
+    color: "#10b981"
+    description: "AI 輔助工作中的倫理、安全與問責"
+    subtopics:
+      - "保護敏感資訊並確保資料安全"
+      - "遵循職場政策與法律要求"
+      - "避免濫用（抄襲、冒充）"
+      - "管理高風險情境中的風險"
+      - "對 AI 輔助的決策保持個人問責"
+
+# === 7 Delivery Principles ===
+principles:
+  - id: "DP-1"
+    name_en: "Enable Experiential Learning"
+    name_zh: "啟動體驗式學習"
+    icon: "🤲"
+    description: "人們透過實作來學習 AI，而不是閱讀。將動手實作嵌入真實任務中。"
+
+  - id: "DP-2"
+    name_en: "Embed Learning in Context"
+    name_zh: "情境嵌入式學習"
+    icon: "🏢"
+    description: "將 AI 素養與學習者的實際工作或領域結合，才能真正內化。"
+
+  - id: "DP-3"
+    name_en: "Build Complementary Human Skills"
+    name_zh: "培養互補的人類技能"
+    icon: "💡"
+    description: "批判性思考、創造力、溝通力、價值觀決策和領域專業 — AI 放大人類能力的基石。"
+
+  - id: "DP-4"
+    name_en: "Address Prerequisites"
+    name_zh: "解決先備條件"
+    icon: "📶"
+    description: "確保學習者具備基礎數位素養、設備與網路連線，再開始 AI 素養訓練。"
+
+  - id: "DP-5"
+    name_en: "Create Pathways for Continued Learning"
+    name_zh: "建立持續學習路徑"
+    icon: "🛤️"
+    description: "基礎 AI 素養是起點而非終點，需建立可堆疊的進階學習路徑。"
+
+  - id: "DP-6"
+    name_en: "Prepare Enabling Roles"
+    name_zh: "培育賦能角色"
+    icon: "👥"
+    description: "管理者、培訓師、導師和輔導員需要自己的 AI 素養，才能支持組織的 AI 應用。"
+
+  - id: "DP-7"
+    name_en: "Design for Agility"
+    name_zh: "敏捷設計"
+    icon: "🔄"
+    description: "AI 快速演進，培訓必須內建模組化、反饋驅動的更新機制以保持時效性。"
+
+# === Metadata ===
+source:
+  title: "Training and Employment Notice No. 07-25 (TEN 07-25)"
+  publisher: "U.S. Department of Labor, Employment and Training Administration"
+  date: "2026-02-13"
+  url: "https://www.dol.gov/agencies/eta/advisories/ten-07-25"
+  press_release: "https://www.dol.gov/newsroom/releases/eta/eta20260213"
