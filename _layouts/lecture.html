@@ -12,6 +12,14 @@ layout: default
     {% if page.tagline %}
     <p class="tagline">{{ page.tagline }}</p>
     {% endif %}
+    {% if page.ipas_topics and page.ipas_topics.size > 0 %}
+    <div class="ipas-topics">
+      {% for topic in page.ipas_topics %}
+      {% assign lvl = topic | slice: 0, 2 %}
+      <span class="ipas-topic-tag" data-level="{{ lvl }}">{{ topic }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
     {% if page.tags and page.tags.size > 0 %}
     <div class="tag-list">
       {% for tag in page.tags %}
@@ -20,6 +28,30 @@ layout: default
     </div>
     {% endif %}
   </div>
+
+  {% if page.cornell %}
+  <div class="cornell-note">
+    <div class="cornell-note-header">
+      <span>📋</span>
+      <h3>本講學習重點（康乃爾筆記）</h3>
+    </div>
+    <div class="cornell-body">
+      <div class="cornell-cue">
+        {% for cue in page.cornell.cues %}
+        <div class="cornell-cue-item">{{ cue }}</div>
+        {% endfor %}
+      </div>
+      <div class="cornell-notes">
+        {% for note in page.cornell.notes %}
+        <p>{{ note }}</p>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="cornell-summary">
+      📌 {{ page.cornell.summary }}
+    </div>
+  </div>
+  {% endif %}
 
   {% if page.image %}
   <div class="lecture-hero-image">

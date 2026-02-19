@@ -466,6 +466,157 @@ a:hover { color: var(--teal); }
 
 .lecture-content tr:hover td { background: rgba(6, 182, 212, 0.03); }
 
+/* === Cornell Note / Learning Objectives === */
+.cornell-note {
+  margin: 1.5rem 0 2rem;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border-glow);
+  background: var(--bg-card);
+}
+
+.cornell-note-header {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(139, 92, 246, 0.12));
+  padding: 0.8rem 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.cornell-note-header h3 {
+  font-size: 0.95rem;
+  color: var(--cyan);
+  margin: 0;
+}
+
+.cornell-body {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  min-height: 0;
+}
+
+.cornell-cue {
+  padding: 1rem;
+  border-right: 2px solid var(--border-glow);
+  background: rgba(6, 182, 212, 0.04);
+}
+
+.cornell-cue-item {
+  font-size: 0.82rem;
+  color: var(--cyan);
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+  line-height: 1.4;
+}
+
+.cornell-notes {
+  padding: 1rem 1.2rem;
+}
+
+.cornell-notes p, .cornell-notes li {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 0.5rem;
+}
+
+.cornell-summary {
+  padding: 0.8rem 1.2rem;
+  border-top: 2px solid var(--border-glow);
+  background: rgba(139, 92, 246, 0.06);
+  font-size: 0.88rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* === iPAS Topic Tags === */
+.ipas-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+
+.ipas-topic-tag {
+  font-size: 0.72rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 10px;
+  font-weight: 500;
+  border: 1px solid;
+}
+
+.ipas-topic-tag[data-level="L1"] {
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--cyan);
+  border-color: rgba(6, 182, 212, 0.25);
+}
+
+.ipas-topic-tag[data-level="L2"] {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--purple);
+  border-color: rgba(139, 92, 246, 0.25);
+}
+
+/* === Answer Toggle === */
+.answer-toggle {
+  margin: 1.5rem 0;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.answer-toggle summary {
+  padding: 0.8rem 1.2rem;
+  background: var(--bg-card);
+  color: var(--cyan);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.2s;
+  list-style: none;
+}
+
+.answer-toggle summary::-webkit-details-marker { display: none; }
+
+.answer-toggle summary::before {
+  content: "▶";
+  font-size: 0.7rem;
+  transition: transform 0.2s;
+  display: inline-block;
+}
+
+.answer-toggle[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.answer-toggle summary:hover {
+  background: var(--bg-card-hover);
+}
+
+.answer-content {
+  padding: 1.2rem;
+  background: rgba(6, 182, 212, 0.03);
+  border-top: 1px solid var(--border);
+}
+
+.answer-content img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.8rem;
+}
+
+.answer-content p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin-bottom: 0.6rem;
+}
+
 /* === Keywords Check === */
 .keywords-check {
   margin: 2.5rem 0;
@@ -544,6 +695,9 @@ a:hover { color: var(--teal); }
   .nav-prev, .nav-next { max-width: 100%; }
   .filter-bar { gap: 0.3rem; }
   .filter-btn { padding: 0.3rem 0.7rem; font-size: 0.78rem; }
+  .cornell-body { grid-template-columns: 1fr; }
+  .cornell-cue { border-right: none; border-bottom: 1px solid var(--border-glow); display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .cornell-cue-item { margin-bottom: 0; }
 }
 
 @media (max-width: 480px) {
