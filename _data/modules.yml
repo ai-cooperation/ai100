@@ -1,0 +1,40 @@
+- id: M01
+  name: "AI 思維與治理"
+  desc: "從 AI 的定義出發，建立治理觀念、人機協作框架與專案評估能力"
+  icon: "🧠"
+- id: M02
+  name: "資料素養與資料流程"
+  desc: "理解資料的型態、品質、清理流程，以及隱私與安全的基本功"
+  icon: "📊"
+- id: M03
+  name: "機器學習入門"
+  desc: "監督式 vs 非監督式、常見模型、評估指標與交叉驗證"
+  icon: "⚙️"
+- id: M04
+  name: "深度學習與代表架構"
+  desc: "神經網路、CNN、RNN、Transformer 到預訓練微調的直覺理解"
+  icon: "🔬"
+- id: M05
+  name: "生成式 AI 基礎"
+  desc: "LLM、Prompt Engineering、RAG、工具呼叫與安全對齊"
+  icon: "✨"
+- id: M06
+  name: "No/Low Code 與應用規劃"
+  desc: "企業導入 AI 的實務：自動化工作流、導入評估與規格撰寫"
+  icon: "🔧"
+- id: M07
+  name: "NLP / CV / 多模態應用"
+  desc: "自然語言、電腦視覺、多模態的任務地圖與應用場景"
+  icon: "👁️"
+- id: M08
+  name: "大數據處理分析與應用"
+  desc: "統計基礎、數據工程、資料視覺化到大數據 × AI 整合"
+  icon: "📈"
+- id: M09
+  name: "MLOps 與系統部署整合"
+  desc: "從 Notebook 到產品：版本管理、部署、監控與成本控制"
+  icon: "🚀"
+- id: M10
+  name: "iPAS 題型策略與實戰"
+  desc: "考試技巧、題型分析、模擬練習與考前衝刺計畫"
+  icon: "🎯"

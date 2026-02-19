@@ -1,0 +1,15 @@
+<a href="{{ include.lecture.url | relative_url }}" class="lecture-card" data-module="{{ include.lecture.module }}">
+  <div class="card-image">
+    {% if include.lecture.image %}
+    <img src="{{ '/assets/images/lectures/' | append: include.lecture.image | relative_url }}" alt="{{ include.lecture.title }}" loading="lazy" onerror="this.parentElement.classList.add('no-img')">
+    {% endif %}
+  </div>
+  <div class="card-body">
+    <span class="card-badge">{{ include.lecture.lecture_id }}</span>
+    <span class="card-module">{{ include.lecture.module }}</span>
+    <h3>{{ include.lecture.title }}</h3>
+    {% if include.lecture.tagline %}
+    <p>{{ include.lecture.tagline }}</p>
+    {% endif %}
+  </div>
+</a>

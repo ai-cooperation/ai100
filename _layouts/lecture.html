@@ -1,0 +1,61 @@
+---
+layout: default
+---
+<article class="lecture-detail">
+  <div class="lecture-header">
+    <a href="{{ '/' | relative_url }}" class="back-link">&larr; 回首頁</a>
+    <span class="module-badge">{{ page.module }} {{ page.module_name }}</span>
+    {% if page.ipas_code %}
+    <span class="ipas-badge">iPAS {{ page.ipas_code }}</span>
+    {% endif %}
+    <h1>{{ page.lecture_id }}｜{{ page.title }}</h1>
+    {% if page.tagline %}
+    <p class="tagline">{{ page.tagline }}</p>
+    {% endif %}
+    {% if page.tags and page.tags.size > 0 %}
+    <div class="tag-list">
+      {% for tag in page.tags %}
+      <span class="tag">{{ tag }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  {% if page.image %}
+  <div class="lecture-hero-image">
+    <img src="{{ '/assets/images/lectures/' | append: page.image | relative_url }}" alt="{{ page.title }}" loading="lazy">
+  </div>
+  {% endif %}
+
+  <div class="lecture-content">
+    {{ content }}
+  </div>
+
+  {% if page.keywords %}
+  <div class="keywords-check">
+    <h3>關鍵字自我檢核</h3>
+    <div class="keywords-list">
+      {% for kw in page.keywords %}
+      <span class="keyword-item">✅ {{ kw }}</span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <nav class="lecture-nav">
+    {% assign sorted = site.lectures | sort: "number" %}
+    {% for lec in sorted %}
+      {% if lec.number == page.number %}
+        {% assign idx = forloop.index0 %}
+      {% endif %}
+    {% endfor %}
+    {% assign prev_idx = idx | minus: 1 %}
+    {% assign next_idx = idx | plus: 1 %}
+    {% if prev_idx >= 0 %}
+      <a href="{{ sorted[prev_idx].url | relative_url }}" class="nav-prev">&larr; {{ sorted[prev_idx].lecture_id }} {{ sorted[prev_idx].title }}</a>
+    {% endif %}
+    {% if next_idx < sorted.size %}
+      <a href="{{ sorted[next_idx].url | relative_url }}" class="nav-next">{{ sorted[next_idx].lecture_id }} {{ sorted[next_idx].title }} &rarr;</a>
+    {% endif %}
+  </nav>
+</article>

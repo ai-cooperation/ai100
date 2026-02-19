@@ -1,0 +1,56 @@
+---
+layout: default
+---
+<div class="hero">
+  <div class="hero-glow"></div>
+  <h1>AI 100 講</h1>
+  <p class="hero-subtitle">iPAS AI 應用規劃師導向 — 用白話和圖解，帶你搞懂 AI 的 100 個核心觀念</p>
+  <div class="progress-wrapper">
+    {% assign total = site.lectures | size %}
+    {% assign pct = total | times: 1.0 | divided_by: 100 | times: 100 %}
+    <div class="progress-bar">
+      <div class="progress-fill" style="width: {{ pct }}%"></div>
+    </div>
+    <span class="progress-text">{{ total }} / 100 講已上線</span>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <button class="filter-btn active" data-module="all">全部</button>
+  {% for m in site.data.modules %}
+  <button class="filter-btn" data-module="{{ m.id }}">{{ m.id }}</button>
+  {% endfor %}
+</div>
+
+<section class="modules-overview">
+  <h2 class="section-title">10 大模組</h2>
+  <div class="modules-grid">
+    {% for m in site.data.modules %}
+    <div class="module-card" data-module="{{ m.id }}">
+      {% assign cover = '/assets/images/modules/' | append: m.id | append: '.png' %}
+      <div class="module-cover">
+        <img src="{{ cover | relative_url }}" alt="{{ m.name }}" loading="lazy" onerror="this.style.display='none'">
+        <span class="module-icon">{{ m.icon }}</span>
+      </div>
+      <div class="module-info">
+        <h3>{{ m.id }} {{ m.name }}</h3>
+        <p>{{ m.desc }}</p>
+        {% assign count = site.lectures | where: "module", m.id | size %}
+        <span class="module-count">{{ count }} 講</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="lectures-section">
+  <h2 class="section-title">所有講座</h2>
+  <div class="lectures-grid">
+    {% assign sorted = site.lectures | sort: "number" %}
+    {% for lec in sorted %}
+    {% include lecture-card.html lecture=lec %}
+    {% endfor %}
+  </div>
+</section>
+
+{{ content }}

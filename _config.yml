@@ -1,0 +1,22 @@
+title: "AI 100 講"
+description: "iPAS AI 應用規劃師導向 — 10 模組 × 10 講，白話解說 + 視覺圖解"
+url: "https://ai-cooperation.github.io"
+baseurl: "/ai100"
+lang: "zh-TW"
+
+collections:
+  lectures:
+    output: true
+    permalink: /lectures/:name/
+    sort_by: number
+
+defaults:
+  - scope:
+      path: ""
+      type: "lectures"
+    values:
+      layout: "lecture"
+
+markdown: kramdown
+kramdown:
+  input: GFM
