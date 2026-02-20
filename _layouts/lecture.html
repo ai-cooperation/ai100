@@ -3,7 +3,7 @@ layout: default
 ---
 <article class="lecture-detail">
   <div class="lecture-header">
-    <a href="{{ '/' | relative_url }}" class="back-link">&larr; 回首頁</a>
+    <a href="{{ '/modules/' | append: page.module | relative_url }}" class="back-link">&larr; {{ page.module }} {{ page.module_name }}</a>
     <span class="module-badge">{{ page.module }} {{ page.module_name }}</span>
     {% if page.ipas_code %}
     <span class="ipas-badge">iPAS {{ page.ipas_code }}</span>

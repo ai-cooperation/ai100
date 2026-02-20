@@ -1,0 +1,74 @@
+---
+layout: default
+---
+{% assign mid = page.module_id %}
+{% assign mod = nil %}
+{% for m in site.data.modules %}
+  {% if m.id == mid %}
+    {% assign mod = m %}
+  {% endif %}
+{% endfor %}
+
+<article class="module-detail">
+  <div class="module-detail-header">
+    <a href="{{ '/' | relative_url }}" class="back-link">&larr; 回首頁</a>
+    <div class="module-detail-hero">
+      {% assign cover = '/assets/images/modules/' | append: mid | append: '.png' %}
+      <img src="{{ cover | relative_url }}" alt="{{ mod.name }}" loading="lazy">
+      <div class="module-detail-hero-overlay">
+        <span class="module-detail-icon">{{ mod.icon }}</span>
+        <h1>{{ mid }} {{ mod.name }}</h1>
+        <p>{{ mod.desc }}</p>
+      </div>
+    </div>
+  </div>
+
+  {% assign lectures = site.lectures | where: "module", mid | sort: "number" %}
+  <div class="module-detail-stats">
+    <span>共 {{ lectures.size }} 講</span>
+  </div>
+
+  <div class="module-detail-lectures">
+    {% for lec in lectures %}
+    <a href="{{ lec.url | relative_url }}" class="module-lecture-card">
+      {% if lec.image %}
+      <div class="module-lecture-img">
+        <img src="{{ '/assets/images/lectures/' | append: lec.image | relative_url }}" alt="{{ lec.title }}" loading="lazy">
+      </div>
+      {% endif %}
+      <div class="module-lecture-info">
+        <span class="module-lecture-id">{{ lec.lecture_id }}</span>
+        <h3>{{ lec.title }}</h3>
+        {% if lec.tagline %}
+        <p>{{ lec.tagline }}</p>
+        {% endif %}
+        {% if lec.tags and lec.tags.size > 0 %}
+        <div class="module-lecture-tags">
+          {% for tag in lec.tags %}
+          <span class="tag">{{ tag }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  <nav class="module-nav">
+    {% for m in site.data.modules %}
+      {% if m.id == mid %}
+        {% assign idx = forloop.index0 %}
+      {% endif %}
+    {% endfor %}
+    {% assign prev_idx = idx | minus: 1 %}
+    {% assign next_idx = idx | plus: 1 %}
+    {% if prev_idx >= 0 %}
+      {% assign prev_m = site.data.modules[prev_idx] %}
+      <a href="{{ '/modules/' | append: prev_m.id | relative_url }}" class="nav-prev">&larr; {{ prev_m.id }} {{ prev_m.name }}</a>
+    {% endif %}
+    {% if next_idx < site.data.modules.size %}
+      {% assign next_m = site.data.modules[next_idx] %}
+      <a href="{{ '/modules/' | append: next_m.id | relative_url }}" class="nav-next">{{ next_m.id }} {{ next_m.name }} &rarr;</a>
+    {% endif %}
+  </nav>
+</article>

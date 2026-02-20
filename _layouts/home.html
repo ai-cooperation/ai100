@@ -42,7 +42,7 @@ layout: default
   <h2 class="section-title">10 大模組</h2>
   <div class="modules-grid">
     {% for m in site.data.modules %}
-    <div class="module-card" data-module="{{ m.id }}">
+    <a href="{{ '/modules/' | append: m.id | relative_url }}" class="module-card" data-module="{{ m.id }}">
       {% assign cover = '/assets/images/modules/' | append: m.id | append: '.png' %}
       <div class="module-cover">
         <img src="{{ cover | relative_url }}" alt="{{ m.name }}" loading="lazy" onerror="this.style.display='none'">
@@ -54,7 +54,7 @@ layout: default
         {% assign count = site.lectures | where: "module", m.id | size %}
         <span class="module-count">{{ count }} 講</span>
       </div>
-    </div>
+    </a>
     {% endfor %}
   </div>
 </section>
