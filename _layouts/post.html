@@ -1,0 +1,58 @@
+---
+layout: default
+---
+<article class="news-detail">
+  <div class="news-header">
+    <a href="{{ '/news' | relative_url }}" class="back-link">&larr; AI 動態</a>
+    <time class="news-date">{{ page.date | date: "%Y-%m-%d" }}</time>
+    {% if page.source %}
+    <span class="news-source">{{ page.source }}</span>
+    {% endif %}
+    <h1>{{ page.title }}</h1>
+    {% if page.summary %}
+    <p class="news-summary">{{ page.summary }}</p>
+    {% endif %}
+    {% if page.tags and page.tags.size > 0 %}
+    <div class="tag-list">
+      {% for tag in page.tags %}
+      <span class="tag">{{ tag }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  {% if page.image %}
+  <div class="news-hero-image">
+    <img src="{{ '/assets/images/news/' | append: page.image | relative_url }}" alt="{{ page.title }}" loading="lazy">
+  </div>
+  {% endif %}
+
+  <div class="lecture-content">
+    {{ content }}
+  </div>
+
+  {% if page.related_lectures and page.related_lectures.size > 0 %}
+  <div class="related-lectures">
+    <h3>相關講座</h3>
+    <div class="related-grid">
+      {% assign sorted = site.lectures | sort: "number" %}
+      {% for lid in page.related_lectures %}
+        {% for lec in sorted %}
+          {% if lec.lecture_id == lid %}
+          <a href="{{ lec.url | relative_url }}" class="related-card">
+            <span class="related-badge">{{ lec.lecture_id }}</span>
+            <span class="related-title">{{ lec.title }}</span>
+          </a>
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if page.source_url %}
+  <div class="news-source-link">
+    <a href="{{ page.source_url }}" target="_blank" rel="noopener">查看原文 &rarr;</a>
+  </div>
+  {% endif %}
+</article>

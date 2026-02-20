@@ -16,6 +16,11 @@ defaults:
       type: "lectures"
     values:
       layout: "lecture"
+  - scope:
+      path: "_posts"
+      type: "posts"
+    values:
+      layout: "post"
 
 markdown: kramdown
 kramdown:
