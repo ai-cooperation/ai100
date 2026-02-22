@@ -296,6 +296,8 @@ def analyze_article(article: dict, content: str) -> dict | None:
 
     prompt = f"""你是 AI 100 講的新聞編輯。請分析以下 AI 相關文章，產出結構化的中文新聞摘要。
 
+重要：請先用你的搜尋能力驗證這則新聞的真實性與正確性。如果發現資訊有誤、過時、或無法驗證，請在摘要中如實說明。
+
 文章標題: {article['title']}
 來源: {article['source_name']}
 原始摘要: {article['summary']}
@@ -305,12 +307,13 @@ def analyze_article(article: dict, content: str) -> dict | None:
 {{
   "title_zh": "中文標題（15-25字，吸引人）",
   "summary": "一段話摘要（50-80字，白話說明這則新聞的重點）",
-  "body": "正文（200-400字，用白話解說這個技術/產品/事件的重點、為什麼重要、對一般人的影響。分2-3段。）",
+  "body": "正文（200-400字，用白話解說這個技術/產品/事件的重點、為什麼重要、對一般人的影響。分2-3段。如果經查證發現有不準確之處，請在文末補充說明。）",
   "tags": ["標籤1", "標籤2", "標籤3"],
   "related_modules": ["M05", "M07"],
   "related_lecture_ids": ["M05.03", "M07.02"],
   "image_prompt": "圖片視覺描述（科技風格、概念示意，30字內，只描述視覺元素不含文字指令）",
-  "relevance_score": 8
+  "relevance_score": 8,
+  "verified": true或false（你是否能透過搜尋驗證此新聞的核心事實）
 }}
 
 講座模組對照:
@@ -320,14 +323,15 @@ def analyze_article(article: dict, content: str) -> dict | None:
 - related_modules: 選 1-3 個最相關的模組
 - related_lecture_ids: 選 1-3 個最精確對應的講座 ID（格式如 M05.03）
 - relevance_score: 1-10，這則新聞與 AI 學習的相關程度
+- verified: 透過搜尋驗證後，核心事實是否正確
 - 只回 JSON，不要加任何其他文字
 """
 
     try:
         resp = httpx.post(
             f"{AI_HUB_BASE}/api/llm/chat",
-            json={"prompt": prompt, "provider": "auto"},
-            timeout=120,
+            json={"prompt": prompt, "provider": "gemini"},
+            timeout=180,
         )
         data = resp.json()
         if data.get("success"):
