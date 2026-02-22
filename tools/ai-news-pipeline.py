@@ -114,12 +114,7 @@ RSS_SOURCES = [
         "lang": "en",
         "tier": 3,
     },
-    {
-        "name": "Anthropic News",
-        "url": "https://www.anthropic.com/rss.xml",
-        "lang": "en",
-        "tier": 3,
-    },
+    # Anthropic: no public RSS feed available
 ]
 
 # 講座主題對應表 (用於 LLM 反向連結)
@@ -242,9 +237,26 @@ def fetch_rss_articles() -> list[dict]:
 
     client.close()
 
-    # 按 tier 排序 (tier 1 優先)，然後去重
-    articles.sort(key=lambda a: a["tier"])
-    return articles
+    # 按 tier 排序，同 tier 內各來源輪流交錯（避免單一來源壟斷）
+    from itertools import zip_longest
+    by_source = {}
+    for a in articles:
+        by_source.setdefault(a["source_name"], []).append(a)
+
+    # 每個來源內部按 tier 排序
+    for src in by_source.values():
+        src.sort(key=lambda a: a["tier"])
+
+    # 各來源輪流取一篇，交錯混合
+    interleaved = []
+    # 先按 tier 再按來源名排序各 bucket（讓 tier 1 來源先出現）
+    sorted_sources = sorted(by_source.values(), key=lambda lst: lst[0]["tier"])
+    for batch in zip_longest(*sorted_sources):
+        for a in batch:
+            if a is not None:
+                interleaved.append(a)
+
+    return interleaved
 
 
 # ============================================================
