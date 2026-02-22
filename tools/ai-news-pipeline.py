@@ -75,6 +75,9 @@ RSS_SOURCES = [
         "url": "https://simonwillison.net/atom/everything/",
         "lang": "en",
         "tier": 1,
+        "filter_keywords": ["AI", "LLM", "GPT", "Claude", "Gemini", "Anthropic", "OpenAI",
+                            "machine learning", "deep learning", "neural", "transformer",
+                            "language model", "embedding", "RAG", "agent", "fine-tuning"],
     },
     {
         "name": "Ars Technica AI",
