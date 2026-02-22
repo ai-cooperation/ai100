@@ -536,7 +536,11 @@ def run_pipeline(dry_run: bool = False, no_image: bool = False, no_push: bool = 
         log.info(f"  標題: {analysis['title_zh']}")
         log.info(f"  相關度: {score}/10")
         log.info(f"  相關講座: {analysis.get('related_lecture_ids', [])}")
+        verified = analysis.get("verified", False)
+        if not verified:
+            log.warning(f"  ⚠️ 未驗證: {analysis['title_zh']} (verified=false，需人工審核)")
         article["_title_zh"] = analysis["title_zh"]
+        article["_verified"] = verified
 
         # 4c. 生成圖片
         has_image = False
@@ -569,8 +573,15 @@ def run_pipeline(dry_run: bool = False, no_image: bool = False, no_push: bool = 
 
     # 7. 回報結果 (只在有產出時通知)
     if created_files and not dry_run:
-        titles = [f"• {a.get('_title_zh', a['title'][:30])}"
-                  for a in batch[:len(created_files)]]
+        titles = []
+        unverified = []
+        for a in batch[:len(created_files)]:
+            t = a.get("_title_zh", a["title"][:30])
+            if not a.get("_verified", True):
+                titles.append(f"• ⚠️ {t}")
+                unverified.append(t)
+            else:
+                titles.append(f"• ✅ {t}")
         status = "✅ 已部署" if push_ok else "⚠️ commit 成功但 push 失敗"
         tg_send(
             f"<b>📰 AI 100 講動態更新</b>\n\n"
