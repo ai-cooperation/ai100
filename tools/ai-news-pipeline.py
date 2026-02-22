@@ -237,26 +237,18 @@ def fetch_rss_articles() -> list[dict]:
 
     client.close()
 
-    # 按 tier 排序，同 tier 內各來源輪流交錯（避免單一來源壟斷）
-    from itertools import zip_longest
-    by_source = {}
-    for a in articles:
-        by_source.setdefault(a["source_name"], []).append(a)
+    # 按發布時間排序（最新優先），同時間則 tier 低的優先
+    from email.utils import parsedate_to_datetime
+    import datetime
 
-    # 每個來源內部按 tier 排序
-    for src in by_source.values():
-        src.sort(key=lambda a: a["tier"])
+    def parse_pub_time(a):
+        try:
+            return parsedate_to_datetime(a["published"])
+        except Exception:
+            return datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
 
-    # 各來源輪流取一篇，交錯混合
-    interleaved = []
-    # 先按 tier 再按來源名排序各 bucket（讓 tier 1 來源先出現）
-    sorted_sources = sorted(by_source.values(), key=lambda lst: lst[0]["tier"])
-    for batch in zip_longest(*sorted_sources):
-        for a in batch:
-            if a is not None:
-                interleaved.append(a)
-
-    return interleaved
+    articles.sort(key=lambda a: (parse_pub_time(a),), reverse=True)
+    return articles
 
 
 # ============================================================
