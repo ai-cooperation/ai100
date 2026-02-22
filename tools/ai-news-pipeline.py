@@ -292,7 +292,7 @@ def analyze_article(article: dict, content: str) -> dict | None:
   "tags": ["標籤1", "標籤2", "標籤3"],
   "related_modules": ["M05", "M07"],
   "related_lecture_ids": ["M05.03", "M07.02"],
-  "image_prompt": "English description for image generation (professional tech illustration style, 50 words max)",
+  "image_prompt": "圖片視覺描述（科技風格、概念示意，30字內，只描述視覺元素不含文字指令）",
   "relevance_score": 8
 }}
 
@@ -331,9 +331,13 @@ def analyze_article(article: dict, content: str) -> dict | None:
 # 圖片生成
 # ============================================================
 
-def generate_image(prompt: str, filename: str) -> bool:
+def generate_image(prompt: str, title_zh: str, filename: str) -> bool:
     """使用 AI Hub 生成新聞配圖，失敗重試最多 3 次。"""
-    full_prompt = f"Professional tech news illustration, dark blue background, glowing cyan accents: {prompt}"
+    full_prompt = (
+        f"生成一張科技新聞配圖。深藍色背景，發光的青色點綴。"
+        f"圖片上方必須顯示繁體中文標題「{title_zh}」，文字清晰、字體現代。"
+        f"圖片風格：{prompt}"
+    )
 
     max_attempts = 3
     for attempt in range(1, max_attempts + 1):
@@ -517,7 +521,7 @@ def run_pipeline(dry_run: bool = False, no_image: bool = False, no_push: bool = 
         has_image = False
         img_filename = f"{datetime.date.today().isoformat()}-{article['id']}.png"
         if not no_image and analysis.get("image_prompt"):
-            has_image = generate_image(analysis["image_prompt"], img_filename)
+            has_image = generate_image(analysis["image_prompt"], analysis["title_zh"], img_filename)
             if has_image:
                 created_files.append(os.path.join("assets", "images", "news", img_filename))
 
