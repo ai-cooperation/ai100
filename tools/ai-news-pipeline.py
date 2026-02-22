@@ -242,10 +242,20 @@ def fetch_rss_articles() -> list[dict]:
     import datetime
 
     def parse_pub_time(a):
-        try:
-            return parsedate_to_datetime(a["published"])
-        except Exception:
+        pub = a.get("published", "")
+        if not pub:
             return datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
+        # RFC 2822 (most RSS feeds)
+        try:
+            return parsedate_to_datetime(pub)
+        except Exception:
+            pass
+        # ISO 8601 (Atom feeds like Simon Willison)
+        try:
+            return datetime.datetime.fromisoformat(pub)
+        except Exception:
+            pass
+        return datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
 
     articles.sort(key=lambda a: (parse_pub_time(a),), reverse=True)
     return articles
