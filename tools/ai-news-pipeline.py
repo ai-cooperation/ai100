@@ -20,7 +20,6 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-
 try:
     import feedparser
 except ImportError:
@@ -296,27 +295,44 @@ def analyze_article(article: dict, content: str) -> dict | None:
 # 圖片生成
 # ============================================================
 
-def generate_image(prompt: str, filename: str) -> bool:
-    """使用 AI Hub 生成新聞配圖。"""
-    full_prompt = f"Professional tech news illustration, dark blue background, glowing cyan accents: {prompt}"
+def generate_image(prompt: str, title_zh: str, filename: str) -> bool:
+    """使用 Pro model 生成專業 AI 新聞配圖，含繁體中文標題。"""
+    full_prompt = (
+        f"Design a professional AI technology news card image in square format. "
+        f"Title text: \u300c{title_zh}\u300d displayed prominently in bold white Traditional Chinese (繁體中文) "
+        f"centered on a semi-transparent dark overlay band at the top. "
+        f"Background scene: {prompt}. "
+        f"Style: futuristic tech editorial with cinematic lighting, neon-blue and cyan accents, "
+        f"circuit board patterns, data visualization elements. Use a dark navy gradient "
+        f"(#0a1628 to #1a2840) as the overlay tone. "
+        f"The title must be the visual focal point — large, sharp, and fully legible. "
+        f"No watermarks, no logos, no extra decorative text."
+    )
 
-    try:
-        resp = httpx.post(
-            f"{AI_HUB_BASE}/api/image/generate",
-            json={"prompt": full_prompt, "timeout": 90},
-            timeout=120,
-        )
-        data = resp.json()
-        if data.get("success") and data.get("image_base64"):
-            img_data = base64.b64decode(data["image_base64"])
-            os.makedirs(NEWS_IMG_DIR, exist_ok=True)
-            img_path = os.path.join(NEWS_IMG_DIR, filename)
-            with open(img_path, "wb") as f:
-                f.write(img_data)
-            log.info(f"圖片生成成功: {filename} ({len(img_data)} bytes)")
-            return True
-    except Exception as e:
-        log.warning(f"圖片生成失敗: {e}")
+    max_attempts = 3
+    for attempt in range(1, max_attempts + 1):
+        try:
+            resp = httpx.post(
+                f"{AI_HUB_BASE}/api/image/generate",
+                json={"prompt": full_prompt, "timeout": 120},
+                timeout=150,
+            )
+            data = resp.json()
+            if data.get("success") and data.get("image_base64"):
+                img_data = base64.b64decode(data["image_base64"])
+
+                os.makedirs(NEWS_IMG_DIR, exist_ok=True)
+                img_path = os.path.join(NEWS_IMG_DIR, filename)
+                with open(img_path, "wb") as f:
+                    f.write(img_data)
+                log.info(f"圖片生成成功: {filename} ({len(img_data)} bytes, Pro)")
+                return True
+            else:
+                log.warning(f"圖片生成失敗 (attempt {attempt}/{max_attempts}): {data.get('detail', data.get('message', ''))}")
+        except Exception as e:
+            log.warning(f"圖片生成異常 (attempt {attempt}/{max_attempts}): {e}")
+        if attempt < max_attempts:
+            time.sleep(30)
     return False
 
 
@@ -447,7 +463,7 @@ def run_pipeline(dry_run: bool = False, no_image: bool = False, no_push: bool = 
         has_image = False
         img_filename = f"{datetime.date.today().isoformat()}-{article['id']}.png"
         if not no_image and analysis.get("image_prompt"):
-            has_image = generate_image(analysis["image_prompt"], img_filename)
+            has_image = generate_image(analysis["image_prompt"], analysis["title_zh"], img_filename)
             if has_image:
                 created_files.append(os.path.join("assets", "images", "news", img_filename))
 
