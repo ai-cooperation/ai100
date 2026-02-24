@@ -116,29 +116,17 @@ a:hover { color: var(--teal); }
 
 .hero-desc strong { color: var(--cyan); }
 
-.progress-wrapper { max-width: 420px; margin: 0 auto; }
+.hero-banner {
+  max-width: 720px;
+  margin: 0 auto 1.5rem;
+}
 
-.progress-bar {
-  background: var(--bg-card);
-  border-radius: 20px;
-  height: 10px;
-  overflow: hidden;
+.hero-banner img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
   border: 1px solid var(--border);
-}
-
-.progress-fill {
-  background: linear-gradient(90deg, var(--cyan), var(--purple));
-  height: 100%;
-  border-radius: 20px;
-  transition: width 0.6s ease;
-}
-
-.progress-text {
-  display: block;
-  margin-top: 0.5rem;
-  font-size: 0.85rem;
-  color: var(--text-dim);
-  font-family: var(--font-mono);
+  box-shadow: var(--card-shadow);
 }
 
 /* === Filter Bar === */
@@ -1880,8 +1868,6 @@ a:hover { color: var(--teal); }
 
 /* === Responsive === */
 @media (max-width: 768px) {
-  .hero h1 { font-size: 2rem; }
-  .hero-subtitle { font-size: 0.92rem; }
   .modules-grid { grid-template-columns: 1fr; }
   .dol-areas-grid { grid-template-columns: 1fr; }
   .lectures-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
@@ -1907,7 +1893,6 @@ a:hover { color: var(--teal); }
 
 @media (max-width: 480px) {
   .hero { padding: 2.5rem 0.5rem 1.5rem; }
-  .hero h1 { font-size: 1.6rem; }
   .card-image { height: 120px; }
   .module-cover { height: 120px; }
 }

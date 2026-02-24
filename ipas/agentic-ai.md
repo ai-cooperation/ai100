@@ -6,6 +6,8 @@ permalink: /ipas/agentic-ai/
 related_lectures: ["M05-05", "M07-06", "M10-09"]
 prev_url: /ipas/privacy-ai/
 prev_title: 隱私保護 AI 技術
+next_url: /ipas/ai-automation/
+next_title: AI 自動化的發展
 ---
 
 ## 為什麼 Agentic AI 是 2026 必考重點？

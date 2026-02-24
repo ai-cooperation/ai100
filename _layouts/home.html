@@ -3,17 +3,10 @@ layout: default
 ---
 <div class="hero">
   <div class="hero-glow"></div>
-  <h1>AI 100 講</h1>
-  <p class="hero-subtitle">用白話和圖解，帶你搞懂 AI 的 100 個核心觀念</p>
-  <p class="hero-desc">本站同時對照台灣 <strong>iPAS AI 應用規劃師</strong>證照考試與美國勞工部 <strong>DOL AI 素養框架</strong>，幫助你一次掌握國際 AI 素養標準與國內證照考試重點。</p>
-  <div class="progress-wrapper">
-    {% assign total = site.lectures | size %}
-    {% assign pct = total | times: 1.0 | divided_by: 100 | times: 100 %}
-    <div class="progress-bar">
-      <div class="progress-fill" style="width: {{ pct }}%"></div>
-    </div>
-    <span class="progress-text">{{ total }} / 100 講已上線</span>
+  <div class="hero-banner">
+    <img src="{{ '/assets/images/hero-banner.png' | relative_url }}" alt="AI 100 講 — iPAS × DOL AI Literacy">
   </div>
+  <p class="hero-desc">本站同時對照台灣 <strong>iPAS AI 應用規劃師</strong>證照考試與美國勞工部 <strong>DOL AI 素養框架</strong>，幫助你一次掌握國際 AI 素養標準與國內證照考試重點。</p>
 </div>
 
 <!-- Dual Track Toggle -->
@@ -42,7 +35,7 @@ layout: default
 <section class="modules-overview" id="modules-section">
   <div class="track-intro">
     <h2 class="section-title">🇹🇼 iPAS AI 應用規劃師 — 10 大模組</h2>
-    <p class="track-desc">經濟部產業人才能力鑑定（iPAS）AI 應用規劃師，分為初級與中級。本站 100 講依考試大綱分為 10 大模組，涵蓋演算法理論、生成式 AI 架構、企業導入場景與法規倫理。<a href="https://www.ipas.org.tw/AIAP/AbilityBriefingList.aspx" target="_blank" rel="noopener">2026 考試簡章 &rarr;</a></p>
+    <p class="track-desc">經濟部產業人才能力鑑定（iPAS）AI 應用規劃師，分為初級與中級。本站 100 講依考試大綱分為 10 大模組，涵蓋演算法理論、生成式 AI 架構、企業導入場景與法規倫理。<a href="https://ipd.nat.gov.tw/ipas/certification/AIAP/news" target="_blank" rel="noopener">2026 考試簡章 &rarr;</a></p>
   </div>
   <div class="modules-grid">
     {% for m in site.data.modules %}

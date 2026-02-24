@@ -21,3 +21,11 @@
   url: "/ipas/agentic-ai/"
   related_lectures: ["M05-05", "M07-06", "M10-09"]
   icon: "🤖"
+
+- id: ai-automation
+  short: "AI 自動化"
+  title: "AI 自動化的發展"
+  description: "從傳統自動化到 AI Agent，RPA、工作流引擎與智慧代理的演進脈絡，企業自動化轉型選型策略"
+  url: "/ipas/ai-automation/"
+  related_lectures: ["M05-05", "M07-06", "M09-08", "M10-09"]
+  icon: "⚡"
