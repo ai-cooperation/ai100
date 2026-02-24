@@ -1,0 +1,56 @@
+---
+layout: default
+---
+<article class="ipas-detail">
+  <div class="ipas-header">
+    <a href="{{ '/ipas/' | relative_url }}" class="back-link">&larr; iPAS 補充教材總覽</a>
+    <span class="ipas-badge">iPAS AI 應用規劃師 2026 考點補充</span>
+    <h1>{{ page.title }}</h1>
+    {% if page.description %}
+    <p class="tagline">{{ page.description }}</p>
+    {% endif %}
+  </div>
+
+  <nav class="ipas-topics-nav">
+    {% for topic in site.data.ipas_topics %}
+    <a href="{{ topic.url | relative_url }}"
+       class="ipas-topic-link{% if page.url == topic.url %} active{% endif %}">
+      {{ topic.icon }} {{ topic.short }}
+    </a>
+    {% endfor %}
+  </nav>
+
+  {% if page.related_lectures %}
+  <div class="ipas-related">
+    <span class="ipas-related-label">關聯正課：</span>
+    {% for lid in page.related_lectures %}
+      {% assign parts = lid | split: "-" %}
+      {% assign mod = parts[0] %}
+      {% assign num = parts[1] %}
+      {% assign fname = mod | append: "-" | append: num %}
+      {% for lec in site.lectures %}
+        {% if lec.lecture_id == mod | append: "." | append: num %}
+          <a href="{{ lec.url | relative_url }}" class="ipas-related-link">{{ lec.lecture_id }} {{ lec.title }}</a>
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="ipas-content lecture-content">
+    {{ content }}
+  </div>
+
+  <nav class="module-nav">
+    {% if page.prev_url %}
+    <a href="{{ page.prev_url | relative_url }}" class="nav-prev">&larr; {{ page.prev_title }}</a>
+    {% else %}
+    <span></span>
+    {% endif %}
+    {% if page.next_url %}
+    <a href="{{ page.next_url | relative_url }}" class="nav-next">{{ page.next_title }} &rarr;</a>
+    {% else %}
+    <span></span>
+    {% endif %}
+  </nav>
+</article>

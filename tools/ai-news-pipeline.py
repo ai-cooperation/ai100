@@ -19,7 +19,6 @@ import re
 import subprocess
 import sys
 import time
-import urllib.request
 from pathlib import Path
 
 try:
@@ -53,14 +52,6 @@ STATE_FILE = os.environ.get("NEWS_STATE_FILE",
 # 每次最多處理幾篇
 MAX_ARTICLES_PER_RUN = 3
 
-# Telegram 通知
-TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "")
-TG_CHAT_ID = os.environ.get("TG_CHAT_ID", "")
-
-# Log 路徑 (持久化，不放 /tmp)
-LOG_DIR = Path("/var/log/ai-hub")
-LOG_DIR.mkdir(parents=True, exist_ok=True)
-
 # RSS 來源 (經過驗證的高命中率來源)
 RSS_SOURCES = [
     # Tier 1: 高命中率 AI 專業來源
@@ -75,9 +66,6 @@ RSS_SOURCES = [
         "url": "https://simonwillison.net/atom/everything/",
         "lang": "en",
         "tier": 1,
-        "filter_keywords": ["AI", "LLM", "GPT", "Claude", "Gemini", "Anthropic", "OpenAI",
-                            "machine learning", "deep learning", "neural", "transformer",
-                            "language model", "embedding", "RAG", "agent", "fine-tuning"],
     },
     {
         "name": "Ars Technica AI",
@@ -117,7 +105,12 @@ RSS_SOURCES = [
         "lang": "en",
         "tier": 3,
     },
-    # Anthropic: no public RSS feed available
+    {
+        "name": "Anthropic News",
+        "url": "https://www.anthropic.com/rss.xml",
+        "lang": "en",
+        "tier": 3,
+    },
 ]
 
 # 講座主題對應表 (用於 LLM 反向連結)
@@ -138,34 +131,8 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%H:%M:%S",
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler(LOG_DIR / "ai100-news.log"),
-    ],
 )
 log = logging.getLogger("ai-news")
-
-
-# ============================================================
-# Telegram 通知
-# ============================================================
-
-def tg_send(message: str):
-    """發送 Telegram 通知。"""
-    try:
-        data = json.dumps({
-            "chat_id": TG_CHAT_ID,
-            "text": message,
-            "parse_mode": "HTML",
-        }).encode()
-        req = urllib.request.Request(
-            f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage",
-            data=data,
-            headers={"Content-Type": "application/json"},
-        )
-        urllib.request.urlopen(req, timeout=10)
-    except Exception as e:
-        log.warning(f"Telegram 通知失敗: {e}")
 
 
 # ============================================================
@@ -240,27 +207,8 @@ def fetch_rss_articles() -> list[dict]:
 
     client.close()
 
-    # 按發布時間排序（最新優先），同時間則 tier 低的優先
-    from email.utils import parsedate_to_datetime
-    import datetime
-
-    def parse_pub_time(a):
-        pub = a.get("published", "")
-        if not pub:
-            return datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
-        # RFC 2822 (most RSS feeds)
-        try:
-            return parsedate_to_datetime(pub)
-        except Exception:
-            pass
-        # ISO 8601 (Atom feeds like Simon Willison)
-        try:
-            return datetime.datetime.fromisoformat(pub)
-        except Exception:
-            pass
-        return datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
-
-    articles.sort(key=lambda a: (parse_pub_time(a),), reverse=True)
+    # 按 tier 排序 (tier 1 優先)，然後去重
+    articles.sort(key=lambda a: a["tier"])
     return articles
 
 
@@ -296,8 +244,6 @@ def analyze_article(article: dict, content: str) -> dict | None:
 
     prompt = f"""你是 AI 100 講的新聞編輯。請分析以下 AI 相關文章，產出結構化的中文新聞摘要。
 
-重要：請先用你的搜尋能力驗證這則新聞的真實性與正確性。如果發現資訊有誤、過時、或無法驗證，請在摘要中如實說明。
-
 文章標題: {article['title']}
 來源: {article['source_name']}
 原始摘要: {article['summary']}
@@ -307,13 +253,12 @@ def analyze_article(article: dict, content: str) -> dict | None:
 {{
   "title_zh": "中文標題（15-25字，吸引人）",
   "summary": "一段話摘要（50-80字，白話說明這則新聞的重點）",
-  "body": "正文（200-400字，用白話解說這個技術/產品/事件的重點、為什麼重要、對一般人的影響。分2-3段。如果經查證發現有不準確之處，請在文末補充說明。）",
+  "body": "正文（200-400字，用白話解說這個技術/產品/事件的重點、為什麼重要、對一般人的影響。分2-3段。）",
   "tags": ["標籤1", "標籤2", "標籤3"],
   "related_modules": ["M05", "M07"],
   "related_lecture_ids": ["M05.03", "M07.02"],
-  "image_prompt": "圖片視覺描述（科技風格、概念示意，30字內，只描述視覺元素不含文字指令）",
-  "relevance_score": 8,
-  "verified": true或false（你是否能透過搜尋驗證此新聞的核心事實）
+  "image_prompt": "English description for image generation (professional tech illustration style, 50 words max)",
+  "relevance_score": 8
 }}
 
 講座模組對照:
@@ -323,15 +268,14 @@ def analyze_article(article: dict, content: str) -> dict | None:
 - related_modules: 選 1-3 個最相關的模組
 - related_lecture_ids: 選 1-3 個最精確對應的講座 ID（格式如 M05.03）
 - relevance_score: 1-10，這則新聞與 AI 學習的相關程度
-- verified: 透過搜尋驗證後，核心事實是否正確
 - 只回 JSON，不要加任何其他文字
 """
 
     try:
         resp = httpx.post(
             f"{AI_HUB_BASE}/api/llm/chat",
-            json={"prompt": prompt, "provider": "gemini"},
-            timeout=180,
+            json={"prompt": prompt, "provider": "auto"},
+            timeout=120,
         )
         data = resp.json()
         if data.get("success"):
@@ -352,37 +296,27 @@ def analyze_article(article: dict, content: str) -> dict | None:
 # 圖片生成
 # ============================================================
 
-def generate_image(prompt: str, title_zh: str, filename: str) -> bool:
-    """使用 AI Hub 生成新聞配圖，失敗重試最多 3 次。"""
-    full_prompt = (
-        f"生成一張科技新聞配圖。深藍色背景，發光的青色點綴。"
-        f"圖片上方必須顯示繁體中文標題「{title_zh}」，文字清晰、字體現代。"
-        f"圖片風格：{prompt}"
-    )
+def generate_image(prompt: str, filename: str) -> bool:
+    """使用 AI Hub 生成新聞配圖。"""
+    full_prompt = f"Professional tech news illustration, dark blue background, glowing cyan accents: {prompt}"
 
-    max_attempts = 3
-    for attempt in range(1, max_attempts + 1):
-        try:
-            resp = httpx.post(
-                f"{AI_HUB_BASE}/api/image/generate",
-                json={"prompt": full_prompt, "timeout": 90, "queue_timeout": 120},
-                timeout=240,
-            )
-            data = resp.json()
-            if data.get("success") and data.get("image_base64"):
-                img_data = base64.b64decode(data["image_base64"])
-                os.makedirs(NEWS_IMG_DIR, exist_ok=True)
-                img_path = os.path.join(NEWS_IMG_DIR, filename)
-                with open(img_path, "wb") as f:
-                    f.write(img_data)
-                log.info(f"圖片生成成功: {filename} ({len(img_data)} bytes)")
-                return True
-            else:
-                log.warning(f"圖片生成失敗 (attempt {attempt}/{max_attempts}): {data.get('detail', data.get('message', ''))}")
-        except Exception as e:
-            log.warning(f"圖片生成異常 (attempt {attempt}/{max_attempts}): {e}")
-        if attempt < max_attempts:
-            time.sleep(30)
+    try:
+        resp = httpx.post(
+            f"{AI_HUB_BASE}/api/image/generate",
+            json={"prompt": full_prompt, "timeout": 90},
+            timeout=120,
+        )
+        data = resp.json()
+        if data.get("success") and data.get("image_base64"):
+            img_data = base64.b64decode(data["image_base64"])
+            os.makedirs(NEWS_IMG_DIR, exist_ok=True)
+            img_path = os.path.join(NEWS_IMG_DIR, filename)
+            with open(img_path, "wb") as f:
+                f.write(img_data)
+            log.info(f"圖片生成成功: {filename} ({len(img_data)} bytes)")
+            return True
+    except Exception as e:
+        log.warning(f"圖片生成失敗: {e}")
     return False
 
 
@@ -435,46 +369,18 @@ tags: {tags_yaml}
 # Git 操作
 # ============================================================
 
-def git_commit_and_push(files: list[str]) -> bool:
-    """Git commit 並 push 到 GitHub，失敗時重試並通知。"""
+def git_commit_and_push(files: list[str]):
+    """Git commit 並 push 到 GitHub。"""
     try:
         os.chdir(REPO_DIR)
         subprocess.run(["git", "add"] + files, check=True, capture_output=True)
         today = datetime.date.today().isoformat()
         msg = f"news: AI 動態更新 {today}\n\nCo-Authored-By: AI News Pipeline <noreply@ai100.dev>"
         subprocess.run(["git", "commit", "-m", msg], check=True, capture_output=True)
-
-        # Push with retry (max 2 attempts)
-        for attempt in range(1, 3):
-            try:
-                subprocess.run(
-                    ["git", "push"], check=True, capture_output=True, text=True, timeout=120,
-                )
-                log.info("Git push 完成")
-                return True
-            except subprocess.CalledProcessError as e:
-                log.error(f"Git push 失敗 (attempt {attempt}/2): {e.stderr or e}")
-                if attempt < 2:
-                    time.sleep(5)
-            except subprocess.TimeoutExpired:
-                log.error(f"Git push 超時 (attempt {attempt}/2)")
-                if attempt < 2:
-                    time.sleep(5)
-
-        # All retries failed
-        tg_send(
-            "<b>⚠️ AI 100 講新聞 Pipeline</b>\n\n"
-            "Git push 失敗（已重試 2 次）\n"
-            "本地有 unpushed commits\n"
-            "📂 ~/ai100\n"
-            "🔧 手動: <code>cd ~/ai100 &amp;&amp; git push</code>"
-        )
-        return False
-
+        subprocess.run(["git", "push"], check=True, capture_output=True)
+        log.info("Git push 完成")
     except subprocess.CalledProcessError as e:
-        log.error(f"Git 操作失敗: {e}")
-        tg_send(f"<b>⚠️ AI 100 講新聞 Pipeline</b>\n\nGit 操作失敗: {e}")
-        return False
+        log.warning(f"Git 操作失敗: {e}")
 
 
 # ============================================================
@@ -536,17 +442,12 @@ def run_pipeline(dry_run: bool = False, no_image: bool = False, no_push: bool = 
         log.info(f"  標題: {analysis['title_zh']}")
         log.info(f"  相關度: {score}/10")
         log.info(f"  相關講座: {analysis.get('related_lecture_ids', [])}")
-        verified = analysis.get("verified", False)
-        if not verified:
-            log.warning(f"  ⚠️ 未驗證: {analysis['title_zh']} (verified=false，需人工審核)")
-        article["_title_zh"] = analysis["title_zh"]
-        article["_verified"] = verified
 
         # 4c. 生成圖片
         has_image = False
         img_filename = f"{datetime.date.today().isoformat()}-{article['id']}.png"
         if not no_image and analysis.get("image_prompt"):
-            has_image = generate_image(analysis["image_prompt"], analysis["title_zh"], img_filename)
+            has_image = generate_image(analysis["image_prompt"], img_filename)
             if has_image:
                 created_files.append(os.path.join("assets", "images", "news", img_filename))
 
@@ -565,30 +466,10 @@ def run_pipeline(dry_run: bool = False, no_image: bool = False, no_push: bool = 
     save_state(state)
 
     # 6. Git commit & push
-    push_ok = True
     if created_files and not dry_run and not no_push:
-        push_ok = git_commit_and_push(created_files)
+        git_commit_and_push(created_files)
 
     log.info(f"\n完成！產出 {len(created_files)} 個檔案")
-
-    # 7. 回報結果 (只在有產出時通知)
-    if created_files and not dry_run:
-        titles = []
-        unverified = []
-        for a in batch[:len(created_files)]:
-            t = a.get("_title_zh", a["title"][:30])
-            if not a.get("_verified", True):
-                titles.append(f"• ⚠️ {t}")
-                unverified.append(t)
-            else:
-                titles.append(f"• ✅ {t}")
-        status = "✅ 已部署" if push_ok else "⚠️ commit 成功但 push 失敗"
-        tg_send(
-            f"<b>📰 AI 100 講動態更新</b>\n\n"
-            f"產出 {len(created_files)} 篇\n"
-            + "\n".join(titles) + "\n\n"
-            f"{status}"
-        )
 
 
 if __name__ == "__main__":

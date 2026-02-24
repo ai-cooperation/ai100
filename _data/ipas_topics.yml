@@ -1,0 +1,23 @@
+- id: xai
+  short: "XAI"
+  title: "可解釋性 AI (XAI) 實務"
+  description: "LIME、SHAP 工具深入解析，金融醫療合規場景，EU AI Act 高風險系統的可解釋性要求"
+  url: "/ipas/xai/"
+  related_lectures: ["M03-05", "M06-07", "M10-03"]
+  icon: "🔍"
+
+- id: privacy-ai
+  short: "隱私保護"
+  title: "隱私保護 AI 技術"
+  description: "聯邦學習、差分隱私、同態加密的原理與企業場景，跨機構協作訓練的實務架構"
+  url: "/ipas/privacy-ai/"
+  related_lectures: ["M02-08", "M08-09", "M10-03"]
+  icon: "🛡️"
+
+- id: agentic-ai
+  short: "Agentic AI"
+  title: "Agentic AI 架構設計"
+  description: "LangGraph、多代理協作模式、工具編排，企業 Agentic Workflow 從 PoC 到生產的實務"
+  url: "/ipas/agentic-ai/"
+  related_lectures: ["M05-05", "M07-06", "M10-09"]
+  icon: "🤖"
