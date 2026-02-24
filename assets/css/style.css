@@ -100,11 +100,21 @@ a:hover { color: var(--teal); }
 .hero-subtitle {
   color: var(--text-muted);
   font-size: 1.05rem;
-  margin-bottom: 2rem;
+  margin-bottom: 0.8rem;
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
 }
+
+.hero-desc {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  max-width: 680px;
+  margin: 0 auto 2rem;
+}
+
+.hero-desc strong { color: var(--cyan); }
 
 .progress-wrapper { max-width: 420px; margin: 0 auto; }
 
@@ -935,6 +945,23 @@ a:hover { color: var(--teal); }
 .track-btn.active {
   background: linear-gradient(135deg, var(--cyan), var(--purple));
   color: #fff;
+}
+
+/* === Track Intro === */
+.track-intro {
+  margin-bottom: 1.2rem;
+}
+
+.track-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-top: 0.5rem;
+}
+
+.track-desc a {
+  color: var(--cyan);
+  font-weight: 600;
 }
 
 /* === DOL Filter Bar === */
