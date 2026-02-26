@@ -314,7 +314,7 @@ def generate_image(prompt: str, title_zh: str, filename: str) -> bool:
         try:
             resp = httpx.post(
                 f"{AI_HUB_BASE}/api/image/generate",
-                json={"prompt": full_prompt, "timeout": 120},
+                json={"prompt": full_prompt, "timeout": 120, "model": "pro"},
                 timeout=150,
             )
             data = resp.json()
