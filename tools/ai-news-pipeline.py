@@ -317,6 +317,11 @@ def generate_image(prompt: str, title_zh: str, filename: str) -> bool:
                 json={"prompt": full_prompt, "timeout": 120, "model": "pro"},
                 timeout=150,
             )
+            # Pro quota exhausted — stop retries immediately
+            if resp.status_code == 503:
+                detail = resp.json().get("detail", "")
+                logger.warning(f"Pro quota exhausted: {detail}")
+                return False
             data = resp.json()
             if data.get("success") and data.get("image_base64"):
                 img_data = base64.b64decode(data["image_base64"])
