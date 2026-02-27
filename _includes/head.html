@@ -1,7 +1,137 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% if page.title %}{{ page.title }} — {% endif %}{{ site.title }}</title>
-<meta name="description" content="{{ page.description | default: site.description }}">
+<meta name="description" content="{{ page.description | default: page.tagline | default: page.summary | default: site.description | truncate: 160 }}">
+<meta name="keywords" content="AI,人工智慧,iPAS,AI應用規劃師,機器學習,深度學習,生成式AI,自然語言處理,電腦視覺,{{ page.tags | join: ',' }}">
+<link rel="canonical" href="{{ site.url }}{{ site.baseurl }}{{ page.url }}">
 <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Open Graph -->
+<meta property="og:type" content="{% if page.layout == 'lecture' %}article{% elsif page.layout == 'post' %}article{% else %}website{% endif %}">
+<meta property="og:title" content="{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}">
+<meta property="og:description" content="{{ page.description | default: page.tagline | default: page.summary | default: site.description | truncate: 200 }}">
+<meta property="og:url" content="{{ site.url }}{{ site.baseurl }}{{ page.url }}">
+<meta property="og:site_name" content="{{ site.title }}">
+<meta property="og:locale" content="zh_TW">
+{% if page.image %}<meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/assets/images/{% if page.layout == 'post' %}news/{% else %}lectures/{% endif %}{{ page.image }}">
+{% endif %}
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}">
+<meta name="twitter:description" content="{{ page.description | default: page.tagline | default: page.summary | default: site.description | truncate: 200 }}">
+
+<!-- JSON-LD: Site-level Course (iPAS AI 應用規劃師) -->
+{% if page.url == "/" %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Course",
+  "name": "AI 100 講",
+  "description": "iPAS AI 應用規劃師導向課程，10 模組 × 10 講，涵蓋機器學習、深度學習、生成式 AI、自然語言處理、電腦視覺等核心領域",
+  "provider": {
+    "@type": "Organization",
+    "name": "AI Cooperation",
+    "url": "https://ai-cooperation.github.io"
+  },
+  "educationalLevel": "Professional",
+  "inLanguage": "zh-TW",
+  "about": [
+    {"@type": "Thing", "name": "人工智慧"},
+    {"@type": "Thing", "name": "機器學習"},
+    {"@type": "Thing", "name": "深度學習"},
+    {"@type": "Thing", "name": "生成式 AI"},
+    {"@type": "Thing", "name": "自然語言處理"},
+    {"@type": "Thing", "name": "電腦視覺"},
+    {"@type": "Thing", "name": "AI 倫理與治理"}
+  ],
+  "teaches": [
+    "AI 基礎概念與發展歷程",
+    "機器學習演算法原理與應用",
+    "深度學習與神經網路架構",
+    "生成式 AI 與大型語言模型",
+    "自然語言處理技術與應用",
+    "電腦視覺與影像辨識",
+    "AI 專案規劃與導入策略",
+    "AI 倫理、偏見與治理框架",
+    "AI 安全與隱私保護",
+    "產業 AI 應用案例分析"
+  ],
+  "hasCourseInstance": {
+    "@type": "CourseInstance",
+    "courseMode": "online",
+    "courseWorkload": "PT100H"
+  },
+  "educationalCredentialAwarded": "iPAS AI 應用規劃師考試準備",
+  "url": "{{ site.url }}{{ site.baseurl }}/"
+}
+</script>
+{% endif %}
+
+<!-- JSON-LD: Lecture as LearningResource -->
+{% if page.layout == "lecture" %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "{{ page.lecture_id }}｜{{ page.title }}",
+  "description": "{{ page.tagline | default: page.title }}",
+  "url": "{{ site.url }}{{ site.baseurl }}{{ page.url }}",
+  "inLanguage": "zh-TW",
+  "learningResourceType": ["lecture", "infographic"],
+  "educationalLevel": "Professional",
+  "isPartOf": {
+    "@type": "Course",
+    "name": "AI 100 講",
+    "url": "{{ site.url }}{{ site.baseurl }}/",
+    "description": "對應 iPAS AI 應用規劃師能力指標"
+  },
+  "teaches": "{{ page.title }}",
+  "datePublished": "{{ page.date | date: '%Y-%m-%d' }}",
+  "keywords": "{{ page.tags | join: ', ' | default: 'AI,人工智慧,iPAS AI應用規劃師' }}",
+  {% if page.ipas_code %}"educationalAlignment": {
+    "@type": "AlignmentObject",
+    "alignmentType": "teaches",
+    "targetName": "iPAS AI 應用規劃師 — {{ page.ipas_code }}",
+    "targetUrl": "https://www.ipas.org.tw/"
+  },{% endif %}
+  {% if page.cornell %}"hasPart": {
+    "@type": "Quiz",
+    "name": "{{ page.lecture_id }} 學習重點自我檢核",
+    "about": "{{ page.title }}"
+  },{% endif %}
+  "provider": {
+    "@type": "Organization",
+    "name": "AI Cooperation"
+  }
+}
+</script>
+{% endif %}
+
+<!-- JSON-LD: News Article -->
+{% if page.layout == "post" %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  "headline": "{{ page.title }}",
+  "description": "{{ page.summary | default: page.title }}",
+  "url": "{{ site.url }}{{ site.baseurl }}{{ page.url }}",
+  "datePublished": "{{ page.date | date: '%Y-%m-%d' }}",
+  "inLanguage": "zh-TW",
+  "keywords": "{{ page.tags | join: ', ' | default: 'AI,人工智慧' }}",
+  {% if page.image %}"image": "{{ site.url }}{{ site.baseurl }}/assets/images/news/{{ page.image }}",{% endif %}
+  {% if page.source %}"publisher": {
+    "@type": "Organization",
+    "name": "{{ page.source }}"
+  },{% endif %}
+  "isPartOf": {
+    "@type": "Course",
+    "name": "AI 100 講 — AI 動態",
+    "description": "iPAS AI 應用規劃師考試相關 AI 產業新聞追蹤"
+  }
+}
+</script>
+{% endif %}
