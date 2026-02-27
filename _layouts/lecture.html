@@ -78,6 +78,38 @@ layout: default
   </div>
   {% endif %}
 
+  {% if page.podcast_zh %}
+  <section class="podcast-section">
+    <h2>🎙️ Podcast（中文）</h2>
+    <div class="podcast-player" data-lang="zh">
+      <audio id="audio-zh" preload="metadata">
+        <source src="{{ '/assets/audio/' | append: page.lecture_id | replace: '.', '-' | append: '/podcast_zh.m4a' | relative_url }}" type="audio/mp4">
+      </audio>
+      <div class="player-controls">
+        <button class="play-btn" data-target="audio-zh" aria-label="Play/Pause">
+          <svg class="icon-play" viewBox="0 0 24 24" width="28" height="28"><polygon points="5,3 19,12 5,21" fill="currentColor"/></svg>
+          <svg class="icon-pause" viewBox="0 0 24 24" width="28" height="28" style="display:none"><rect x="6" y="4" width="4" height="16" fill="currentColor"/><rect x="14" y="4" width="4" height="16" fill="currentColor"/></svg>
+        </button>
+        <div class="progress-container">
+          <div class="player-progress">
+            <div class="player-progress-fill"></div>
+          </div>
+          <div class="time-display">
+            <span class="current-time">0:00</span> / <span class="total-time">0:00</span>
+          </div>
+        </div>
+        <select class="speed-select" data-target="audio-zh">
+          <option value="0.75">0.75x</option>
+          <option value="1" selected>1x</option>
+          <option value="1.25">1.25x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2">2x</option>
+        </select>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
   <div class="lecture-content">
     {{ content }}
   </div>
@@ -109,4 +141,79 @@ layout: default
       <a href="{{ sorted[next_idx].url | relative_url }}" class="nav-next">{{ sorted[next_idx].lecture_id }} {{ sorted[next_idx].title }} &rarr;</a>
     {% endif %}
   </nav>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var players = document.querySelectorAll('.podcast-player');
+  var allAudios = document.querySelectorAll('audio');
+
+  players.forEach(function(player) {
+    var audio = player.querySelector('audio');
+    var playBtn = player.querySelector('.play-btn');
+    var iconPlay = playBtn.querySelector('.icon-play');
+    var iconPause = playBtn.querySelector('.icon-pause');
+    var progressFill = player.querySelector('.player-progress-fill');
+    var progressBar = player.querySelector('.player-progress');
+    var currentTime = player.querySelector('.current-time');
+    var totalTime = player.querySelector('.total-time');
+    var speedSelect = player.querySelector('.speed-select');
+
+    function formatTime(s) {
+      if (isNaN(s)) return '0:00';
+      var m = Math.floor(s / 60);
+      var sec = Math.floor(s % 60);
+      return m + ':' + (sec < 10 ? '0' : '') + sec;
+    }
+
+    playBtn.addEventListener('click', function() {
+      if (audio.paused) {
+        allAudios.forEach(function(a) {
+          if (a !== audio && !a.paused) {
+            a.pause();
+            var op = a.closest('.podcast-player');
+            if (op) {
+              op.querySelector('.icon-play').style.display = '';
+              op.querySelector('.icon-pause').style.display = 'none';
+            }
+          }
+        });
+        audio.play();
+        iconPlay.style.display = 'none';
+        iconPause.style.display = '';
+      } else {
+        audio.pause();
+        iconPlay.style.display = '';
+        iconPause.style.display = 'none';
+      }
+    });
+
+    audio.addEventListener('timeupdate', function() {
+      if (audio.duration) {
+        progressFill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+        currentTime.textContent = formatTime(audio.currentTime);
+      }
+    });
+
+    audio.addEventListener('loadedmetadata', function() {
+      totalTime.textContent = formatTime(audio.duration);
+    });
+
+    audio.addEventListener('ended', function() {
+      iconPlay.style.display = '';
+      iconPause.style.display = 'none';
+    });
+
+    progressBar.addEventListener('click', function(e) {
+      var rect = progressBar.getBoundingClientRect();
+      var pct = (e.clientX - rect.left) / rect.width;
+      audio.currentTime = pct * audio.duration;
+    });
+
+    speedSelect.addEventListener('change', function() {
+      audio.playbackRate = parseFloat(this.value);
+    });
+  });
+});
+</script>
+
 </article>

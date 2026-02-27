@@ -1896,3 +1896,16 @@ a:hover { color: var(--teal); }
   .card-image { height: 120px; }
   .module-cover { height: 120px; }
 }
+
+/* === Podcast Player === */
+.podcast-section { margin: 2rem 0; }
+.podcast-section h2 { font-size: 1.2rem; color: var(--cyan); margin-bottom: 0.8rem; border-bottom: 1px solid var(--cyan-dim); padding-bottom: 0.3rem; }
+.player-controls { display: flex; align-items: center; gap: 0.8rem; background: var(--bg-card); padding: 0.8rem 1rem; border-radius: 12px; border: 1px solid var(--cyan-dim); }
+.play-btn { background: var(--cyan); color: var(--bg-deep); border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s; }
+.play-btn:hover { background: var(--teal); }
+.progress-container { flex: 1; }
+.player-progress { background: var(--bg-deep); border-radius: 4px; height: 6px; cursor: pointer; position: relative; }
+.player-progress-fill { background: linear-gradient(90deg, var(--cyan), var(--teal)); height: 100%; border-radius: 4px; width: 0; transition: width 0.1s linear; }
+.time-display { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem; }
+.speed-select { background: var(--bg-deep); color: var(--text-muted); border: 1px solid var(--cyan-dim); border-radius: 6px; padding: 0.3rem 0.5rem; font-size: 0.8rem; cursor: pointer; }
+.speed-select:focus { outline: 1px solid var(--cyan); }
