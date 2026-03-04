@@ -1,0 +1,18 @@
+---
+layout: null
+permalink: /llms-full.txt
+---
+# AI 100 講
+
+> {{ site.description }}
+
+本站提供 100 堂 AI 入門到進階講義，對應經濟部 iPAS「AI 應用規劃師」能力鑑定。
+
+{% for lecture in site.lectures %}
+## {{ lecture.lecture_id }} {{ lecture.title }}
+
+{{ lecture.content | strip_html | strip_newlines | truncatewords: 500 }}
+
+---
+
+{% endfor %}

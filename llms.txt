@@ -1,0 +1,29 @@
+# AI 100 講
+
+> iPAS AI 應用規劃師導向課程 — 10 模組 × 10 講，白話解說搭配視覺圖解，涵蓋 AI 基礎到實戰應用。
+
+本站提供 100 堂 AI 入門到進階講義，對應經濟部 iPAS「AI 應用規劃師」能力鑑定範圍。內容以繁體中文撰寫，適合台灣地區 AI 學習者與備考者。每講附有 Cornell 筆記、視覺圖解與中文 Podcast。
+
+## 模組總覽
+
+- [M01 AI 基礎概論](https://ai-cooperation.github.io/ai100/lectures/M01-01/): 什麼是 AI、能力邊界、發展歷程、應用場景
+- [M02 資料科學基礎](https://ai-cooperation.github.io/ai100/lectures/M02-01/): 資料本質、結構化/非結構化、資料品質、特徵工程
+- [M03 機器學習](https://ai-cooperation.github.io/ai100/lectures/M03-01/): 監督式/非監督式學習、決策樹、SVM、模型評估
+- [M04 深度學習](https://ai-cooperation.github.io/ai100/lectures/M04-01/): 神經網路、CNN、RNN、Transformer 架構
+- [M05 生成式 AI](https://ai-cooperation.github.io/ai100/lectures/M05-01/): 大型語言模型、提示工程、RAG、微調技術
+- [M06 No-Code/Low-Code AI](https://ai-cooperation.github.io/ai100/lectures/M06-01/): AutoML、視覺化建模、AI 平台選擇
+- [M07 自然語言處理](https://ai-cooperation.github.io/ai100/lectures/M07-01/): 文本分類、情感分析、NER、語言模型
+- [M08 大數據分析](https://ai-cooperation.github.io/ai100/lectures/M08-01/): 5V 特性、資料管線、視覺化、ETL 流程
+- [M09 MLOps](https://ai-cooperation.github.io/ai100/lectures/M09-01/): 模型部署、CI/CD、監控、版本管理
+- [M10 iPAS 考試攻略](https://ai-cooperation.github.io/ai100/lectures/M10-01/): 考試架構、題型解析、備考策略、AI 倫理與法規
+
+## 其他內容
+
+- [首頁](https://ai-cooperation.github.io/ai100/): 課程總覽與學習路徑
+- [iPAS 對照](https://ai-cooperation.github.io/ai100/ipas/): iPAS 能力指標與講義對照表
+- [DOL 學習框架](https://ai-cooperation.github.io/ai100/dol-framework/): 自主學習方法論
+- [AI 新聞](https://ai-cooperation.github.io/ai100/news/): 每日 AI 產業新聞追蹤
+
+## Optional
+
+- [Sitemap](https://ai-cooperation.github.io/ai100/sitemap.xml): 完整頁面索引
