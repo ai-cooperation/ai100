@@ -320,7 +320,7 @@ def generate_image(prompt: str, title_zh: str, filename: str) -> bool:
             # Pro quota exhausted — stop retries immediately
             if resp.status_code == 503:
                 detail = resp.json().get("detail", "")
-                logger.warning(f"Pro quota exhausted: {detail}")
+                log.warning(f"Pro quota exhausted: {detail}")
                 return False
             data = resp.json()
             if data.get("success") and data.get("image_base64"):
