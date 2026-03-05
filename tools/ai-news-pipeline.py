@@ -39,6 +39,11 @@ except ImportError:
 # AI Hub API (ac-mac)
 AI_HUB_BASE = os.environ.get("AI_HUB_URL", "http://127.0.0.1:8760")
 
+# Telegram 通知
+TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "")
+TG_CHAT_ID = int(os.environ.get("TG_CHAT_ID", "8550440980"))
+SITE_URL = "https://ai-cooperation.github.io/ai100"
+
 # 專案路徑 (需要 git clone 的 ai100 repo)
 REPO_DIR = os.environ.get("AI100_REPO", os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 POSTS_DIR = os.path.join(REPO_DIR, "_posts")
@@ -338,6 +343,7 @@ def generate_image(prompt: str, title_zh: str, filename: str) -> bool:
             log.warning(f"圖片生成異常 (attempt {attempt}/{max_attempts}): {e}")
         if attempt < max_attempts:
             time.sleep(30)
+    log.error(f"圖片生成最終失敗: {filename} (已嘗試 {max_attempts} 次)")
     return False
 
 
@@ -405,6 +411,31 @@ def git_commit_and_push(files: list[str]):
 
 
 # ============================================================
+# TG 通知
+# ============================================================
+
+def send_tg(message: str):
+    """發送 Telegram 通知。"""
+    if not TG_BOT_TOKEN:
+        log.warning("TG_BOT_TOKEN 未設定，跳過通知")
+        return
+    try:
+        httpx.post(
+            f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage",
+            json={
+                "chat_id": TG_CHAT_ID,
+                "text": message,
+                "parse_mode": "HTML",
+                "disable_web_page_preview": False,
+            },
+            timeout=10,
+        )
+        log.info("TG 通知已發送")
+    except Exception as e:
+        log.warning(f"TG 發送失敗: {e}")
+
+
+# ============================================================
 # 主流程
 # ============================================================
 
@@ -434,6 +465,8 @@ def run_pipeline(dry_run: bool = False, no_image: bool = False, no_push: bool = 
     # 4. 限制每次處理數量
     batch = new_articles[:MAX_ARTICLES_PER_RUN]
     created_files = []
+    created_posts = []
+    image_failures = []
 
     for i, article in enumerate(batch, 1):
         log.info(f"\n--- [{i}/{len(batch)}] {article['title'][:60]} ---")
@@ -475,6 +508,9 @@ def run_pipeline(dry_run: bool = False, no_image: bool = False, no_push: bool = 
         # 4d. 產出 Jekyll post
         post_filename = create_post(article, analysis, has_image)
         created_files.append(os.path.join("_posts", post_filename))
+        created_posts.append(analysis)
+        if not has_image and not no_image:
+            image_failures.append(analysis.get("title_zh", article["title"]))
 
         # 4e. 標記已處理
         state["processed"].append(article["id"])
@@ -489,6 +525,24 @@ def run_pipeline(dry_run: bool = False, no_image: bool = False, no_push: bool = 
     # 6. Git commit & push
     if created_files and not dry_run and not no_push:
         git_commit_and_push(created_files)
+
+    # 7. TG 通知
+    if created_posts and not dry_run:
+        today = datetime.date.today().strftime("%Y-%m-%d")
+        news_url = f"{SITE_URL}/news/"
+
+        lines = [f"<b>🤖 AI 動態 {today}</b>\n"]
+        for p in created_posts:
+            title = p.get("title_zh", "")
+            summary = p.get("summary", "")
+            tags = " ".join(f"#{t}" for t in p.get("tags", [])[:3])
+            lines.append(f"• <b>{title}</b>\n  {summary}\n  {tags}\n")
+
+        if image_failures:
+            lines.append(f"⚠️ {len(image_failures)} 篇圖片生成失敗")
+
+        lines.append(f'🔗 <a href="{news_url}">查看完整報導</a>')
+        send_tg("\n".join(lines))
 
     log.info(f"\n完成！產出 {len(created_files)} 個檔案")
 
