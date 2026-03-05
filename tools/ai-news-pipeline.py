@@ -319,8 +319,8 @@ def generate_image(prompt: str, title_zh: str, filename: str) -> bool:
         try:
             resp = httpx.post(
                 f"{AI_HUB_BASE}/api/image/generate",
-                json={"prompt": full_prompt, "timeout": 120, "model": "pro"},
-                timeout=150,
+                json={"prompt": full_prompt, "timeout": 180, "model": "pro"},
+                timeout=200,
             )
             # Pro quota exhausted — stop retries immediately
             if resp.status_code == 503:
