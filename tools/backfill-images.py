@@ -130,7 +130,7 @@ def generate_background(prompt: str) -> bytes | None:
     try:
         resp = httpx.post(
             f"{AI_HUB}/api/image/generate",
-            json={"prompt": clean_prompt, "timeout": 180},
+            json={"prompt": clean_prompt, "timeout": 180, "model": "pro"},
             timeout=200,
         )
         data = resp.json()
