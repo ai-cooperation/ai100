@@ -222,7 +222,7 @@ def update_frontmatter(md_path: str, slug: str):
     date_str = slug[:10]
     content = content.replace(
         f"date: {date_str}",
-        f"date: {date_str}\nimage: /assets/images/news/{slug}.png",
+        f"date: {date_str}\nimage: {slug}.png",
         1,
     )
     with open(md_path, "w", encoding="utf-8") as f:
