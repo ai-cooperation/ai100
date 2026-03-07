@@ -439,11 +439,41 @@ def send_tg(message: str):
 # 主流程
 # ============================================================
 
+
+# ============================================================
+# Warmup
+# ============================================================
+
+def warmup_ai_hub() -> bool:
+    """Pipeline 啟動前 warmup: 用 LLM chat 確認 AI Hub 可互動。"""
+    log.info("Warmup: 測試 AI Hub 連線...")
+    try:
+        resp = httpx.post(
+            f"{AI_HUB_BASE}/api/llm/chat",
+            json={"prompt": "Reply OK", "provider": "auto"},
+            timeout=30,
+        )
+        data = resp.json()
+        if data.get("success"):
+            log.info("Warmup: AI Hub OK")
+            return True
+        log.warning(f"Warmup: LLM 回應異常: {data.get('message', '')}")
+        return False
+    except Exception as e:
+        log.warning(f"Warmup: AI Hub 不可達: {e}")
+        return False
+
+
 def run_pipeline(dry_run: bool = False, no_image: bool = False, no_push: bool = False):
     """執行完整 pipeline。"""
     log.info("=" * 50)
     log.info("AI 100 講 — 新聞 Pipeline 開始")
     log.info("=" * 50)
+
+    # 0. Warmup AI Hub
+    if not dry_run:
+        if not warmup_ai_hub():
+            log.warning("Warmup 失敗，但仍繼續執行 pipeline")
 
     # 1. 載入狀態
     state = load_state()
