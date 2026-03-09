@@ -322,11 +322,18 @@ def generate_image(prompt: str, title_zh: str, filename: str) -> bool:
                 json={"prompt": full_prompt, "timeout": 180, "model": "pro"},
                 timeout=200,
             )
-            # Pro quota exhausted — stop retries immediately
+            # 503: distinguish quota exhaustion vs transient errors
             if resp.status_code == 503:
                 detail = resp.json().get("detail", "")
-                log.warning(f"Pro quota exhausted: {detail}")
-                return False
+                # Real quota exhaustion — stop retries
+                if "quota" in detail.lower() and "exhausted" in detail.lower():
+                    log.warning(f"Pro quota exhausted: {detail}")
+                    return False
+                # Transient error (timeout, tab crash) — let retry loop handle it
+                log.warning(f"圖片生成暫時失敗 (attempt {attempt}/{max_attempts}): {detail}")
+                if attempt < max_attempts:
+                    time.sleep(30)
+                continue
             data = resp.json()
             if data.get("success") and data.get("image_base64"):
                 img_data = base64.b64decode(data["image_base64"])
@@ -445,22 +452,29 @@ def send_tg(message: str):
 # ============================================================
 
 def warmup_ai_hub() -> bool:
-    """Pipeline 啟動前 warmup: 用 LLM chat 確認 AI Hub 可互動。"""
-    log.info("Warmup: 測試 AI Hub 連線...")
+    """Pipeline 啟動前 warmup: 用 fast image generate 暖 Chrome/Gemini。"""
+    log.info("Warmup: 暖機 Chrome/Gemini (fast image)...")
     try:
         resp = httpx.post(
-            f"{AI_HUB_BASE}/api/llm/chat",
-            json={"prompt": "Reply OK", "provider": "auto"},
-            timeout=30,
+            f"{AI_HUB_BASE}/api/image/generate",
+            json={
+                "prompt": "A simple blue gradient background with subtle grid lines",
+                "model": "fast",
+                "timeout": 90,
+            },
+            timeout=120,
         )
-        data = resp.json()
-        if data.get("success"):
-            log.info("Warmup: AI Hub OK")
-            return True
-        log.warning(f"Warmup: LLM 回應異常: {data.get('message', '')}")
+        if resp.status_code == 200:
+            data = resp.json()
+            if data.get("success"):
+                log.info(f"Warmup: OK ({data.get('generation_time', 0):.1f}s)")
+                return True
+            log.warning(f"Warmup: 生成失敗: {data.get('message', '')}")
+        else:
+            log.warning(f"Warmup: HTTP {resp.status_code}")
         return False
     except Exception as e:
-        log.warning(f"Warmup: AI Hub 不可達: {e}")
+        log.warning(f"Warmup: 失敗: {e}")
         return False
 
 
