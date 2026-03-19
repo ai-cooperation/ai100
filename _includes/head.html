@@ -125,21 +125,41 @@
 {
   "@context": "https://schema.org",
   "@type": "NewsArticle",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ site.url }}{{ site.baseurl }}{{ page.url }}"
+  },
   "headline": "{{ page.title }}",
   "description": "{{ page.summary | default: page.title }}",
   "url": "{{ site.url }}{{ site.baseurl }}{{ page.url }}",
-  "datePublished": "{{ page.date | date: '%Y-%m-%d' }}",
+  "datePublished": "{{ page.date | date: '%Y-%m-%dT00:00:00+08:00' }}",
+  "dateModified": "{{ page.date | date: '%Y-%m-%dT00:00:00+08:00' }}",
   "inLanguage": "zh-TW",
   "keywords": "{{ page.tags | join: ', ' | default: 'AI,人工智慧' }}",
-  {% if page.image %}"image": "{{ site.url }}{{ site.baseurl }}/assets/images/news/{{ page.image }}",{% endif %}
-  {% if page.source %}"publisher": {
-    "@type": "Organization",
-    "name": "{{ page.source }}"
+  {% if page.image %}"image": {
+    "@type": "ImageObject",
+    "url": "{{ site.url }}{{ site.baseurl }}/assets/images/news/{{ page.image }}"
   },{% endif %}
+  "author": {
+    "@type": "Organization",
+    "name": "AI Cooperation",
+    "url": "https://cooperation.tw"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AI Cooperation",
+    "url": "https://cooperation.tw",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://ai100.cooperation.tw/assets/images/logo.png",
+      "width": 200,
+      "height": 60
+    }
+  },
   "isPartOf": {
-    "@type": "Course",
-    "name": "AI 100 講 — AI 動態",
-    "description": "iPAS AI 應用規劃師考試相關 AI 產業新聞追蹤"
+    "@type": "WebSite",
+    "name": "AI 100 講",
+    "url": "{{ site.url }}{{ site.baseurl }}/"
   }
 }
 </script>
