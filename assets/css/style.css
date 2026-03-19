@@ -26,6 +26,15 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* reading-glasses skill: 22px base — 正文 22px，最小字級 16px */
+html { font-size: 22px; }
+
+/* 全站最小字級保底：小標籤 ≥ 16px */
+.card-module, .ipas-topic-tag,
+.dol-area-tag, .dol-principle-tag, .dol-label {
+  font-size: max(16px, 0.72rem);
+}
+
 body {
   font-family: var(--font-sans);
   color: var(--text);
@@ -236,7 +245,7 @@ a:hover { color: var(--teal); }
 .module-info p {
   font-size: 0.85rem;
   color: var(--text-muted);
-  line-height: 1.6;
+  line-height: 1.7;
   margin-bottom: 0.5rem;
 }
 
@@ -319,7 +328,7 @@ a:hover { color: var(--teal); }
 }
 
 .card-body h3 {
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--text);
   margin: 0.4rem 0 0.3rem;
   line-height: 1.4;
@@ -328,7 +337,7 @@ a:hover { color: var(--teal); }
 .card-body p {
   font-size: 0.82rem;
   color: var(--text-muted);
-  line-height: 1.5;
+  line-height: 1.7;
 }
 
 /* === Module Detail Page === */
@@ -450,7 +459,7 @@ a:hover { color: var(--teal); }
 .module-lecture-info p {
   font-size: 0.85rem;
   color: var(--text-muted);
-  line-height: 1.5;
+  line-height: 1.7;
   margin-bottom: 0.4rem;
 }
 
@@ -483,7 +492,7 @@ a:hover { color: var(--teal); }
 }
 
 /* === Lecture Detail === */
-.lecture-detail { padding: 2rem 0 3rem; max-width: 800px; margin: 0 auto; }
+.lecture-detail { padding: 2rem 0 3rem; max-width: 720px; margin: 0 auto; }
 
 .back-link {
   font-size: 0.85rem;
@@ -525,7 +534,6 @@ a:hover { color: var(--teal); }
 .tagline {
   color: var(--text-muted);
   font-size: 1.05rem;
-  font-style: italic;
   margin-top: 0.3rem;
 }
 
