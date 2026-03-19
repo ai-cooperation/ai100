@@ -9,6 +9,9 @@
   gtag('config', 'G-P6WG6WFNKH');
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/x-icon" href="{{ '/favicon.ico' | relative_url }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ '/assets/images/favicon.png' | relative_url }}">
+<link rel="apple-touch-icon" href="{{ '/assets/images/favicon.png' | relative_url }}">
 <title>{% if page.title %}{{ page.title }} — {% endif %}{{ site.title }}</title>
 <meta name="description" content="{{ page.description | default: page.tagline | default: page.summary | default: site.description | truncate: 160 }}">
 <meta name="keywords" content="AI,人工智慧,iPAS,AI應用規劃師,生成式AI,AI新聞,AI工具,Claude,ChatGPT,Gemini,AI應用,AI學習,機器學習,自然語言處理,{{ page.tags | join: ',' }}">
@@ -152,8 +155,8 @@
     "logo": {
       "@type": "ImageObject",
       "url": "https://ai100.cooperation.tw/assets/images/logo.png",
-      "width": 200,
-      "height": 60
+      "width": 120,
+      "height": 120
     }
   },
   "isPartOf": {
