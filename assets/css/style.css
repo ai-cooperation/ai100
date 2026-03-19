@@ -68,6 +68,15 @@ a:hover { color: var(--teal); }
   transition: color 0.2s;
 }
 .site-header nav a:hover { color: var(--cyan); text-decoration: none; }
+.site-header nav a.nav-cta {
+  color: var(--cyan);
+  border: 1px solid var(--cyan);
+  border-radius: 6px;
+  padding: 0.3rem 0.8rem;
+  margin-left: 2rem;
+  font-weight: 600;
+}
+.site-header nav a.nav-cta:hover { background: rgba(6,182,212,0.1); color: var(--cyan); }
 
 /* === Hero === */
 .hero {
