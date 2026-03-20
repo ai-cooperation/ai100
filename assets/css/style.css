@@ -90,31 +90,30 @@ a:hover { color: var(--teal); }
 /* Header mobile */
 @media (max-width: 768px) {
   .header-inner {
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .site-title {
+    font-size: 18px;
   }
   .site-header nav {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.3rem 0;
-    width: 100%;
     justify-content: center;
+    gap: 6px 4px;
   }
   .site-header nav a {
-    margin-left: 0.7rem;
-    margin-right: 0.7rem;
-    font-size: max(16px, 0.75rem);
+    margin-left: 6px;
+    margin-right: 6px;
+    font-size: 14px;
+    white-space: nowrap;
   }
   .site-header nav a.nav-cta {
-    margin-left: 0.7rem;
-    margin-right: 0.7rem;
-    padding: 0.25rem 0.6rem;
-    font-size: max(16px, 0.72rem);
-  }
-  .site-title {
-    width: 100%;
-    text-align: center;
-    font-size: 1rem;
+    margin-left: 6px;
+    margin-right: 6px;
+    padding: 4px 10px;
+    font-size: 13px;
   }
 }
 
