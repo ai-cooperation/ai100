@@ -1,7 +1,10 @@
 <header class="site-header">
   <div class="container header-inner">
     <a href="{{ '/' | relative_url }}" class="site-title">AI 100 講</a>
-    <nav>
+    <button class="nav-toggle" aria-label="選單" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav-menu">
       <a href="{{ '/' | relative_url }}">首頁</a>
       <a href="{{ '/ipas/' | relative_url }}">iPAS 補充</a>
       <a href="{{ '/news' | relative_url }}">AI 動態</a>
@@ -10,3 +13,10 @@
     </nav>
   </div>
 </header>
+<script>
+document.querySelector('.nav-toggle').addEventListener('click', function() {
+  var open = this.classList.toggle('open');
+  this.setAttribute('aria-expanded', open);
+  document.querySelector('.nav-menu').classList.toggle('open');
+});
+</script>
