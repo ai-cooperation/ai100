@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marp 風格示範 — AI 簡報路線 6</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --marp-blue: #246;
+    --marp-accent: #09c;
+    --marp-bg: #f8f9fa;
+    --marp-text: #333;
+    --marp-dim: #777;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; overflow:hidden; background:#e9ecef; font-family:'Noto Sans TC',sans-serif; }
+
+  /* Slide container — mimics Marp's clean card style */
+  .slides { width:100%; height:100%; position:relative; display:flex; align-items:center; justify-content:center; }
+  .slide {
+    position:absolute; width:min(900px, 92vw); aspect-ratio:16/9;
+    background:#fff; border-radius:2px;
+    box-shadow:0 4px 24px rgba(0,0,0,0.12);
+    display:flex; flex-direction:column; justify-content:center;
+    padding:3.5rem 4rem;
+    opacity:0; transform:scale(0.95); pointer-events:none;
+    transition: opacity 0.35s, transform 0.35s;
+  }
+  .slide.active { opacity:1; transform:scale(1); pointer-events:auto; }
+
+  /* Controls */
+  .controls {
+    position:fixed; bottom:1.5rem; right:1.5rem; z-index:100;
+    display:flex; gap:0.4rem;
+  }
+  .controls button {
+    width:40px; height:40px; border:2px solid var(--marp-accent); border-radius:50%;
+    background:transparent; color:var(--marp-accent); font-size:1rem;
+    cursor:pointer; transition:all 0.15s;
+  }
+  .controls button:hover { background:var(--marp-accent); color:#fff; }
+  .controls button:disabled { opacity:0.25; cursor:default; background:transparent; }
+
+  .slide-counter {
+    position:fixed; bottom:1.5rem; left:1.5rem; z-index:100;
+    color:var(--marp-dim); font-size:0.8rem;
+  }
+
+  .back-link {
+    position:fixed; top:1.2rem; left:1.2rem; z-index:100;
+    color:var(--marp-dim); text-decoration:none; font-size:0.8rem;
+  }
+  .back-link:hover { color:var(--marp-accent); }
+
+  .marp-badge {
+    position:fixed; top:1.2rem; right:1.2rem; z-index:100;
+    background:var(--marp-accent); color:#fff; padding:0.2rem 0.7rem;
+    border-radius:3px; font-size:0.7rem; font-weight:700;
+  }
+
+  /* Typography — Marp's clean, minimal style */
+  h1 { font-size:2.4rem; font-weight:900; color:var(--marp-blue); margin-bottom:0.8rem; border-bottom:3px solid var(--marp-accent); padding-bottom:0.5rem; display:inline-block; }
+  h2 { font-size:1.6rem; font-weight:700; color:var(--marp-blue); margin-bottom:1.2rem; }
+  p { font-size:1rem; line-height:1.7; color:var(--marp-text); }
+  ul { list-style:none; padding:0; }
+  ul li { padding:0.4rem 0; padding-left:1.5rem; position:relative; font-size:0.95rem; color:var(--marp-text); }
+  ul li::before { content:'▸'; position:absolute; left:0; color:var(--marp-accent); font-weight:700; }
+
+  /* Markdown source */
+  .md-source {
+    background:#f1f3f5; border-radius:6px; padding:1rem 1.2rem;
+    font-family:'Fira Code',monospace; font-size:0.78rem; line-height:1.7;
+    color:#495057; border-left:3px solid var(--marp-accent);
+    max-width:600px; margin-top:1rem;
+  }
+  .md-source .md-kw { color:var(--marp-accent); font-weight:700; }
+  .md-source .md-cm { color:#adb5bd; }
+
+  /* Side-by-side */
+  .split { display:grid; grid-template-columns:1fr 1fr; gap:2rem; align-items:start; }
+
+  /* Comparison table */
+  .marp-table { width:100%; border-collapse:collapse; font-size:0.85rem; margin-top:1rem; }
+  .marp-table th { background:var(--marp-blue); color:#fff; padding:0.6rem 0.8rem; text-align:left; }
+  .marp-table td { padding:0.5rem 0.8rem; border-bottom:1px solid #dee2e6; }
+  .marp-table tr:nth-child(even) { background:#f8f9fa; }
+  .marp-table .yes { color:#2b8a3e; font-weight:700; }
+  .marp-table .no { color:#c92a2a; }
+
+  @media (max-width:768px) {
+    .slide { padding:2rem; }
+    h1 { font-size:1.6rem; }
+    .split { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<a href="ai-pptx-routes.html#route6" class="back-link">← 返回六種路線</a>
+<div class="marp-badge">Marp 風格</div>
+
+<div class="slides">
+  <!-- Slide 1 -->
+  <div class="slide active" data-index="0">
+    <h1>Marp</h1>
+    <p style="font-size:1.2rem; color:var(--marp-blue); margin-bottom:1rem;">Markdown Presentation Ecosystem</p>
+    <p>最輕量的開發者簡報方案 — 寫 Markdown，產出 PDF / PPTX / HTML</p>
+    <p style="margin-top:1.5rem; font-size:0.85rem; color:var(--marp-dim);">按 → 或點擊右下角切換</p>
+  </div>
+
+  <!-- Slide 2: Markdown → Slide -->
+  <div class="slide" data-index="1">
+    <h2>Markdown 寫簡報</h2>
+    <div class="split">
+      <div>
+        <p style="font-size:0.85rem; color:var(--marp-dim); margin-bottom:0.5rem;">你寫的 Markdown：</p>
+        <div class="md-source">
+          <span class="md-cm">---</span><br>
+          <span class="md-kw">marp</span>: true<br>
+          <span class="md-kw">theme</span>: default<br>
+          <span class="md-cm">---</span><br><br>
+          <span class="md-kw"># </span>第一頁標題<br><br>
+          內容就是普通 Markdown<br><br>
+          <span class="md-cm">---</span><br><br>
+          <span class="md-kw"># </span>第二頁<br><br>
+          <span class="md-kw">- </span>用 `---` 分頁<br>
+          <span class="md-kw">- </span>就這麼簡單
+        </div>
+      </div>
+      <div>
+        <p style="font-size:0.85rem; color:var(--marp-dim); margin-bottom:0.5rem;">VS Code 即時預覽：</p>
+        <div style="background:#fff;border:2px solid #dee2e6;border-radius:6px;padding:1.5rem;text-align:center;">
+          <div style="font-size:1.3rem;font-weight:900;color:var(--marp-blue);margin-bottom:0.5rem;">第一頁標題</div>
+          <div style="color:var(--marp-text);font-size:0.9rem;">內容就是普通 Markdown</div>
+        </div>
+        <div style="text-align:center;margin-top:0.5rem;">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--marp-accent);margin:0 3px;"></span>
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#dee2e6;margin:0 3px;"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 3: Key advantage -->
+  <div class="slide" data-index="2">
+    <h2>Marp 獨家優勢</h2>
+    <table class="marp-table">
+      <thead><tr><th>功能</th><th>Marp</th><th>Slidev</th><th>reveal.js</th></tr></thead>
+      <tbody>
+        <tr><td>匯出 PPTX</td><td class="yes">支援</td><td class="no">不支援</td><td class="no">不支援</td></tr>
+        <tr><td>VS Code 整合</td><td class="yes">官方擴充</td><td>社群</td><td>無</td></tr>
+        <tr><td>CLI 腳本化</td><td class="yes">marp-cli</td><td class="yes">slidev export</td><td>需自建</td></tr>
+        <tr><td>學習成本</td><td class="yes">最低</td><td>中</td><td>中高</td></tr>
+        <tr><td>互動元件</td><td class="no">不支援</td><td class="yes">Vue</td><td class="yes">HTML/JS</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:1.5rem; background:#e7f5ff; padding:0.8rem 1rem; border-radius:6px; font-size:0.9rem; color:var(--marp-blue);">
+      Marp 是三者中唯一能直接匯出 .pptx 的框架 — 學員拿到的是可編輯的 PowerPoint 檔案
+    </p>
+  </div>
+
+  <!-- Slide 4 -->
+  <div class="slide" data-index="3">
+    <h2>最適合場景</h2>
+    <ul>
+      <li>需要 <strong>PPTX 匯出</strong> 給非技術人員</li>
+      <li>想用 <strong>Markdown</strong> 寫但不想學框架</li>
+      <li>需要 <strong>Git 版控</strong> 簡報內容</li>
+      <li>偏好 <strong>VS Code</strong> 工作流</li>
+      <li>追求 <strong>最低學習成本</strong></li>
+    </ul>
+    <div style="margin-top:2rem; padding:1rem; background:var(--marp-blue); color:#fff; border-radius:6px; display:inline-block;">
+      <span style="font-weight:700;">一句話總結：</span> 寫 Markdown，得 PPTX — 最務實的開發者簡報方案
+    </div>
+  </div>
+</div>
+
+<div class="slide-counter"><span id="current">1</span> / <span id="total">4</span></div>
+<div class="controls">
+  <button id="prev" disabled>←</button>
+  <button id="next">→</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+let idx = 0;
+function go(n) {
+  slides[idx].classList.remove('active');
+  idx = n;
+  slides.forEach(s => s.classList.remove('active'));
+  slides[idx].classList.add('active');
+  document.getElementById('current').textContent = idx + 1;
+  document.getElementById('prev').disabled = idx === 0;
+  document.getElementById('next').disabled = idx === slides.length - 1;
+}
+document.getElementById('next').onclick = () => { if (idx < slides.length - 1) go(idx + 1); };
+document.getElementById('prev').onclick = () => { if (idx > 0) go(idx - 1); };
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); if (idx < slides.length - 1) go(idx + 1); }
+  if (e.key === 'ArrowLeft') { if (idx > 0) go(idx - 1); }
+});
+</script>
+</body>
+</html>

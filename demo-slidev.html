@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slidev 風格示範 — AI 簡報路線 6</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --slidev-bg: #121212;
+    --slidev-surface: #1e1e1e;
+    --slidev-primary: #3eaf7c;
+    --slidev-accent: #42b883;
+    --slidev-text: #e0e0e0;
+    --slidev-dim: #888;
+    --slidev-code-bg: #0d1117;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; overflow:hidden; background:var(--slidev-bg); color:var(--slidev-text); font-family:'Noto Sans TC',sans-serif; }
+
+  /* Slide container */
+  .slides { width:100%; height:100%; position:relative; }
+  .slide {
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    justify-content:center; padding:4rem 6rem;
+    opacity:0; transform:translateX(60px); pointer-events:none;
+    transition: opacity 0.5s, transform 0.5s;
+  }
+  .slide.active { opacity:1; transform:translateX(0); pointer-events:auto; }
+  .slide.prev { opacity:0; transform:translateX(-60px); }
+
+  /* Controls */
+  .controls {
+    position:fixed; bottom:2rem; right:2rem; z-index:100;
+    display:flex; gap:0.5rem;
+  }
+  .controls button {
+    width:44px; height:44px; border:none; border-radius:50%;
+    background:var(--slidev-primary); color:#fff; font-size:1.2rem;
+    cursor:pointer; transition:transform 0.15s, background 0.15s;
+  }
+  .controls button:hover { transform:scale(1.1); background:var(--slidev-accent); }
+  .controls button:disabled { opacity:0.3; cursor:default; transform:none; }
+
+  .slide-counter {
+    position:fixed; bottom:2rem; left:2rem; z-index:100;
+    color:var(--slidev-dim); font-size:0.85rem;
+  }
+
+  .back-link {
+    position:fixed; top:1.5rem; left:1.5rem; z-index:100;
+    color:var(--slidev-dim); text-decoration:none; font-size:0.8rem;
+    transition:color 0.2s;
+  }
+  .back-link:hover { color:var(--slidev-primary); }
+
+  .slidev-badge {
+    position:fixed; top:1.5rem; right:1.5rem; z-index:100;
+    background:var(--slidev-primary); color:#fff; padding:0.25rem 0.8rem;
+    border-radius:4px; font-size:0.75rem; font-weight:700;
+  }
+
+  /* Typography */
+  h1 { font-size:3rem; font-weight:900; line-height:1.2; margin-bottom:1rem; }
+  h2 { font-size:2rem; font-weight:700; margin-bottom:1.5rem; color:var(--slidev-primary); }
+  p { font-size:1.1rem; line-height:1.8; color:var(--slidev-dim); }
+  .highlight { color:var(--slidev-accent); }
+
+  /* Code block with line highlighting */
+  .code-window {
+    background:var(--slidev-code-bg); border-radius:12px; overflow:hidden;
+    box-shadow:0 8px 32px rgba(0,0,0,0.4); max-width:700px;
+  }
+  .code-titlebar {
+    background:#161b22; padding:0.6rem 1rem; display:flex; gap:6px; align-items:center;
+  }
+  .code-dot { width:12px; height:12px; border-radius:50%; }
+  .code-dot.r { background:#ff5f56; }
+  .code-dot.y { background:#ffbd2e; }
+  .code-dot.g { background:#27c93f; }
+  .code-titlebar span { margin-left:0.8rem; color:var(--slidev-dim); font-size:0.75rem; }
+  .code-body {
+    padding:1.2rem 1.5rem; font-family:'Fira Code',monospace; font-size:0.85rem;
+    line-height:1.8; overflow-x:auto;
+  }
+  .code-line { transition: background 0.3s, opacity 0.3s; padding:0 0.5rem; margin:0 -0.5rem; border-radius:4px; }
+  .code-line.dim { opacity:0.3; }
+  .code-line.lit { background:rgba(62,175,124,0.15); opacity:1; }
+  .kw { color:#ff7b72; }
+  .str { color:#a5d6ff; }
+  .fn { color:#d2a8ff; }
+  .cm { color:#6e7681; }
+  .num { color:#79c0ff; }
+  .vue { color:#42b883; }
+
+  /* Feature grid */
+  .features { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; max-width:750px; }
+  .feature {
+    background:var(--slidev-surface); border-radius:10px; padding:1.5rem;
+    border-left:3px solid var(--slidev-primary);
+    opacity:0; transform:translateY(20px);
+    animation: featureIn 0.4s forwards;
+  }
+  .feature:nth-child(2) { animation-delay:0.1s; }
+  .feature:nth-child(3) { animation-delay:0.2s; }
+  .feature:nth-child(4) { animation-delay:0.3s; }
+  .slide.active .feature { animation-play-state:running; }
+  @keyframes featureIn { to { opacity:1; transform:translateY(0); } }
+  .feature h3 { font-size:1rem; color:var(--slidev-primary); margin-bottom:0.4rem; }
+  .feature p { font-size:0.85rem; color:var(--slidev-dim); line-height:1.5; }
+
+  /* Vue logo animation */
+  .vue-logo {
+    width:120px; height:120px; position:absolute; right:6rem; top:50%; transform:translateY(-50%);
+    opacity:0.12;
+  }
+  .vue-logo svg { width:100%; height:100%; }
+
+  /* Mermaid-like diagram */
+  .diagram {
+    display:flex; align-items:center; gap:1rem; margin-top:1.5rem;
+    flex-wrap:wrap;
+  }
+  .diagram .node {
+    background:var(--slidev-surface); border:2px solid var(--slidev-primary);
+    border-radius:8px; padding:0.8rem 1.2rem; font-size:0.9rem; font-weight:700;
+    color:var(--slidev-primary);
+    opacity:0; transform:scale(0.8);
+    animation: nodeIn 0.3s forwards;
+  }
+  .diagram .node:nth-child(2) { animation-delay:0.15s; }
+  .diagram .node:nth-child(3) { animation-delay:0.3s; }
+  .diagram .node:nth-child(4) { animation-delay:0.45s; }
+  .diagram .node:nth-child(5) { animation-delay:0.6s; }
+  .diagram .arrow { color:var(--slidev-dim); font-size:1.2rem; opacity:0; animation: nodeIn 0.3s forwards; }
+  .diagram .arrow:nth-of-type(1) { animation-delay:0.08s; }
+  .diagram .arrow:nth-of-type(2) { animation-delay:0.23s; }
+  .diagram .arrow:nth-of-type(3) { animation-delay:0.38s; }
+  .diagram .arrow:nth-of-type(4) { animation-delay:0.53s; }
+  .slide.active .node, .slide.active .arrow { animation-play-state:running; }
+  @keyframes nodeIn { to { opacity:1; transform:scale(1); } }
+
+  @media (max-width:768px) {
+    .slide { padding:2rem; }
+    h1 { font-size:2rem; }
+    h2 { font-size:1.5rem; }
+    .features { grid-template-columns:1fr; }
+    .vue-logo { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<a href="ai-pptx-routes.html#route6" class="back-link">← 返回六種路線</a>
+<div class="slidev-badge">Slidev 風格</div>
+
+<div class="slides">
+  <!-- Slide 1: Cover -->
+  <div class="slide active" data-index="0">
+    <div style="position:relative;">
+      <h1>Slid<span class="highlight">ev</span></h1>
+      <p style="font-size:1.3rem; color:var(--slidev-text);">為開發者打造的簡報框架</p>
+      <p style="margin-top:1rem;">Markdown 撰寫 · Vue 3 驅動 · Vite 即時預覽</p>
+      <p style="margin-top:2rem; font-size:0.85rem;">按 <kbd style="background:var(--slidev-surface);padding:0.15rem 0.5rem;border-radius:4px;border:1px solid #333;">→</kbd> 切換頁面</p>
+      <div class="vue-logo">
+        <svg viewBox="0 0 261 226"><path d="M161 0l-65 113L31 0H0l96 226L192 0z" fill="#42b883"/><path d="M161 0l-65 113L31 0H62l34 68 35-68z" fill="#35495e"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 2: Code highlighting -->
+  <div class="slide" data-index="1">
+    <h2>程式碼高亮 + 行級動畫</h2>
+    <p style="margin-bottom:1.5rem;">Slidev 原生支援 Shiki 語法高亮，可以逐行 highlight</p>
+    <div class="code-window">
+      <div class="code-titlebar">
+        <div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div>
+        <span>slides.md</span>
+      </div>
+      <div class="code-body">
+        <div class="code-line dim"><span class="cm">---</span></div>
+        <div class="code-line dim"><span class="kw">theme</span>: <span class="str">seriph</span></div>
+        <div class="code-line dim"><span class="cm">---</span></div>
+        <div class="code-line dim">&nbsp;</div>
+        <div class="code-line lit"><span class="cm"># 歡迎來到 Slidev</span></div>
+        <div class="code-line lit">&nbsp;</div>
+        <div class="code-line lit">用 <span class="str">**Markdown**</span> 寫簡報</div>
+        <div class="code-line dim">&nbsp;</div>
+        <div class="code-line dim"><span class="cm">---</span></div>
+        <div class="code-line dim">&nbsp;</div>
+        <div class="code-line dim"><span class="cm"># 第二頁</span></div>
+        <div class="code-line dim">&nbsp;</div>
+        <div class="code-line dim"><span class="kw">```ts</span> <span class="cm">{lines:true}</span></div>
+        <div class="code-line lit"><span class="kw">const</span> <span class="fn">greeting</span> = <span class="str">'Hello Slidev'</span></div>
+        <div class="code-line dim"><span class="kw">```</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 3: Mermaid diagram -->
+  <div class="slide" data-index="2">
+    <h2>Mermaid 圖表原生支援</h2>
+    <p style="margin-bottom:1rem;">直接在 Markdown 中寫 Mermaid 語法，即時渲染為互動圖表</p>
+    <div class="diagram">
+      <div class="node">Markdown</div>
+      <div class="arrow">→</div>
+      <div class="node">Slidev Parser</div>
+      <div class="arrow">→</div>
+      <div class="node">Vue Components</div>
+      <div class="arrow">→</div>
+      <div class="node">Vite HMR</div>
+      <div class="arrow">→</div>
+      <div class="node" style="border-color:#ffbd2e;color:#ffbd2e;">瀏覽器即時預覽</div>
+    </div>
+    <p style="margin-top:2rem; font-size:0.9rem;">
+      修改 Markdown → 自動熱更新 → 不用手動重新整理
+    </p>
+  </div>
+
+  <!-- Slide 4: Features -->
+  <div class="slide" data-index="3">
+    <h2>核心特點</h2>
+    <div class="features">
+      <div class="feature">
+        <h3>Markdown 撰寫</h3>
+        <p>用 --- 分隔頁面，專注內容不分心排版</p>
+      </div>
+      <div class="feature">
+        <h3>Vue 元件嵌入</h3>
+        <p>在投影片中直接使用 Vue 互動元件</p>
+      </div>
+      <div class="feature">
+        <h3>Presenter Mode</h3>
+        <p>講者視圖 + 計時器 + 筆記，專業演講必備</p>
+      </div>
+      <div class="feature">
+        <h3>匯出 PDF / PNG</h3>
+        <p>一行指令匯出，但不支援 PPTX</p>
+      </div>
+    </div>
+    <p style="margin-top:2rem; font-size:0.95rem; color:var(--slidev-accent); font-weight:700;">
+      12K+ GitHub Stars · Anthony Fu（Vue 核心成員）開發 · 免費開源
+    </p>
+  </div>
+</div>
+
+<div class="slide-counter"><span id="current">1</span> / <span id="total">4</span></div>
+<div class="controls">
+  <button id="prev" disabled>←</button>
+  <button id="next">→</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+let idx = 0;
+
+function go(n) {
+  slides[idx].classList.remove('active');
+  slides[idx].classList.add(n > idx ? 'prev' : '');
+  idx = n;
+  slides.forEach((s, i) => {
+    s.classList.remove('active', 'prev');
+    if (i < idx) s.classList.add('prev');
+  });
+  slides[idx].classList.add('active');
+  document.getElementById('current').textContent = idx + 1;
+  document.getElementById('prev').disabled = idx === 0;
+  document.getElementById('next').disabled = idx === slides.length - 1;
+}
+
+document.getElementById('next').onclick = () => { if (idx < slides.length - 1) go(idx + 1); };
+document.getElementById('prev').onclick = () => { if (idx > 0) go(idx - 1); };
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); if (idx < slides.length - 1) go(idx + 1); }
+  if (e.key === 'ArrowLeft') { if (idx > 0) go(idx - 1); }
+});
+</script>
+</body>
+</html>

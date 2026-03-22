@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>reveal.js 風格示範 — AI 簡報路線 6</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --reveal-bg: #191919;
+    --reveal-surface: #252525;
+    --reveal-primary: #42affa;
+    --reveal-accent: #e7ad52;
+    --reveal-text: #eee;
+    --reveal-dim: #999;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; overflow:hidden; background:var(--reveal-bg); font-family:'Noto Sans TC',sans-serif; color:var(--reveal-text); }
+
+  .slides { width:100%; height:100%; position:relative; perspective:800px; }
+  .slide {
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+    padding:3rem 5rem;
+    opacity:0; transform:rotateY(8deg) scale(0.92); pointer-events:none;
+    transition: opacity 0.6s, transform 0.6s cubic-bezier(0.2,0.8,0.2,1);
+  }
+  .slide.active { opacity:1; transform:rotateY(0) scale(1); pointer-events:auto; }
+  .slide.prev { opacity:0; transform:rotateY(-8deg) scale(0.92); }
+
+  /* Progress bar */
+  .progress {
+    position:fixed; bottom:0; left:0; height:3px; background:var(--reveal-primary);
+    transition:width 0.4s; z-index:100;
+  }
+
+  .controls {
+    position:fixed; bottom:1.5rem; right:1.5rem; z-index:100;
+    display:flex; gap:0.4rem;
+  }
+  .controls button {
+    width:44px; height:44px; border:none; border-radius:8px;
+    background:rgba(255,255,255,0.08); color:var(--reveal-primary);
+    font-size:1.1rem; cursor:pointer; transition:all 0.15s;
+    backdrop-filter:blur(8px);
+  }
+  .controls button:hover { background:rgba(66,175,250,0.2); }
+  .controls button:disabled { opacity:0.2; cursor:default; }
+
+  .back-link {
+    position:fixed; top:1.2rem; left:1.2rem; z-index:100;
+    color:var(--reveal-dim); text-decoration:none; font-size:0.8rem;
+  }
+  .back-link:hover { color:var(--reveal-primary); }
+
+  .reveal-badge {
+    position:fixed; top:1.2rem; right:1.2rem; z-index:100;
+    background:var(--reveal-primary); color:#fff; padding:0.2rem 0.7rem;
+    border-radius:4px; font-size:0.7rem; font-weight:700;
+  }
+
+  .slide-counter {
+    position:fixed; bottom:1.5rem; left:1.5rem; z-index:100;
+    color:var(--reveal-dim); font-size:0.8rem;
+  }
+
+  /* Typography */
+  h1 { font-size:3rem; font-weight:900; text-shadow:0 2px 12px rgba(66,175,250,0.3); }
+  h2 { font-size:2rem; font-weight:700; color:var(--reveal-primary); margin-bottom:1.5rem; }
+
+  /* Fragments — reveal.js signature feature */
+  .fragment {
+    opacity:0; transform:translateY(15px);
+    transition: opacity 0.35s, transform 0.35s;
+  }
+  .fragment.visible { opacity:1; transform:translateY(0); }
+  .fragment.grow.visible { transform:scale(1.05); }
+
+  /* Plugin cards */
+  .plugin-grid { display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; margin-top:1rem; }
+  .plugin {
+    background:var(--reveal-surface); border-radius:10px; padding:1.2rem 1.5rem;
+    min-width:180px; text-align:left;
+    border:1px solid #333; transition:border-color 0.3s, transform 0.3s;
+  }
+  .plugin:hover { border-color:var(--reveal-primary); transform:translateY(-4px); }
+  .plugin h3 { font-size:0.9rem; color:var(--reveal-primary); margin-bottom:0.3rem; }
+  .plugin p { font-size:0.8rem; color:var(--reveal-dim); line-height:1.4; }
+
+  /* Transition demo */
+  .transition-demo {
+    display:flex; gap:0.8rem; margin-top:1.5rem; flex-wrap:wrap; justify-content:center;
+  }
+  .transition-btn {
+    padding:0.6rem 1.2rem; border:2px solid var(--reveal-dim); border-radius:8px;
+    background:transparent; color:var(--reveal-dim); font-size:0.85rem;
+    cursor:pointer; transition:all 0.3s; font-family:inherit;
+  }
+  .transition-btn:hover, .transition-btn.active {
+    border-color:var(--reveal-primary); color:var(--reveal-primary);
+    box-shadow:0 0 20px rgba(66,175,250,0.2);
+  }
+  .transition-btn.active { background:rgba(66,175,250,0.1); }
+
+  /* Embed demo */
+  .embed-area {
+    background:var(--reveal-surface); border-radius:12px; padding:2rem;
+    border:1px solid #333; margin-top:1rem; max-width:600px; width:100%;
+  }
+  .embed-area .counter {
+    font-size:3rem; font-weight:900; color:var(--reveal-accent);
+    transition:transform 0.15s;
+  }
+  .embed-area button {
+    padding:0.5rem 1.5rem; border:2px solid var(--reveal-accent);
+    background:transparent; color:var(--reveal-accent); border-radius:6px;
+    font-size:0.9rem; cursor:pointer; margin:0.5rem; transition:all 0.2s;
+    font-family:inherit;
+  }
+  .embed-area button:hover { background:var(--reveal-accent); color:var(--reveal-bg); }
+
+  @media (max-width:768px) {
+    .slide { padding:2rem; }
+    h1 { font-size:2rem; }
+    .plugin-grid { flex-direction:column; align-items:center; }
+  }
+</style>
+</head>
+<body>
+
+<a href="ai-pptx-routes.html#route6" class="back-link">← 返回六種路線</a>
+<div class="reveal-badge">reveal.js 風格</div>
+<div class="progress" id="progress" style="width:25%;"></div>
+
+<div class="slides">
+  <!-- Slide 1: Cover -->
+  <div class="slide active" data-index="0">
+    <h1 style="color:var(--reveal-primary);">reveal<span style="color:var(--reveal-accent);">.js</span></h1>
+    <p style="font-size:1.2rem; margin-top:1rem; color:var(--reveal-dim);">The HTML Presentation Framework</p>
+    <p style="margin-top:2rem; font-size:0.85rem; color:#555;">最成熟的網頁簡報框架 · 豐富 Plugin · 完整 HTML/CSS/JS 控制</p>
+  </div>
+
+  <!-- Slide 2: Fragments -->
+  <div class="slide" data-index="1">
+    <h2>Fragment 動畫</h2>
+    <p style="color:var(--reveal-dim); margin-bottom:1.5rem;">reveal.js 的招牌功能 — 內容逐步顯現</p>
+    <div style="text-align:left; max-width:500px;">
+      <div class="fragment" data-order="0" style="padding:0.8rem; margin:0.3rem 0; background:var(--reveal-surface); border-radius:8px; border-left:3px solid var(--reveal-primary);">
+        <span style="color:var(--reveal-primary);font-weight:700;">Step 1</span> — 先顯示這一行
+      </div>
+      <div class="fragment" data-order="1" style="padding:0.8rem; margin:0.3rem 0; background:var(--reveal-surface); border-radius:8px; border-left:3px solid var(--reveal-accent);">
+        <span style="color:var(--reveal-accent);font-weight:700;">Step 2</span> — 再按一下出現第二行
+      </div>
+      <div class="fragment" data-order="2" style="padding:0.8rem; margin:0.3rem 0; background:var(--reveal-surface); border-radius:8px; border-left:3px solid #e06c75;">
+        <span style="color:#e06c75;font-weight:700;">Step 3</span> — 最後出現結論
+      </div>
+      <div class="fragment" data-order="3" style="padding:0.8rem; margin:0.5rem 0; background:rgba(66,175,250,0.1); border-radius:8px; text-align:center; font-weight:700; color:var(--reveal-primary);">
+        每個 Fragment 都可以獨立控制出場順序和動畫效果
+      </div>
+    </div>
+    <p style="margin-top:1rem; font-size:0.8rem; color:#555;">按 → 逐步顯現 Fragment</p>
+  </div>
+
+  <!-- Slide 3: Plugins -->
+  <div class="slide" data-index="2">
+    <h2>豐富 Plugin 生態</h2>
+    <div class="plugin-grid">
+      <div class="plugin">
+        <h3>Highlight</h3>
+        <p>Prism.js 程式碼高亮 + 行級 highlight</p>
+      </div>
+      <div class="plugin">
+        <h3>Markdown</h3>
+        <p>用 Markdown 撰寫投影片內容</p>
+      </div>
+      <div class="plugin">
+        <h3>Math</h3>
+        <p>KaTeX / MathJax 數學公式</p>
+      </div>
+      <div class="plugin">
+        <h3>Notes</h3>
+        <p>講者筆記 + Speaker View</p>
+      </div>
+      <div class="plugin">
+        <h3>Zoom</h3>
+        <p>Alt+Click 放大任意區域</p>
+      </div>
+      <div class="plugin">
+        <h3>Search</h3>
+        <p>Ctrl+Shift+F 全文搜索</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 4: Interactive embed -->
+  <div class="slide" data-index="3">
+    <h2>互動 Demo 嵌入</h2>
+    <p style="color:var(--reveal-dim); margin-bottom:0.5rem;">reveal.js 可以在投影片中嵌入任意 HTML/JS — 像這個計數器：</p>
+    <div class="embed-area">
+      <div class="counter" id="counter">0</div>
+      <div>
+        <button onclick="changeCount(-1)">− 1</button>
+        <button onclick="changeCount(1)">+ 1</button>
+        <button onclick="document.getElementById('counter').textContent='0'">Reset</button>
+      </div>
+      <p style="margin-top:1rem; font-size:0.8rem; color:var(--reveal-dim);">
+        這不是截圖 — 這是真正的互動元件，直接在簡報中運行
+      </p>
+    </div>
+    <p style="margin-top:1.5rem; font-size:0.9rem; color:var(--reveal-accent); font-weight:700;">
+      免費開源 · 最成熟框架 · 完整 HTML/CSS/JS 控制 · 付費託管 slides.com
+    </p>
+  </div>
+</div>
+
+<div class="slide-counter"><span id="current">1</span> / <span id="total">4</span></div>
+<div class="controls">
+  <button id="prev" disabled>←</button>
+  <button id="next">→</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const totalSlides = slides.length;
+let idx = 0;
+let fragmentIdx = -1;
+
+function getFragments(slideEl) {
+  return slideEl.querySelectorAll('.fragment');
+}
+
+function go(n) {
+  slides[idx].classList.remove('active');
+  slides[idx].classList.add(n > idx ? 'prev' : '');
+  idx = n;
+  fragmentIdx = -1;
+  slides.forEach((s, i) => {
+    s.classList.remove('active', 'prev');
+    if (i < idx) s.classList.add('prev');
+    // Reset fragments
+    s.querySelectorAll('.fragment').forEach(f => f.classList.remove('visible'));
+  });
+  slides[idx].classList.add('active');
+  updateUI();
+}
+
+function updateUI() {
+  document.getElementById('current').textContent = idx + 1;
+  document.getElementById('prev').disabled = idx === 0 && fragmentIdx <= 0;
+  document.getElementById('next').disabled = idx === totalSlides - 1 && fragmentIdx >= getFragments(slides[idx]).length - 1;
+  document.getElementById('progress').style.width = ((idx + 1) / totalSlides * 100) + '%';
+}
+
+function advance() {
+  const frags = getFragments(slides[idx]);
+  if (fragmentIdx < frags.length - 1) {
+    fragmentIdx++;
+    frags[fragmentIdx].classList.add('visible');
+    updateUI();
+  } else if (idx < totalSlides - 1) {
+    go(idx + 1);
+  }
+}
+
+function retreat() {
+  const frags = getFragments(slides[idx]);
+  if (fragmentIdx >= 0) {
+    frags[fragmentIdx].classList.remove('visible');
+    fragmentIdx--;
+    updateUI();
+  } else if (idx > 0) {
+    go(idx - 1);
+    // Show all fragments of previous slide
+    const prevFrags = getFragments(slides[idx]);
+    prevFrags.forEach(f => f.classList.add('visible'));
+    fragmentIdx = prevFrags.length - 1;
+    updateUI();
+  }
+}
+
+document.getElementById('next').onclick = advance;
+document.getElementById('prev').onclick = retreat;
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); advance(); }
+  if (e.key === 'ArrowLeft') { retreat(); }
+});
+
+function changeCount(d) {
+  const el = document.getElementById('counter');
+  el.textContent = parseInt(el.textContent) + d;
+  el.style.transform = 'scale(1.2)';
+  setTimeout(() => el.style.transform = 'scale(1)', 150);
+}
+</script>
+</body>
+</html>

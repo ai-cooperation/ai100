@@ -288,6 +288,30 @@
   }
   .fade-in.visible { opacity: 1; transform: translateY(0); }
 
+  /* ─── Demo Cards (Route 6) ─── */
+  .demo-card {
+    display:block; text-decoration:none; color:inherit;
+    background:#fff; border-radius:12px; overflow:hidden;
+    box-shadow:0 2px 12px rgba(0,0,0,0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .demo-card:hover { transform:translateY(-6px) scale(1.02); box-shadow:0 12px 32px rgba(0,0,0,0.15); }
+  .demo-card-preview {
+    height:120px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    border-bottom:3px solid var(--demo-color, var(--teal));
+    transition:transform 0.3s;
+  }
+  .demo-card:hover .demo-card-preview { transform:scale(1.02); }
+  .demo-card-body { padding:1.2rem 1.5rem; }
+  .demo-card-body h3 { font-size:1.1rem; margin-bottom:0.3rem; }
+  .demo-card-desc { font-size:0.82rem; color:var(--gray-text); margin-bottom:0.8rem; line-height:1.4; }
+  .demo-card-cta {
+    font-size:0.85rem; font-weight:700;
+    transition:letter-spacing 0.2s;
+  }
+  .demo-card:hover .demo-card-cta { letter-spacing:1px; }
+
   /* ─── Responsive ─── */
   @media (max-width: 768px) {
     nav { padding: 0 1rem; gap: 0.5rem; }
@@ -792,58 +816,58 @@ generate_l1d2.js → require(<span class="string">'./design'</span>)
   <h2>Markdown 框架</h2>
 </div>
 <section>
-  <p style="color:var(--gray-text); margin-bottom:1rem; font-size:0.95rem;">
+  <p style="color:var(--gray-text); margin-bottom:0.5rem; font-size:0.95rem;">
     這就是你現在正在看的 — 網頁呈現，支援動態效果、程式碼高亮、互動展示。
   </p>
+  <p style="color:var(--dark-text); margin-bottom:1.5rem; font-size:1.05rem; font-weight:700;">
+    點擊下方卡片，體驗三種 Markdown 框架各自的風格和特色功能：
+  </p>
   <div class="grid-3 fade-in">
-    <div class="card">
-      <div class="accent-bar" style="background:var(--teal);"></div>
-      <h3 style="color:var(--teal);">Slidev</h3>
-      <div style="display:flex; gap:0.5rem; margin-bottom:0.8rem;">
-        <span class="price" style="background:#D1FAE5; color:var(--teal-dark);">免費開源</span>
-        <span class="price" style="background:#DBEAFE; color:var(--navy);">Web / PDF / PNG</span>
+    <a href="demo-slidev.html" class="demo-card" style="--demo-color:var(--teal); --demo-bg:#121212;">
+      <div class="demo-card-preview" style="background:#121212;">
+        <span style="font-size:2rem; font-weight:900; color:#42b883;">Slid<span style="color:#3eaf7c;">ev</span></span>
+        <span style="font-size:0.7rem; color:#888; display:block; margin-top:0.3rem;">Vue 3 + Vite</span>
       </div>
-      <ul>
-        <li>Vue 3 + Vite + Markdown</li>
-        <li>Anthony Fu（Vue 核心）開發</li>
-        <li>程式碼高亮動畫</li>
-        <li>Mermaid 圖表原生支援</li>
-        <li>12K+ GitHub Stars</li>
-        <li><strong>不產 PPTX</strong></li>
-      </ul>
-    </div>
-    <div class="card">
-      <div class="accent-bar" style="background:var(--gold-dark);"></div>
-      <h3 style="color:var(--gold-dark);">Marp</h3>
-      <div style="display:flex; gap:0.5rem; margin-bottom:0.8rem;">
-        <span class="price" style="background:#D1FAE5; color:var(--teal-dark);">免費開源</span>
-        <span class="price" style="background:#DBEAFE; color:var(--navy);">PDF / PPTX / HTML</span>
+      <div class="demo-card-body">
+        <h3 style="color:var(--teal);">Slidev</h3>
+        <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+          <span class="price" style="background:#D1FAE5; color:var(--teal-dark);">免費開源</span>
+          <span class="price" style="background:#DBEAFE; color:var(--navy);">Web / PDF / PNG</span>
+        </div>
+        <p class="demo-card-desc">程式碼高亮動畫 · Mermaid 圖表 · Vue 元件嵌入</p>
+        <span class="demo-card-cta" style="color:var(--teal);">點擊體驗 →</span>
       </div>
-      <ul>
-        <li>Markdown → PPTX 最直接</li>
-        <li>VS Code 擴充套件</li>
-        <li>CSS 主題自訂</li>
-        <li>CLI 可腳本化</li>
-        <li>最輕量方案</li>
-        <li><strong>可產 PPTX</strong></li>
-      </ul>
-    </div>
-    <div class="card">
-      <div class="accent-bar" style="background:var(--navy);"></div>
-      <h3 style="color:var(--navy);">reveal.js</h3>
-      <div style="display:flex; gap:0.5rem; margin-bottom:0.8rem;">
-        <span class="price" style="background:#D1FAE5; color:var(--teal-dark);">免費開源</span>
-        <span class="price" style="background:#DBEAFE; color:var(--navy);">Web / PDF</span>
+    </a>
+    <a href="demo-marp.html" class="demo-card" style="--demo-color:var(--gold-dark); --demo-bg:#f8f9fa;">
+      <div class="demo-card-preview" style="background:#f8f9fa;">
+        <span style="font-size:2rem; font-weight:900; color:#246;">Marp</span>
+        <span style="font-size:0.7rem; color:#777; display:block; margin-top:0.3rem;">Markdown → PPTX</span>
       </div>
-      <ul>
-        <li>最成熟框架</li>
-        <li>完整 HTML/CSS/JS 控制</li>
-        <li>豐富 Plugin 生態</li>
-        <li>互動 demo / 嵌入影片</li>
-        <li>付費 slides.com 託管</li>
-        <li><strong>不產 PPTX</strong></li>
-      </ul>
-    </div>
+      <div class="demo-card-body">
+        <h3 style="color:var(--gold-dark);">Marp</h3>
+        <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+          <span class="price" style="background:#D1FAE5; color:var(--teal-dark);">免費開源</span>
+          <span class="price" style="background:#DBEAFE; color:var(--navy);">PDF / PPTX / HTML</span>
+        </div>
+        <p class="demo-card-desc">VS Code 整合 · CSS 主題 · 唯一可產 PPTX</p>
+        <span class="demo-card-cta" style="color:var(--gold-dark);">點擊體驗 →</span>
+      </div>
+    </a>
+    <a href="demo-revealjs.html" class="demo-card" style="--demo-color:var(--navy); --demo-bg:#191919;">
+      <div class="demo-card-preview" style="background:#191919;">
+        <span style="font-size:2rem; font-weight:900;"><span style="color:#42affa;">reveal</span><span style="color:#e7ad52;">.js</span></span>
+        <span style="font-size:0.7rem; color:#999; display:block; margin-top:0.3rem;">HTML Presentation</span>
+      </div>
+      <div class="demo-card-body">
+        <h3 style="color:var(--navy);">reveal.js</h3>
+        <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+          <span class="price" style="background:#D1FAE5; color:var(--teal-dark);">免費開源</span>
+          <span class="price" style="background:#DBEAFE; color:var(--navy);">Web / PDF</span>
+        </div>
+        <p class="demo-card-desc">Fragment 動畫 · Plugin 生態 · 互動 Demo 嵌入</p>
+        <span class="demo-card-cta" style="color:var(--navy);">點擊體驗 →</span>
+      </div>
+    </a>
   </div>
 
   <table class="comparison-table fade-in">
