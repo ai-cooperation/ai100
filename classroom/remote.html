@@ -114,8 +114,20 @@ let currentUser=null,roomId='',sections=[],currentIdx=0;
 
 auth.onAuthStateChanged(user=>{
   currentUser=user;
-  if(user){document.getElementById('loginScreen').style.display='none';document.getElementById('setupScreen').classList.remove('hidden')}
-  else{document.getElementById('loginScreen').style.display='flex';document.getElementById('setupScreen').classList.add('hidden')}
+  if(user){
+    document.getElementById('loginScreen').style.display='none';
+    // Check URL param for room
+    const urlRoom=new URLSearchParams(location.search).get('room');
+    if(urlRoom){
+      document.getElementById('inputRoom').value=urlRoom;
+      enterRemote(); // Auto-enter if room param exists
+    }else{
+      document.getElementById('setupScreen').classList.remove('hidden');
+    }
+  } else{
+    document.getElementById('loginScreen').style.display='flex';
+    document.getElementById('setupScreen').classList.add('hidden');
+  }
 });
 function googleLogin(){
   const provider=new firebase.auth.GoogleAuthProvider();
