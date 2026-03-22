@@ -117,7 +117,11 @@ auth.onAuthStateChanged(user=>{
   if(user){document.getElementById('loginScreen').style.display='none';document.getElementById('setupScreen').classList.remove('hidden')}
   else{document.getElementById('loginScreen').style.display='flex';document.getElementById('setupScreen').classList.add('hidden')}
 });
-function googleLogin(){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>alert(e.message))}
+function googleLogin(){
+  const provider=new firebase.auth.GoogleAuthProvider();
+  if(/iPhone|iPad|Android/i.test(navigator.userAgent)){auth.signInWithRedirect(provider)}
+  else{auth.signInWithPopup(provider).catch(e=>alert(e.message))}
+}
 
 function enterRemote(){
   roomId=document.getElementById('inputRoom').value.trim();

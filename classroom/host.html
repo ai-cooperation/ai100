@@ -280,7 +280,11 @@ auth.onAuthStateChanged(user=>{
     document.getElementById('lobby').classList.remove('active');
   }
 });
-function googleLogin(){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>alert(e.message))}
+function googleLogin(){
+  const provider=new firebase.auth.GoogleAuthProvider();
+  if(/iPhone|iPad|Android/i.test(navigator.userAgent)){auth.signInWithRedirect(provider)}
+  else{auth.signInWithPopup(provider).catch(e=>alert(e.message))}
+}
 function googleLogout(){if(confirm('登出？'))auth.signOut().then(()=>location.reload())}
 
 // ═══ Room List ═══
