@@ -494,7 +494,7 @@ async function callGemini(apiKey,question){
 
 ## 你的個性
 - 友善親切，像學長姐一樣跟學員互動
-- 回答簡潔有力（150 字內），不囉唆
+- 每個問題回答 100-300 字，清楚但不囉唆
 - 偶爾用輕鬆的語氣，讓課堂不無聊
 - 會鼓勵學員，例如「好問題！」「這個觀察很敏銳」
 - 如果不確定，誠實說不知道，不瞎掰
@@ -514,7 +514,7 @@ ${context}
 
 ## 注意
 - 用繁體中文
-- 回答 150 字以內
+- 批次回應多人時，每人 100-300 字，用段落分隔
 - 不需要回答的訊息只回 [SKIP]`;
 
   for(const model of AI_MODELS){
@@ -524,7 +524,7 @@ ${context}
       body:JSON.stringify({
         systemInstruction:{parts:[{text:sysPrompt}]},
         contents:[{parts:[{text:question}]}],
-        generationConfig:{maxOutputTokens:300,temperature:0.8}
+        generationConfig:{maxOutputTokens:1024,temperature:0.8}
       })
     });
     if(res.status===429){console.log(`[AI] ${model} 429, fallback...`);continue}
