@@ -1176,6 +1176,72 @@ window.addEventListener('scroll', () => {
     }
   });
 });
+
+// ─── Firebase Slide Control ───
+(function initSlideControl() {
+  const params = new URLSearchParams(location.search);
+  const room = params.get('room');
+  if (!room) return; // No room param = standalone mode, no Firebase
+
+  // Load Firebase SDK dynamically
+  const scripts = [
+    'https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js',
+    'https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js'
+  ];
+  let loaded = 0;
+  scripts.forEach(src => {
+    const s = document.createElement('script'); s.src = src;
+    s.onload = () => { if (++loaded === scripts.length) connectFirebase(room); };
+    document.head.appendChild(s);
+  });
+
+  function connectFirebase(roomId) {
+    firebase.initializeApp({
+      apiKey: ['AIza','SyC5X5C0Uje6bCMzrvuUuq5Bz33ly0PR-vc'].join(''),
+      authDomain: 'ai-classroom-70a97.firebaseapp.com',
+      databaseURL: 'https://ai-classroom-70a97-default-rtdb.firebaseio.com',
+      projectId: 'ai-classroom-70a97',
+      storageBucket: 'ai-classroom-70a97.firebasestorage.app',
+      appId: '1:160782638499:web:f3fb834ce32d643de28e16',
+    });
+    const db = firebase.database();
+
+    // Build section list from the page
+    const sectionEls = document.querySelectorAll('.section-header[id]');
+    const sectionList = [...sectionEls].map(el => ({
+      id: el.id,
+      title: el.querySelector('h2')?.textContent || el.id
+    }));
+    // Add overview (first section)
+    const overview = document.getElementById('overview');
+    if (overview) sectionList.unshift({ id: 'overview', title: '6 種路線總覽' });
+
+    // Write sections to Firebase so remote can read them
+    db.ref(`rooms/${roomId}/presentation`).set({
+      sections: sectionList,
+      current: 0,
+      url: location.pathname
+    });
+
+    // Listen for slide control commands
+    db.ref(`rooms/${roomId}/slideControl`).on('value', snap => {
+      const cmd = snap.val();
+      if (!cmd || cmd.action !== 'goto') return;
+      const target = sectionList[cmd.index];
+      if (target) {
+        const el = document.getElementById(target.id);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+
+    // Show connected indicator
+    const badge = document.createElement('div');
+    badge.style.cssText = 'position:fixed;bottom:1rem;left:1rem;background:#0F9D8A;color:#fff;padding:0.3rem 0.8rem;border-radius:6px;font-size:0.75rem;font-weight:700;z-index:999;opacity:0.8;';
+    badge.textContent = '📡 遙控已連線 · ' + roomId;
+    document.body.appendChild(badge);
+    setTimeout(() => { badge.style.opacity = '0.3'; }, 3000);
+  }
+})();
 </script>
 </body>
 </html>

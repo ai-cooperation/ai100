@@ -6,122 +6,140 @@
 <title>AI 課堂互動 — 老師控制台</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root { --pri:#0F9D8A; --pri-d:#0A7A6B; --navy:#0B3C5D; --navy-l:#134B6E; --gold:#FFC857; --red:#DC2626; --purple:#7C3AED; --cyan:#06B6D4; --orange:#E07A3A; --bg:#0d1117; --surface:#161b22; --surface2:#1c2333; --text:#e6edf3; --dim:#7d8590; --border:#30363d; }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html,body { height:100%; font-family:'Noto Sans TC',system-ui,sans-serif; background:var(--bg); color:var(--text); }
-  button { font-family:inherit; cursor:pointer; border:none; }
-  input,textarea,select { font-family:inherit; }
+  :root { --pri:#0F9D8A; --pri-d:#0A7A6B; --navy:#0B3C5D; --gold:#FFC857; --gold-d:#d4a632; --red:#DC2626; --purple:#7C3AED; --cyan:#06B6D4; --orange:#E07A3A; --bg:#0d1117; --surface:#161b22; --text:#e6edf3; --dim:#7d8590; --border:#30363d; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+  button{font-family:inherit;cursor:pointer;border:none} input,textarea{font-family:inherit}
 
-  .setup { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:2rem; }
-  .setup-box { background:var(--surface); border-radius:16px; padding:2.5rem; width:min(420px,100%); border:1px solid var(--border); }
-  .setup-box h1 { font-size:1.5rem; color:var(--gold); margin-bottom:0.3rem; }
-  .setup-box .sub { color:var(--dim); font-size:0.85rem; margin-bottom:1.5rem; }
-  .setup-box label { display:block; font-size:0.8rem; color:var(--dim); margin-bottom:0.3rem; margin-top:1rem; }
-  .setup-box input { width:100%; padding:0.8rem 1rem; background:var(--bg); border:2px solid var(--border); border-radius:10px; color:var(--text); font-size:1rem; outline:none; }
-  .setup-box input:focus { border-color:var(--pri); }
-  .setup-box .btn-create { width:100%; padding:0.9rem; margin-top:1.5rem; background:var(--pri); color:#fff; font-size:1.05rem; font-weight:700; border-radius:10px; }
-  .setup-box .btn-create:disabled { opacity:0.4; cursor:default; }
+  /* Login */
+  .login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+  .login-box{background:var(--surface);border-radius:16px;padding:2.5rem;width:min(380px,100%);border:1px solid var(--border);text-align:center}
+  .login-box h1{font-size:1.5rem;color:var(--gold);margin-bottom:0.3rem}
+  .login-box .sub{color:var(--dim);font-size:0.85rem;margin-bottom:2rem}
+  .btn-google{display:flex;align-items:center;justify-content:center;gap:0.8rem;width:100%;padding:0.9rem;background:#fff;color:#333;font-size:1rem;font-weight:700;border-radius:10px;border:1px solid #ddd}
+  .btn-google:hover{box-shadow:0 2px 12px rgba(0,0,0,0.15)}
+  .btn-google img{width:20px;height:20px}
 
-  /* Google Sign-In */
-  .login-screen { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:2rem; }
-  .login-box { background:var(--surface); border-radius:16px; padding:2.5rem; width:min(380px,100%); border:1px solid var(--border); text-align:center; }
-  .login-box h1 { font-size:1.5rem; color:var(--gold); margin-bottom:0.3rem; }
-  .login-box .sub { color:var(--dim); font-size:0.85rem; margin-bottom:2rem; }
-  .btn-google { display:flex; align-items:center; justify-content:center; gap:0.8rem; width:100%; padding:0.9rem; background:#fff; color:#333; font-size:1rem; font-weight:700; border-radius:10px; border:1px solid #ddd; transition:box-shadow 0.2s; }
-  .btn-google:hover { box-shadow:0 2px 12px rgba(0,0,0,0.15); }
-  .btn-google img { width:20px; height:20px; }
-  .user-bar { display:flex; align-items:center; gap:0.5rem; padding:0.4rem 0.8rem; background:var(--bg); border-radius:8px; font-size:0.75rem; color:var(--dim); }
-  .user-bar img { width:22px; height:22px; border-radius:50%; }
-  .user-bar .logout { color:var(--red); cursor:pointer; margin-left:0.3rem; font-size:0.7rem; }
+  /* Setup */
+  .setup{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+  .setup-box{background:var(--surface);border-radius:16px;padding:2.5rem;width:min(420px,100%);border:1px solid var(--border)}
+  .setup-box h1{font-size:1.5rem;color:var(--gold);margin-bottom:0.3rem}
+  .setup-box .sub{color:var(--dim);font-size:0.85rem;margin-bottom:1.5rem}
+  .setup-box label{display:block;font-size:0.8rem;color:var(--dim);margin-bottom:0.3rem;margin-top:1rem}
+  .setup-box input{width:100%;padding:0.8rem 1rem;background:var(--bg);border:2px solid var(--border);border-radius:10px;color:var(--text);font-size:1rem;outline:none}
+  .setup-box input:focus{border-color:var(--pri)}
+  .setup-box .btn-create{width:100%;padding:0.9rem;margin-top:1.5rem;background:var(--pri);color:#fff;font-size:1.05rem;font-weight:700;border-radius:10px}
+  .setup-box .btn-create:disabled{opacity:0.4}
+  .user-info{display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;padding:0.6rem;background:var(--bg);border-radius:8px}
+  .user-info img{width:28px;height:28px;border-radius:50%}
+  .user-info span{font-size:0.85rem;flex:1}
+  .user-info .logout{font-size:0.7rem;color:var(--red);cursor:pointer}
 
-  .dash { display:none; flex-direction:column; height:100vh; }
-  .dash.active { display:flex; }
+  /* Dashboard */
+  .dash{display:none;flex-direction:column;height:100vh}
+  .dash.active{display:flex}
+  .toolbar{display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.8rem;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+  .toolbar .room-label{font-size:0.8rem;color:var(--gold);font-weight:700;margin-right:0.3rem}
+  .toolbar .online{font-size:0.75rem;color:var(--dim);margin-right:auto}
+  .mode-btn{padding:0.35rem 0.7rem;border-radius:8px;font-size:0.75rem;font-weight:700;background:var(--bg);color:var(--dim);border:1px solid var(--border);transition:all 0.2s}
+  .mode-btn:hover{border-color:var(--pri);color:var(--pri)}
+  .mode-btn.active{background:var(--pri);color:#fff;border-color:var(--pri)}
+  .act-btn{padding:0.35rem 0.7rem;border-radius:8px;font-size:0.7rem;background:var(--bg);color:var(--dim);border:1px solid var(--border);transition:all 0.2s}
+  .act-btn:hover{border-color:var(--gold);color:var(--gold)}
+  .act-btn.ai-on{background:var(--purple);color:#fff;border-color:var(--purple)}
+  .act-btn.danger:hover{border-color:var(--red);color:var(--red)}
+  .toolbar .user-chip{display:flex;align-items:center;gap:0.3rem;font-size:0.7rem;color:var(--dim)}
+  .toolbar .user-chip img{width:20px;height:20px;border-radius:50%}
 
-  .toolbar { display:flex; align-items:center; gap:0.5rem; padding:0.6rem 1rem; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; flex-wrap:wrap; }
-  .toolbar .room-label { font-size:0.85rem; color:var(--gold); font-weight:700; margin-right:0.5rem; }
-  .toolbar .online { font-size:0.8rem; color:var(--dim); margin-right:auto; }
-  .mode-btn { padding:0.4rem 0.8rem; border-radius:8px; font-size:0.8rem; font-weight:700; background:var(--bg); color:var(--dim); border:1px solid var(--border); transition:all 0.2s; }
-  .mode-btn:hover { border-color:var(--pri); color:var(--pri); }
-  .mode-btn.active { background:var(--pri); color:#fff; border-color:var(--pri); }
-  .act-btn { padding:0.4rem 0.8rem; border-radius:8px; font-size:0.75rem; background:var(--bg); color:var(--dim); border:1px solid var(--border); transition:all 0.2s; }
-  .act-btn:hover { border-color:var(--gold); color:var(--gold); }
-  .act-btn.danger:hover { border-color:var(--red); color:var(--red); }
-  .act-btn.ai-on { background:var(--purple); color:#fff; border-color:var(--purple); }
-
-  .main { flex:1; overflow-y:auto; padding:1rem; }
+  /* Main */
+  .main{flex:1;overflow-y:auto;padding:1rem}
 
   /* Wall */
-  .wall-msg { background:var(--surface); border-radius:12px; padding:1rem 1.2rem; margin-bottom:0.6rem; border-left:3px solid var(--pri); animation:slideIn 0.3s; }
-  .wall-msg.ai-msg { border-left-color:var(--purple); background:#1a1530; }
-  @keyframes slideIn { from { opacity:0; transform:translateX(-20px); } }
-  .wall-msg .wm-name { font-size:0.85rem; color:var(--pri); font-weight:700; }
-  .wall-msg .wm-name.ai { color:var(--purple); }
-  .wall-msg .wm-text { font-size:1.3rem; margin-top:0.3rem; line-height:1.5; white-space:pre-wrap; }
-  .wall-msg .wm-time { font-size:0.7rem; color:var(--dim); margin-top:0.2rem; }
+  .wall-msg{background:var(--surface);border-radius:12px;padding:1rem 1.2rem;margin-bottom:0.6rem;border-left:3px solid var(--pri);animation:slideIn 0.3s}
+  .wall-msg.ai{border-left-color:var(--purple);background:#1a1530}
+  .wall-msg.teacher{border-left-color:var(--gold);background:#1f1a0e}
+  @keyframes slideIn{from{opacity:0;transform:translateX(-20px)}}
+  .wm-name{font-size:0.85rem;font-weight:700;color:var(--pri)}
+  .wm-name.ai{color:var(--purple)} .wm-name.teacher{color:var(--gold)}
+  .wm-text{font-size:1.3rem;margin-top:0.3rem;line-height:1.5;white-space:pre-wrap}
+  .wm-time{font-size:0.7rem;color:var(--dim);margin-top:0.2rem}
+  /* Teacher wall input */
+  .host-input{display:flex;gap:0.5rem;padding:0.6rem 0.8rem;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
+  .host-input input{flex:1;padding:0.7rem 1rem;background:var(--bg);border:2px solid var(--gold);border-radius:24px;color:var(--text);font-size:0.95rem;outline:none}
+  .host-input button{padding:0 1rem;border-radius:24px;background:var(--gold);color:var(--navy);font-size:0.85rem;font-weight:700}
 
   /* Vote */
-  .vote-panel { max-width:800px; margin:0 auto; }
-  .vote-q { font-size:1.8rem; font-weight:900; color:var(--gold); text-align:center; margin-bottom:1.5rem; }
-  .vote-row { display:flex; align-items:center; gap:1rem; margin-bottom:1rem; }
-  .vote-label { font-size:1.1rem; font-weight:700; min-width:120px; }
-  .vote-bar-outer { flex:1; height:40px; background:var(--surface); border-radius:8px; overflow:hidden; }
-  .vote-bar-fill { height:100%; border-radius:8px; transition:width 0.6s; display:flex; align-items:center; justify-content:flex-end; padding-right:0.8rem; }
-  .vote-bar-fill span { font-size:0.9rem; font-weight:700; color:#fff; }
-  .vote-count { font-size:0.9rem; color:var(--dim); min-width:50px; text-align:right; }
-  .vote-total { text-align:center; color:var(--dim); margin-top:1rem; font-size:0.9rem; }
-  .vote-form { max-width:600px; margin:0 auto; background:var(--surface); border-radius:12px; padding:1.5rem; border:1px solid var(--border); }
-  .vote-form h3 { color:var(--gold); margin-bottom:1rem; }
-  .vote-form input { width:100%; padding:0.7rem; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:0.95rem; outline:none; margin-bottom:0.5rem; }
-  .vote-form .opt-row { display:flex; gap:0.5rem; margin-bottom:0.5rem; }
-  .vote-form .opt-row input { flex:1; }
-  .vote-form .opt-row button { width:36px; height:36px; border-radius:8px; background:var(--red); color:#fff; font-size:1rem; flex-shrink:0; }
-  .vote-form .btn-add-opt { padding:0.5rem 1rem; background:var(--bg); color:var(--pri); border:1px dashed var(--pri); border-radius:8px; font-size:0.85rem; width:100%; margin-bottom:1rem; }
-  .vote-form .btn-start-vote { padding:0.7rem 1.5rem; background:var(--pri); color:#fff; font-size:1rem; font-weight:700; border-radius:10px; width:100%; }
+  .vote-panel{max-width:800px;margin:0 auto}
+  .vote-q{font-size:1.8rem;font-weight:900;color:var(--gold);text-align:center;margin-bottom:1.5rem}
+  .vote-row{display:flex;align-items:center;gap:1rem;margin-bottom:1rem}
+  .vote-label{font-size:1.1rem;font-weight:700;min-width:120px}
+  .vote-bar-outer{flex:1;height:40px;background:var(--surface);border-radius:8px;overflow:hidden}
+  .vote-bar-fill{height:100%;border-radius:8px;transition:width 0.6s;display:flex;align-items:center;justify-content:flex-end;padding-right:0.8rem}
+  .vote-bar-fill span{font-size:0.9rem;font-weight:700;color:#fff}
+  .vote-count{font-size:0.9rem;color:var(--dim);min-width:50px;text-align:right}
+  .vote-total{text-align:center;color:var(--dim);margin-top:1rem}
+  .vote-form{max-width:600px;margin:0 auto;background:var(--surface);border-radius:12px;padding:1.5rem;border:1px solid var(--border)}
+  .vote-form h3{color:var(--gold);margin-bottom:1rem}
+  .vote-form input{width:100%;padding:0.7rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.95rem;outline:none;margin-bottom:0.5rem}
+  .opt-row{display:flex;gap:0.5rem;margin-bottom:0.5rem}
+  .opt-row input{flex:1} .opt-row button{width:36px;height:36px;border-radius:8px;background:var(--red);color:#fff;font-size:1rem;flex-shrink:0}
+  .btn-add-opt{padding:0.5rem;background:var(--bg);color:var(--pri);border:1px dashed var(--pri);border-radius:8px;font-size:0.85rem;width:100%;margin-bottom:1rem}
+  .btn-start-vote{padding:0.7rem;background:var(--pri);color:#fff;font-size:1rem;font-weight:700;border-radius:10px;width:100%}
 
   /* QA */
-  .qa-row { background:var(--surface); border-radius:12px; padding:1rem 1.2rem; margin-bottom:0.6rem; display:flex; gap:1rem; align-items:flex-start; animation:slideIn 0.3s; }
-  .qa-row.ai-answer { background:#1a1530; border-left:3px solid var(--purple); }
-  .qa-votes { text-align:center; min-width:50px; }
-  .qa-votes .num { font-size:1.5rem; font-weight:900; color:var(--gold); }
-  .qa-votes .label { font-size:0.65rem; color:var(--dim); }
-  .qa-row .q-text { font-size:1.15rem; line-height:1.5; white-space:pre-wrap; }
-  .qa-row .q-meta { font-size:0.75rem; color:var(--dim); margin-top:0.3rem; }
+  .qa-card{background:var(--surface);border-radius:12px;padding:1rem 1.2rem;margin-bottom:0.8rem;animation:slideIn 0.3s}
+  .qa-top{display:flex;gap:1rem;align-items:flex-start}
+  .qa-votes{text-align:center;min-width:50px}
+  .qa-votes .num{font-size:1.5rem;font-weight:900;color:var(--gold)}
+  .qa-votes .lbl{font-size:0.65rem;color:var(--dim)}
+  .q-text{font-size:1.15rem;line-height:1.5}
+  .q-meta{font-size:0.75rem;color:var(--dim);margin-top:0.3rem}
+  /* Replies */
+  .qa-replies{margin-top:0.8rem;padding-top:0.6rem;border-top:1px solid var(--border)}
+  .qa-reply{padding:0.5rem 0.8rem;margin-bottom:0.4rem;border-radius:8px;font-size:0.95rem;line-height:1.5;white-space:pre-wrap}
+  .qa-reply.ai{background:#1a1530;border-left:2px solid var(--purple)}
+  .qa-reply.teacher{background:#1f1a0e;border-left:2px solid var(--gold)}
+  .qa-reply .rp-name{font-size:0.75rem;font-weight:700;margin-bottom:0.2rem}
+  .qa-reply .rp-name.ai{color:var(--purple)} .qa-reply .rp-name.teacher{color:var(--gold)}
+  /* Reply input */
+  .reply-box{display:flex;gap:0.5rem;margin-top:0.5rem}
+  .reply-box input{flex:1;padding:0.5rem 0.8rem;background:var(--bg);border:1px solid var(--gold);border-radius:8px;color:var(--text);font-size:0.85rem;outline:none}
+  .reply-box button{padding:0 0.8rem;background:var(--gold);color:var(--navy);border-radius:8px;font-size:0.8rem;font-weight:700}
+  .btn-reply{font-size:0.75rem;color:var(--gold);background:none;margin-top:0.3rem;padding:0.2rem 0}
 
   /* Pause */
-  .pause-display { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; }
-  .pause-display .icon { font-size:4rem; animation:pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:0.3;} 50%{opacity:1;} }
-  .pause-display p { font-size:1.3rem; color:var(--dim); margin-top:1rem; }
+  .pause-display{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%}
+  .pause-display .icon{font-size:4rem;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:0.3}50%{opacity:1}}
 
-  /* Settings Panel */
-  .settings-panel { position:fixed; top:0; right:-360px; width:350px; height:100vh; background:var(--surface); border-left:1px solid var(--border); z-index:200; transition:right 0.3s; display:flex; flex-direction:column; }
-  .settings-panel.open { right:0; }
-  .settings-panel .sp-header { padding:1rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
-  .settings-panel .sp-header h3 { color:var(--gold); }
-  .settings-panel .sp-close { background:none; color:var(--dim); font-size:1.2rem; }
-  .settings-panel .sp-body { padding:1rem; flex:1; overflow-y:auto; }
-  .sp-section { margin-bottom:1.5rem; }
-  .sp-section h4 { font-size:0.85rem; color:var(--pri); margin-bottom:0.5rem; }
-  .sp-section p { font-size:0.75rem; color:var(--dim); margin-bottom:0.5rem; }
-  .sp-section input { width:100%; padding:0.6rem; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:0.9rem; outline:none; }
-  .sp-section input:focus { border-color:var(--pri); }
-  .sp-toggle { display:flex; align-items:center; gap:0.5rem; cursor:pointer; }
-  .sp-toggle input[type="checkbox"] { width:18px; height:18px; accent-color:var(--pri); }
-  .sp-toggle label { font-size:0.85rem; cursor:pointer; }
-  .sp-btn { padding:0.5rem 1rem; border-radius:8px; font-size:0.85rem; width:100%; margin-top:0.5rem; }
-  .sp-btn.save { background:var(--pri); color:#fff; }
-  .sp-btn.clear { background:var(--bg); color:var(--red); border:1px solid var(--red); }
-  .settings-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:199; display:none; }
-  .settings-overlay.show { display:block; }
+  /* AI status */
+  .ai-status{position:fixed;bottom:1rem;right:1rem;background:var(--purple);color:#fff;padding:0.4rem 0.8rem;border-radius:8px;font-size:0.8rem;display:none;animation:pulse 1.5s infinite}
 
-  /* QR Overlay */
-  .qr-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.85); display:none; align-items:center; justify-content:center; z-index:100; flex-direction:column; gap:1.5rem; cursor:pointer; }
-  .qr-overlay.show { display:flex; }
-  .qr-overlay .qr-box { background:#fff; padding:1.5rem; border-radius:16px; }
-  .qr-overlay .qr-url { color:var(--gold); font-size:1.1rem; font-weight:700; text-align:center; }
-  .qr-overlay .qr-hint { color:var(--dim); font-size:0.85rem; }
+  /* Settings */
+  .settings-panel{position:fixed;top:0;right:-360px;width:350px;height:100vh;background:var(--surface);border-left:1px solid var(--border);z-index:200;transition:right 0.3s;display:flex;flex-direction:column}
+  .settings-panel.open{right:0}
+  .sp-header{padding:1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+  .sp-header h3{color:var(--gold)} .sp-close{background:none;color:var(--dim);font-size:1.2rem}
+  .sp-body{padding:1rem;flex:1;overflow-y:auto}
+  .sp-section{margin-bottom:1.5rem}
+  .sp-section h4{font-size:0.85rem;color:var(--pri);margin-bottom:0.5rem}
+  .sp-section p{font-size:0.75rem;color:var(--dim);margin-bottom:0.5rem}
+  .sp-section input{width:100%;padding:0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;outline:none}
+  .sp-toggle{display:flex;align-items:center;gap:0.5rem;cursor:pointer}
+  .sp-toggle input[type="checkbox"]{width:18px;height:18px;accent-color:var(--pri)}
+  .sp-btn{padding:0.5rem 1rem;border-radius:8px;font-size:0.85rem;width:100%;margin-top:0.5rem}
+  .sp-btn.save{background:var(--pri);color:#fff} .sp-btn.clear{background:var(--bg);color:var(--red);border:1px solid var(--red)}
+  .settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:199;display:none}
+  .settings-overlay.show{display:block}
 
-  .hidden { display:none !important; }
+  /* QR */
+  .qr-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:100;flex-direction:column;gap:1.5rem;cursor:pointer}
+  .qr-overlay.show{display:flex}
+  .qr-overlay .qr-box{background:#fff;padding:1.5rem;border-radius:16px}
+  .qr-overlay .qr-url{color:var(--gold);font-size:1rem;font-weight:700;text-align:center}
+  .qr-overlay .qr-hint{color:var(--dim);font-size:0.85rem}
+
+  .hidden{display:none!important}
 </style>
 </head>
 <body>
@@ -132,22 +150,17 @@
     <h1>AI 課堂互動</h1>
     <p class="sub">老師控制台 — 請先登入 Google 帳號</p>
     <button class="btn-google" onclick="googleLogin()">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G">
-      使用 Google 帳號登入
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G">使用 Google 帳號登入
     </button>
   </div>
 </div>
 
-<!-- Setup (hidden until logged in) -->
+<!-- Setup -->
 <div class="setup hidden" id="setupScreen">
   <div class="setup-box">
     <h1>AI 課堂互動</h1>
     <p class="sub">老師控制台 — 建立或加入房間</p>
-    <div id="userInfo" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;padding:0.6rem;background:var(--bg);border-radius:8px;">
-      <img id="userAvatar" src="" style="width:28px;height:28px;border-radius:50%;">
-      <span id="userName" style="font-size:0.85rem;color:var(--text);flex:1;"></span>
-      <span onclick="googleLogout()" style="font-size:0.7rem;color:var(--red);cursor:pointer;">登出</span>
-    </div>
+    <div class="user-info"><img id="userAvatar" src=""><span id="userName"></span><span class="logout" onclick="googleLogout()">登出</span></div>
     <label>房間代碼</label>
     <input type="text" id="inputRoom" placeholder="例如 ai100-0322" autocomplete="off">
     <label>課程名稱（選填）</label>
@@ -156,56 +169,56 @@
   </div>
 </div>
 
+<!-- Dashboard -->
 <div class="dash" id="dash">
   <div class="toolbar">
     <span class="room-label" id="dispRoom"></span>
-    <span class="online" id="dispOnline">0 人在線</span>
+    <span class="online" id="dispOnline">0</span>
     <button class="mode-btn active" data-mode="wall" onclick="setMode('wall')">💬 訊息牆</button>
     <button class="mode-btn" data-mode="vote" onclick="setMode('vote')">📊 投票</button>
     <button class="mode-btn" data-mode="qa" onclick="setMode('qa')">❓ 問答</button>
-    <button class="mode-btn" data-mode="pause" onclick="setMode('pause')">⏸ 暫停</button>
-    <button class="act-btn" id="btnAI" onclick="toggleAI()">🤖 AI 助教</button>
-    <button class="act-btn" onclick="toggleQR()">QR Code</button>
+    <button class="mode-btn" data-mode="pause" onclick="setMode('pause')">⏸</button>
+    <button class="act-btn" id="btnAI" onclick="toggleAI()">🤖 AI</button>
+    <button class="act-btn" onclick="toggleQR()">QR</button>
     <button class="act-btn" onclick="toggleSettings()">設定</button>
     <button class="act-btn" onclick="exportData()">匯出</button>
-    <div class="user-bar" id="dashUserBar"><img id="dashAvatar" src="" style="width:22px;height:22px;border-radius:50%;"><span id="dashName"></span><span class="logout" onclick="googleLogout()">登出</span></div>
+    <div class="user-chip"><img id="dashAvatar" src=""><span id="dashName"></span></div>
   </div>
   <div class="main" id="mainContent"></div>
+  <!-- Teacher wall input (shown in wall mode) -->
+  <div class="host-input hidden" id="hostWallBar">
+    <input type="text" id="hostWallText" placeholder="老師發言..." maxlength="500" autocomplete="off">
+    <button onclick="sendTeacherWall()">👨‍🏫 發送</button>
+  </div>
 </div>
+
+<!-- AI Status -->
+<div class="ai-status" id="aiStatus">🤖 AI 回答中...</div>
 
 <!-- Settings -->
 <div class="settings-overlay" id="settingsOverlay" onclick="toggleSettings()"></div>
 <div class="settings-panel" id="settingsPanel">
-  <div class="sp-header">
-    <h3>房間設定</h3>
-    <button class="sp-close" onclick="toggleSettings()">✕</button>
-  </div>
+  <div class="sp-header"><h3>房間設定</h3><button class="sp-close" onclick="toggleSettings()">✕</button></div>
   <div class="sp-body">
     <div class="sp-section">
       <h4>房間密碼</h4>
       <p>啟用後學員需輸入密碼才能加入</p>
-      <div class="sp-toggle">
-        <input type="checkbox" id="chkPassword" onchange="togglePasswordField()">
-        <label for="chkPassword">啟用密碼</label>
-      </div>
-      <input type="text" id="inputPassword" placeholder="設定密碼" style="margin-top:0.5rem;" class="hidden">
-      <button class="sp-btn save" onclick="savePassword()" style="margin-top:0.5rem;">儲存密碼設定</button>
+      <div class="sp-toggle"><input type="checkbox" id="chkPassword" onchange="document.getElementById('inputPassword').classList.toggle('hidden',!this.checked)"><label for="chkPassword">啟用密碼</label></div>
+      <input type="text" id="inputPassword" placeholder="設定密碼" style="margin-top:0.5rem" class="hidden">
+      <button class="sp-btn save" onclick="savePassword()">儲存密碼設定</button>
     </div>
     <div class="sp-section">
       <h4>AI 助教設定</h4>
-      <p>輸入 Gemini API Key，學員在訊息牆輸入 @AI 即可提問</p>
+      <p>填入 Gemini API Key，開啟 AI 後自動回答所有學員問題</p>
       <input type="password" id="inputAIKey" placeholder="Gemini API Key">
       <button class="sp-btn save" onclick="saveAIKey()">儲存 API Key</button>
-      <p style="margin-top:0.5rem;">Key 存在你的瀏覽器中，不會上傳</p>
+      <p style="margin-top:0.5rem">Key 存在你的瀏覽器，不會上傳</p>
     </div>
-    <div class="sp-section">
-      <h4>危險操作</h4>
-      <button class="sp-btn clear" onclick="clearRoom()">清除所有互動資料</button>
-    </div>
+    <div class="sp-section"><h4>危險操作</h4><button class="sp-btn clear" onclick="clearRoom()">清除所有互動資料</button></div>
   </div>
 </div>
 
-<!-- QR Overlay -->
+<!-- QR -->
 <div class="qr-overlay" id="qrOverlay" onclick="toggleQR()">
   <div class="qr-box" id="qrBox" onclick="event.stopPropagation()"></div>
   <div class="qr-url" id="qrUrl"></div>
@@ -225,19 +238,13 @@ firebase.initializeApp({
   storageBucket: 'ai-classroom-70a97.firebasestorage.app',
   appId: '1:160782638499:web:f3fb834ce32d643de28e16',
 });
-const db = firebase.database();
-const auth = firebase.auth();
+const db = firebase.database(), auth = firebase.auth();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
-
-let currentUser = null;
-let roomId = '', roomTitle = '', currentMode = 'wall';
-let aiEnabled = false;
+let currentUser = null, roomId = '', roomTitle = '', currentMode = 'wall';
+let aiEnabled = false, listeners = [], voteOpts = ['',''];
 const voteColors = ['#0F9D8A','#E07A3A','#7C3AED','#06B6D4','#FFC857','#DC2626'];
-let voteOpts = ['', ''];
-let listeners = [];
-let aiProcessed = new Set(); // track already-answered messages
 
-// ── Auth ──
+// ═══ Auth ═══
 auth.onAuthStateChanged(user => {
   currentUser = user;
   if (user) {
@@ -252,361 +259,267 @@ auth.onAuthStateChanged(user => {
     document.getElementById('setupScreen').classList.add('hidden');
   }
 });
+function googleLogin() { auth.signInWithPopup(googleProvider).catch(e => alert('登入失敗：' + e.message)); }
+function googleLogout() { if (confirm('確定登出？')) auth.signOut().then(() => location.reload()); }
 
-function googleLogin() {
-  auth.signInWithPopup(googleProvider).catch(err => alert('登入失敗：' + err.message));
-}
-
-function googleLogout() {
-  if (confirm('確定登出？')) auth.signOut().then(() => location.reload());
-}
-
-// ── Create / Enter ──
+// ═══ Room ═══
 function createRoom() {
-  if (!currentUser) { alert('請先登入'); return; }
+  if (!currentUser) return;
   roomId = document.getElementById('inputRoom').value.trim();
   roomTitle = document.getElementById('inputTitle').value.trim() || roomId;
   if (!roomId) { alert('請輸入房間代碼'); return; }
   document.getElementById('btnCreate').disabled = true;
-  const configRef = db.ref(`rooms/${roomId}/config`);
-  configRef.once('value').then(snap => {
+  db.ref(`rooms/${roomId}/config`).once('value').then(snap => {
     if (!snap.exists()) {
-      // New room — I am the host
-      configRef.set({ title: roomTitle, mode: 'wall', created: firebase.database.ServerValue.TIMESTAMP, hostUid: currentUser.uid, hostName: currentUser.displayName || currentUser.email });
+      db.ref(`rooms/${roomId}/config`).set({ title: roomTitle, mode: 'wall', created: firebase.database.ServerValue.TIMESTAMP, hostUid: currentUser.uid, hostName: currentUser.displayName || currentUser.email });
     } else {
-      const config = snap.val();
-      roomTitle = config.title || roomId;
-      // Check ownership
-      if (config.hostUid && config.hostUid !== currentUser.uid) {
-        alert(`此房間由 ${config.hostName || '其他老師'} 建立，你沒有控制權限。`);
-        document.getElementById('btnCreate').disabled = false;
-        return;
-      }
-      // If no hostUid (old room), claim it
-      if (!config.hostUid) {
-        configRef.update({ hostUid: currentUser.uid, hostName: currentUser.displayName || currentUser.email });
-      }
+      const c = snap.val(); roomTitle = c.title || roomId;
+      if (c.hostUid && c.hostUid !== currentUser.uid) { alert(`此房間由 ${c.hostName||'其他老師'} 建立，你沒有控制權限。`); document.getElementById('btnCreate').disabled = false; return; }
+      if (!c.hostUid) db.ref(`rooms/${roomId}/config`).update({ hostUid: currentUser.uid, hostName: currentUser.displayName });
     }
     enterDashboard();
-  }).catch(err => { alert('連線失敗：' + err.message); document.getElementById('btnCreate').disabled = false; });
+  }).catch(e => { alert('連線失敗：' + e.message); document.getElementById('btnCreate').disabled = false; });
 }
 
 function enterDashboard() {
-  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('setupScreen').classList.add('hidden');
   document.getElementById('dash').classList.add('active');
-  document.getElementById('dispRoom').textContent = `${roomTitle} (${roomId})`;
-  generateQR();
-  loadSettings();
+  document.getElementById('dispRoom').textContent = `${roomTitle}`;
+  generateQR(); loadSettings();
   // Online
-  db.ref(`rooms/${roomId}/presence`).on('value', snap => {
-    document.getElementById('dispOnline').textContent = `${snap.numChildren()} 人在線`;
-  });
+  db.ref(`rooms/${roomId}/presence`).on('value', s => { document.getElementById('dispOnline').textContent = `${s.numChildren()} 人在線`; });
   // Mode
-  let lastRenderedMode = null;
-  db.ref(`rooms/${roomId}/config/mode`).on('value', snap => {
-    const mode = snap.val() || 'wall';
-    if (mode === lastRenderedMode) return;
-    lastRenderedMode = mode;
-    currentMode = mode;
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  let lastMode = null;
+  db.ref(`rooms/${roomId}/config/mode`).on('value', s => {
+    const m = s.val() || 'wall'; if (m === lastMode) return; lastMode = m; currentMode = m;
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
     renderContent();
   });
-  // AI status sync
-  db.ref(`rooms/${roomId}/config/aiEnabled`).on('value', snap => {
-    aiEnabled = !!snap.val();
+  // AI
+  db.ref(`rooms/${roomId}/config/aiEnabled`).on('value', s => {
+    aiEnabled = !!s.val();
     document.getElementById('btnAI').classList.toggle('ai-on', aiEnabled);
-    document.getElementById('btnAI').textContent = aiEnabled ? '🤖 AI ON' : '🤖 AI 助教';
+    document.getElementById('btnAI').textContent = aiEnabled ? '🤖 ON' : '🤖 AI';
   });
+  // Keyboard
+  document.getElementById('hostWallText').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendTeacherWall(); } });
+  // Start persistent AI listener
+  startAIListener();
 }
 
-function loadSettings() {
-  // Load password state
-  db.ref(`rooms/${roomId}/config/password`).once('value').then(snap => {
-    const pwd = snap.val();
-    document.getElementById('chkPassword').checked = !!pwd;
-    if (pwd) {
-      document.getElementById('inputPassword').value = pwd;
-      document.getElementById('inputPassword').classList.remove('hidden');
-    }
-  });
-  // Load AI key from localStorage
-  const savedKey = localStorage.getItem('_ai_key');
-  if (savedKey) document.getElementById('inputAIKey').value = savedKey;
-}
-
-// ── Mode ──
-function setMode(mode) { currentMode = mode; db.ref(`rooms/${roomId}/config/mode`).set(mode); }
-
-function renderContent() {
-  listeners.forEach(l => l.ref.off(l.event));
-  listeners = [];
-  const el = document.getElementById('mainContent');
-  if (currentMode === 'wall') renderWall(el);
-  else if (currentMode === 'vote') renderVoteHost(el);
-  else if (currentMode === 'qa') renderQA(el);
-  else el.innerHTML = '<div class="pause-display"><div class="icon">⏸</div><p>學員看到「老師準備中，請稍候...」</p></div>';
-}
-
-// ── Wall ──
-function renderWall(el) {
-  el.innerHTML = '';
-  const ref = db.ref(`rooms/${roomId}/wall`).orderByChild('ts').limitToLast(200);
-  ref.on('child_added', snap => {
-    const d = snap.val();
-    const isAI = d.name === 'AI 助教';
-    const div = document.createElement('div');
-    div.className = 'wall-msg' + (isAI ? ' ai-msg' : '');
-    div.innerHTML = `<span class="wm-name${isAI ? ' ai' : ''}">${isAI ? '🤖 ' : ''}${esc(d.name)}</span><span class="wm-time" style="margin-left:0.5rem;">${timeStr(d.ts)}</span><div class="wm-text">${esc(d.text)}</div>`;
-    el.appendChild(div);
-    el.scrollTop = el.scrollHeight;
-    // AI auto-respond
-    if (aiEnabled && !isAI && d.text.startsWith('@AI ') && !aiProcessed.has(snap.key)) {
-      aiProcessed.add(snap.key);
-      handleAIRequest(d.text.slice(4).trim(), 'wall');
-    }
-  });
-  listeners.push({ ref, event: 'child_added' });
-}
-
-// ── Vote ──
-function renderVoteHost(el) {
-  const cvRef = db.ref(`rooms/${roomId}/currentVote`);
-  cvRef.on('value', snap => {
-    const data = snap.val();
-    if (data) renderVoteResults(el, data);
-    else renderVoteForm(el);
-  });
-  listeners.push({ ref: cvRef, event: 'value' });
-}
-
-function renderVoteResults(el, data) {
-  const voteId = data.id, opts = data.options || [];
-  const ref = db.ref(`rooms/${roomId}/votes/${voteId}`);
-  ref.on('value', snap => {
-    const responses = snap.val() || {};
-    const counts = {}; let total = 0;
-    opts.forEach((_, i) => counts[i] = 0);
-    Object.entries(responses).forEach(([k, v]) => { if (typeof v === 'number') { counts[v]=(counts[v]||0)+1; total++; } });
-    const maxCount = Math.max(...Object.values(counts), 1);
-    let html = `<div class="vote-panel"><div class="vote-q">${esc(data.question)}</div>`;
-    opts.forEach((opt, i) => {
-      const pct = total ? Math.round(counts[i]/total*100) : 0;
-      const w = maxCount ? Math.round(counts[i]/maxCount*100) : 0;
-      html += `<div class="vote-row"><div class="vote-label">${esc(opt)}</div><div class="vote-bar-outer"><div class="vote-bar-fill" style="width:${w}%;background:${voteColors[i%6]}"><span>${pct}%</span></div></div><div class="vote-count">${counts[i]} 票</div></div>`;
+// ═══ AI Listener (persistent, independent of mode) ═══
+function startAIListener() {
+  const existingWall = new Set(), existingQa = new Set();
+  // Snapshot existing keys, then listen for NEW ones only
+  db.ref(`rooms/${roomId}/wall`).once('value').then(snap => {
+    snap.forEach(c => existingWall.add(c.key));
+    db.ref(`rooms/${roomId}/wall`).on('child_added', s => {
+      if (existingWall.has(s.key)) { existingWall.delete(s.key); return; }
+      if (!aiEnabled) return;
+      const d = s.val();
+      if (d.role === 'ai' || d.role === 'teacher') return;
+      handleAIRequest(d.text, 'wall');
     });
-    html += `<div class="vote-total">共 ${total} 人投票</div><div style="text-align:center;margin-top:1.5rem;"><button class="act-btn" onclick="endVote()" style="padding:0.6rem 1.5rem;">結束投票 / 建新投票</button></div></div>`;
-    el.innerHTML = html;
   });
-  listeners.push({ ref, event: 'value' });
-}
-
-function renderVoteForm(el) {
-  voteOpts = ['', ''];
-  el.innerHTML = buildVoteFormHTML();
-}
-
-function buildVoteFormHTML() {
-  let html = `<div class="vote-form"><h3>建立新投票</h3><input type="text" id="voteQuestion" placeholder="投票問題">`;
-  voteOpts.forEach((opt, i) => {
-    html += `<div class="opt-row"><input type="text" class="vote-opt-input" data-idx="${i}" placeholder="選項 ${i+1}" value="${esc(opt)}" oninput="voteOpts[${i}]=this.value">${voteOpts.length > 2 ? `<button onclick="removeOpt(${i})">✕</button>` : '<button style="visibility:hidden">✕</button>'}</div>`;
+  db.ref(`rooms/${roomId}/qa`).once('value').then(snap => {
+    snap.forEach(c => existingQa.add(c.key));
+    db.ref(`rooms/${roomId}/qa`).on('child_added', s => {
+      if (existingQa.has(s.key)) { existingQa.delete(s.key); return; }
+      if (!aiEnabled) return;
+      const d = s.val();
+      if (d.role === 'ai' || d.role === 'teacher') return;
+      handleAIRequest(d.text, 'qa', s.key);
+    });
   });
-  html += `<button class="btn-add-opt" onclick="addOpt()">+ 新增選項</button><button class="btn-start-vote" onclick="startVote()">開始投票</button></div>`;
-  return html;
 }
 
-function addOpt() { voteOpts.push(''); document.getElementById('mainContent').innerHTML = buildVoteFormHTML(); }
-function removeOpt(i) { voteOpts.splice(i,1); document.getElementById('mainContent').innerHTML = buildVoteFormHTML(); }
-
-function startVote() {
-  document.querySelectorAll('.vote-opt-input').forEach(inp => { voteOpts[parseInt(inp.dataset.idx)] = inp.value; });
-  const question = document.getElementById('voteQuestion').value.trim();
-  const opts = voteOpts.map(o => o.trim()).filter(o => o);
-  if (!question) { alert('請輸入投票問題'); return; }
-  if (opts.length < 2) { alert('至少需要兩個選項'); return; }
-  db.ref(`rooms/${roomId}/currentVote`).set({ question, options: opts, id: 'v' + Date.now() });
-}
-
-function endVote() { db.ref(`rooms/${roomId}/currentVote`).remove(); }
-
-// ── QA ──
-function renderQA(el) {
-  el.innerHTML = '';
-  const ref = db.ref(`rooms/${roomId}/qa`);
-  ref.on('value', snap => {
-    const items = [];
-    snap.forEach(c => items.push({ id: c.key, ...c.val() }));
-    items.sort((a,b) => (b.ups||0) - (a.ups||0));
-    if (!items.length) { el.innerHTML = '<div class="pause-display"><p style="font-size:1.1rem;">等待學員提問...</p></div>'; return; }
-    el.innerHTML = items.map(q => {
-      const isAI = q.name === 'AI 助教';
-      return `<div class="qa-row${isAI ? ' ai-answer' : ''}">
-        <div class="qa-votes"><div class="num">${isAI ? '🤖' : (q.ups||0)}</div>${isAI ? '' : '<div class="label">票</div>'}</div>
-        <div><div class="q-text">${esc(q.text)}</div><div class="q-meta">${esc(q.name)} · ${timeStr(q.ts)}</div></div>
-      </div>`;
-    }).join('');
-    // AI auto-respond to new questions
-    if (aiEnabled) {
-      items.forEach(q => {
-        if (q.name !== 'AI 助教' && !aiProcessed.has(q.id)) {
-          aiProcessed.add(q.id);
-          handleAIRequest(q.text, 'qa');
-        }
-      });
-    }
-  });
-  listeners.push({ ref, event: 'value' });
-}
-
-// ── Settings ──
-function toggleSettings() {
-  document.getElementById('settingsPanel').classList.toggle('open');
-  document.getElementById('settingsOverlay').classList.toggle('show');
-}
-
-function togglePasswordField() {
-  const checked = document.getElementById('chkPassword').checked;
-  document.getElementById('inputPassword').classList.toggle('hidden', !checked);
-}
-
-function savePassword() {
-  const enabled = document.getElementById('chkPassword').checked;
-  const pwd = document.getElementById('inputPassword').value.trim();
-  if (enabled && !pwd) { alert('請輸入密碼'); return; }
-  db.ref(`rooms/${roomId}/config/password`).set(enabled ? pwd : null)
-    .then(() => alert(enabled ? '密碼已設定' : '密碼已關閉'))
-    .catch(err => alert('失敗：' + err.message));
-}
-
-function saveAIKey() {
-  const key = document.getElementById('inputAIKey').value.trim();
-  if (!key) { localStorage.removeItem('_ai_key'); alert('API Key 已清除'); return; }
-  localStorage.setItem('_ai_key', key);
-  alert('API Key 已儲存到瀏覽器');
-}
-
-// ── AI Toggle ──
-function toggleAI() {
-  const apiKey = localStorage.getItem('_ai_key');
-  if (!apiKey && !aiEnabled) {
-    alert('請先在「設定」中填入 Gemini API Key');
-    toggleSettings();
-    return;
-  }
-  const newState = !aiEnabled;
-  db.ref(`rooms/${roomId}/config/aiEnabled`).set(newState);
-}
-
-// ── AI Response (runs in teacher's browser) ──
-async function handleAIRequest(question, source) {
+async function handleAIRequest(question, source, qaId) {
   const apiKey = localStorage.getItem('_ai_key');
   if (!apiKey || !question) return;
-
+  document.getElementById('aiStatus').style.display = 'block';
   try {
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          systemInstruction: { parts: [{ text: `你是 AI 課堂助教。請用繁體中文簡潔回答（200 字以內）。課程主題：${roomTitle}。若問題不適當，禮貌拒絕。` }] },
+          systemInstruction: { parts: [{ text: `你是課堂 AI 助教。課程：${roomTitle}。用繁體中文簡潔回答（150字內）。如果訊息是打招呼、閒聊或不需要回答的（如「OK」「收到」「+1」），只回覆 [SKIP]。` }] },
           contents: [{ parts: [{ text: question }] }],
-          generationConfig: { maxOutputTokens: 300, temperature: 0.7 }
+          generationConfig: { maxOutputTokens: 250, temperature: 0.7 }
         })
       }
     );
     const data = await res.json();
     const answer = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!answer) return;
-
+    if (!answer || answer.includes('[SKIP]')) { document.getElementById('aiStatus').style.display = 'none'; return; }
     if (source === 'wall') {
-      db.ref(`rooms/${roomId}/wall`).push({ text: answer, name: 'AI 助教', ts: firebase.database.ServerValue.TIMESTAMP });
-    } else if (source === 'qa') {
-      db.ref(`rooms/${roomId}/qa`).push({ text: `💡 ${answer}`, name: 'AI 助教', ts: firebase.database.ServerValue.TIMESTAMP, ups: 0 });
+      db.ref(`rooms/${roomId}/wall`).push({ text: answer, name: 'AI 助教', role: 'ai', ts: firebase.database.ServerValue.TIMESTAMP });
+    } else if (source === 'qa' && qaId) {
+      db.ref(`rooms/${roomId}/qaReplies/${qaId}`).push({ text: answer, name: 'AI 助教', role: 'ai', ts: firebase.database.ServerValue.TIMESTAMP });
     }
-  } catch (err) {
-    console.error('AI error:', err);
-  }
+  } catch (e) { console.error('AI error:', e); }
+  document.getElementById('aiStatus').style.display = 'none';
 }
 
-// ── QR ──
+// ═══ Mode ═══
+function setMode(m) { db.ref(`rooms/${roomId}/config/mode`).set(m); }
+
+function renderContent() {
+  listeners.forEach(l => l.ref.off(l.event)); listeners = [];
+  const el = document.getElementById('mainContent');
+  document.getElementById('hostWallBar').classList.toggle('hidden', currentMode !== 'wall');
+  if (currentMode === 'wall') renderWall(el);
+  else if (currentMode === 'vote') renderVoteHost(el);
+  else if (currentMode === 'qa') renderQA(el);
+  else el.innerHTML = '<div class="pause-display"><div class="icon">⏸</div><p style="color:var(--dim);margin-top:1rem">學員看到「老師準備中」</p></div>';
+}
+
+// ═══ Wall ═══
+function renderWall(el) {
+  el.innerHTML = '';
+  const ref = db.ref(`rooms/${roomId}/wall`).orderByChild('ts').limitToLast(200);
+  ref.on('child_added', s => {
+    const d = s.val(), r = d.role || 'student';
+    const div = document.createElement('div');
+    div.className = `wall-msg ${r}`;
+    const icon = r==='ai' ? '🤖 ' : r==='teacher' ? '👨‍🏫 ' : '';
+    div.innerHTML = `<span class="wm-name ${r}">${icon}${esc(d.name)}</span><span class="wm-time" style="margin-left:0.5rem">${timeStr(d.ts)}</span><div class="wm-text">${esc(d.text)}</div>`;
+    el.appendChild(div); el.scrollTop = el.scrollHeight;
+  });
+  listeners.push({ ref, event: 'child_added' });
+}
+
+function sendTeacherWall() {
+  const inp = document.getElementById('hostWallText'), text = inp.value.trim();
+  if (!text || !roomId) return; inp.value = '';
+  db.ref(`rooms/${roomId}/wall`).push({ text, name: currentUser.displayName || '老師', role: 'teacher', ts: firebase.database.ServerValue.TIMESTAMP });
+}
+
+// ═══ Vote ═══
+function renderVoteHost(el) {
+  const ref = db.ref(`rooms/${roomId}/currentVote`);
+  ref.on('value', s => { s.val() ? renderVoteResults(el, s.val()) : renderVoteForm(el); });
+  listeners.push({ ref, event: 'value' });
+}
+function renderVoteResults(el, data) {
+  const id = data.id, opts = data.options || [];
+  const ref = db.ref(`rooms/${roomId}/votes/${id}`);
+  ref.on('value', s => {
+    const R = s.val() || {}, C = {}; let T = 0;
+    opts.forEach((_,i) => C[i]=0);
+    Object.values(R).forEach(v => { if (typeof v==='number') { C[v]=(C[v]||0)+1; T++; } });
+    const mx = Math.max(...Object.values(C), 1);
+    let h = `<div class="vote-panel"><div class="vote-q">${esc(data.question)}</div>`;
+    opts.forEach((o,i) => { const p=T?Math.round(C[i]/T*100):0, w=Math.round(C[i]/mx*100); h+=`<div class="vote-row"><div class="vote-label">${esc(o)}</div><div class="vote-bar-outer"><div class="vote-bar-fill" style="width:${w}%;background:${voteColors[i%6]}"><span>${p}%</span></div></div><div class="vote-count">${C[i]} 票</div></div>`; });
+    h += `<div class="vote-total">共 ${T} 人投票</div><div style="text-align:center;margin-top:1.5rem"><button class="act-btn" onclick="endVote()" style="padding:0.6rem 1.5rem">結束投票</button></div></div>`;
+    el.innerHTML = h;
+  });
+  listeners.push({ ref, event: 'value' });
+}
+function renderVoteForm(el) { voteOpts=['','']; el.innerHTML = buildVF(); }
+function buildVF() {
+  let h = `<div class="vote-form"><h3>建立新投票</h3><input type="text" id="voteQuestion" placeholder="投票問題">`;
+  voteOpts.forEach((o,i) => { h+=`<div class="opt-row"><input type="text" class="voi" data-idx="${i}" placeholder="選項 ${i+1}" value="${esc(o)}" oninput="voteOpts[${i}]=this.value">${voteOpts.length>2?`<button onclick="removeOpt(${i})">✕</button>`:'<button style="visibility:hidden">✕</button>'}</div>`; });
+  return h + `<button class="btn-add-opt" onclick="addOpt()">+ 新增選項</button><button class="btn-start-vote" onclick="startVote()">開始投票</button></div>`;
+}
+function addOpt(){voteOpts.push('');document.getElementById('mainContent').innerHTML=buildVF()}
+function removeOpt(i){voteOpts.splice(i,1);document.getElementById('mainContent').innerHTML=buildVF()}
+function startVote(){document.querySelectorAll('.voi').forEach(i=>{voteOpts[+i.dataset.idx]=i.value});const q=document.getElementById('voteQuestion').value.trim(),o=voteOpts.map(x=>x.trim()).filter(x=>x);if(!q){alert('請輸入問題');return}if(o.length<2){alert('至少兩個選項');return}db.ref(`rooms/${roomId}/currentVote`).set({question:q,options:o,id:'v'+Date.now()})}
+function endVote(){db.ref(`rooms/${roomId}/currentVote`).remove()}
+
+// ═══ QA (with replies) ═══
+function renderQA(el) {
+  el.innerHTML = '';
+  const ref = db.ref(`rooms/${roomId}/qa`);
+  ref.on('value', snap => {
+    const items = []; snap.forEach(c => items.push({ id: c.key, ...c.val() }));
+    items.sort((a,b) => (b.ups||0)-(a.ups||0));
+    if (!items.length) { el.innerHTML = '<div class="pause-display"><p style="color:var(--dim)">等待學員提問...</p></div>'; return; }
+    // Fetch all replies
+    db.ref(`rooms/${roomId}/qaReplies`).once('value').then(rsnap => {
+      const allReplies = rsnap.val() || {};
+      el.innerHTML = items.map(q => {
+        const replies = allReplies[q.id] ? Object.values(allReplies[q.id]).sort((a,b)=>a.ts-b.ts) : [];
+        let rhtml = replies.map(r => `<div class="qa-reply ${r.role}"><div class="rp-name ${r.role}">${r.role==='ai'?'🤖 AI 助教':'👨‍🏫 '+(r.name||'老師')}</div>${esc(r.text)}</div>`).join('');
+        return `<div class="qa-card">
+          <div class="qa-top">
+            <div class="qa-votes"><div class="num">${q.ups||0}</div><div class="lbl">票</div></div>
+            <div style="flex:1"><div class="q-text">${esc(q.text)}</div><div class="q-meta">${esc(q.name)} · ${timeStr(q.ts)}</div>
+              <button class="btn-reply" onclick="showReply('${q.id}')">回覆</button>
+            </div>
+          </div>
+          ${rhtml ? `<div class="qa-replies">${rhtml}</div>` : ''}
+          <div class="reply-box hidden" id="rb-${q.id}">
+            <input type="text" id="ri-${q.id}" placeholder="輸入回覆..." onkeydown="if(event.key==='Enter')replyQ('${q.id}')">
+            <button onclick="replyQ('${q.id}')">回覆</button>
+          </div>
+        </div>`;
+      }).join('');
+    });
+  });
+  listeners.push({ ref, event: 'value' });
+}
+
+function showReply(qid) { document.getElementById(`rb-${qid}`).classList.toggle('hidden'); document.getElementById(`ri-${qid}`).focus(); }
+function replyQ(qid) {
+  const inp = document.getElementById(`ri-${qid}`), text = inp.value.trim();
+  if (!text) return; inp.value = '';
+  db.ref(`rooms/${roomId}/qaReplies/${qid}`).push({ text, name: currentUser.displayName || '老師', role: 'teacher', ts: firebase.database.ServerValue.TIMESTAMP });
+}
+
+// ═══ Settings ═══
+function loadSettings() {
+  db.ref(`rooms/${roomId}/config/password`).once('value').then(s => {
+    const p = s.val(); document.getElementById('chkPassword').checked = !!p;
+    if (p) { document.getElementById('inputPassword').value = p; document.getElementById('inputPassword').classList.remove('hidden'); }
+  });
+  const k = localStorage.getItem('_ai_key'); if (k) document.getElementById('inputAIKey').value = k;
+}
+function toggleSettings() { document.getElementById('settingsPanel').classList.toggle('open'); document.getElementById('settingsOverlay').classList.toggle('show'); }
+function savePassword() {
+  const on = document.getElementById('chkPassword').checked, pwd = document.getElementById('inputPassword').value.trim();
+  if (on && !pwd) { alert('請輸入密碼'); return; }
+  db.ref(`rooms/${roomId}/config/password`).set(on ? pwd : null).then(() => alert(on ? '密碼已設定' : '密碼已關閉'));
+}
+function saveAIKey() {
+  const k = document.getElementById('inputAIKey').value.trim();
+  if (!k) { localStorage.removeItem('_ai_key'); alert('API Key 已清除'); return; }
+  localStorage.setItem('_ai_key', k); alert('API Key 已儲存');
+}
+function toggleAI() {
+  if (!localStorage.getItem('_ai_key') && !aiEnabled) { alert('請先在設定中填入 Gemini API Key'); toggleSettings(); return; }
+  db.ref(`rooms/${roomId}/config/aiEnabled`).set(!aiEnabled);
+}
+function clearRoom() {
+  if (!confirm('確定清除所有互動資料？')) return;
+  db.ref(`rooms/${roomId}`).update({ wall:null, votes:null, currentVote:null, qa:null, qaUps:null, qaReplies:null });
+}
+
+// ═══ QR ═══
 function generateQR() {
-  const joinUrl = `${location.origin}/classroom/?room=${encodeURIComponent(roomId)}`;
-  document.getElementById('qrUrl').textContent = joinUrl;
-  const qr = qrcode(0, 'M');
-  qr.addData(joinUrl);
-  qr.make();
+  const url = `${location.origin}/classroom/?room=${encodeURIComponent(roomId)}`;
+  document.getElementById('qrUrl').textContent = url;
+  const qr = qrcode(0, 'M'); qr.addData(url); qr.make();
   document.getElementById('qrBox').innerHTML = qr.createSvgTag({ cellSize: 6, margin: 4 });
 }
 function toggleQR() { document.getElementById('qrOverlay').classList.toggle('show'); }
 
-// ── Clear ──
-function clearRoom() {
-  if (!confirm(`確定清除「${roomId}」的所有互動資料？`)) return;
-  db.ref(`rooms/${roomId}`).update({ wall:null, votes:null, currentVote:null, qa:null, qaUps:null });
-  aiProcessed.clear();
-}
-
-// ── Export ──
+// ═══ Export ═══
 async function exportData() {
-  const [wallSnap, qaSnap, cvSnap, presSnap] = await Promise.all([
-    db.ref(`rooms/${roomId}/wall`).orderByChild('ts').once('value'),
-    db.ref(`rooms/${roomId}/qa`).once('value'),
-    db.ref(`rooms/${roomId}/currentVote`).once('value'),
-    db.ref(`rooms/${roomId}/presence`).once('value'),
-  ]);
-  let voteHTML = '';
-  const cv = cvSnap.val();
-  if (cv) {
-    const vSnap = await db.ref(`rooms/${roomId}/votes/${cv.id}`).once('value');
-    const responses = vSnap.val() || {};
-    const counts = {}; let total = 0;
-    (cv.options||[]).forEach((_,i) => counts[i]=0);
-    Object.values(responses).forEach(v => { if (typeof v==='number') { counts[v]=(counts[v]||0)+1; total++; } });
-    voteHTML = `<div class="section"><h2>📊 投票結果</h2><h3>${esc(cv.question)}</h3><div class="vote-results">`;
-    (cv.options||[]).forEach((opt,i) => {
-      const pct = total ? Math.round(counts[i]/total*100) : 0;
-      voteHTML += `<div class="vr"><span class="vr-label">${esc(opt)}</span><div class="vr-bar"><div class="vr-fill" style="width:${pct}%;background:${voteColors[i%6]}">${pct}%</div></div><span class="vr-count">${counts[i]} 票</span></div>`;
-    });
-    voteHTML += `<p class="vr-total">共 ${total} 人投票</p></div></div>`;
-  }
-  const msgs = []; wallSnap.forEach(c => msgs.push(c.val()));
-  let wallHTML = '';
-  if (msgs.length) {
-    wallHTML = `<div class="section"><h2>💬 訊息牆 (${msgs.length} 則)</h2><div class="messages">`;
-    msgs.forEach(m => { const isAI = m.name==='AI 助教'; wallHTML += `<div class="msg${isAI?' ai':''}"><span class="msg-n${isAI?' ai-n':''}">${isAI?'🤖 ':''}${esc(m.name)}</span><span class="msg-t">${timeStr(m.ts)}</span><p>${esc(m.text)}</p></div>`; });
-    wallHTML += '</div></div>';
-  }
-  const qas = []; qaSnap.forEach(c => qas.push(c.val()));
-  qas.sort((a,b) => (b.ups||0)-(a.ups||0));
-  let qaHTML = '';
-  if (qas.length) {
-    qaHTML = `<div class="section"><h2>❓ 問答 (${qas.length} 題)</h2><div class="qa-list">`;
-    qas.forEach(q => { const isAI=q.name==='AI 助教'; qaHTML += `<div class="qa${isAI?' ai':''}"><span class="qa-u">${isAI?'🤖':'▲ '+(q.ups||0)}</span><div><p>${esc(q.text)}</p><span class="qa-m">${esc(q.name)} · ${timeStr(q.ts)}</span></div></div>`; });
-    qaHTML += '</div></div>';
-  }
-  const now = new Date();
-  const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-  const html = `<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>${esc(roomTitle)} — 課堂互動成果</title>
-<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans TC',system-ui,sans-serif;background:#F5F7FA;color:#1A1A1A;padding:2rem;max-width:900px;margin:0 auto}
-.header{background:#0B3C5D;color:#fff;padding:2rem;border-radius:12px;margin-bottom:2rem;text-align:center}.header h1{font-size:1.8rem;color:#FFC857}.header .meta{color:#D4F0EB;font-size:0.9rem;margin-top:0.5rem}
-.section{background:#fff;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06)}.section h2{font-size:1.3rem;color:#0B3C5D;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid #D4F0EB}.section h3{font-size:1.1rem;margin-bottom:1rem}
-.msg{padding:0.6rem 0;border-bottom:1px solid #e5e7eb}.msg:last-child{border:none}.msg.ai{background:#EDE9FE;padding:0.6rem;border-radius:8px;margin:0.3rem 0}.msg-n{font-weight:700;color:#0F9D8A;font-size:0.85rem}.ai-n{color:#7C3AED}.msg-t{color:#5A6B7A;font-size:0.75rem;margin-left:0.5rem}.msg p{margin-top:0.2rem;font-size:0.95rem;white-space:pre-wrap}
-.vr{display:flex;align-items:center;gap:0.8rem;margin-bottom:0.6rem}.vr-label{min-width:100px;font-weight:700}.vr-bar{flex:1;height:28px;background:#e5e7eb;border-radius:6px;overflow:hidden}.vr-fill{height:100%;border-radius:6px;color:#fff;font-size:0.8rem;font-weight:700;display:flex;align-items:center;justify-content:flex-end;padding-right:0.5rem;min-width:30px}.vr-count{font-size:0.85rem;color:#5A6B7A;min-width:50px;text-align:right}.vr-total{text-align:center;color:#5A6B7A;margin-top:0.5rem}
-.qa{display:flex;gap:0.8rem;padding:0.6rem 0;border-bottom:1px solid #e5e7eb}.qa:last-child{border:none}.qa.ai{background:#EDE9FE;padding:0.6rem;border-radius:8px;margin:0.3rem 0}.qa-u{font-size:1rem;font-weight:900;color:#FFC857;min-width:40px;text-align:center}.qa p{font-size:0.95rem;white-space:pre-wrap}.qa-m{font-size:0.75rem;color:#5A6B7A}
-.footer{text-align:center;color:#5A6B7A;font-size:0.8rem;margin-top:2rem}</style></head><body>
-<div class="header"><h1>${esc(roomTitle)}</h1><div class="meta">${dateStr} · ${presSnap.numChildren()} 人參與 · 房間 ${esc(roomId)}</div></div>
-${voteHTML}${wallHTML}${qaHTML}
-<div class="footer">AI 課堂互動成果 · ai100.cooperation.tw/classroom</div></body></html>`;
-  const blob = new Blob([html], { type: 'text/html' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `classroom-${roomId}-${dateStr}.html`;
-  a.click();
+  const [ws,qs,cvs,ps] = await Promise.all([db.ref(`rooms/${roomId}/wall`).orderByChild('ts').once('value'),db.ref(`rooms/${roomId}/qa`).once('value'),db.ref(`rooms/${roomId}/currentVote`).once('value'),db.ref(`rooms/${roomId}/presence`).once('value')]);
+  const rps = (await db.ref(`rooms/${roomId}/qaReplies`).once('value')).val() || {};
+  let vH=''; const cv=cvs.val();
+  if(cv){const vs=await db.ref(`rooms/${roomId}/votes/${cv.id}`).once('value');const R=vs.val()||{};const C={};let T=0;(cv.options||[]).forEach((_,i)=>C[i]=0);Object.values(R).forEach(v=>{if(typeof v==='number'){C[v]=(C[v]||0)+1;T++}});vH=`<div class="section"><h2>📊 投票：${esc(cv.question)}</h2>`;(cv.options||[]).forEach((o,i)=>{const p=T?Math.round(C[i]/T*100):0;vH+=`<div class="vr"><span class="vr-l">${esc(o)}</span><div class="vr-b"><div class="vr-f" style="width:${p}%;background:${voteColors[i%6]}">${p}%</div></div><span class="vr-c">${C[i]}</span></div>`});vH+=`<p class="vr-t">共 ${T} 人</p></div>`}
+  const msgs=[];ws.forEach(c=>msgs.push(c.val()));
+  let wH='';if(msgs.length){wH=`<div class="section"><h2>💬 訊息牆 (${msgs.length})</h2>`;msgs.forEach(m=>{const r=m.role||'student';wH+=`<div class="msg ${r}"><b class="${r}">${r==='ai'?'🤖 ':r==='teacher'?'👨‍🏫 ':''}${esc(m.name)}</b> <small>${timeStr(m.ts)}</small><p>${esc(m.text)}</p></div>`});wH+='</div>'}
+  const qas=[];qs.forEach(c=>qas.push({id:c.key,...c.val()}));qas.sort((a,b)=>(b.ups||0)-(a.ups||0));
+  let qH='';if(qas.length){qH=`<div class="section"><h2>❓ 問答 (${qas.length})</h2>`;qas.forEach(q=>{qH+=`<div class="qa"><b>▲${q.ups||0}</b> ${esc(q.text)} <small>— ${esc(q.name)}</small>`;const replies=rps[q.id]?Object.values(rps[q.id]).sort((a,b)=>a.ts-b.ts):[];replies.forEach(r=>{qH+=`<div class="rp ${r.role}"><b>${r.role==='ai'?'🤖':'👨‍🏫'} ${esc(r.name)}</b> ${esc(r.text)}</div>`});qH+='</div>'});qH+='</div>'}
+  const now=new Date(),ds=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const html=`<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${esc(roomTitle)} 成果</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans TC',system-ui,sans-serif;background:#F5F7FA;color:#1A1A1A;padding:2rem;max-width:900px;margin:0 auto}.hd{background:#0B3C5D;color:#fff;padding:2rem;border-radius:12px;margin-bottom:2rem;text-align:center}.hd h1{color:#FFC857;font-size:1.8rem}.hd .m{color:#D4F0EB;font-size:0.9rem;margin-top:0.5rem}.section{background:#fff;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06)}.section h2{color:#0B3C5D;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid #D4F0EB}.msg{padding:0.5rem 0;border-bottom:1px solid #eee}.msg.ai{background:#EDE9FE;padding:0.5rem;border-radius:6px;margin:0.2rem 0}.msg.teacher{background:#FEF3C7;padding:0.5rem;border-radius:6px;margin:0.2rem 0}.msg b{font-size:0.85rem}.msg b.ai{color:#7C3AED}.msg b.teacher{color:#d4a632}.msg p{margin-top:0.2rem;white-space:pre-wrap}.vr{display:flex;align-items:center;gap:0.8rem;margin-bottom:0.5rem}.vr-l{min-width:100px;font-weight:700}.vr-b{flex:1;height:24px;background:#eee;border-radius:4px;overflow:hidden}.vr-f{height:100%;border-radius:4px;color:#fff;font-size:0.75rem;display:flex;align-items:center;justify-content:flex-end;padding-right:0.4rem}.vr-c{font-size:0.85rem;color:#666}.vr-t{text-align:center;color:#666;margin-top:0.5rem}.qa{padding:0.6rem 0;border-bottom:1px solid #eee}.qa b{color:#d4a632}.rp{padding:0.4rem 0.6rem;margin:0.3rem 0 0.3rem 2rem;border-radius:6px;font-size:0.9rem}.rp.ai{background:#EDE9FE}.rp.teacher{background:#FEF3C7}.ft{text-align:center;color:#999;font-size:0.8rem;margin-top:2rem}</style></head><body><div class="hd"><h1>${esc(roomTitle)}</h1><div class="m">${ds} · ${ps.numChildren()} 人 · ${esc(roomId)}</div></div>${vH}${wH}${qH}<div class="ft">AI 課堂互動成果</div></body></html>`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=`classroom-${roomId}-${ds}.html`;a.click();
 }
 
-function esc(s) { if (!s) return ''; const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
-function timeStr(ts) { if (!ts) return ''; const d=new Date(ts); return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`; }
+function esc(s){if(!s)return '';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function timeStr(t){if(!t)return '';const d=new Date(t);return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`}
 </script>
 </body>
 </html>
