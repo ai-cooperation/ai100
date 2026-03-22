@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI 課堂互動</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --pri:#0F9D8A; --pri-d:#0A7A6B; --navy:#0B3C5D; --gold:#FFC857; --red:#DC2626; --bg:#F5F7FA; --surface:#fff; --text:#1A1A1A; --dim:#5A6B7A; --border:#e5e7eb; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { height:100%; font-family:'Noto Sans TC',system-ui,sans-serif; background:var(--bg); color:var(--text); }
+  button { font-family:inherit; cursor:pointer; border:none; }
+  input,textarea { font-family:inherit; }
+
+  /* ── Join Screen ── */
+  .join-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:2rem; }
+  .join-box { background:var(--surface); border-radius:16px; padding:2.5rem; width:min(380px,100%); box-shadow:0 4px 24px rgba(0,0,0,0.08); text-align:center; }
+  .join-box h1 { font-size:1.5rem; color:var(--navy); margin-bottom:0.3rem; }
+  .join-box .sub { color:var(--dim); font-size:0.85rem; margin-bottom:1.5rem; }
+  .join-box input { width:100%; padding:0.8rem 1rem; border:2px solid var(--border); border-radius:10px; font-size:1rem; outline:none; transition:border-color 0.2s; margin-bottom:0.8rem; }
+  .join-box input:focus { border-color:var(--pri); }
+  .join-box .btn-join { width:100%; padding:0.9rem; background:var(--pri); color:#fff; font-size:1.05rem; font-weight:700; border-radius:10px; transition:background 0.2s; }
+  .join-box .btn-join:hover { background:var(--pri-d); }
+  .join-box .btn-join:disabled { opacity:0.5; cursor:default; }
+
+  /* ── App Shell ── */
+  .app { display:none; flex-direction:column; height:100vh; }
+  .app.active { display:flex; }
+  .topbar { background:var(--navy); color:#fff; padding:0.6rem 1rem; display:flex; align-items:center; gap:0.5rem; flex-shrink:0; }
+  .topbar .room-name { font-size:0.8rem; color:var(--gold); font-weight:700; }
+  .topbar .mode-label { font-size:0.85rem; margin-left:auto; }
+  .topbar .online { font-size:0.75rem; color:rgba(255,255,255,0.6); margin-left:0.5rem; }
+
+  /* ── Content Area ── */
+  .content { flex:1; overflow-y:auto; padding:0.8rem; -webkit-overflow-scrolling:touch; }
+
+  /* ── Wall Mode ── */
+  .msg { background:var(--surface); border-radius:10px; padding:0.8rem 1rem; margin-bottom:0.5rem; box-shadow:0 1px 4px rgba(0,0,0,0.05); animation:msgIn 0.3s; }
+  @keyframes msgIn { from { opacity:0; transform:translateY(10px); } }
+  .msg .msg-name { font-size:0.75rem; font-weight:700; color:var(--pri); }
+  .msg .msg-text { font-size:0.95rem; margin-top:0.2rem; line-height:1.5; word-break:break-word; }
+  .msg .msg-time { font-size:0.65rem; color:var(--dim); margin-top:0.2rem; }
+  .input-bar { display:flex; gap:0.5rem; padding:0.6rem 0.8rem; background:var(--surface); border-top:1px solid var(--border); flex-shrink:0; }
+  .input-bar input { flex:1; padding:0.7rem 1rem; border:2px solid var(--border); border-radius:24px; font-size:0.95rem; outline:none; }
+  .input-bar input:focus { border-color:var(--pri); }
+  .input-bar button { width:44px; height:44px; border-radius:50%; background:var(--pri); color:#fff; font-size:1.2rem; flex-shrink:0; transition:background 0.15s; }
+  .input-bar button:active { background:var(--pri-d); }
+
+  /* ── Vote Mode ── */
+  .vote-question { font-size:1.2rem; font-weight:700; color:var(--navy); text-align:center; padding:1.5rem 1rem 1rem; }
+  .vote-option { display:block; width:100%; padding:1rem; margin-bottom:0.6rem; background:var(--surface); border:2px solid var(--border); border-radius:12px; font-size:1rem; text-align:left; transition:all 0.2s; }
+  .vote-option:active { transform:scale(0.98); }
+  .vote-option.selected { border-color:var(--pri); background:#D4F0EB; }
+  .vote-option.disabled { opacity:0.7; cursor:default; }
+  .vote-bar { height:6px; background:var(--border); border-radius:3px; margin-top:0.5rem; overflow:hidden; }
+  .vote-bar .fill { height:100%; background:var(--pri); border-radius:3px; transition:width 0.6s; }
+  .vote-result { font-size:0.8rem; color:var(--dim); margin-top:0.3rem; }
+  .voted-badge { text-align:center; margin-top:1rem; color:var(--pri); font-weight:700; font-size:0.9rem; }
+
+  /* ── QA Mode ── */
+  .qa-item { background:var(--surface); border-radius:10px; padding:0.8rem 1rem; margin-bottom:0.5rem; display:flex; gap:0.8rem; align-items:flex-start; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+  .qa-up { display:flex; flex-direction:column; align-items:center; min-width:40px; }
+  .qa-up button { width:36px; height:36px; border-radius:8px; background:var(--bg); color:var(--dim); font-size:1rem; transition:all 0.15s; border:1px solid var(--border); }
+  .qa-up button.voted { background:var(--pri); color:#fff; border-color:var(--pri); }
+  .qa-up .count { font-size:0.8rem; font-weight:700; color:var(--navy); margin-top:0.2rem; }
+  .qa-body .qa-text { font-size:0.95rem; line-height:1.5; }
+  .qa-body .qa-meta { font-size:0.7rem; color:var(--dim); margin-top:0.2rem; }
+  .qa-input { display:flex; gap:0.5rem; padding:0.6rem 0.8rem; background:var(--surface); border-top:1px solid var(--border); flex-shrink:0; }
+  .qa-input textarea { flex:1; padding:0.7rem 1rem; border:2px solid var(--border); border-radius:12px; font-size:0.95rem; outline:none; resize:none; height:44px; }
+  .qa-input textarea:focus { border-color:var(--pri); }
+  .qa-input button { padding:0 1.2rem; border-radius:12px; background:var(--pri); color:#fff; font-size:0.9rem; font-weight:700; flex-shrink:0; }
+
+  /* ── Pause Mode ── */
+  .pause-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--dim); }
+  .pause-screen .icon { font-size:3rem; margin-bottom:1rem; animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:0.4;} 50%{opacity:1;} }
+  .pause-screen p { font-size:1.1rem; }
+
+  /* ── Utilities ── */
+  .hidden { display:none !important; }
+  .error-msg { color:var(--red); font-size:0.8rem; text-align:center; margin-top:0.5rem; }
+</style>
+</head>
+<body>
+
+<!-- Join Screen -->
+<div class="join-screen" id="joinScreen">
+  <div class="join-box">
+    <h1>AI 課堂互動</h1>
+    <p class="sub">掃描 QR Code 或輸入房間代碼加入</p>
+    <input type="text" id="inputRoom" placeholder="房間代碼（例如 ai100-0322）" autocomplete="off">
+    <input type="text" id="inputName" placeholder="你的暱稱" autocomplete="off" maxlength="20">
+    <button class="btn-join" id="btnJoin" onclick="joinRoom()">加入課堂</button>
+    <p class="error-msg hidden" id="joinError"></p>
+  </div>
+</div>
+
+<!-- App -->
+<div class="app" id="app">
+  <div class="topbar">
+    <span class="room-name" id="dispRoom"></span>
+    <span class="mode-label" id="dispMode"></span>
+    <span class="online" id="dispOnline"></span>
+  </div>
+
+  <!-- Wall -->
+  <div class="content hidden" id="wallContent"></div>
+  <div class="input-bar hidden" id="wallInput">
+    <input type="text" id="wallText" placeholder="輸入訊息..." maxlength="500" autocomplete="off">
+    <button onclick="sendMessage()">↑</button>
+  </div>
+
+  <!-- Vote -->
+  <div class="content hidden" id="voteContent"></div>
+
+  <!-- QA -->
+  <div class="content hidden" id="qaContent"></div>
+  <div class="qa-input hidden" id="qaInput">
+    <textarea id="qaText" placeholder="提出你的問題..." maxlength="300"></textarea>
+    <button onclick="sendQuestion()">發問</button>
+  </div>
+
+  <!-- Pause -->
+  <div class="content hidden" id="pauseContent">
+    <div class="pause-screen">
+      <div class="icon">⏳</div>
+      <p>老師準備中，請稍候...</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
+<script>
+// ── Firebase Config ──
+firebase.initializeApp({
+  apiKey: ['AIza','SyC5X5C0Uje6bCMzrvuUuq5Bz33ly0PR-vc'].join(''),
+  authDomain: 'ai-classroom-70a97.firebaseapp.com',
+  databaseURL: 'https://ai-classroom-70a97-default-rtdb.firebaseio.com',
+  projectId: 'ai-classroom-70a97',
+  storageBucket: 'ai-classroom-70a97.firebasestorage.app',
+  appId: '1:160782638499:web:f3fb834ce32d643de28e16',
+});
+const db = firebase.database();
+
+// ── State ──
+let roomId = '', userName = '', odID = '';
+let currentMode = 'pause';
+let myVote = null;
+let myQaUps = {};
+let listeners = [];
+
+// ── Init ──
+(function init() {
+  const params = new URLSearchParams(location.search);
+  const r = params.get('room');
+  if (r) document.getElementById('inputRoom').value = r;
+  odID = localStorage.getItem('_odid') || (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2));
+  localStorage.setItem('_odid', odID);
+  const savedName = localStorage.getItem('_name');
+  if (savedName) document.getElementById('inputName').value = savedName;
+  // Enter key
+  document.getElementById('inputRoom').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('inputName').focus(); });
+  document.getElementById('inputName').addEventListener('keydown', e => { if (e.key === 'Enter') joinRoom(); });
+  document.getElementById('wallText').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+})();
+
+// ── Join ──
+function joinRoom() {
+  const room = document.getElementById('inputRoom').value.trim();
+  const name = document.getElementById('inputName').value.trim() || '匿名';
+  if (!room) { showError('請輸入房間代碼'); return; }
+  roomId = room;
+  userName = name;
+  localStorage.setItem('_name', name);
+  document.getElementById('btnJoin').disabled = true;
+  // Check room exists
+  db.ref(`rooms/${roomId}/config`).once('value').then(snap => {
+    if (!snap.exists()) { showError('找不到這個房間'); document.getElementById('btnJoin').disabled = false; return; }
+    enterRoom();
+  }).catch(err => {
+    showError('連線失敗：' + err.message);
+    document.getElementById('btnJoin').disabled = false;
+  });
+}
+
+function showError(msg) {
+  const el = document.getElementById('joinError');
+  el.textContent = msg; el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 3000);
+}
+
+function enterRoom() {
+  document.getElementById('joinScreen').style.display = 'none';
+  document.getElementById('app').classList.add('active');
+  document.getElementById('dispRoom').textContent = roomId;
+  // Presence
+  const presRef = db.ref(`rooms/${roomId}/presence/${odID}`);
+  db.ref('.info/connected').on('value', snap => {
+    if (snap.val()) { presRef.onDisconnect().remove(); presRef.set({ name: userName, ts: firebase.database.ServerValue.TIMESTAMP }); }
+  });
+  // Online count
+  const onlineRef = db.ref(`rooms/${roomId}/presence`);
+  onlineRef.on('value', snap => {
+    const count = snap.numChildren();
+    document.getElementById('dispOnline').textContent = `${count} 人在線`;
+  });
+  listeners.push({ ref: onlineRef, event: 'value' });
+  // Listen mode
+  const modeRef = db.ref(`rooms/${roomId}/config/mode`);
+  modeRef.on('value', snap => { switchMode(snap.val() || 'pause'); });
+  listeners.push({ ref: modeRef, event: 'value' });
+}
+
+// ── Mode Switch ──
+const modeNames = { wall:'💬 訊息牆', vote:'📊 投票', qa:'❓ 問答', pause:'⏸ 等待中' };
+function switchMode(mode) {
+  currentMode = mode;
+  document.getElementById('dispMode').textContent = modeNames[mode] || mode;
+  ['wallContent','wallInput','voteContent','qaContent','qaInput','pauseContent'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  // Detach old listeners for content
+  listeners.filter(l => l.content).forEach(l => l.ref.off(l.event));
+  listeners = listeners.filter(l => !l.content);
+  if (mode === 'wall') { showWall(); }
+  else if (mode === 'vote') { showVote(); }
+  else if (mode === 'qa') { showQA(); }
+  else { document.getElementById('pauseContent').classList.remove('hidden'); }
+}
+
+// ── Wall ──
+function showWall() {
+  const el = document.getElementById('wallContent');
+  el.classList.remove('hidden');
+  el.innerHTML = '';
+  document.getElementById('wallInput').classList.remove('hidden');
+  const ref = db.ref(`rooms/${roomId}/wall`).orderByChild('ts').limitToLast(100);
+  ref.on('child_added', snap => {
+    const d = snap.val();
+    const div = document.createElement('div');
+    div.className = 'msg';
+    div.innerHTML = `<div class="msg-name">${esc(d.name)}</div><div class="msg-text">${esc(d.text)}</div><div class="msg-time">${timeStr(d.ts)}</div>`;
+    el.appendChild(div);
+    el.scrollTop = el.scrollHeight;
+  });
+  listeners.push({ ref, event: 'child_added', content: true });
+}
+
+function sendMessage() {
+  const input = document.getElementById('wallText');
+  const text = input.value.trim();
+  if (!text) return;
+  db.ref(`rooms/${roomId}/wall`).push({ text, name: userName, ts: firebase.database.ServerValue.TIMESTAMP });
+  input.value = '';
+}
+
+// ── Vote ──
+function showVote() {
+  const el = document.getElementById('voteContent');
+  el.classList.remove('hidden');
+  myVote = null;
+  const cvRef = db.ref(`rooms/${roomId}/currentVote`);
+  cvRef.on('value', snap => {
+    const data = snap.val();
+    if (!data) { el.innerHTML = '<div class="pause-screen"><p>尚未開始投票</p></div>'; return; }
+    renderVote(el, data);
+  });
+  listeners.push({ ref: cvRef, event: 'value', content: true });
+}
+
+function renderVote(el, data) {
+  const voteId = data.id;
+  const opts = data.options || [];
+  // Check if already voted
+  db.ref(`rooms/${roomId}/votes/${voteId}/${odID}`).once('value').then(snap => {
+    myVote = snap.exists() ? snap.val() : null;
+    // Listen results
+    const vRef = db.ref(`rooms/${roomId}/votes/${voteId}`);
+    vRef.on('value', rsnap => {
+      const responses = rsnap.val() || {};
+      const counts = {};
+      let total = 0;
+      opts.forEach((_, i) => counts[i] = 0);
+      Object.entries(responses).forEach(([k, v]) => { if (typeof v === 'number') { counts[v] = (counts[v]||0) + 1; total++; } });
+      let html = `<div class="vote-question">${esc(data.question)}</div><div style="padding:0 0.8rem;">`;
+      opts.forEach((opt, i) => {
+        const pct = total ? Math.round(counts[i]/total*100) : 0;
+        const sel = myVote === i ? ' selected' : '';
+        const dis = myVote !== null ? ' disabled' : '';
+        html += `<button class="vote-option${sel}${dis}" onclick="castVote('${voteId}',${i})" ${myVote !== null ? 'disabled' : ''}>
+          ${esc(opt)}
+          ${myVote !== null ? `<div class="vote-bar"><div class="fill" style="width:${pct}%"></div></div><div class="vote-result">${pct}% (${counts[i]} 票)</div>` : ''}
+        </button>`;
+      });
+      if (myVote !== null) html += `<div class="voted-badge">已投票</div>`;
+      html += '</div>';
+      el.innerHTML = html;
+    });
+    listeners.push({ ref: vRef, event: 'value', content: true });
+  });
+}
+
+function castVote(voteId, optIndex) {
+  if (myVote !== null) return;
+  myVote = optIndex;
+  db.ref(`rooms/${roomId}/votes/${voteId}/${odID}`).set(optIndex);
+}
+
+// ── QA ──
+function showQA() {
+  const el = document.getElementById('qaContent');
+  el.classList.remove('hidden');
+  document.getElementById('qaInput').classList.remove('hidden');
+  myQaUps = {};
+  // Load my upvotes
+  db.ref(`rooms/${roomId}/qaUps`).once('value').then(snap => {
+    const data = snap.val() || {};
+    Object.keys(data).forEach(qid => { if (data[qid][odID]) myQaUps[qid] = true; });
+  });
+  const ref = db.ref(`rooms/${roomId}/qa`);
+  ref.on('value', snap => {
+    const items = [];
+    snap.forEach(c => items.push({ id: c.key, ...c.val() }));
+    items.sort((a, b) => (b.ups||0) - (a.ups||0));
+    el.innerHTML = items.map(q => `
+      <div class="qa-item">
+        <div class="qa-up">
+          <button class="${myQaUps[q.id] ? 'voted' : ''}" onclick="upvoteQ('${q.id}')">▲</button>
+          <span class="count">${q.ups||0}</span>
+        </div>
+        <div class="qa-body">
+          <div class="qa-text">${esc(q.text)}</div>
+          <div class="qa-meta">${esc(q.name)} · ${timeStr(q.ts)}</div>
+        </div>
+      </div>`).join('');
+  });
+  listeners.push({ ref, event: 'value', content: true });
+}
+
+function sendQuestion() {
+  const input = document.getElementById('qaText');
+  const text = input.value.trim();
+  if (!text) return;
+  db.ref(`rooms/${roomId}/qa`).push({ text, name: userName, ts: firebase.database.ServerValue.TIMESTAMP, ups: 0 });
+  input.value = '';
+}
+
+function upvoteQ(qid) {
+  if (myQaUps[qid]) return;
+  myQaUps[qid] = true;
+  db.ref(`rooms/${roomId}/qa/${qid}/ups`).transaction(v => (v||0)+1);
+  db.ref(`rooms/${roomId}/qaUps/${qid}/${odID}`).set(true);
+}
+
+// ── Utils ──
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function timeStr(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+}
+</script>
+</body>
+</html>
