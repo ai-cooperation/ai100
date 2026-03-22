@@ -383,7 +383,7 @@ async function handleAIRequest(question,source,qaId){
   document.getElementById('aiError').style.display='none';
   try{
     console.log('[AI] calling Gemini...');
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         systemInstruction:{parts:[{text:`你是課堂 AI 助教。課程：${roomTitle}。用繁體中文簡潔回答（150字內）。若訊息是打招呼、閒聊或不需要回答的（如「OK」「收到」「+1」「謝謝」），只回覆 [SKIP] 不要說其他的。`}]},
@@ -418,7 +418,7 @@ async function testAIKey(){
   if(!key){status.textContent='❌ 請先填入 Key';status.style.color='var(--red)';return}
   status.textContent='⏳ 測試中...';status.style.color='var(--dim)';
   try{
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({contents:[{parts:[{text:'說「AI助教已上線」這五個字'}]}],generationConfig:{maxOutputTokens:20}})
     });
