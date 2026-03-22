@@ -20,6 +20,19 @@
   .setup-box input { width:100%; padding:0.8rem 1rem; background:var(--bg); border:2px solid var(--border); border-radius:10px; color:var(--text); font-size:1rem; outline:none; }
   .setup-box input:focus { border-color:var(--pri); }
   .setup-box .btn-create { width:100%; padding:0.9rem; margin-top:1.5rem; background:var(--pri); color:#fff; font-size:1.05rem; font-weight:700; border-radius:10px; }
+  .setup-box .btn-create:disabled { opacity:0.4; cursor:default; }
+
+  /* Google Sign-In */
+  .login-screen { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:2rem; }
+  .login-box { background:var(--surface); border-radius:16px; padding:2.5rem; width:min(380px,100%); border:1px solid var(--border); text-align:center; }
+  .login-box h1 { font-size:1.5rem; color:var(--gold); margin-bottom:0.3rem; }
+  .login-box .sub { color:var(--dim); font-size:0.85rem; margin-bottom:2rem; }
+  .btn-google { display:flex; align-items:center; justify-content:center; gap:0.8rem; width:100%; padding:0.9rem; background:#fff; color:#333; font-size:1rem; font-weight:700; border-radius:10px; border:1px solid #ddd; transition:box-shadow 0.2s; }
+  .btn-google:hover { box-shadow:0 2px 12px rgba(0,0,0,0.15); }
+  .btn-google img { width:20px; height:20px; }
+  .user-bar { display:flex; align-items:center; gap:0.5rem; padding:0.4rem 0.8rem; background:var(--bg); border-radius:8px; font-size:0.75rem; color:var(--dim); }
+  .user-bar img { width:22px; height:22px; border-radius:50%; }
+  .user-bar .logout { color:var(--red); cursor:pointer; margin-left:0.3rem; font-size:0.7rem; }
 
   .dash { display:none; flex-direction:column; height:100vh; }
   .dash.active { display:flex; }
@@ -113,15 +126,33 @@
 </head>
 <body>
 
-<div class="setup" id="setupScreen">
+<!-- Login -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <h1>AI 課堂互動</h1>
+    <p class="sub">老師控制台 — 請先登入 Google 帳號</p>
+    <button class="btn-google" onclick="googleLogin()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G">
+      使用 Google 帳號登入
+    </button>
+  </div>
+</div>
+
+<!-- Setup (hidden until logged in) -->
+<div class="setup hidden" id="setupScreen">
   <div class="setup-box">
     <h1>AI 課堂互動</h1>
     <p class="sub">老師控制台 — 建立或加入房間</p>
+    <div id="userInfo" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;padding:0.6rem;background:var(--bg);border-radius:8px;">
+      <img id="userAvatar" src="" style="width:28px;height:28px;border-radius:50%;">
+      <span id="userName" style="font-size:0.85rem;color:var(--text);flex:1;"></span>
+      <span onclick="googleLogout()" style="font-size:0.7rem;color:var(--red);cursor:pointer;">登出</span>
+    </div>
     <label>房間代碼</label>
     <input type="text" id="inputRoom" placeholder="例如 ai100-0322" autocomplete="off">
     <label>課程名稱（選填）</label>
     <input type="text" id="inputTitle" placeholder="例如 AI100 第一講" autocomplete="off">
-    <button class="btn-create" onclick="createRoom()">建立 / 進入房間</button>
+    <button class="btn-create" id="btnCreate" onclick="createRoom()">建立 / 進入房間</button>
   </div>
 </div>
 
@@ -137,6 +168,7 @@
     <button class="act-btn" onclick="toggleQR()">QR Code</button>
     <button class="act-btn" onclick="toggleSettings()">設定</button>
     <button class="act-btn" onclick="exportData()">匯出</button>
+    <div class="user-bar" id="dashUserBar"><img id="dashAvatar" src="" style="width:22px;height:22px;border-radius:50%;"><span id="dashName"></span><span class="logout" onclick="googleLogout()">登出</span></div>
   </div>
   <div class="main" id="mainContent"></div>
 </div>
@@ -181,6 +213,7 @@
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <script>
@@ -193,7 +226,10 @@ firebase.initializeApp({
   appId: '1:160782638499:web:f3fb834ce32d643de28e16',
 });
 const db = firebase.database();
+const auth = firebase.auth();
+const googleProvider = new firebase.auth.GoogleAuthProvider();
 
+let currentUser = null;
 let roomId = '', roomTitle = '', currentMode = 'wall';
 let aiEnabled = false;
 const voteColors = ['#0F9D8A','#E07A3A','#7C3AED','#06B6D4','#FFC857','#DC2626'];
@@ -201,20 +237,58 @@ let voteOpts = ['', ''];
 let listeners = [];
 let aiProcessed = new Set(); // track already-answered messages
 
+// ── Auth ──
+auth.onAuthStateChanged(user => {
+  currentUser = user;
+  if (user) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('setupScreen').classList.remove('hidden');
+    document.getElementById('userAvatar').src = user.photoURL || '';
+    document.getElementById('userName').textContent = user.displayName || user.email;
+    document.getElementById('dashAvatar').src = user.photoURL || '';
+    document.getElementById('dashName').textContent = (user.displayName || user.email).split(' ')[0];
+  } else {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('setupScreen').classList.add('hidden');
+  }
+});
+
+function googleLogin() {
+  auth.signInWithPopup(googleProvider).catch(err => alert('登入失敗：' + err.message));
+}
+
+function googleLogout() {
+  if (confirm('確定登出？')) auth.signOut().then(() => location.reload());
+}
+
 // ── Create / Enter ──
 function createRoom() {
+  if (!currentUser) { alert('請先登入'); return; }
   roomId = document.getElementById('inputRoom').value.trim();
   roomTitle = document.getElementById('inputTitle').value.trim() || roomId;
   if (!roomId) { alert('請輸入房間代碼'); return; }
+  document.getElementById('btnCreate').disabled = true;
   const configRef = db.ref(`rooms/${roomId}/config`);
   configRef.once('value').then(snap => {
     if (!snap.exists()) {
-      configRef.set({ title: roomTitle, mode: 'wall', created: firebase.database.ServerValue.TIMESTAMP });
+      // New room — I am the host
+      configRef.set({ title: roomTitle, mode: 'wall', created: firebase.database.ServerValue.TIMESTAMP, hostUid: currentUser.uid, hostName: currentUser.displayName || currentUser.email });
     } else {
-      roomTitle = snap.val().title || roomId;
+      const config = snap.val();
+      roomTitle = config.title || roomId;
+      // Check ownership
+      if (config.hostUid && config.hostUid !== currentUser.uid) {
+        alert(`此房間由 ${config.hostName || '其他老師'} 建立，你沒有控制權限。`);
+        document.getElementById('btnCreate').disabled = false;
+        return;
+      }
+      // If no hostUid (old room), claim it
+      if (!config.hostUid) {
+        configRef.update({ hostUid: currentUser.uid, hostName: currentUser.displayName || currentUser.email });
+      }
     }
     enterDashboard();
-  }).catch(err => alert('連線失敗：' + err.message));
+  }).catch(err => { alert('連線失敗：' + err.message); document.getElementById('btnCreate').disabled = false; });
 }
 
 function enterDashboard() {
