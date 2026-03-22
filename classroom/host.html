@@ -376,10 +376,74 @@ function startAIListener(){
   });
 }
 
-const AI_MODELS=['gemini-2.5-pro','gemini-2.5-flash']; // pro 優先，429 自動降 flash
+const AI_MODELS=['gemini-2.5-pro','gemini-2.5-flash'];
+
+// Build conversation context from recent classroom activity
+async function buildContext(){
+  const wallSnap=await db.ref(`rooms/${roomId}/wall`).orderByChild('ts').limitToLast(30).once('value');
+  const qaSnap=await db.ref(`rooms/${roomId}/qa`).orderByChild('ts').limitToLast(10).once('value');
+  const repliesSnap=await db.ref(`rooms/${roomId}/qaReplies`).once('value');
+  const presSnap=await db.ref(`rooms/${roomId}/presence`).once('value');
+  const studentCount=presSnap.numChildren();
+  const replies=repliesSnap.val()||{};
+
+  let ctx=`【教室狀況】${studentCount} 位學員在線\n\n`;
+
+  // Recent wall messages
+  const msgs=[];
+  wallSnap.forEach(c=>{const d=c.val();msgs.push(d)});
+  if(msgs.length){
+    ctx+='【最近的訊息牆對話】\n';
+    msgs.forEach(m=>{
+      const role=m.role==='teacher'?'👨‍🏫老師':m.role==='ai'?'🤖AI助教':'學員'+m.name;
+      ctx+=`${role}：${m.text}\n`;
+    });
+    ctx+='\n';
+  }
+
+  // Recent QA
+  const qas=[];
+  qaSnap.forEach(c=>qas.push({id:c.key,...c.val()}));
+  if(qas.length){
+    ctx+='【學員提問區】\n';
+    qas.forEach(q=>{
+      ctx+=`[${q.ups||0}票] ${q.name}問：${q.text}\n`;
+      const r=replies[q.id];
+      if(r)Object.values(r).forEach(rp=>{ctx+=`  → ${rp.role==='teacher'?'老師':'AI'}回覆：${rp.text}\n`});
+    });
+  }
+  return ctx;
+}
 
 async function callGemini(apiKey,question){
-  const sysPrompt=`你是課堂 AI 助教。課程：${roomTitle}。用繁體中文簡潔回答（150字內）。若訊息是打招呼、閒聊或不需要回答的（如「OK」「收到」「+1」「謝謝」），只回覆 [SKIP] 不要說其他的。`;
+  const context=await buildContext();
+  const sysPrompt=`你是「小助」，一位活潑、專業的課堂 AI 助教。
+
+## 你的個性
+- 友善親切，像學長姐一樣跟學員互動
+- 回答簡潔有力（150 字內），不囉唆
+- 偶爾用輕鬆的語氣，讓課堂不無聊
+- 會鼓勵學員，例如「好問題！」「這個觀察很敏銳」
+- 如果不確定，誠實說不知道，不瞎掰
+
+## 你的職責
+- 回答學員的課堂問題
+- 如果老師剛講過相關內容（在對話紀錄裡），引用老師說的來補充
+- 如果有多個學員問類似問題，主動歸納
+- 打招呼、閒聊、不需要回答的（「OK」「收到」「+1」「謝謝」「哈哈」），只回 [SKIP]
+
+## 課程資訊
+- 課程名稱：${roomTitle}
+- 老師：${currentUser.displayName||'老師'}
+
+## 目前教室狀況
+${context}
+
+## 注意
+- 用繁體中文
+- 回答 150 字以內
+- 不需要回答的訊息只回 [SKIP]`;
+
   for(const model of AI_MODELS){
     console.log(`[AI] trying ${model}...`);
     const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,{
@@ -387,7 +451,7 @@ async function callGemini(apiKey,question){
       body:JSON.stringify({
         systemInstruction:{parts:[{text:sysPrompt}]},
         contents:[{parts:[{text:question}]}],
-        generationConfig:{maxOutputTokens:250,temperature:0.7}
+        generationConfig:{maxOutputTokens:300,temperature:0.8}
       })
     });
     if(res.status===429){console.log(`[AI] ${model} 429, fallback...`);continue}
