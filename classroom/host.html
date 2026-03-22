@@ -399,43 +399,24 @@ async function processAIBatch(){
   document.getElementById('aiError').style.display='none';
 
   try{
-    // Build one combined prompt for all pending messages
-    let prompt='';
+    // Wall and QA are handled separately — no fragile splitting
     if(wallItems.length){
-      prompt+='【訊息牆有新訊息，請一次回應】\n';
+      let prompt='以下是學員在訊息牆的新訊息：\n\n';
       wallItems.forEach(m=>{prompt+=`${m.name}：${m.text}\n`});
-      prompt+='\n請針對以上訊息，用一則回覆統一回應（可以分段回應不同人）。如果全部都是閒聊不需要回答，回 [SKIP]。\n';
-    }
-    if(qaItems.length){
-      prompt+='【問答區有新問題】\n';
-      qaItems.forEach(q=>{prompt+=`${q.name}問：${q.text}\n`});
-      prompt+='\n請依序回答每個問題。用 ---SPLIT--- 分隔每個回答。如果某題不需要回答，該段回 [SKIP]。\n';
-    }
-
-    const answer=await callGemini(apiKey,prompt);
-    if(!answer||answer.trim()==='[SKIP]'){document.getElementById('aiStatus').style.display='none';return}
-
-    // Handle wall response (one combined reply)
-    if(wallItems.length){
-      const wallPart=qaItems.length?answer.split('---SPLIT---')[0]?.trim():answer.trim();
-      if(wallPart&&!wallPart.includes('[SKIP]')){
-        // Extract just the wall response if there are also QA answers
-        const wallAnswer=qaItems.length?wallPart.split('【問答區')[0]?.trim()||wallPart:wallPart;
-        if(wallAnswer&&!wallAnswer.includes('[SKIP]')){
-          await db.ref(`rooms/${roomId}/wall`).push({text:wallAnswer,name:'AI 助教',role:'ai',ts:firebase.database.ServerValue.TIMESTAMP});
-        }
+      prompt+='\n請用一則回覆統一回應。可以分段回應不同人。如果全部都是不需要回答的閒聊，回 [SKIP]。';
+      const answer=await callGemini(apiKey,prompt);
+      if(answer&&!answer.includes('[SKIP]')){
+        await db.ref(`rooms/${roomId}/wall`).push({text:answer.trim(),name:'AI 助教',role:'ai',ts:firebase.database.ServerValue.TIMESTAMP});
       }
     }
 
-    // Handle QA responses (split by ---SPLIT---)
     if(qaItems.length){
-      const parts=answer.split('---SPLIT---');
-      // If wall+qa combined, qa answers start after the wall part
-      const qaStart=wallItems.length?1:0;
-      for(let i=0;i<qaItems.length;i++){
-        const aPart=(parts[qaStart+i]||'').trim();
-        if(aPart&&!aPart.includes('[SKIP]')){
-          await db.ref(`rooms/${roomId}/qaReplies/${qaItems[i].id}`).push({text:aPart,name:'AI 助教',role:'ai',ts:firebase.database.ServerValue.TIMESTAMP});
+      // Each QA question gets its own API call for clean replies
+      for(const q of qaItems){
+        const prompt=`學員 ${q.name} 提問：${q.text}\n\n請回答這個問題。如果不需要回答，回 [SKIP]。`;
+        const answer=await callGemini(apiKey,prompt);
+        if(answer&&!answer.includes('[SKIP]')){
+          await db.ref(`rooms/${roomId}/qaReplies/${q.id}`).push({text:answer.trim(),name:'AI 助教',role:'ai',ts:firebase.database.ServerValue.TIMESTAMP});
         }
       }
     }
