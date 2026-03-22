@@ -3,136 +3,143 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI 課堂互動 — 老師控制台</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<title>AI 課堂互動 — 講師後台</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  :root { --pri:#0F9D8A; --pri-d:#0A7A6B; --navy:#0B3C5D; --gold:#FFC857; --gold-d:#d4a632; --red:#DC2626; --purple:#7C3AED; --cyan:#06B6D4; --orange:#E07A3A; --bg:#0d1117; --surface:#161b22; --text:#e6edf3; --dim:#7d8590; --border:#30363d; }
-  *{margin:0;padding:0;box-sizing:border-box}
-  html,body{height:100%;font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:var(--text)}
-  button{font-family:inherit;cursor:pointer;border:none} input,textarea{font-family:inherit}
+  :root{--pri:#0F9D8A;--pri-d:#0A7A6B;--navy:#0B3C5D;--gold:#FFC857;--gold-d:#d4a632;--red:#DC2626;--purple:#7C3AED;--bg:#0d1117;--surface:#161b22;--text:#e6edf3;--dim:#7d8590;--border:#30363d}
+  *{margin:0;padding:0;box-sizing:border-box}html,body{height:100%;font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+  button{font-family:inherit;cursor:pointer;border:none}input,textarea{font-family:inherit}
+  a{color:var(--pri);text-decoration:none}
 
   /* Login */
-  .login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
-  .login-box{background:var(--surface);border-radius:16px;padding:2.5rem;width:min(380px,100%);border:1px solid var(--border);text-align:center}
-  .login-box h1{font-size:1.5rem;color:var(--gold);margin-bottom:0.3rem}
-  .login-box .sub{color:var(--dim);font-size:0.85rem;margin-bottom:2rem}
+  .center-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+  .box{background:var(--surface);border-radius:16px;padding:2.5rem;width:min(460px,100%);border:1px solid var(--border);text-align:center}
+  .box h1{font-size:1.5rem;color:var(--gold);margin-bottom:0.3rem}
+  .box .sub{color:var(--dim);font-size:0.85rem;margin-bottom:2rem}
   .btn-google{display:flex;align-items:center;justify-content:center;gap:0.8rem;width:100%;padding:0.9rem;background:#fff;color:#333;font-size:1rem;font-weight:700;border-radius:10px;border:1px solid #ddd}
   .btn-google:hover{box-shadow:0 2px 12px rgba(0,0,0,0.15)}
   .btn-google img{width:20px;height:20px}
 
-  /* Setup */
-  .setup{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
-  .setup-box{background:var(--surface);border-radius:16px;padding:2.5rem;width:min(420px,100%);border:1px solid var(--border)}
-  .setup-box h1{font-size:1.5rem;color:var(--gold);margin-bottom:0.3rem}
-  .setup-box .sub{color:var(--dim);font-size:0.85rem;margin-bottom:1.5rem}
-  .setup-box label{display:block;font-size:0.8rem;color:var(--dim);margin-bottom:0.3rem;margin-top:1rem}
-  .setup-box input{width:100%;padding:0.8rem 1rem;background:var(--bg);border:2px solid var(--border);border-radius:10px;color:var(--text);font-size:1rem;outline:none}
-  .setup-box input:focus{border-color:var(--pri)}
-  .setup-box .btn-create{width:100%;padding:0.9rem;margin-top:1.5rem;background:var(--pri);color:#fff;font-size:1.05rem;font-weight:700;border-radius:10px}
-  .setup-box .btn-create:disabled{opacity:0.4}
-  .user-info{display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;padding:0.6rem;background:var(--bg);border-radius:8px}
-  .user-info img{width:28px;height:28px;border-radius:50%}
-  .user-info span{font-size:0.85rem;flex:1}
-  .user-info .logout{font-size:0.7rem;color:var(--red);cursor:pointer}
+  /* Lobby */
+  .lobby{display:none;min-height:100vh;padding:1.5rem;max-width:900px;margin:0 auto}
+  .lobby.active{display:block}
+  .lobby-header{display:flex;align-items:center;gap:1rem;margin-bottom:2rem}
+  .lobby-header h1{font-size:1.3rem;color:var(--gold);flex:1}
+  .lobby-header .user{display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--dim)}
+  .lobby-header .user img{width:28px;height:28px;border-radius:50%}
+  .lobby-header .logout{color:var(--red);cursor:pointer;font-size:0.7rem}
+
+  /* Create room */
+  .create-section{background:var(--surface);border-radius:12px;padding:1.5rem;border:1px solid var(--border);margin-bottom:2rem}
+  .create-section h2{font-size:1rem;color:var(--pri);margin-bottom:1rem}
+  .create-row{display:flex;gap:0.5rem;align-items:center}
+  .create-row .prefix{font-size:0.9rem;color:var(--dim);white-space:nowrap;background:var(--bg);padding:0.6rem 0.8rem;border-radius:8px;border:1px solid var(--border)}
+  .create-row input{flex:1;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;outline:none}
+  .create-row input:focus{border-color:var(--pri)}
+  .create-row button{padding:0.6rem 1.2rem;background:var(--pri);color:#fff;font-size:0.9rem;font-weight:700;border-radius:8px;white-space:nowrap}
+
+  /* Room list */
+  .room-list h2{font-size:1rem;color:var(--dim);margin-bottom:0.8rem}
+  .room-card{background:var(--surface);border-radius:12px;padding:1rem 1.2rem;border:1px solid var(--border);margin-bottom:0.6rem;display:flex;align-items:center;gap:1rem;transition:border-color 0.2s;cursor:pointer}
+  .room-card:hover{border-color:var(--pri)}
+  .room-card .rc-info{flex:1}
+  .room-card .rc-name{font-weight:700;color:var(--text)}
+  .room-card .rc-meta{font-size:0.75rem;color:var(--dim)}
+  .room-card .rc-enter{padding:0.4rem 1rem;background:var(--pri);color:#fff;border-radius:8px;font-size:0.8rem;font-weight:700}
+  .room-card .rc-del{padding:0.4rem 0.6rem;background:none;color:var(--dim);font-size:0.8rem;border-radius:8px;border:1px solid var(--border)}
+  .room-card .rc-del:hover{color:var(--red);border-color:var(--red)}
+  .no-rooms{color:var(--dim);font-size:0.9rem;text-align:center;padding:2rem}
 
   /* Dashboard */
   .dash{display:none;flex-direction:column;height:100vh}
   .dash.active{display:flex}
-  .toolbar{display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.8rem;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
-  .toolbar .room-label{font-size:0.8rem;color:var(--gold);font-weight:700;margin-right:0.3rem}
-  .toolbar .online{font-size:0.75rem;color:var(--dim);margin-right:auto}
-  .mode-btn{padding:0.35rem 0.7rem;border-radius:8px;font-size:0.75rem;font-weight:700;background:var(--bg);color:var(--dim);border:1px solid var(--border);transition:all 0.2s}
-  .mode-btn:hover{border-color:var(--pri);color:var(--pri)}
+  .toolbar{display:flex;align-items:center;gap:0.4rem;padding:0.5rem 0.8rem;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+  .toolbar .room-label{font-size:0.8rem;color:var(--gold);font-weight:700}
+  .toolbar .online{font-size:0.7rem;color:var(--dim);margin-right:auto}
+  .mode-btn{padding:0.3rem 0.6rem;border-radius:6px;font-size:0.7rem;font-weight:700;background:var(--bg);color:var(--dim);border:1px solid var(--border);transition:all 0.2s}
   .mode-btn.active{background:var(--pri);color:#fff;border-color:var(--pri)}
-  .act-btn{padding:0.35rem 0.7rem;border-radius:8px;font-size:0.7rem;background:var(--bg);color:var(--dim);border:1px solid var(--border);transition:all 0.2s}
+  .act-btn{padding:0.3rem 0.6rem;border-radius:6px;font-size:0.65rem;background:var(--bg);color:var(--dim);border:1px solid var(--border)}
   .act-btn:hover{border-color:var(--gold);color:var(--gold)}
   .act-btn.ai-on{background:var(--purple);color:#fff;border-color:var(--purple)}
-  .act-btn.danger:hover{border-color:var(--red);color:var(--red)}
-  .toolbar .user-chip{display:flex;align-items:center;gap:0.3rem;font-size:0.7rem;color:var(--dim)}
-  .toolbar .user-chip img{width:20px;height:20px;border-radius:50%}
+  .btn-back{padding:0.3rem 0.6rem;border-radius:6px;font-size:0.65rem;background:none;color:var(--dim);border:1px solid var(--border)}
 
-  /* Main */
   .main{flex:1;overflow-y:auto;padding:1rem}
 
-  /* Wall */
-  .wall-msg{background:var(--surface);border-radius:12px;padding:1rem 1.2rem;margin-bottom:0.6rem;border-left:3px solid var(--pri);animation:slideIn 0.3s}
+  /* Info Panel (materials, QR codes) */
+  .info-panel{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem}
+  .info-card{background:var(--surface);border-radius:10px;padding:1rem;border:1px solid var(--border);text-align:center}
+  .info-card h3{font-size:0.8rem;color:var(--pri);margin-bottom:0.5rem}
+  .info-card .qr-small{margin:0.5rem auto;max-width:120px}
+  .info-card .qr-small svg{width:100%;height:auto}
+  .info-card .url-text{font-size:0.6rem;color:var(--dim);word-break:break-all;margin-top:0.3rem}
+  .info-card button{margin-top:0.5rem;padding:0.3rem 0.8rem;background:var(--pri);color:#fff;border-radius:6px;font-size:0.75rem}
+
+  /* Materials */
+  .mat-list{margin-bottom:1rem}
+  .mat-item{display:flex;align-items:center;gap:0.8rem;padding:0.6rem 0.8rem;background:var(--surface);border-radius:8px;border:1px solid var(--border);margin-bottom:0.4rem;cursor:pointer;transition:border-color 0.2s}
+  .mat-item:hover{border-color:var(--pri)}
+  .mat-item .mat-icon{font-size:1.2rem}
+  .mat-item .mat-title{flex:1;font-size:0.85rem}
+  .mat-item .mat-open{font-size:0.7rem;color:var(--pri);padding:0.2rem 0.6rem;border:1px solid var(--pri);border-radius:4px}
+
+  /* Wall/Vote/QA styles (same as before) */
+  .wall-msg{background:var(--surface);border-radius:10px;padding:0.8rem 1rem;margin-bottom:0.5rem;border-left:3px solid var(--pri);animation:slideIn 0.3s}
   .wall-msg.ai{border-left-color:var(--purple);background:#1a1530}
   .wall-msg.teacher{border-left-color:var(--gold);background:#1f1a0e}
   @keyframes slideIn{from{opacity:0;transform:translateX(-20px)}}
-  .wm-name{font-size:0.85rem;font-weight:700;color:var(--pri)}
-  .wm-name.ai{color:var(--purple)} .wm-name.teacher{color:var(--gold)}
-  .wm-text{font-size:1.3rem;margin-top:0.3rem;line-height:1.5;white-space:pre-wrap}
-  .wm-time{font-size:0.7rem;color:var(--dim);margin-top:0.2rem}
-  /* Teacher wall input */
-  .host-input{display:flex;gap:0.5rem;padding:0.6rem 0.8rem;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
-  .host-input input{flex:1;padding:0.7rem 1rem;background:var(--bg);border:2px solid var(--gold);border-radius:24px;color:var(--text);font-size:0.95rem;outline:none}
-  .host-input button{padding:0 1rem;border-radius:24px;background:var(--gold);color:var(--navy);font-size:0.85rem;font-weight:700}
+  .wm-name{font-size:0.8rem;font-weight:700;color:var(--pri)}.wm-name.ai{color:var(--purple)}.wm-name.teacher{color:var(--gold)}
+  .wm-text{font-size:1.2rem;margin-top:0.2rem;line-height:1.5;white-space:pre-wrap}
+  .wm-time{font-size:0.65rem;color:var(--dim)}
+  .host-input{display:flex;gap:0.5rem;padding:0.5rem 0.8rem;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
+  .host-input input{flex:1;padding:0.6rem 1rem;background:var(--bg);border:2px solid var(--gold);border-radius:20px;color:var(--text);font-size:0.9rem;outline:none}
+  .host-input button{padding:0 1rem;border-radius:20px;background:var(--gold);color:var(--navy);font-size:0.8rem;font-weight:700}
 
-  /* Vote */
   .vote-panel{max-width:800px;margin:0 auto}
-  .vote-q{font-size:1.8rem;font-weight:900;color:var(--gold);text-align:center;margin-bottom:1.5rem}
-  .vote-row{display:flex;align-items:center;gap:1rem;margin-bottom:1rem}
-  .vote-label{font-size:1.1rem;font-weight:700;min-width:120px}
-  .vote-bar-outer{flex:1;height:40px;background:var(--surface);border-radius:8px;overflow:hidden}
+  .vote-q{font-size:1.6rem;font-weight:900;color:var(--gold);text-align:center;margin-bottom:1.5rem}
+  .vote-row{display:flex;align-items:center;gap:1rem;margin-bottom:0.8rem}
+  .vote-label{font-size:1rem;font-weight:700;min-width:100px}
+  .vote-bar-outer{flex:1;height:36px;background:var(--surface);border-radius:8px;overflow:hidden}
   .vote-bar-fill{height:100%;border-radius:8px;transition:width 0.6s;display:flex;align-items:center;justify-content:flex-end;padding-right:0.8rem}
-  .vote-bar-fill span{font-size:0.9rem;font-weight:700;color:#fff}
-  .vote-count{font-size:0.9rem;color:var(--dim);min-width:50px;text-align:right}
-  .vote-total{text-align:center;color:var(--dim);margin-top:1rem}
+  .vote-bar-fill span{font-size:0.85rem;font-weight:700;color:#fff}
+  .vote-count{font-size:0.85rem;color:var(--dim);min-width:45px;text-align:right}
+  .vote-total{text-align:center;color:var(--dim);margin-top:0.8rem}
   .vote-form{max-width:600px;margin:0 auto;background:var(--surface);border-radius:12px;padding:1.5rem;border:1px solid var(--border)}
   .vote-form h3{color:var(--gold);margin-bottom:1rem}
-  .vote-form input{width:100%;padding:0.7rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.95rem;outline:none;margin-bottom:0.5rem}
-  .opt-row{display:flex;gap:0.5rem;margin-bottom:0.5rem}
-  .opt-row input{flex:1} .opt-row button{width:36px;height:36px;border-radius:8px;background:var(--red);color:#fff;font-size:1rem;flex-shrink:0}
-  .btn-add-opt{padding:0.5rem;background:var(--bg);color:var(--pri);border:1px dashed var(--pri);border-radius:8px;font-size:0.85rem;width:100%;margin-bottom:1rem}
-  .btn-start-vote{padding:0.7rem;background:var(--pri);color:#fff;font-size:1rem;font-weight:700;border-radius:10px;width:100%}
+  .vote-form input{width:100%;padding:0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;outline:none;margin-bottom:0.5rem}
+  .opt-row{display:flex;gap:0.5rem;margin-bottom:0.5rem}.opt-row input{flex:1}.opt-row button{width:32px;height:32px;border-radius:8px;background:var(--red);color:#fff;font-size:0.9rem;flex-shrink:0}
+  .btn-add-opt{padding:0.5rem;background:var(--bg);color:var(--pri);border:1px dashed var(--pri);border-radius:8px;font-size:0.8rem;width:100%;margin-bottom:1rem}
+  .btn-start-vote{padding:0.6rem;background:var(--pri);color:#fff;font-size:0.95rem;font-weight:700;border-radius:10px;width:100%}
 
-  /* QA */
-  .qa-card{background:var(--surface);border-radius:12px;padding:1rem 1.2rem;margin-bottom:0.8rem;animation:slideIn 0.3s}
-  .qa-top{display:flex;gap:1rem;align-items:flex-start}
-  .qa-votes{text-align:center;min-width:50px}
-  .qa-votes .num{font-size:1.5rem;font-weight:900;color:var(--gold)}
-  .qa-votes .lbl{font-size:0.65rem;color:var(--dim)}
-  .q-text{font-size:1.15rem;line-height:1.5}
-  .q-meta{font-size:0.75rem;color:var(--dim);margin-top:0.3rem}
-  /* Replies */
-  .qa-replies{margin-top:0.8rem;padding-top:0.6rem;border-top:1px solid var(--border)}
-  .qa-reply{padding:0.5rem 0.8rem;margin-bottom:0.4rem;border-radius:8px;font-size:0.95rem;line-height:1.5;white-space:pre-wrap}
-  .qa-reply.ai{background:#1a1530;border-left:2px solid var(--purple)}
-  .qa-reply.teacher{background:#1f1a0e;border-left:2px solid var(--gold)}
-  .qa-reply .rp-name{font-size:0.75rem;font-weight:700;margin-bottom:0.2rem}
-  .qa-reply .rp-name.ai{color:var(--purple)} .qa-reply .rp-name.teacher{color:var(--gold)}
-  /* Reply input */
-  .reply-box{display:flex;gap:0.5rem;margin-top:0.5rem}
-  .reply-box input{flex:1;padding:0.5rem 0.8rem;background:var(--bg);border:1px solid var(--gold);border-radius:8px;color:var(--text);font-size:0.85rem;outline:none}
-  .reply-box button{padding:0 0.8rem;background:var(--gold);color:var(--navy);border-radius:8px;font-size:0.8rem;font-weight:700}
-  .btn-reply{font-size:0.75rem;color:var(--gold);background:none;margin-top:0.3rem;padding:0.2rem 0}
+  .qa-card{background:var(--surface);border-radius:10px;padding:0.8rem 1rem;margin-bottom:0.6rem}
+  .qa-top{display:flex;gap:0.8rem;align-items:flex-start}
+  .qa-votes{text-align:center;min-width:45px}.qa-votes .num{font-size:1.3rem;font-weight:900;color:var(--gold)}.qa-votes .lbl{font-size:0.6rem;color:var(--dim)}
+  .q-text{font-size:1rem;line-height:1.5}.q-meta{font-size:0.7rem;color:var(--dim);margin-top:0.2rem}
+  .qa-replies{margin-top:0.6rem;padding-top:0.5rem;border-top:1px solid var(--border)}
+  .qa-reply{padding:0.4rem 0.6rem;margin-bottom:0.3rem;border-radius:6px;font-size:0.9rem;line-height:1.4;white-space:pre-wrap}
+  .qa-reply.ai{background:#1a1530;border-left:2px solid var(--purple)}.qa-reply.teacher{background:#1f1a0e;border-left:2px solid var(--gold)}
+  .rp-name{font-size:0.7rem;font-weight:700;margin-bottom:0.15rem}.rp-name.ai{color:var(--purple)}.rp-name.teacher{color:var(--gold)}
+  .reply-box{display:flex;gap:0.5rem;margin-top:0.4rem}.reply-box input{flex:1;padding:0.4rem 0.6rem;background:var(--bg);border:1px solid var(--gold);border-radius:6px;color:var(--text);font-size:0.8rem;outline:none}.reply-box button{padding:0 0.6rem;background:var(--gold);color:var(--navy);border-radius:6px;font-size:0.75rem;font-weight:700}
+  .btn-reply{font-size:0.7rem;color:var(--gold);background:none;margin-top:0.2rem;padding:0.15rem 0}
 
-  /* Pause */
   .pause-display{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%}
-  .pause-display .icon{font-size:4rem;animation:pulse 2s infinite}
+  .pause-display .icon{font-size:3.5rem;animation:pulse 2s infinite}
   @keyframes pulse{0%,100%{opacity:0.3}50%{opacity:1}}
 
-  /* AI status */
-  .ai-status{position:fixed;bottom:1rem;right:1rem;background:var(--purple);color:#fff;padding:0.4rem 0.8rem;border-radius:8px;font-size:0.8rem;display:none;animation:pulse 1.5s infinite}
+  .ai-status{position:fixed;bottom:1rem;right:1rem;background:var(--purple);color:#fff;padding:0.4rem 0.8rem;border-radius:8px;font-size:0.8rem;display:none;z-index:50}
+  .ai-error{position:fixed;bottom:1rem;left:1rem;background:var(--red);color:#fff;padding:0.4rem 0.8rem;border-radius:8px;font-size:0.75rem;display:none;z-index:50;max-width:300px}
 
   /* Settings */
   .settings-panel{position:fixed;top:0;right:-360px;width:350px;height:100vh;background:var(--surface);border-left:1px solid var(--border);z-index:200;transition:right 0.3s;display:flex;flex-direction:column}
   .settings-panel.open{right:0}
-  .sp-header{padding:1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-  .sp-header h3{color:var(--gold)} .sp-close{background:none;color:var(--dim);font-size:1.2rem}
+  .sp-header{padding:1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}.sp-header h3{color:var(--gold)}.sp-close{background:none;color:var(--dim);font-size:1.2rem}
   .sp-body{padding:1rem;flex:1;overflow-y:auto}
-  .sp-section{margin-bottom:1.5rem}
-  .sp-section h4{font-size:0.85rem;color:var(--pri);margin-bottom:0.5rem}
-  .sp-section p{font-size:0.75rem;color:var(--dim);margin-bottom:0.5rem}
+  .sp-section{margin-bottom:1.5rem}.sp-section h4{font-size:0.85rem;color:var(--pri);margin-bottom:0.5rem}.sp-section p{font-size:0.75rem;color:var(--dim);margin-bottom:0.5rem}
   .sp-section input{width:100%;padding:0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;outline:none}
-  .sp-toggle{display:flex;align-items:center;gap:0.5rem;cursor:pointer}
-  .sp-toggle input[type="checkbox"]{width:18px;height:18px;accent-color:var(--pri)}
+  .sp-toggle{display:flex;align-items:center;gap:0.5rem}.sp-toggle input[type="checkbox"]{width:18px;height:18px;accent-color:var(--pri)}
   .sp-btn{padding:0.5rem 1rem;border-radius:8px;font-size:0.85rem;width:100%;margin-top:0.5rem}
-  .sp-btn.save{background:var(--pri);color:#fff} .sp-btn.clear{background:var(--bg);color:var(--red);border:1px solid var(--red)}
-  .settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:199;display:none}
-  .settings-overlay.show{display:block}
+  .sp-btn.save{background:var(--pri);color:#fff}.sp-btn.test{background:var(--purple);color:#fff}.sp-btn.clear{background:var(--bg);color:var(--red);border:1px solid var(--red)}
+  .settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:199;display:none}.settings-overlay.show{display:block}
 
-  /* QR */
   .qr-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:100;flex-direction:column;gap:1.5rem;cursor:pointer}
   .qr-overlay.show{display:flex}
   .qr-overlay .qr-box{background:#fff;padding:1.5rem;border-radius:16px}
@@ -140,79 +147,86 @@
   .qr-overlay .qr-hint{color:var(--dim);font-size:0.85rem}
 
   .hidden{display:none!important}
+  @media(max-width:700px){.info-panel{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
 <!-- Login -->
-<div class="login-screen" id="loginScreen">
-  <div class="login-box">
+<div class="center-screen" id="loginScreen">
+  <div class="box">
     <h1>AI 課堂互動</h1>
-    <p class="sub">老師控制台 — 請先登入 Google 帳號</p>
+    <p class="sub">講師後台 — 請先登入 Google 帳號</p>
     <button class="btn-google" onclick="googleLogin()">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G">使用 Google 帳號登入
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg">使用 Google 帳號登入
     </button>
   </div>
 </div>
 
-<!-- Setup -->
-<div class="setup hidden" id="setupScreen">
-  <div class="setup-box">
-    <h1>AI 課堂互動</h1>
-    <p class="sub">老師控制台 — 建立或加入房間</p>
-    <div class="user-info"><img id="userAvatar" src=""><span id="userName"></span><span class="logout" onclick="googleLogout()">登出</span></div>
-    <label>房間代碼</label>
-    <input type="text" id="inputRoom" placeholder="例如 ai100-0322" autocomplete="off">
-    <label>課程名稱（選填）</label>
-    <input type="text" id="inputTitle" placeholder="例如 AI100 第一講" autocomplete="off">
-    <button class="btn-create" id="btnCreate" onclick="createRoom()">建立 / 進入房間</button>
+<!-- Lobby -->
+<div class="lobby" id="lobby">
+  <div class="lobby-header">
+    <h1>📚 講師後台</h1>
+    <div class="user"><img id="lobbyAvatar" src=""><span id="lobbyName"></span><span class="logout" onclick="googleLogout()">登出</span></div>
+  </div>
+  <div class="create-section">
+    <h2>建立新教室</h2>
+    <div class="create-row">
+      <span class="prefix" id="datePrefix"></span>
+      <input type="text" id="inputSuffix" placeholder="教室名稱（例如 ai100）" autocomplete="off">
+      <button onclick="createRoom()">建立</button>
+    </div>
+  </div>
+  <div class="room-list">
+    <h2>我的教室</h2>
+    <div id="roomListContainer"><div class="no-rooms">尚無教室</div></div>
   </div>
 </div>
 
 <!-- Dashboard -->
 <div class="dash" id="dash">
   <div class="toolbar">
+    <button class="btn-back" onclick="backToLobby()">← 返回</button>
     <span class="room-label" id="dispRoom"></span>
     <span class="online" id="dispOnline">0</span>
-    <button class="mode-btn active" data-mode="wall" onclick="setMode('wall')">💬 訊息牆</button>
-    <button class="mode-btn" data-mode="vote" onclick="setMode('vote')">📊 投票</button>
-    <button class="mode-btn" data-mode="qa" onclick="setMode('qa')">❓ 問答</button>
+    <button class="mode-btn active" data-mode="wall" onclick="setMode('wall')">💬</button>
+    <button class="mode-btn" data-mode="vote" onclick="setMode('vote')">📊</button>
+    <button class="mode-btn" data-mode="qa" onclick="setMode('qa')">❓</button>
     <button class="mode-btn" data-mode="pause" onclick="setMode('pause')">⏸</button>
-    <button class="act-btn" id="btnAI" onclick="toggleAI()">🤖 AI</button>
+    <button class="act-btn" id="btnAI" onclick="toggleAI()">🤖</button>
     <button class="act-btn" onclick="toggleQR()">QR</button>
     <button class="act-btn" onclick="toggleSettings()">設定</button>
     <button class="act-btn" onclick="exportData()">匯出</button>
-    <div class="user-chip"><img id="dashAvatar" src=""><span id="dashName"></span></div>
   </div>
   <div class="main" id="mainContent"></div>
-  <!-- Teacher wall input (shown in wall mode) -->
   <div class="host-input hidden" id="hostWallBar">
     <input type="text" id="hostWallText" placeholder="老師發言..." maxlength="500" autocomplete="off">
     <button onclick="sendTeacherWall()">👨‍🏫 發送</button>
   </div>
 </div>
 
-<!-- AI Status -->
 <div class="ai-status" id="aiStatus">🤖 AI 回答中...</div>
+<div class="ai-error" id="aiError"></div>
 
 <!-- Settings -->
 <div class="settings-overlay" id="settingsOverlay" onclick="toggleSettings()"></div>
 <div class="settings-panel" id="settingsPanel">
-  <div class="sp-header"><h3>房間設定</h3><button class="sp-close" onclick="toggleSettings()">✕</button></div>
+  <div class="sp-header"><h3>教室設定</h3><button class="sp-close" onclick="toggleSettings()">✕</button></div>
   <div class="sp-body">
     <div class="sp-section">
       <h4>房間密碼</h4>
-      <p>啟用後學員需輸入密碼才能加入</p>
       <div class="sp-toggle"><input type="checkbox" id="chkPassword" onchange="document.getElementById('inputPassword').classList.toggle('hidden',!this.checked)"><label for="chkPassword">啟用密碼</label></div>
-      <input type="text" id="inputPassword" placeholder="設定密碼" style="margin-top:0.5rem" class="hidden">
-      <button class="sp-btn save" onclick="savePassword()">儲存密碼設定</button>
+      <input type="text" id="inputPassword" placeholder="密碼" style="margin-top:0.5rem" class="hidden">
+      <button class="sp-btn save" onclick="savePassword()">儲存</button>
     </div>
     <div class="sp-section">
-      <h4>AI 助教設定</h4>
-      <p>填入 Gemini API Key，開啟 AI 後自動回答所有學員問題</p>
+      <h4>AI 助教</h4>
+      <p>填入 Gemini API Key，開啟 AI 後自動回答學員問題</p>
       <input type="password" id="inputAIKey" placeholder="Gemini API Key">
-      <button class="sp-btn save" onclick="saveAIKey()">儲存 API Key</button>
-      <p style="margin-top:0.5rem">Key 存在你的瀏覽器，不會上傳</p>
+      <button class="sp-btn save" onclick="saveAIKey()">儲存 Key</button>
+      <button class="sp-btn test" onclick="testAIKey()">測試 AI 連線</button>
+      <p style="margin-top:0.3rem">Key 只存你的瀏覽器，不上傳</p>
+      <p id="aiKeyStatus" style="color:var(--pri);font-weight:700"></p>
     </div>
     <div class="sp-section"><h4>危險操作</h4><button class="sp-btn clear" onclick="clearRoom()">清除所有互動資料</button></div>
   </div>
@@ -231,295 +245,317 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <script>
 firebase.initializeApp({
-  apiKey: ['AIza','SyC5X5C0Uje6bCMzrvuUuq5Bz33ly0PR-vc'].join(''),
-  authDomain: 'ai-classroom-70a97.firebaseapp.com',
-  databaseURL: 'https://ai-classroom-70a97-default-rtdb.firebaseio.com',
-  projectId: 'ai-classroom-70a97',
-  storageBucket: 'ai-classroom-70a97.firebasestorage.app',
-  appId: '1:160782638499:web:f3fb834ce32d643de28e16',
+  apiKey:['AIza','SyC5X5C0Uje6bCMzrvuUuq5Bz33ly0PR-vc'].join(''),
+  authDomain:'ai-classroom-70a97.firebaseapp.com',
+  databaseURL:'https://ai-classroom-70a97-default-rtdb.firebaseio.com',
+  projectId:'ai-classroom-70a97',
+  storageBucket:'ai-classroom-70a97.firebasestorage.app',
+  appId:'1:160782638499:web:f3fb834ce32d643de28e16',
 });
-const db = firebase.database(), auth = firebase.auth();
-const googleProvider = new firebase.auth.GoogleAuthProvider();
-let currentUser = null, roomId = '', roomTitle = '', currentMode = 'wall';
-let aiEnabled = false, listeners = [], voteOpts = ['',''];
-const voteColors = ['#0F9D8A','#E07A3A','#7C3AED','#06B6D4','#FFC857','#DC2626'];
+const db=firebase.database(),auth=firebase.auth();
+let currentUser=null,roomId='',roomTitle='',currentMode='wall',aiEnabled=false,listeners=[],voteOpts=['',''];
+const VC=['#0F9D8A','#E07A3A','#7C3AED','#06B6D4','#FFC857','#DC2626'];
+
+// Teaching materials
+const materials=[
+  {title:'AI 簡報生成 6 種路線',icon:'📊',url:'/ai-pptx-routes',hasSlideControl:true},
+  {title:'Slidev 風格示範',icon:'🎯',url:'/demo-slidev'},
+  {title:'Marp 風格示範',icon:'📝',url:'/demo-marp'},
+  {title:'reveal.js 風格示範',icon:'🔀',url:'/demo-revealjs'},
+];
 
 // ═══ Auth ═══
-auth.onAuthStateChanged(user => {
-  currentUser = user;
-  if (user) {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('setupScreen').classList.remove('hidden');
-    document.getElementById('userAvatar').src = user.photoURL || '';
-    document.getElementById('userName').textContent = user.displayName || user.email;
-    document.getElementById('dashAvatar').src = user.photoURL || '';
-    document.getElementById('dashName').textContent = (user.displayName || user.email).split(' ')[0];
+auth.onAuthStateChanged(user=>{
+  currentUser=user;
+  if(user){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('lobby').classList.add('active');
+    document.getElementById('lobbyAvatar').src=user.photoURL||'';
+    document.getElementById('lobbyName').textContent=user.displayName||user.email;
+    const today=new Date();
+    document.getElementById('datePrefix').textContent=`${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}-`;
+    loadRoomList();
   } else {
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('setupScreen').classList.add('hidden');
+    document.getElementById('loginScreen').style.display='flex';
+    document.getElementById('lobby').classList.remove('active');
   }
 });
-function googleLogin() { auth.signInWithPopup(googleProvider).catch(e => alert('登入失敗：' + e.message)); }
-function googleLogout() { if (confirm('確定登出？')) auth.signOut().then(() => location.reload()); }
+function googleLogin(){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>alert(e.message))}
+function googleLogout(){if(confirm('登出？'))auth.signOut().then(()=>location.reload())}
 
-// ═══ Room ═══
-function createRoom() {
-  if (!currentUser) return;
-  roomId = document.getElementById('inputRoom').value.trim();
-  roomTitle = document.getElementById('inputTitle').value.trim() || roomId;
-  if (!roomId) { alert('請輸入房間代碼'); return; }
-  document.getElementById('btnCreate').disabled = true;
-  db.ref(`rooms/${roomId}/config`).once('value').then(snap => {
-    if (!snap.exists()) {
-      db.ref(`rooms/${roomId}/config`).set({ title: roomTitle, mode: 'wall', created: firebase.database.ServerValue.TIMESTAMP, hostUid: currentUser.uid, hostName: currentUser.displayName || currentUser.email });
-    } else {
-      const c = snap.val(); roomTitle = c.title || roomId;
-      if (c.hostUid && c.hostUid !== currentUser.uid) { alert(`此房間由 ${c.hostName||'其他老師'} 建立，你沒有控制權限。`); document.getElementById('btnCreate').disabled = false; return; }
-      if (!c.hostUid) db.ref(`rooms/${roomId}/config`).update({ hostUid: currentUser.uid, hostName: currentUser.displayName });
-    }
-    enterDashboard();
-  }).catch(e => { alert('連線失敗：' + e.message); document.getElementById('btnCreate').disabled = false; });
+// ═══ Room List ═══
+function loadRoomList(){
+  db.ref(`users/${currentUser.uid}/rooms`).on('value',snap=>{
+    const el=document.getElementById('roomListContainer');
+    const rooms=[];
+    snap.forEach(c=>rooms.push({id:c.key,...c.val()}));
+    rooms.sort((a,b)=>(b.created||0)-(a.created||0));
+    if(!rooms.length){el.innerHTML='<div class="no-rooms">尚無教室，上方建立一個吧</div>';return}
+    el.innerHTML=rooms.map(r=>`<div class="room-card">
+      <div class="rc-info" onclick="enterRoom('${r.id}','${esc(r.title||r.id)}')"><div class="rc-name">${esc(r.title||r.id)}</div><div class="rc-meta">${r.id}</div></div>
+      <button class="rc-enter" onclick="enterRoom('${r.id}','${esc(r.title||r.id)}')">進入</button>
+      <button class="rc-del" onclick="event.stopPropagation();deleteRoom('${r.id}')">刪除</button>
+    </div>`).join('');
+  });
 }
 
-function enterDashboard() {
-  document.getElementById('setupScreen').classList.add('hidden');
+function createRoom(){
+  const prefix=document.getElementById('datePrefix').textContent;
+  const suffix=document.getElementById('inputSuffix').value.trim();
+  if(!suffix){alert('請輸入教室名稱');return}
+  roomId=prefix+suffix;
+  roomTitle=suffix;
+  db.ref(`rooms/${roomId}/config`).once('value').then(snap=>{
+    if(snap.exists()){alert('此教室代碼已存在，請換一個');return}
+    db.ref(`rooms/${roomId}/config`).set({title:roomTitle,mode:'wall',created:firebase.database.ServerValue.TIMESTAMP,hostUid:currentUser.uid,hostName:currentUser.displayName||currentUser.email});
+    db.ref(`users/${currentUser.uid}/rooms/${roomId}`).set({title:roomTitle,created:firebase.database.ServerValue.TIMESTAMP});
+    document.getElementById('inputSuffix').value='';
+    enterRoom(roomId,roomTitle);
+  });
+}
+
+function deleteRoom(rid){
+  if(!confirm(`刪除教室「${rid}」？資料也會清除。`))return;
+  db.ref(`rooms/${rid}`).remove();
+  db.ref(`users/${currentUser.uid}/rooms/${rid}`).remove();
+}
+
+function enterRoom(rid,title){
+  roomId=rid;roomTitle=title||rid;
+  document.getElementById('lobby').classList.remove('active');
   document.getElementById('dash').classList.add('active');
-  document.getElementById('dispRoom').textContent = `${roomTitle}`;
-  generateQR(); loadSettings();
+  document.getElementById('dispRoom').textContent=roomTitle;
+  loadSettings();
   // Online
-  db.ref(`rooms/${roomId}/presence`).on('value', s => { document.getElementById('dispOnline').textContent = `${s.numChildren()} 人在線`; });
+  db.ref(`rooms/${roomId}/presence`).on('value',s=>{document.getElementById('dispOnline').textContent=`${s.numChildren()} 人`});
   // Mode
-  let lastMode = null;
-  db.ref(`rooms/${roomId}/config/mode`).on('value', s => {
-    const m = s.val() || 'wall'; if (m === lastMode) return; lastMode = m; currentMode = m;
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
-    renderContent();
-  });
+  let lastMode=null;
+  db.ref(`rooms/${roomId}/config/mode`).on('value',s=>{const m=s.val()||'wall';if(m===lastMode)return;lastMode=m;currentMode=m;
+    document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));renderContent()});
   // AI
-  db.ref(`rooms/${roomId}/config/aiEnabled`).on('value', s => {
-    aiEnabled = !!s.val();
-    document.getElementById('btnAI').classList.toggle('ai-on', aiEnabled);
-    document.getElementById('btnAI').textContent = aiEnabled ? '🤖 ON' : '🤖 AI';
-  });
+  db.ref(`rooms/${roomId}/config/aiEnabled`).on('value',s=>{aiEnabled=!!s.val();
+    document.getElementById('btnAI').classList.toggle('ai-on',aiEnabled);document.getElementById('btnAI').textContent=aiEnabled?'🤖ON':'🤖'});
   // Keyboard
-  document.getElementById('hostWallText').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendTeacherWall(); } });
-  // Start persistent AI listener
+  document.getElementById('hostWallText').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendTeacherWall()}});
+  // Start AI listener
   startAIListener();
 }
 
-// ═══ AI Listener (persistent, independent of mode) ═══
-function startAIListener() {
-  const existingWall = new Set(), existingQa = new Set();
-  // Snapshot existing keys, then listen for NEW ones only
-  db.ref(`rooms/${roomId}/wall`).once('value').then(snap => {
-    snap.forEach(c => existingWall.add(c.key));
-    db.ref(`rooms/${roomId}/wall`).on('child_added', s => {
-      if (existingWall.has(s.key)) { existingWall.delete(s.key); return; }
-      if (!aiEnabled) return;
-      const d = s.val();
-      if (d.role === 'ai' || d.role === 'teacher') return;
-      handleAIRequest(d.text, 'wall');
-    });
+function backToLobby(){
+  // Detach all listeners
+  listeners.forEach(l=>l.ref.off(l.event));listeners=[];
+  db.ref(`rooms/${roomId}`).off();
+  document.getElementById('dash').classList.remove('active');
+  document.getElementById('lobby').classList.add('active');
+  roomId='';
+}
+
+// ═══ AI Listener (FIXED: uses delayed ready flag) ═══
+function startAIListener(){
+  let aiReady=false;
+  // Wait 3 seconds for initial child_added replay to finish, then start processing
+  setTimeout(()=>{aiReady=true;console.log('[AI] listener ready, will process new messages')},3000);
+
+  db.ref(`rooms/${roomId}/wall`).on('child_added',s=>{
+    if(!aiReady||!aiEnabled)return;
+    const d=s.val();
+    if(d.role==='ai'||d.role==='teacher')return;
+    console.log('[AI] wall trigger:',d.text?.slice(0,30));
+    handleAIRequest(d.text,'wall');
   });
-  db.ref(`rooms/${roomId}/qa`).once('value').then(snap => {
-    snap.forEach(c => existingQa.add(c.key));
-    db.ref(`rooms/${roomId}/qa`).on('child_added', s => {
-      if (existingQa.has(s.key)) { existingQa.delete(s.key); return; }
-      if (!aiEnabled) return;
-      const d = s.val();
-      if (d.role === 'ai' || d.role === 'teacher') return;
-      handleAIRequest(d.text, 'qa', s.key);
-    });
+  db.ref(`rooms/${roomId}/qa`).on('child_added',s=>{
+    if(!aiReady||!aiEnabled)return;
+    const d=s.val();
+    if(d.role==='ai'||d.role==='teacher')return;
+    console.log('[AI] qa trigger:',d.text?.slice(0,30));
+    handleAIRequest(d.text,'qa',s.key);
   });
 }
 
-async function handleAIRequest(question, source, qaId) {
-  const apiKey = localStorage.getItem('_ai_key');
-  if (!apiKey || !question) return;
-  document.getElementById('aiStatus').style.display = 'block';
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: `你是課堂 AI 助教。課程：${roomTitle}。用繁體中文簡潔回答（150字內）。如果訊息是打招呼、閒聊或不需要回答的（如「OK」「收到」「+1」），只回覆 [SKIP]。` }] },
-          contents: [{ parts: [{ text: question }] }],
-          generationConfig: { maxOutputTokens: 250, temperature: 0.7 }
-        })
-      }
-    );
-    const data = await res.json();
-    const answer = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!answer || answer.includes('[SKIP]')) { document.getElementById('aiStatus').style.display = 'none'; return; }
-    if (source === 'wall') {
-      db.ref(`rooms/${roomId}/wall`).push({ text: answer, name: 'AI 助教', role: 'ai', ts: firebase.database.ServerValue.TIMESTAMP });
-    } else if (source === 'qa' && qaId) {
-      db.ref(`rooms/${roomId}/qaReplies/${qaId}`).push({ text: answer, name: 'AI 助教', role: 'ai', ts: firebase.database.ServerValue.TIMESTAMP });
+async function handleAIRequest(question,source,qaId){
+  const apiKey=localStorage.getItem('_ai_key');
+  if(!apiKey||!question){console.log('[AI] skip: no key or empty question');return}
+  document.getElementById('aiStatus').style.display='block';
+  document.getElementById('aiError').style.display='none';
+  try{
+    console.log('[AI] calling Gemini...');
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        systemInstruction:{parts:[{text:`你是課堂 AI 助教。課程：${roomTitle}。用繁體中文簡潔回答（150字內）。若訊息是打招呼、閒聊或不需要回答的（如「OK」「收到」「+1」「謝謝」），只回覆 [SKIP] 不要說其他的。`}]},
+        contents:[{parts:[{text:question}]}],
+        generationConfig:{maxOutputTokens:250,temperature:0.7}
+      })
+    });
+    if(!res.ok){const err=await res.text();throw new Error(`HTTP ${res.status}: ${err.slice(0,100)}`)}
+    const data=await res.json();
+    const answer=data.candidates?.[0]?.content?.parts?.[0]?.text;
+    console.log('[AI] response:',answer?.slice(0,50));
+    if(!answer||answer.trim()==='[SKIP]'||answer.includes('[SKIP]')){document.getElementById('aiStatus').style.display='none';return}
+    if(source==='wall'){
+      await db.ref(`rooms/${roomId}/wall`).push({text:answer,name:'AI 助教',role:'ai',ts:firebase.database.ServerValue.TIMESTAMP});
+    }else if(source==='qa'&&qaId){
+      await db.ref(`rooms/${roomId}/qaReplies/${qaId}`).push({text:answer,name:'AI 助教',role:'ai',ts:firebase.database.ServerValue.TIMESTAMP});
     }
-  } catch (e) { console.error('AI error:', e); }
-  document.getElementById('aiStatus').style.display = 'none';
+    console.log('[AI] response posted');
+  }catch(e){
+    console.error('[AI] error:',e);
+    const errEl=document.getElementById('aiError');
+    errEl.textContent='AI 錯誤：'+e.message;errEl.style.display='block';
+    setTimeout(()=>{errEl.style.display='none'},5000);
+  }
+  document.getElementById('aiStatus').style.display='none';
+}
+
+// Test AI Key
+async function testAIKey(){
+  const key=document.getElementById('inputAIKey').value.trim()||localStorage.getItem('_ai_key');
+  const status=document.getElementById('aiKeyStatus');
+  if(!key){status.textContent='❌ 請先填入 Key';status.style.color='var(--red)';return}
+  status.textContent='⏳ 測試中...';status.style.color='var(--dim)';
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:'說「AI助教已上線」這五個字'}]}],generationConfig:{maxOutputTokens:20}})
+    });
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'(無回應)';
+    status.textContent='✅ 連線成功：'+text.trim();status.style.color='var(--pri)';
+  }catch(e){
+    status.textContent='❌ 失敗：'+e.message;status.style.color='var(--red)';
+  }
 }
 
 // ═══ Mode ═══
-function setMode(m) { db.ref(`rooms/${roomId}/config/mode`).set(m); }
-
-function renderContent() {
-  listeners.forEach(l => l.ref.off(l.event)); listeners = [];
-  const el = document.getElementById('mainContent');
-  document.getElementById('hostWallBar').classList.toggle('hidden', currentMode !== 'wall');
-  if (currentMode === 'wall') renderWall(el);
-  else if (currentMode === 'vote') renderVoteHost(el);
-  else if (currentMode === 'qa') renderQA(el);
-  else el.innerHTML = '<div class="pause-display"><div class="icon">⏸</div><p style="color:var(--dim);margin-top:1rem">學員看到「老師準備中」</p></div>';
+function setMode(m){db.ref(`rooms/${roomId}/config/mode`).set(m)}
+function renderContent(){
+  listeners.forEach(l=>l.ref.off(l.event));listeners=[];
+  const el=document.getElementById('mainContent');
+  document.getElementById('hostWallBar').classList.toggle('hidden',currentMode!=='wall');
+  if(currentMode==='wall')renderWall(el);
+  else if(currentMode==='vote')renderVoteHost(el);
+  else if(currentMode==='qa')renderQA(el);
+  else if(currentMode==='info')renderInfo(el);
+  else el.innerHTML='<div class="pause-display"><div class="icon">⏸</div><p style="color:var(--dim);margin-top:1rem">學員看到「老師準備中」</p></div>';
 }
 
 // ═══ Wall ═══
-function renderWall(el) {
-  el.innerHTML = '';
-  const ref = db.ref(`rooms/${roomId}/wall`).orderByChild('ts').limitToLast(200);
-  ref.on('child_added', s => {
-    const d = s.val(), r = d.role || 'student';
-    const div = document.createElement('div');
-    div.className = `wall-msg ${r}`;
-    const icon = r==='ai' ? '🤖 ' : r==='teacher' ? '👨‍🏫 ' : '';
-    div.innerHTML = `<span class="wm-name ${r}">${icon}${esc(d.name)}</span><span class="wm-time" style="margin-left:0.5rem">${timeStr(d.ts)}</span><div class="wm-text">${esc(d.text)}</div>`;
-    el.appendChild(div); el.scrollTop = el.scrollHeight;
-  });
-  listeners.push({ ref, event: 'child_added' });
+function renderWall(el){
+  el.innerHTML='';
+  const ref=db.ref(`rooms/${roomId}/wall`).orderByChild('ts').limitToLast(200);
+  ref.on('child_added',s=>{const d=s.val(),r=d.role||'student';
+    const div=document.createElement('div');div.className=`wall-msg ${r}`;
+    const icon=r==='ai'?'🤖 ':r==='teacher'?'👨‍🏫 ':'';
+    div.innerHTML=`<span class="wm-name ${r}">${icon}${esc(d.name)}</span> <span class="wm-time">${timeStr(d.ts)}</span><div class="wm-text">${esc(d.text)}</div>`;
+    el.appendChild(div);el.scrollTop=el.scrollHeight});
+  listeners.push({ref,event:'child_added'});
 }
-
-function sendTeacherWall() {
-  const inp = document.getElementById('hostWallText'), text = inp.value.trim();
-  if (!text || !roomId) return; inp.value = '';
-  db.ref(`rooms/${roomId}/wall`).push({ text, name: currentUser.displayName || '老師', role: 'teacher', ts: firebase.database.ServerValue.TIMESTAMP });
-}
+function sendTeacherWall(){const i=document.getElementById('hostWallText'),t=i.value.trim();if(!t)return;i.value='';
+  db.ref(`rooms/${roomId}/wall`).push({text:t,name:currentUser.displayName||'老師',role:'teacher',ts:firebase.database.ServerValue.TIMESTAMP})}
 
 // ═══ Vote ═══
-function renderVoteHost(el) {
-  const ref = db.ref(`rooms/${roomId}/currentVote`);
-  ref.on('value', s => { s.val() ? renderVoteResults(el, s.val()) : renderVoteForm(el); });
-  listeners.push({ ref, event: 'value' });
-}
-function renderVoteResults(el, data) {
-  const id = data.id, opts = data.options || [];
-  const ref = db.ref(`rooms/${roomId}/votes/${id}`);
-  ref.on('value', s => {
-    const R = s.val() || {}, C = {}; let T = 0;
-    opts.forEach((_,i) => C[i]=0);
-    Object.values(R).forEach(v => { if (typeof v==='number') { C[v]=(C[v]||0)+1; T++; } });
-    const mx = Math.max(...Object.values(C), 1);
-    let h = `<div class="vote-panel"><div class="vote-q">${esc(data.question)}</div>`;
-    opts.forEach((o,i) => { const p=T?Math.round(C[i]/T*100):0, w=Math.round(C[i]/mx*100); h+=`<div class="vote-row"><div class="vote-label">${esc(o)}</div><div class="vote-bar-outer"><div class="vote-bar-fill" style="width:${w}%;background:${voteColors[i%6]}"><span>${p}%</span></div></div><div class="vote-count">${C[i]} 票</div></div>`; });
-    h += `<div class="vote-total">共 ${T} 人投票</div><div style="text-align:center;margin-top:1.5rem"><button class="act-btn" onclick="endVote()" style="padding:0.6rem 1.5rem">結束投票</button></div></div>`;
-    el.innerHTML = h;
-  });
-  listeners.push({ ref, event: 'value' });
-}
-function renderVoteForm(el) { voteOpts=['','']; el.innerHTML = buildVF(); }
-function buildVF() {
-  let h = `<div class="vote-form"><h3>建立新投票</h3><input type="text" id="voteQuestion" placeholder="投票問題">`;
-  voteOpts.forEach((o,i) => { h+=`<div class="opt-row"><input type="text" class="voi" data-idx="${i}" placeholder="選項 ${i+1}" value="${esc(o)}" oninput="voteOpts[${i}]=this.value">${voteOpts.length>2?`<button onclick="removeOpt(${i})">✕</button>`:'<button style="visibility:hidden">✕</button>'}</div>`; });
-  return h + `<button class="btn-add-opt" onclick="addOpt()">+ 新增選項</button><button class="btn-start-vote" onclick="startVote()">開始投票</button></div>`;
-}
+function renderVoteHost(el){const ref=db.ref(`rooms/${roomId}/currentVote`);ref.on('value',s=>{s.val()?renderVR(el,s.val()):renderVF(el)});listeners.push({ref,event:'value'})}
+function renderVR(el,data){const id=data.id,opts=data.options||[];const ref=db.ref(`rooms/${roomId}/votes/${id}`);
+  ref.on('value',s=>{const R=s.val()||{},C={};let T=0;opts.forEach((_,i)=>C[i]=0);Object.values(R).forEach(v=>{if(typeof v==='number'){C[v]=(C[v]||0)+1;T++}});const mx=Math.max(...Object.values(C),1);
+    let h=`<div class="vote-panel"><div class="vote-q">${esc(data.question)}</div>`;
+    opts.forEach((o,i)=>{const p=T?Math.round(C[i]/T*100):0,w=Math.round(C[i]/mx*100);h+=`<div class="vote-row"><div class="vote-label">${esc(o)}</div><div class="vote-bar-outer"><div class="vote-bar-fill" style="width:${w}%;background:${VC[i%6]}"><span>${p}%</span></div></div><div class="vote-count">${C[i]}</div></div>`});
+    h+=`<div class="vote-total">共 ${T} 人</div><div style="text-align:center;margin-top:1rem"><button class="act-btn" onclick="endVote()" style="padding:0.5rem 1.5rem">結束投票</button></div></div>`;el.innerHTML=h});
+  listeners.push({ref,event:'value'})}
+function renderVF(el){voteOpts=['',''];el.innerHTML=buildVF()}
+function buildVF(){let h=`<div class="vote-form"><h3>建立新投票</h3><input type="text" id="voteQuestion" placeholder="問題">`;
+  voteOpts.forEach((o,i)=>{h+=`<div class="opt-row"><input type="text" class="voi" data-idx="${i}" placeholder="選項${i+1}" value="${esc(o)}" oninput="voteOpts[${i}]=this.value">${voteOpts.length>2?`<button onclick="removeOpt(${i})">✕</button>`:'<button style="visibility:hidden">✕</button>'}</div>`});
+  return h+`<button class="btn-add-opt" onclick="addOpt()">+ 新增</button><button class="btn-start-vote" onclick="startVote()">開始投票</button></div>`}
 function addOpt(){voteOpts.push('');document.getElementById('mainContent').innerHTML=buildVF()}
 function removeOpt(i){voteOpts.splice(i,1);document.getElementById('mainContent').innerHTML=buildVF()}
-function startVote(){document.querySelectorAll('.voi').forEach(i=>{voteOpts[+i.dataset.idx]=i.value});const q=document.getElementById('voteQuestion').value.trim(),o=voteOpts.map(x=>x.trim()).filter(x=>x);if(!q){alert('請輸入問題');return}if(o.length<2){alert('至少兩個選項');return}db.ref(`rooms/${roomId}/currentVote`).set({question:q,options:o,id:'v'+Date.now()})}
+function startVote(){document.querySelectorAll('.voi').forEach(i=>{voteOpts[+i.dataset.idx]=i.value});const q=document.getElementById('voteQuestion').value.trim(),o=voteOpts.map(x=>x.trim()).filter(x=>x);if(!q||o.length<2){alert('需要問題和至少兩個選項');return}db.ref(`rooms/${roomId}/currentVote`).set({question:q,options:o,id:'v'+Date.now()})}
 function endVote(){db.ref(`rooms/${roomId}/currentVote`).remove()}
 
-// ═══ QA (with replies) ═══
-function renderQA(el) {
-  el.innerHTML = '';
-  const ref = db.ref(`rooms/${roomId}/qa`);
-  ref.on('value', snap => {
-    const items = []; snap.forEach(c => items.push({ id: c.key, ...c.val() }));
-    items.sort((a,b) => (b.ups||0)-(a.ups||0));
-    if (!items.length) { el.innerHTML = '<div class="pause-display"><p style="color:var(--dim)">等待學員提問...</p></div>'; return; }
-    // Fetch all replies
-    db.ref(`rooms/${roomId}/qaReplies`).once('value').then(rsnap => {
-      const allReplies = rsnap.val() || {};
-      el.innerHTML = items.map(q => {
-        const replies = allReplies[q.id] ? Object.values(allReplies[q.id]).sort((a,b)=>a.ts-b.ts) : [];
-        let rhtml = replies.map(r => `<div class="qa-reply ${r.role}"><div class="rp-name ${r.role}">${r.role==='ai'?'🤖 AI 助教':'👨‍🏫 '+(r.name||'老師')}</div>${esc(r.text)}</div>`).join('');
-        return `<div class="qa-card">
-          <div class="qa-top">
-            <div class="qa-votes"><div class="num">${q.ups||0}</div><div class="lbl">票</div></div>
-            <div style="flex:1"><div class="q-text">${esc(q.text)}</div><div class="q-meta">${esc(q.name)} · ${timeStr(q.ts)}</div>
-              <button class="btn-reply" onclick="showReply('${q.id}')">回覆</button>
-            </div>
-          </div>
-          ${rhtml ? `<div class="qa-replies">${rhtml}</div>` : ''}
-          <div class="reply-box hidden" id="rb-${q.id}">
-            <input type="text" id="ri-${q.id}" placeholder="輸入回覆..." onkeydown="if(event.key==='Enter')replyQ('${q.id}')">
-            <button onclick="replyQ('${q.id}')">回覆</button>
-          </div>
-        </div>`;
-      }).join('');
-    });
+// ═══ QA ═══
+function renderQA(el){el.innerHTML='';
+  const ref=db.ref(`rooms/${roomId}/qa`);
+  ref.on('value',snap=>{const items=[];snap.forEach(c=>items.push({id:c.key,...c.val()}));items.sort((a,b)=>(b.ups||0)-(a.ups||0));
+    if(!items.length){el.innerHTML='<div class="pause-display"><p style="color:var(--dim)">等待學員提問...</p></div>';return}
+    db.ref(`rooms/${roomId}/qaReplies`).once('value').then(rs=>{const allR=rs.val()||{};
+      el.innerHTML=items.map(q=>{const replies=allR[q.id]?Object.values(allR[q.id]).sort((a,b)=>a.ts-b.ts):[];
+        let rh=replies.map(r=>`<div class="qa-reply ${r.role}"><div class="rp-name ${r.role}">${r.role==='ai'?'🤖 AI':'👨‍🏫 '+(r.name||'老師')}</div>${esc(r.text)}</div>`).join('');
+        return `<div class="qa-card"><div class="qa-top"><div class="qa-votes"><div class="num">${q.ups||0}</div><div class="lbl">票</div></div>
+          <div style="flex:1"><div class="q-text">${esc(q.text)}</div><div class="q-meta">${esc(q.name)} · ${timeStr(q.ts)}</div><button class="btn-reply" onclick="showReply('${q.id}')">回覆</button></div>
+        </div>${rh?`<div class="qa-replies">${rh}</div>`:''}<div class="reply-box hidden" id="rb-${q.id}"><input id="ri-${q.id}" placeholder="回覆..." onkeydown="if(event.key==='Enter')replyQ('${q.id}')"><button onclick="replyQ('${q.id}')">送出</button></div></div>`}).join('')})});
+  listeners.push({ref,event:'value'})}
+function showReply(qid){document.getElementById(`rb-${qid}`).classList.toggle('hidden');document.getElementById(`ri-${qid}`).focus()}
+function replyQ(qid){const i=document.getElementById(`ri-${qid}`),t=i.value.trim();if(!t)return;i.value='';
+  db.ref(`rooms/${roomId}/qaReplies/${qid}`).push({text:t,name:currentUser.displayName||'老師',role:'teacher',ts:firebase.database.ServerValue.TIMESTAMP})}
+
+// ═══ Info/Materials (rendered first time entering room) ═══
+function renderInfoPanel(){
+  const studentUrl=`${location.origin}/classroom/?room=${encodeURIComponent(roomId)}`;
+  const remoteUrl=`${location.origin}/classroom/remote?room=${encodeURIComponent(roomId)}`;
+  let html=`<div class="info-panel">
+    <div class="info-card"><h3>📱 學員 QR Code</h3><div class="qr-small" id="qrStudent"></div><div class="url-text">${studentUrl}</div></div>
+    <div class="info-card"><h3>🎮 老師手機遙控</h3><div class="qr-small" id="qrRemote"></div><div class="url-text">${remoteUrl}</div></div>
+    <div class="info-card"><h3>📊 教室資訊</h3><p style="font-size:0.8rem;color:var(--text);margin-top:1rem">房間：${esc(roomId)}<br>老師：${esc(currentUser.displayName)}</p></div>
+  </div>`;
+  html+=`<div class="mat-list"><h3 style="font-size:0.85rem;color:var(--pri);margin-bottom:0.5rem">教材（點擊在新視窗開啟，自動連結遙控）</h3>`;
+  materials.forEach(m=>{
+    const url=m.hasSlideControl?`${m.url}?room=${encodeURIComponent(roomId)}`:m.url;
+    html+=`<div class="mat-item" onclick="window.open('${url}','_blank')"><span class="mat-icon">${m.icon}</span><span class="mat-title">${m.title}</span><span class="mat-open">開啟 ↗</span></div>`;
   });
-  listeners.push({ ref, event: 'value' });
+  html+='</div>';
+  return html;
 }
 
-function showReply(qid) { document.getElementById(`rb-${qid}`).classList.toggle('hidden'); document.getElementById(`ri-${qid}`).focus(); }
-function replyQ(qid) {
-  const inp = document.getElementById(`ri-${qid}`), text = inp.value.trim();
-  if (!text) return; inp.value = '';
-  db.ref(`rooms/${roomId}/qaReplies/${qid}`).push({ text, name: currentUser.displayName || '老師', role: 'teacher', ts: firebase.database.ServerValue.TIMESTAMP });
-}
+// Insert info panel at top of main content when entering room
+const origRenderContent=renderContent;
+renderContent=function(){
+  origRenderContent();
+  // Prepend info panel in wall/qa/pause modes
+  const el=document.getElementById('mainContent');
+  if(currentMode!=='vote'){
+    const infoDiv=document.createElement('div');
+    infoDiv.innerHTML=renderInfoPanel();
+    el.insertBefore(infoDiv,el.firstChild);
+    // Generate QR codes
+    setTimeout(()=>{
+      makeQR('qrStudent',`${location.origin}/classroom/?room=${encodeURIComponent(roomId)}`);
+      makeQR('qrRemote',`${location.origin}/classroom/remote?room=${encodeURIComponent(roomId)}`);
+    },50);
+  }
+};
 
 // ═══ Settings ═══
-function loadSettings() {
-  db.ref(`rooms/${roomId}/config/password`).once('value').then(s => {
-    const p = s.val(); document.getElementById('chkPassword').checked = !!p;
-    if (p) { document.getElementById('inputPassword').value = p; document.getElementById('inputPassword').classList.remove('hidden'); }
-  });
-  const k = localStorage.getItem('_ai_key'); if (k) document.getElementById('inputAIKey').value = k;
+function loadSettings(){
+  db.ref(`rooms/${roomId}/config/password`).once('value').then(s=>{const p=s.val();document.getElementById('chkPassword').checked=!!p;if(p){document.getElementById('inputPassword').value=p;document.getElementById('inputPassword').classList.remove('hidden')}});
+  const k=localStorage.getItem('_ai_key');if(k)document.getElementById('inputAIKey').value=k;
 }
-function toggleSettings() { document.getElementById('settingsPanel').classList.toggle('open'); document.getElementById('settingsOverlay').classList.toggle('show'); }
-function savePassword() {
-  const on = document.getElementById('chkPassword').checked, pwd = document.getElementById('inputPassword').value.trim();
-  if (on && !pwd) { alert('請輸入密碼'); return; }
-  db.ref(`rooms/${roomId}/config/password`).set(on ? pwd : null).then(() => alert(on ? '密碼已設定' : '密碼已關閉'));
-}
-function saveAIKey() {
-  const k = document.getElementById('inputAIKey').value.trim();
-  if (!k) { localStorage.removeItem('_ai_key'); alert('API Key 已清除'); return; }
-  localStorage.setItem('_ai_key', k); alert('API Key 已儲存');
-}
-function toggleAI() {
-  if (!localStorage.getItem('_ai_key') && !aiEnabled) { alert('請先在設定中填入 Gemini API Key'); toggleSettings(); return; }
-  db.ref(`rooms/${roomId}/config/aiEnabled`).set(!aiEnabled);
-}
-function clearRoom() {
-  if (!confirm('確定清除所有互動資料？')) return;
-  db.ref(`rooms/${roomId}`).update({ wall:null, votes:null, currentVote:null, qa:null, qaUps:null, qaReplies:null });
-}
+function toggleSettings(){document.getElementById('settingsPanel').classList.toggle('open');document.getElementById('settingsOverlay').classList.toggle('show')}
+function savePassword(){const on=document.getElementById('chkPassword').checked,pwd=document.getElementById('inputPassword').value.trim();if(on&&!pwd){alert('請輸入密碼');return}db.ref(`rooms/${roomId}/config/password`).set(on?pwd:null).then(()=>alert(on?'密碼已設定':'密碼已關閉'))}
+function saveAIKey(){const k=document.getElementById('inputAIKey').value.trim();if(!k){localStorage.removeItem('_ai_key');alert('Key 已清除');return}localStorage.setItem('_ai_key',k);alert('Key 已儲存')}
+function toggleAI(){if(!localStorage.getItem('_ai_key')&&!aiEnabled){alert('請先在設定中填入 Gemini API Key 並測試');toggleSettings();return}db.ref(`rooms/${roomId}/config/aiEnabled`).set(!aiEnabled)}
+function clearRoom(){if(!confirm('清除所有互動資料？'))return;db.ref(`rooms/${roomId}`).update({wall:null,votes:null,currentVote:null,qa:null,qaUps:null,qaReplies:null})}
 
 // ═══ QR ═══
-function generateQR() {
-  const url = `${location.origin}/classroom/?room=${encodeURIComponent(roomId)}`;
-  document.getElementById('qrUrl').textContent = url;
-  const qr = qrcode(0, 'M'); qr.addData(url); qr.make();
-  document.getElementById('qrBox').innerHTML = qr.createSvgTag({ cellSize: 6, margin: 4 });
-}
-function toggleQR() { document.getElementById('qrOverlay').classList.toggle('show'); }
+function makeQR(elId,url){const el=document.getElementById(elId);if(!el)return;const qr=qrcode(0,'M');qr.addData(url);qr.make();el.innerHTML=qr.createSvgTag({cellSize:3,margin:2})}
+function toggleQR(){
+  const url=`${location.origin}/classroom/?room=${encodeURIComponent(roomId)}`;
+  document.getElementById('qrUrl').textContent=url;
+  const el=document.getElementById('qrBox');const qr=qrcode(0,'M');qr.addData(url);qr.make();el.innerHTML=qr.createSvgTag({cellSize:6,margin:4});
+  document.getElementById('qrOverlay').classList.toggle('show')}
 
 // ═══ Export ═══
-async function exportData() {
-  const [ws,qs,cvs,ps] = await Promise.all([db.ref(`rooms/${roomId}/wall`).orderByChild('ts').once('value'),db.ref(`rooms/${roomId}/qa`).once('value'),db.ref(`rooms/${roomId}/currentVote`).once('value'),db.ref(`rooms/${roomId}/presence`).once('value')]);
-  const rps = (await db.ref(`rooms/${roomId}/qaReplies`).once('value')).val() || {};
-  let vH=''; const cv=cvs.val();
-  if(cv){const vs=await db.ref(`rooms/${roomId}/votes/${cv.id}`).once('value');const R=vs.val()||{};const C={};let T=0;(cv.options||[]).forEach((_,i)=>C[i]=0);Object.values(R).forEach(v=>{if(typeof v==='number'){C[v]=(C[v]||0)+1;T++}});vH=`<div class="section"><h2>📊 投票：${esc(cv.question)}</h2>`;(cv.options||[]).forEach((o,i)=>{const p=T?Math.round(C[i]/T*100):0;vH+=`<div class="vr"><span class="vr-l">${esc(o)}</span><div class="vr-b"><div class="vr-f" style="width:${p}%;background:${voteColors[i%6]}">${p}%</div></div><span class="vr-c">${C[i]}</span></div>`});vH+=`<p class="vr-t">共 ${T} 人</p></div>`}
-  const msgs=[];ws.forEach(c=>msgs.push(c.val()));
-  let wH='';if(msgs.length){wH=`<div class="section"><h2>💬 訊息牆 (${msgs.length})</h2>`;msgs.forEach(m=>{const r=m.role||'student';wH+=`<div class="msg ${r}"><b class="${r}">${r==='ai'?'🤖 ':r==='teacher'?'👨‍🏫 ':''}${esc(m.name)}</b> <small>${timeStr(m.ts)}</small><p>${esc(m.text)}</p></div>`});wH+='</div>'}
-  const qas=[];qs.forEach(c=>qas.push({id:c.key,...c.val()}));qas.sort((a,b)=>(b.ups||0)-(a.ups||0));
-  let qH='';if(qas.length){qH=`<div class="section"><h2>❓ 問答 (${qas.length})</h2>`;qas.forEach(q=>{qH+=`<div class="qa"><b>▲${q.ups||0}</b> ${esc(q.text)} <small>— ${esc(q.name)}</small>`;const replies=rps[q.id]?Object.values(rps[q.id]).sort((a,b)=>a.ts-b.ts):[];replies.forEach(r=>{qH+=`<div class="rp ${r.role}"><b>${r.role==='ai'?'🤖':'👨‍🏫'} ${esc(r.name)}</b> ${esc(r.text)}</div>`});qH+='</div>'});qH+='</div>'}
-  const now=new Date(),ds=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-  const html=`<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${esc(roomTitle)} 成果</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans TC',system-ui,sans-serif;background:#F5F7FA;color:#1A1A1A;padding:2rem;max-width:900px;margin:0 auto}.hd{background:#0B3C5D;color:#fff;padding:2rem;border-radius:12px;margin-bottom:2rem;text-align:center}.hd h1{color:#FFC857;font-size:1.8rem}.hd .m{color:#D4F0EB;font-size:0.9rem;margin-top:0.5rem}.section{background:#fff;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06)}.section h2{color:#0B3C5D;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid #D4F0EB}.msg{padding:0.5rem 0;border-bottom:1px solid #eee}.msg.ai{background:#EDE9FE;padding:0.5rem;border-radius:6px;margin:0.2rem 0}.msg.teacher{background:#FEF3C7;padding:0.5rem;border-radius:6px;margin:0.2rem 0}.msg b{font-size:0.85rem}.msg b.ai{color:#7C3AED}.msg b.teacher{color:#d4a632}.msg p{margin-top:0.2rem;white-space:pre-wrap}.vr{display:flex;align-items:center;gap:0.8rem;margin-bottom:0.5rem}.vr-l{min-width:100px;font-weight:700}.vr-b{flex:1;height:24px;background:#eee;border-radius:4px;overflow:hidden}.vr-f{height:100%;border-radius:4px;color:#fff;font-size:0.75rem;display:flex;align-items:center;justify-content:flex-end;padding-right:0.4rem}.vr-c{font-size:0.85rem;color:#666}.vr-t{text-align:center;color:#666;margin-top:0.5rem}.qa{padding:0.6rem 0;border-bottom:1px solid #eee}.qa b{color:#d4a632}.rp{padding:0.4rem 0.6rem;margin:0.3rem 0 0.3rem 2rem;border-radius:6px;font-size:0.9rem}.rp.ai{background:#EDE9FE}.rp.teacher{background:#FEF3C7}.ft{text-align:center;color:#999;font-size:0.8rem;margin-top:2rem}</style></head><body><div class="hd"><h1>${esc(roomTitle)}</h1><div class="m">${ds} · ${ps.numChildren()} 人 · ${esc(roomId)}</div></div>${vH}${wH}${qH}<div class="ft">AI 課堂互動成果</div></body></html>`;
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=`classroom-${roomId}-${ds}.html`;a.click();
-}
+async function exportData(){
+  const [ws,qs,cvs,ps]=await Promise.all([db.ref(`rooms/${roomId}/wall`).orderByChild('ts').once('value'),db.ref(`rooms/${roomId}/qa`).once('value'),db.ref(`rooms/${roomId}/currentVote`).once('value'),db.ref(`rooms/${roomId}/presence`).once('value')]);
+  const rps=(await db.ref(`rooms/${roomId}/qaReplies`).once('value')).val()||{};
+  let vH='';const cv=cvs.val();
+  if(cv){const vs=await db.ref(`rooms/${roomId}/votes/${cv.id}`).once('value');const R=vs.val()||{},C={};let T=0;(cv.options||[]).forEach((_,i)=>C[i]=0);Object.values(R).forEach(v=>{if(typeof v==='number'){C[v]=(C[v]||0)+1;T++}});vH=`<div class="section"><h2>📊 ${esc(cv.question)}</h2>`;(cv.options||[]).forEach((o,i)=>{const p=T?Math.round(C[i]/T*100):0;vH+=`<div class="vr"><span class="vr-l">${esc(o)}</span><div class="vr-b"><div class="vr-f" style="width:${p}%;background:${VC[i%6]}">${p}%</div></div><span class="vr-c">${C[i]}</span></div>`});vH+=`<p class="vr-t">共${T}人</p></div>`}
+  const msgs=[];ws.forEach(c=>msgs.push(c.val()));let wH='';if(msgs.length){wH=`<div class="section"><h2>💬 訊息牆(${msgs.length})</h2>`;msgs.forEach(m=>{const r=m.role||'student';wH+=`<div class="msg ${r}"><b class="${r}">${r==='ai'?'🤖':r==='teacher'?'👨‍🏫':''}${esc(m.name)}</b> <small>${timeStr(m.ts)}</small><p>${esc(m.text)}</p></div>`});wH+='</div>'}
+  const qas=[];qs.forEach(c=>qas.push({id:c.key,...c.val()}));qas.sort((a,b)=>(b.ups||0)-(a.ups||0));let qH='';if(qas.length){qH=`<div class="section"><h2>❓ 問答(${qas.length})</h2>`;qas.forEach(q=>{qH+=`<div class="qa"><b>▲${q.ups||0}</b> ${esc(q.text)} <small>—${esc(q.name)}</small>`;const replies=rps[q.id]?Object.values(rps[q.id]).sort((a,b)=>a.ts-b.ts):[];replies.forEach(r=>{qH+=`<div class="rp ${r.role}"><b>${r.role==='ai'?'🤖':'👨‍🏫'}${esc(r.name)}</b> ${esc(r.text)}</div>`});qH+='</div>'});qH+='</div>'}
+  const ds=new Date().toISOString().slice(0,10);
+  const html=`<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${esc(roomTitle)} 成果</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans TC',system-ui,sans-serif;background:#F5F7FA;color:#1A1A1A;padding:2rem;max-width:900px;margin:0 auto}.hd{background:#0B3C5D;color:#fff;padding:2rem;border-radius:12px;margin-bottom:2rem;text-align:center}.hd h1{color:#FFC857;font-size:1.8rem}.hd .m{color:#D4F0EB;margin-top:0.5rem}.section{background:#fff;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06)}.section h2{color:#0B3C5D;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid #D4F0EB}.msg{padding:0.5rem 0;border-bottom:1px solid #eee}.msg.ai{background:#EDE9FE;padding:0.5rem;border-radius:6px;margin:0.2rem 0}.msg.teacher{background:#FEF3C7;padding:0.5rem;border-radius:6px;margin:0.2rem 0}.msg b.ai{color:#7C3AED}.msg b.teacher{color:#d4a632}.msg p{margin-top:0.2rem;white-space:pre-wrap}.vr{display:flex;align-items:center;gap:0.8rem;margin-bottom:0.5rem}.vr-l{min-width:100px;font-weight:700}.vr-b{flex:1;height:24px;background:#eee;border-radius:4px;overflow:hidden}.vr-f{height:100%;border-radius:4px;color:#fff;font-size:0.75rem;display:flex;align-items:center;justify-content:flex-end;padding-right:0.4rem}.vr-c{color:#666}.vr-t{text-align:center;color:#666}.qa{padding:0.6rem 0;border-bottom:1px solid #eee}.rp{padding:0.4rem 0.6rem;margin:0.3rem 0 0.3rem 2rem;border-radius:6px}.rp.ai{background:#EDE9FE}.rp.teacher{background:#FEF3C7}</style></head><body><div class="hd"><h1>${esc(roomTitle)}</h1><div class="m">${ds} · ${ps.numChildren()}人 · ${esc(roomId)}</div></div>${vH}${wH}${qH}<div style="text-align:center;color:#999;font-size:0.8rem;margin-top:2rem">AI 課堂互動成果</div></body></html>`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=`${roomId}.html`;a.click()}
 
-function esc(s){if(!s)return '';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
-function timeStr(t){if(!t)return '';const d=new Date(t);return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`}
+function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function timeStr(t){if(!t)return'';const d=new Date(t);return`${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`}
 </script>
 </body>
 </html>
