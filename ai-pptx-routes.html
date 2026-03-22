@@ -1206,15 +1206,43 @@ window.addEventListener('scroll', () => {
     });
     const db = firebase.database();
 
-    // Build section list from the page
-    const sectionEls = document.querySelectorAll('.section-header[id]');
-    const sectionList = [...sectionEls].map(el => ({
-      id: el.id,
-      title: el.querySelector('h2')?.textContent || el.id
-    }));
-    // Add overview (first section)
-    const overview = document.getElementById('overview');
-    if (overview) sectionList.unshift({ id: 'overview', title: '6 種路線總覽' });
+    // Build fine-grained scroll points from page content
+    // Collect all meaningful content blocks, not just section headers
+    const candidates = document.querySelectorAll(
+      '.section-header[id], section[id], .fade-in, .code-block, .comparison-table, .decision-flow'
+    );
+    const sectionList = [];
+    let lastY = -500;
+    let pointIdx = 0;
+    candidates.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      const y = rect.top + window.scrollY;
+      if (y - lastY < 350) return; // skip if too close to previous point
+
+      // Auto-assign ID if missing
+      if (!el.id) { el.id = 'sp-' + pointIdx; }
+      pointIdx++;
+
+      // Get best title
+      let title = '';
+      if (el.classList.contains('section-header')) {
+        title = el.querySelector('h2')?.textContent?.trim() || '';
+      } else {
+        const h = el.querySelector('h3, h4');
+        title = h?.textContent?.trim() || '';
+        // For pros/cons, label them
+        if (el.classList.contains('pros-cons')) title = '優缺點分析';
+        if (el.classList.contains('decision-flow')) title = '決策流程';
+        if (el.classList.contains('comparison-table')) title = '比較表';
+        if (el.classList.contains('code-block')) title = '程式碼範例';
+        // Indent sub-items
+        if (title && !el.classList.contains('section-header')) title = '　→ ' + title;
+      }
+      if (!title) return; // skip untitled elements
+
+      sectionList.push({ id: el.id, title });
+      lastY = y;
+    });
 
     // Write sections to Firebase so remote can read them
     db.ref(`rooms/${roomId}/presentation`).set({
