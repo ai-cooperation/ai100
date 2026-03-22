@@ -178,8 +178,11 @@ function enterDashboard() {
     document.getElementById('dispOnline').textContent = `${snap.numChildren()} 人在線`;
   });
   // Listen mode (in case changed elsewhere)
+  let lastRenderedMode = null;
   db.ref(`rooms/${roomId}/config/mode`).on('value', snap => {
     const mode = snap.val() || 'wall';
+    if (mode === lastRenderedMode) return;
+    lastRenderedMode = mode;
     currentMode = mode;
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
     renderContent();

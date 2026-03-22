@@ -215,6 +215,7 @@ function enterRoom() {
 // ── Mode Switch ──
 const modeNames = { wall:'💬 訊息牆', vote:'📊 投票', qa:'❓ 問答', pause:'⏸ 等待中' };
 function switchMode(mode) {
+  if (mode === currentMode && document.getElementById(mode + 'Content') && !document.getElementById(mode + 'Content').classList.contains('hidden')) return;
   currentMode = mode;
   document.getElementById('dispMode').textContent = modeNames[mode] || mode;
   ['wallContent','wallInput','voteContent','qaContent','qaInput','pauseContent'].forEach(id => document.getElementById(id).classList.add('hidden'));
@@ -248,9 +249,12 @@ function showWall() {
 function sendMessage() {
   const input = document.getElementById('wallText');
   const text = input.value.trim();
-  if (!text) return;
-  db.ref(`rooms/${roomId}/wall`).push({ text, name: userName, ts: firebase.database.ServerValue.TIMESTAMP });
+  if (!text || !roomId) return;
+  const msg = { text, name: userName, ts: firebase.database.ServerValue.TIMESTAMP };
   input.value = '';
+  input.focus();
+  db.ref(`rooms/${roomId}/wall`).push(msg)
+    .catch(err => { console.error('sendMessage error:', err); alert('發送失敗：' + err.message); });
 }
 
 // ── Vote ──
@@ -339,9 +343,12 @@ function showQA() {
 function sendQuestion() {
   const input = document.getElementById('qaText');
   const text = input.value.trim();
-  if (!text) return;
-  db.ref(`rooms/${roomId}/qa`).push({ text, name: userName, ts: firebase.database.ServerValue.TIMESTAMP, ups: 0 });
+  if (!text || !roomId) return;
+  const q = { text, name: userName, ts: firebase.database.ServerValue.TIMESTAMP, ups: 0 };
   input.value = '';
+  input.focus();
+  db.ref(`rooms/${roomId}/qa`).push(q)
+    .catch(err => { console.error('sendQuestion error:', err); alert('發送失敗：' + err.message); });
 }
 
 function upvoteQ(qid) {
