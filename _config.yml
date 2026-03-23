@@ -22,6 +22,15 @@ defaults:
     values:
       layout: "post"
 
+exclude:
+  - scripts/
+  - "*.py"
+  - ARCHITECTURE.md
+  - README.md
+  - node_modules/
+  - package.json
+  - package-lock.json
+
 markdown: kramdown
 kramdown:
   input: GFM
