@@ -25,7 +25,9 @@ defaults:
 exclude:
   - scripts/
   - "*.py"
-  - ARCHITECTURE.md
+  - classroom/ARCHITECTURE.md
+  - classroom/classroom_agent.py
+  - classroom/assistant.py
   - README.md
   - node_modules/
   - package.json
