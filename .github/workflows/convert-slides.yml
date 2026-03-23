@@ -1,0 +1,29 @@
+name: Convert PPTX Slides
+
+on:
+  push:
+    paths:
+      - 'slides/**/*.pptx'
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libreoffice poppler-utils
+          pip install pdf2image python-pptx Pillow
+
+      - name: Convert PPTX to WebP images
+        run: python scripts/convert_slides.py
+
+      - name: Commit converted images
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add slides/
+          git diff --cached --quiet || git commit -m "chore: auto-convert PPTX slides"
+          git push

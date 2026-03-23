@@ -1,0 +1,37 @@
+{
+  "id": "demo",
+  "title": "AI 簡報系統 Demo",
+  "totalSlides": 5,
+  "slides": [
+    {
+      "index": 1,
+      "image": "slide-01.svg",
+      "thumbnail": "slide-01.svg",
+      "notes": "歡迎來到 AI 課堂互動系統示範"
+    },
+    {
+      "index": 2,
+      "image": "slide-02.svg",
+      "thumbnail": "slide-02.svg",
+      "notes": "系統架構介紹：Firebase 即時同步"
+    },
+    {
+      "index": 3,
+      "image": "slide-03.svg",
+      "thumbnail": "slide-03.svg",
+      "notes": "語音驅動：老師說話就是操作"
+    },
+    {
+      "index": 4,
+      "image": "slide-04.svg",
+      "thumbnail": "slide-04.svg",
+      "notes": "互動功能：即時投票、文字雲、QA"
+    },
+    {
+      "index": 5,
+      "image": "slide-05.svg",
+      "thumbnail": "slide-05.svg",
+      "notes": "課前課後：AI 問卷 + 對話回饋"
+    }
+  ]
+}

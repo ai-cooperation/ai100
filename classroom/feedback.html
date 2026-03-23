@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>課後回饋</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--pri:#0F9D8A;--navy:#0B3C5D;--gold:#FFC857;--purple:#7C3AED;--purple-light:#EDE9FE;--bg:#F5F7FA;--surface:#fff;--text:#1A1A1A;--dim:#5A6B7A;--border:#e5e7eb;--student-bg:#0F9D8A;--ai-bg:#F3F0FF}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+  button{font-family:inherit;cursor:pointer;border:none}
+  input,textarea{font-family:inherit}
+
+  /* Progress dots */
+  .progress{display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.8rem 1rem;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+  .progress .dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:all 0.3s}
+  .progress .dot.active{background:var(--purple);transform:scale(1.3)}
+  .progress .dot.done{background:var(--pri)}
+  .progress .line{width:20px;height:2px;background:var(--border);transition:background 0.3s}
+  .progress .line.done{background:var(--pri)}
+
+  /* App shell */
+  .app{display:none;flex-direction:column;height:100vh;height:100dvh}
+  .app.active{display:flex}
+  .topbar{background:var(--navy);color:#fff;padding:0.6rem 1rem;display:flex;align-items:center;gap:0.5rem;flex-shrink:0}
+  .topbar .title{font-size:0.9rem;font-weight:700}
+  .topbar .room-name{font-size:0.75rem;color:var(--gold);margin-left:auto}
+
+  /* Chat area */
+  .chat{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.6rem;-webkit-overflow-scrolling:touch}
+
+  /* Message bubbles */
+  .msg-row{display:flex;align-items:flex-end;gap:0.5rem;animation:msgIn 0.3s ease-out}
+  .msg-row.ai{justify-content:flex-start}
+  .msg-row.student{justify-content:flex-end}
+  @keyframes msgIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+  .avatar{width:32px;height:32px;border-radius:50%;background:var(--purple-light);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+  .bubble{max-width:80%;padding:0.7rem 1rem;border-radius:16px;font-size:0.95rem;line-height:1.6;word-break:break-word;white-space:pre-wrap}
+  .msg-row.ai .bubble{background:var(--ai-bg);color:var(--text);border-bottom-left-radius:4px}
+  .msg-row.student .bubble{background:var(--student-bg);color:#fff;border-bottom-right-radius:4px}
+
+  /* Typing indicator */
+  .typing{display:flex;align-items:flex-end;gap:0.5rem}
+  .typing .dots{display:flex;gap:4px;padding:0.7rem 1rem;background:var(--ai-bg);border-radius:16px;border-bottom-left-radius:4px}
+  .typing .dots span{width:7px;height:7px;border-radius:50%;background:var(--purple);opacity:0.4;animation:blink 1.2s infinite}
+  .typing .dots span:nth-child(2){animation-delay:0.2s}
+  .typing .dots span:nth-child(3){animation-delay:0.4s}
+  @keyframes blink{0%,100%{opacity:0.4;transform:scale(1)}50%{opacity:1;transform:scale(1.2)}}
+
+  /* Quick replies */
+  .quick-replies{display:flex;gap:0.5rem;padding:0.6rem 1rem;overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch;background:var(--surface);border-top:1px solid var(--border)}
+  .quick-replies::-webkit-scrollbar{display:none}
+  .qr-btn{flex-shrink:0;padding:0.55rem 1rem;border-radius:20px;font-size:0.9rem;font-weight:700;background:var(--surface);color:var(--purple);border:2px solid var(--purple);transition:all 0.2s;white-space:nowrap}
+  .qr-btn:active{background:var(--purple);color:#fff;transform:scale(0.96)}
+
+  /* Text input bar */
+  .input-bar{display:flex;gap:0.5rem;padding:0.6rem 0.8rem;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
+  .input-bar input,.input-bar textarea{flex:1;padding:0.7rem 1rem;border:2px solid var(--border);border-radius:24px;font-size:0.95rem;outline:none;resize:none}
+  .input-bar input:focus,.input-bar textarea:focus{border-color:var(--pri)}
+  .input-bar .btn-send{width:44px;height:44px;border-radius:50%;background:var(--pri);color:#fff;font-size:1.2rem;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .input-bar .btn-send:disabled{opacity:0.4}
+  .input-bar .btn-skip{padding:0 1rem;border-radius:20px;background:none;color:var(--dim);border:1px solid var(--border);font-size:0.85rem;flex-shrink:0}
+
+  /* Star rating widget */
+  .rating-section{padding:0.8rem 0;animation:msgIn 0.3s ease-out}
+  .rating-group{display:flex;flex-direction:column;gap:1rem;padding:0.5rem 0}
+  .rating-item{display:flex;align-items:center;gap:0.8rem;padding:0.6rem 1rem;background:var(--surface);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+  .rating-label{font-size:0.9rem;font-weight:700;color:var(--navy);min-width:5em}
+  .stars{display:flex;gap:0.3rem}
+  .star{font-size:1.6rem;cursor:pointer;transition:transform 0.15s;color:var(--border);user-select:none;-webkit-user-select:none}
+  .star.filled{color:var(--gold)}
+  .star:active{transform:scale(1.3)}
+
+  /* Completion section */
+  .completion{display:flex;flex-direction:column;align-items:center;gap:1rem;padding:1.5rem;animation:msgIn 0.4s}
+  .completion .checkmark{width:56px;height:56px;border-radius:50%;background:var(--pri);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.8rem}
+  .btn-download{display:flex;align-items:center;justify-content:center;gap:0.5rem;width:100%;max-width:300px;padding:0.8rem;background:var(--navy);color:#fff;font-size:1rem;font-weight:700;border-radius:12px;text-decoration:none}
+  .btn-done{width:100%;max-width:300px;padding:0.8rem;background:var(--pri);color:#fff;font-size:1rem;font-weight:700;border-radius:12px}
+
+  /* Already submitted screen */
+  .done-screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;text-align:center;gap:1rem}
+  .done-screen.active{display:flex}
+  .done-screen .icon{font-size:3rem}
+  .done-screen h2{color:var(--navy);font-size:1.3rem}
+  .done-screen p{color:var(--dim);font-size:0.9rem}
+
+  /* Error screen */
+  .error-screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;text-align:center;gap:1rem}
+  .error-screen.active{display:flex}
+  .error-screen .icon{font-size:3rem}
+  .error-screen h2{color:var(--navy);font-size:1.3rem}
+  .error-screen p{color:var(--dim);font-size:0.9rem}
+
+  /* Loading screen */
+  .loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem}
+  .loading-screen .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin 0.8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading-screen p{color:var(--dim);font-size:0.9rem}
+
+  /* Hide utility */
+  .hidden{display:none !important}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loadingScreen" class="loading-screen">
+  <div class="spinner"></div>
+  <p>載入中...</p>
+</div>
+
+<!-- Error: no room -->
+<div id="errorScreen" class="error-screen">
+  <div class="icon">😕</div>
+  <h2>找不到教室</h2>
+  <p>請確認連結是否正確，或掃描老師提供的 QR Code。</p>
+</div>
+
+<!-- Already submitted -->
+<div id="doneScreen" class="done-screen">
+  <div class="icon">✅</div>
+  <h2>已完成回饋</h2>
+  <p>感謝你的回饋，老師已收到！</p>
+  <a id="doneDownloadBtn" class="btn-download hidden" href="#" target="_blank">📥 下載簡報</a>
+</div>
+
+<!-- Main chat app -->
+<div id="app" class="app">
+  <div class="topbar">
+    <span class="title">📋 課後回饋</span>
+    <span id="roomLabel" class="room-name"></span>
+  </div>
+
+  <div class="progress" id="progressBar">
+    <div class="dot active" data-step="1"></div>
+    <div class="line" data-after="1"></div>
+    <div class="dot" data-step="2"></div>
+    <div class="line" data-after="2"></div>
+    <div class="dot" data-step="3"></div>
+    <div class="line" data-after="3"></div>
+    <div class="dot" data-step="4"></div>
+    <div class="line" data-after="4"></div>
+    <div class="dot" data-step="5"></div>
+  </div>
+
+  <div class="chat" id="chat"></div>
+
+  <!-- Quick reply area -->
+  <div class="quick-replies hidden" id="quickReplies"></div>
+
+  <!-- Text input area -->
+  <div class="input-bar hidden" id="inputBar">
+    <input type="text" id="textInput" placeholder="輸入你的想法..." autocomplete="off">
+    <button class="btn-send" id="btnSend" disabled>➤</button>
+  </div>
+
+  <!-- Text input with skip -->
+  <div class="input-bar hidden" id="inputBarSkip">
+    <input type="text" id="textInputSkip" placeholder="有什麼建議嗎？（可跳過）" autocomplete="off">
+    <button class="btn-skip" id="btnSkip">跳過</button>
+    <button class="btn-send" id="btnSendSkip" disabled>➤</button>
+  </div>
+
+  <!-- Rating area -->
+  <div class="hidden" id="ratingArea" style="padding:0 1rem 0.5rem">
+    <div class="rating-group">
+      <div class="rating-item">
+        <span class="rating-label">整體滿意度</span>
+        <div class="stars" data-key="satisfaction">
+          <span class="star" data-v="1">★</span>
+          <span class="star" data-v="2">★</span>
+          <span class="star" data-v="3">★</span>
+          <span class="star" data-v="4">★</span>
+          <span class="star" data-v="5">★</span>
+        </div>
+      </div>
+      <div class="rating-item">
+        <span class="rating-label">推薦意願</span>
+        <div class="stars" data-key="recommend">
+          <span class="star" data-v="1">★</span>
+          <span class="star" data-v="2">★</span>
+          <span class="star" data-v="3">★</span>
+          <span class="star" data-v="4">★</span>
+          <span class="star" data-v="5">★</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Completion buttons -->
+  <div class="hidden" id="completionArea" style="padding:0 1rem 1rem">
+    <div class="completion">
+      <div class="checkmark">✓</div>
+      <a id="downloadBtn" class="btn-download hidden" href="#" target="_blank">📥 下載簡報</a>
+      <button class="btn-done" id="btnDone">完成 🎉</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  // --- Firebase init ---
+  firebase.initializeApp({
+    apiKey: ['AIza','SyC5X5C0Uje6bCMzrvuUuq5Bz33ly0PR-vc'].join(''),
+    authDomain: 'ai-classroom-70a97.firebaseapp.com',
+    databaseURL: 'https://ai-classroom-70a97-default-rtdb.firebaseio.com',
+    projectId: 'ai-classroom-70a97',
+    storageBucket: 'ai-classroom-70a97.firebasestorage.app',
+    appId: '1:160782638499:web:f3fb834ce32d643de28e16',
+  });
+  var db = firebase.database();
+
+  // --- URL params ---
+  var params = new URLSearchParams(window.location.search);
+  var roomId = params.get('room');
+
+  // --- Device & user identity ---
+  var odID = localStorage.getItem('_odid') || generateId();
+  localStorage.setItem('_odid', odID);
+  var studentName = localStorage.getItem('_name') || '匿名學員';
+
+  // --- DOM refs ---
+  var $loading = document.getElementById('loadingScreen');
+  var $error = document.getElementById('errorScreen');
+  var $done = document.getElementById('doneScreen');
+  var $app = document.getElementById('app');
+  var $chat = document.getElementById('chat');
+  var $quickReplies = document.getElementById('quickReplies');
+  var $inputBar = document.getElementById('inputBar');
+  var $textInput = document.getElementById('textInput');
+  var $btnSend = document.getElementById('btnSend');
+  var $inputBarSkip = document.getElementById('inputBarSkip');
+  var $textInputSkip = document.getElementById('textInputSkip');
+  var $btnSendSkip = document.getElementById('btnSendSkip');
+  var $btnSkip = document.getElementById('btnSkip');
+  var $ratingArea = document.getElementById('ratingArea');
+  var $completionArea = document.getElementById('completionArea');
+  var $progressBar = document.getElementById('progressBar');
+  var $roomLabel = document.getElementById('roomLabel');
+
+  // --- State ---
+  var currentStep = 0;
+  var conversation = [];
+  var answers = {};
+  var ratings = { satisfaction: 0, recommend: 0 };
+  var sections = [];
+  var roomConfig = {};
+  var slideUrl = '';
+  var startedAt = Date.now();
+
+  // --- Utilities ---
+  function generateId() {
+    return 'xxxx-xxxx'.replace(/x/g, function() {
+      return Math.floor(Math.random() * 16).toString(16);
+    });
+  }
+
+  function show(el) { el.classList.remove('hidden'); }
+  function hide(el) { el.classList.add('hidden'); }
+
+  function scrollToBottom() {
+    requestAnimationFrame(function() {
+      $chat.scrollTop = $chat.scrollHeight;
+    });
+  }
+
+  // --- Progress bar ---
+  function updateProgress(step) {
+    var dots = $progressBar.querySelectorAll('.dot');
+    var lines = $progressBar.querySelectorAll('.line');
+    dots.forEach(function(d) {
+      var s = parseInt(d.dataset.step);
+      d.classList.remove('active', 'done');
+      if (s < step) d.classList.add('done');
+      else if (s === step) d.classList.add('active');
+    });
+    lines.forEach(function(l) {
+      var a = parseInt(l.dataset.after);
+      l.classList.toggle('done', a < step);
+    });
+  }
+
+  // --- Chat rendering ---
+  function addAIMessage(text) {
+    conversation.push({ role: 'ai', text: text });
+    var row = document.createElement('div');
+    row.className = 'msg-row ai';
+    row.innerHTML = '<div class="avatar">🤖</div><div class="bubble">' + escapeHtml(text) + '</div>';
+    $chat.appendChild(row);
+    scrollToBottom();
+  }
+
+  function addStudentMessage(text) {
+    conversation.push({ role: 'student', text: text });
+    var row = document.createElement('div');
+    row.className = 'msg-row student';
+    row.innerHTML = '<div class="bubble">' + escapeHtml(text) + '</div>';
+    $chat.appendChild(row);
+    scrollToBottom();
+  }
+
+  function showTyping() {
+    var el = document.createElement('div');
+    el.className = 'typing';
+    el.id = 'typingIndicator';
+    el.innerHTML = '<div class="avatar">🤖</div><div class="dots"><span></span><span></span><span></span></div>';
+    $chat.appendChild(el);
+    scrollToBottom();
+  }
+
+  function hideTyping() {
+    var el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+  }
+
+  function aiSay(text, callback) {
+    hideAllInputs();
+    showTyping();
+    setTimeout(function() {
+      hideTyping();
+      addAIMessage(text);
+      if (callback) callback();
+    }, 500);
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // --- Input helpers ---
+  function hideAllInputs() {
+    hide($quickReplies);
+    hide($inputBar);
+    hide($inputBarSkip);
+    hide($ratingArea);
+    hide($completionArea);
+    $quickReplies.innerHTML = '';
+  }
+
+  function showQuickReplies(options, onSelect) {
+    $quickReplies.innerHTML = '';
+    options.forEach(function(opt) {
+      var btn = document.createElement('button');
+      btn.className = 'qr-btn';
+      btn.textContent = opt.label;
+      btn.addEventListener('click', function() {
+        hideAllInputs();
+        addStudentMessage(opt.label);
+        onSelect(opt.value, opt.label);
+      });
+      $quickReplies.appendChild(btn);
+    });
+    show($quickReplies);
+    scrollToBottom();
+  }
+
+  function showTextInput(placeholder, onSubmit) {
+    $textInput.value = '';
+    $textInput.placeholder = placeholder || '輸入你的想法...';
+    $btnSend.disabled = true;
+    show($inputBar);
+    $textInput.focus();
+
+    var handler = function() {
+      var val = $textInput.value.trim();
+      if (!val) return;
+      $textInput.removeEventListener('keydown', keyHandler);
+      $btnSend.removeEventListener('click', handler);
+      hideAllInputs();
+      addStudentMessage(val);
+      onSubmit(val);
+    };
+    var keyHandler = function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); handler(); }
+    };
+    $textInput.addEventListener('input', function() {
+      $btnSend.disabled = !$textInput.value.trim();
+    });
+    $textInput.addEventListener('keydown', keyHandler);
+    $btnSend.addEventListener('click', handler);
+    scrollToBottom();
+  }
+
+  function showTextInputWithSkip(placeholder, onSubmit, onSkip) {
+    $textInputSkip.value = '';
+    $textInputSkip.placeholder = placeholder || '有什麼建議嗎？（可跳過）';
+    $btnSendSkip.disabled = true;
+    show($inputBarSkip);
+    $textInputSkip.focus();
+
+    var submitted = false;
+    var handler = function() {
+      if (submitted) return;
+      var val = $textInputSkip.value.trim();
+      if (!val) return;
+      submitted = true;
+      cleanup();
+      hideAllInputs();
+      addStudentMessage(val);
+      onSubmit(val);
+    };
+    var skipHandler = function() {
+      if (submitted) return;
+      submitted = true;
+      cleanup();
+      hideAllInputs();
+      addStudentMessage('（跳過）');
+      onSkip();
+    };
+    var keyHandler = function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); handler(); }
+    };
+    var inputHandler = function() {
+      $btnSendSkip.disabled = !$textInputSkip.value.trim();
+    };
+
+    function cleanup() {
+      $textInputSkip.removeEventListener('keydown', keyHandler);
+      $textInputSkip.removeEventListener('input', inputHandler);
+      $btnSendSkip.removeEventListener('click', handler);
+      $btnSkip.removeEventListener('click', skipHandler);
+    }
+
+    $textInputSkip.addEventListener('input', inputHandler);
+    $textInputSkip.addEventListener('keydown', keyHandler);
+    $btnSendSkip.addEventListener('click', handler);
+    $btnSkip.addEventListener('click', skipHandler);
+    scrollToBottom();
+  }
+
+  // --- Star rating ---
+  function initStarRatings() {
+    document.querySelectorAll('.stars').forEach(function(group) {
+      var key = group.dataset.key;
+      group.querySelectorAll('.star').forEach(function(star) {
+        star.addEventListener('click', function() {
+          var val = parseInt(star.dataset.v);
+          ratings[key] = val;
+          group.querySelectorAll('.star').forEach(function(s) {
+            s.classList.toggle('filled', parseInt(s.dataset.v) <= val);
+          });
+          checkRatingsComplete();
+        });
+      });
+    });
+  }
+
+  function checkRatingsComplete() {
+    if (ratings.satisfaction > 0 && ratings.recommend > 0) {
+      show($completionArea);
+      scrollToBottom();
+    }
+  }
+
+  // --- Steps ---
+  function runStep(step) {
+    currentStep = step;
+    updateProgress(step);
+
+    switch (step) {
+      case 1: stepHelpful(); break;
+      case 2: stepUnclear(); break;
+      case 3: stepPacing(); break;
+      case 4: stepSuggestion(); break;
+      case 5: stepComplete(); break;
+    }
+  }
+
+  function stepHelpful() {
+    var text = '感謝參加今天的課！想聽聽你的想法 😊\n今天哪一段對你最有幫助？';
+    aiSay(text, function() {
+      var options = sections.map(function(s, i) {
+        return { label: s, value: s };
+      });
+      options.push({ label: '其他', value: '__other__' });
+
+      showQuickReplies(options, function(value, label) {
+        if (value === '__other__') {
+          showTextInput('輸入你覺得最有幫助的部分...', function(val) {
+            answers.helpful = val;
+            runStep(2);
+          });
+        } else {
+          answers.helpful = value;
+          runStep(2);
+        }
+      });
+    });
+  }
+
+  function stepUnclear() {
+    aiSay('太好了！那有沒有哪裡覺得不太清楚的？', function() {
+      showTextInput('例如：RAG 的部分有點快', function(val) {
+        answers.unclear = val;
+        runStep(3);
+      });
+    });
+  }
+
+  function stepPacing() {
+    aiSay('整體節奏覺得如何？', function() {
+      showQuickReplies([
+        { label: '有點快 🏃', value: 'too_fast' },
+        { label: '剛剛好 👌', value: 'just_right' },
+        { label: '可以更快 🚀', value: 'too_slow' }
+      ], function(value) {
+        answers.pacing = value;
+        runStep(4);
+      });
+    });
+  }
+
+  function stepSuggestion() {
+    aiSay('最後，有什麼建議想給老師的嗎？', function() {
+      showTextInputWithSkip(
+        '有什麼建議嗎？（可跳過）',
+        function(val) {
+          answers.suggestion = val;
+          runStep(5);
+        },
+        function() {
+          answers.suggestion = '';
+          runStep(5);
+        }
+      );
+    });
+  }
+
+  function stepComplete() {
+    aiSay('謝謝你的回饋！幫你整理一下...', function() {
+      show($ratingArea);
+      scrollToBottom();
+    });
+  }
+
+  // --- Save to Firebase ---
+  function saveFeedback(callback) {
+    var data = {
+      name: studentName,
+      startedAt: startedAt,
+      completedAt: Date.now(),
+      conversation: conversation,
+      answers: answers,
+      ratings: ratings,
+      downloadedSlides: false
+    };
+    db.ref('rooms/' + roomId + '/feedback/' + odID).set(data)
+      .then(callback)
+      .catch(function(err) {
+        console.error('Save failed:', err);
+        callback();
+      });
+  }
+
+  // --- Download tracking ---
+  function trackDownload() {
+    db.ref('rooms/' + roomId + '/feedback/' + odID + '/downloadedSlides').set(true);
+  }
+
+  // --- Completion ---
+  function setupCompletion() {
+    var $downloadBtn = document.getElementById('downloadBtn');
+    var $btnDone = document.getElementById('btnDone');
+
+    if (slideUrl) {
+      $downloadBtn.href = slideUrl;
+      show($downloadBtn);
+      $downloadBtn.addEventListener('click', function() {
+        trackDownload();
+      });
+    }
+
+    $btnDone.addEventListener('click', function() {
+      saveFeedback(function() {
+        hide($app);
+        show($done);
+        $done.classList.add('active');
+        if (slideUrl) {
+          var $doneDownload = document.getElementById('doneDownloadBtn');
+          $doneDownload.href = slideUrl;
+          show($doneDownload);
+          $doneDownload.addEventListener('click', function() {
+            trackDownload();
+          });
+        }
+      });
+    });
+  }
+
+  // --- Init ---
+  function init() {
+    if (!roomId) {
+      hide($loading);
+      show($error);
+      $error.classList.add('active');
+      return;
+    }
+
+    // Check room exists and load config
+    var configRef = db.ref('rooms/' + roomId + '/config');
+    configRef.once('value').then(function(snap) {
+      if (!snap.exists()) {
+        hide($loading);
+        show($error);
+        $error.classList.add('active');
+        return;
+      }
+
+      roomConfig = snap.val() || {};
+      $roomLabel.textContent = roomConfig.title || roomId;
+
+      // Check for duplicate submission
+      return db.ref('rooms/' + roomId + '/feedback/' + odID).once('value');
+    }).then(function(snap) {
+      if (!snap) return; // room not found, already handled
+
+      if (snap.exists()) {
+        // Already submitted
+        hide($loading);
+        var existing = snap.val();
+        // Show slide download if available
+        return db.ref('rooms/' + roomId + '/presentation').once('value').then(function(presSnap) {
+          var pres = presSnap.val() || {};
+          if (pres.url) {
+            var $doneDownload = document.getElementById('doneDownloadBtn');
+            $doneDownload.href = pres.url;
+            show($doneDownload);
+          }
+          show($done);
+          $done.classList.add('active');
+        });
+      }
+
+      // Load sections for step 1
+      return db.ref('rooms/' + roomId + '/presentation').once('value').then(function(presSnap) {
+        var pres = presSnap.val() || {};
+        sections = pres.sections || [];
+        slideUrl = pres.url || '';
+
+        if (sections.length === 0) {
+          sections = ['全部都很有幫助'];
+        }
+
+        hide($loading);
+        show($app);
+        $app.classList.add('active');
+
+        initStarRatings();
+        setupCompletion();
+        runStep(1);
+      });
+    }).catch(function(err) {
+      console.error('Init error:', err);
+      hide($loading);
+      show($error);
+      $error.classList.add('active');
+    });
+  }
+
+  init();
+
+})();
+</script>
+</body>
+</html>

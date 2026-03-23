@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Presenter — AI 課堂簡報</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0B3C5D;
+    --teal: #0F9D8A;
+    --gold: #FFC857;
+    --dark-bg: #0d1117;
+    --surface: #161b22;
+    --text: #e6edf3;
+    --dim: #7d8590;
+    --border: #30363d;
+    --purple: #7C3AED;
+    --red: #DC2626;
+    --orange: #E07A3A;
+    --cyan: #06B6D4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: 'Noto Sans TC', system-ui, sans-serif;
+    color: var(--text);
+    cursor: none;
+  }
+
+  body.ui-visible { cursor: default; }
+
+  /* ── Slide viewport ── */
+  #slide-viewport {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: #000;
+  }
+
+  #slide-img {
+    max-width: 100%; max-height: 100%;
+    object-fit: contain;
+    transition: opacity 0.25s ease;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  #slide-img.loading { opacity: 0; }
+
+  /* ── UI layer (toggleable) ── */
+  .ui-layer {
+    position: fixed;
+    z-index: 50;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  .ui-hidden .ui-layer { opacity: 0; }
+
+  /* ── Connected badge — bottom-left ── */
+  #badge-connected {
+    bottom: 1rem; left: 1rem;
+    background: var(--teal);
+    color: #fff;
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    opacity: 0.85;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    pointer-events: auto;
+  }
+
+  #badge-connected .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #4ade80;
+    animation: pulse-dot 2s infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ── Slide counter — bottom-right ── */
+  #slide-counter {
+    bottom: 1rem; right: 1rem;
+    background: rgba(0, 0, 0, 0.6);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    pointer-events: auto;
+  }
+
+  /* ── Overlay — bottom portion ── */
+  #overlay-container {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 38%;
+    z-index: 40;
+    pointer-events: none;
+    display: none;
+  }
+
+  #overlay-container.active { display: block; }
+
+  #overlay-backdrop {
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.75) 30%, rgba(0,0,0,0.88) 100%);
+    pointer-events: none;
+  }
+
+  #overlay-content {
+    position: absolute; inset: 0;
+    padding: 2.5rem 3rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── Vote bar chart ── */
+  .vote-title {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  }
+
+  .vote-bars {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .vote-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .vote-bar-label {
+    min-width: 120px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    text-align: right;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    flex-shrink: 0;
+  }
+
+  .vote-bar-track {
+    flex: 1;
+    height: 32px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .vote-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+    min-width: 0;
+    position: relative;
+  }
+
+  .vote-bar-fill::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%);
+    border-radius: 6px;
+  }
+
+  .vote-bar-pct {
+    min-width: 60px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.85);
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .vote-bar-count {
+    min-width: 40px;
+    font-size: 0.8rem;
+    color: var(--dim);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Word cloud ── */
+  #wordcloud-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .wc-word {
+    position: absolute;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    white-space: nowrap;
+    animation: wc-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    transition: font-size 0.4s ease, left 0.4s ease, top 0.4s ease;
+  }
+
+  @keyframes wc-pop {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* ── Fullscreen prompt ── */
+  #fs-prompt {
+    position: fixed; inset: 0;
+    z-index: 200;
+    background: rgba(0,0,0,0.9);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 1.5rem;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  #fs-prompt.hidden { display: none; }
+
+  #fs-prompt .icon { font-size: 4rem; opacity: 0.7; }
+  #fs-prompt .msg { font-size: 1.4rem; font-weight: 700; }
+  #fs-prompt .sub { font-size: 0.9rem; color: var(--dim); }
+
+  /* ── Error state ── */
+  #error-display {
+    position: fixed; inset: 0;
+    z-index: 100;
+    background: var(--dark-bg);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: var(--text);
+    padding: 2rem;
+    text-align: center;
+  }
+
+  #error-display.active { display: flex; }
+  #error-display .err-icon { font-size: 3rem; opacity: 0.5; }
+  #error-display .err-title { font-size: 1.3rem; font-weight: 700; color: var(--red); }
+  #error-display .err-detail { font-size: 0.9rem; color: var(--dim); max-width: 500px; }
+</style>
+</head>
+<body class="ui-visible">
+
+<!-- Slide viewport -->
+<div id="slide-viewport">
+  <img id="slide-img" alt="Slide">
+</div>
+
+<!-- UI overlays -->
+<div id="badge-connected" class="ui-layer" style="display:none;">
+  <span class="dot"></span>
+  <span id="badge-text">connecting...</span>
+</div>
+
+<div id="slide-counter" class="ui-layer">- / -</div>
+
+<!-- Overlay container (bottom portion) -->
+<div id="overlay-container">
+  <div id="overlay-backdrop"></div>
+  <div id="overlay-content"></div>
+</div>
+
+<!-- Fullscreen prompt -->
+<div id="fs-prompt">
+  <div class="icon">&#9974;</div>
+  <div class="msg">Click to enter fullscreen</div>
+  <div class="sub">Press F anytime to toggle &middot; ESC to exit</div>
+</div>
+
+<!-- Error display -->
+<div id="error-display">
+  <div class="err-icon">&#9888;</div>
+  <div class="err-title" id="err-title">Error</div>
+  <div class="err-detail" id="err-detail"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  // ── Config ──
+  var VOTE_COLORS = ['#0F9D8A','#E07A3A','#7C3AED','#06B6D4','#FFC857','#DC2626'];
+  var PRELOAD_RANGE = 2;
+  var WC_COLORS = ['#0F9D8A','#FFC857','#7C3AED','#06B6D4','#E07A3A','#DC2626','#4ade80','#f472b6'];
+
+  // ── URL params ──
+  var params = new URLSearchParams(window.location.search);
+  var roomId = params.get('room');
+  var deckName = params.get('deck');
+
+  if (!roomId || !deckName) {
+    showError('Missing Parameters', 'URL must include ?room=xxx&deck=yyy');
+    return;
+  }
+
+  // ── State ──
+  var slides = [];
+  var currentIndex = 0;
+  var preloadCache = {};
+  var uiVisible = true;
+  var uiTimeout = null;
+  var db = null;
+  var overlayType = 'none';
+  var voteListener = null;
+  var wallListener = null;
+
+  // ── DOM refs ──
+  var slideImg = document.getElementById('slide-img');
+  var slideCounter = document.getElementById('slide-counter');
+  var badgeConnected = document.getElementById('badge-connected');
+  var badgeText = document.getElementById('badge-text');
+  var overlayContainer = document.getElementById('overlay-container');
+  var overlayContent = document.getElementById('overlay-content');
+  var fsPrompt = document.getElementById('fs-prompt');
+
+  // ── Initialize ──
+  initFirebase();
+  loadSlides();
+  setupKeyboard();
+  setupClickToggle();
+  setupFullscreenPrompt();
+
+  // ── Firebase init ──
+  function initFirebase() {
+    firebase.initializeApp({
+      apiKey: ['AIza','SyC5X5C0Uje6bCMzrvuUuq5Bz33ly0PR-vc'].join(''),
+      authDomain: 'ai-classroom-70a97.firebaseapp.com',
+      databaseURL: 'https://ai-classroom-70a97-default-rtdb.firebaseio.com',
+      projectId: 'ai-classroom-70a97',
+      storageBucket: 'ai-classroom-70a97.firebasestorage.app',
+      appId: '1:160782638499:web:f3fb834ce32d643de28e16',
+    });
+    db = firebase.database();
+
+    // Show connected badge
+    badgeConnected.style.display = 'flex';
+    badgeText.textContent = 'connecting...';
+
+    // Monitor connection state
+    db.ref('.info/connected').on('value', function(snap) {
+      if (snap.val() === true) {
+        badgeText.textContent = '\u{1F4E1} connected \u00B7 ' + roomId;
+        badgeConnected.style.background = '#0F9D8A';
+      } else {
+        badgeText.textContent = '\u26A0 disconnected';
+        badgeConnected.style.background = '#DC2626';
+      }
+    });
+
+    // Listen for slide control commands
+    db.ref('rooms/' + roomId + '/slideControl').on('value', function(snap) {
+      var val = snap.val();
+      if (!val) return;
+      if (val.action === 'goto' && typeof val.index === 'number') {
+        goToSlide(val.index);
+      }
+    });
+
+    // Listen for overlay commands
+    db.ref('rooms/' + roomId + '/overlay').on('value', function(snap) {
+      var val = snap.val();
+      if (!val || !val.type) {
+        hideOverlay();
+        return;
+      }
+      handleOverlay(val);
+    });
+  }
+
+  // ── Load slides manifest ──
+  function loadSlides() {
+    var manifestUrl = '/slides/' + deckName + '/slides.json';
+    fetch(manifestUrl)
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status + ' loading ' + manifestUrl);
+        return res.json();
+      })
+      .then(function(data) {
+        if (!data || !data.slides || !data.slides.length) {
+          throw new Error('Empty or invalid slides.json');
+        }
+        slides = data.slides;
+        writePresentationMeta(data);
+        goToSlide(0);
+      })
+      .catch(function(err) {
+        showError('Failed to load slides', err.message);
+      });
+  }
+
+  // ── Write presentation metadata to Firebase ──
+  function writePresentationMeta(data) {
+    if (!db) return;
+    var sections = [];
+    if (data.sections) {
+      sections = data.sections;
+    } else {
+      sections = [{ title: data.title || deckName, startIndex: 0 }];
+    }
+    db.ref('rooms/' + roomId + '/presentation').set({
+      sections: sections,
+      current: 0,
+      totalSlides: slides.length,
+      url: window.location.href,
+      deck: deckName,
+    });
+  }
+
+  // ── Navigation ──
+  function goToSlide(index) {
+    if (slides.length === 0) return;
+    var idx = Math.max(0, Math.min(index, slides.length - 1));
+    if (idx === currentIndex && slideImg.src) {
+      // Already at this slide, but update counter anyway
+      updateCounter(idx);
+      return;
+    }
+    currentIndex = idx;
+    var slide = slides[idx];
+    var src = buildSlidePath(slide);
+
+    slideImg.classList.add('loading');
+    var img = getOrPreload(src);
+    if (img.complete && img.naturalWidth > 0) {
+      applySlide(src);
+    } else {
+      img.onload = function() { applySlide(src); };
+      img.onerror = function() { applySlide(src); };
+    }
+
+    updateCounter(idx);
+    preloadAdjacent(idx);
+
+    // Update Firebase current index
+    if (db) {
+      db.ref('rooms/' + roomId + '/presentation/current').set(idx);
+    }
+  }
+
+  function applySlide(src) {
+    slideImg.src = src;
+    slideImg.classList.remove('loading');
+  }
+
+  function buildSlidePath(slide) {
+    return '/slides/' + deckName + '/' + slide.image;
+  }
+
+  function updateCounter(idx) {
+    slideCounter.textContent = (idx + 1) + ' / ' + slides.length;
+  }
+
+  // ── Preloading ──
+  function getOrPreload(src) {
+    if (preloadCache[src]) return preloadCache[src];
+    var img = new Image();
+    img.src = src;
+    preloadCache[src] = img;
+    return img;
+  }
+
+  function preloadAdjacent(idx) {
+    for (var i = 1; i <= PRELOAD_RANGE; i++) {
+      if (idx + i < slides.length) {
+        getOrPreload(buildSlidePath(slides[idx + i]));
+      }
+      if (idx - i >= 0) {
+        getOrPreload(buildSlidePath(slides[idx - i]));
+      }
+    }
+  }
+
+  // ── Keyboard ──
+  function setupKeyboard() {
+    document.addEventListener('keydown', function(e) {
+      switch (e.key) {
+        case 'ArrowRight':
+        case 'PageDown':
+          e.preventDefault();
+          goToSlide(currentIndex + 1);
+          break;
+        case 'ArrowLeft':
+        case 'PageUp':
+          e.preventDefault();
+          goToSlide(currentIndex - 1);
+          break;
+        case 'Home':
+          e.preventDefault();
+          goToSlide(0);
+          break;
+        case 'End':
+          e.preventDefault();
+          goToSlide(slides.length - 1);
+          break;
+        case 'f':
+        case 'F':
+          e.preventDefault();
+          toggleFullscreen();
+          break;
+        case 'Escape':
+          // Let browser handle exiting fullscreen
+          break;
+      }
+    });
+  }
+
+  // ── Click to toggle UI ──
+  function setupClickToggle() {
+    document.getElementById('slide-viewport').addEventListener('click', function() {
+      uiVisible = !uiVisible;
+      document.body.classList.toggle('ui-hidden', !uiVisible);
+      document.body.classList.toggle('ui-visible', uiVisible);
+    });
+  }
+
+  // ── Fullscreen ──
+  function toggleFullscreen() {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      var el = document.documentElement;
+      if (el.requestFullscreen) {
+        el.requestFullscreen();
+      } else if (el.webkitRequestFullscreen) {
+        el.webkitRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+    }
+  }
+
+  function setupFullscreenPrompt() {
+    fsPrompt.addEventListener('click', function() {
+      fsPrompt.classList.add('hidden');
+      toggleFullscreen();
+    });
+
+    // Also hide on any key
+    document.addEventListener('keydown', function() {
+      if (!fsPrompt.classList.contains('hidden')) {
+        fsPrompt.classList.add('hidden');
+      }
+    }, { once: false });
+
+    // Auto-hide after 5 seconds
+    setTimeout(function() {
+      fsPrompt.classList.add('hidden');
+    }, 5000);
+  }
+
+  // ── Overlay system ──
+  function handleOverlay(overlayData) {
+    // Clean up previous listeners
+    cleanupOverlayListeners();
+
+    overlayType = overlayData.type;
+
+    if (overlayType === 'none') {
+      hideOverlay();
+      return;
+    }
+
+    overlayContent.innerHTML = '';
+    overlayContainer.classList.add('active');
+
+    if (overlayType === 'vote_live') {
+      setupVoteOverlay(overlayData);
+    } else if (overlayType === 'wordcloud') {
+      setupWordCloudOverlay(overlayData);
+    } else {
+      hideOverlay();
+    }
+  }
+
+  function hideOverlay() {
+    overlayType = 'none';
+    overlayContainer.classList.remove('active');
+    overlayContent.innerHTML = '';
+    cleanupOverlayListeners();
+  }
+
+  function cleanupOverlayListeners() {
+    if (voteListener) {
+      voteListener.off();
+      voteListener = null;
+    }
+    if (wallListener) {
+      wallListener.off();
+      wallListener = null;
+    }
+  }
+
+  // ── Vote live overlay ──
+  function setupVoteOverlay(overlayData) {
+    // Read currentVote for question + options
+    db.ref('rooms/' + roomId + '/currentVote').once('value', function(snap) {
+      var voteData = snap.val();
+      if (!voteData) {
+        overlayContent.innerHTML = '<div class="vote-title">No active vote</div>';
+        return;
+      }
+
+      var question = voteData.question || '';
+      var options = voteData.options || [];
+      var voteId = voteData.id || 'unknown';
+
+      renderVoteBars(question, options);
+
+      // Listen for real-time vote updates
+      voteListener = db.ref('rooms/' + roomId + '/votes/' + voteId);
+      voteListener.on('value', function(voteSnap) {
+        var votes = voteSnap.val() || {};
+        updateVoteBars(options, votes);
+      });
+    });
+  }
+
+  function renderVoteBars(question, options) {
+    var html = '<div class="vote-title">' + escapeHtml(question) + '</div>';
+    html += '<div class="vote-bars" id="vote-bars">';
+    for (var i = 0; i < options.length; i++) {
+      var color = VOTE_COLORS[i % VOTE_COLORS.length];
+      html += '<div class="vote-bar-row">';
+      html += '  <div class="vote-bar-label">' + escapeHtml(options[i]) + '</div>';
+      html += '  <div class="vote-bar-track">';
+      html += '    <div class="vote-bar-fill" id="vbar-' + i + '" style="width:0%;background:' + color + ';"></div>';
+      html += '  </div>';
+      html += '  <div class="vote-bar-pct" id="vpct-' + i + '">0%</div>';
+      html += '  <div class="vote-bar-count" id="vcnt-' + i + '">(0)</div>';
+      html += '</div>';
+    }
+    html += '</div>';
+    overlayContent.innerHTML = html;
+  }
+
+  function updateVoteBars(options, votes) {
+    // Count votes per option
+    var counts = new Array(options.length).fill(0);
+    var total = 0;
+    var keys = Object.keys(votes);
+    for (var k = 0; k < keys.length; k++) {
+      var optIdx = votes[keys[k]];
+      if (typeof optIdx === 'number' && optIdx >= 0 && optIdx < options.length) {
+        counts[optIdx]++;
+        total++;
+      }
+    }
+
+    // Find max for relative bar sizing
+    var maxCount = Math.max.apply(null, counts.concat([1]));
+
+    for (var i = 0; i < options.length; i++) {
+      var bar = document.getElementById('vbar-' + i);
+      var pct = document.getElementById('vpct-' + i);
+      var cnt = document.getElementById('vcnt-' + i);
+      if (!bar) continue;
+
+      var percentage = total > 0 ? Math.round((counts[i] / total) * 100) : 0;
+      var barWidth = maxCount > 0 ? Math.round((counts[i] / maxCount) * 100) : 0;
+
+      bar.style.width = barWidth + '%';
+      pct.textContent = percentage + '%';
+      cnt.textContent = '(' + counts[i] + ')';
+    }
+  }
+
+  // ── Word cloud overlay ──
+  function setupWordCloudOverlay(overlayData) {
+    var startTime = overlayData.startTime || 0;
+    var wordFreq = {};
+
+    overlayContent.innerHTML = '<div id="wordcloud-area"></div>';
+
+    // Listen to wall messages
+    wallListener = db.ref('rooms/' + roomId + '/wall').orderByChild('ts').startAt(startTime);
+    wallListener.on('value', function(snap) {
+      var messages = snap.val();
+      wordFreq = {};
+
+      if (messages) {
+        var msgKeys = Object.keys(messages);
+        for (var k = 0; k < msgKeys.length; k++) {
+          var msg = messages[msgKeys[k]];
+          if (msg && msg.text) {
+            extractWords(msg.text, wordFreq);
+          }
+        }
+      }
+      renderWordCloud(wordFreq);
+    });
+  }
+
+  function extractWords(text, freq) {
+    // Split by common delimiters, filter short words
+    var words = text.replace(/[.,!?;:(){}[\]"'`~@#$%^&*+=<>/\\|]/g, ' ')
+                    .split(/\s+/)
+                    .filter(function(w) { return w.length >= 2; });
+    for (var i = 0; i < words.length; i++) {
+      var w = words[i];
+      freq[w] = (freq[w] || 0) + 1;
+    }
+  }
+
+  function renderWordCloud(freq) {
+    var area = document.getElementById('wordcloud-area');
+    if (!area) return;
+
+    var entries = Object.keys(freq).map(function(w) {
+      return { word: w, count: freq[w] };
+    });
+
+    // Sort by frequency descending, take top 40
+    entries.sort(function(a, b) { return b.count - a.count; });
+    entries = entries.slice(0, 40);
+
+    if (entries.length === 0) {
+      area.innerHTML = '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:1.2rem;">Waiting for messages...</div>';
+      return;
+    }
+
+    var maxFreq = entries[0].count;
+    var minSize = 14;
+    var maxSize = 52;
+
+    area.innerHTML = '';
+
+    // Place words with pseudo-random positions
+    var areaRect = area.getBoundingClientRect();
+    var usedRects = [];
+
+    for (var i = 0; i < entries.length; i++) {
+      var entry = entries[i];
+      var ratio = maxFreq > 1 ? (entry.count - 1) / (maxFreq - 1) : 0;
+      var fontSize = minSize + ratio * (maxSize - minSize);
+      var color = WC_COLORS[i % WC_COLORS.length];
+
+      var span = document.createElement('span');
+      span.className = 'wc-word';
+      span.textContent = entry.word;
+      span.style.fontSize = fontSize + 'px';
+      span.style.color = color;
+      span.style.animationDelay = (i * 0.05) + 's';
+
+      // Distribute across the area using golden ratio-ish placement
+      var angle = i * 2.399963;
+      var r = 0.25 + (i / entries.length) * 0.35;
+      var cx = 50 + Math.cos(angle) * r * 80;
+      var cy = 50 + Math.sin(angle) * r * 60;
+      cx = Math.max(5, Math.min(85, cx));
+      cy = Math.max(5, Math.min(85, cy));
+
+      span.style.left = cx + '%';
+      span.style.top = cy + '%';
+      span.style.transform = 'translate(-50%, -50%)';
+      span.style.opacity = 0.7 + ratio * 0.3;
+
+      area.appendChild(span);
+    }
+  }
+
+  // ── Utilities ──
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  function showError(title, detail) {
+    document.getElementById('err-title').textContent = title;
+    document.getElementById('err-detail').textContent = detail || '';
+    document.getElementById('error-display').classList.add('active');
+    document.getElementById('fs-prompt').classList.add('hidden');
+  }
+
+})();
+</script>
+</body>
+</html>

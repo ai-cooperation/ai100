@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 課堂互動 — 課程規劃</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--pri:#0F9D8A;--pri-d:#0A7A6B;--navy:#0B3C5D;--gold:#FFC857;--gold-d:#d4a632;--red:#DC2626;--purple:#7C3AED;--orange:#E07A3A;--bg:#0d1117;--surface:#161b22;--text:#e6edf3;--dim:#7d8590;--border:#30363d}
+  *{margin:0;padding:0;box-sizing:border-box}html,body{height:100%;font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+  button{font-family:inherit;cursor:pointer;border:none}input,textarea,select{font-family:inherit}
+  a{color:var(--pri);text-decoration:none}
+
+  /* Login */
+  .center-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+  .box{background:var(--surface);border-radius:16px;padding:2.5rem;width:min(460px,100%);border:1px solid var(--border);text-align:center}
+  .box h1{font-size:1.5rem;color:var(--gold);margin-bottom:0.3rem}
+  .box .sub{color:var(--dim);font-size:0.85rem;margin-bottom:2rem}
+  .btn-google{display:flex;align-items:center;justify-content:center;gap:0.8rem;width:100%;padding:0.9rem;background:#fff;color:#333;font-size:1rem;font-weight:700;border-radius:10px;border:1px solid #ddd}
+  .btn-google:hover{box-shadow:0 2px 12px rgba(0,0,0,0.15)}
+  .btn-google img{width:20px;height:20px}
+
+  /* Top bar */
+  .topbar{display:flex;align-items:center;gap:0.8rem;padding:0.8rem 1.2rem;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+  .topbar h1{font-size:1.1rem;color:var(--gold);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topbar .user{display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--dim)}
+  .topbar .user img{width:28px;height:28px;border-radius:50%}
+  .topbar .logout{color:var(--red);cursor:pointer;font-size:0.7rem}
+  .breadcrumb{display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;color:var(--dim)}
+  .breadcrumb a{color:var(--pri);font-weight:700}
+  .breadcrumb span{color:var(--dim)}
+
+  /* Screens */
+  .screen{display:none}.screen.active{display:block}
+
+  /* Course list */
+  .course-list{max-width:900px;margin:0 auto;padding:1.5rem}
+  .course-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-top:1rem}
+  .course-card{background:var(--surface);border-radius:12px;padding:1.2rem;border:1px solid var(--border);cursor:pointer;transition:border-color 0.2s,transform 0.15s}
+  .course-card:hover{border-color:var(--pri);transform:translateY(-2px)}
+  .course-card h3{font-size:1rem;color:var(--text);margin-bottom:0.3rem}
+  .course-card .cc-audience{font-size:0.8rem;color:var(--dim);margin-bottom:0.6rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .course-card .cc-meta{display:flex;gap:1rem;font-size:0.75rem;color:var(--dim)}
+  .course-card .cc-meta b{color:var(--pri)}
+  .btn-new-course{background:var(--surface);border:2px dashed var(--border);border-radius:12px;padding:2rem;display:flex;align-items:center;justify-content:center;gap:0.5rem;font-size:1rem;color:var(--dim);cursor:pointer;transition:border-color 0.2s,color 0.2s}
+  .btn-new-course:hover{border-color:var(--pri);color:var(--pri)}
+
+  /* Kanban */
+  .kanban-wrap{padding:1rem;overflow-x:auto;min-height:calc(100vh - 120px)}
+  .kanban{display:flex;gap:1rem;min-width:max-content;padding-bottom:1rem}
+  .kanban-col{width:280px;min-width:280px;background:var(--surface);border-radius:12px;border:1px solid var(--border);display:flex;flex-direction:column;max-height:calc(100vh - 180px)}
+  .kanban-col-header{padding:0.8rem 1rem;border-bottom:1px solid var(--border);font-size:0.9rem;font-weight:700;display:flex;align-items:center;gap:0.4rem;flex-shrink:0}
+  .kanban-col-header .col-count{font-size:0.7rem;color:var(--dim);background:var(--bg);padding:0.1rem 0.5rem;border-radius:10px}
+  .kanban-col-body{flex:1;overflow-y:auto;padding:0.6rem}
+  .session-card{background:var(--bg);border-radius:8px;padding:0.8rem;margin-bottom:0.5rem;border:1px solid var(--border);cursor:pointer;transition:border-color 0.2s}
+  .session-card:hover{border-color:var(--pri)}
+  .session-card .sc-title{font-size:0.85rem;font-weight:700;margin-bottom:0.3rem}
+  .session-card .sc-date{font-size:0.7rem;color:var(--dim);margin-bottom:0.4rem}
+  .session-card .sc-deck{font-size:0.7rem;color:var(--pri);margin-bottom:0.4rem}
+  .session-card .sc-tasks{display:flex;flex-wrap:wrap;gap:0.3rem}
+  .task-dot{font-size:0.6rem;padding:0.15rem 0.4rem;border-radius:4px;background:var(--surface);border:1px solid var(--border);color:var(--dim)}
+  .task-dot.done{background:#0F9D8A22;border-color:var(--pri);color:var(--pri)}
+  .task-dot.in-progress{background:#FFC85722;border-color:var(--gold);color:var(--gold)}
+  .btn-add-session{width:100%;padding:0.6rem;background:none;border:1px dashed var(--border);border-radius:8px;color:var(--dim);font-size:0.8rem;margin-top:0.3rem;transition:color 0.2s,border-color 0.2s}
+  .btn-add-session:hover{color:var(--pri);border-color:var(--pri)}
+
+  /* Schedule table */
+  .schedule-section{padding:0 1rem 2rem;max-width:1200px}
+  .schedule-section h3{font-size:0.95rem;color:var(--gold);margin-bottom:0.8rem}
+  .sched-table{width:100%;border-collapse:collapse;font-size:0.85rem}
+  .sched-table th{text-align:left;padding:0.5rem 0.8rem;color:var(--dim);border-bottom:1px solid var(--border);font-weight:400;font-size:0.75rem}
+  .sched-table td{padding:0.5rem 0.8rem;border-bottom:1px solid var(--border)}
+  .sched-table tr:hover td{background:var(--surface)}
+  .sched-table .status-badge{display:inline-block;padding:0.15rem 0.5rem;border-radius:4px;font-size:0.7rem;font-weight:700}
+
+  /* Detail panel */
+  .panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:none;opacity:0;transition:opacity 0.3s}
+  .panel-overlay.open{display:block;opacity:1}
+  .detail-panel{position:fixed;top:0;right:0;width:min(480px,100vw);height:100vh;background:var(--surface);border-left:1px solid var(--border);z-index:101;transform:translateX(100%);transition:transform 0.3s ease;display:flex;flex-direction:column;overflow:hidden}
+  .detail-panel.open{transform:translateX(0)}
+  .dp-header{padding:1rem 1.2rem;border-bottom:1px solid var(--border);flex-shrink:0}
+  .dp-header-top{display:flex;align-items:center;gap:0.8rem;margin-bottom:0.5rem}
+  .dp-header h2{font-size:1.1rem;flex:1}
+  .dp-close{background:none;color:var(--dim);font-size:1.3rem;padding:0.2rem 0.5rem;border-radius:6px}
+  .dp-close:hover{color:var(--text);background:var(--bg)}
+  .dp-meta{display:flex;gap:1rem;font-size:0.75rem;color:var(--dim);flex-wrap:wrap}
+  .dp-meta b{color:var(--pri)}
+  .dp-links{display:flex;gap:0.5rem;margin-top:0.6rem;flex-wrap:wrap}
+  .dp-link{padding:0.3rem 0.7rem;border-radius:6px;font-size:0.7rem;font-weight:700;border:1px solid var(--border);color:var(--dim);transition:all 0.2s}
+  .dp-link:hover{border-color:var(--pri);color:var(--pri)}
+  .dp-link.pri{background:var(--pri);color:#fff;border-color:var(--pri)}
+  .dp-body{flex:1;overflow-y:auto;padding:1rem 1.2rem}
+
+  /* Task cards */
+  .task-card{background:var(--bg);border-radius:10px;border:1px solid var(--border);margin-bottom:0.6rem;overflow:hidden;transition:border-color 0.2s}
+  .task-card:hover{border-color:var(--border)}
+  .task-card-header{display:flex;align-items:center;gap:0.6rem;padding:0.7rem 0.8rem;cursor:pointer}
+  .task-card-header .tc-icon{font-size:1.1rem}
+  .task-card-header .tc-title{flex:1;font-size:0.85rem;font-weight:700}
+  .task-card-header .tc-status{font-size:0.65rem;padding:0.15rem 0.5rem;border-radius:4px;font-weight:700}
+  .tc-status.pending{background:var(--border);color:var(--dim)}
+  .tc-status.generating,.tc-status.in-progress,.tc-status.active{background:#FFC85722;color:var(--gold);border:1px solid var(--gold)}
+  .tc-status.done,.tc-status.sent,.tc-status.completed{background:#0F9D8A22;color:var(--pri);border:1px solid var(--pri)}
+  .task-card-body{display:none;padding:0 0.8rem 0.8rem}
+  .task-card.expanded .task-card-body{display:block}
+  .task-card-body .tc-desc{font-size:0.75rem;color:var(--dim);margin-bottom:0.6rem}
+  .btn-ai{display:inline-flex;align-items:center;gap:0.3rem;padding:0.4rem 0.8rem;background:var(--purple);color:#fff;border-radius:6px;font-size:0.75rem;font-weight:700;transition:opacity 0.2s}
+  .btn-ai:hover{opacity:0.85}
+  .btn-ai.loading{opacity:0.6;pointer-events:none}
+  .btn-save{padding:0.4rem 0.8rem;background:var(--pri);color:#fff;border-radius:6px;font-size:0.75rem;font-weight:700;margin-left:0.5rem}
+  .ai-textarea{width:100%;min-height:120px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:0.6rem;font-size:0.8rem;line-height:1.5;resize:vertical;outline:none;margin-top:0.5rem}
+  .ai-textarea:focus{border-color:var(--pri)}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Modal */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;display:none;align-items:center;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--surface);border-radius:16px;padding:2rem;width:min(500px,90vw);border:1px solid var(--border)}
+  .modal h2{font-size:1.1rem;color:var(--gold);margin-bottom:1.2rem}
+  .form-group{margin-bottom:1rem}
+  .form-group label{display:block;font-size:0.8rem;color:var(--dim);margin-bottom:0.3rem}
+  .form-group input,.form-group textarea,.form-group select{width:100%;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;outline:none}
+  .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--pri)}
+  .form-group textarea{min-height:80px;resize:vertical}
+  .form-actions{display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1.5rem}
+  .form-actions button{padding:0.5rem 1.2rem;border-radius:8px;font-size:0.85rem;font-weight:700}
+  .btn-cancel{background:var(--bg);color:var(--dim);border:1px solid var(--border)}
+  .btn-confirm{background:var(--pri);color:#fff}
+
+  /* Inline add session form */
+  .inline-form{background:var(--bg);border-radius:8px;padding:0.8rem;margin-top:0.5rem;border:1px solid var(--pri)}
+  .inline-form input,.inline-form select{width:100%;padding:0.4rem 0.6rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem;outline:none;margin-bottom:0.4rem}
+  .inline-form .if-actions{display:flex;gap:0.4rem}
+  .inline-form .if-actions button{padding:0.3rem 0.8rem;border-radius:6px;font-size:0.75rem;font-weight:700}
+
+  /* Deck picker */
+  .deck-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:0.5rem;margin-top:0.5rem}
+  .deck-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.5rem;text-align:center;cursor:pointer;transition:border-color 0.2s;font-size:0.7rem;color:var(--dim)}
+  .deck-item:hover,.deck-item.selected{border-color:var(--pri);color:var(--pri)}
+  .deck-item .di-icon{font-size:1.5rem;margin-bottom:0.2rem}
+
+  .empty-state{text-align:center;padding:3rem 1rem;color:var(--dim)}
+  .empty-state .es-icon{font-size:3rem;margin-bottom:0.5rem}
+  .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--pri);color:#fff;padding:0.6rem 1.2rem;border-radius:8px;font-size:0.85rem;font-weight:700;z-index:300;opacity:0;transition:opacity 0.3s;pointer-events:none}
+  .toast.show{opacity:1}
+
+  .hidden{display:none!important}
+  @media(max-width:700px){
+    .kanban-col{width:260px;min-width:260px}
+    .detail-panel{width:100vw}
+    .course-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="center-screen" id="loginScreen">
+  <div class="box">
+    <h1>AI 課堂互動</h1>
+    <p class="sub">課程規劃 — 請先登入 Google 帳號</p>
+    <button class="btn-google" onclick="googleLogin()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg">使用 Google 帳號登入
+    </button>
+  </div>
+</div>
+
+<!-- Top bar -->
+<div class="topbar hidden" id="topbar">
+  <div class="breadcrumb" id="breadcrumb">
+    <a href="#" onclick="showCourseList();return false">我的課程</a>
+  </div>
+  <h1 id="topTitle">課程規劃</h1>
+  <div class="user">
+    <img id="topAvatar" src="">
+    <span id="topName"></span>
+    <span class="logout" onclick="googleLogout()">登出</span>
+  </div>
+</div>
+
+<!-- Screen: Course List -->
+<div class="screen" id="screenCourseList">
+  <div class="course-list">
+    <div class="course-grid" id="courseGrid">
+      <button class="btn-new-course" onclick="openCreateCourse()">＋ 新課程</button>
+    </div>
+  </div>
+</div>
+
+<!-- Screen: Course Detail (Kanban + Schedule) -->
+<div class="screen" id="screenCourseDetail">
+  <div class="kanban-wrap">
+    <div class="kanban" id="kanbanBoard">
+      <div class="kanban-col" data-status="preparing">
+        <div class="kanban-col-header">📋 準備中 <span class="col-count" id="countPreparing">0</span></div>
+        <div class="kanban-col-body" id="colPreparing"></div>
+      </div>
+      <div class="kanban-col" data-status="pre-class">
+        <div class="kanban-col-header">📬 課前 <span class="col-count" id="countPreClass">0</span></div>
+        <div class="kanban-col-body" id="colPreClass"></div>
+      </div>
+      <div class="kanban-col" data-status="live">
+        <div class="kanban-col-header">🎤 上課中 <span class="col-count" id="countLive">0</span></div>
+        <div class="kanban-col-body" id="colLive"></div>
+      </div>
+      <div class="kanban-col" data-status="completed">
+        <div class="kanban-col-header">✅ 已完成 <span class="col-count" id="countCompleted">0</span></div>
+        <div class="kanban-col-body" id="colCompleted"></div>
+      </div>
+    </div>
+  </div>
+  <div class="schedule-section">
+    <h3>📅 課程排程</h3>
+    <table class="sched-table">
+      <thead><tr><th>#</th><th>日期</th><th>主題</th><th>簡報</th><th>狀態</th><th></th></tr></thead>
+      <tbody id="schedBody"></tbody>
+    </table>
+    <button style="margin-top:0.8rem;padding:0.5rem 1rem;background:none;border:1px dashed var(--border);border-radius:8px;color:var(--dim);font-size:0.8rem;cursor:pointer" onclick="openAddSession()">＋ 新增堂次</button>
+  </div>
+</div>
+
+<!-- Detail panel overlay -->
+<div class="panel-overlay" id="panelOverlay" onclick="closeDetailPanel()"></div>
+<div class="detail-panel" id="detailPanel">
+  <div class="dp-header">
+    <div class="dp-header-top">
+      <h2 id="dpTitle">堂次名稱</h2>
+      <button class="dp-close" onclick="closeDetailPanel()">✕</button>
+    </div>
+    <div class="dp-meta">
+      <span>📅 <b id="dpDate">-</b></span>
+      <span>⏱ <b id="dpDuration">-</b> 分鐘</span>
+      <span>📄 <b id="dpDeck">-</b></span>
+      <span>🏷 <b id="dpRoom">-</b></span>
+    </div>
+    <div class="dp-links" id="dpLinks"></div>
+  </div>
+  <div class="dp-body" id="dpBody"></div>
+</div>
+
+<!-- Modal: Create Course -->
+<div class="modal-overlay" id="modalCreateCourse">
+  <div class="modal">
+    <h2>建立新課程</h2>
+    <div class="form-group">
+      <label>課程名稱</label>
+      <input type="text" id="newCourseTitle" placeholder="例如：AI 應用規劃師培訓" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label>目標受眾</label>
+      <textarea id="newCourseAudience" placeholder="例如：企業 IT 部門主管，具備基礎程式能力"></textarea>
+    </div>
+    <div class="form-group">
+      <label>預計堂數</label>
+      <input type="number" id="newCourseSessions" value="6" min="1" max="50">
+    </div>
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="closeModal('modalCreateCourse')">取消</button>
+      <button class="btn-confirm" onclick="createCourse()">建立</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add Session -->
+<div class="modal-overlay" id="modalAddSession">
+  <div class="modal">
+    <h2>新增堂次</h2>
+    <div class="form-group">
+      <label>堂次主題</label>
+      <input type="text" id="newSessionTitle" placeholder="例如：LLM 基礎與提示工程" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label>日期</label>
+      <input type="date" id="newSessionDate">
+    </div>
+    <div class="form-group">
+      <label>時長（分鐘）</label>
+      <input type="number" id="newSessionDuration" value="120" min="30" max="480">
+    </div>
+    <div class="form-group">
+      <label>選擇簡報（可選）</label>
+      <div class="deck-grid" id="deckPicker"></div>
+      <input type="hidden" id="newSessionDeck" value="">
+    </div>
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="closeModal('modalAddSession')">取消</button>
+      <button class="btn-confirm" onclick="addSession()">新增</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:['AIza','SyC5X5C0Uje6bCMzrvuUuq5Bz33ly0PR-vc'].join(''),
+  authDomain:'ai-classroom-70a97.firebaseapp.com',
+  databaseURL:'https://ai-classroom-70a97-default-rtdb.firebaseio.com',
+  projectId:'ai-classroom-70a97',
+  storageBucket:'ai-classroom-70a97.firebasestorage.app',
+  appId:'1:160782638499:web:f3fb834ce32d643de28e16',
+});
+const auth = firebase.auth();
+const db = firebase.database();
+
+/* ── State ── */
+let currentUser = null;
+let currentCourseId = null;
+let currentCourse = null;
+let sessions = {};
+let availableDecks = [];
+let openSessionId = null;
+
+const TASK_TYPES = [
+  { id:'deck', icon:'📄', title:'簡報', description:'上傳 PPTX / 選擇已有簡報' },
+  { id:'notes', icon:'📝', title:'教案', description:'AI 自動生成，可手動編輯' },
+  { id:'goals', icon:'🎯', title:'學習目標', description:'AI 建議 2-3 個目標' },
+  { id:'time', icon:'⏱', title:'時間分配', description:'AI 建議各段時間' },
+  { id:'survey', icon:'📋', title:'課前問卷', description:'AI 根據主題生成' },
+  { id:'feedback', icon:'💬', title:'課後回饋', description:'課程結束後自動啟動' },
+  { id:'report', icon:'📊', title:'教學報告', description:'AI 自動彙整分析' },
+];
+
+const STATUS_MAP = {
+  preparing: { label:'準備中', col:'colPreparing', count:'countPreparing' },
+  'pre-class': { label:'課前', col:'colPreClass', count:'countPreClass' },
+  live: { label:'上課中', col:'colLive', count:'countLive' },
+  'post-class': { label:'已完成', col:'colCompleted', count:'countCompleted' },
+  completed: { label:'已完成', col:'colCompleted', count:'countCompleted' },
+};
+
+const STATUS_LABELS = {
+  pending:'待處理', generating:'生成中', 'in-progress':'進行中',
+  done:'完成', sent:'已發送', active:'進行中', completed:'完成'
+};
+
+/* ── Auth ── */
+function googleLogin(){
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+}
+function googleLogout(){
+  auth.signOut();
+}
+auth.onAuthStateChanged(u => {
+  currentUser = u;
+  if(u){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('topbar').classList.remove('hidden');
+    document.getElementById('topAvatar').src = u.photoURL || '';
+    document.getElementById('topName').textContent = u.displayName || u.email;
+    showCourseList();
+    loadDecks();
+  } else {
+    document.getElementById('loginScreen').style.display='flex';
+    document.getElementById('topbar').classList.add('hidden');
+    hideAllScreens();
+  }
+});
+
+/* ── Navigation ── */
+function hideAllScreens(){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+}
+
+function showCourseList(){
+  hideAllScreens();
+  currentCourseId = null;
+  currentCourse = null;
+  sessions = {};
+  document.getElementById('screenCourseList').classList.add('active');
+  document.getElementById('topTitle').textContent = '課程規劃';
+  document.getElementById('breadcrumb').innerHTML = '<span style="color:var(--gold);font-weight:700">我的課程</span>';
+  loadCourses();
+}
+
+function showCourseDetail(courseId){
+  hideAllScreens();
+  currentCourseId = courseId;
+  document.getElementById('screenCourseDetail').classList.add('active');
+  loadCourseDetail(courseId);
+}
+
+/* ── Courses ── */
+function loadCourses(){
+  const grid = document.getElementById('courseGrid');
+  grid.innerHTML = '<button class="btn-new-course" onclick="openCreateCourse()">＋ 新課程</button>';
+
+  db.ref('courses').orderByChild('config/teacherUid').equalTo(currentUser.uid).once('value', snap => {
+    const data = snap.val() || {};
+    const entries = Object.entries(data).sort((a,b) => (b[1].config?.created||0) - (a[1].config?.created||0));
+    if(entries.length === 0) return;
+
+    entries.forEach(([id, course]) => {
+      const cfg = course.config || {};
+      const sessionCount = course.sessions ? Object.keys(course.sessions).length : 0;
+      const card = document.createElement('div');
+      card.className = 'course-card';
+      card.onclick = () => showCourseDetail(id);
+      card.innerHTML = `
+        <h3>${esc(cfg.title || '未命名課程')}</h3>
+        <div class="cc-audience">${esc(cfg.audience || '')}</div>
+        <div class="cc-meta">
+          <span>📚 <b>${sessionCount}</b> 堂</span>
+          <span>👤 <b>${esc(cfg.teacherName || '')}</b></span>
+        </div>`;
+      grid.insertBefore(card, grid.firstChild);
+    });
+  });
+}
+
+function openCreateCourse(){
+  document.getElementById('newCourseTitle').value = '';
+  document.getElementById('newCourseAudience').value = '';
+  document.getElementById('newCourseSessions').value = '6';
+  openModal('modalCreateCourse');
+}
+
+function createCourse(){
+  const title = document.getElementById('newCourseTitle').value.trim();
+  const audience = document.getElementById('newCourseAudience').value.trim();
+  const numSessions = parseInt(document.getElementById('newCourseSessions').value) || 6;
+  if(!title){ toast('請輸入課程名稱'); return; }
+
+  const courseId = db.ref('courses').push().key;
+  const config = {
+    title, audience, teacherUid: currentUser.uid,
+    teacherName: currentUser.displayName || currentUser.email,
+    created: firebase.database.ServerValue.TIMESTAMP,
+    plannedSessions: numSessions
+  };
+  db.ref(`courses/${courseId}/config`).set(config).then(() => {
+    closeModal('modalCreateCourse');
+    toast('課程已建立');
+    showCourseDetail(courseId);
+  });
+}
+
+/* ── Course Detail ── */
+function loadCourseDetail(courseId){
+  db.ref(`courses/${courseId}`).on('value', snap => {
+    const data = snap.val();
+    if(!data){ showCourseList(); return; }
+    currentCourse = data;
+    sessions = data.sessions || {};
+    const cfg = data.config || {};
+
+    document.getElementById('topTitle').textContent = cfg.title || '未命名課程';
+    document.getElementById('breadcrumb').innerHTML =
+      `<a href="#" onclick="showCourseList();return false">我的課程</a>` +
+      `<span>/</span><span style="color:var(--text)">${esc(cfg.title || '')}</span>`;
+
+    renderKanban();
+    renderSchedule();
+
+    if(openSessionId && sessions[openSessionId]){
+      renderDetailPanel(openSessionId);
+    }
+  });
+}
+
+/* ── Kanban ── */
+function renderKanban(){
+  const cols = { preparing:[], 'pre-class':[], live:[], completed:[] };
+
+  Object.entries(sessions).forEach(([id, s]) => {
+    let st = s.status || 'preparing';
+    if(st === 'post-class') st = 'completed';
+    if(!cols[st]) st = 'preparing';
+    cols[st].push({ id, ...s });
+  });
+
+  Object.entries(cols).forEach(([status, items]) => {
+    const info = STATUS_MAP[status];
+    if(!info) return;
+    const body = document.getElementById(info.col);
+    const counter = document.getElementById(info.count);
+    counter.textContent = items.length;
+    items.sort((a,b) => (a.date||'').localeCompare(b.date||''));
+
+    body.innerHTML = '';
+    items.forEach(s => {
+      body.innerHTML += buildSessionCard(s);
+    });
+    if(status === 'preparing'){
+      body.innerHTML += '<button class="btn-add-session" onclick="openAddSession()">＋ 新增堂次</button>';
+    }
+  });
+}
+
+function buildSessionCard(s){
+  const tasks = s.tasks || {};
+  let taskDots = '';
+  TASK_TYPES.forEach(t => {
+    const ts = tasks[t.id]?.status || 'pending';
+    const cls = ts === 'done' || ts === 'completed' || ts === 'sent' ? 'done' :
+                ts === 'generating' || ts === 'in-progress' || ts === 'active' ? 'in-progress' : '';
+    taskDots += `<span class="task-dot ${cls}">${t.icon}</span>`;
+  });
+
+  const deckLabel = s.deckId ? `📄 ${s.deckId}` : '';
+  return `<div class="session-card" onclick="openDetailPanel('${s.id}')">
+    <div class="sc-title">${esc(s.title || '未命名堂次')}</div>
+    <div class="sc-date">${s.date || '日期未定'}</div>
+    ${deckLabel ? `<div class="sc-deck">${esc(deckLabel)}</div>` : ''}
+    <div class="sc-tasks">${taskDots}</div>
+  </div>`;
+}
+
+/* ── Schedule Table ── */
+function renderSchedule(){
+  const body = document.getElementById('schedBody');
+  const arr = Object.entries(sessions).map(([id,s]) => ({ id, ...s }));
+  arr.sort((a,b) => (a.date||'').localeCompare(b.date||''));
+
+  body.innerHTML = '';
+  arr.forEach((s, i) => {
+    const st = s.status || 'preparing';
+    const statusColor = st === 'completed' || st === 'post-class' ? 'var(--pri)' :
+                         st === 'live' ? 'var(--gold)' :
+                         st === 'pre-class' ? 'var(--orange)' : 'var(--dim)';
+    const statusLabel = STATUS_MAP[st]?.label || st;
+    body.innerHTML += `<tr onclick="openDetailPanel('${s.id}')" style="cursor:pointer">
+      <td>${i+1}</td>
+      <td>${s.date || '-'}</td>
+      <td>${esc(s.title || '-')}</td>
+      <td style="color:var(--pri)">${s.deckId ? esc(s.deckId) : '-'}</td>
+      <td><span class="status-badge" style="background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}">${statusLabel}</span></td>
+      <td><button onclick="event.stopPropagation();changeSessionStatus('${s.id}')" style="background:none;border:1px solid var(--border);color:var(--dim);padding:0.2rem 0.5rem;border-radius:4px;font-size:0.65rem;cursor:pointer">推進</button></td>
+    </tr>`;
+  });
+}
+
+function changeSessionStatus(sessionId){
+  const s = sessions[sessionId];
+  if(!s) return;
+  const flow = ['preparing','pre-class','live','post-class','completed'];
+  const cur = flow.indexOf(s.status || 'preparing');
+  const next = flow[Math.min(cur+1, flow.length-1)];
+  db.ref(`courses/${currentCourseId}/sessions/${sessionId}/status`).set(next);
+  toast(`狀態已更新: ${STATUS_MAP[next]?.label || next}`);
+}
+
+/* ── Detail Panel ── */
+function openDetailPanel(sessionId){
+  openSessionId = sessionId;
+  renderDetailPanel(sessionId);
+  document.getElementById('panelOverlay').classList.add('open');
+  document.getElementById('detailPanel').classList.add('open');
+}
+
+function closeDetailPanel(){
+  openSessionId = null;
+  document.getElementById('panelOverlay').classList.remove('open');
+  document.getElementById('detailPanel').classList.remove('open');
+}
+
+function renderDetailPanel(sessionId){
+  const s = sessions[sessionId];
+  if(!s) return;
+
+  document.getElementById('dpTitle').textContent = s.title || '未命名堂次';
+  document.getElementById('dpDate').textContent = s.date || '未定';
+  document.getElementById('dpDuration').textContent = s.duration || 120;
+  document.getElementById('dpDeck').textContent = s.deckId || '未選擇';
+  document.getElementById('dpRoom').textContent = s.roomId || '未建立';
+
+  // Quick links
+  const links = document.getElementById('dpLinks');
+  links.innerHTML = '';
+  if(s.roomId){
+    links.innerHTML += `<a class="dp-link pri" href="host.html?room=${encodeURIComponent(s.roomId)}" target="_blank">進入教室</a>`;
+    if(s.deckId){
+      links.innerHTML += `<a class="dp-link" href="presenter.html?room=${encodeURIComponent(s.roomId)}&deck=${encodeURIComponent(s.deckId)}" target="_blank">開簡報</a>`;
+    }
+    links.innerHTML += `<a class="dp-link" href="survey.html?room=${encodeURIComponent(s.roomId)}" target="_blank">問卷連結</a>`;
+  }
+
+  // Task cards
+  const body = document.getElementById('dpBody');
+  const tasks = s.tasks || {};
+  body.innerHTML = '';
+
+  TASK_TYPES.forEach(t => {
+    const task = tasks[t.id] || { status:'pending' };
+    const statusLabel = STATUS_LABELS[task.status] || '待處理';
+    const statusClass = task.status === 'done' || task.status === 'sent' || task.status === 'completed' ? 'done' :
+                        task.status === 'generating' || task.status === 'in-progress' || task.status === 'active' ? 'in-progress' : 'pending';
+
+    body.innerHTML += `<div class="task-card" id="tc-${t.id}">
+      <div class="task-card-header" onclick="toggleTaskCard('${t.id}')">
+        <span class="tc-icon">${t.icon}</span>
+        <span class="tc-title">${t.title}</span>
+        <span class="tc-status ${statusClass}">${statusLabel}</span>
+      </div>
+      <div class="task-card-body">
+        <div class="tc-desc">${t.description}</div>
+        <div id="tcContent-${t.id}">${renderTaskContent(t.id, task, s)}</div>
+      </div>
+    </div>`;
+  });
+}
+
+function toggleTaskCard(taskId){
+  const card = document.getElementById('tc-'+taskId);
+  if(card) card.classList.toggle('expanded');
+}
+
+function renderTaskContent(taskId, task, session){
+  switch(taskId){
+    case 'deck':
+      return renderDeckTask(task, session);
+    case 'notes':
+      return renderAITask('notes', task, session, '根據以下課程資訊，生成一份詳細的教案大綱，包含教學流程、重點提示、互動設計：\n\n課程主題：{title}\n受眾：{audience}\n時長：{duration} 分鐘');
+    case 'goals':
+      return renderAITask('goals', task, session, '根據以下課程資訊，建議 2-3 個具體、可衡量的學習目標：\n\n課程主題：{title}\n受眾：{audience}');
+    case 'time':
+      return renderAITask('time', task, session, '根據以下課程資訊，建議時間分配方案（含暖場、主要內容、實作、Q&A）：\n\n課程主題：{title}\n受眾：{audience}\n時長：{duration} 分鐘');
+    case 'survey':
+      return renderAITask('survey', task, session, '根據以下資訊生成課前問卷，包含 5-8 題選擇題和開放題，格式為 JSON：\n\n課程主題：{title}\n受眾：{audience}');
+    case 'feedback':
+      return renderFeedbackTask(task);
+    case 'report':
+      return renderReportTask(task);
+    default:
+      return '';
+  }
+}
+
+function renderDeckTask(task, session){
+  let html = '';
+  if(session.deckId){
+    html += `<div style="padding:0.5rem;background:var(--surface);border-radius:6px;margin-bottom:0.5rem">
+      <span style="color:var(--pri);font-weight:700">📄 ${esc(session.deckId)}</span>
+      ${task.slideCount ? `<span style="color:var(--dim);font-size:0.7rem;margin-left:0.5rem">${task.slideCount} 頁</span>` : ''}
+    </div>`;
+  }
+  html += `<button class="btn-ai" onclick="openDeckPicker()" style="background:var(--navy)">📂 選擇簡報</button>`;
+  return html;
+}
+
+function renderAITask(taskId, task, session, promptTemplate){
+  let html = '';
+  const content = task.content || task.goals?.join('\n') || task.segments?.map(s => `${s.title}: ${s.duration}min`).join('\n') || '';
+
+  if(content){
+    html += `<textarea class="ai-textarea" id="aiResult-${taskId}" onchange="markTaskEdited('${taskId}')">${esc(content)}</textarea>`;
+    html += `<div style="margin-top:0.5rem">`;
+    html += `<button class="btn-save" onclick="saveTaskContent('${taskId}')">儲存</button>`;
+    html += `<button class="btn-ai" onclick="aiGenerate('${taskId}','${encodeURIComponent(promptTemplate)}')" style="margin-left:0.3rem">🤖 重新生成</button>`;
+    html += `</div>`;
+  } else {
+    html += `<button class="btn-ai" onclick="aiGenerate('${taskId}','${encodeURIComponent(promptTemplate)}')" id="aiBtn-${taskId}">🤖 AI 生成</button>`;
+    html += `<div id="aiArea-${taskId}"></div>`;
+  }
+  return html;
+}
+
+function renderFeedbackTask(task){
+  if(task.status === 'done'){
+    return `<div style="color:var(--pri)">收到 ${task.responseCount || 0} 份回饋</div>`;
+  }
+  return `<div style="color:var(--dim);font-size:0.75rem">課程結束後，系統會自動發送課後回饋表給學員。</div>`;
+}
+
+function renderReportTask(task){
+  if(task.status === 'done' && task.url){
+    return `<a href="${task.url}" target="_blank" class="btn-ai" style="background:var(--pri)">📊 查看報告</a>`;
+  }
+  return `<div style="color:var(--dim);font-size:0.75rem">課程結束並收集回饋後，AI 將自動彙整教學分析報告。</div>`;
+}
+
+/* ── AI Generation ── */
+async function aiGenerate(taskId, encodedPrompt){
+  const apiKey = localStorage.getItem('_ai_key');
+  if(!apiKey){
+    toast('請先在教室設定中儲存 Gemini API Key');
+    return;
+  }
+  if(!openSessionId || !currentCourseId) return;
+
+  const session = sessions[openSessionId];
+  const cfg = currentCourse?.config || {};
+  let prompt = decodeURIComponent(encodedPrompt);
+  prompt = prompt.replace('{title}', session.title || '')
+                 .replace('{audience}', cfg.audience || '')
+                 .replace('{duration}', session.duration || 120);
+
+  // Update status
+  const taskPath = `courses/${currentCourseId}/sessions/${openSessionId}/tasks/${taskId}`;
+  await db.ref(`${taskPath}/status`).set('generating');
+
+  const btn = document.getElementById('aiBtn-'+taskId);
+  if(btn){ btn.classList.add('loading'); btn.innerHTML = '<span class="spinner"></span> 生成中...'; }
+
+  const result = await callGemini(apiKey, prompt);
+
+  if(result){
+    await db.ref(taskPath).update({ status:'done', content: result });
+    toast(`${taskId} 生成完成`);
+
+    // For survey, also save config
+    if(taskId === 'survey' && session.roomId){
+      try {
+        const parsed = JSON.parse(result);
+        await db.ref(`rooms/${session.roomId}/surveyConfig`).set(parsed);
+      } catch(e) {
+        // Not valid JSON, save as-is
+      }
+    }
+  } else {
+    await db.ref(`${taskPath}/status`).set('pending');
+    toast('AI 生成失敗，請確認 API Key');
+  }
+}
+
+function saveTaskContent(taskId){
+  if(!openSessionId || !currentCourseId) return;
+  const textarea = document.getElementById('aiResult-'+taskId);
+  if(!textarea) return;
+
+  const taskPath = `courses/${currentCourseId}/sessions/${openSessionId}/tasks/${taskId}`;
+  db.ref(taskPath).update({ status:'done', content: textarea.value });
+  toast('已儲存');
+}
+
+function markTaskEdited(taskId){
+  // visual feedback could be added here
+}
+
+async function callGemini(apiKey, prompt){
+  const models = ['gemini-2.5-pro', 'gemini-2.5-flash'];
+  for(const model of models){
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const res = await fetch(url, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          contents:[{parts:[{text:prompt}]}],
+          generationConfig:{maxOutputTokens:4096, temperature:0.7}
+        })
+      });
+      if(res.status === 429) continue;
+      const data = await res.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    } catch(e){ continue; }
+  }
+  return null;
+}
+
+/* ── Deck Management ── */
+function loadDecks(){
+  fetch('/slides/index.json').then(r => r.ok ? r.json() : []).then(data => {
+    availableDecks = Array.isArray(data) ? data : [];
+  }).catch(() => { availableDecks = []; });
+}
+
+function openDeckPicker(){
+  // Show a simple deck selection in the task content area
+  if(!availableDecks.length){
+    toast('尚無可用簡報（/slides/index.json）');
+    return;
+  }
+  const area = document.getElementById('tcContent-deck');
+  if(!area) return;
+
+  let html = '<div class="deck-grid" style="margin-bottom:0.5rem">';
+  availableDecks.forEach(d => {
+    const name = typeof d === 'string' ? d : (d.name || d.id || '');
+    const selected = sessions[openSessionId]?.deckId === name ? 'selected' : '';
+    html += `<div class="deck-item ${selected}" onclick="selectDeck('${esc(name)}')">
+      <div class="di-icon">📊</div>${esc(name)}
+    </div>`;
+  });
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function selectDeck(deckId){
+  if(!openSessionId || !currentCourseId) return;
+  const path = `courses/${currentCourseId}/sessions/${openSessionId}`;
+  db.ref(path).update({ deckId });
+  db.ref(`${path}/tasks/deck`).update({ status:'done', deckId });
+  toast(`已選擇簡報: ${deckId}`);
+}
+
+/* ── Sessions ── */
+function openAddSession(){
+  const today = new Date();
+  document.getElementById('newSessionTitle').value = '';
+  document.getElementById('newSessionDate').value = today.toISOString().split('T')[0];
+  document.getElementById('newSessionDuration').value = '120';
+  document.getElementById('newSessionDeck').value = '';
+
+  // Render deck picker in modal
+  const picker = document.getElementById('deckPicker');
+  picker.innerHTML = '<div class="deck-item" onclick="selectModalDeck(this,\'\')"><div class="di-icon">❌</div>不選</div>';
+  availableDecks.forEach(d => {
+    const name = typeof d === 'string' ? d : (d.name || d.id || '');
+    picker.innerHTML += `<div class="deck-item" onclick="selectModalDeck(this,'${esc(name)}')"><div class="di-icon">📊</div>${esc(name)}</div>`;
+  });
+  openModal('modalAddSession');
+}
+
+function selectModalDeck(el, deckId){
+  document.querySelectorAll('#deckPicker .deck-item').forEach(d => d.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('newSessionDeck').value = deckId;
+}
+
+function addSession(){
+  const title = document.getElementById('newSessionTitle').value.trim();
+  const date = document.getElementById('newSessionDate').value;
+  const duration = parseInt(document.getElementById('newSessionDuration').value) || 120;
+  const deckId = document.getElementById('newSessionDeck').value || null;
+  if(!title){ toast('請輸入堂次主題'); return; }
+  if(!currentCourseId){ toast('請先選擇課程'); return; }
+
+  const sessionId = db.ref(`courses/${currentCourseId}/sessions`).push().key;
+
+  // Generate roomId: YYYYMMDD-courseSlug
+  const slug = (currentCourse?.config?.title || 'course').replace(/[^a-zA-Z0-9\u4e00-\u9fff]/g,'').substring(0,10).toLowerCase() || 'class';
+  const dateStr = (date || new Date().toISOString().split('T')[0]).replace(/-/g,'');
+  const roomId = `${dateStr}-${slug}`;
+
+  const sessionData = {
+    title, date, duration, deckId,
+    roomId,
+    status: 'preparing',
+    tasks: {
+      deck: { status: deckId ? 'done' : 'pending', deckId: deckId || null },
+      notes: { status:'pending' },
+      goals: { status:'pending' },
+      time: { status:'pending' },
+      survey: { status:'pending' },
+      feedback: { status:'pending' },
+      report: { status:'pending' },
+    }
+  };
+
+  db.ref(`courses/${currentCourseId}/sessions/${sessionId}`).set(sessionData).then(() => {
+    closeModal('modalAddSession');
+    toast('堂次已新增');
+  });
+}
+
+/* ── Modals ── */
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+/* ── Toast ── */
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+/* ── Util ── */
+function esc(s){
+  if(!s) return '';
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+/* ── Keyboard ── */
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){
+    if(openSessionId) closeDetailPanel();
+    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+/* ── Cleanup on unload ── */
+window.addEventListener('beforeunload', () => {
+  if(currentCourseId){
+    db.ref(`courses/${currentCourseId}`).off();
+  }
+});
+</script>
+</body>
+</html>

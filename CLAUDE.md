@@ -24,6 +24,10 @@
 | 學員互動 | `/classroom/` | 掃 QR 加入 → 訊息牆 / 投票 / 問答 |
 | 手機遙控 | `/classroom/remote` | 老師手機控制簡報翻頁 + 模式切換 |
 | 網頁簡報 | `/ai-pptx-routes?room=xxx` | 帶 room 參數時接受遙控換頁 |
+| PPTX 檢視器 | `/classroom/presenter?room=xxx&deck=demo` | PPTX 轉圖片投影 + 覆蓋層 |
+| 課程規劃 | `/classroom/planner` | Trello 式看板，課程全生命週期 |
+| 課前問卷 | `/classroom/survey?room=xxx` | AI 自動生成問卷 + 學員分群 |
+| 課後回饋 | `/classroom/feedback?room=xxx` | AI 對話式回饋（取代問卷） |
 | Slidev demo | `/demo-slidev` | 路線 6 示範 |
 | Marp demo | `/demo-marp` | 路線 6 示範 |
 | reveal.js demo | `/demo-revealjs` | 路線 6 示範 |
@@ -45,6 +49,16 @@ rooms/{roomId}/
   qaReplies/{qaId}/{pushId}: { text, name, ts, role: "teacher"|"ai" }
   presentation: { sections[], current, url }
   slideControl: { action, index, ts }
+  overlay: { type, show, data }
+  surveyConfig/: { sections[], enabled }
+  survey/{odID}/: { name, ts, answers/ }
+  surveyAnalysis/: { summary, segments[], topQuestions[] }
+  feedback/{odID}/: { name, conversation[], ratings/, answers/ }
+  feedbackAnalysis/: { responseCount, avgSatisfaction, highlights[] }
+
+courses/{courseId}/
+  config/: { title, audience, teacherUid, created }
+  sessions/{sessionId}/: { title, date, deckId, roomId, status, tasks/ }
 
 users/{uid}/rooms/{roomId}: { title, created }
 ```
@@ -119,6 +133,7 @@ users/{uid}/rooms/{roomId}: { title, created }
 ## 教材清單（host.html 中定義）
 | 教材 | 路徑 | 支援遙控 |
 |------|------|---------|
+| PPTX 簡報檢視器 | /classroom/presenter | ✅（可指定 deck） |
 | AI 簡報生成 6 種路線 | /ai-pptx-routes | ✅ |
 | Slidev 風格示範 | /demo-slidev | |
 | Marp 風格示範 | /demo-marp | |
@@ -126,11 +141,27 @@ users/{uid}/rooms/{roomId}: { title, created }
 
 新增教材時，在 host.html 的 `materials` 陣列中加入即可。
 
+## PPTX 簡報支援
+- **上傳**: 將 .pptx 放到 `slides/` 目錄，push 後 GitHub Actions 自動轉換
+- **轉換**: LibreOffice → PDF → WebP 圖片（200 DPI）
+- **檢視器**: `/classroom/presenter?room=xxx&deck=deckId`
+- **轉換腳本**: `scripts/convert_slides.py`
+- **GitHub Actions**: `.github/workflows/convert-slides.yml`
+- **Demo 投影片**: `slides/demo/` (SVG 格式，5 張)
+
 ## PPTX 簡報生成
 - **腳本**: `/Users/user/Desktop/AI100講/generate_pptx_comparison.js`（v1）
 - **腳本 v2**: `/Users/user/Desktop/AI100講/generate_pptx_comparison_v2.js`
 - **執行**: `NODE_PATH=/opt/homebrew/lib/node_modules node generate_pptx_comparison.js`
 - **設計系統**: Cooperation 品牌配色（Navy #0B3C5D, Teal #0F9D8A, Gold #FFC857）
+
+## AI Agent 系統 (Phase 2)
+- **檔案**: `classroom/classroom_agent.py` (取代 assistant.py)
+- **架構**: 感知(Voice+Firebase) → 決策(Intent+Confusion+Advisor) → 執行(Slide+Vote+Interaction)
+- **模組**: VoiceBridge, IntentParser, SlideController, VoteManager, InteractionEngine, ConfusionDetector, TeachingAdvisor, AutopilotModule, Responder
+- **語音橋接**: jt-live-whisper TCP 19780
+- **啟動**: `python3 classroom_agent.py ROOM_ID --key GEMINI_KEY --voice`
+- **語音指令**: 下一頁/上一頁/跳到第N/開投票/開問答/出一題/暖場/文字雲/總結/自動導航/下課
 
 ## 開發注意事項
 - Firebase API Key（AIza...）在瀏覽器端是公開的（Firebase 設計如此），安全性靠 Rules 控制

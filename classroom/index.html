@@ -118,6 +118,7 @@
     <button id="qaSendBtn" onclick="sendQuestion()">發問</button>
   </div>
   <div class="content hidden" id="pauseContent"><div class="pause-screen"><div class="icon">⏳</div><p>老師準備中，請稍候...</p></div></div>
+  <div class="content hidden" id="feedbackContent"><div class="pause-screen"><div class="icon" style="animation:none">💬</div><p style="font-weight:700;color:#7C3AED">課程結束！感謝你的參與</p><p style="font-size:0.85rem;color:#7d8590;margin-top:0.5rem">請花 2 分鐘給老師回饋</p><a id="feedbackLink" href="#" style="display:inline-block;margin-top:1rem;padding:0.8rem 2rem;background:#7C3AED;color:#fff;border-radius:10px;font-weight:700;text-decoration:none;font-size:1rem">開始回饋 →</a></div></div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
@@ -176,9 +177,13 @@ const modeNames={wall:'💬 訊息牆',vote:'📊 投票',qa:'❓ 問答',pause:
 function switchMode(m){
   if(m===currentMode&&!document.getElementById(m+'Content')?.classList.contains('hidden'))return;
   currentMode=m;document.getElementById('dispMode').textContent=modeNames[m]||m;
-  ['wallContent','wallInput','voteContent','qaContent','qaInput','pauseContent'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  ['wallContent','wallInput','voteContent','qaContent','qaInput','pauseContent','feedbackContent'].forEach(id=>document.getElementById(id).classList.add('hidden'));
   listeners.filter(l=>l.c).forEach(l=>l.ref.off(l.event));listeners=listeners.filter(l=>!l.c);
   if(m==='wall')showWall();else if(m==='vote')showVote();else if(m==='qa')showQA();
+  else if(m==='feedback'){
+    document.getElementById('feedbackContent').classList.remove('hidden');
+    document.getElementById('feedbackLink').href=`/classroom/feedback?room=${roomId}`;
+  }
   else document.getElementById('pauseContent').classList.remove('hidden');
 }
 

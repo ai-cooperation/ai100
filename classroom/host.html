@@ -146,8 +146,24 @@
   .qr-overlay .qr-url{color:var(--gold);font-size:1rem;font-weight:700;text-align:center}
   .qr-overlay .qr-hint{color:var(--dim);font-size:0.85rem}
 
+  /* Agent Panel */
+  .agent-panel{position:fixed;top:56px;right:0;width:320px;max-height:calc(100vh - 56px);background:var(--surface);border-left:1px solid var(--border);z-index:150;transform:translateX(100%);transition:transform 0.3s;overflow-y:auto;display:flex;flex-direction:column}
+  .agent-panel.open{transform:translateX(0)}
+  .ap-header{padding:0.8rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.5rem}
+  .ap-header h3{font-size:0.9rem;color:var(--purple);flex:1}
+  .ap-header .dot{width:8px;height:8px;border-radius:50%;background:var(--dim)}.ap-header .dot.online{background:#22c55e;box-shadow:0 0 6px #22c55e}
+  .ap-header button{background:none;color:var(--dim);font-size:1rem;cursor:pointer;border:none}
+  .ap-body{padding:0.8rem;flex:1}
+  .ap-card{background:var(--bg);border-radius:8px;padding:0.8rem;margin-bottom:0.6rem;border-left:3px solid var(--border)}
+  .ap-card.warn{border-left-color:var(--gold)}.ap-card.alert{border-left-color:var(--red)}.ap-card.ok{border-left-color:var(--pri)}
+  .ap-card .title{font-size:0.75rem;font-weight:700;color:var(--dim);margin-bottom:0.3rem}
+  .ap-card .body{font-size:0.85rem;line-height:1.5;white-space:pre-wrap}
+  .ap-modules{display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.5rem}
+  .ap-mod{font-size:0.6rem;padding:0.15rem 0.4rem;border-radius:4px;background:var(--bg);color:var(--dim);border:1px solid var(--border)}
+  .ap-mod.active{border-color:var(--pri);color:var(--pri)}
+
   .hidden{display:none!important}
-  @media(max-width:700px){.info-panel{grid-template-columns:1fr}}
+  @media(max-width:700px){.info-panel{grid-template-columns:1fr}.agent-panel{width:100%}}
 </style>
 </head>
 <body>
@@ -168,6 +184,20 @@
   <div class="lobby-header">
     <h1>📚 講師後台</h1>
     <div class="user"><img id="lobbyAvatar" src=""><span id="lobbyName"></span><span class="logout" onclick="googleLogout()">登出</span></div>
+  </div>
+  <div style="display:flex;gap:0.6rem;margin-bottom:1.5rem;flex-wrap:wrap">
+    <a href="/classroom/planner" style="flex:1;min-width:200px;display:flex;align-items:center;gap:0.8rem;padding:1rem 1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text);transition:border-color 0.2s">
+      <span style="font-size:1.5rem">📋</span>
+      <div><div style="font-weight:700;color:var(--gold);font-size:0.9rem">課程規劃看板</div><div style="font-size:0.7rem;color:var(--dim)">Trello 式課程管理 · 教案 · 問卷</div></div>
+    </a>
+    <a href="/classroom/survey" style="flex:1;min-width:200px;display:flex;align-items:center;gap:0.8rem;padding:1rem 1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text);transition:border-color 0.2s">
+      <span style="font-size:1.5rem">📝</span>
+      <div><div style="font-weight:700;color:var(--pri);font-size:0.9rem">課前問卷</div><div style="font-size:0.7rem;color:var(--dim)">AI 自動生成 · 學員分群</div></div>
+    </a>
+    <a href="/classroom/feedback" style="flex:1;min-width:200px;display:flex;align-items:center;gap:0.8rem;padding:1rem 1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text);transition:border-color 0.2s">
+      <span style="font-size:1.5rem">💬</span>
+      <div><div style="font-weight:700;color:#7C3AED;font-size:0.9rem">課後回饋</div><div style="font-size:0.7rem;color:var(--dim)">AI 對話式 · 取代傳統問卷</div></div>
+    </a>
   </div>
   <div class="create-section">
     <h2>建立新教室</h2>
@@ -195,6 +225,10 @@
     <button class="mode-btn" data-mode="pause" onclick="setMode('pause')">⏸</button>
     <button class="act-btn" id="btnAI" onclick="toggleAI()">🤖</button>
     <button class="act-btn" onclick="toggleQR()">QR</button>
+    <button class="act-btn" onclick="openPresenter()">📽</button>
+    <button class="act-btn" onclick="openSurvey()">📝問卷</button>
+    <button class="act-btn" onclick="startFeedback()">💬回饋</button>
+    <button class="act-btn" id="btnAgent" onclick="toggleAgentPanel()">🧠</button>
     <button class="act-btn" onclick="toggleSettings()">設定</button>
     <button class="act-btn" onclick="exportData()">匯出</button>
   </div>
@@ -207,6 +241,34 @@
 
 <div class="ai-status" id="aiStatus">🤖 AI 回答中...</div>
 <div class="ai-error" id="aiError"></div>
+
+<!-- Agent Panel -->
+<div class="agent-panel" id="agentPanel">
+  <div class="ap-header">
+    <div class="dot" id="agentDot"></div>
+    <h3>🧠 Agent 狀態</h3>
+    <button onclick="toggleAgentPanel()">✕</button>
+  </div>
+  <div class="ap-body">
+    <div class="ap-card ok" id="agentStatusCard">
+      <div class="title">連線狀態</div>
+      <div class="body" id="agentStatusText">未連線 — 請在伺服器啟動 classroom_agent.py</div>
+      <div class="ap-modules" id="agentModules"></div>
+    </div>
+    <div class="ap-card" id="agentVoiceCard" style="display:none">
+      <div class="title">🎤 語音橋接</div>
+      <div class="body" id="agentVoiceText">未啟用</div>
+    </div>
+    <div class="ap-card" id="agentAdviceCard" style="display:none">
+      <div class="title">💡 教學建議</div>
+      <div class="body" id="agentAdviceText"></div>
+    </div>
+    <div style="margin-top:1rem">
+      <div class="title" style="font-size:0.75rem;color:var(--dim);margin-bottom:0.5rem">啟動指令</div>
+      <div style="background:var(--bg);border-radius:8px;padding:0.6rem;font-family:monospace;font-size:0.7rem;color:var(--pri);word-break:break-all;line-height:1.6" id="agentCmdDisplay">python3 classroom_agent.py ROOM_ID --key YOUR_KEY</div>
+    </div>
+  </div>
+</div>
 
 <!-- Settings -->
 <div class="settings-overlay" id="settingsOverlay" onclick="toggleSettings()"></div>
@@ -258,6 +320,7 @@ const VC=['#0F9D8A','#E07A3A','#7C3AED','#06B6D4','#FFC857','#DC2626'];
 
 // Teaching materials
 const materials=[
+  {title:'PPTX 簡報檢視器',icon:'📽',url:'/classroom/presenter',hasSlideControl:true,queryExtra:'&deck=demo'},
   {title:'AI 簡報生成 6 種路線',icon:'📊',url:'/ai-pptx-routes',hasSlideControl:true},
   {title:'Slidev 風格示範',icon:'🎯',url:'/demo-slidev'},
   {title:'Marp 風格示範',icon:'📝',url:'/demo-marp'},
@@ -343,6 +406,8 @@ function enterRoom(rid,title){
   document.getElementById('hostWallText').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendTeacherWall()}});
   // Start AI listener
   startAIListener();
+  // Start Agent panel
+  initAgentPanel();
 }
 
 function backToLobby(){
@@ -571,6 +636,7 @@ function renderContent(){
   else if(currentMode==='vote')renderVoteHost(el);
   else if(currentMode==='qa')renderQA(el);
   else if(currentMode==='info')renderInfo(el);
+  else if(currentMode==='feedback')el.innerHTML='<div class="pause-display"><div class="icon" style="animation:none">💬</div><p style="color:var(--purple);margin-top:1rem;font-weight:700">課後回饋進行中</p><p style="color:var(--dim);font-size:0.85rem;margin-top:0.5rem">學員正在進行 AI 對話式回饋</p><button class="act-btn" style="margin-top:1rem" onclick="window.open(\'/classroom/feedback?room=\'+roomId,\'_blank\')">查看回饋頁</button></div>';
   else el.innerHTML='<div class="pause-display"><div class="icon">⏸</div><p style="color:var(--dim);margin-top:1rem">學員看到「老師準備中」</p></div>';
 }
 
@@ -675,6 +741,73 @@ function toggleQR(){
   document.getElementById('qrUrl').textContent=url;
   const el=document.getElementById('qrBox');const qr=qrcode(0,'M');qr.addData(url);qr.make();el.innerHTML=qr.createSvgTag({cellSize:6,margin:4});
   document.getElementById('qrOverlay').classList.toggle('show')}
+
+// ═══ Agent Panel ═══
+function toggleAgentPanel(){document.getElementById('agentPanel').classList.toggle('open')}
+function initAgentPanel(){
+  // Update command display
+  document.getElementById('agentCmdDisplay').textContent=`python3 classroom_agent.py ${roomId} --key YOUR_KEY --voice`;
+  // Listen for agent status
+  const ref=db.ref(`rooms/${roomId}/agentStatus`);
+  ref.on('value',s=>{
+    const d=s.val();
+    const dot=document.getElementById('agentDot');
+    const txt=document.getElementById('agentStatusText');
+    const mods=document.getElementById('agentModules');
+    const voiceCard=document.getElementById('agentVoiceCard');
+    const voiceTxt=document.getElementById('agentVoiceText');
+    if(d&&d.online){
+      dot.classList.add('online');
+      txt.textContent=`${d.name||'Agent'} 已上線`;
+      document.getElementById('btnAgent').style.background='var(--purple)';
+      document.getElementById('btnAgent').style.color='#fff';
+      document.getElementById('btnAgent').style.borderColor='var(--purple)';
+      if(d.modules){mods.innerHTML=d.modules.map(m=>`<span class="ap-mod active">${m}</span>`).join('')}
+      if(d.voice!==undefined){
+        voiceCard.style.display='block';
+        voiceTxt.textContent=d.voice?'✅ 已連線 jt-live-whisper':'⏳ 等待語音連線...';
+      }
+    } else {
+      dot.classList.remove('online');
+      txt.textContent='未連線';
+      document.getElementById('btnAgent').style.background='';
+      document.getElementById('btnAgent').style.color='';
+      document.getElementById('btnAgent').style.borderColor='';
+      mods.innerHTML='';
+      voiceCard.style.display='none';
+    }
+  });
+  listeners.push({ref,event:'value'});
+  // Listen for teaching advice
+  const advRef=db.ref(`rooms/${roomId}/agentAdvice`);
+  advRef.on('value',s=>{
+    const d=s.val();
+    const card=document.getElementById('agentAdviceCard');
+    const txt=document.getElementById('agentAdviceText');
+    if(d&&d.text){
+      card.style.display='block';
+      card.className='ap-card '+(d.signals&&d.signals.some(s=>s==='low_accuracy')?'alert':'warn');
+      txt.textContent=d.text;
+    } else {
+      card.style.display='none';
+    }
+  });
+  listeners.push({ref:advRef,event:'value'});
+}
+
+// ═══ New Page Links ═══
+function openPresenter(){
+  // Find a deck for this room or use default
+  const deckId=localStorage.getItem(`_deck_${roomId}`)||'demo';
+  window.open(`/classroom/presenter?room=${roomId}&deck=${deckId}`,'_blank');
+}
+function openSurvey(){window.open(`/classroom/survey?room=${roomId}`,'_blank')}
+function startFeedback(){
+  if(confirm('切換到課後回饋模式？學員將看到回饋介面。')){
+    db.ref(`rooms/${roomId}/config/mode`).set('feedback');
+    window.open(`/classroom/feedback?room=${roomId}`,'_blank');
+  }
+}
 
 // ═══ Export ═══
 async function exportData(){
