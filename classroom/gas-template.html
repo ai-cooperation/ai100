@@ -327,6 +327,121 @@ API Key 用 PropertiesService。
   </table>
 </div>
 
+<!-- ═══════ 🎨 AI 生圖案例 ═══════ -->
+<div class="section" id="ai-image">
+  <h2>🎨 補充案例：GAS × AI 生圖</h2>
+
+  <div class="resource-card" style="border-color:var(--purple);">
+    <h3><span class="tag purple">🆕 圖片</span> 用 GAS 呼叫 AI 生成圖片</h3>
+    <p>前面五個案例都是「文字 AI」— 這個補充案例讓你用 GAS 串「圖片 AI」！<br>
+    A1 輸入描述 → 執行 → 圖片自動插入 Sheet + 存到 Drive。</p>
+    <p style="color:var(--g800);font-weight:500;">使用 <strong>GemGate</strong> — 免費 AI 圖片 API（不需信用卡）</p>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag green">Step 1</span> 註冊 API Key（10 秒）</h3>
+    <p>打開 GemGate → 輸入你的代號 → 立刻拿到 <code>gg-xxx</code> API Key</p>
+    <a class="action primary" href="http://43.159.131.124:8760/" target="_blank" rel="noopener">🔑 前往 GemGate 註冊 →</a>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag blue">Step 2</span> Prompt（貼到 ChatGPT 讓它寫 code）</h3>
+    <p>跟前面一樣，讓 AI 幫你寫 GAS 程式碼：</p>
+    <div class="code-box" id="prompt-image">請幫我寫一段 Google Apps Script。
+功能：A1 輸入圖片描述，執行後圖片插入 Sheet 的 C1，Drive 連結寫到 B1。
+API 端點：http://43.159.131.124:8760/v1/images/generations
+呼叫方式：POST，Header 帶 Authorization: Bearer API_KEY
+Body：{"model":"gemini-image","prompt":"A1的內容","n":1,"size":"1024x1024"}
+回傳格式：{"data":[{"b64_json":"base64圖片資料"}]}
+用 Utilities.base64Decode + Utilities.newBlob 把 base64 變圖片。
+用 sheet.insertImage(blob, 3, 1) 插入 Sheet。
+用 DriveApp 存一份到 Drive。
+API Key 用 PropertiesService，不寫死。
+503 錯誤自動重試最多 3 次（間隔 3 秒）。
+程式碼要有中文註解。<button class="copy-btn" onclick="copyCode('prompt-image')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag purple">Step 3</span> 或者直接用這段完整程式碼</h3>
+    <p>不想問 ChatGPT？直接複製貼到 Apps Script 就能跑：</p>
+    <div class="code-box" id="code-image">var GEMGATE_URL = "http://43.159.131.124:8760";
+
+function generateImage() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var prompt = sheet.getRange("A1").getValue();
+  var apiKey = PropertiesService.getScriptProperties().getProperty("GEMGATE_API_KEY");
+
+  if (!prompt) { SpreadsheetApp.getUi().alert("請在 A1 輸入圖片描述！"); return; }
+  if (!apiKey) { SpreadsheetApp.getUi().alert("請先執行「設定 API Key」"); return; }
+
+  sheet.getRange("B1").setValue("⏳ 生成中（約 30-60 秒）...");
+  SpreadsheetApp.flush();
+
+  var payload = {model:"gemini-image", prompt:prompt, n:1, size:"1024x1024"};
+  var options = {
+    method: "post",
+    contentType: "application/json",
+    headers: {"Authorization": "Bearer " + apiKey},
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  };
+
+  // 最多重試 3 次（503 = 暫時失敗）
+  var response, code;
+  for (var i = 1; i <= 3; i++) {
+    if (i > 1) { Utilities.sleep(3000); }
+    response = UrlFetchApp.fetch(GEMGATE_URL + "/v1/images/generations", options);
+    code = response.getResponseCode();
+    if (code === 200 || code !== 503) break;
+  }
+
+  if (code !== 200) {
+    sheet.getRange("B1").setValue("❌ 錯誤 " + code);
+    return;
+  }
+
+  var json = JSON.parse(response.getContentText());
+  var b64 = json.data[0].b64_json;
+  var blob = Utilities.newBlob(Utilities.base64Decode(b64), "image/png", "ai_image.png");
+
+  // 存到 Drive
+  var folders = DriveApp.getFoldersByName("GAS_AI_Images");
+  var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder("GAS_AI_Images");
+  var file = folder.createFile(blob);
+
+  sheet.getRange("B1").setValue("✅ 完成！");
+  sheet.getRange("B2").setFormula('=HYPERLINK("' + file.getUrl() + '","🖼️ 查看圖片")');
+  sheet.insertImage(blob, 3, 1);
+}
+
+function setup() {
+  var ui = SpreadsheetApp.getUi();
+  var result = ui.prompt("設定 API Key", "輸入你的 GemGate Key（gg-xxx）：", ui.ButtonSet.OK_CANCEL);
+  if (result.getSelectedButton() === ui.Button.OK) {
+    PropertiesService.getScriptProperties().setProperty("GEMGATE_API_KEY", result.getResponseText().trim());
+    ui.alert("✅ Key 已儲存！");
+  }
+}
+
+function onOpen() {
+  SpreadsheetApp.getUi().createMenu("🎨 AI 生圖")
+    .addItem("生成圖片", "generateImage")
+    .addItem("設定 API Key", "setup")
+    .addToUi();
+}<button class="copy-btn" onclick="copyCode('code-image')">複製</button></div>
+  </div>
+
+  <div class="resource-card" style="background:var(--purple-lt);border-color:var(--purple);">
+    <h3>💡 跟前面案例的差異</h3>
+    <p style="color:var(--g900);">
+      <strong>Groq</strong> 回傳<strong>文字</strong> → 你用 <code>JSON.parse</code> 拿文字寫入格子<br>
+      <strong>GemGate</strong> 回傳<strong>圖片（base64）</strong> → 你用 <code>Utilities.newBlob</code> 把 base64 變成圖片檔<br>
+      其餘 <code>UrlFetchApp</code>、<code>headers</code>、<code>JSON.stringify</code> 完全一樣！<br><br>
+      🎯 會了文字 API + 圖片 API，GAS 就能做出「有圖有文」的完整自動化。
+    </p>
+  </div>
+</div>
+
 <!-- ═══════ API 申請連結 ═══════ -->
 <div class="section">
   <h2>🔑 API 申請連結</h2>
@@ -334,6 +449,11 @@ API Key 用 PropertiesService。
     <h3>⭐ Groq（首選，完全免費）</h3>
     <p>Google 帳號登入，不需信用卡，14,400 次/天</p>
     <a class="action primary" href="https://console.groq.com" target="_blank" rel="noopener">前往 console.groq.com →</a>
+  </div>
+  <div class="resource-card">
+    <h3>🎨 GemGate（AI 生圖，完全免費）</h3>
+    <p>自助註冊拿 Key，不需信用卡，Gemini 同款圖片品質</p>
+    <a class="action outline" href="http://43.159.131.124:8760/" target="_blank" rel="noopener">前往 GemGate →</a>
   </div>
   <div class="resource-card">
     <h3>Google Gemini（多模態，能看圖）</h3>
