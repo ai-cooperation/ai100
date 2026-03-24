@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S03 — CLI Agent</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   grow.google 簡潔風 + Reading Glasses
+   投影教學用 (3-10m 觀看距離)
+   ═══════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--white);}
+
+/* Slides */
+.slides{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;opacity:0;transform:translateX(30px);pointer-events:none;transition:opacity .4s,transform .4s ease;background:var(--white);}
+.slide.active{opacity:1;transform:none;pointer-events:auto;}
+.slide.prev{opacity:0;transform:translateX(-30px);}
+.slide.cover{background:var(--navy);color:#fff;text-align:center;}
+.slide.section-title{background:var(--green);color:#fff;text-align:center;}
+.slide.break-slide{background:var(--offwhite);text-align:center;}
+
+/* Typography */
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:2rem;font-weight:700;color:var(--g900);margin-bottom:1rem;line-height:1.4;}
+h3{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.1rem;line-height:1.8;}
+.subtitle{font-size:1.15rem;color:var(--g600);font-weight:500;}
+.blue{color:var(--blue);}.green{color:var(--green);}.gold{color:var(--gold);}.red{color:var(--red);}.purple{color:var(--purple);}.dim{color:var(--g600);}.bold{font-weight:700;}
+
+/* Fragment */
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* Cards */
+.card-grid{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;margin-top:1.2rem;max-width:1100px;}
+.card{background:var(--white);border:2px solid var(--g100);border-radius:16px;padding:1.8rem;min-width:220px;max-width:300px;flex:1;transition:border-color .2s;}
+.card:hover{border-color:var(--blue);}
+.card .icon{font-size:2.5rem;margin-bottom:.6rem;}
+.card p{font-size:1rem;color:var(--g600);}
+
+/* Steps */
+.step-list{text-align:left;max-width:800px;width:100%;}
+.step{display:flex;gap:1.2rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:40px;height:40px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.1rem;}.step-content p{font-size:1rem;color:var(--g600);margin-top:.15rem;}
+
+/* Code */
+.code-block{background:var(--g50);border:2px solid var(--g200);border-radius:12px;padding:1.3rem 1.8rem;text-align:left;max-width:860px;width:100%;font-family:'Fira Code',monospace;font-size:1rem;line-height:1.8;margin:.8rem 0;color:var(--g900);}
+.code-block .kw{color:#D93025;font-weight:700;}.code-block .str{color:#0F9D8A;}.code-block .fn{color:#7C3AED;}.code-block .cm{color:var(--g400);}
+
+/* Table */
+.compare-table{border-collapse:collapse;font-size:1rem;margin-top:.8rem;width:100%;max-width:860px;}
+.compare-table th{background:var(--navy);color:#fff;padding:.7rem 1rem;text-align:left;font-size:1rem;}
+.compare-table td{padding:.7rem 1rem;border-bottom:1px solid var(--g100);font-size:1rem;}
+.compare-table tr:hover td{background:var(--g50);}
+
+/* Info boxes */
+.info-box{border-radius:12px;padding:1.3rem 1.8rem;max-width:800px;width:100%;text-align:left;margin-top:.8rem;}
+.info-box.analogy{background:var(--blue-lt);border-left:4px solid var(--blue);}
+.info-box.warning{background:var(--red-lt);border-left:4px solid var(--red);}
+.info-box.success{background:var(--green-lt);border-left:4px solid var(--green);}
+.info-box.tip{background:var(--gold-lt);border-left:4px solid var(--gold);}
+.info-box .label{font-weight:700;font-size:1rem;margin-bottom:.4rem;}
+.info-box p{font-size:1.05rem;}
+
+/* Flow */
+.flow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1.2rem 0;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.7rem 1rem;font-size:1rem;font-weight:700;text-align:center;}
+.flow-arrow{color:var(--blue);font-size:1.5rem;font-weight:900;}
+
+/* Banner */
+.exercise-banner{display:inline-block;background:var(--purple);color:#fff;padding:.35rem 1.4rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.8rem;}
+
+/* Two col */
+.two-col{display:flex;gap:2rem;width:100%;max-width:960px;text-align:left;}
+.two-col .col{flex:1;}
+
+/* Big number */
+.big-num{font-size:4.5rem;font-weight:900;color:var(--blue);line-height:1;}
+
+/* ═══════════════════════════════════════
+   MOCKUP UI
+   ═══════════════════════════════════════ */
+.mockup-browser{
+  max-width:820px;width:100%;border-radius:12px;overflow:hidden;
+  border:2px solid var(--g200);margin:.8rem 0;max-height:65vh;overflow:hidden;
+  box-shadow:0 4px 24px rgba(0,0,0,.08);
+}
+.mockup-bar{
+  background:var(--g50);padding:.5rem 1rem;display:flex;align-items:center;gap:.6rem;
+  border-bottom:1px solid var(--g200);
+}
+.mockup-dots{display:flex;gap:5px;}
+.mockup-dot{width:10px;height:10px;border-radius:50%;}
+.mockup-dot.r{background:#FF5F57;}.mockup-dot.y{background:#FFBD2E;}.mockup-dot.g{background:#28C840;}
+.mockup-url{
+  flex:1;background:var(--white);border:1px solid var(--g200);border-radius:100px;
+  padding:.25rem .8rem;font-size:.8rem;color:var(--g600);font-family:'Fira Code',monospace;
+}
+.mockup-body{background:var(--white);padding:1rem 1.5rem;min-height:auto;max-height:50vh;overflow-y:auto;position:relative;}
+.mockup-body.dark{background:#1E1E1E;color:#D4D4D4;}
+
+/* Terminal mockup */
+.mockup-terminal{
+  max-width:820px;width:100%;border-radius:12px;overflow:hidden;
+  border:2px solid #444;margin:.8rem 0;
+  box-shadow:0 4px 24px rgba(0,0,0,.15);
+}
+.mockup-term-bar{
+  background:#2D2D2D;padding:.5rem 1rem;display:flex;align-items:center;gap:.6rem;
+  border-bottom:1px solid #444;
+}
+.mockup-term-title{color:#999;font-size:.8rem;font-family:'Fira Code',monospace;flex:1;text-align:center;}
+.mockup-term-body{
+  background:#1E1E1E;padding:1.2rem 1.5rem;min-height:160px;
+  font-family:'Fira Code',monospace;font-size:.85rem;line-height:1.9;color:#D4D4D4;
+}
+.term-prompt{color:#6A9955;}
+.term-cmd{color:#DCDCAA;}
+.term-output{color:#9CDCFE;}
+.term-ai{color:#CE9178;}
+.term-success{color:#4EC9B0;}
+.term-warn{color:#FFBD2E;}
+.term-error{color:#F44747;}
+.term-dim{color:#6A6A6A;}
+.term-blue{color:#569CD6;}
+.term-file{color:#C586C0;}
+
+/* Mockup UI elements */
+.mock-btn{
+  display:inline-block;padding:.4rem 1.2rem;border-radius:8px;font-weight:700;font-size:.9rem;
+  border:none;cursor:default;
+}
+.mock-btn.primary{background:var(--blue);color:#fff;}
+.mock-btn.green{background:var(--green);color:#fff;}
+.mock-btn.outline{background:transparent;border:2px solid var(--g200);color:var(--g800);}
+.mock-input{
+  border:2px solid var(--g200);border-radius:8px;padding:.4rem .8rem;font-size:.9rem;
+  background:var(--white);color:var(--g800);display:inline-block;min-width:200px;
+}
+.mock-sidebar{
+  background:var(--g50);padding:1rem;border-right:1px solid var(--g200);
+  min-width:160px;font-size:.85rem;
+}
+.mock-sidebar-item{padding:.4rem .6rem;border-radius:6px;margin:.2rem 0;cursor:default;}
+.mock-sidebar-item.active{background:var(--blue-lt);color:var(--blue);font-weight:700;}
+.mock-sidebar-item:hover{background:var(--g100);}
+
+/* Highlight arrow / callout */
+.callout{
+  position:absolute;background:var(--red);color:#fff;padding:.3rem .8rem;
+  border-radius:8px;font-size:.85rem;font-weight:700;
+  animation:pulse 1.5s infinite;z-index:5;
+}
+.callout::after{
+  content:'';position:absolute;border:8px solid transparent;
+}
+.callout.arrow-down::after{top:100%;left:50%;transform:translateX(-50%);border-top-color:var(--red);}
+.callout.arrow-left::after{top:50%;right:100%;transform:translateY(-50%);border-right-color:var(--red);}
+.callout.arrow-right::after{top:50%;left:100%;transform:translateY(-50%);border-left-color:var(--red);}
+.callout.arrow-up::after{bottom:100%;left:50%;transform:translateX(-50%);border-bottom-color:var(--red);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.7;}}
+
+/* Controls */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:var(--white);color:var(--g800);font-size:1.2rem;cursor:pointer;transition:all .15s;}
+.controls button:hover{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
+.controls button:disabled{opacity:.25;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:var(--green-lt);color:var(--green);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
+
+/* QR Code */
+.qr-solo{
+  position:absolute;top:.6rem;right:.8rem;z-index:110;
+  background:var(--white);padding:4px;border-radius:6px;
+}
+
+.slide.cover h1{font-size:3.5rem;}
+.slide.cover .subtitle{color:rgba(255,255,255,.8);}
+.slide.section-title h1{font-size:2.8rem;}
+.slide.section-title .subtitle{color:rgba(255,255,255,.85);font-size:1.1rem;}
+
+/* Typing cursor animation */
+.cursor{display:inline-block;width:8px;height:1.1em;background:#D4D4D4;animation:blink 1s step-end infinite;vertical-align:text-bottom;margin-left:2px;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+
+/* Permission badge */
+.perm-allow{display:inline-block;background:#4EC9B0;color:#1E1E1E;padding:.1rem .5rem;border-radius:4px;font-size:.75rem;font-weight:700;}
+.perm-deny{display:inline-block;background:#F44747;color:#fff;padding:.1rem .5rem;border-radius:4px;font-size:.75rem;font-weight:700;}
+.perm-ask{display:inline-block;background:#FFBD2E;color:#1E1E1E;padding:.1rem .5rem;border-radius:4px;font-size:.75rem;font-weight:700;}
+</style>
+</head>
+<body>
+
+<div class="module-title">CLI Agent</div>
+<div class="module-badge">S03 補充單元</div>
+<div class="slides">
+
+<!-- ===== 0: COVER ===== -->
+<div class="slide cover" data-index="0">
+  <p style="font-size:1.1rem;color:rgba(255,255,255,.6);margin-bottom:1rem;">AI 100 講 — 補充單元</p>
+  <h1>CLI Agent<br><span style="font-size:2rem;">AI 接管你的電腦</span></h1>
+  <p class="subtitle" style="margin-top:1.5rem;font-size:1.3rem;">你打字，AI 動手</p>
+  <p style="color:rgba(255,255,255,.4);margin-top:3rem;font-size:.9rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- ===== 1: 議程 ===== -->
+<div class="slide" data-index="1">
+  <h2>今天的旅程</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>Demo 震撼</strong><p>看 AI 兩分鐘從零建網站</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--green);">2</div><div class="step-content"><strong>上手：安裝 + 基本操作</strong><p>AI 看檔案、改檔案</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--purple);">3</div><div class="step-content"><strong>核心概念：CLAUDE.md / Skills / MCP</strong><p>給 AI 規則、裝技能、接外部工具</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--gold);">4</div><div class="step-content"><strong>連上外部世界：GitHub</strong><p>AI 推 code、部署網站</p></div></div>
+    <div class="step fragment" data-order="4"><div class="step-num" style="background:var(--red);">5</div><div class="step-content"><strong>Permission + 安全 + 額度</strong><p>信任 vs 速度 vs 荷包</p></div></div>
+  </div>
+</div>
+
+<!-- ===== 2: 概念過渡 — 三種模式 ===== -->
+<div class="slide" data-index="2">
+  <h2>從 S01 到 S03：你的角色在變</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-color:var(--green);">
+      <div class="icon">S01</div>
+      <h3>搬運工</h3>
+      <p>問 AI → 複製 → 手動貼<br><span class="dim" style="font-size:.85rem;">你搬 AI 的產出</span></p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:var(--blue);">
+      <div class="icon">S02</div>
+      <h3>老闆</h3>
+      <p>描述 → AI 交貨 → 你驗收<br><span class="dim" style="font-size:.85rem;">說就好</span></p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-color:var(--red);">
+      <div class="icon">S03</div>
+      <h3 class="red">建造者</h3>
+      <p>你下令 → AI 在你電腦上蓋房子<br><span class="dim" style="font-size:.85rem;">從零到上線</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 3: 概念過渡 — 演化圖 ===== -->
+<div class="slide" data-index="3">
+  <h2>從「手動」到「自主」的演化</h2>
+  <div class="flow" style="margin-top:1.5rem;">
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">S01<br><span class="dim" style="font-size:.8rem;">複製貼上</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);">S02<br><span class="dim" style="font-size:.8rem;">對話生成</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--red-lt);border-color:var(--red);"><strong>S03</strong><br><span style="font-size:.8rem;color:var(--red);">AI 操作電腦</span></div>
+  </div>
+  <div class="info-box analogy fragment" data-order="0" style="margin-top:1.5rem;">
+    <div class="label">比喻</div>
+    <p>S01 = 你是廚師，AI 是食譜書<br>
+    S02 = 你描述菜色，AI 端上桌<br>
+    <strong>S03 = 你說「我餓了」，AI 進廚房煮完洗完</strong></p>
+  </div>
+</div>
+
+<!-- ===== SECTION: Demo 震撼 ===== -->
+<div class="slide section-title" data-index="4">
+  <p class="subtitle">0:00 – 0:15</p>
+  <h1>Demo 震撼</h1>
+  <p class="subtitle" style="margin-top:.5rem;">先看效果，再學怎麼做</p>
+</div>
+
+<!-- ===== 5: Demo 1 — 一句話建站 (指令) ===== -->
+<div class="slide" data-index="5">
+  <h2>Demo 1：一句話建站</h2>
+  <div class="mockup-terminal">
+    <div class="mockup-term-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-term-title">Terminal — claude</div>
+    </div>
+    <div class="mockup-term-body">
+      <span class="term-prompt">user@mac ~ $</span> <span class="term-cmd">claude</span><br>
+      <br>
+      <span class="term-dim">╭──────────────────────────────────────╮</span><br>
+      <span class="term-dim">│</span> <span class="term-blue">Claude Code</span> <span class="term-dim">v1.0.0</span> <span class="term-dim">│</span><br>
+      <span class="term-dim">╰──────────────────────────────────────╯</span><br>
+      <br>
+      <span class="term-prompt">></span> <span class="term-cmd">建一個天氣查詢網站，好看的介面，</span><br>
+      <span class="term-cmd">&nbsp;&nbsp;部署到 GitHub Pages</span><span class="cursor"></span><br>
+    </div>
+  </div>
+  <p class="dim" style="margin-top:.5rem;font-size:1rem;">一行中文，不需要任何技術名詞</p>
+</div>
+
+<!-- ===== 6: Demo 1 — AI 自己做 ===== -->
+<div class="slide" data-index="6">
+  <h2>AI 自己動手了</h2>
+  <div class="mockup-terminal">
+    <div class="mockup-term-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-term-title">Terminal — claude</div>
+    </div>
+    <div class="mockup-term-body" style="font-size:.8rem;">
+      <span class="term-ai">Claude:</span> 好的，我來幫你建一個天氣查詢網站。<br>
+      <br>
+      <span class="fragment" data-order="0"><span class="term-dim">[1/6]</span> <span class="term-file">Creating</span> weather-app/index.html<br></span>
+      <span class="fragment" data-order="1"><span class="term-dim">[2/6]</span> <span class="term-file">Creating</span> weather-app/style.css<br></span>
+      <span class="fragment" data-order="2"><span class="term-dim">[3/6]</span> <span class="term-file">Creating</span> weather-app/app.js<br></span>
+      <span class="fragment" data-order="3"><span class="term-dim">[4/6]</span> <span class="term-success">Running</span> git init && git add . && git commit<br></span>
+      <span class="fragment" data-order="4"><span class="term-dim">[5/6]</span> <span class="term-success">Running</span> gh repo create weather-app --public<br></span>
+      <span class="fragment" data-order="5"><span class="term-dim">[6/6]</span> <span class="term-success">Running</span> git push && gh pages enable<br>
+      <br>
+      <span class="term-success">✅ 你的網站在</span> <span style="color:#569CD6;text-decoration:underline;">username.github.io/weather-app</span></span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 7: Demo 1 — 成果展示 ===== -->
+<div class="slide" data-index="7">
+  <h2>打開瀏覽器 — 它真的上線了</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">username.github.io/weather-app</div>
+    </div>
+    <div class="mockup-body" style="text-align:center;padding:2rem;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border-radius:0;">
+      <p style="font-size:2rem;font-weight:900;">天氣查詢</p>
+      <div style="margin:1rem auto;background:rgba(255,255,255,.2);border-radius:12px;padding:.5rem 1rem;display:inline-flex;gap:.5rem;align-items:center;">
+        <span style="font-size:.9rem;">台北</span>
+        <span style="background:#fff;color:#764ba2;padding:.3rem .8rem;border-radius:8px;font-weight:700;font-size:.85rem;">查詢</span>
+      </div>
+      <div style="margin-top:1rem;">
+        <p style="font-size:3rem;font-weight:900;">28°C</p>
+        <p style="font-size:1rem;opacity:.8;">多雲 | 濕度 72%</p>
+      </div>
+    </div>
+  </div>
+  <p class="fragment" data-order="0" style="margin-top:.8rem;font-size:1.4rem;font-weight:900;color:var(--blue);">從空資料夾到上線網站，2 分鐘</p>
+</div>
+
+<!-- ===== 8: Demo 2 — 環境設定 ===== -->
+<div class="slide" data-index="8">
+  <h2>Demo 2：環境設定也行</h2>
+  <div class="mockup-terminal">
+    <div class="mockup-term-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-term-title">Terminal — claude</div>
+    </div>
+    <div class="mockup-term-body">
+      <span class="term-prompt">></span> <span class="term-cmd">幫我設定 GitHub SSH 連線，測試是否成功</span><br>
+      <br>
+      <span class="fragment" data-order="0">
+      <span class="term-ai">Claude:</span> 我來幫你設定 SSH 連線。<br>
+      <br>
+      <span class="term-success">Running</span> ssh-keygen -t ed25519 -C "you@email.com"<br>
+      <span class="term-success">Running</span> pbcopy < ~/.ssh/id_ed25519.pub<br>
+      <span class="term-ai">已複製到剪貼簿，請到 GitHub Settings → SSH Keys 貼上</span><br>
+      </span>
+      <span class="fragment" data-order="1">
+      <br>
+      <span class="term-success">Running</span> ssh -T git@github.com<br>
+      <span class="term-output">Hi username! You've been authenticated.</span><br>
+      <br>
+      <span class="term-success">✅ SSH 連線成功</span>
+      </span>
+    </div>
+  </div>
+  <p class="fragment dim" data-order="2" style="margin-top:.5rem;">它知道怎麼操作你的系統</p>
+</div>
+
+<!-- ===== 9: Demo 小結 ===== -->
+<div class="slide" data-index="9">
+  <h2>剛才發生了什麼？</h2>
+  <div style="text-align:left;max-width:700px;margin-top:1rem;">
+    <p class="fragment" data-order="0" style="font-size:1.3rem;padding:.6rem 0;">1. 你用<span class="blue bold">中文</span>說了一句話</p>
+    <p class="fragment" data-order="1" style="font-size:1.3rem;padding:.6rem 0;">2. AI 自己<span class="green bold">建檔、寫 code、執行指令</span></p>
+    <p class="fragment" data-order="2" style="font-size:1.3rem;padding:.6rem 0;">3. 成品直接<span class="purple bold">上線</span>，你的瀏覽器能看到</p>
+  </div>
+  <p class="fragment" data-order="3" style="margin-top:2rem;font-size:1.5rem;font-weight:900;color:var(--red);">你沒有寫任何一行程式碼</p>
+</div>
+
+<!-- ===== SECTION: 上手 ===== -->
+<div class="slide section-title" data-index="10">
+  <p class="subtitle">0:15 – 0:45</p>
+  <h1>上手</h1>
+  <p class="subtitle" style="margin-top:.5rem;">安裝 + 你的第一次互動</p>
+</div>
+
+<!-- ===== 11: 安裝 Claude Code ===== -->
+<div class="slide" data-index="11">
+  <div class="exercise-banner">全班一起裝</div>
+  <h2>安裝 Claude Code</h2>
+  <div class="qr-solo"><div id="qr-install"></div></div>
+  <div class="mockup-terminal">
+    <div class="mockup-term-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-term-title">Terminal</div>
+    </div>
+    <div class="mockup-term-body">
+      <span class="term-prompt">user@mac ~ $</span> <span class="term-cmd">npm install -g @anthropic-ai/claude-code</span><br>
+      <br>
+      <span class="term-dim">added 1 package in 12s</span><br>
+      <br>
+      <span class="term-prompt">user@mac ~ $</span> <span class="term-cmd">claude</span><br>
+      <span class="term-success">Welcome to Claude Code!</span><br>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:.5rem;">
+    <div class="label">前提</div>
+    <p>需要 Node.js 18+ 和 Anthropic 帳號（$20/月 Pro）<br>QR Code → 資源頁有安裝步驟教學</p>
+  </div>
+</div>
+
+<!-- ===== 12: 安裝確認 ===== -->
+<div class="slide" data-index="12">
+  <div class="exercise-banner">確認安裝成功</div>
+  <h2>看到這個畫面就對了</h2>
+  <div class="mockup-terminal">
+    <div class="mockup-term-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-term-title">Terminal — claude</div>
+    </div>
+    <div class="mockup-term-body" style="text-align:center;padding:2rem;">
+      <span class="term-dim">╭──────────────────────────────────────╮</span><br>
+      <span class="term-dim">│</span> <span class="term-blue" style="font-size:1.1em;">Claude Code</span> <span class="term-dim">│</span><br>
+      <span class="term-dim">╰──────────────────────────────────────╯</span><br>
+      <br>
+      <span class="term-dim">Tips: Type your request and press Enter.</span><br>
+      <span class="term-dim">      Use /help for available commands.</span><br>
+      <br>
+      <span class="term-prompt">></span> <span class="cursor"></span>
+    </div>
+  </div>
+  <p class="dim" style="margin-top:.8rem;">這就是你跟 AI 對話的地方，跟聊天一樣打字</p>
+</div>
+
+<!-- ===== 13: ⭐ AI 看我的檔案 ===== -->
+<div class="slide" data-index="13">
+  <div class="exercise-banner">⭐ 練習</div>
+  <h2>AI 看我的檔案</h2>
+  <div class="mockup-terminal">
+    <div class="mockup-term-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-term-title">Terminal — claude</div>
+    </div>
+    <div class="mockup-term-body">
+      <span class="term-prompt">></span> <span class="term-cmd">看看桌面有什麼檔案，解釋給我聽</span><br>
+      <br>
+      <span class="fragment" data-order="0">
+      <span class="term-ai">Claude:</span> 我來看看你的桌面。<br>
+      <br>
+      <span class="term-success">Reading</span> ~/Desktop/<br>
+      <br>
+      你的桌面有這些東西：<br>
+      <span class="term-output">  📁 my-site/</span> — 一個網站資料夾，裡面有 index.html<br>
+      <span class="term-output">  📄 report.docx</span> — Word 文件，看起來是月報<br>
+      <span class="term-output">  📄 notes.md</span> — Markdown 筆記<br>
+      <span class="term-output">  🖼️ screenshot.png</span> — 螢幕截圖<br>
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 14: ⭐ AI 看檔案 — 感受 ===== -->
+<div class="slide" data-index="14">
+  <h2>再試一個</h2>
+  <div class="mockup-terminal">
+    <div class="mockup-term-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-term-title">Terminal — claude</div>
+    </div>
+    <div class="mockup-term-body">
+      <span class="term-prompt">></span> <span class="term-cmd">解釋 S02 做的那個網站的結構</span><br>
+      <br>
+      <span class="fragment" data-order="0">
+      <span class="term-success">Reading</span> my-site/index.html<br>
+      <span class="term-success">Reading</span> my-site/style.css<br>
+      <span class="term-success">Reading</span> my-site/script.js<br>
+      <br>
+      <span class="term-ai">Claude:</span> 這是一個三檔結構的網站：<br>
+      <span class="term-output">  index.html</span> — 主頁面，有導航列和三個區塊<br>
+      <span class="term-output">  style.css</span> — 樣式，使用 flexbox 排版<br>
+      <span class="term-output">  script.js</span> — 互動邏輯，處理表單送出<br>
+      </span>
+    </div>
+  </div>
+  <p class="fragment" data-order="1" style="margin-top:1rem;font-size:1.5rem;font-weight:900;color:var(--purple);">「它能看到我的東西欸」</p>
+</div>
+
+<!-- ===== 15: ⭐⭐ AI 改我的檔案 ===== -->
+<div class="slide" data-index="15">
+  <div class="exercise-banner">⭐⭐ 練習</div>
+  <h2>AI 改我的檔案</h2>
+  <div class="mockup-terminal">
+    <div class="mockup-term-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-term-title">Terminal — claude</div>
+    </div>
+    <div class="mockup-term-body">
+      <span class="term-prompt">></span> <span class="term-cmd">把這個網站的標題改成「我的作品集」</span><br>
+      <br>
+      <span class="fragment" data-order="0">
+      <span class="term-success">Reading</span> my-site/index.html<br>
+      <span class="term-warn">Editing</span> my-site/index.html<br>
+      <br>
+      <span class="term-dim">  - &lt;title&gt;My Website&lt;/title&gt;</span><br>
+      <span class="term-success">  + &lt;title&gt;我的作品集&lt;/title&gt;</span><br>
+      <span class="term-dim">  - &lt;h1&gt;Welcome&lt;/h1&gt;</span><br>
+      <span class="term-success">  + &lt;h1&gt;我的作品集&lt;/h1&gt;</span><br>
+      <br>
+      <span class="perm-ask">Allow edit?</span> <span class="term-dim">[Y/n]</span>
+      </span>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="1">
+    <div class="label">注意</div>
+    <p>AI 會先<strong>顯示要改什麼</strong>，等你確認才真的改。就像有人問你：「這樣改可以嗎？」</p>
+  </div>
+</div>
+
+<!-- ===== 16: ⭐⭐ 改檔案 — 驗證 ===== -->
+<div class="slide" data-index="16">
+  <h2>打開檔案 — 真的改了！</h2>
+  <div class="two-col">
+    <div class="col">
+      <p class="bold" style="margin-bottom:.5rem;">改之前</p>
+      <div class="mockup-browser" style="max-width:400px;">
+        <div class="mockup-bar"><div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div><div class="mockup-url">my-site</div></div>
+        <div class="mockup-body" style="padding:1.2rem;min-height:120px;">
+          <p style="font-size:1.5rem;font-weight:900;">Welcome</p>
+          <p class="dim" style="font-size:.85rem;">My personal website</p>
+        </div>
+      </div>
+    </div>
+    <div class="col fragment" data-order="0">
+      <p class="bold green" style="margin-bottom:.5rem;">改之後</p>
+      <div class="mockup-browser" style="max-width:400px;border-color:var(--green);">
+        <div class="mockup-bar"><div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div><div class="mockup-url">my-site</div></div>
+        <div class="mockup-body" style="padding:1.2rem;min-height:120px;">
+          <p style="font-size:1.5rem;font-weight:900;">我的作品集</p>
+          <p class="dim" style="font-size:.85rem;">My personal website</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="fragment" data-order="1" style="margin-top:1rem;font-size:1rem;">再試：<span class="blue bold">「加一個 footer，寫上版權 2026」</span></p>
+  <p class="fragment" data-order="2" style="margin-top:.8rem;font-size:1.5rem;font-weight:900;color:var(--red);">「它直接改了我的檔案！」</p>
+</div>
+
+<!-- ===== 17: 第一次互動小結 ===== -->
+<div class="slide" data-index="17">
+  <h2>到目前為止你做了什麼？</h2>
+  <div style="text-align:left;max-width:650px;margin-top:1rem;">
+    <div class="fragment" data-order="0" style="padding:.6rem 1.2rem;margin:.4rem 0;background:var(--green-lt);border-radius:12px;border-left:4px solid var(--green);">
+      <strong class="green">⭐ 讀</strong> — AI 看了你的檔案，解釋給你聽
+    </div>
+    <div class="fragment" data-order="1" style="padding:.6rem 1.2rem;margin:.4rem 0;background:var(--blue-lt);border-radius:12px;border-left:4px solid var(--blue);">
+      <strong class="blue">⭐⭐ 改</strong> — AI 修改了你的檔案（經過你同意）
+    </div>
+  </div>
+  <p class="fragment" data-order="2" style="margin-top:2rem;font-size:1.3rem;color:var(--g600);">接下來：AI 能不能幫你<span class="bold" style="color:var(--purple);">「做一件事」</span>？</p>
+</div>
+
+<!-- ===== 18: BREAK ===== -->
+<div class="slide break-slide" data-index="18">
+  <p style="font-size:5rem;">☕</p>
+  <h2 style="margin-top:1rem;color:var(--g800);">休息 10 分鐘</h2>
+  <p class="dim" style="margin-top:1rem;">下半場：核心概念 + 完成任務</p>
+</div>
+
+<!-- ===== SECTION: 核心概念 ===== -->
+<div class="slide section-title" data-index="19">
+  <p class="subtitle">0:55 – 1:30</p>
+  <h1>核心概念</h1>
+  <p class="subtitle" style="margin-top:.5rem;">CLAUDE.md / Skills / MCP</p>
+</div>
+
+<!-- ===== 20: CLAUDE.md 比喻 ===== -->
+<div class="slide" data-index="20">
+  <h2>CLAUDE.md — 新員工的 SOP 手冊</h2>
+  <div class="info-box analogy">
+    <div class="label">比喻</div>
+    <p>你請了一個超強的助理，但他不知道你的規矩。<br>
+    <strong>CLAUDE.md = 你寫給 AI 的工作守則</strong>。<br>
+    每次開新對話，AI 都會先看這份手冊。</p>
+  </div>
+  <div class="mockup-terminal fragment" data-order="0" style="margin-top:.8rem;">
+    <div class="mockup-term-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-term-title">CLAUDE.md</div>
+    </div>
+    <div class="mockup-term-body" style="font-size:.85rem;">
+      <span class="term-blue"># 工作規則</span><br>
+      <span class="term-output">- 所有網頁必須有手機版（RWD）</span><br>
+      <span class="term-output">- 使用繁體中文</span><br>
+      <span class="term-output">- CSS 用 Tailwind</span><br>
+      <span class="term-output">- 每個功能都要寫測試</span><br>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 21: CLAUDE.md 實測 ===== -->
+<div class="slide" data-index="21">
+  <div class="exercise-banner">實測</div>
+  <h2>CLAUDE.md 真的有效嗎？</h2>
+  <div class="two-col">
+    <div class="col">
+      <p class="bold red" style="margin-bottom:.5rem;">沒有 CLAUDE.md</p>
+      <div class="mockup-terminal" style="max-width:400px;">
+        <div class="mockup-term-bar"><div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div><div class="mockup-term-title">claude</div></div>
+        <div class="mockup-term-body" style="font-size:.75rem;min-height:140px;">
+          <span class="term-prompt">></span> 做一個自我介紹頁面<br><br>
+          <span class="term-dim">→ 英文介面</span><br>
+          <span class="term-dim">→ 桌面版 only</span><br>
+          <span class="term-dim">→ 原生 CSS</span><br>
+          <span class="term-error">不符合你的需求</span>
+        </div>
+      </div>
+    </div>
+    <div class="col fragment" data-order="0">
+      <p class="bold green" style="margin-bottom:.5rem;">有 CLAUDE.md</p>
+      <div class="mockup-terminal" style="max-width:400px;border-color:var(--green);">
+        <div class="mockup-term-bar"><div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div><div class="mockup-term-title">claude</div></div>
+        <div class="mockup-term-body" style="font-size:.75rem;min-height:140px;">
+          <span class="term-prompt">></span> 做一個自我介紹頁面<br><br>
+          <span class="term-dim">→ 繁體中文</span><br>
+          <span class="term-dim">→ 有 RWD 手機版</span><br>
+          <span class="term-dim">→ 用 Tailwind CSS</span><br>
+          <span class="term-success">自動遵守你的規則！</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="fragment" data-order="1" style="margin-top:.8rem;font-size:1.3rem;font-weight:900;color:var(--green);">「它記住你的規則了」</p>
+</div>
+
+<!-- ===== 22: Skills ===== -->
+<div class="slide" data-index="22">
+  <h2>Skills — 給 AI 裝 App</h2>
+  <div class="info-box analogy">
+    <div class="label">比喻</div>
+    <p>CLAUDE.md 是規則，Skills 是<strong>能力</strong>。<br>就像手機裝 App，裝了就多一個功能。</p>
+  </div>
+  <div class="two-col fragment" data-order="0" style="margin-top:1rem;">
+    <div class="col">
+      <p class="bold red" style="margin-bottom:.3rem;">沒有 Skill</p>
+      <div class="mockup-terminal" style="max-width:400px;">
+        <div class="mockup-term-bar"><div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div><div class="mockup-term-title">claude</div></div>
+        <div class="mockup-term-body" style="font-size:.78rem;min-height:80px;">
+          <span class="term-prompt">></span> 今天台灣有什麼 AI 新聞？<br>
+          <span class="term-error">我無法搜尋網路，我的訓練</span><br>
+          <span class="term-error">資料截止到...</span>
+        </div>
+      </div>
+    </div>
+    <div class="col fragment" data-order="1">
+      <p class="bold green" style="margin-bottom:.3rem;">有 web-search Skill</p>
+      <div class="mockup-terminal" style="max-width:400px;border-color:var(--green);">
+        <div class="mockup-term-bar"><div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div><div class="mockup-term-title">claude</div></div>
+        <div class="mockup-term-body" style="font-size:.78rem;min-height:80px;">
+          <span class="term-prompt">></span> 今天台灣有什麼 AI 新聞？<br>
+          <span class="term-success">Searching...</span> 找到 5 篇<br>
+          <span class="term-output">1. Anthropic 推出 Claude 5...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 23: MCP ===== -->
+<div class="slide" data-index="23">
+  <h2>MCP — 萬能插頭</h2>
+  <p class="dim" style="margin-bottom:.8rem;">Model Context Protocol — 讓 AI 連接任何外部系統</p>
+  <div class="flow" style="margin-top:1rem;">
+    <div class="flow-box" style="border-color:var(--blue);background:var(--blue-lt);font-size:1.1rem;">AI<br><span class="dim" style="font-size:.75rem;">Claude Code</span></div>
+    <div class="flow-arrow">+</div>
+    <div class="flow-box" style="border-color:var(--purple);background:var(--purple-lt);font-size:1.1rem;">MCP<br><span class="dim" style="font-size:.75rem;">協議</span></div>
+    <div class="flow-arrow">→</div>
+    <div style="display:flex;flex-direction:column;gap:.4rem;">
+      <div class="flow-box fragment" data-order="0" style="font-size:.9rem;">GitHub</div>
+      <div class="flow-box fragment" data-order="1" style="font-size:.9rem;">Google Drive</div>
+      <div class="flow-box fragment" data-order="2" style="font-size:.9rem;">資料庫</div>
+      <div class="flow-box fragment" data-order="3" style="font-size:.9rem;">任何 API</div>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="4">
+    <div class="label">概念就好</div>
+    <p>今天不需要設定 MCP，只要知道：<br><strong>AI 的能力是可以擴充的，不是固定的。</strong></p>
+  </div>
+</div>
+
+<!-- ===== 24: 三層架構總結 ===== -->
+<div class="slide" data-index="24">
+  <h2>三層架構一次看</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card" style="border-color:var(--blue);border-width:3px;">
+      <div class="icon" style="font-size:2rem;">📋</div>
+      <h3 class="blue">CLAUDE.md</h3>
+      <p>規則<br><span class="dim" style="font-size:.85rem;">AI 的工作守則</span></p>
+    </div>
+    <div class="card" style="border-color:var(--purple);border-width:3px;">
+      <div class="icon" style="font-size:2rem;">🧩</div>
+      <h3 class="purple">Skills</h3>
+      <p>能力<br><span class="dim" style="font-size:.85rem;">可安裝的功能</span></p>
+    </div>
+    <div class="card" style="border-color:var(--green);border-width:3px;">
+      <div class="icon" style="font-size:2rem;">🔌</div>
+      <h3 class="green">MCP</h3>
+      <p>連接<br><span class="dim" style="font-size:.85rem;">接外部系統</span></p>
+    </div>
+  </div>
+  <div class="info-box analogy fragment" data-order="0" style="margin-top:1rem;">
+    <div class="label">再一次比喻</div>
+    <p>CLAUDE.md = 公司規章 | Skills = 員工的證照 | MCP = 員工的辦公工具</p>
+  </div>
+</div>
+
+<!-- ===== 25: ⭐⭐⭐ AI 完成一件任務 ===== -->
+<div class="slide" data-index="25">
+  <div class="exercise-banner">⭐⭐⭐ 練習</div>
+  <h2>AI 幫我完成一件事</h2>
+  <div class="mockup-terminal">
+    <div class="mockup-term-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-term-title">Terminal — claude</div>
+    </div>
+    <div class="mockup-term-body">
+      <span class="term-prompt">></span> <span class="term-cmd">把桌面上這三份 Markdown 筆記合併成一份，</span><br>
+      <span class="term-cmd">&nbsp;&nbsp;轉成 PDF</span><br>
+      <br>
+      <span class="fragment" data-order="0">
+      <span class="term-ai">Claude:</span> 好的，讓我來處理。<br>
+      <br>
+      <span class="term-success">Reading</span> ~/Desktop/note1.md<br>
+      <span class="term-success">Reading</span> ~/Desktop/note2.md<br>
+      <span class="term-success">Reading</span> ~/Desktop/note3.md<br>
+      </span>
+      <span class="fragment" data-order="1">
+      <span class="term-file">Creating</span> ~/Desktop/merged-notes.md<br>
+      <span class="term-success">Running</span> npx md-to-pdf merged-notes.md<br>
+      </span>
+      <span class="fragment" data-order="2">
+      <br>
+      <span class="term-success">✅ PDF 已存到 ~/Desktop/merged-notes.pdf</span>
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 26: 任務驅動思維 ===== -->
+<div class="slide" data-index="26">
+  <h2>重要觀念：說任務，不說技術</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <p class="bold red" style="margin-bottom:.5rem;">別這樣說</p>
+      <div style="background:var(--red-lt);border-radius:12px;padding:1rem;font-size:.95rem;line-height:1.8;">
+        「用 cat 把三個 .md 合併<br>然後 pipe 到 pandoc<br>輸出 PDF 格式」
+      </div>
+    </div>
+    <div class="col fragment" data-order="0">
+      <p class="bold green" style="margin-bottom:.5rem;">這樣說就好</p>
+      <div style="background:var(--green-lt);border-radius:12px;padding:1rem;font-size:.95rem;line-height:1.8;">
+        「把桌面的三份筆記<br>合併成一份 PDF」
+      </div>
+    </div>
+  </div>
+  <div class="info-box analogy fragment" data-order="1" style="margin-top:1rem;">
+    <div class="label">關鍵心法</div>
+    <p>你說的是<strong>任務</strong>，不是技術指令。<br>AI 自己決定用什麼工具。你不需要知道 pandoc 是什麼。</p>
+  </div>
+  <p class="fragment" data-order="2" style="margin-top:.5rem;font-size:1.3rem;font-weight:900;color:var(--purple);">「它幫我做到了一件事」</p>
+</div>
+
+<!-- ===== 27: 更多任務範例 ===== -->
+<div class="slide" data-index="27">
+  <h2>你可以試的任務</h2>
+  <div class="step-list" style="margin-top:.5rem;">
+    <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--green);">A</div><div class="step-content"><strong>「把這個資料夾裡的圖片都縮到 800px 寬」</strong><p>AI 會自己找 ImageMagick 或寫 script</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--blue);">B</div><div class="step-content"><strong>「分析這份 CSV，告訴我銷售最好的前 5 名」</strong><p>AI 會自己用 Python 或 Node.js 分析</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--purple);">C</div><div class="step-content"><strong>「幫我把這個 JSON 轉成 Excel」</strong><p>AI 會自己安裝需要的套件</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--gold);">D</div><div class="step-content"><strong>「整理這個資料夾，按日期分類到子資料夾」</strong><p>AI 會自己寫腳本移動檔案</p></div></div>
+  </div>
+</div>
+
+<!-- ===== 28: 三工具比較 ===== -->
+<div class="slide" data-index="28">
+  <h2>三大 CLI Agent 比較</h2>
+  <p class="dim" style="margin-bottom:.5rem;">現在你體驗過了 Claude Code，來認識其他兩個</p>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-color:var(--purple);border-width:3px;">
+      <div class="icon" style="font-size:1.8rem;">Claude Code</div>
+      <h3 class="purple">一對一助理</h3>
+      <p>最聽話，能設 CLAUDE.md 規則<br>$20/月 Pro<br><span class="dim" style="font-size:.85rem;">適合：深度任務、有規範的專案</span></p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:var(--green);border-width:3px;">
+      <div class="icon" style="font-size:1.8rem;">Codex</div>
+      <h3 class="green">快速執行者</h3>
+      <p>OpenAI 生態，速度快<br>$20/月 Plus<br><span class="dim" style="font-size:.85rem;">適合：快速 prototype、GPT 用戶</span></p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-color:var(--blue);border-width:3px;">
+      <div class="icon" style="font-size:1.8rem;">Antigravity</div>
+      <h3 class="blue">圖形介面多工</h3>
+      <p>有 GUI，可同時跑多任務<br><span class="green bold">免費 Preview</span><br><span class="dim" style="font-size:.85rem;">適合：新手入門、多工並行</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 29: 工具選擇建議 ===== -->
+<div class="slide" data-index="29">
+  <h2>怎麼選？</h2>
+  <table class="compare-table">
+    <tr><th>情境</th><th>建議</th><th>原因</th></tr>
+    <tr><td>剛入門，想免費試</td><td class="blue bold">Antigravity</td><td>免費 + 圖形介面</td></tr>
+    <tr><td>有預算，要深度合作</td><td class="purple bold">Claude Code</td><td>CLAUDE.md + MCP 最強</td></tr>
+    <tr><td>已有 ChatGPT Plus</td><td class="green bold">Codex</td><td>無需額外付費</td></tr>
+    <tr><td>什麼都想試</td><td class="gold bold">都裝</td><td>簡單的免費做，複雜的付費做</td></tr>
+  </table>
+  <div class="info-box tip fragment" data-order="0">
+    <div class="label">講師建議</div>
+    <p>不用糾結。<strong>都試試看，選你喜歡的。</strong><br>它們會做的事 80% 一樣，差別在體驗和生態。</p>
+  </div>
+</div>
+
+<!-- ===== 30: BREAK ===== -->
+<div class="slide break-slide" data-index="30">
+  <p style="font-size:5rem;">☕</p>
+  <h2 style="margin-top:1rem;color:var(--g800);">休息 10 分鐘</h2>
+  <p class="dim" style="margin-top:1rem;">最後：連上 GitHub + 安全 + 總結</p>
+</div>
+
+<!-- ===== SECTION: 連上外部世界 ===== -->
+<div class="slide section-title" data-index="31">
+  <p class="subtitle">1:40 – 2:20</p>
+  <h1>連上外部世界</h1>
+  <p class="subtitle" style="margin-top:.5rem;">AI + GitHub = 無限可能</p>
+</div>
+
+<!-- ===== 32: ⭐⭐⭐⭐ AI 連上 GitHub ===== -->
+<div class="slide" data-index="32">
+  <div class="exercise-banner">⭐⭐⭐⭐ 練習</div>
+  <h2>AI 幫我推上 GitHub</h2>
+  <div class="qr-solo"><div id="qr-github"></div></div>
+  <div class="mockup-terminal">
+    <div class="mockup-term-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-term-title">Terminal — claude</div>
+    </div>
+    <div class="mockup-term-body" style="font-size:.8rem;">
+      <span class="term-prompt">></span> <span class="term-cmd">幫我在 GitHub 建一個新 repo 叫 my-portfolio，</span><br>
+      <span class="term-cmd">&nbsp;&nbsp;把桌面的 my-site 資料夾推上去</span><br>
+      <br>
+      <span class="fragment" data-order="0">
+      <span class="term-success">Running</span> cd ~/Desktop/my-site<br>
+      <span class="term-success">Running</span> git init<br>
+      <span class="term-success">Running</span> git add .<br>
+      <span class="term-success">Running</span> git commit -m "Initial commit"<br>
+      </span>
+      <span class="fragment" data-order="1">
+      <span class="term-success">Running</span> gh repo create my-portfolio --public --source=.<br>
+      <span class="term-success">Running</span> git push -u origin main<br>
+      <br>
+      <span class="term-success">✅ 已推送到</span> <span style="color:#569CD6;">github.com/username/my-portfolio</span>
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 33: GitHub 成果 ===== -->
+<div class="slide" data-index="33">
+  <h2>打開 GitHub — 檔案都在！</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">github.com/username/my-portfolio</div>
+    </div>
+    <div class="mockup-body" style="padding:1rem 1.5rem;">
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;">
+        <span style="font-size:1.2rem;">📦</span>
+        <span style="font-weight:700;font-size:1.1rem;">username / my-portfolio</span>
+        <span style="background:var(--g100);border-radius:100px;padding:.1rem .5rem;font-size:.75rem;">Public</span>
+      </div>
+      <div style="border:1px solid var(--g200);border-radius:8px;overflow:hidden;font-size:.85rem;">
+        <div style="padding:.5rem .8rem;border-bottom:1px solid var(--g200);display:flex;gap:.8rem;">
+          <span>📄 index.html</span>
+        </div>
+        <div style="padding:.5rem .8rem;border-bottom:1px solid var(--g200);display:flex;gap:.8rem;">
+          <span>🎨 style.css</span>
+        </div>
+        <div style="padding:.5rem .8rem;display:flex;gap:.8rem;">
+          <span>⚡ script.js</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="info-box success fragment" data-order="0" style="margin-top:.5rem;">
+    <div class="label">腦洞大開的瞬間</div>
+    <p>CLI 能連到的地方，就是 AI 能到的地方。<br>GitHub、雲端、伺服器、資料庫... <strong>什麼都能推上去。</strong></p>
+  </div>
+</div>
+
+<!-- ===== 34: ⭐⭐⭐⭐⭐ 從零到上線 — 說明 ===== -->
+<div class="slide" data-index="34">
+  <div class="exercise-banner">⭐⭐⭐⭐⭐ 大魔王 Demo</div>
+  <h2>從零到上線：一句話搞定</h2>
+  <div class="mockup-terminal">
+    <div class="mockup-term-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-term-title">Terminal — claude</div>
+    </div>
+    <div class="mockup-term-body" style="font-size:.85rem;">
+      <span class="term-prompt">></span> <span class="term-cmd">建一個查詢台北天氣的網站，用好看的介面，</span><br>
+      <span class="term-cmd">&nbsp;&nbsp;部署到 GitHub Pages</span><span class="cursor"></span>
+    </div>
+  </div>
+  <p style="margin-top:1rem;font-size:1.3rem;font-weight:700;color:var(--g600);">接下來講師操作，你看大螢幕</p>
+  <div class="flow fragment" data-order="0" style="margin-top:.8rem;">
+    <div class="flow-box" style="font-size:.9rem;">空資料夾</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="font-size:.9rem;">建立檔案</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="font-size:.9rem;">寫 code</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="font-size:.9rem;">Git push</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--green);background:var(--green-lt);font-size:.9rem;">上線！</div>
+  </div>
+</div>
+
+<!-- ===== 35: 從零到上線 — 過程 1 ===== -->
+<div class="slide" data-index="35">
+  <h2>AI 正在工作...</h2>
+  <div class="mockup-terminal">
+    <div class="mockup-term-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-term-title">Terminal — claude</div>
+    </div>
+    <div class="mockup-term-body" style="font-size:.78rem;">
+      <span class="term-ai">Claude:</span> 我會幫你完成以下步驟：<br>
+      <br>
+      <span class="fragment" data-order="0">
+      <span class="term-dim">[1/8]</span> <span class="term-file">Creating</span> weather-app/<br>
+      <span class="term-dim">[2/8]</span> <span class="term-file">Writing</span> index.html <span class="term-dim">(HTML 結構 + 搜尋框)</span><br>
+      <span class="term-dim">[3/8]</span> <span class="term-file">Writing</span> style.css <span class="term-dim">(漸層背景 + 卡片設計)</span><br>
+      <span class="term-dim">[4/8]</span> <span class="term-file">Writing</span> app.js <span class="term-dim">(天氣 API 呼叫)</span><br>
+      </span>
+      <span class="fragment" data-order="1">
+      <span class="term-dim">[5/8]</span> <span class="term-success">Running</span> git init<br>
+      <span class="term-dim">[6/8]</span> <span class="term-success">Running</span> git add . && git commit<br>
+      <span class="term-dim">[7/8]</span> <span class="term-success">Running</span> gh repo create --public --push<br>
+      </span>
+      <span class="fragment" data-order="2">
+      <span class="term-dim">[8/8]</span> <span class="term-success">Running</span> gh api repos/.../pages -X POST<br>
+      <br>
+      <span class="term-success">✅ 部署完成！</span><br>
+      <span class="term-output">https://username.github.io/weather-app</span>
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 36: 從零到上線 — 成品 ===== -->
+<div class="slide" data-index="36">
+  <h2>打開瀏覽器 — 它真的在線上</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">username.github.io/weather-app</div>
+    </div>
+    <div class="mockup-body" style="text-align:center;padding:2rem;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;">
+      <p style="font-size:1.8rem;font-weight:900;">台北天氣</p>
+      <div style="display:flex;justify-content:center;gap:1rem;margin:1rem 0;flex-wrap:wrap;">
+        <div style="background:rgba(255,255,255,.15);border-radius:12px;padding:1rem;min-width:100px;">
+          <p style="font-size:2.5rem;font-weight:900;">28°C</p>
+          <p style="font-size:.85rem;opacity:.8;">多雲</p>
+        </div>
+        <div style="background:rgba(255,255,255,.15);border-radius:12px;padding:1rem;min-width:100px;">
+          <p style="font-size:1.2rem;font-weight:700;">濕度</p>
+          <p style="font-size:1.5rem;font-weight:900;">72%</p>
+        </div>
+        <div style="background:rgba(255,255,255,.15);border-radius:12px;padding:1rem;min-width:100px;">
+          <p style="font-size:1.2rem;font-weight:700;">風速</p>
+          <p style="font-size:1.5rem;font-weight:900;">12km/h</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:1rem;margin-top:1rem;">
+    <div class="big-num" style="font-size:3.5rem;">2</div>
+    <div>
+      <p style="font-size:1.3rem;font-weight:900;">分鐘</p>
+      <p class="dim" style="font-size:1rem;">空資料夾 → 上線的網站</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 37: 感受收集 ===== -->
+<div class="slide" data-index="37">
+  <h2>你的感受？</h2>
+  <div style="text-align:left;max-width:700px;margin-top:1.5rem;">
+    <p class="fragment" data-order="0" style="font-size:1.3rem;padding:.5rem 0;">
+      <span class="green bold">⭐</span> 「它能看到我的東西」
+    </p>
+    <p class="fragment" data-order="1" style="font-size:1.3rem;padding:.5rem 0;">
+      <span class="blue bold">⭐⭐</span> 「它直接改了我的檔案」
+    </p>
+    <p class="fragment" data-order="2" style="font-size:1.3rem;padding:.5rem 0;">
+      <span class="purple bold">⭐⭐⭐</span> 「它幫我做到了一件事」
+    </p>
+    <p class="fragment" data-order="3" style="font-size:1.3rem;padding:.5rem 0;">
+      <span class="gold bold">⭐⭐⭐⭐</span> 「它連上 GitHub 了」
+    </p>
+    <p class="fragment" data-order="4" style="font-size:1.3rem;padding:.5rem 0;">
+      <span class="red bold">⭐⭐⭐⭐⭐</span> 「兩分鐘，從零到上線」
+    </p>
+  </div>
+  <p class="fragment" data-order="5" style="margin-top:1.5rem;font-size:1.1rem;color:var(--g600);">每一步都更「失控」，但你始終是那個按 Yes / No 的人</p>
+</div>
+
+<!-- ===== SECTION: Permission + 安全 ===== -->
+<div class="slide section-title" data-index="38">
+  <p class="subtitle">2:20 – 2:45</p>
+  <h1>Permission + 安全</h1>
+  <p class="subtitle" style="margin-top:.5rem;">信任 vs 速度 vs 荷包</p>
+</div>
+
+<!-- ===== 39: Permission 三種模式 ===== -->
+<div class="slide" data-index="39">
+  <h2>Permission 三種模式</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-color:var(--green);border-width:3px;">
+      <div class="icon" style="font-size:2rem;">🛡️</div>
+      <h3 class="green">安全模式</h3>
+      <p>每個動作都問你<br><span class="perm-ask">Allow?</span> 一直跳出來<br><span class="dim" style="font-size:.85rem;">適合：新手、敏感環境</span></p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:var(--blue);border-width:3px;">
+      <div class="icon" style="font-size:2rem;">⚖️</div>
+      <h3 class="blue">半自動</h3>
+      <p>讀自動、改要確認<br><span class="perm-allow">READ</span> <span class="perm-ask">WRITE?</span><br><span class="dim" style="font-size:.85rem;">適合：日常使用（推薦）</span></p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-color:var(--red);border-width:3px;">
+      <div class="icon" style="font-size:2rem;">🚀</div>
+      <h3 class="red">Bypass</h3>
+      <p>AI 不停下來，全速跑<br><span class="perm-allow">ALL AUTO</span><br><span class="dim" style="font-size:.85rem;">最快，但最燒錢</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 40: Permission — 信任光譜 ===== -->
+<div class="slide" data-index="40">
+  <h2>信任光譜</h2>
+  <div style="max-width:800px;width:100%;margin-top:1.5rem;">
+    <div style="display:flex;justify-content:space-between;margin-bottom:.3rem;">
+      <span class="bold green">安全</span>
+      <span class="bold gold">平衡</span>
+      <span class="bold red">全速</span>
+    </div>
+    <div style="height:16px;border-radius:100px;background:linear-gradient(to right,var(--green),var(--gold),var(--red));"></div>
+    <div style="display:flex;justify-content:space-between;margin-top:.5rem;font-size:.9rem;color:var(--g600);">
+      <span>每步確認</span>
+      <span>讀自動 / 寫確認</span>
+      <span>全自動</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:.3rem;font-size:.85rem;">
+      <span>信任 ↓ 速度 ↓ 花費 ↓</span>
+      <span></span>
+      <span>信任 ↑ 速度 ↑ 花費 ↑</span>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="0" style="margin-top:1.5rem;">
+    <div class="label">訣竅</div>
+    <p>剛開始用<strong>半自動</strong>。等你熟悉了，再決定要不要開 Bypass。</p>
+  </div>
+</div>
+
+<!-- ===== 41: Bypass 的代價 ===== -->
+<div class="slide" data-index="41">
+  <h2>Bypass 的代價</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <div style="background:var(--green-lt);border-radius:12px;padding:1.2rem;text-align:center;">
+        <p style="font-size:1.5rem;font-weight:900;color:var(--green);">正常模式</p>
+        <p style="margin-top:.8rem;font-size:.95rem;line-height:1.8;">
+          AI 做一步 → 等你確認<br>
+          大部分時間在等你按 Y<br>
+          <strong>$20/月用很久</strong>
+        </p>
+      </div>
+    </div>
+    <div class="col fragment" data-order="0">
+      <div style="background:var(--red-lt);border-radius:12px;padding:1.2rem;text-align:center;">
+        <p style="font-size:1.5rem;font-weight:900;color:var(--red);">Bypass 模式</p>
+        <p style="margin-top:.8rem;font-size:.95rem;line-height:1.8;">
+          AI 連續做不停<br>
+          每一步都在燒 token<br>
+          <strong class="red">$20 可能一個下午就燒完</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="info-box warning fragment" data-order="1" style="margin-top:.8rem;">
+    <div class="label">原則</div>
+    <p>確定要做什麼才開 Bypass，做完馬上關。<br>就像計程車跳表 — 你不會開著計程車去逛街。</p>
+  </div>
+</div>
+
+<!-- ===== 42: Bypass 實際設定 ===== -->
+<div class="slide" data-index="42">
+  <h2>Bypass 怎麼設才安全？</h2>
+  <p class="dim" style="margin-bottom:.8rem;">講師的實際設定：幾乎全開，但「刪除」仍需確認</p>
+  <div class="code-block" style="font-size:.95rem;">
+    <span class="kw">"permissions"</span>: {<br>
+    &nbsp;&nbsp;<span class="str">"defaultMode"</span>: <span class="str">"bypassPermissions"</span>, <span class="cm">← 預設全開</span><br>
+    &nbsp;&nbsp;<span class="str">"ask"</span>: [<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"Bash(rm -rf:*)"</span>, <span class="cm">← 刪整個資料夾要確認</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"Bash(sudo rm:*)"</span> &nbsp;<span class="cm">← sudo 刪除要確認</span><br>
+    &nbsp;&nbsp;]<br>
+    }
+  </div>
+  <div class="info-box warning fragment" data-order="0" style="margin-top:.6rem;">
+    <div class="label">⚠️ 任務中斷風險</div>
+    <p>bypass 中斷網 / 關機 / 額度用完 → <strong>AI 停在半路，不會自動回滾</strong><br>
+    檔案可能改到一半、Git 可能 commit 到一半<br>
+    所以：<strong>開 bypass 前先寫好 CLAUDE.md</strong>，不然 AI 沒規則會亂跑</p>
+  </div>
+</div>
+
+<!-- ===== 43: 額度管理 ===== -->
+<div class="slide" data-index="43">
+  <h2>要花多少錢？</h2>
+  <table class="compare-table">
+    <tr><th>方案</th><th>費用</th><th>適合</th></tr>
+    <tr><td><strong class="purple">Claude Pro</strong></td><td>$20/月</td><td>不開 bypass 日常很夠用</td></tr>
+    <tr><td><strong class="blue">Antigravity</strong></td><td class="green bold">免費（Preview）</td><td>入門首選</td></tr>
+    <tr><td><strong class="gold">混合使用</strong></td><td>$0-20</td><td>簡單免費做，複雜付費做</td></tr>
+  </table>
+  <div class="info-box tip fragment" data-order="0" style="margin-top:.8rem;">
+    <div class="label">💡 查自己用了多少</div>
+    <p>Claude → claude.ai/settings → Usage<br>
+    Groq → console.groq.com → Usage<br>
+    OpenRouter → openrouter.ai/activity<br>
+    <span class="dim">實際用量因人而異，建議自己追蹤一週再評估</span></p>
+  </div>
+</div>
+
+<!-- ===== 43: 安全提醒 ===== -->
+<div class="slide" data-index="43">
+  <h2>安全提醒</h2>
+  <div class="mockup-terminal">
+    <div class="mockup-term-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-term-title">Terminal — claude</div>
+    </div>
+    <div class="mockup-term-body" style="font-size:.85rem;">
+      <span class="term-prompt">></span> <span class="term-cmd">刪掉桌面上所有 .tmp 檔案</span><br>
+      <br>
+      <span class="term-ai">Claude:</span> 我找到 23 個 .tmp 檔案，要全部刪除嗎？<br>
+      <br>
+      <span class="term-warn">⚠️ Running</span> rm ~/Desktop/*.tmp<br>
+      <span class="perm-ask">Allow?</span> <span class="term-dim">[Y/n]</span><br>
+      <br>
+      <span style="position:relative;display:inline-block;">
+        <span class="callout arrow-left" style="right:calc(100% + 12px);top:50%;transform:translateY(-50%);">這裡要看清楚！</span>
+        <span class="term-dim">→ 確認是 .tmp 不是重要檔案再按 Y</span>
+      </span>
+    </div>
+  </div>
+  <div style="text-align:left;max-width:700px;margin-top:.8rem;">
+    <p class="fragment" data-order="0" style="font-size:1.05rem;padding:.3rem 0;">1. <strong>刪除</strong>操作 — 先看清楚範圍</p>
+    <p class="fragment" data-order="1" style="font-size:1.05rem;padding:.3rem 0;">2. <strong>密碼 / API Key</strong> — 不要讓 AI 寫在公開檔案裡</p>
+    <p class="fragment" data-order="2" style="font-size:1.05rem;padding:.3rem 0;">3. <strong>不確定就按 n</strong> — AI 不會生氣，它會換方式</p>
+  </div>
+</div>
+
+<!-- ===== 44: 什麼時候該說 No ===== -->
+<div class="slide" data-index="44">
+  <h2>什麼時候該按 <span class="red">n</span>？</h2>
+  <div class="step-list" style="margin-top:.5rem;">
+    <div class="step fragment" data-order="0">
+      <div class="step-num" style="background:var(--red);">!</div>
+      <div class="step-content"><strong>AI 要刪大量檔案</strong><p>「rm -rf」或大範圍刪除 → 先問它具體刪什麼</p></div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--red);">!</div>
+      <div class="step-content"><strong>AI 要安裝不認識的套件</strong><p>看不懂的 npm/pip 套件 → 先問它為什麼需要</p></div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="background:var(--red);">!</div>
+      <div class="step-content"><strong>AI 要修改系統設定</strong><p>碰 .zshrc、.bashrc 等 → 先確認改什麼</p></div>
+    </div>
+    <div class="step fragment" data-order="3">
+      <div class="step-num" style="background:var(--red);">!</div>
+      <div class="step-content"><strong>AI 要推到公開 repo</strong><p>確認沒有密碼、個資在裡面</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION: 收尾 ===== -->
+<div class="slide section-title" data-index="45">
+  <p class="subtitle">2:45 – 3:00</p>
+  <h1>Recap + 預告</h1>
+</div>
+
+<!-- ===== 46: Recap ===== -->
+<div class="slide" data-index="46">
+  <h2>今天你學會了</h2>
+  <div style="text-align:left;max-width:720px;margin-top:.5rem;">
+    <div class="fragment" data-order="0" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--green-lt);border-radius:12px;border-left:4px solid var(--green);">
+      <strong class="green">AI 能讀你的檔案</strong> — 看懂你的專案結構
+    </div>
+    <div class="fragment" data-order="1" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--blue-lt);border-radius:12px;border-left:4px solid var(--blue);">
+      <strong class="blue">AI 能改你的檔案</strong> — 經過你同意才動手
+    </div>
+    <div class="fragment" data-order="2" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--purple-lt);border-radius:12px;border-left:4px solid var(--purple);">
+      <strong class="purple">AI 能幫你完成任務</strong> — 它自己決定用什麼工具
+    </div>
+    <div class="fragment" data-order="3" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--gold-lt);border-radius:12px;border-left:4px solid var(--gold);">
+      <strong class="gold">AI 能連上 GitHub</strong> — 推 code、建 repo、部署
+    </div>
+    <div class="fragment" data-order="4" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--red-lt);border-radius:12px;border-left:4px solid var(--red);">
+      <strong class="red">AI 能從零到上線</strong> — 兩分鐘，空資料夾到網站
+    </div>
+  </div>
+</div>
+
+<!-- ===== 47: CLAUDE.md 帶走 ===== -->
+<div class="slide" data-index="47">
+  <h2>帶走的 CLAUDE.md 模板</h2>
+  <div class="qr-solo"><div id="qr-template"></div></div>
+  <div class="mockup-terminal">
+    <div class="mockup-term-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-term-title">CLAUDE.md</div>
+    </div>
+    <div class="mockup-term-body" style="font-size:.85rem;">
+      <span class="term-blue"># 我的工作規則</span><br>
+      <br>
+      <span class="term-output">## 語言</span><br>
+      <span class="term-dim">- 所有介面使用繁體中文</span><br>
+      <span class="term-dim">- 程式碼註解用中文</span><br>
+      <br>
+      <span class="term-output">## 網頁</span><br>
+      <span class="term-dim">- 必須有手機版（RWD）</span><br>
+      <span class="term-dim">- 使用 Tailwind CSS</span><br>
+      <br>
+      <span class="term-output">## 安全</span><br>
+      <span class="term-dim">- API Key 不寫在程式碼裡</span><br>
+      <span class="term-dim">- 敏感資料放 .env</span><br>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 48: 三工具 cheat sheet ===== -->
+<div class="slide" data-index="48">
+  <h2>三工具速查表</h2>
+  <table class="compare-table" style="font-size:.9rem;">
+    <tr><th></th><th style="color:var(--purple);">Claude Code</th><th style="color:var(--green);">Codex</th><th style="color:var(--blue);">Antigravity</th></tr>
+    <tr><td><strong>安裝</strong></td><td>npm install</td><td>npm install</td><td>下載 App</td></tr>
+    <tr><td><strong>介面</strong></td><td>Terminal</td><td>Terminal</td><td>GUI + Terminal</td></tr>
+    <tr><td><strong>規則檔</strong></td><td>CLAUDE.md</td><td>AGENTS.md</td><td>Settings UI</td></tr>
+    <tr><td><strong>擴充</strong></td><td>Skills + MCP</td><td>Tools</td><td>Extensions</td></tr>
+    <tr><td><strong>費用</strong></td><td>$20/月</td><td>$20/月</td><td class="green bold">免費 Preview</td></tr>
+    <tr><td><strong>強項</strong></td><td>深度合作</td><td>速度快</td><td>視覺化</td></tr>
+  </table>
+</div>
+
+<!-- ===== 49: 常用指令表 ===== -->
+<div class="slide" data-index="49">
+  <h2>Claude Code 常用指令</h2>
+  <div class="mockup-terminal">
+    <div class="mockup-term-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-term-title">常用指令速查</div>
+    </div>
+    <div class="mockup-term-body" style="font-size:.82rem;">
+      <span class="term-blue"># 基本操作</span><br>
+      <span class="term-prompt">$</span> <span class="term-cmd">claude</span> <span class="term-dim"># 啟動對話</span><br>
+      <span class="term-prompt">$</span> <span class="term-cmd">claude "幫我做某件事"</span> <span class="term-dim"># 直接下指令</span><br>
+      <br>
+      <span class="term-blue"># 對話中指令</span><br>
+      <span class="term-prompt">></span> <span class="term-cmd">/help</span> <span class="term-dim"># 看說明</span><br>
+      <span class="term-prompt">></span> <span class="term-cmd">/clear</span> <span class="term-dim"># 清除對話</span><br>
+      <span class="term-prompt">></span> <span class="term-cmd">/cost</span> <span class="term-dim"># 看花了多少</span><br>
+      <span class="term-prompt">></span> <span class="term-cmd">/permissions</span> <span class="term-dim"># 調整權限</span><br>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 50: 預告 S04 ===== -->
+<div class="slide" data-index="50">
+  <h2>下一堂預告</h2>
+  <div class="two-col" style="margin-top:1.5rem;align-items:center;">
+    <div class="col" style="text-align:center;">
+      <p style="font-size:1.1rem;color:var(--g600);">S03 你學了</p>
+      <p style="font-size:1.5rem;font-weight:900;margin-top:.5rem;">AI 從零建造</p>
+    </div>
+    <div class="col fragment" data-order="0" style="text-align:center;">
+      <p style="font-size:1.1rem;color:var(--blue);">S04 你會學</p>
+      <p style="font-size:1.5rem;font-weight:900;color:var(--blue);margin-top:.5rem;">AI 接手別人的<br>改成你的</p>
+    </div>
+  </div>
+  <div class="flow fragment" data-order="1" style="margin-top:2rem;">
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">S01 ✅</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);">S02 ✅</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--purple-lt);border-color:var(--purple);">S03 ✅</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--gold);background:var(--gold-lt);"><strong>S04 IDE</strong></div>
+    <div class="flow-arrow" style="opacity:.3;">→</div>
+    <div class="flow-box" style="opacity:.3;">S05</div>
+  </div>
+</div>
+
+<!-- ===== 51: END ===== -->
+<div class="slide cover" data-index="51">
+  <p style="font-size:1rem;color:rgba(255,255,255,.6);margin-bottom:1rem;">S03 補充單元</p>
+  <h1>完成！</h1>
+  <p class="subtitle" style="margin-top:1.5rem;font-size:1.2rem;">
+    讀 → 改 → 做 → 推 → 上線
+  </p>
+  <p style="color:rgba(255,255,255,.5);margin-top:1rem;font-size:1rem;">你是建造者，AI 是你的施工隊</p>
+  <p style="color:rgba(255,255,255,.4);margin-top:3rem;font-size:.9rem;">ai100.cooperation.tw</p>
+</div>
+
+</div>
+
+<div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>←</button><button id="next">→</button></div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),tot=slides.length;
+let idx=0,fi=-1;
+document.getElementById('total').textContent=tot;
+const gf=el=>el.querySelectorAll('.fragment');
+function go(n){slides.forEach((s,i)=>{s.classList.remove('active','prev');if(i<n)s.classList.add('prev');s.querySelectorAll('.fragment').forEach(f=>f.classList.remove('visible'));});idx=n;fi=-1;slides[idx].classList.add('active');ui();}
+function ui(){document.getElementById('current').textContent=idx+1;document.getElementById('prev').disabled=idx===0&&fi<=0;const f=gf(slides[idx]);document.getElementById('next').disabled=idx===tot-1&&fi>=f.length-1;document.getElementById('progress').style.width=((idx+1)/tot*100)+'%';}
+function adv(){const f=gf(slides[idx]);if(fi<f.length-1){fi++;f[fi].classList.add('visible');ui();}else if(idx<tot-1)go(idx+1);}
+function ret(){const f=gf(slides[idx]);if(fi>=0){f[fi].classList.remove('visible');fi--;ui();}else if(idx>0){go(idx-1);const p=gf(slides[idx]);p.forEach(x=>x.classList.add('visible'));fi=p.length-1;ui();}}
+document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
+document.addEventListener('keydown',e=>{if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}if(e.key==='Home'){e.preventDefault();go(0);}if(e.key==='End'){e.preventDefault();go(tot-1);}if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}});
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
+ui();
+
+// ─── QR Code Generation ───
+const TEMPLATE_URL = 'https://ai100.cooperation.tw/classroom/s03-template.html';
+const qrOpts = {width:240,height:240,colorDark:'#202124',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M};
+
+function makeQR(id,url){
+  const el = document.getElementById(id);
+  if(el && !el.querySelector('canvas')){new QRCode(el,{...qrOpts,text:url});}
+}
+
+// Generate all QR codes
+makeQR('qr-install', TEMPLATE_URL + '#install');
+makeQR('qr-github', TEMPLATE_URL + '#github');
+makeQR('qr-template', TEMPLATE_URL + '#claudemd');
+</script>
+</body>
+</html>

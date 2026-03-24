@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S04 — VS Code IDE</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   grow.google 簡潔風 + Reading Glasses
+   投影教學用 (3-10m 觀看距離)
+   ═══════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--white);}
+
+/* Slides */
+.slides{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;opacity:0;transform:translateX(30px);pointer-events:none;transition:opacity .4s,transform .4s ease;background:var(--white);}
+.slide.active{opacity:1;transform:none;pointer-events:auto;}
+.slide.prev{opacity:0;transform:translateX(-30px);}
+.slide.cover{background:var(--navy);color:#fff;text-align:center;}
+.slide.section-title{background:var(--green);color:#fff;text-align:center;}
+.slide.break-slide{background:var(--offwhite);text-align:center;}
+
+/* Typography */
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:2rem;font-weight:700;color:var(--g900);margin-bottom:1rem;line-height:1.4;}
+h3{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.1rem;line-height:1.8;}
+.subtitle{font-size:1.15rem;color:var(--g600);font-weight:500;}
+.blue{color:var(--blue);}.green{color:var(--green);}.gold{color:var(--gold);}.red{color:var(--red);}.purple{color:var(--purple);}.dim{color:var(--g600);}.bold{font-weight:700;}
+
+/* Fragment */
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* Cards */
+.card-grid{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;margin-top:1.2rem;max-width:1100px;}
+.card{background:var(--white);border:2px solid var(--g100);border-radius:16px;padding:1.8rem;min-width:220px;max-width:300px;flex:1;transition:border-color .2s;}
+.card:hover{border-color:var(--blue);}
+.card .icon{font-size:2.5rem;margin-bottom:.6rem;}
+.card p{font-size:1rem;color:var(--g600);}
+
+/* Steps */
+.step-list{text-align:left;max-width:800px;width:100%;}
+.step{display:flex;gap:1.2rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:40px;height:40px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.1rem;}.step-content p{font-size:1rem;color:var(--g600);margin-top:.15rem;}
+
+/* Code */
+.code-block{background:var(--g50);border:2px solid var(--g200);border-radius:12px;padding:1.3rem 1.8rem;text-align:left;max-width:860px;width:100%;font-family:'Fira Code',monospace;font-size:1rem;line-height:1.8;margin:.8rem 0;color:var(--g900);}
+.code-block .kw{color:#D93025;font-weight:700;}.code-block .str{color:#0F9D8A;}.code-block .fn{color:#7C3AED;}.code-block .cm{color:var(--g400);}
+
+/* Table */
+.compare-table{border-collapse:collapse;font-size:1rem;margin-top:.8rem;width:100%;max-width:860px;}
+.compare-table th{background:var(--navy);color:#fff;padding:.7rem 1rem;text-align:left;font-size:1rem;}
+.compare-table td{padding:.7rem 1rem;border-bottom:1px solid var(--g100);font-size:1rem;}
+.compare-table tr:hover td{background:var(--g50);}
+
+/* Info boxes */
+.info-box{border-radius:12px;padding:1.3rem 1.8rem;max-width:800px;width:100%;text-align:left;margin-top:.8rem;}
+.info-box.analogy{background:var(--blue-lt);border-left:4px solid var(--blue);}
+.info-box.warning{background:var(--red-lt);border-left:4px solid var(--red);}
+.info-box.success{background:var(--green-lt);border-left:4px solid var(--green);}
+.info-box.tip{background:var(--gold-lt);border-left:4px solid var(--gold);}
+.info-box .label{font-weight:700;font-size:1rem;margin-bottom:.4rem;}
+.info-box p{font-size:1.05rem;}
+
+/* Flow */
+.flow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1.2rem 0;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.7rem 1rem;font-size:1rem;font-weight:700;text-align:center;}
+.flow-arrow{color:var(--blue);font-size:1.5rem;font-weight:900;}
+
+/* Banner */
+.exercise-banner{display:inline-block;background:var(--purple);color:#fff;padding:.35rem 1.4rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.8rem;}
+.demo-banner{display:inline-block;background:var(--blue);color:#fff;padding:.35rem 1.4rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.8rem;}
+
+/* Two col */
+.two-col{display:flex;gap:2rem;width:100%;max-width:960px;text-align:left;}
+.two-col .col{flex:1;}
+
+/* Big number */
+.big-num{font-size:4.5rem;font-weight:900;color:var(--blue);line-height:1;}
+
+/* ═══════════════════════════════════════
+   MOCKUP UI — Browser
+   ═══════════════════════════════════════ */
+.mockup-browser{
+  max-width:820px;width:100%;border-radius:12px;overflow:hidden;
+  border:2px solid var(--g200);margin:.8rem 0;max-height:65vh;overflow:hidden;
+  box-shadow:0 4px 24px rgba(0,0,0,.08);
+}
+.mockup-bar{
+  background:var(--g50);padding:.5rem 1rem;display:flex;align-items:center;gap:.6rem;
+  border-bottom:1px solid var(--g200);
+}
+.mockup-dots{display:flex;gap:5px;}
+.mockup-dot{width:10px;height:10px;border-radius:50%;}
+.mockup-dot.r{background:#FF5F57;}.mockup-dot.y{background:#FFBD2E;}.mockup-dot.g{background:#28C840;}
+.mockup-url{
+  flex:1;background:var(--white);border:1px solid var(--g200);border-radius:100px;
+  padding:.25rem .8rem;font-size:.8rem;color:var(--g600);font-family:'Fira Code',monospace;
+}
+.mockup-body{background:var(--white);padding:1rem 1.5rem;min-height:auto;max-height:50vh;overflow-y:auto;position:relative;}
+.mockup-body.dark{background:#1E1E1E;color:#D4D4D4;}
+
+/* Mockup UI elements */
+.mock-btn{
+  display:inline-block;padding:.4rem 1.2rem;border-radius:8px;font-weight:700;font-size:.9rem;
+  border:none;cursor:default;
+}
+.mock-btn.primary{background:var(--blue);color:#fff;}
+.mock-btn.green{background:var(--green);color:#fff;}
+.mock-btn.outline{background:transparent;border:2px solid var(--g200);color:var(--g800);}
+.mock-input{
+  border:2px solid var(--g200);border-radius:8px;padding:.4rem .8rem;font-size:.9rem;
+  background:var(--white);color:var(--g800);display:inline-block;min-width:200px;
+}
+.mock-sidebar{
+  background:var(--g50);padding:1rem;border-right:1px solid var(--g200);
+  min-width:160px;font-size:.85rem;
+}
+.mock-sidebar-item{padding:.4rem .6rem;border-radius:6px;margin:.2rem 0;cursor:default;}
+.mock-sidebar-item.active{background:var(--blue-lt);color:var(--blue);font-weight:700;}
+.mock-sidebar-item:hover{background:var(--g100);}
+
+/* Highlight arrow / callout */
+.callout{
+  position:absolute;background:var(--red);color:#fff;padding:.3rem .8rem;
+  border-radius:8px;font-size:.85rem;font-weight:700;
+  animation:pulse 1.5s infinite;z-index:5;
+}
+.callout::after{
+  content:'';position:absolute;border:8px solid transparent;
+}
+.callout.arrow-down::after{top:100%;left:50%;transform:translateX(-50%);border-top-color:var(--red);}
+.callout.arrow-left::after{top:50%;right:100%;transform:translateY(-50%);border-right-color:var(--red);}
+.callout.arrow-right::after{top:50%;left:100%;transform:translateY(-50%);border-left-color:var(--red);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.7;}}
+
+/* Mockup Sheet */
+.mock-sheet{width:100%;border-collapse:collapse;font-size:.9rem;}
+.mock-sheet th{background:var(--g100);padding:.3rem .8rem;text-align:center;font-weight:700;color:var(--g600);border:1px solid var(--g200);}
+.mock-sheet td{padding:.4rem .8rem;border:1px solid var(--g200);min-width:80px;}
+.mock-sheet .row-num{background:var(--g50);color:var(--g600);text-align:center;width:30px;font-size:.8rem;}
+.mock-sheet .input-cell{background:#E8F0FE;font-weight:500;}
+.mock-sheet .output-cell{background:#E6F4F1;color:var(--green);font-weight:500;}
+
+/* ═══════════════════════════════════════
+   VS CODE MOCKUP
+   ═══════════════════════════════════════ */
+.vscode-mockup{
+  max-width:900px;width:100%;border-radius:12px;overflow:hidden;
+  border:2px solid var(--g200);margin:.8rem 0;max-height:65vh;overflow:hidden;
+  box-shadow:0 4px 24px rgba(0,0,0,.08);
+  font-family:'Fira Code',monospace;
+}
+.vscode-titlebar{
+  background:#323233;padding:.35rem 1rem;display:flex;align-items:center;gap:.6rem;
+  color:#CCCCCC;font-size:.75rem;
+}
+.vscode-titlebar .mockup-dots{margin-right:.5rem;}
+.vscode-main{display:flex;min-height:240px;background:#1E1E1E;}
+
+/* Activity Bar (far left icons) */
+.vscode-activity{
+  background:#333333;width:36px;display:flex;flex-direction:column;align-items:center;
+  padding:.5rem 0;gap:.6rem;font-size:.9rem;color:#858585;flex-shrink:0;
+}
+.vscode-activity .act-icon{padding:.3rem;cursor:default;border-left:2px solid transparent;}
+.vscode-activity .act-icon.active{color:#FFF;border-left-color:var(--blue);}
+
+/* Sidebar (file tree) */
+.vscode-sidebar{
+  background:#252526;width:170px;padding:.5rem 0;font-size:.72rem;color:#CCCCCC;
+  border-right:1px solid #3C3C3C;overflow:hidden;flex-shrink:0;
+}
+.vscode-sidebar .sidebar-title{
+  font-size:.65rem;font-weight:700;color:#BBBBBB;padding:.3rem .8rem;text-transform:uppercase;
+  letter-spacing:.05em;
+}
+.vscode-sidebar .file-item{
+  padding:.15rem .8rem .15rem 1.2rem;cursor:default;white-space:nowrap;overflow:hidden;
+}
+.vscode-sidebar .file-item:hover{background:#2A2D2E;}
+.vscode-sidebar .file-item.active{background:#094771;color:#FFF;}
+.vscode-sidebar .file-item.folder{color:#C5C5C5;font-weight:700;}
+.vscode-sidebar .file-item .icon{margin-right:.3rem;font-size:.7rem;}
+
+/* Editor area */
+.vscode-editor{
+  flex:1;display:flex;flex-direction:column;min-width:0;
+}
+.vscode-tabs{
+  background:#252526;display:flex;border-bottom:1px solid #3C3C3C;
+}
+.vscode-tab{
+  padding:.3rem 1rem;font-size:.72rem;color:#969696;cursor:default;
+  border-right:1px solid #3C3C3C;white-space:nowrap;
+}
+.vscode-tab.active{background:#1E1E1E;color:#FFF;border-bottom:1px solid var(--blue);}
+.vscode-code{
+  flex:1;padding:.6rem 1rem;font-size:.72rem;line-height:1.8;color:#D4D4D4;
+  overflow:hidden;
+}
+.vscode-code .ln{color:#858585;display:inline-block;width:2rem;text-align:right;margin-right:.8rem;user-select:none;}
+.vscode-code .kw{color:#569CD6;}.vscode-code .str{color:#CE9178;}.vscode-code .fn{color:#DCDCAA;}.vscode-code .cm{color:#6A9955;}.vscode-code .typ{color:#4EC9B0;}.vscode-code .num{color:#B5CEA8;}.vscode-code .tag{color:#569CD6;}.vscode-code .attr{color:#9CDCFE;}.vscode-code .op{color:#D4D4D4;}
+
+/* Claude Chat Panel */
+.vscode-chat{
+  width:220px;background:#1E1E1E;border-left:1px solid #3C3C3C;
+  display:flex;flex-direction:column;font-size:.7rem;color:#D4D4D4;flex-shrink:0;
+}
+.vscode-chat-header{
+  background:#252526;padding:.4rem .6rem;font-weight:700;font-size:.7rem;
+  border-bottom:1px solid #3C3C3C;color:#CCCCCC;display:flex;align-items:center;gap:.3rem;
+}
+.vscode-chat-body{flex:1;padding:.5rem;overflow:hidden;}
+.chat-msg{margin-bottom:.5rem;line-height:1.5;}
+.chat-msg.user{background:#094771;border-radius:8px;padding:.3rem .5rem;}
+.chat-msg.ai{background:#2D2D2D;border-radius:8px;padding:.3rem .5rem;}
+.vscode-chat-input{
+  border-top:1px solid #3C3C3C;padding:.4rem;display:flex;gap:.3rem;
+}
+.vscode-chat-input input{
+  flex:1;background:#3C3C3C;border:none;border-radius:4px;padding:.25rem .4rem;
+  color:#D4D4D4;font-size:.65rem;font-family:'Fira Code',monospace;
+}
+
+/* Terminal */
+.vscode-terminal{
+  background:#1E1E1E;border-top:1px solid #3C3C3C;padding:.4rem .8rem;
+  font-size:.68rem;color:#CCCCCC;line-height:1.6;max-height:80px;
+}
+.vscode-terminal .prompt{color:#6A9955;}
+.vscode-terminal .cmd{color:#D4D4D4;}
+.vscode-terminal .output{color:#858585;}
+
+/* Diff view */
+.diff-line{padding:.05rem .4rem;font-size:.72rem;line-height:1.6;}
+.diff-line.added{background:rgba(35,134,54,.25);color:#D4D4D4;}
+.diff-line.removed{background:rgba(218,54,51,.25);color:#D4D4D4;}
+.diff-line.context{color:#858585;}
+.diff-header{background:#252526;padding:.2rem .6rem;font-size:.68rem;color:#969696;border-bottom:1px solid #3C3C3C;}
+
+/* Star rating display */
+.star-level{font-size:1.5rem;letter-spacing:.15rem;margin-bottom:.3rem;}
+.star-level .filled{color:var(--gold);}
+.star-level .empty{color:var(--g200);}
+
+/* Controls */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:var(--white);color:var(--g800);font-size:1.2rem;cursor:pointer;transition:all .15s;}
+.controls button:hover{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
+.controls button:disabled{opacity:.25;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:var(--green-lt);color:var(--green);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
+
+/* QR Code */
+.qr-solo{
+  position:absolute;top:.6rem;right:.8rem;z-index:110;
+  background:var(--white);padding:4px;border-radius:6px;
+}
+
+.slide.cover h1{font-size:3.5rem;}
+.slide.cover .subtitle{color:rgba(255,255,255,.8);}
+.slide.section-title h1{font-size:2.8rem;}
+.slide.section-title .subtitle{color:rgba(255,255,255,.85);font-size:1.1rem;}
+
+/* Decision tree */
+.decision-tree{max-width:800px;width:100%;text-align:left;}
+.decision-node{
+  padding:.6rem 1.2rem;margin:.3rem 0;border-radius:12px;
+  border-left:4px solid var(--g200);background:var(--g50);
+  display:flex;align-items:center;gap:.8rem;
+}
+.decision-node .arrow{color:var(--blue);font-weight:900;font-size:1.2rem;}
+</style>
+</head>
+<body>
+
+<div class="module-title">VS Code IDE</div>
+<div class="module-badge">S04 補充單元</div>
+<div class="slides">
+
+<!-- ===== 0: COVER ===== -->
+<div class="slide cover" data-index="0">
+  <p style="font-size:1.1rem;color:rgba(255,255,255,.6);margin-bottom:1rem;">AI 100 講 — 補充單元</p>
+  <h1>VS Code IDE</h1>
+  <p class="subtitle" style="margin-top:.8rem;font-size:1.5rem;">看著 AI 在你旁邊工作</p>
+  <p style="color:rgba(255,255,255,.5);margin-top:.5rem;font-size:1.1rem;">它能問、能改、能想、能修、能造</p>
+  <p style="color:rgba(255,255,255,.4);margin-top:3rem;font-size:.9rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- ===== 1: 議程 ===== -->
+<div class="slide" data-index="1">
+  <h2>今天的旅程</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>為什麼需要 IDE + 安裝</strong><p>CLI 跟 IDE 的差別，裝好 Claude 擴充</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--green);">2</div><div class="step-content"><strong>五個遞進案例</strong><p>AI 能力從「回答」到「完整改造」</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--gold);">3</div><div class="step-content"><strong>四大 AI 擴充比較</strong><p>Claude / Copilot / Amazon Q / Continue</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--purple);">4</div><div class="step-content"><strong>工具全景 + 收尾</strong><p>S01 ~ S05 什麼時候用什麼工具</p></div></div>
+  </div>
+</div>
+
+<!-- ===== 2: S03 vs S04 ===== -->
+<div class="slide" data-index="2">
+  <h2>S03 <span class="dim">建造者</span> vs S04 <span class="blue">改造者</span></h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <div style="background:var(--g50);border-radius:12px;padding:1.5rem;text-align:center;">
+        <p style="font-size:2.5rem;">S03</p>
+        <p style="font-size:1.3rem;font-weight:900;color:var(--g800);margin:.5rem 0;">建造者</p>
+        <p class="dim">空資料夾 → 全新專案</p>
+        <div style="margin-top:.8rem;font-size:.95rem;color:var(--g600);">
+          <p>從零開始</p>
+          <p>CLI 打字指揮</p>
+          <p>看文字輸出</p>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div style="background:var(--blue-lt);border-radius:12px;padding:1.5rem;text-align:center;border:2px solid var(--blue);">
+        <p style="font-size:2.5rem;">S04</p>
+        <p style="font-size:1.3rem;font-weight:900;color:var(--blue);margin:.5rem 0;">改造師</p>
+        <p class="blue">現有專案 → 客製產品</p>
+        <div style="margin-top:.8rem;font-size:.95rem;color:var(--blue);">
+          <p>接手改造</p>
+          <p>IDE 可視化操作</p>
+          <p>每步都能 diff</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="fragment dim" data-order="0" style="margin-top:1.5rem;font-size:1.2rem;">90% 的工作不是從零開始，是<span class="blue bold">接手 + 改造</span></p>
+</div>
+
+<!-- ===== 3: 為什麼需要 IDE ===== -->
+<div class="slide" data-index="3">
+  <h2>為什麼需要 <span class="blue">IDE</span>？</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <div style="background:var(--g50);border-radius:12px;padding:1.5rem;">
+        <h3>CLI 模式</h3>
+        <p style="font-size:1rem;color:var(--g600);margin-top:.3rem;">像跟 AI <strong>打電話</strong></p>
+        <ul style="margin-top:.5rem;font-size:.95rem;color:var(--g600);padding-left:1.2rem;">
+          <li>看文字跑，看不到全貌</li>
+          <li>改了什麼？不確定</li>
+          <li>多檔案？很難追蹤</li>
+          <li>Debug？得自己切畫面</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div style="background:var(--blue-lt);border-radius:12px;padding:1.5rem;border:2px solid var(--blue);">
+        <h3 class="blue">IDE 模式</h3>
+        <p style="font-size:1rem;color:var(--blue);margin-top:.3rem;">像 AI <strong>坐你旁邊</strong></p>
+        <ul style="margin-top:.5rem;font-size:.95rem;color:var(--blue);padding-left:1.2rem;">
+          <li>看到所有檔案結構</li>
+          <li>每一步都能 diff 對照</li>
+          <li>檔案樹一目了然</li>
+          <li>Console 錯誤直接貼</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="0" style="margin-top:.8rem;">
+    <div class="label">什麼時候用 IDE？</div>
+    <p>接手別人的專案、多檔案修改、需要 debug、看程式碼結構</p>
+  </div>
+</div>
+
+<!-- ===== 4: 額度確認 ===== -->
+<div class="slide" data-index="4">
+  <h2>額度確認 <span class="red">FIRST</span></h2>
+  <p class="dim" style="margin-bottom:.8rem;">裝完才發現沒額度 = 浪費時間</p>
+  <div class="step-list" style="max-width:700px;">
+    <div class="step fragment" data-order="0">
+      <div class="step-num" style="background:var(--green);">$</div>
+      <div class="step-content"><strong>Claude Pro $20/月</strong><p>今天的課夠用。推薦。</p></div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--gold);">0</div>
+      <div class="step-content"><strong>沒訂閱？</strong><p>Amazon Q（免費 50 次/月）或 Continue.dev（免費，接任何模型）</p></div>
+    </div>
+  </div>
+  <div class="info-box warning fragment" data-order="2">
+    <div class="label">先確認，不要裝完才發現沒額度</div>
+    <p>打開 claude.ai → 看右上角是否有 Pro / Max 標示<br>
+    沒有的話，等等用免費替代方案也能跟上</p>
+  </div>
+</div>
+
+<!-- ===== 5: 安裝 Claude Extension ===== -->
+<div class="slide" data-index="5">
+  <div class="exercise-banner">全班跟做</div>
+  <h2>安裝 Claude for VS Code</h2>
+  <div class="qr-solo"><div id="qr-install"></div></div>
+  <div class="vscode-mockup">
+    <div class="vscode-titlebar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span>Visual Studio Code</span>
+    </div>
+    <div class="vscode-main" style="min-height:200px;">
+      <div class="vscode-activity">
+        <div class="act-icon">📁</div>
+        <div class="act-icon">🔍</div>
+        <div class="act-icon active" style="position:relative;">
+          🧩
+          <span class="callout arrow-right" style="left:calc(100% + 8px);top:50%;transform:translateY(-50%);font-size:.7rem;white-space:nowrap;">Extensions</span>
+        </div>
+        <div class="act-icon">🐛</div>
+      </div>
+      <div style="width:220px;background:#252526;padding:.8rem;border-right:1px solid #3C3C3C;">
+        <div style="background:#3C3C3C;border-radius:4px;padding:.3rem .5rem;font-size:.7rem;color:#D4D4D4;margin-bottom:.8rem;">
+          Search: <span style="color:var(--gold);">Claude</span>
+        </div>
+        <div style="background:#094771;border-radius:6px;padding:.5rem;margin-bottom:.4rem;">
+          <p style="font-size:.75rem;color:#FFF;font-weight:700;">Claude</p>
+          <p style="font-size:.6rem;color:#AAAAAA;">Anthropic</p>
+          <p style="font-size:.6rem;color:var(--green);margin-top:.2rem;">Verified Publisher</p>
+        </div>
+        <div style="border-radius:6px;padding:.5rem;">
+          <p style="font-size:.7rem;color:#969696;">GitHub Copilot</p>
+          <p style="font-size:.6rem;color:#666;">GitHub</p>
+        </div>
+      </div>
+      <div style="flex:1;padding:1.5rem;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+        <p style="font-size:1.5rem;font-weight:900;color:#FFF;margin-bottom:.5rem;">Claude</p>
+        <p style="font-size:.8rem;color:#AAAAAA;margin-bottom:1rem;">by Anthropic — Deep code understanding</p>
+        <div class="mock-btn primary" style="position:relative;font-size:.85rem;">
+          Install
+          <span class="callout arrow-down" style="top:calc(100% + 10px);left:50%;transform:translateX(-50%);font-size:.75rem;">點 Install</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 6: Sign In ===== -->
+<div class="slide" data-index="6">
+  <div class="exercise-banner">全班跟做</div>
+  <h2>登入帳號</h2>
+  <div class="step-list" style="max-width:700px;">
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>安裝完成 → 側邊欄出現 Claude 圖示</strong><p>點擊它打開聊天面板</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>Sign In with Claude.ai</strong><p>用你的 Claude 帳號登入</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>看到聊天框 = 成功</strong><p>可以開始跟 AI 對話了</p></div></div>
+  </div>
+  <div class="info-box success fragment" data-order="0" style="margin-top:.8rem;">
+    <div class="label">確認成功</div>
+    <p>在聊天框打「hello」→ Claude 回覆 → 你準備好了</p>
+  </div>
+</div>
+
+<!-- ===== 7: SECTION — 一星 ===== -->
+<div class="slide section-title" data-index="7">
+  <div class="star-level"><span class="filled">&#9733;</span><span class="empty">&#9733;&#9733;&#9733;&#9733;</span></div>
+  <h1>AI 回答問題</h1>
+  <p class="subtitle" style="margin-top:.5rem;">"它看懂了"</p>
+</div>
+
+<!-- ===== 8: 問 AI — 選一段 ===== -->
+<div class="slide" data-index="8">
+  <div class="demo-banner">Demo + 跟做</div>
+  <h2>選一段問它：「這段做什麼？」</h2>
+  <div class="vscode-mockup">
+    <div class="vscode-titlebar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span>landing-page — VS Code</span>
+    </div>
+    <div class="vscode-main" style="min-height:220px;">
+      <div class="vscode-activity">
+        <div class="act-icon active">📁</div>
+        <div class="act-icon">🔍</div>
+        <div class="act-icon">🧩</div>
+      </div>
+      <div class="vscode-sidebar" style="width:150px;">
+        <div class="sidebar-title">Landing Page</div>
+        <div class="file-item folder"><span class="icon">📂</span>src/</div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">📄</span>App.jsx</div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">📄</span>Hero.jsx</div>
+        <div class="file-item active" style="padding-left:1.8rem;"><span class="icon">📄</span>Nav.jsx</div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">📄</span>Footer.jsx</div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">🎨</span>styles.css</div>
+        <div class="file-item folder"><span class="icon">📂</span>public/</div>
+        <div class="file-item"><span class="icon">📄</span>package.json</div>
+        <div class="file-item"><span class="icon">📄</span>index.html</div>
+      </div>
+      <div class="vscode-editor">
+        <div class="vscode-tabs">
+          <div class="vscode-tab active">Nav.jsx</div>
+          <div class="vscode-tab">App.jsx</div>
+        </div>
+        <div class="vscode-code">
+          <div><span class="ln">1</span><span class="kw">import</span> { useState } <span class="kw">from</span> <span class="str">'react'</span>;</div>
+          <div><span class="ln">2</span></div>
+          <div style="background:rgba(26,115,232,.2);border-left:3px solid var(--blue);"><span class="ln">3</span><span class="kw">export default function</span> <span class="fn">Nav</span>() {</div>
+          <div style="background:rgba(26,115,232,.2);"><span class="ln">4</span>&nbsp;&nbsp;<span class="kw">const</span> [open, setOpen] = <span class="fn">useState</span>(<span class="kw">false</span>);</div>
+          <div style="background:rgba(26,115,232,.2);"><span class="ln">5</span>&nbsp;&nbsp;<span class="kw">return</span> (</div>
+          <div style="background:rgba(26,115,232,.2);"><span class="ln">6</span>&nbsp;&nbsp;&nbsp;&nbsp;&lt;<span class="tag">nav</span> <span class="attr">className</span>=<span class="str">"flex"</span>&gt;</div>
+          <div style="background:rgba(26,115,232,.2);"><span class="ln">7</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...</div>
+          <div><span class="ln">8</span>&nbsp;&nbsp;);</div>
+          <div><span class="ln">9</span>}</div>
+        </div>
+      </div>
+      <div class="vscode-chat">
+        <div class="vscode-chat-header">🤖 Claude</div>
+        <div class="vscode-chat-body">
+          <div class="chat-msg user">這段做什麼？</div>
+          <div class="chat-msg ai">這是一個 React 導覽列組件。它使用 useState 控制漢堡選單的展開/收合狀態，適用於響應式設計...</div>
+        </div>
+        <div class="vscode-chat-input"><input value="Ask Claude..." readonly></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 9: 問整個專案架構 ===== -->
+<div class="slide" data-index="9">
+  <div class="demo-banner">Demo + 跟做</div>
+  <h2>問整個專案：「架構是什麼？」</h2>
+  <div class="vscode-mockup">
+    <div class="vscode-titlebar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span>landing-page — VS Code</span>
+    </div>
+    <div class="vscode-main" style="min-height:200px;">
+      <div class="vscode-activity">
+        <div class="act-icon active">📁</div>
+        <div class="act-icon">🔍</div>
+      </div>
+      <div class="vscode-sidebar" style="width:150px;">
+        <div class="sidebar-title">Landing Page</div>
+        <div class="file-item folder" style="background:#094771;color:#FFF;"><span class="icon">📂</span>src/ <span style="font-size:.6rem;background:var(--blue);padding:0 .3rem;border-radius:3px;">selected</span></div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">📄</span>App.jsx</div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">📄</span>Hero.jsx</div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">📄</span>Nav.jsx</div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">📄</span>Footer.jsx</div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">📄</span>Contact.jsx</div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">🎨</span>styles.css</div>
+      </div>
+      <div class="vscode-editor" style="display:none;"></div>
+      <div class="vscode-chat" style="flex:1;width:auto;">
+        <div class="vscode-chat-header">🤖 Claude</div>
+        <div class="vscode-chat-body" style="font-size:.75rem;line-height:1.7;">
+          <div class="chat-msg user">這個專案的架構是什麼？</div>
+          <div class="chat-msg ai">
+            <strong>專案架構分析：</strong><br><br>
+            <strong>入口：</strong>App.jsx (路由)<br>
+            <strong>頁面組件 (5個)：</strong><br>
+            &nbsp;- Hero.jsx → 首屏<br>
+            &nbsp;- Nav.jsx → 導覽列<br>
+            &nbsp;- Contact.jsx → 表單<br>
+            &nbsp;- Footer.jsx → 頁尾<br>
+            <strong>樣式：</strong>styles.css (Tailwind)<br>
+            <strong>建置：</strong>Vite + React
+          </div>
+        </div>
+        <div class="vscode-chat-input"><input value="Ask Claude..." readonly></div>
+      </div>
+    </div>
+  </div>
+  <p class="fragment dim" data-order="0" style="margin-top:.5rem;">選一段問它，它真的看懂了。選整個資料夾，它看懂架構。</p>
+</div>
+
+<!-- ===== 10: 學員練習 ===== -->
+<div class="slide" data-index="10">
+  <div class="exercise-banner">全班跟做</div>
+  <h2>打開任一本地檔案 → 選取 → 問 Claude</h2>
+  <div class="qr-solo"><div id="qr-exercise1"></div></div>
+  <div class="step-list" style="max-width:700px;">
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>File → Open Folder</strong><p>打開你電腦上任何一個專案或資料夾</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>選取一段程式碼</strong><p>任何檔案都行 — HTML、CSS、JS、Python...</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>在 Claude 面板問：「這段做什麼？」</strong><p>或：「這個專案的架構是什麼？」</p></div></div>
+  </div>
+  <div class="info-box success fragment" data-order="0">
+    <div class="label">感受</div>
+    <p>「選一段問它，它真的看懂了」</p>
+  </div>
+</div>
+
+<!-- ===== 11: SECTION — 二星 ===== -->
+<div class="slide section-title" data-index="11">
+  <div class="star-level"><span class="filled">&#9733;&#9733;</span><span class="empty">&#9733;&#9733;&#9733;</span></div>
+  <h1>AI 幫我改</h1>
+  <p class="subtitle" style="margin-top:.5rem;">"8 個檔案都改了"</p>
+</div>
+
+<!-- ===== 12: 改中文 ===== -->
+<div class="slide" data-index="12">
+  <div class="demo-banner">Demo</div>
+  <h2>「把英文介面改成繁體中文」</h2>
+  <div class="vscode-mockup">
+    <div class="vscode-titlebar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span>landing-page — VS Code</span>
+    </div>
+    <div class="vscode-main" style="min-height:220px;">
+      <div class="vscode-activity">
+        <div class="act-icon active">📁</div>
+      </div>
+      <div class="vscode-sidebar" style="width:140px;">
+        <div class="sidebar-title">Changed Files (8)</div>
+        <div class="file-item" style="color:#E2B93D;"><span class="icon">M</span> Nav.jsx</div>
+        <div class="file-item" style="color:#E2B93D;"><span class="icon">M</span> Hero.jsx</div>
+        <div class="file-item" style="color:#E2B93D;"><span class="icon">M</span> Footer.jsx</div>
+        <div class="file-item active" style="color:#E2B93D;"><span class="icon">M</span> Contact.jsx</div>
+        <div class="file-item" style="color:#E2B93D;"><span class="icon">M</span> About.jsx</div>
+        <div class="file-item" style="color:#E2B93D;"><span class="icon">M</span> Pricing.jsx</div>
+        <div class="file-item" style="color:#E2B93D;"><span class="icon">M</span> FAQ.jsx</div>
+        <div class="file-item" style="color:#E2B93D;"><span class="icon">M</span> CTA.jsx</div>
+      </div>
+      <div class="vscode-editor" style="flex:1;">
+        <div class="diff-header">Contact.jsx — 4 changes</div>
+        <div style="display:flex;flex:1;">
+          <div style="flex:1;padding:.4rem;border-right:1px solid #3C3C3C;">
+            <div class="diff-line removed">- &lt;h2&gt;Contact Us&lt;/h2&gt;</div>
+            <div class="diff-line removed">- &lt;label&gt;Your Name&lt;/label&gt;</div>
+            <div class="diff-line removed">- &lt;label&gt;Email&lt;/label&gt;</div>
+            <div class="diff-line removed">- &lt;button&gt;Submit&lt;/button&gt;</div>
+          </div>
+          <div style="flex:1;padding:.4rem;">
+            <div class="diff-line added">+ &lt;h2&gt;聯絡我們&lt;/h2&gt;</div>
+            <div class="diff-line added">+ &lt;label&gt;您的姓名&lt;/label&gt;</div>
+            <div class="diff-line added">+ &lt;label&gt;電子郵件&lt;/label&gt;</div>
+            <div class="diff-line added">+ &lt;button&gt;送出&lt;/button&gt;</div>
+          </div>
+        </div>
+      </div>
+      <div class="vscode-chat" style="width:180px;">
+        <div class="vscode-chat-header">🤖 Claude</div>
+        <div class="vscode-chat-body">
+          <div class="chat-msg user">把英文介面改成繁體中文</div>
+          <div class="chat-msg ai">找到 8 個檔案需要修改。已將所有使用者介面文字翻譯為繁體中文。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 13: 改配色 ===== -->
+<div class="slide" data-index="13">
+  <div class="demo-banner">Demo</div>
+  <h2>「配色從藍改成綠」</h2>
+  <div class="vscode-mockup">
+    <div class="vscode-titlebar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span>styles.css — VS Code</span>
+    </div>
+    <div class="vscode-main" style="min-height:180px;">
+      <div class="vscode-activity">
+        <div class="act-icon active">📁</div>
+      </div>
+      <div class="vscode-sidebar" style="width:140px;">
+        <div class="sidebar-title">Changed Files (3)</div>
+        <div class="file-item active" style="color:#E2B93D;"><span class="icon">M</span> styles.css</div>
+        <div class="file-item" style="color:#E2B93D;"><span class="icon">M</span> tailwind.config</div>
+        <div class="file-item" style="color:#E2B93D;"><span class="icon">M</span> theme.js</div>
+      </div>
+      <div class="vscode-editor" style="flex:1;">
+        <div class="diff-header">styles.css — CSS Variables</div>
+        <div style="padding:.5rem;">
+          <div class="diff-line context">&nbsp;&nbsp;:root {</div>
+          <div class="diff-line removed">-&nbsp;&nbsp;--primary: <span style="display:inline-block;width:12px;height:12px;background:#1A73E8;border-radius:3px;vertical-align:middle;"></span> #1A73E8;</div>
+          <div class="diff-line removed">-&nbsp;&nbsp;--primary-dark: <span style="display:inline-block;width:12px;height:12px;background:#1557B0;border-radius:3px;vertical-align:middle;"></span> #1557B0;</div>
+          <div class="diff-line removed">-&nbsp;&nbsp;--primary-light: <span style="display:inline-block;width:12px;height:12px;background:#E8F0FE;border-radius:3px;vertical-align:middle;"></span> #E8F0FE;</div>
+          <div class="diff-line added">+&nbsp;&nbsp;--primary: <span style="display:inline-block;width:12px;height:12px;background:#0F9D58;border-radius:3px;vertical-align:middle;"></span> #0F9D58;</div>
+          <div class="diff-line added">+&nbsp;&nbsp;--primary-dark: <span style="display:inline-block;width:12px;height:12px;background:#0B8043;border-radius:3px;vertical-align:middle;"></span> #0B8043;</div>
+          <div class="diff-line added">+&nbsp;&nbsp;--primary-light: <span style="display:inline-block;width:12px;height:12px;background:#E6F4EA;border-radius:3px;vertical-align:middle;"></span> #E6F4EA;</div>
+          <div class="diff-line context">&nbsp;&nbsp;}</div>
+        </div>
+      </div>
+      <div class="vscode-chat" style="width:180px;">
+        <div class="vscode-chat-header">🤖 Claude</div>
+        <div class="vscode-chat-body">
+          <div class="chat-msg user">配色從藍改成綠</div>
+          <div class="chat-msg ai">改了 3 個 CSS 變數，整個網站配色已更新。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="fragment" data-order="0" style="margin-top:.5rem;font-size:1.1rem;color:var(--blue);font-weight:700;">我說改中文，8 個檔案都改了，每一步我都能看到</p>
+</div>
+
+<!-- ===== 14: Diff 的價值 ===== -->
+<div class="slide" data-index="14">
+  <h2>Diff View 的價值</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <h3 class="red">沒有 Diff</h3>
+      <div style="background:var(--red-lt);border-radius:12px;padding:1.2rem;margin-top:.5rem;">
+        <p style="font-size:1rem;">AI 說：「改好了」</p>
+        <p style="font-size:1rem;margin-top:.3rem;">你：「改了什麼？」</p>
+        <p style="font-size:1rem;margin-top:.3rem;">AI 說：「信我就對了」</p>
+        <p style="font-size:2rem;margin-top:.5rem;text-align:center;">😰</p>
+      </div>
+    </div>
+    <div class="col">
+      <h3 class="green">有 Diff</h3>
+      <div style="background:var(--green-lt);border-radius:12px;padding:1.2rem;margin-top:.5rem;">
+        <p style="font-size:1rem;"><span style="color:var(--red);">紅色</span> = 刪掉的</p>
+        <p style="font-size:1rem;margin-top:.3rem;"><span style="color:var(--green);">綠色</span> = 新增的</p>
+        <p style="font-size:1rem;margin-top:.3rem;">你看得到每一個字的變化</p>
+        <p style="font-size:1.2rem;margin-top:.5rem;text-align:center;font-weight:700;color:var(--green);">Accept / Reject</p>
+      </div>
+    </div>
+  </div>
+  <p class="fragment dim" data-order="0" style="margin-top:1rem;font-size:1.1rem;">IDE 最大的優勢：<span class="blue bold">每一步都透明</span></p>
+</div>
+
+<!-- ===== 15: SECTION — 三星 ===== -->
+<div class="slide section-title" data-index="15">
+  <div class="star-level"><span class="filled">&#9733;&#9733;&#9733;</span><span class="empty">&#9733;&#9733;</span></div>
+  <h1>AI 替我想</h1>
+  <p class="subtitle" style="margin-top:.5rem;">"它自己決定改哪"</p>
+</div>
+
+<!-- ===== 16: 二星 vs 三星 ===== -->
+<div class="slide" data-index="16">
+  <h2>二星 vs 三星的差別</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <div style="background:var(--g50);border-radius:12px;padding:1.5rem;">
+        <h3>二星：你指定改哪裡</h3>
+        <div style="margin-top:.5rem;font-size:1rem;color:var(--g600);">
+          <p>「把 <strong>英文</strong> 改成 <strong>中文</strong>」</p>
+          <p style="margin-top:.3rem;">「把 <strong>藍色</strong> 改成 <strong>綠色</strong>」</p>
+          <p style="margin-top:.5rem;font-style:italic;">你告訴 AI 改什麼 + 怎麼改</p>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div style="background:var(--purple-lt);border-radius:12px;padding:1.5rem;border:2px solid var(--purple);">
+        <h3 class="purple">三星：你只說要什麼</h3>
+        <div style="margin-top:.5rem;font-size:1rem;color:var(--purple);">
+          <p>「加一個<strong>深色模式</strong>」</p>
+          <p style="margin-top:.3rem;">「加一個<strong>搜尋功能</strong>」</p>
+          <p style="margin-top:.5rem;font-style:italic;">AI 自己決定改哪些檔案</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="info-box analogy fragment" data-order="0" style="margin-top:.8rem;">
+    <div class="label">關鍵轉變</div>
+    <p>你不需要告訴 AI「改第 42 行」，你只需要說「我要這個功能」<br>AI 自己分析該動哪些檔案、該新增什麼</p>
+  </div>
+</div>
+
+<!-- ===== 17: 互動 Demo ===== -->
+<div class="slide" data-index="17">
+  <div class="demo-banner">互動 Demo</div>
+  <h2>你們想加什麼功能？</h2>
+  <p class="dim" style="margin-bottom:1rem;">講師打開那個 Landing Page 專案，現場問大家</p>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0"><div class="icon">🌙</div><h3>深色模式</h3><p>切換深色/淺色主題</p></div>
+    <div class="card fragment" data-order="1"><div class="icon">🔍</div><h3>搜尋功能</h3><p>在網站內搜尋內容</p></div>
+    <div class="card fragment" data-order="2"><div class="icon">🌐</div><h3>多語系</h3><p>中/英語言切換</p></div>
+  </div>
+  <p class="fragment" data-order="3" style="margin-top:1.5rem;font-size:1.3rem;font-weight:900;color:var(--purple);">現場投票 → 講師輸入 → Claude 開始規劃</p>
+</div>
+
+<!-- ===== 18: Claude 規劃 ===== -->
+<div class="slide" data-index="18">
+  <div class="demo-banner">Demo</div>
+  <h2>Claude 的規劃</h2>
+  <div class="vscode-mockup">
+    <div class="vscode-titlebar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span>landing-page — VS Code</span>
+    </div>
+    <div class="vscode-main" style="min-height:220px;">
+      <div class="vscode-activity">
+        <div class="act-icon active">📁</div>
+      </div>
+      <div class="vscode-sidebar" style="width:150px;">
+        <div class="sidebar-title">Changes</div>
+        <div class="file-item" style="color:#E2B93D;"><span class="icon">M</span> App.jsx</div>
+        <div class="file-item" style="color:#E2B93D;"><span class="icon">M</span> Nav.jsx</div>
+        <div class="file-item" style="color:#E2B93D;"><span class="icon">M</span> styles.css</div>
+        <div class="file-item" style="color:#73C991;"><span class="icon">A</span> ThemeToggle.jsx</div>
+      </div>
+      <div class="vscode-editor" style="display:none;"></div>
+      <div class="vscode-chat" style="flex:1;width:auto;">
+        <div class="vscode-chat-header">🤖 Claude</div>
+        <div class="vscode-chat-body" style="font-size:.75rem;line-height:1.7;">
+          <div class="chat-msg user">幫這個網站加深色模式</div>
+          <div class="chat-msg ai">
+            <strong>分析完成。實作計畫：</strong><br><br>
+            1. <strong style="color:#E2B93D;">修改</strong> styles.css<br>
+            &nbsp;&nbsp;→ 新增 dark theme CSS 變數<br><br>
+            2. <strong style="color:#73C991;">新增</strong> ThemeToggle.jsx<br>
+            &nbsp;&nbsp;→ 月亮/太陽切換按鈕<br><br>
+            3. <strong style="color:#E2B93D;">修改</strong> Nav.jsx<br>
+            &nbsp;&nbsp;→ 嵌入 Toggle 按鈕<br><br>
+            4. <strong style="color:#E2B93D;">修改</strong> App.jsx<br>
+            &nbsp;&nbsp;→ 加入 theme context<br><br>
+            要我開始嗎？
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="fragment" data-order="0" style="margin-top:.5rem;font-size:1.1rem;color:var(--purple);font-weight:700;">我只說要什麼，它自己決定怎麼做</p>
+</div>
+
+<!-- ===== 19: 結果預覽 ===== -->
+<div class="slide" data-index="19">
+  <h2>Apply → Preview 結果</h2>
+  <div class="flow" style="margin-top:1rem;">
+    <div class="flow-box" style="border-color:var(--purple);background:var(--purple-lt);">Claude 規劃</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--blue);background:var(--blue-lt);">Review Diff</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--green);background:var(--green-lt);">Accept All</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--gold);background:var(--gold-lt);">Preview</div>
+  </div>
+  <div class="info-box success fragment" data-order="0" style="margin-top:1rem;">
+    <div class="label">三星的感受</div>
+    <p style="font-size:1.2rem;">「我只說要什麼，它自己決定改哪」</p>
+  </div>
+  <div class="info-box analogy fragment" data-order="1" style="margin-top:.5rem;">
+    <div class="label">跟二星的差異</div>
+    <p>二星：你說「把這邊改成那樣」（你指路）<br>
+    三星：你說「我要這個效果」（AI 自己找路）</p>
+  </div>
+</div>
+
+<!-- ===== 20: BREAK ===== -->
+<div class="slide break-slide" data-index="20">
+  <p style="font-size:5rem;">☕</p>
+  <h2 style="margin-top:1rem;color:var(--g800);">休息 10 分鐘</h2>
+  <p class="dim" style="margin-top:1rem;">接下來：AI 幫你找 Bug + 完整改造案例</p>
+</div>
+
+<!-- ===== 21: SECTION — 四星 ===== -->
+<div class="slide section-title" data-index="21">
+  <div class="star-level"><span class="filled">&#9733;&#9733;&#9733;&#9733;</span><span class="empty">&#9733;</span></div>
+  <h1>AI 找問題</h1>
+  <p class="subtitle" style="margin-top:.5rem;">"它比我先找到"</p>
+</div>
+
+<!-- ===== 22: 故意搞壞 ===== -->
+<div class="slide" data-index="22">
+  <div class="demo-banner">Demo</div>
+  <h2>講師故意搞壞一行 code</h2>
+  <div class="vscode-mockup">
+    <div class="vscode-titlebar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span>Nav.jsx — VS Code</span>
+    </div>
+    <div class="vscode-main" style="min-height:160px;">
+      <div class="vscode-activity">
+        <div class="act-icon active">📁</div>
+      </div>
+      <div class="vscode-editor" style="flex:1;">
+        <div class="vscode-tabs">
+          <div class="vscode-tab active">Nav.jsx</div>
+        </div>
+        <div class="vscode-code">
+          <div><span class="ln">3</span><span class="kw">export default function</span> <span class="fn">Nav</span>() {</div>
+          <div><span class="ln">4</span>&nbsp;&nbsp;<span class="kw">const</span> [open, setOpen] = <span class="fn">useState</span>(<span class="kw">false</span>);</div>
+          <div style="background:rgba(218,54,51,.3);border-left:3px solid var(--red);position:relative;">
+            <span class="ln">5</span>&nbsp;&nbsp;<span class="kw">return</span> &lt;<span class="tag">buttn</span> onClick={...}&gt;
+            <span class="callout arrow-left" style="right:-110px;top:50%;transform:translateY(-50%);font-size:.7rem;white-space:nowrap;">故意改錯</span>
+          </div>
+          <div><span class="ln">6</span>&nbsp;&nbsp;&nbsp;&nbsp;{open ? <span class="str">'Close'</span> : <span class="str">'Menu'</span>}</div>
+          <div><span class="ln">7</span>&nbsp;&nbsp;&lt;/<span class="tag">buttn</span>&gt;;</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top:.8rem;font-size:1.2rem;">打開網頁 → <span class="red bold">按鈕消失了！</span></p>
+  <p class="fragment dim" data-order="0" style="margin-top:.3rem;">「如果是你，你怎麼辦？」</p>
+</div>
+
+<!-- ===== 23: 複製 Error ===== -->
+<div class="slide" data-index="23">
+  <div class="demo-banner">Demo</div>
+  <h2>Console Error → 貼給 Claude</h2>
+  <div class="vscode-mockup">
+    <div class="vscode-titlebar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span>landing-page — VS Code</span>
+    </div>
+    <div class="vscode-main" style="min-height:220px;">
+      <div class="vscode-activity">
+        <div class="act-icon active">📁</div>
+      </div>
+      <div class="vscode-editor" style="flex:1;display:flex;flex-direction:column;">
+        <div class="vscode-tabs">
+          <div class="vscode-tab active">Nav.jsx</div>
+        </div>
+        <div class="vscode-code" style="flex:1;">
+          <div><span class="ln">5</span>&nbsp;&nbsp;<span class="kw">return</span> &lt;<span class="tag" style="color:var(--red);text-decoration:wavy underline var(--red);">buttn</span> onClick={...}&gt;</div>
+        </div>
+        <div class="vscode-terminal">
+          <div style="color:var(--red);font-weight:700;">Warning: The tag &lt;buttn&gt; is unrecognized in this browser.</div>
+          <div style="color:var(--red);">at Nav (Nav.jsx:5)</div>
+          <div style="color:#858585;margin-top:.2rem;">React does not recognize the `buttn` prop on a DOM element.</div>
+        </div>
+      </div>
+      <div class="vscode-chat" style="width:200px;">
+        <div class="vscode-chat-header">🤖 Claude</div>
+        <div class="vscode-chat-body">
+          <div class="chat-msg user" style="font-size:.65rem;">網頁按鈕不見了，Console 顯示：Warning: The tag &lt;buttn&gt; is unrecognized...</div>
+          <div class="chat-msg ai" style="font-size:.65rem;">
+            <strong>找到了！</strong><br>
+            Nav.jsx 第 5 行：<br>
+            <span style="color:var(--red);">buttn</span> → 應該是 <span style="color:var(--green);">button</span><br><br>
+            打錯字了。修正如下：
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 24: 一鍵修好 ===== -->
+<div class="slide" data-index="24">
+  <h2>一鍵修好 → 網頁恢復</h2>
+  <div class="flow" style="margin-top:1.5rem;">
+    <div class="flow-box" style="border-color:var(--red);background:var(--red-lt);">Error 出現</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">複製 Error</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--blue);background:var(--blue-lt);">貼給 Claude</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--green);background:var(--green-lt);">Accept Fix</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--green);background:var(--green-lt);">正常了</div>
+  </div>
+  <div class="info-box tip fragment" data-order="0" style="margin-top:1.5rem;">
+    <div class="label">Debug 的正確姿勢</div>
+    <p style="font-size:1.2rem;">你<strong>不需要看懂 code</strong><br>
+    你需要知道：<span class="blue bold">怎麼問 AI 正確的問題</span></p>
+  </div>
+  <div class="info-box analogy fragment" data-order="1" style="margin-top:.5rem;">
+    <div class="label">Error → Copy → Ask → Fix → Verify</div>
+    <p>這是你以後遇到任何 bug 的標準流程</p>
+  </div>
+</div>
+
+<!-- ===== 25: 架構的重要性 ===== -->
+<div class="slide" data-index="25">
+  <h2>為什麼<span class="blue">架構</span>很重要？</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <h3 class="red">沒有架構</h3>
+      <div style="background:var(--red-lt);border-radius:12px;padding:1rem;margin-top:.5rem;font-size:.95rem;">
+        <p>所有程式碼塞一個檔案</p>
+        <p>AI 想加功能 → 不知道放哪</p>
+        <p>越改越亂 → 義大利麵條</p>
+        <p style="font-size:2rem;text-align:center;margin-top:.5rem;">🍝</p>
+      </div>
+    </div>
+    <div class="col">
+      <h3 class="green">好的架構</h3>
+      <div style="background:var(--green-lt);border-radius:12px;padding:1rem;margin-top:.5rem;font-size:.95rem;">
+        <p>每個檔案有明確職責</p>
+        <p>AI 知道新功能放哪裡</p>
+        <p>改一個不會壞其他的</p>
+        <p style="font-size:2rem;text-align:center;margin-top:.5rem;">📁</p>
+      </div>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="0" style="margin-top:.8rem;">
+    <div class="label">S03 學的 CLAUDE.md 規則，在 IDE 裡一樣有用</div>
+    <p>CLAUDE.md = 給 AI 的工作手冊，告訴它專案的規則與架構</p>
+  </div>
+</div>
+
+<!-- ===== 26: 架構範例 ===== -->
+<div class="slide" data-index="26">
+  <h2>好架構的範例：AI 100 講網站</h2>
+  <div class="vscode-mockup">
+    <div class="vscode-titlebar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span>ai100 — VS Code</span>
+    </div>
+    <div class="vscode-main" style="min-height:220px;">
+      <div class="vscode-activity">
+        <div class="act-icon active">📁</div>
+      </div>
+      <div class="vscode-sidebar" style="width:180px;">
+        <div class="sidebar-title">ai100</div>
+        <div class="file-item folder"><span class="icon">📂</span>_layouts/ <span style="font-size:.55rem;color:#6A9955;">← 頁面模板</span></div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">📄</span>default.html</div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">📄</span>lecture.html</div>
+        <div class="file-item folder"><span class="icon">📂</span>_lectures/ <span style="font-size:.55rem;color:#6A9955;">← 課程內容</span></div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">📄</span>L1-01.md</div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">📄</span>L1-02.md</div>
+        <div class="file-item folder"><span class="icon">📂</span>_data/ <span style="font-size:.55rem;color:#6A9955;">← 設定資料</span></div>
+        <div class="file-item folder"><span class="icon">📂</span>assets/ <span style="font-size:.55rem;color:#6A9955;">← 樣式/圖片</span></div>
+        <div class="file-item"><span class="icon">📄</span>CLAUDE.md <span style="font-size:.55rem;color:var(--gold);">← AI 規則</span></div>
+      </div>
+      <div class="vscode-editor" style="display:none;"></div>
+      <div class="vscode-chat" style="flex:1;width:auto;">
+        <div class="vscode-chat-header">🤖 Claude</div>
+        <div class="vscode-chat-body" style="font-size:.75rem;line-height:1.7;">
+          <div class="chat-msg user">這個專案的架構？</div>
+          <div class="chat-msg ai">
+            <strong>Jekyll 靜態網站</strong><br><br>
+            <strong>_layouts/</strong> 頁面模板<br>
+            <strong>_lectures/</strong> 100 個課程 MD<br>
+            <strong>_data/</strong> YAML 設定<br>
+            <strong>assets/</strong> CSS + 圖片<br>
+            <strong>CLAUDE.md</strong> AI 工作規則<br><br>
+            結構清晰，每個課程一個 MD 檔。
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 27: BREAK 2 ===== -->
+<div class="slide break-slide" data-index="27">
+  <p style="font-size:5rem;">☕</p>
+  <h2 style="margin-top:1rem;color:var(--g800);">休息 10 分鐘</h2>
+  <p class="dim" style="margin-top:1rem;">最後：完整改造大 Demo + 工具全景</p>
+</div>
+
+<!-- ===== 28: SECTION — 五星 ===== -->
+<div class="slide section-title" data-index="28">
+  <div class="star-level"><span class="filled">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+  <h1>完整改造</h1>
+  <p class="subtitle" style="margin-top:.5rem;">"開源模板變成我的產品"</p>
+</div>
+
+<!-- ===== 29: 咖啡店改造簡介 ===== -->
+<div class="slide" data-index="29">
+  <h2>大 Demo：咖啡店模板 → 山海咖啡</h2>
+  <p class="dim" style="margin-bottom:.5rem;">GitHub 上找到一個免費咖啡店模板，用五星改造流程把它變成自己的產品</p>
+  <div class="flow" style="margin-top:1rem;">
+    <div class="flow-box fragment" data-order="0">找 (&#9733;)</div>
+    <div class="flow-arrow fragment" data-order="1">→</div>
+    <div class="flow-box fragment" data-order="1">改外觀 (&#9733;&#9733;)</div>
+    <div class="flow-arrow fragment" data-order="2">→</div>
+    <div class="flow-box fragment" data-order="2" style="border-color:var(--purple);background:var(--purple-lt);">加功能 (&#9733;&#9733;&#9733;)</div>
+    <div class="flow-arrow fragment" data-order="3">→</div>
+    <div class="flow-box fragment" data-order="3" style="border-color:var(--red);background:var(--red-lt);">修問題 (&#9733;&#9733;&#9733;&#9733;)</div>
+    <div class="flow-arrow fragment" data-order="4">→</div>
+    <div class="flow-box fragment" data-order="4" style="border-color:var(--green);background:var(--green-lt);">部署 (&#9733;&#9733;&#9733;&#9733;&#9733;)</div>
+  </div>
+  <p class="fragment" data-order="5" style="margin-top:1.5rem;font-size:1.2rem;font-weight:700;color:var(--blue);">
+    這就是真實世界的工作方式：找模板 → 客製化 → 上線
+  </p>
+</div>
+
+<!-- ===== 30: Step 1 — 找 ===== -->
+<div class="slide" data-index="30">
+  <div class="demo-banner">Demo — Step 1</div>
+  <h2>&#9733; 找：Clone 模板 + 問架構</h2>
+  <div class="vscode-mockup">
+    <div class="vscode-titlebar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span>coffee-shop-template — VS Code</span>
+    </div>
+    <div class="vscode-main" style="min-height:200px;">
+      <div class="vscode-activity">
+        <div class="act-icon active">📁</div>
+      </div>
+      <div class="vscode-sidebar" style="width:160px;">
+        <div class="sidebar-title">coffee-shop</div>
+        <div class="file-item folder"><span class="icon">📂</span>src/</div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">📄</span>App.jsx</div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">📄</span>Home.jsx</div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">📄</span>Menu.jsx</div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">📄</span>About.jsx</div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">📄</span>Contact.jsx</div>
+        <div class="file-item" style="padding-left:1.8rem;"><span class="icon">🎨</span>styles.css</div>
+        <div class="file-item folder"><span class="icon">📂</span>public/</div>
+        <div class="file-item"><span class="icon">📄</span>package.json</div>
+      </div>
+      <div class="vscode-editor" style="display:none;"></div>
+      <div class="vscode-chat" style="flex:1;width:auto;">
+        <div class="vscode-chat-header">🤖 Claude</div>
+        <div class="vscode-chat-body" style="font-size:.75rem;line-height:1.7;">
+          <div class="chat-msg user">這個專案的架構？有哪些頁面？</div>
+          <div class="chat-msg ai">
+            <strong>咖啡店模板 (React + Vite)</strong><br><br>
+            <strong>5 個頁面：</strong><br>
+            Home → 首頁 (banner + 精選)<br>
+            Menu → 菜單頁<br>
+            About → 關於我們<br>
+            Contact → 聯絡表單<br>
+            App → 路由入口<br><br>
+            樣式用 Tailwind CSS。
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 31: Step 2 — 改外觀 ===== -->
+<div class="slide" data-index="31">
+  <div class="demo-banner">Demo — Step 2</div>
+  <h2>&#9733;&#9733; 改外觀：店名 + 配色</h2>
+  <p class="dim" style="margin-bottom:.3rem;">「店名改成山海咖啡，配色改成木質色系」</p>
+  <div class="vscode-mockup">
+    <div class="vscode-titlebar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span>coffee-shop-template — VS Code</span>
+    </div>
+    <div class="vscode-main" style="min-height:180px;">
+      <div class="vscode-activity">
+        <div class="act-icon active">📁</div>
+      </div>
+      <div class="vscode-sidebar" style="width:140px;">
+        <div class="sidebar-title">Changed (6)</div>
+        <div class="file-item" style="color:#E2B93D;"><span class="icon">M</span> Home.jsx</div>
+        <div class="file-item" style="color:#E2B93D;"><span class="icon">M</span> Nav.jsx</div>
+        <div class="file-item" style="color:#E2B93D;"><span class="icon">M</span> Footer.jsx</div>
+        <div class="file-item active" style="color:#E2B93D;"><span class="icon">M</span> styles.css</div>
+        <div class="file-item" style="color:#E2B93D;"><span class="icon">M</span> About.jsx</div>
+        <div class="file-item" style="color:#E2B93D;"><span class="icon">M</span> index.html</div>
+      </div>
+      <div class="vscode-editor" style="flex:1;">
+        <div class="diff-header">styles.css</div>
+        <div style="padding:.4rem;">
+          <div class="diff-line removed">-&nbsp;&nbsp;--primary: <span style="display:inline-block;width:12px;height:12px;background:#6F4E37;border-radius:3px;vertical-align:middle;"></span> #4A90D9;</div>
+          <div class="diff-line added">+&nbsp;&nbsp;--primary: <span style="display:inline-block;width:12px;height:12px;background:#8B6914;border-radius:3px;vertical-align:middle;"></span> #8B6914;</div>
+          <div class="diff-line removed">-&nbsp;&nbsp;--bg: #FFFFFF;</div>
+          <div class="diff-line added">+&nbsp;&nbsp;--bg: <span style="display:inline-block;width:12px;height:12px;background:#FDF6EC;border-radius:3px;vertical-align:middle;"></span> #FDF6EC;</div>
+        </div>
+        <div class="diff-header" style="margin-top:.3rem;">Home.jsx</div>
+        <div style="padding:.4rem;">
+          <div class="diff-line removed">-&nbsp;&nbsp;&lt;h1&gt;Coffee House&lt;/h1&gt;</div>
+          <div class="diff-line added">+&nbsp;&nbsp;&lt;h1&gt;山海咖啡&lt;/h1&gt;</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 32: Step 3 — 加功能 ===== -->
+<div class="slide" data-index="32">
+  <div class="demo-banner">Demo — Step 3</div>
+  <h2>&#9733;&#9733;&#9733; 加功能：線上預約</h2>
+  <p class="dim" style="margin-bottom:.3rem;">講師問：「咖啡店還需要什麼？」→「線上預約！」</p>
+  <div class="vscode-mockup">
+    <div class="vscode-titlebar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span>coffee-shop-template — VS Code</span>
+    </div>
+    <div class="vscode-main" style="min-height:200px;">
+      <div class="vscode-activity">
+        <div class="act-icon active">📁</div>
+      </div>
+      <div class="vscode-sidebar" style="width:140px;">
+        <div class="sidebar-title">Changes</div>
+        <div class="file-item" style="color:#E2B93D;"><span class="icon">M</span> App.jsx</div>
+        <div class="file-item" style="color:#E2B93D;"><span class="icon">M</span> Nav.jsx</div>
+        <div class="file-item" style="color:#73C991;"><span class="icon">A</span> Reservation.jsx</div>
+        <div class="file-item" style="color:#73C991;"><span class="icon">A</span> useGoogleSheet.js</div>
+      </div>
+      <div class="vscode-editor" style="display:none;"></div>
+      <div class="vscode-chat" style="flex:1;width:auto;">
+        <div class="vscode-chat-header">🤖 Claude</div>
+        <div class="vscode-chat-body" style="font-size:.75rem;line-height:1.7;">
+          <div class="chat-msg user">加一個線上預約功能，資料存到 Google Sheet</div>
+          <div class="chat-msg ai">
+            <strong>實作計畫：</strong><br><br>
+            1. <strong style="color:#73C991;">新增</strong> Reservation.jsx<br>
+            &nbsp;&nbsp;→ 日期 + 時段 + 人數表單<br><br>
+            2. <strong style="color:#73C991;">新增</strong> useGoogleSheet.js<br>
+            &nbsp;&nbsp;→ 串接 Google Apps Script<br><br>
+            3. <strong style="color:#E2B93D;">修改</strong> App.jsx<br>
+            &nbsp;&nbsp;→ 新增 /reserve 路由<br><br>
+            4. <strong style="color:#E2B93D;">修改</strong> Nav.jsx<br>
+            &nbsp;&nbsp;→ 導覽列加「預約」
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 33: Step 4 — 修問題 ===== -->
+<div class="slide" data-index="33">
+  <div class="demo-banner">Demo — Step 4</div>
+  <h2>&#9733;&#9733;&#9733;&#9733; 修問題：表單壞了</h2>
+  <p class="dim" style="margin-bottom:.3rem;">故意搞壞預約表單 → 用四星流程修</p>
+  <div class="flow" style="margin-top:.5rem;">
+    <div class="flow-box" style="border-color:var(--red);background:var(--red-lt);">表單送出 → 白畫面</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">F12 Console</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--blue);background:var(--blue-lt);">複製 Error</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--green);background:var(--green-lt);">Claude 修好</div>
+  </div>
+  <div class="vscode-mockup" style="margin-top:.5rem;">
+    <div class="vscode-titlebar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span>Reservation.jsx — VS Code</span>
+    </div>
+    <div class="vscode-main" style="min-height:120px;">
+      <div class="vscode-editor" style="flex:1;">
+        <div class="diff-header">Reservation.jsx — Fix</div>
+        <div style="padding:.4rem;">
+          <div class="diff-line removed">-&nbsp;&nbsp;<span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(SHEET_URL)</div>
+          <div class="diff-line added">+&nbsp;&nbsp;<span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(SHEET_URL, {</div>
+          <div class="diff-line added">+&nbsp;&nbsp;&nbsp;&nbsp;method: <span class="str">'POST'</span>,</div>
+          <div class="diff-line added">+&nbsp;&nbsp;&nbsp;&nbsp;body: JSON.stringify(formData)</div>
+          <div class="diff-line added">+&nbsp;&nbsp;})</div>
+        </div>
+      </div>
+      <div class="vscode-chat" style="width:180px;">
+        <div class="vscode-chat-header">🤖 Claude</div>
+        <div class="vscode-chat-body" style="font-size:.65rem;">
+          <div class="chat-msg ai">fetch 預設是 GET，需要改成 POST 並帶上 body。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 34: Step 5 — 部署 ===== -->
+<div class="slide" data-index="34">
+  <div class="demo-banner">Demo — Step 5</div>
+  <h2>&#9733;&#9733;&#9733;&#9733;&#9733; 部署到 GitHub Pages</h2>
+  <div class="vscode-mockup">
+    <div class="vscode-titlebar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span>coffee-shop-template — VS Code</span>
+    </div>
+    <div class="vscode-main" style="min-height:140px;">
+      <div class="vscode-activity">
+        <div class="act-icon active">📁</div>
+      </div>
+      <div class="vscode-editor" style="flex:1;display:flex;flex-direction:column;">
+        <div class="vscode-tabs">
+          <div class="vscode-tab active">Terminal</div>
+        </div>
+        <div class="vscode-terminal" style="flex:1;max-height:none;padding:.8rem;">
+          <div><span class="prompt">$</span> <span class="cmd">git add .</span></div>
+          <div><span class="prompt">$</span> <span class="cmd">git commit -m "feat: 山海咖啡 customization"</span></div>
+          <div><span class="prompt">$</span> <span class="cmd">git push origin main</span></div>
+          <div style="color:var(--green);margin-top:.3rem;">remote: Deployed to https://yourname.github.io/coffee-shop/</div>
+        </div>
+      </div>
+      <div class="vscode-chat" style="width:180px;">
+        <div class="vscode-chat-header">🤖 Claude</div>
+        <div class="vscode-chat-body" style="font-size:.65rem;">
+          <div class="chat-msg ai">已推送到 GitHub。GitHub Pages 部署中，約 1-2 分鐘後即可存取。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="info-box success fragment" data-order="0" style="margin-top:.5rem;">
+    <div class="label">完成！</div>
+    <p style="font-size:1.1rem;">一個開源模板 → 變成<strong>山海咖啡</strong>的專屬網站<br>
+    找 → 改外觀 → 加功能 → 修問題 → 部署上線</p>
+  </div>
+</div>
+
+<!-- ===== 35: 四合一畫面 ===== -->
+<div class="slide" data-index="35">
+  <h2>VS Code 四合一</h2>
+  <div class="vscode-mockup" style="max-width:920px;">
+    <div class="vscode-titlebar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span>山海咖啡 — VS Code</span>
+    </div>
+    <div class="vscode-main" style="min-height:280px;">
+      <div class="vscode-activity">
+        <div class="act-icon active">📁</div>
+        <div class="act-icon">🔍</div>
+        <div class="act-icon">🧩</div>
+        <div class="act-icon">🐛</div>
+      </div>
+      <div class="vscode-sidebar" style="width:130px;">
+        <div class="sidebar-title" style="font-size:.6rem;">山海咖啡</div>
+        <div class="file-item folder" style="font-size:.65rem;"><span class="icon">📂</span>src/</div>
+        <div class="file-item" style="padding-left:1.5rem;font-size:.65rem;"><span class="icon">📄</span>App.jsx</div>
+        <div class="file-item" style="padding-left:1.5rem;font-size:.65rem;"><span class="icon">📄</span>Home.jsx</div>
+        <div class="file-item active" style="padding-left:1.5rem;font-size:.65rem;"><span class="icon">📄</span>Reservation</div>
+        <div class="file-item" style="padding-left:1.5rem;font-size:.65rem;"><span class="icon">📄</span>Menu.jsx</div>
+        <div class="file-item" style="padding-left:1.5rem;font-size:.65rem;"><span class="icon">📄</span>About.jsx</div>
+        <div class="file-item" style="padding-left:1.5rem;font-size:.65rem;"><span class="icon">🎨</span>styles.css</div>
+        <div class="file-item" style="font-size:.65rem;"><span class="icon">📄</span>CLAUDE.md</div>
+      </div>
+      <div class="vscode-editor" style="flex:1;display:flex;flex-direction:column;">
+        <div class="vscode-tabs">
+          <div class="vscode-tab active" style="font-size:.65rem;">Reservation.jsx</div>
+          <div class="vscode-tab" style="font-size:.65rem;">styles.css</div>
+        </div>
+        <div class="vscode-code" style="flex:1;font-size:.62rem;">
+          <div><span class="ln">1</span><span class="kw">import</span> { useState } <span class="kw">from</span> <span class="str">'react'</span>;</div>
+          <div><span class="ln">2</span></div>
+          <div><span class="ln">3</span><span class="kw">export default function</span> <span class="fn">Reservation</span>() {</div>
+          <div><span class="ln">4</span>&nbsp;&nbsp;<span class="kw">const</span> [date, setDate] = <span class="fn">useState</span>(<span class="str">''</span>);</div>
+          <div><span class="ln">5</span>&nbsp;&nbsp;<span class="kw">const</span> [guests, setGuests] = <span class="fn">useState</span>(<span class="num">2</span>);</div>
+          <div><span class="ln">6</span>&nbsp;&nbsp;...</div>
+        </div>
+        <div class="vscode-terminal" style="font-size:.6rem;">
+          <div><span class="prompt">$</span> <span class="cmd">npm run dev</span></div>
+          <div><span class="output">Local: http://localhost:5173/</span></div>
+          <div style="color:var(--green);">ready in 342ms</div>
+        </div>
+      </div>
+      <div class="vscode-chat" style="width:190px;">
+        <div class="vscode-chat-header" style="font-size:.65rem;">🤖 Claude</div>
+        <div class="vscode-chat-body" style="font-size:.6rem;">
+          <div class="chat-msg user">預約表單加一個「備註」欄位</div>
+          <div class="chat-msg ai">好的，我來在 Reservation.jsx 中新增備註輸入框，並更新 POST body...</div>
+        </div>
+        <div class="vscode-chat-input"><input value="Ask Claude..." readonly style="font-size:.55rem;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="flow fragment" data-order="0" style="margin-top:.3rem;font-size:.9rem;">
+    <div class="flow-box" style="font-size:.85rem;">檔案樹</div>
+    <div class="flow-arrow">+</div>
+    <div class="flow-box" style="font-size:.85rem;">程式碼</div>
+    <div class="flow-arrow">+</div>
+    <div class="flow-box" style="font-size:.85rem;">終端機</div>
+    <div class="flow-arrow">+</div>
+    <div class="flow-box" style="font-size:.85rem;border-color:var(--blue);background:var(--blue-lt);">Claude 聊天</div>
+  </div>
+</div>
+
+<!-- ===== 36: 改造流程回顧 ===== -->
+<div class="slide" data-index="36">
+  <h2>改造者 Workflow 總結</h2>
+  <div class="step-list" style="margin-top:.5rem;">
+    <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--green);font-size:.8rem;">&#9733;</div><div class="step-content"><strong>找 — 問架構</strong><p>Clone 專案 → 問 Claude「架構是什麼？」→ 理解全貌</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--blue);font-size:.7rem;">&#9733;&#9733;</div><div class="step-content"><strong>改 — 指定修改</strong><p>「改中文」「改配色」→ 你指路，AI 執行，diff 確認</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--purple);font-size:.65rem;">&#9733;&#9733;&#9733;</div><div class="step-content"><strong>加 — 說要什麼</strong><p>「加預約功能」→ AI 自己規劃，你只看結果</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--gold);font-size:.6rem;">&#9733;&#9733;&#9733;&#9733;</div><div class="step-content"><strong>修 — 貼 Error</strong><p>Error → Copy → Ask → Fix → Verify</p></div></div>
+    <div class="step fragment" data-order="4"><div class="step-num" style="background:var(--red);font-size:.55rem;">&#9733;&#9733;&#9733;&#9733;&#9733;</div><div class="step-content"><strong>部署 — 推上線</strong><p>git push → GitHub Pages → 全世界看到</p></div></div>
+  </div>
+</div>
+
+<!-- ===== 37: SECTION — 四大擴充 ===== -->
+<div class="slide section-title" data-index="37">
+  <p class="subtitle">工具比較</p>
+  <h1>四大 AI 擴充</h1>
+  <p class="subtitle" style="margin-top:.5rem;">Claude / Copilot / Amazon Q / Continue</p>
+</div>
+
+<!-- ===== 38: 擴充比較表 ===== -->
+<div class="slide" data-index="38">
+  <h2>四大 AI 擴充比較</h2>
+  <table class="compare-table">
+    <tr><th style="width:160px;">擴充</th><th>特色</th><th>價格</th><th>推薦指數</th></tr>
+    <tr>
+      <td><strong style="color:var(--purple);">Claude for VS Code</strong></td>
+      <td>深度理解、長上下文、可對話</td>
+      <td>$20/月 (Pro)</td>
+      <td style="color:var(--gold);font-weight:700;">&#9733;&#9733;&#9733;&#9733;&#9733;</td>
+    </tr>
+    <tr>
+      <td><strong>GitHub Copilot</strong></td>
+      <td>最快自動補全、程式碼建議</td>
+      <td>$10/月 或免費版</td>
+      <td style="color:var(--gold);font-weight:700;">&#9733;&#9733;&#9733;&#9733;</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--green);">Amazon Q</strong></td>
+      <td>免費 50 次/月、安全掃描</td>
+      <td class="green bold">免費</td>
+      <td style="color:var(--gold);font-weight:700;">&#9733;&#9733;&#9733;</td>
+    </tr>
+    <tr>
+      <td><strong>Continue.dev</strong></td>
+      <td>開源、接任何模型 (GPT/Claude/local)</td>
+      <td class="green bold">免費</td>
+      <td style="color:var(--gold);font-weight:700;">&#9733;&#9733;&#9733;</td>
+    </tr>
+  </table>
+  <div class="info-box tip fragment" data-order="0" style="margin-top:.8rem;">
+    <div class="label">最佳免費組合</div>
+    <p><strong>Claude 延伸 + Copilot Free + Amazon Q</strong> = 三個都裝，互補使用<br>
+    Claude 問問題、Copilot 自動補全、Amazon Q 安全掃描</p>
+  </div>
+</div>
+
+<!-- ===== 39: 什麼時候用什麼 ===== -->
+<div class="slide" data-index="39">
+  <h2>什麼時候用什麼？</h2>
+  <div class="step-list" style="max-width:800px;">
+    <div class="step fragment" data-order="0">
+      <div class="step-num" style="background:var(--purple);font-size:.8rem;">C</div>
+      <div class="step-content"><strong>問問題、理解架構、多檔案修改</strong><p style="color:var(--purple);">→ Claude for VS Code（深度理解最強）</p></div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--g800);font-size:.8rem;">G</div>
+      <div class="step-content"><strong>寫程式碼、自動補全、一行一行寫</strong><p style="color:var(--g800);">→ GitHub Copilot（速度最快）</p></div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="background:var(--green);font-size:.8rem;">A</div>
+      <div class="step-content"><strong>安全掃描、免費額度</strong><p style="color:var(--green);">→ Amazon Q（完全免費）</p></div>
+    </div>
+    <div class="step fragment" data-order="3">
+      <div class="step-num" style="background:var(--gold);font-size:.8rem;">O</div>
+      <div class="step-content"><strong>想用自己的模型、本地 LLM</strong><p style="color:var(--gold);">→ Continue.dev（開源彈性最大）</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 40: SECTION — 工具全景 ===== -->
+<div class="slide section-title" data-index="40">
+  <p class="subtitle">決策指南</p>
+  <h1>工具全景決策樹</h1>
+  <p class="subtitle" style="margin-top:.5rem;">S01 ~ S05 什麼時候用什麼</p>
+</div>
+
+<!-- ===== 41: 決策樹 ===== -->
+<div class="slide" data-index="41">
+  <h2>你要做什麼？</h2>
+  <div class="decision-tree" style="margin-top:.5rem;">
+    <div class="decision-node fragment" data-order="0" style="border-left-color:var(--green);background:var(--green-lt);">
+      <span class="arrow">→</span>
+      <div><strong>Google 試算表自動化</strong><br><span class="dim" style="font-size:.9rem;">GAS (S01) — AI 幫你寫腳本</span></div>
+    </div>
+    <div class="decision-node fragment" data-order="1" style="border-left-color:var(--blue);background:var(--blue-lt);">
+      <span class="arrow">→</span>
+      <div><strong>快速做網站 / 原型</strong><br><span class="dim" style="font-size:.9rem;">Vibe Coding (S02) — 說話就能做</span></div>
+    </div>
+    <div class="decision-node fragment" data-order="2" style="border-left-color:var(--gold);background:var(--gold-lt);">
+      <span class="arrow">→</span>
+      <div><strong>AI 操作你的電腦</strong><br><span class="dim" style="font-size:.9rem;">CLI Agent (S03) — 從空資料夾開始</span></div>
+    </div>
+    <div class="decision-node fragment" data-order="3" style="border-left-color:var(--purple);background:var(--purple-lt);">
+      <span class="arrow">→</span>
+      <div><strong>開發 / 改造複雜專案</strong><br><span class="dim" style="font-size:.9rem;">VS Code IDE (S04) — 接手 + 改造</span></div>
+    </div>
+    <div class="decision-node fragment" data-order="4" style="border-left-color:var(--red);background:var(--red-lt);">
+      <span class="arrow">→</span>
+      <div><strong>24/7 自動化 AI 管家</strong><br><span class="dim" style="font-size:.9rem;">OpenClaw (S05) — AI 不下班</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 42: 五堂課進程 ===== -->
+<div class="slide" data-index="42">
+  <h2>五堂課的進程</h2>
+  <div class="flow" style="margin-top:1.5rem;">
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">S01<br><span style="font-size:.75rem;">GAS</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);">S02<br><span style="font-size:.75rem;">Vibe</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);">S03<br><span style="font-size:.75rem;">CLI</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--purple-lt);border-color:var(--purple);border-width:3px;">S04<br><span style="font-size:.75rem;font-weight:900;">IDE</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--red-lt);border-color:var(--red);">S05<br><span style="font-size:.75rem;">🦞</span></div>
+  </div>
+  <div class="two-col fragment" data-order="0" style="margin-top:1.5rem;">
+    <div class="col" style="text-align:center;">
+      <p style="font-size:.95rem;color:var(--g600);">你介入程度</p>
+      <p style="font-size:1.5rem;font-weight:900;">多 ─────→ 少</p>
+    </div>
+    <div class="col" style="text-align:center;">
+      <p style="font-size:.95rem;color:var(--g600);">AI 自主程度</p>
+      <p style="font-size:1.5rem;font-weight:900;">少 ─────→ 多</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 43: Recap ===== -->
+<div class="slide" data-index="43">
+  <h2>今天你學會了</h2>
+  <div style="text-align:left;max-width:720px;margin-top:.5rem;">
+    <div class="fragment" data-order="0" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--green-lt);border-radius:12px;border-left:4px solid var(--green);">
+      <strong class="green">&#9733; AI 回答</strong> — 選一段問它，它真的看懂了
+    </div>
+    <div class="fragment" data-order="1" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--blue-lt);border-radius:12px;border-left:4px solid var(--blue);">
+      <strong class="blue">&#9733;&#9733; AI 改</strong> — 8 個檔案都改了，每步都有 diff
+    </div>
+    <div class="fragment" data-order="2" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--purple-lt);border-radius:12px;border-left:4px solid var(--purple);">
+      <strong class="purple">&#9733;&#9733;&#9733; AI 想</strong> — 我只說要什麼，它自己決定改哪
+    </div>
+    <div class="fragment" data-order="3" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--gold-lt);border-radius:12px;border-left:4px solid var(--gold);">
+      <strong class="gold">&#9733;&#9733;&#9733;&#9733; AI 修</strong> — Error → Copy → Ask → Fix → Verify
+    </div>
+    <div class="fragment" data-order="4" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--red-lt);border-radius:12px;border-left:4px solid var(--red);">
+      <strong class="red">&#9733;&#9733;&#9733;&#9733;&#9733; AI 改造</strong> — 開源模板變成自己的產品
+    </div>
+  </div>
+</div>
+
+<!-- ===== 44: 核心金句 ===== -->
+<div class="slide" data-index="44">
+  <h2>帶走一句話</h2>
+  <div style="margin-top:2rem;text-align:center;">
+    <p style="font-size:2rem;font-weight:900;color:var(--blue);line-height:1.5;">
+      90% 的工作<br>不是從零開始
+    </p>
+    <p style="font-size:2rem;font-weight:900;color:var(--purple);margin-top:1rem;line-height:1.5;">
+      是接手 + 改造
+    </p>
+  </div>
+  <p class="fragment dim" data-order="0" style="margin-top:2rem;font-size:1.1rem;">
+    你不需要會寫程式。你需要會<span class="blue bold">讀架構</span>、<span class="green bold">看 diff</span>、<span class="red bold">貼 error</span>。
+  </p>
+</div>
+
+<!-- ===== 45: 預告 S05 ===== -->
+<div class="slide" data-index="45">
+  <h2>下一堂預告</h2>
+  <p style="font-size:1.1rem;margin-top:1rem;line-height:2;color:var(--g600);">
+    前四堂，AI 都是你開工具它才做事。
+  </p>
+  <p style="font-size:1.1rem;line-height:2;color:var(--g600);">
+    你<strong>關電腦</strong>，AI 就<strong>下班</strong>。
+  </p>
+  <div class="fragment" data-order="0" style="margin-top:2rem;">
+    <p style="font-size:1.6rem;font-weight:900;color:var(--red);">
+      下一堂，AI 不下班了。
+    </p>
+    <div class="flow" style="margin-top:1.5rem;">
+      <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">S01 ✅</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);">S02 ✅</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);">S03 ✅</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--purple-lt);border-color:var(--purple);">S04 ✅</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="border-color:var(--red);background:var(--red-lt);"><strong>S05 🦞</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 46: END ===== -->
+<div class="slide cover" data-index="46">
+  <p style="font-size:1rem;color:rgba(255,255,255,.6);margin-bottom:1rem;">S04 補充單元</p>
+  <h1>完成！</h1>
+  <p class="subtitle" style="margin-top:1.5rem;font-size:1.2rem;">
+    問 → 改 → 想 → 修 → 改造
+  </p>
+  <p style="color:rgba(255,255,255,.5);margin-top:.5rem;font-size:1rem;">改造者的五個層次</p>
+  <p style="color:rgba(255,255,255,.4);margin-top:3rem;font-size:.9rem;">ai100.cooperation.tw</p>
+</div>
+
+</div>
+
+<div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>←</button><button id="next">→</button></div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),tot=slides.length;
+let idx=0,fi=-1;
+document.getElementById('total').textContent=tot;
+const gf=el=>el.querySelectorAll('.fragment');
+function go(n){slides.forEach((s,i)=>{s.classList.remove('active','prev');if(i<n)s.classList.add('prev');s.querySelectorAll('.fragment').forEach(f=>f.classList.remove('visible'));});idx=n;fi=-1;slides[idx].classList.add('active');ui();}
+function ui(){document.getElementById('current').textContent=idx+1;document.getElementById('prev').disabled=idx===0&&fi<=0;const f=gf(slides[idx]);document.getElementById('next').disabled=idx===tot-1&&fi>=f.length-1;document.getElementById('progress').style.width=((idx+1)/tot*100)+'%';}
+function adv(){const f=gf(slides[idx]);if(fi<f.length-1){fi++;f[fi].classList.add('visible');ui();}else if(idx<tot-1)go(idx+1);}
+function ret(){const f=gf(slides[idx]);if(fi>=0){f[fi].classList.remove('visible');fi--;ui();}else if(idx>0){go(idx-1);const p=gf(slides[idx]);p.forEach(x=>x.classList.add('visible'));fi=p.length-1;ui();}}
+document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
+document.addEventListener('keydown',e=>{if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}if(e.key==='Home'){e.preventDefault();go(0);}if(e.key==='End'){e.preventDefault();go(tot-1);}if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}});
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
+ui();
+
+// ─── QR Code Generation ───
+const TEMPLATE_URL = 'https://ai100.cooperation.tw/classroom/s04-template.html';
+const qrOpts = {width:240,height:240,colorDark:'#202124',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M};
+
+function makeQR(id,url){
+  const el = document.getElementById(id);
+  if(el && !el.querySelector('canvas')){new QRCode(el,{...qrOpts,text:url});}
+}
+
+// Generate all QR codes
+makeQR('qr-install', TEMPLATE_URL);
+makeQR('qr-exercise1', TEMPLATE_URL + '#exercise1');
+</script>
+</body>
+</html>

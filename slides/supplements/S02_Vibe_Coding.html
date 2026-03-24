@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S02 — Vibe Coding</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   grow.google 簡潔風 + Reading Glasses
+   投影教學用 (3-10m 觀看距離)
+   ═══════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--white);}
+
+/* Slides */
+.slides{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;opacity:0;transform:translateX(30px);pointer-events:none;transition:opacity .4s,transform .4s ease;background:var(--white);}
+.slide.active{opacity:1;transform:none;pointer-events:auto;}
+.slide.prev{opacity:0;transform:translateX(-30px);}
+.slide.cover{background:var(--navy);color:#fff;text-align:center;}
+.slide.section-title{background:var(--green);color:#fff;text-align:center;}
+.slide.break-slide{background:var(--offwhite);text-align:center;}
+
+/* Typography */
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:2rem;font-weight:700;color:var(--g900);margin-bottom:1rem;line-height:1.4;}
+h3{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.1rem;line-height:1.8;}
+.subtitle{font-size:1.15rem;color:var(--g600);font-weight:500;}
+.blue{color:var(--blue);}.green{color:var(--green);}.gold{color:var(--gold);}.red{color:var(--red);}.purple{color:var(--purple);}.dim{color:var(--g600);}.bold{font-weight:700;}
+
+/* Fragment */
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* Cards */
+.card-grid{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;margin-top:1.2rem;max-width:1100px;}
+.card{background:var(--white);border:2px solid var(--g100);border-radius:16px;padding:1.8rem;min-width:220px;max-width:300px;flex:1;transition:border-color .2s;}
+.card:hover{border-color:var(--blue);}
+.card .icon{font-size:2.5rem;margin-bottom:.6rem;}
+.card p{font-size:1rem;color:var(--g600);}
+
+/* Steps */
+.step-list{text-align:left;max-width:800px;width:100%;}
+.step{display:flex;gap:1.2rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:40px;height:40px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.1rem;}.step-content p{font-size:1rem;color:var(--g600);margin-top:.15rem;}
+
+/* Code */
+.code-block{background:var(--g50);border:2px solid var(--g200);border-radius:12px;padding:1.3rem 1.8rem;text-align:left;max-width:860px;width:100%;font-family:'Fira Code',monospace;font-size:1rem;line-height:1.8;margin:.8rem 0;color:var(--g900);}
+.code-block .kw{color:#D93025;font-weight:700;}.code-block .str{color:#0F9D8A;}.code-block .fn{color:#7C3AED;}.code-block .cm{color:var(--g400);}
+
+/* Table */
+.compare-table{border-collapse:collapse;font-size:1rem;margin-top:.8rem;width:100%;max-width:860px;}
+.compare-table th{background:var(--navy);color:#fff;padding:.7rem 1rem;text-align:left;font-size:1rem;}
+.compare-table td{padding:.7rem 1rem;border-bottom:1px solid var(--g100);font-size:1rem;}
+.compare-table tr:hover td{background:var(--g50);}
+
+/* Info boxes */
+.info-box{border-radius:12px;padding:1.3rem 1.8rem;max-width:800px;width:100%;text-align:left;margin-top:.8rem;}
+.info-box.analogy{background:var(--blue-lt);border-left:4px solid var(--blue);}
+.info-box.warning{background:var(--red-lt);border-left:4px solid var(--red);}
+.info-box.success{background:var(--green-lt);border-left:4px solid var(--green);}
+.info-box.tip{background:var(--gold-lt);border-left:4px solid var(--gold);}
+.info-box .label{font-weight:700;font-size:1rem;margin-bottom:.4rem;}
+.info-box p{font-size:1.05rem;}
+
+/* Flow */
+.flow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1.2rem 0;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.7rem 1rem;font-size:1rem;font-weight:700;text-align:center;}
+.flow-arrow{color:var(--blue);font-size:1.5rem;font-weight:900;}
+
+/* Banner */
+.exercise-banner{display:inline-block;background:var(--purple);color:#fff;padding:.35rem 1.4rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.8rem;}
+
+/* Two col */
+.two-col{display:flex;gap:2rem;width:100%;max-width:960px;text-align:left;}
+.two-col .col{flex:1;}
+
+/* Big number */
+.big-num{font-size:4.5rem;font-weight:900;color:var(--blue);line-height:1;}
+
+/* ═══════════════════════════════════════
+   MOCKUP UI
+   ═══════════════════════════════════════ */
+.mockup-browser{
+  max-width:820px;width:100%;border-radius:12px;overflow:hidden;
+  border:2px solid var(--g200);margin:.8rem 0;max-height:65vh;overflow:hidden;
+  box-shadow:0 4px 24px rgba(0,0,0,.08);
+}
+.mockup-bar{
+  background:var(--g50);padding:.5rem 1rem;display:flex;align-items:center;gap:.6rem;
+  border-bottom:1px solid var(--g200);
+}
+.mockup-dots{display:flex;gap:5px;}
+.mockup-dot{width:10px;height:10px;border-radius:50%;}
+.mockup-dot.r{background:#FF5F57;}.mockup-dot.y{background:#FFBD2E;}.mockup-dot.g{background:#28C840;}
+.mockup-url{
+  flex:1;background:var(--white);border:1px solid var(--g200);border-radius:100px;
+  padding:.25rem .8rem;font-size:.8rem;color:var(--g600);font-family:'Fira Code',monospace;
+}
+.mockup-body{background:var(--white);padding:1rem 1.5rem;min-height:auto;max-height:50vh;overflow-y:auto;position:relative;}
+.mockup-body.dark{background:#1E1E1E;color:#D4D4D4;}
+
+/* Mockup UI elements */
+.mock-btn{
+  display:inline-block;padding:.4rem 1.2rem;border-radius:8px;font-weight:700;font-size:.9rem;
+  border:none;cursor:default;
+}
+.mock-btn.primary{background:var(--blue);color:#fff;}
+.mock-btn.green{background:var(--green);color:#fff;}
+.mock-btn.outline{background:transparent;border:2px solid var(--g200);color:var(--g800);}
+.mock-input{
+  border:2px solid var(--g200);border-radius:8px;padding:.4rem .8rem;font-size:.9rem;
+  background:var(--white);color:var(--g800);display:inline-block;min-width:200px;
+}
+.mock-sidebar{
+  background:var(--g50);padding:1rem;border-right:1px solid var(--g200);
+  min-width:160px;font-size:.85rem;
+}
+.mock-sidebar-item{padding:.4rem .6rem;border-radius:6px;margin:.2rem 0;cursor:default;}
+.mock-sidebar-item.active{background:var(--blue-lt);color:var(--blue);font-weight:700;}
+.mock-sidebar-item:hover{background:var(--g100);}
+
+/* Highlight arrow / callout */
+.callout{
+  position:absolute;background:var(--red);color:#fff;padding:.3rem .8rem;
+  border-radius:8px;font-size:.85rem;font-weight:700;
+  animation:pulse 1.5s infinite;z-index:5;
+}
+.callout::after{
+  content:'';position:absolute;border:8px solid transparent;
+}
+.callout.arrow-down::after{top:100%;left:50%;transform:translateX(-50%);border-top-color:var(--red);}
+.callout.arrow-left::after{top:50%;right:100%;transform:translateY(-50%);border-right-color:var(--red);}
+.callout.arrow-right::after{top:50%;left:100%;transform:translateY(-50%);border-left-color:var(--red);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.7;}}
+
+/* Mockup Sheet */
+.mock-sheet{width:100%;border-collapse:collapse;font-size:.9rem;}
+.mock-sheet th{background:var(--g100);padding:.3rem .8rem;text-align:center;font-weight:700;color:var(--g600);border:1px solid var(--g200);}
+.mock-sheet td{padding:.4rem .8rem;border:1px solid var(--g200);min-width:80px;}
+.mock-sheet .row-num{background:var(--g50);color:var(--g600);text-align:center;width:30px;font-size:.8rem;}
+.mock-sheet .input-cell{background:#E8F0FE;font-weight:500;}
+.mock-sheet .output-cell{background:#E6F4F1;color:var(--green);font-weight:500;}
+
+/* Controls */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:var(--white);color:var(--g800);font-size:1.2rem;cursor:pointer;transition:all .15s;}
+.controls button:hover{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
+.controls button:disabled{opacity:.25;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:var(--green-lt);color:var(--green);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
+
+/* QR Code */
+.qr-solo{
+  position:absolute;top:.6rem;right:.8rem;z-index:110;
+  background:var(--white);padding:4px;border-radius:6px;
+}
+
+.slide.cover h1{font-size:3.5rem;}
+.slide.cover .subtitle{color:rgba(255,255,255,.8);}
+.slide.section-title h1{font-size:2.8rem;}
+.slide.section-title .subtitle{color:rgba(255,255,255,.85);font-size:1.1rem;}
+
+/* S02 specific */
+.prompt-compare{display:flex;gap:1rem;max-width:960px;width:100%;margin-top:1rem;}
+.prompt-col{flex:1;border-radius:12px;padding:1.2rem;font-size:.95rem;line-height:1.7;text-align:left;}
+.prompt-col.bad{background:var(--red-lt);border:2px solid var(--red);}
+.prompt-col.mid{background:var(--gold-lt);border:2px solid var(--gold);}
+.prompt-col.good{background:var(--green-lt);border:2px solid var(--green);}
+.prompt-col .grade{font-weight:900;font-size:1.1rem;margin-bottom:.5rem;}
+
+.mockup-sm{max-width:420px;}
+.two-mockup{display:flex;gap:1.5rem;width:100%;max-width:960px;justify-content:center;}
+.two-mockup .mockup-browser{flex:1;max-width:450px;}
+
+.level-badge{display:inline-block;background:var(--gold);color:#fff;padding:.2rem .8rem;border-radius:100px;font-weight:900;font-size:.85rem;margin-bottom:.3rem;}
+</style>
+</head>
+<body>
+
+<div class="module-title">Vibe Coding</div>
+<div class="module-badge">S02 補充單元</div>
+<div class="slides">
+
+<!-- ===== 0: COVER ===== -->
+<div class="slide cover" data-index="0">
+  <p style="font-size:1.1rem;color:rgba(255,255,255,.6);margin-bottom:1rem;">AI 100 講 — 補充單元</p>
+  <h1>Vibe Coding</h1>
+  <p style="font-size:1.8rem;margin-top:.5rem;color:rgba(255,255,255,.9);font-weight:700;">說出來，AI 做出來</p>
+  <p class="subtitle" style="margin-top:1.5rem;font-size:1.2rem;">三種方式讓全世界看到你的作品</p>
+  <p style="color:rgba(255,255,255,.4);margin-top:3rem;font-size:.9rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- ===== 1: 議程 ===== -->
+<div class="slide" data-index="1">
+  <h2>今天的旅程 — 三小時</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>Prompt 品質 & Claude 產出</strong><p>說得越清楚，AI 做得越好</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--green);">2</div><div class="step-content"><strong>Level 1 — Claude 做出 HTML</strong><p>一句話變一個完整網站</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--gold);">3</div><div class="step-content"><strong>Level 2 — GAS 部署上線</strong><p>讓全世界看到你的網站</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--purple);">4</div><div class="step-content"><strong>Level 3 — GitHub Pages + 自由創作</strong><p>好看的網址 + 你的專屬作品</p></div></div>
+  </div>
+</div>
+
+<!-- ===== 2: 概念過渡 ===== -->
+<div class="slide" data-index="2">
+  <h2>從 S01 到 S02：你的角色升級了</h2>
+  <div class="two-col" style="margin-top:1.5rem;">
+    <div class="col">
+      <div class="info-box" style="background:var(--g50);border-left:4px solid var(--g400);">
+        <div class="label" style="color:var(--g600);">S01 — GAS 自動化</div>
+        <div class="flow" style="margin:.8rem 0;font-size:.9rem;">
+          <div class="flow-box" style="font-size:.85rem;">問 ChatGPT</div>
+          <div class="flow-arrow" style="font-size:1.2rem;">→</div>
+          <div class="flow-box" style="font-size:.85rem;">複製</div>
+          <div class="flow-arrow" style="font-size:1.2rem;">→</div>
+          <div class="flow-box" style="font-size:.85rem;">手動貼</div>
+          <div class="flow-arrow" style="font-size:1.2rem;">→</div>
+          <div class="flow-box" style="font-size:.85rem;">執行</div>
+        </div>
+        <p style="font-size:1.2rem;text-align:center;margin-top:.5rem;">你是<span class="red bold">搬運工</span></p>
+      </div>
+    </div>
+    <div class="col fragment" data-order="0">
+      <div class="info-box" style="background:var(--blue-lt);border-left:4px solid var(--blue);">
+        <div class="label" style="color:var(--blue);">S02 — Vibe Coding</div>
+        <div class="flow" style="margin:.8rem 0;font-size:.9rem;">
+          <div class="flow-box" style="font-size:.85rem;border-color:var(--blue);background:var(--blue-lt);">你描述</div>
+          <div class="flow-arrow" style="font-size:1.2rem;">→</div>
+          <div class="flow-box" style="font-size:.85rem;border-color:var(--green);background:var(--green-lt);">AI 做出來</div>
+          <div class="flow-arrow" style="font-size:1.2rem;">→</div>
+          <div class="flow-box" style="font-size:.85rem;border-color:var(--gold);background:var(--gold-lt);">你驗收</div>
+        </div>
+        <p style="font-size:1.2rem;text-align:center;margin-top:.5rem;">你是<span class="blue bold">老闆</span></p>
+      </div>
+    </div>
+  </div>
+  <p class="fragment dim" data-order="1" style="margin-top:1.5rem;font-size:1.3rem;">老闆最重要的技能？<span class="blue bold">說清楚你要什麼</span></p>
+</div>
+
+<!-- ===== 3: Prompt 品質 — 三版比較 ===== -->
+<div class="slide" data-index="3">
+  <h2>Prompt 品質決定成品品質</h2>
+  <p class="dim" style="margin-bottom:.5rem;">同樣的需求，三種說法，三種結果</p>
+  <div class="prompt-compare">
+    <div class="prompt-col bad fragment" data-order="0">
+      <div class="grade red">❌ 模糊</div>
+      <p>「做一個網站」</p>
+      <p style="font-size:.85rem;color:var(--g600);margin-top:.5rem;">AI 不知道做什麼、給誰看、長什麼樣</p>
+    </div>
+    <div class="prompt-col mid fragment" data-order="1">
+      <div class="grade gold">⚠️ 有方向</div>
+      <p>「做一個咖啡店網站」</p>
+      <p style="font-size:.85rem;color:var(--g600);margin-top:.5rem;">知道主題，但不知道要哪些頁面、什麼風格</p>
+    </div>
+    <div class="prompt-col good fragment" data-order="2">
+      <div class="grade green">✅ 具體</div>
+      <p>「做一個精品咖啡店網站：首頁全幅圖片、菜單用卡片排列含價格、預約表單、深木色+奶油白配色、手機版漢堡選單」</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 4: 三版結果對比 ===== -->
+<div class="slide" data-index="4">
+  <h2>結果差多少？</h2>
+  <div class="prompt-compare" style="gap:1rem;">
+    <div style="flex:1;text-align:center;">
+      <div class="mockup-browser mockup-sm" style="max-width:280px;margin:0 auto;">
+        <div class="mockup-bar"><div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div><div class="mockup-url" style="font-size:.7rem;">localhost</div></div>
+        <div class="mockup-body" style="min-height:120px;padding:1rem;text-align:center;">
+          <p style="font-size:1.2rem;font-weight:900;">Hello World</p>
+          <p style="font-size:.8rem;color:var(--g400);margin-top:.5rem;">Welcome to my website</p>
+          <div style="background:var(--g100);height:40px;border-radius:4px;margin-top:.5rem;"></div>
+        </div>
+      </div>
+      <p class="red bold" style="margin-top:.5rem;font-size:.9rem;">模糊 Prompt</p>
+    </div>
+    <div class="fragment" data-order="0" style="flex:1;text-align:center;">
+      <div class="mockup-browser mockup-sm" style="max-width:280px;margin:0 auto;">
+        <div class="mockup-bar"><div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div><div class="mockup-url" style="font-size:.7rem;">localhost</div></div>
+        <div class="mockup-body" style="min-height:120px;padding:1rem;text-align:center;">
+          <p style="font-size:1rem;font-weight:900;">☕ Coffee Shop</p>
+          <div style="display:flex;gap:.3rem;margin-top:.3rem;justify-content:center;font-size:.7rem;">
+            <span style="padding:.2rem .4rem;background:var(--g100);border-radius:4px;">Home</span>
+            <span style="padding:.2rem .4rem;background:var(--g100);border-radius:4px;">Menu</span>
+            <span style="padding:.2rem .4rem;background:var(--g100);border-radius:4px;">About</span>
+          </div>
+          <div style="background:var(--g100);height:50px;border-radius:4px;margin-top:.5rem;"></div>
+        </div>
+      </div>
+      <p class="gold bold" style="margin-top:.5rem;font-size:.9rem;">有方向 Prompt</p>
+    </div>
+    <div class="fragment" data-order="1" style="flex:1;text-align:center;">
+      <div class="mockup-browser mockup-sm" style="max-width:280px;margin:0 auto;">
+        <div class="mockup-bar"><div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div><div class="mockup-url" style="font-size:.7rem;">localhost</div></div>
+        <div class="mockup-body" style="min-height:120px;padding:0;text-align:center;overflow:hidden;">
+          <div style="background:linear-gradient(135deg,#3E2723,#5D4037);padding:.5rem;color:#FFF8E1;">
+            <p style="font-size:.9rem;font-weight:900;">Artisan Coffee</p>
+            <p style="font-size:.6rem;opacity:.8;">手工烘焙 / 精品莊園</p>
+          </div>
+          <div style="display:flex;gap:.3rem;padding:.3rem;justify-content:center;">
+            <div style="flex:1;background:#FFF8E1;border:1px solid #D7CCC8;border-radius:4px;padding:.3rem;font-size:.6rem;">
+              <strong>拿鐵</strong><br><span style="color:var(--green);">$150</span>
+            </div>
+            <div style="flex:1;background:#FFF8E1;border:1px solid #D7CCC8;border-radius:4px;padding:.3rem;font-size:.6rem;">
+              <strong>手沖</strong><br><span style="color:var(--green);">$180</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="green bold" style="margin-top:.5rem;font-size:.9rem;">具體 Prompt</p>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="2">
+    <div class="label">公式</div>
+    <p><strong>主題</strong> + <strong>頁面結構</strong> + <strong>內容細節</strong> + <strong>風格配色</strong> + <strong>手機適配</strong> = 好 Prompt</p>
+  </div>
+</div>
+
+<!-- ===== 5: Prompt 公式拆解 ===== -->
+<div class="slide" data-index="5">
+  <h2>五要素 Prompt 公式</h2>
+  <div class="step-list" style="margin-top:.5rem;">
+    <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--blue);">1</div><div class="step-content"><strong>主題 & 目的</strong><p>「精品咖啡店網站，給顧客看菜單和預約」</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--green);">2</div><div class="step-content"><strong>頁面結構</strong><p>「首頁全幅圖片 + 菜單區 + 預約表單 + 關於我們」</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--gold);">3</div><div class="step-content"><strong>內容細節</strong><p>「菜單用卡片排列，每張卡片有品名、描述、價格」</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--purple);">4</div><div class="step-content"><strong>風格配色</strong><p>「深木色 + 奶油白，有質感的文青風格」</p></div></div>
+    <div class="step fragment" data-order="4"><div class="step-num" style="background:var(--red);">5</div><div class="step-content"><strong>手機適配</strong><p>「RWD 響應式，手機版用漢堡選單」</p></div></div>
+  </div>
+</div>
+
+<!-- ===== 6: Demo 預告 ===== -->
+<div class="slide" data-index="6">
+  <h2>接下來，講師 Live Demo</h2>
+  <div class="big-num" style="margin:1.5rem 0;">3 分鐘</div>
+  <p style="font-size:1.4rem;">從<span class="dim">零</span>到一個<span class="blue bold">完整網站</span></p>
+  <div class="flow fragment" data-order="0" style="margin-top:2rem;">
+    <div class="flow-box" style="border-color:var(--blue);background:var(--blue-lt);">打開 Claude</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">貼 Prompt</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--green);background:var(--green-lt);">網站完成</div>
+  </div>
+  <p class="fragment dim" data-order="1" style="margin-top:1.5rem;font-size:1.1rem;">不用寫任何一行程式碼</p>
+</div>
+
+<!-- ===== SECTION: Level 1 ===== -->
+<div class="slide section-title" data-index="7">
+  <p class="subtitle">Level 1</p>
+  <h1>Claude 產出 HTML</h1>
+  <p class="subtitle" style="margin-top:.5rem;">一句話變一個完整網站</p>
+</div>
+
+<!-- ===== 8: Claude Demo — 輸入 ===== -->
+<div class="slide" data-index="8">
+  <h2>Demo — 對 Claude 說話</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 claude.ai</div>
+    </div>
+    <div class="mockup-body" style="padding:1.5rem;">
+      <div style="background:var(--blue-lt);border-radius:12px;padding:1rem 1.2rem;font-size:.9rem;line-height:1.7;">
+        <strong>你：</strong>幫我做一個精品咖啡店的單頁網站。<br>
+        首頁有全幅背景圖（用 CSS 漸層代替），深木色 #3E2723 搭配奶油白 #FFF8E1。<br>
+        菜單區用卡片排列，每張有品名、描述、價格。<br>
+        有預約表單（姓名、電話、日期、人數）。<br>
+        頁尾有地址、營業時間。<br>
+        完整 RWD，手機版用漢堡選單。
+      </div>
+      <div class="fragment" data-order="0" style="margin-top:1rem;">
+        <p style="font-size:.9rem;color:var(--g600);"><strong>Claude：</strong>好的，我來幫你建立這個精品咖啡店網站...</p>
+        <div style="background:var(--g50);border-radius:8px;padding:.5rem .8rem;margin-top:.5rem;font-size:.85rem;color:var(--g400);">
+          正在建立 Artifact... ████████████░░ 80%
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 9: Claude Demo — Artifact 結果 ===== -->
+<div class="slide" data-index="9">
+  <h2>結果 — Artifact 即時預覽</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 claude.ai — Artifact Preview</div>
+    </div>
+    <div class="mockup-body" style="padding:0;overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#3E2723,#5D4037);padding:1.2rem;color:#FFF8E1;text-align:center;">
+        <p style="font-size:.7rem;display:flex;justify-content:flex-end;gap:.8rem;opacity:.8;"><span>首頁</span><span>菜單</span><span>預約</span><span>關於</span></p>
+        <p style="font-size:1.5rem;font-weight:900;margin:.5rem 0;">Artisan Coffee House</p>
+        <p style="font-size:.85rem;opacity:.8;">手工烘焙 / 精品莊園豆 / 慢生活</p>
+      </div>
+      <div style="padding:.8rem;display:flex;gap:.5rem;justify-content:center;background:#FFF8E1;">
+        <div style="flex:1;max-width:150px;background:#fff;border:1px solid #D7CCC8;border-radius:8px;padding:.5rem;text-align:center;">
+          <p style="font-size:.85rem;font-weight:700;">衣索比亞手沖</p>
+          <p style="font-size:.7rem;color:var(--g600);">花果香、明亮酸質</p>
+          <p style="font-size:.85rem;color:var(--green);font-weight:700;">$180</p>
+        </div>
+        <div style="flex:1;max-width:150px;background:#fff;border:1px solid #D7CCC8;border-radius:8px;padding:.5rem;text-align:center;">
+          <p style="font-size:.85rem;font-weight:700;">拿鐵</p>
+          <p style="font-size:.7rem;color:var(--g600);">綿密奶泡、均衡</p>
+          <p style="font-size:.85rem;color:var(--green);font-weight:700;">$150</p>
+        </div>
+        <div style="flex:1;max-width:150px;background:#fff;border:1px solid #D7CCC8;border-radius:8px;padding:.5rem;text-align:center;">
+          <p style="font-size:.85rem;font-weight:700;">冰釀冷萃</p>
+          <p style="font-size:.7rem;color:var(--g600);">12 小時低溫萃取</p>
+          <p style="font-size:.85rem;color:var(--green);font-weight:700;">$160</p>
+        </div>
+      </div>
+      <div style="position:absolute;bottom:.5rem;right:.5rem;">
+        <span class="callout arrow-left" style="position:relative;animation:pulse 1.5s infinite;">完整網站！</span>
+      </div>
+    </div>
+  </div>
+  <p class="fragment" data-order="0" style="margin-top:1rem;font-size:1.3rem;color:var(--blue);font-weight:700;">一段文字 → 一個完整網站</p>
+</div>
+
+<!-- ===== 10: Artifact 功能說明 ===== -->
+<div class="slide" data-index="10">
+  <h2>Claude Artifact 是什麼？</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0">
+      <div class="icon">👁️</div>
+      <h3>即時預覽</h3>
+      <p>右邊面板直接看到網頁效果，不用另開瀏覽器</p>
+    </div>
+    <div class="card fragment" data-order="1">
+      <div class="icon">📋</div>
+      <h3>一鍵複製</h3>
+      <p>點「Copy」拿到完整 HTML 原始碼</p>
+    </div>
+    <div class="card fragment" data-order="2">
+      <div class="icon">🔄</div>
+      <h3>持續修改</h3>
+      <p>跟 Claude 說「改配色」「加區塊」，即時更新</p>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="3">
+    <div class="label">免費帳號也能用</div>
+    <p>Claude.ai 免費版就有 Artifact 功能，每天有免費使用額度</p>
+  </div>
+</div>
+
+<!-- ===== 11: 練習 — 學員自己做 ===== -->
+<div class="slide" data-index="11">
+  <div class="exercise-banner">動手做 — 15 分鐘</div>
+  <h2>你的第一個 Vibe Coding 網站</h2>
+  <div class="qr-solo"><div id="qr-prompt"></div></div>
+  <p class="dim" style="margin-bottom:.5rem;">掃 QR 取得 Prompt 模板 → 選一個主題 → 貼到 Claude</p>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0"><div class="icon">👤</div><h3>個人簡介</h3><p>自我介紹 + 經歷 + 聯絡方式</p></div>
+    <div class="card fragment" data-order="1"><div class="icon">🛍️</div><h3>產品銷售</h3><p>商品展示 + 價格 + 購買方式</p></div>
+    <div class="card fragment" data-order="2"><div class="icon">🏢</div><h3>公司形象</h3><p>公司介紹 + 服務項目 + 團隊</p></div>
+    <div class="card fragment" data-order="3"><div class="icon">📅</div><h3>活動報名</h3><p>活動資訊 + 時間表 + 報名表單</p></div>
+  </div>
+</div>
+
+<!-- ===== 12: 複製原始碼教學 ===== -->
+<div class="slide" data-index="12">
+  <div class="exercise-banner">操作提示</div>
+  <h2>如何複製 Artifact 原始碼</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 claude.ai — Artifact</div>
+    </div>
+    <div class="mockup-body" style="padding:1.2rem;display:flex;gap:1rem;">
+      <div style="flex:1;background:var(--g50);border-radius:8px;padding:.8rem;font-size:.8rem;">
+        <p style="font-weight:700;margin-bottom:.5rem;">Artifact Preview</p>
+        <div style="background:#fff;border:1px solid var(--g200);border-radius:6px;height:80px;"></div>
+      </div>
+      <div style="flex:1;position:relative;">
+        <div style="display:flex;gap:.5rem;margin-bottom:.5rem;align-items:center;">
+          <span class="mock-btn outline" style="font-size:.8rem;padding:.2rem .6rem;position:relative;">
+            &lt;/&gt; Code
+            <span class="callout arrow-down" style="top:calc(100% + 8px);left:50%;transform:translateX(-50%);font-size:.75rem;">先切換到原始碼</span>
+          </span>
+          <span class="mock-btn outline" style="font-size:.8rem;padding:.2rem .6rem;">Preview</span>
+        </div>
+        <div class="fragment" data-order="0" style="background:#1E1E1E;border-radius:6px;padding:.5rem;font-family:'Fira Code',monospace;font-size:.7rem;color:#D4D4D4;height:60px;overflow:hidden;position:relative;">
+          &lt;!DOCTYPE html&gt;<br>
+          &lt;html&gt;...
+          <span class="mock-btn primary" style="position:absolute;top:.3rem;right:.3rem;font-size:.7rem;padding:.15rem .5rem;">
+            📋 Copy
+          </span>
+        </div>
+        <div class="fragment" data-order="1">
+          <span class="callout" style="position:relative;display:inline-block;margin-top:.5rem;font-size:.8rem;">然後 Copy 全部 HTML</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 13: 迭代修改 ===== -->
+<div class="slide" data-index="13">
+  <div class="exercise-banner">動手做 — 迭代</div>
+  <h2>Vibe Coding 的威力：迭代速度</h2>
+  <p class="dim">跟 Claude 說就好，一句話改一版</p>
+  <div style="text-align:left;max-width:700px;margin-top:1rem;">
+    <div class="fragment" data-order="0" style="padding:.8rem 1.2rem;margin:.5rem 0;background:var(--blue-lt);border-radius:12px;border-left:4px solid var(--blue);font-size:1.1rem;">
+      「把配色改成<strong>___色系</strong>」
+    </div>
+    <div class="fragment" data-order="1" style="padding:.8rem 1.2rem;margin:.5rem 0;background:var(--green-lt);border-radius:12px;border-left:4px solid var(--green);font-size:1.1rem;">
+      「加一個<strong>___區塊</strong>」
+    </div>
+    <div class="fragment" data-order="2" style="padding:.8rem 1.2rem;margin:.5rem 0;background:var(--purple-lt);border-radius:12px;border-left:4px solid var(--purple);font-size:1.1rem;">
+      「手機版要用<strong>漢堡選單</strong>」
+    </div>
+  </div>
+  <div class="info-box analogy fragment" data-order="3">
+    <div class="label">核心觀念</div>
+    <p>Vibe Coding 的威力不在第一版完美，在於<strong>迭代速度</strong>。<br>傳統改一版要半天，現在<strong>一句話就好</strong>。</p>
+  </div>
+</div>
+
+<!-- ===== 14: 迭代範例 ===== -->
+<div class="slide" data-index="14">
+  <h2>迭代範例：三輪對話</h2>
+  <div class="step-list" style="margin-top:.5rem;">
+    <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--blue);">v1</div><div class="step-content"><strong>「做一個個人履歷網站」</strong><p style="color:var(--green);">→ AI 產出基本版，有名字、經歷、技能</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--green);">v2</div><div class="step-content"><strong>「加一個作品集區塊，用卡片排列，每張卡片有圖片、標題、描述」</strong><p style="color:var(--green);">→ 出現漂亮的 gallery</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--gold);">v3</div><div class="step-content"><strong>「整體配色改成深藍+金色，加上滑入動畫效果」</strong><p style="color:var(--green);">→ 質感提升，像專業設計師做的</p></div></div>
+  </div>
+  <p class="fragment dim" data-order="3" style="margin-top:1rem;font-size:1.1rem;">三句話 = 三分鐘 = 三次升級</p>
+</div>
+
+<!-- ===== 15: 踩坑 — 手機測試 ===== -->
+<div class="slide" data-index="15">
+  <h2>踩坑提醒：永遠要測手機版</h2>
+  <div class="two-mockup">
+    <div class="mockup-browser" style="max-width:450px;">
+      <div class="mockup-bar"><div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div><div class="mockup-url" style="font-size:.7rem;">💻 桌面版 — 正常</div></div>
+      <div class="mockup-body" style="min-height:140px;padding:.8rem;text-align:center;">
+        <div style="display:flex;gap:.5rem;justify-content:center;font-size:.8rem;margin-bottom:.5rem;">
+          <span style="padding:.2rem .5rem;background:var(--g100);border-radius:4px;">首頁</span>
+          <span style="padding:.2rem .5rem;background:var(--g100);border-radius:4px;">關於</span>
+          <span style="padding:.2rem .5rem;background:var(--g100);border-radius:4px;">服務</span>
+          <span style="padding:.2rem .5rem;background:var(--g100);border-radius:4px;">聯絡</span>
+        </div>
+        <div style="background:var(--green-lt);border-radius:8px;padding:.5rem;font-size:.8rem;border:2px solid var(--green);">
+          <span class="green bold">✅ 排版正常</span>
+        </div>
+      </div>
+    </div>
+    <div class="mockup-browser fragment" data-order="0" style="max-width:250px;">
+      <div class="mockup-bar"><div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div><div class="mockup-url" style="font-size:.6rem;">📱 手機版</div></div>
+      <div class="mockup-body" style="min-height:140px;padding:.5rem;text-align:center;font-size:.7rem;">
+        <div style="display:flex;gap:.2rem;font-size:.55rem;overflow:hidden;white-space:nowrap;margin-bottom:.5rem;">
+          <span style="padding:.1rem .2rem;background:var(--g100);border-radius:2px;flex-shrink:0;">首頁</span>
+          <span style="padding:.1rem .2rem;background:var(--g100);border-radius:2px;flex-shrink:0;">關於</span>
+          <span style="padding:.1rem .2rem;background:var(--g100);border-radius:2px;flex-shrink:0;">服務項目介紹</span>
+          <span style="padding:.1rem .2rem;background:var(--g100);border-radius:2px;flex-shrink:0;">聯絡我們資訊</span>
+        </div>
+        <div style="background:var(--red-lt);border-radius:4px;padding:.3rem;font-size:.7rem;border:2px solid var(--red);">
+          <span class="red bold">❌ 選單溢出</span><br>
+          <span style="font-size:.6rem;">文字太小 / 按鈕擠在一起</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="info-box warning fragment" data-order="1">
+    <div class="label">必加的兩句話</div>
+    <p>1. 「手機版要<strong>自適應</strong> (RWD)」<br>2. 「導航要用<strong>漢堡選單</strong>，不要擠排」</p>
+  </div>
+</div>
+
+<!-- ===== 16: 手機測試技巧 ===== -->
+<div class="slide" data-index="16">
+  <h2>手機測試的三種方法</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0">
+      <div class="icon">📱</div>
+      <h3>用手機掃 QR</h3>
+      <p>部署後掃碼，直接看真實手機效果</p>
+    </div>
+    <div class="card fragment" data-order="1">
+      <div class="icon">💻</div>
+      <h3>瀏覽器 F12</h3>
+      <p>按 F12 → 手機圖示，模擬各種螢幕尺寸</p>
+    </div>
+    <div class="card fragment" data-order="2">
+      <div class="icon">🤖</div>
+      <h3>叫 AI 幫你測</h3>
+      <p>「請確認手機版排列不會溢出」</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 17: Level 1 的限制 ===== -->
+<div class="slide" data-index="17">
+  <h2>Level 1 的限制</h2>
+  <div style="margin-top:1.5rem;text-align:left;max-width:700px;">
+    <p class="fragment" data-order="0" style="font-size:1.3rem;padding:.6rem 0;">
+      「你的網站在哪？」<br>
+      <span class="dim" style="font-size:1.1rem;">→ 在 Claude 的對話裡。</span>
+    </p>
+    <p class="fragment" data-order="1" style="font-size:1.3rem;padding:.6rem 0;">
+      「別人看得到嗎？」<br>
+      <span class="dim" style="font-size:1.1rem;">→ 看不到。關掉視窗就沒了。</span>
+    </p>
+  </div>
+  <p class="fragment" data-order="2" style="margin-top:2rem;font-size:1.5rem;font-weight:900;color:var(--blue);">
+    如果想讓別人看到？<br>你需要一個地方<span class="green">放它</span>。
+  </p>
+</div>
+
+<!-- ===== 18: Level 1 小結 ===== -->
+<div class="slide" data-index="18">
+  <h2>Level 1 小結</h2>
+  <div class="flow" style="margin-top:2rem;font-size:1.1rem;">
+    <div class="flow-box" style="border-color:var(--blue);background:var(--blue-lt);">你描述需求</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--green);background:var(--green-lt);">Claude 產出 HTML</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--gold);background:var(--gold-lt);">即時預覽</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--red);background:var(--red-lt);">一句話迭代</div>
+  </div>
+  <div class="info-box success fragment" data-order="0" style="margin-top:1.5rem;">
+    <div class="label">你已經學會</div>
+    <p>用自然語言「說」出一個網站，並且快速迭代修改</p>
+  </div>
+  <p class="fragment dim" data-order="1" style="margin-top:1rem;font-size:1.2rem;">接下來：讓別人也能看到 →</p>
+</div>
+
+<!-- ===== 19: BREAK ===== -->
+<div class="slide break-slide" data-index="19">
+  <p style="font-size:5rem;">☕</p>
+  <h2 style="margin-top:1rem;color:var(--g800);">休息 10 分鐘</h2>
+  <p class="dim" style="margin-top:1rem;">下一段：Level 2 — GAS 部署上線</p>
+</div>
+
+<!-- ===== SECTION: Level 2 ===== -->
+<div class="slide section-title" data-index="20">
+  <p class="subtitle">Level 2</p>
+  <h1>GAS 部署上線</h1>
+  <p class="subtitle" style="margin-top:.5rem;">讓全世界看到你的網站</p>
+</div>
+
+<!-- ===== 21: GAS 快速入門 ===== -->
+<div class="slide" data-index="21">
+  <h2>GAS 是什麼？（30 秒版）</h2>
+  <div class="info-box analogy">
+    <div class="label">一句話解釋</div>
+    <p><strong>GAS</strong> = Google Apps Script = Google 免費的雲端程式執行環境</p>
+  </div>
+  <div class="flow fragment" data-order="0" style="margin-top:1.5rem;font-size:1.1rem;">
+    <div class="flow-box">你的程式碼</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--blue);background:var(--blue-lt);">Google 伺服器</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--green);background:var(--green-lt);">一個網址</div>
+  </div>
+  <p class="fragment" data-order="1" style="margin-top:1.5rem;font-size:1.2rem;">
+    你的程式放在 <span class="blue bold">Google 的電腦上</span><br>
+    Google 給你一個網址<br>
+    <span class="green bold">任何人都能開</span>
+  </p>
+</div>
+
+<!-- ===== 22: GAS 需要什麼 ===== -->
+<div class="slide" data-index="22">
+  <h2>你只需要</h2>
+  <div class="card-grid" style="margin-top:1.5rem;">
+    <div class="card fragment" data-order="0">
+      <div class="icon">📧</div>
+      <h3>Google 帳號</h3>
+      <p>你已經有了</p>
+    </div>
+    <div class="card fragment" data-order="1">
+      <div class="icon">📄</div>
+      <h3>Claude 產出的 HTML</h3>
+      <p>剛剛做好了</p>
+    </div>
+    <div class="card fragment" data-order="2">
+      <div class="icon">🤖</div>
+      <h3>ChatGPT 幫你轉換</h3>
+      <p>把 HTML 包成 GAS 格式</p>
+    </div>
+  </div>
+  <p class="fragment dim" data-order="3" style="margin-top:1.5rem;font-size:1.1rem;">不用學 GAS 語法，ChatGPT 幫你寫</p>
+</div>
+
+<!-- ===== 23: Step 1 — 複製 HTML ===== -->
+<div class="slide" data-index="23">
+  <div class="exercise-banner">Step 1 — 複製 HTML</div>
+  <h2>從 Claude Artifact 複製完整 HTML 原始碼</h2>
+  <div class="qr-solo"><div id="qr-gas"></div></div>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 claude.ai — Artifact</div>
+    </div>
+    <div class="mockup-body" style="padding:1.2rem;">
+      <div style="display:flex;gap:.5rem;margin-bottom:.8rem;">
+        <span class="mock-btn outline" style="font-size:.8rem;padding:.2rem .6rem;background:var(--blue-lt);border-color:var(--blue);color:var(--blue);">&lt;/&gt; Code</span>
+        <span class="mock-btn outline" style="font-size:.8rem;padding:.2rem .6rem;">Preview</span>
+      </div>
+      <div style="background:#1E1E1E;border-radius:8px;padding:.8rem;font-family:'Fira Code',monospace;font-size:.75rem;color:#D4D4D4;position:relative;">
+        <span style="color:#569CD6;">&lt;!DOCTYPE html&gt;</span><br>
+        <span style="color:#569CD6;">&lt;html&gt;</span><br>
+        <span style="color:#569CD6;">&lt;head&gt;</span>...<span style="color:#569CD6;">&lt;/head&gt;</span><br>
+        <span style="color:#569CD6;">&lt;body&gt;</span>...<span style="color:#569CD6;">&lt;/body&gt;</span><br>
+        <span style="color:#569CD6;">&lt;/html&gt;</span>
+        <span class="mock-btn primary" style="position:absolute;top:.5rem;right:.5rem;font-size:.75rem;padding:.2rem .5rem;">
+          📋 Copy
+          <span class="callout arrow-left" style="left:calc(100% + 8px);top:50%;transform:translateY(-50%);font-size:.75rem;">複製全部</span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 24: Step 2 — 問 ChatGPT 轉換 ===== -->
+<div class="slide" data-index="24">
+  <div class="exercise-banner">Step 2 — 問 ChatGPT</div>
+  <h2>貼到 ChatGPT，請它轉成 GAS 格式</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 chatgpt.com</div>
+    </div>
+    <div class="mockup-body" style="padding:1.2rem;">
+      <div style="background:var(--blue-lt);border-radius:12px;padding:1rem;font-size:.85rem;line-height:1.7;">
+        <strong>你：</strong>幫我寫一個 Google Apps Script。<br>
+        用 doGet() 回傳以下 HTML 網頁。<br>
+        把整段 HTML 放在 HtmlService.createHtmlOutput() 裡。<br>
+        <br>
+        <span style="color:var(--g400);">[貼上你從 Claude 複製的 HTML]</span>
+      </div>
+      <div class="fragment" data-order="0" style="margin-top:1rem;background:var(--g50);border-radius:12px;padding:1rem;font-size:.85rem;line-height:1.7;">
+        <strong>ChatGPT：</strong>好的！<br>
+        <div style="background:#1E1E1E;color:#D4D4D4;border-radius:8px;padding:.6rem;margin-top:.5rem;font-family:'Fira Code',monospace;font-size:.75rem;">
+          <span style="color:#569CD6;">function</span> <span style="color:#DCDCAA;">doGet</span>() {<br>
+          &nbsp;&nbsp;<span style="color:#569CD6;">var</span> html = <span style="color:#CE9178;">`&lt;!DOCTYPE...`</span>;<br>
+          &nbsp;&nbsp;<span style="color:#569CD6;">return</span> HtmlService<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;.createHtmlOutput(html);<br>
+          }
+          <span class="callout arrow-left" style="right:-70px;top:10px;font-size:.75rem;">複製這段</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 25: Step 3 — 建立 GAS 專案 ===== -->
+<div class="slide" data-index="25">
+  <div class="exercise-banner">Step 3 — 建立 GAS 專案</div>
+  <h2>打開 script.google.com → 新專案</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 script.google.com</div>
+    </div>
+    <div class="mockup-body" style="text-align:center;padding:2rem;">
+      <p style="font-size:1.5rem;font-weight:900;margin-bottom:1rem;">Apps Script</p>
+      <div style="display:flex;justify-content:center;gap:1rem;">
+        <div class="mock-btn primary" style="padding:.6rem 2rem;font-size:1rem;position:relative;">
+          + 新專案
+          <span class="callout arrow-down" style="top:calc(100% + 10px);left:50%;transform:translateX(-50%);">點這裡</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="0">
+    <div class="label">小提醒</div>
+    <p>直接在瀏覽器網址列打 <strong>script.google.com</strong> 就能到</p>
+  </div>
+</div>
+
+<!-- ===== 26: Step 4 — 貼上 + 存檔 ===== -->
+<div class="slide" data-index="26">
+  <div class="exercise-banner">Step 4 — 貼上 + 存檔</div>
+  <h2>清空預設 → 貼上 ChatGPT 的程式碼 → 存檔</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 script.google.com/home/projects/...</div>
+    </div>
+    <div class="mockup-body" style="display:flex;padding:0;min-height:180px;">
+      <div class="mock-sidebar" style="min-width:130px;">
+        <p style="font-weight:700;margin-bottom:.5rem;font-size:.8rem;">檔案</p>
+        <div class="mock-sidebar-item active">程式碼.gs</div>
+      </div>
+      <div style="flex:1;background:#1E1E1E;padding:1rem;font-family:'Fira Code',monospace;font-size:.75rem;color:#D4D4D4;line-height:1.8;position:relative;">
+        <div style="position:absolute;top:.5rem;right:.5rem;display:flex;gap:.5rem;">
+          <div class="mock-btn" style="background:var(--g600);color:#fff;padding:.3rem .8rem;font-size:.75rem;">💾 Ctrl+S</div>
+        </div>
+        <span style="color:#569CD6;">function</span> <span style="color:#DCDCAA;">doGet</span>() {<br>
+        &nbsp;&nbsp;<span style="color:#569CD6;">var</span> html = <span style="color:#CE9178;">`</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#CE9178;">&lt;!DOCTYPE html&gt;...</span><br>
+        &nbsp;&nbsp;<span style="color:#CE9178;">`</span>;<br>
+        &nbsp;&nbsp;<span style="color:#569CD6;">return</span> HtmlService<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;.createHtmlOutput(html);<br>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 27: Step 5 — 部署 ===== -->
+<div class="slide" data-index="27">
+  <div class="exercise-banner">Step 5 — 部署</div>
+  <h2>部署 → 新部署 → 網頁應用程式</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 script.google.com — 部署</div>
+    </div>
+    <div class="mockup-body" style="padding:1.5rem;">
+      <div style="display:flex;gap:.8rem;align-items:center;margin-bottom:1rem;">
+        <span class="mock-btn primary" style="position:relative;">
+          部署 ▾
+          <span class="callout arrow-down" style="top:calc(100% + 8px);left:50%;transform:translateX(-50%);font-size:.8rem;">點這裡</span>
+        </span>
+      </div>
+      <div class="fragment" data-order="0" style="background:var(--white);border:1px solid var(--g200);border-radius:8px;padding:1rem;box-shadow:0 4px 12px rgba(0,0,0,.08);">
+        <p style="font-size:1rem;font-weight:700;margin-bottom:.8rem;">新部署</p>
+        <div style="display:flex;gap:.8rem;align-items:center;margin-bottom:.5rem;">
+          <span style="font-size:.9rem;">類型：</span>
+          <span class="mock-btn outline" style="font-size:.85rem;border-color:var(--blue);color:var(--blue);">網頁應用程式</span>
+        </div>
+        <div style="display:flex;gap:.8rem;align-items:center;margin-bottom:.5rem;">
+          <span style="font-size:.9rem;">存取權：</span>
+          <span class="mock-btn outline" style="font-size:.85rem;position:relative;">
+            所有人
+            <span class="callout arrow-left" style="left:calc(100% + 8px);top:50%;transform:translateY(-50%);font-size:.75rem;">選「所有人」</span>
+          </span>
+        </div>
+        <div class="mock-btn green" style="margin-top:.5rem;">部署</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 28: Step 6 — 授權 ===== -->
+<div class="slide" data-index="28">
+  <div class="exercise-banner">Step 6 — 授權</div>
+  <h2>Google 會要求授權（這是正常的）</h2>
+  <div class="mockup-browser" style="max-width:600px;">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 accounts.google.com</div>
+    </div>
+    <div class="mockup-body" style="text-align:center;padding:1.5rem;">
+      <p style="font-size:1.1rem;font-weight:700;margin-bottom:1rem;">這個應用程式未經驗證</p>
+      <p style="font-size:.9rem;color:var(--g600);margin-bottom:1rem;">這是你自己的程式，放心按</p>
+      <div style="display:flex;flex-direction:column;gap:.5rem;align-items:center;">
+        <span class="mock-btn outline" style="font-size:.9rem;position:relative;">
+          進階 → 前往（不安全）
+          <span class="callout arrow-left" style="left:calc(100% + 10px);top:50%;transform:translateY(-50%);font-size:.75rem;">按這裡</span>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="0">
+    <div class="label">為什麼會出現警告？</div>
+    <p>因為這是你「自己寫的」程式，不是 Google 審核過的。<br>你自己的程式 → 你自己授權 → 完全安全。</p>
+  </div>
+</div>
+
+<!-- ===== 29: 結果 ===== -->
+<div class="slide" data-index="29">
+  <div class="exercise-banner" style="background:var(--green);">完成！</div>
+  <h2>你的網站上線了！</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url" style="font-size:.7rem;">🔒 script.google.com/macros/s/AKfycbw.../exec</div>
+    </div>
+    <div class="mockup-body" style="padding:0;overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#3E2723,#5D4037);padding:.8rem;color:#FFF8E1;text-align:center;">
+        <p style="font-size:1.2rem;font-weight:900;">Artisan Coffee House</p>
+        <p style="font-size:.75rem;opacity:.8;">手工烘焙 / 精品莊園豆</p>
+      </div>
+      <div style="padding:.5rem;display:flex;gap:.3rem;justify-content:center;background:#FFF8E1;">
+        <div style="flex:1;max-width:120px;background:#fff;border:1px solid #D7CCC8;border-radius:4px;padding:.3rem;text-align:center;font-size:.7rem;">
+          <strong>手沖</strong> $180
+        </div>
+        <div style="flex:1;max-width:120px;background:#fff;border:1px solid #D7CCC8;border-radius:4px;padding:.3rem;text-align:center;font-size:.7rem;">
+          <strong>拿鐵</strong> $150
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="two-col fragment" data-order="0" style="margin-top:1rem;max-width:700px;">
+    <div class="col" style="text-align:center;">
+      <p style="font-size:.9rem;font-weight:700;color:var(--g400);">Before — Claude</p>
+      <p style="font-size:1rem;">只有你看得到</p>
+    </div>
+    <div class="col" style="text-align:center;">
+      <p style="font-size:.9rem;font-weight:700;color:var(--green);">After — GAS</p>
+      <p style="font-size:1rem;color:var(--green);font-weight:700;">全世界看得到！</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 30: GAS 網址分享 ===== -->
+<div class="slide" data-index="30">
+  <h2>你的網址長這樣</h2>
+  <div class="code-block" style="text-align:center;font-size:1rem;word-break:break-all;">
+    https://script.google.com/macros/s/<span class="str">AKfycbw...</span>/exec
+  </div>
+  <div style="margin-top:1.5rem;text-align:left;max-width:600px;">
+    <p class="fragment" data-order="0" style="font-size:1.1rem;padding:.3rem 0;">✅ 永久有效</p>
+    <p class="fragment" data-order="1" style="font-size:1.1rem;padding:.3rem 0;">✅ 完全免費</p>
+    <p class="fragment" data-order="2" style="font-size:1.1rem;padding:.3rem 0;">✅ 任何人都能開</p>
+    <p class="fragment" data-order="3" style="font-size:1.1rem;padding:.3rem 0;color:var(--gold);">⚠️ 網址比較醜（但功能完整）</p>
+  </div>
+</div>
+
+<!-- ===== 31: 互動 ===== -->
+<div class="slide" data-index="31">
+  <h2>互動時間：全班開對方的網站！</h2>
+  <div style="margin-top:1.5rem;text-align:left;max-width:700px;">
+    <p class="fragment" data-order="0" style="font-size:1.3rem;padding:.6rem 0;">1. 把你的 GAS 網址<span class="blue bold">貼到課堂群組</span></p>
+    <p class="fragment" data-order="1" style="font-size:1.3rem;padding:.6rem 0;">2. 用<span class="green bold">手機</span>打開旁邊同學的網站</p>
+    <p class="fragment" data-order="2" style="font-size:1.3rem;padding:.6rem 0;">3. 看看手機版<span class="red bold">有沒有跑版</span></p>
+  </div>
+  <div class="info-box success fragment" data-order="3">
+    <div class="label">恭喜！</div>
+    <p>你做的東西，別人<strong>真的看到了</strong>。</p>
+  </div>
+</div>
+
+<!-- ===== 32: Level 2 小結 ===== -->
+<div class="slide" data-index="32">
+  <h2>Level 2 小結</h2>
+  <div class="flow" style="margin-top:1.5rem;">
+    <div class="flow-box">Claude 產 HTML</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">ChatGPT 包成 GAS</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">貼到 Apps Script</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--green);background:var(--green-lt);">部署上線</div>
+  </div>
+  <p class="fragment dim" data-order="0" style="margin-top:1.5rem;font-size:1.1rem;">想要更好看的網址？更多功能？</p>
+  <p class="fragment" data-order="1" style="font-size:1.4rem;font-weight:900;color:var(--purple);">Level 3 → GitHub Pages</p>
+</div>
+
+<!-- ===== SECTION: Level 3 ===== -->
+<div class="slide section-title" data-index="33">
+  <p class="subtitle">Level 3</p>
+  <h1>GitHub Pages</h1>
+  <p class="subtitle" style="margin-top:.5rem;">好看的網址 + 版本控制 + 多頁面</p>
+</div>
+
+<!-- ===== 34: 為什麼 GitHub Pages ===== -->
+<div class="slide" data-index="34">
+  <h2>GAS vs GitHub Pages</h2>
+  <table class="compare-table">
+    <tr><th></th><th>GAS</th><th style="color:var(--gold);">GitHub Pages</th></tr>
+    <tr><td><strong>網址</strong></td><td class="dim">script.google.com/macros/s/AKf...</td><td class="green bold">username.github.io</td></tr>
+    <tr><td><strong>速度</strong></td><td>普通</td><td class="green bold">很快（CDN）</td></tr>
+    <tr><td><strong>多頁面</strong></td><td class="red">不方便</td><td class="green bold">隨便加</td></tr>
+    <tr><td><strong>綁自己網域</strong></td><td class="red">不行</td><td class="green bold">可以</td></tr>
+    <tr><td><strong>版本控制</strong></td><td class="red">沒有</td><td class="green bold">Git 完整記錄</td></tr>
+    <tr><td><strong>費用</strong></td><td class="green">免費</td><td class="green bold">免費</td></tr>
+  </table>
+</div>
+
+<!-- ===== 35: GitHub 是什麼 ===== -->
+<div class="slide" data-index="35">
+  <h2>GitHub 是什麼？</h2>
+  <div class="info-box analogy">
+    <div class="label">比喻</div>
+    <p><strong>GitHub</strong> = 程式碼的 Google Drive<br>
+    <strong>GitHub Pages</strong> = 把裡面的 HTML 自動變成網站</p>
+  </div>
+  <div class="card-grid fragment" data-order="0" style="margin-top:1rem;">
+    <div class="card">
+      <div class="icon">📁</div>
+      <h3>Repository</h3>
+      <p>= 資料夾<br>放你的檔案</p>
+    </div>
+    <div class="card">
+      <div class="icon">🌐</div>
+      <h3>GitHub Pages</h3>
+      <p>= 自動把 HTML 變成網站</p>
+    </div>
+    <div class="card">
+      <div class="icon">🔄</div>
+      <h3>版本控制</h3>
+      <p>= 每次修改都有記錄，可以還原</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 36: Step 1 — 註冊 GitHub ===== -->
+<div class="slide" data-index="36">
+  <div class="exercise-banner">Step 1 — 註冊 GitHub</div>
+  <h2>打開 github.com → Sign Up</h2>
+  <div class="qr-solo"><div id="qr-github"></div></div>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 github.com</div>
+    </div>
+    <div class="mockup-body" style="text-align:center;padding:2rem;">
+      <p style="font-size:2rem;font-weight:900;margin-bottom:.5rem;">GitHub</p>
+      <p style="font-size:.9rem;color:var(--g600);margin-bottom:1.5rem;">Where the world builds software</p>
+      <div class="mock-btn primary" style="padding:.6rem 2rem;font-size:1.1rem;position:relative;">
+        Sign up for free
+        <span class="callout arrow-left" style="left:calc(100% + 12px);top:50%;transform:translateY(-50%);">點這裡</span>
+      </div>
+      <p style="font-size:.85rem;color:var(--g400);margin-top:1rem;">已有帳號？直接 Sign in</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 37: Step 2 — 建立 Repository ===== -->
+<div class="slide" data-index="37">
+  <div class="exercise-banner">Step 2 — 建立 Repository</div>
+  <h2>New Repository → 輸入名稱</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 github.com/new</div>
+    </div>
+    <div class="mockup-body" style="padding:1.5rem;">
+      <p style="font-size:1.1rem;font-weight:700;margin-bottom:1rem;">Create a new repository</p>
+      <div style="margin-bottom:.8rem;">
+        <p style="font-size:.85rem;color:var(--g600);margin-bottom:.3rem;">Repository name *</p>
+        <div class="mock-input" style="min-width:300px;position:relative;font-weight:700;color:var(--blue);">
+          你的帳號.github.io
+          <span class="callout arrow-left" style="left:calc(100% + 10px);top:50%;transform:translateY(-50%);font-size:.75rem;">輸入這個名稱</span>
+        </div>
+      </div>
+      <div style="margin-bottom:.8rem;">
+        <label style="font-size:.85rem;"><input type="radio" checked style="margin-right:.3rem;">Public</label>
+      </div>
+      <div class="mock-btn green" style="margin-top:.5rem;">Create repository</div>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="0">
+    <div class="label">重要</div>
+    <p>Repository 名稱必須是 <strong>你的帳號.github.io</strong>，這樣 GitHub 才會自動啟用 Pages</p>
+  </div>
+</div>
+
+<!-- ===== 38: Step 3 — 上傳檔案 ===== -->
+<div class="slide" data-index="38">
+  <div class="exercise-banner">Step 3 — 上傳檔案</div>
+  <h2>Upload files → 拖入 index.html</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 github.com/你的帳號/你的帳號.github.io</div>
+    </div>
+    <div class="mockup-body" style="padding:1.5rem;text-align:center;">
+      <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:1rem;">
+        <span class="mock-btn primary" style="font-size:.85rem;position:relative;">
+          Upload files
+          <span class="callout arrow-down" style="top:calc(100% + 8px);left:50%;transform:translateX(-50%);font-size:.75rem;">按這裡</span>
+        </span>
+      </div>
+      <div class="fragment" data-order="0" style="border:3px dashed var(--g200);border-radius:16px;padding:2rem;">
+        <p style="font-size:1.5rem;">📄</p>
+        <p style="color:var(--g600);font-size:.9rem;">把 <strong>index.html</strong> 拖進來</p>
+        <p style="color:var(--g400);font-size:.8rem;margin-top:.5rem;">（從 Claude Artifact 下載的 HTML 檔案）</p>
+      </div>
+      <div class="fragment" data-order="1" style="margin-top:1rem;">
+        <div class="mock-btn green" style="font-size:1rem;padding:.5rem 2rem;">Commit changes</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 39: 儲存 HTML 為檔案 ===== -->
+<div class="slide" data-index="39">
+  <h2>如何把 Claude 的 HTML 存成檔案？</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>在 Claude Artifact 點「Download」</strong><p>有些版本有下載按鈕</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num">2</div><div class="step-content"><strong>或手動：複製原始碼 → 記事本貼上 → 另存為 index.html</strong><p>注意檔名一定要叫 <strong>index.html</strong></p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--green);">3</div><div class="step-content"><strong>確認編碼是 UTF-8</strong><p>中文才不會亂碼</p></div></div>
+  </div>
+  <div class="info-box warning fragment" data-order="3">
+    <div class="label">常見錯誤</div>
+    <p>檔案叫 <strong style="color:var(--red);">index.html.txt</strong> → 不會動<br>
+    檔案叫 <strong style="color:var(--green);">index.html</strong> → 正確！</p>
+  </div>
+</div>
+
+<!-- ===== 40: Step 4 — 啟用 Pages ===== -->
+<div class="slide" data-index="40">
+  <div class="exercise-banner">Step 4 — 啟用 Pages</div>
+  <h2>Settings → Pages → Branch: main → Save</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 github.com/.../settings/pages</div>
+    </div>
+    <div class="mockup-body" style="display:flex;padding:0;min-height:180px;">
+      <div class="mock-sidebar" style="min-width:130px;">
+        <div class="mock-sidebar-item">General</div>
+        <div class="mock-sidebar-item">Collaborators</div>
+        <div class="mock-sidebar-item active" style="position:relative;">
+          Pages
+          <span class="callout arrow-right" style="left:calc(100% + 8px);top:50%;transform:translateY(-50%);font-size:.7rem;">在這裡</span>
+        </div>
+        <div class="mock-sidebar-item">Environments</div>
+      </div>
+      <div style="flex:1;padding:1.2rem;">
+        <p style="font-size:1rem;font-weight:700;margin-bottom:1rem;">GitHub Pages</p>
+        <div style="display:flex;gap:.8rem;align-items:center;margin-bottom:.8rem;">
+          <span style="font-size:.9rem;">Branch:</span>
+          <span class="mock-btn outline" style="font-size:.85rem;position:relative;">
+            main
+            <span class="callout arrow-down" style="top:calc(100% + 6px);left:50%;transform:translateX(-50%);font-size:.7rem;">選 main</span>
+          </span>
+          <span class="mock-btn green" style="font-size:.85rem;">Save</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 41: 結果 ===== -->
+<div class="slide" data-index="41">
+  <div class="exercise-banner" style="background:var(--green);">完成！</div>
+  <h2>你的 GitHub Pages 網站</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url" style="color:var(--green);font-weight:700;">🔒 username.github.io</div>
+    </div>
+    <div class="mockup-body" style="padding:0;overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#3E2723,#5D4037);padding:1rem;color:#FFF8E1;text-align:center;">
+        <p style="font-size:1.3rem;font-weight:900;">Artisan Coffee House</p>
+      </div>
+      <div style="padding:.5rem;display:flex;gap:.3rem;justify-content:center;background:#FFF8E1;">
+        <div style="flex:1;max-width:130px;background:#fff;border:1px solid #D7CCC8;border-radius:4px;padding:.3rem;text-align:center;font-size:.7rem;">
+          <strong>手沖</strong> $180
+        </div>
+        <div style="flex:1;max-width:130px;background:#fff;border:1px solid #D7CCC8;border-radius:4px;padding:.3rem;text-align:center;font-size:.7rem;">
+          <strong>拿鐵</strong> $150
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="code-block fragment" data-order="0" style="text-align:center;font-size:1.3rem;padding:1rem;margin-top:1rem;">
+    https://<span class="green bold">username</span>.github.io
+  </div>
+  <p class="fragment" data-order="1" style="margin-top:.5rem;font-size:1.2rem;color:var(--green);font-weight:700;">好看的網址，免費，永久！</p>
+</div>
+
+<!-- ===== 42: 等待部署 ===== -->
+<div class="slide" data-index="42">
+  <h2>部署需要 1-2 分鐘</h2>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--gold);">⏳</div><div class="step-content"><strong>第一次可能要等 1-2 分鐘</strong><p>GitHub 在後台把你的檔案部署到全球 CDN</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--green);">✅</div><div class="step-content"><strong>看到綠色勾勾就好了</strong><p>Settings → Pages 頁面會顯示網址</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--blue);">🔄</div><div class="step-content"><strong>之後每次更新也是上傳就好</strong><p>修改檔案 → 重新上傳 → 自動更新</p></div></div>
+  </div>
+</div>
+
+<!-- ===== 43: 三級比較表 ===== -->
+<div class="slide" data-index="43">
+  <h2>三種方式完整比較</h2>
+  <table class="compare-table">
+    <tr><th></th><th>Level 1<br>Claude</th><th>Level 2<br>GAS</th><th style="color:var(--gold);">Level 3<br>GitHub Pages</th></tr>
+    <tr><td><strong>誰看得到</strong></td><td class="red">只有你</td><td class="green">全世界</td><td class="green bold">全世界</td></tr>
+    <tr><td><strong>網址</strong></td><td class="dim">沒有</td><td class="dim">很長很醜</td><td class="green bold">xxx.github.io</td></tr>
+    <tr><td><strong>費用</strong></td><td class="green">免費</td><td class="green">免費</td><td class="green">免費</td></tr>
+    <tr><td><strong>多頁面</strong></td><td class="red">❌</td><td class="red">❌</td><td class="green bold">✅</td></tr>
+    <tr><td><strong>版本控制</strong></td><td class="red">❌</td><td class="red">❌</td><td class="green bold">✅</td></tr>
+    <tr><td><strong>綁自己網域</strong></td><td class="red">❌</td><td class="red">❌</td><td class="green bold">✅</td></tr>
+    <tr><td><strong>難度</strong></td><td class="green">最簡單</td><td>中等</td><td>稍高</td></tr>
+  </table>
+</div>
+
+<!-- ===== 44: BREAK ===== -->
+<div class="slide break-slide" data-index="44">
+  <p style="font-size:5rem;">☕</p>
+  <h2 style="margin-top:1rem;color:var(--g800);">休息 10 分鐘</h2>
+  <p class="dim" style="margin-top:1rem;">最後：自由創作 + 工具推薦</p>
+</div>
+
+<!-- ===== SECTION: 自由創作 ===== -->
+<div class="slide section-title" data-index="45">
+  <p class="subtitle">Final Level</p>
+  <h1>自由創作</h1>
+  <p class="subtitle" style="margin-top:.5rem;">選主題、選部署方式、GO</p>
+</div>
+
+<!-- ===== 46: 自由創作說明 ===== -->
+<div class="slide" data-index="46">
+  <div class="exercise-banner">自由創作 — 15 分鐘</div>
+  <h2>選你的主題，選你的部署方式</h2>
+  <div class="qr-solo"><div id="qr-free"></div></div>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0"><div class="icon">📋</div><h3>個人履歷</h3><p>自我介紹 + 經歷</p></div>
+    <div class="card fragment" data-order="1"><div class="icon">🎨</div><h3>作品集</h3><p>展示你的作品</p></div>
+    <div class="card fragment" data-order="2"><div class="icon">📝</div><h3>課程報名</h3><p>報名表單 + 資訊</p></div>
+    <div class="card fragment" data-order="3"><div class="icon">🏢</div><h3>公司簡介</h3><p>服務 + 團隊介紹</p></div>
+    <div class="card fragment" data-order="4"><div class="icon">🛒</div><h3>產品頁</h3><p>商品展示 + 價格</p></div>
+    <div class="card fragment" data-order="5"><div class="icon">🎉</div><h3>活動頁</h3><p>時間表 + 報名</p></div>
+  </div>
+  <p class="fragment dim" data-order="6" style="margin-top:.8rem;">講師會走動協助，大膽開口問！</p>
+</div>
+
+<!-- ===== 47: 免費工具 — Google Antigravity ===== -->
+<div class="slide" data-index="47">
+  <h2>免費工具推薦 (1/3)</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 idx.google.com (Antigravity)</div>
+    </div>
+    <div class="mockup-body" style="display:flex;padding:0;min-height:160px;">
+      <div class="mock-sidebar" style="min-width:120px;">
+        <p style="font-weight:700;font-size:.8rem;margin-bottom:.5rem;">Explorer</p>
+        <div class="mock-sidebar-item active">index.html</div>
+        <div class="mock-sidebar-item">style.css</div>
+        <div class="mock-sidebar-item">script.js</div>
+      </div>
+      <div style="flex:1;padding:1rem;">
+        <p style="font-size:.8rem;color:var(--g400);margin-bottom:.5rem;">Gemini 2.5 Pro 內建</p>
+        <div style="background:#1E1E1E;border-radius:8px;padding:.5rem;font-family:'Fira Code',monospace;font-size:.7rem;color:#D4D4D4;height:60px;">
+          &lt;div class="hero"&gt;<br>
+          &nbsp;&nbsp;&lt;h1&gt;My Site&lt;/h1&gt;<br>
+          ...
+        </div>
+        <div style="margin-top:.5rem;display:flex;gap:.3rem;">
+          <span class="mock-btn primary" style="font-size:.7rem;padding:.2rem .5rem;">Preview</span>
+          <span class="mock-btn outline" style="font-size:.7rem;padding:.2rem .5rem;">Deploy</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="info-box success" style="margin-top:.8rem;">
+    <div class="label">Google Project IDX (Antigravity)</div>
+    <p>免費雲端 IDE，內建 Gemini 2.5 Pro。<br>不用裝任何東西，瀏覽器開就能寫 + 預覽 + 部署。</p>
+  </div>
+</div>
+
+<!-- ===== 48: 免費工具 — Amazon Q + Claude ===== -->
+<div class="slide" data-index="48">
+  <h2>免費工具推薦 (2/3)</h2>
+  <div class="two-col">
+    <div class="col">
+      <div style="background:var(--blue-lt);border-radius:12px;padding:1.2rem;border:2px solid var(--blue);">
+        <h3 style="color:var(--blue);">Amazon Q Developer</h3>
+        <p style="font-size:.95rem;margin-top:.5rem;">VS Code 免費外掛<br>每月 50 次 Agent 使用<br>內建 AI 寫程式 + 除錯</p>
+        <p style="font-size:.85rem;color:var(--g600);margin-top:.5rem;">適合：想學更多的人</p>
+      </div>
+    </div>
+    <div class="col fragment" data-order="0">
+      <div style="background:var(--purple-lt);border-radius:12px;padding:1.2rem;border:2px solid var(--purple);">
+        <h3 style="color:var(--purple);">Claude.ai Artifacts</h3>
+        <p style="font-size:.95rem;margin-top:.5rem;">免費版就有<br>即時預覽 HTML/CSS/JS<br>一鍵複製原始碼</p>
+        <p style="font-size:.85rem;color:var(--g600);margin-top:.5rem;">適合：今天的 Vibe Coding</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 49: 免費工具 — 更多 AI Coding ===== -->
+<div class="slide" data-index="49">
+  <h2>免費工具推薦 (3/3)</h2>
+  <table class="compare-table">
+    <tr><th>工具</th><th>免費額度</th><th>特色</th></tr>
+    <tr><td><strong style="color:var(--purple);">Claude.ai</strong></td><td>免費版每天可用</td><td>Artifact 即時預覽</td></tr>
+    <tr><td><strong style="color:var(--blue);">Google IDX</strong></td><td>完全免費</td><td>Gemini 2.5 Pro 內建</td></tr>
+    <tr><td><strong style="color:var(--gold);">Amazon Q</strong></td><td>50 次/月 Agent</td><td>VS Code 外掛</td></tr>
+    <tr><td><strong style="color:var(--green);">ChatGPT</strong></td><td>免費版每天可用</td><td>Canvas 預覽功能</td></tr>
+    <tr><td><strong>Bolt.new</strong></td><td>免費試用</td><td>全端即時部署</td></tr>
+    <tr><td><strong>Lovable</strong></td><td>免費試用</td><td>用對話做 App</td></tr>
+  </table>
+</div>
+
+<!-- ===== 50: GitHub 星星專案 ===== -->
+<div class="slide" data-index="50">
+  <h2>免費模板：拿來改就好</h2>
+  <table class="compare-table">
+    <tr><th>專案</th><th>GitHub Stars</th><th>用途</th></tr>
+    <tr><td><strong>html5-boilerplate</strong></td><td class="gold bold">56k ⭐</td><td>網站起手式，最佳實踐</td></tr>
+    <tr><td><strong>startbootstrap-resume</strong></td><td class="gold bold">2k ⭐</td><td>個人履歷模板</td></tr>
+    <tr><td><strong>developer-portfolio</strong></td><td class="gold bold">4k ⭐</td><td>開發者作品集</td></tr>
+    <tr><td><strong>hugo-PaperMod</strong></td><td class="gold bold">9k ⭐</td><td>部落格模板</td></tr>
+  </table>
+  <div class="info-box tip fragment" data-order="0">
+    <div class="label">進階玩法</div>
+    <p>Fork 模板 → 跟 AI 說「幫我改成___風格」→ 上傳 → 完成</p>
+  </div>
+</div>
+
+<!-- ===== 51: 免費部署平台 ===== -->
+<div class="slide" data-index="51">
+  <h2>免費部署平台比較</h2>
+  <table class="compare-table">
+    <tr><th>平台</th><th>免費額度</th><th>速度</th><th>特色</th></tr>
+    <tr><td><strong style="color:var(--g900);">GitHub Pages</strong></td><td class="green">無限靜態</td><td>快</td><td>今天教的</td></tr>
+    <tr><td><strong style="color:var(--gold);">Cloudflare Pages</strong></td><td class="green">無限靜態</td><td class="green bold">最快</td><td>全球 CDN</td></tr>
+    <tr><td><strong>Vercel</strong></td><td>100GB/月</td><td>快</td><td>前端框架首選</td></tr>
+    <tr><td><strong>Netlify</strong></td><td>100GB/月</td><td>快</td><td>簡單好用</td></tr>
+  </table>
+  <p class="fragment dim" data-order="0" style="margin-top:1rem;">全部免費，靜態網站根本不用花錢</p>
+</div>
+
+<!-- ===== 52: Recap ===== -->
+<div class="slide" data-index="52">
+  <h2>今天你學會了</h2>
+  <div style="text-align:left;max-width:720px;margin-top:.5rem;">
+    <div class="fragment" data-order="0" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--blue-lt);border-radius:12px;border-left:4px solid var(--blue);"><strong class="blue">Prompt 品質</strong> — 越具體，AI 做得越好</div>
+    <div class="fragment" data-order="1" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--green-lt);border-radius:12px;border-left:4px solid var(--green);"><strong class="green">Claude 產出</strong> — 一句話就有一個完整網站</div>
+    <div class="fragment" data-order="2" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--gold-lt);border-radius:12px;border-left:4px solid var(--gold);"><strong class="gold">迭代速度</strong> — Vibe Coding 的威力在迭代，不在第一版</div>
+    <div class="fragment" data-order="3" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--purple-lt);border-radius:12px;border-left:4px solid var(--purple);"><strong class="purple">部署上線</strong> — Claude → GAS → GitHub Pages，三種方式</div>
+    <div class="fragment" data-order="4" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--red-lt);border-radius:12px;border-left:4px solid var(--red);"><strong class="red">自由創作</strong> — 你已經能自己做出讓別人看到的作品了</div>
+  </div>
+</div>
+
+<!-- ===== 53: 預告 S03 ===== -->
+<div class="slide" data-index="53">
+  <h2>下一堂預告</h2>
+  <p style="font-size:1.1rem;margin-top:1rem;color:var(--g600);">
+    今天你還是<span class="dim">手動複製 HTML、手動上傳</span>
+  </p>
+  <p style="font-size:1.4rem;margin-top:1rem;line-height:2;">
+    下一堂 <span class="blue bold" style="font-size:1.6rem;">S03 — CLI Agent</span><br>
+    AI 直接在你電腦上操作<br>
+    連<span class="green bold">複製</span>都不用
+  </p>
+  <div class="flow fragment" data-order="0" style="margin-top:2rem;">
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">S01 ✅</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">S02 ✅</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--blue);background:var(--blue-lt);"><strong>S03 CLI</strong></div>
+    <div class="flow-arrow" style="opacity:.3;">→</div>
+    <div class="flow-box" style="opacity:.3;">S04 IDE</div>
+    <div class="flow-arrow" style="opacity:.3;">→</div>
+    <div class="flow-box" style="opacity:.3;">S05</div>
+  </div>
+</div>
+
+<!-- ===== 54: Prompt 模板 ===== -->
+<div class="slide" data-index="54">
+  <h2>帶走的 Prompt 模板</h2>
+  <div class="qr-solo"><div id="qr-all"></div></div>
+  <div class="code-block" style="font-family:'Noto Sans TC',sans-serif;font-size:.95rem;">
+    幫我做一個<span class="str">[主題]</span>的單頁網站。<br><br>
+    <strong>頁面結構：</strong><br>
+    - 首頁：<span class="str">[全幅圖片/漸層背景]</span><br>
+    - <span class="str">[功能區塊1]</span>：<span class="str">[描述]</span><br>
+    - <span class="str">[功能區塊2]</span>：<span class="str">[描述]</span><br>
+    - 聯絡/表單：<span class="str">[欄位]</span><br>
+    - 頁尾：<span class="str">[資訊]</span><br><br>
+    <strong>風格：</strong><span class="str">[配色、風格描述]</span><br>
+    <strong>必要：</strong>完整 RWD，手機版漢堡選單。<br>
+    <strong>語言：</strong>繁體中文。
+  </div>
+</div>
+
+<!-- ===== 55: END ===== -->
+<div class="slide cover" data-index="55">
+  <p style="font-size:1rem;color:rgba(255,255,255,.6);margin-bottom:1rem;">S02 補充單元</p>
+  <h1>完成！</h1>
+  <p class="subtitle" style="margin-top:1.5rem;font-size:1.3rem;">
+    說出來 → AI 做 → 三種方式上線
+  </p>
+  <p style="color:rgba(255,255,255,.4);margin-top:3rem;font-size:.9rem;">ai100.cooperation.tw</p>
+</div>
+
+</div>
+
+<div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>←</button><button id="next">→</button></div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),tot=slides.length;
+let idx=0,fi=-1;
+document.getElementById('total').textContent=tot;
+const gf=el=>el.querySelectorAll('.fragment');
+function go(n){slides.forEach((s,i)=>{s.classList.remove('active','prev');if(i<n)s.classList.add('prev');s.querySelectorAll('.fragment').forEach(f=>f.classList.remove('visible'));});idx=n;fi=-1;slides[idx].classList.add('active');ui();}
+function ui(){document.getElementById('current').textContent=idx+1;document.getElementById('prev').disabled=idx===0&&fi<=0;const f=gf(slides[idx]);document.getElementById('next').disabled=idx===tot-1&&fi>=f.length-1;document.getElementById('progress').style.width=((idx+1)/tot*100)+'%';}
+function adv(){const f=gf(slides[idx]);if(fi<f.length-1){fi++;f[fi].classList.add('visible');ui();}else if(idx<tot-1)go(idx+1);}
+function ret(){const f=gf(slides[idx]);if(fi>=0){f[fi].classList.remove('visible');fi--;ui();}else if(idx>0){go(idx-1);const p=gf(slides[idx]);p.forEach(x=>x.classList.add('visible'));fi=p.length-1;ui();}}
+document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
+document.addEventListener('keydown',e=>{if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}if(e.key==='Home'){e.preventDefault();go(0);}if(e.key==='End'){e.preventDefault();go(tot-1);}if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}});
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
+ui();
+
+// ─── QR Code Generation ───
+const TEMPLATE_URL = 'https://ai100.cooperation.tw/classroom/s02-template.html';
+const qrOpts = {width:240,height:240,colorDark:'#202124',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M};
+
+function makeQR(id,url){
+  const el = document.getElementById(id);
+  if(el && !el.querySelector('canvas')){new QRCode(el,{...qrOpts,text:url});}
+}
+
+// Generate all QR codes
+makeQR('qr-prompt', TEMPLATE_URL);
+makeQR('qr-gas', TEMPLATE_URL + '#gas-deploy');
+makeQR('qr-github', TEMPLATE_URL + '#github-pages');
+makeQR('qr-free', TEMPLATE_URL + '#free-tools');
+makeQR('qr-all', TEMPLATE_URL);
+</script>
+</body>
+</html>

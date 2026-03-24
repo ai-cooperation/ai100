@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S05 — OpenClaw 龍蝦</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   grow.google 簡潔風 + Reading Glasses
+   投影教學用 (3-10m 觀看距離)
+   ═══════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+  --tg-blue:#0088cc; --tg-bg:#e1f5fe; --tg-sent:#EFFDDE; --tg-recv:#FFFFFF;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--white);}
+
+/* Slides */
+.slides{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;opacity:0;transform:translateX(30px);pointer-events:none;transition:opacity .4s,transform .4s ease;background:var(--white);}
+.slide.active{opacity:1;transform:none;pointer-events:auto;}
+.slide.prev{opacity:0;transform:translateX(-30px);}
+.slide.cover{background:var(--navy);color:#fff;text-align:center;}
+.slide.section-title{background:var(--green);color:#fff;text-align:center;}
+.slide.break-slide{background:var(--offwhite);text-align:center;}
+
+/* Typography */
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:2rem;font-weight:700;color:var(--g900);margin-bottom:1rem;line-height:1.4;}
+h3{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.1rem;line-height:1.8;}
+.subtitle{font-size:1.15rem;color:var(--g600);font-weight:500;}
+.blue{color:var(--blue);}.green{color:var(--green);}.gold{color:var(--gold);}.red{color:var(--red);}.purple{color:var(--purple);}.dim{color:var(--g600);}.bold{font-weight:700;}
+
+/* Fragment */
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* Cards */
+.card-grid{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;margin-top:1.2rem;max-width:1100px;}
+.card{background:var(--white);border:2px solid var(--g100);border-radius:16px;padding:1.8rem;min-width:220px;max-width:300px;flex:1;transition:border-color .2s;}
+.card:hover{border-color:var(--blue);}
+.card .icon{font-size:2.5rem;margin-bottom:.6rem;}
+.card p{font-size:1rem;color:var(--g600);}
+
+/* Steps */
+.step-list{text-align:left;max-width:800px;width:100%;}
+.step{display:flex;gap:1.2rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:40px;height:40px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.1rem;}.step-content p{font-size:1rem;color:var(--g600);margin-top:.15rem;}
+
+/* Code */
+.code-block{background:var(--g50);border:2px solid var(--g200);border-radius:12px;padding:1.3rem 1.8rem;text-align:left;max-width:860px;width:100%;font-family:'Fira Code',monospace;font-size:1rem;line-height:1.8;margin:.8rem 0;color:var(--g900);}
+.code-block .kw{color:#D93025;font-weight:700;}.code-block .str{color:#0F9D8A;}.code-block .fn{color:#7C3AED;}.code-block .cm{color:var(--g400);}
+
+/* Table */
+.compare-table{border-collapse:collapse;font-size:1rem;margin-top:.8rem;width:100%;max-width:860px;}
+.compare-table th{background:var(--navy);color:#fff;padding:.7rem 1rem;text-align:left;font-size:1rem;}
+.compare-table td{padding:.7rem 1rem;border-bottom:1px solid var(--g100);font-size:1rem;}
+.compare-table tr:hover td{background:var(--g50);}
+
+/* Info boxes */
+.info-box{border-radius:12px;padding:1.3rem 1.8rem;max-width:800px;width:100%;text-align:left;margin-top:.8rem;}
+.info-box.analogy{background:var(--blue-lt);border-left:4px solid var(--blue);}
+.info-box.warning{background:var(--red-lt);border-left:4px solid var(--red);}
+.info-box.success{background:var(--green-lt);border-left:4px solid var(--green);}
+.info-box.tip{background:var(--gold-lt);border-left:4px solid var(--gold);}
+.info-box .label{font-weight:700;font-size:1rem;margin-bottom:.4rem;}
+.info-box p{font-size:1.05rem;}
+
+/* Flow */
+.flow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1.2rem 0;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.7rem 1rem;font-size:1rem;font-weight:700;text-align:center;}
+.flow-arrow{color:var(--blue);font-size:1.5rem;font-weight:900;}
+
+/* Banner */
+.exercise-banner{display:inline-block;background:var(--purple);color:#fff;padding:.35rem 1.4rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.8rem;}
+
+/* Two col */
+.two-col{display:flex;gap:2rem;width:100%;max-width:960px;text-align:left;}
+.two-col .col{flex:1;}
+
+/* Big number */
+.big-num{font-size:4.5rem;font-weight:900;color:var(--blue);line-height:1;}
+
+/* ═══════════════════════════════════════
+   MOCKUP UI
+   ═══════════════════════════════════════ */
+.mockup-browser{
+  max-width:820px;width:100%;border-radius:12px;overflow:hidden;
+  border:2px solid var(--g200);margin:.8rem 0;max-height:65vh;overflow:hidden;
+  box-shadow:0 4px 24px rgba(0,0,0,.08);
+}
+.mockup-bar{
+  background:var(--g50);padding:.5rem 1rem;display:flex;align-items:center;gap:.6rem;
+  border-bottom:1px solid var(--g200);
+}
+.mockup-dots{display:flex;gap:5px;}
+.mockup-dot{width:10px;height:10px;border-radius:50%;}
+.mockup-dot.r{background:#FF5F57;}.mockup-dot.y{background:#FFBD2E;}.mockup-dot.g{background:#28C840;}
+.mockup-url{
+  flex:1;background:var(--white);border:1px solid var(--g200);border-radius:100px;
+  padding:.25rem .8rem;font-size:.8rem;color:var(--g600);font-family:'Fira Code',monospace;
+}
+.mockup-body{background:var(--white);padding:1rem 1.5rem;min-height:auto;max-height:50vh;overflow-y:auto;position:relative;}
+.mockup-body.dark{background:#1E1E1E;color:#D4D4D4;}
+
+.mock-btn{
+  display:inline-block;padding:.4rem 1.2rem;border-radius:8px;font-weight:700;font-size:.9rem;
+  border:none;cursor:default;
+}
+.mock-btn.primary{background:var(--blue);color:#fff;}
+.mock-btn.green{background:var(--green);color:#fff;}
+.mock-btn.outline{background:transparent;border:2px solid var(--g200);color:var(--g800);}
+.mock-input{
+  border:2px solid var(--g200);border-radius:8px;padding:.4rem .8rem;font-size:.9rem;
+  background:var(--white);color:var(--g800);display:inline-block;min-width:200px;
+}
+.mock-sidebar{
+  background:var(--g50);padding:1rem;border-right:1px solid var(--g200);
+  min-width:160px;font-size:.85rem;
+}
+.mock-sidebar-item{padding:.4rem .6rem;border-radius:6px;margin:.2rem 0;cursor:default;}
+.mock-sidebar-item.active{background:var(--blue-lt);color:var(--blue);font-weight:700;}
+
+/* Callout */
+.callout{
+  position:absolute;background:var(--red);color:#fff;padding:.3rem .8rem;
+  border-radius:8px;font-size:.85rem;font-weight:700;
+  animation:pulse 1.5s infinite;z-index:5;
+}
+.callout::after{content:'';position:absolute;border:8px solid transparent;}
+.callout.arrow-down::after{top:100%;left:50%;transform:translateX(-50%);border-top-color:var(--red);}
+.callout.arrow-left::after{top:50%;right:100%;transform:translateY(-50%);border-right-color:var(--red);}
+.callout.arrow-right::after{top:50%;left:100%;transform:translateY(-50%);border-left-color:var(--red);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.7;}}
+
+/* ═══════════════════════════════════════
+   TELEGRAM MOCKUP
+   ═══════════════════════════════════════ */
+.tg-mockup{
+  max-width:480px;width:100%;border-radius:12px;overflow:hidden;
+  border:2px solid var(--g200);margin:.8rem auto;
+  box-shadow:0 4px 24px rgba(0,0,0,.08);
+}
+.tg-header{
+  background:var(--tg-blue);color:#fff;padding:.6rem 1rem;
+  display:flex;align-items:center;gap:.8rem;
+}
+.tg-avatar{
+  width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:1.1rem;font-weight:700;flex-shrink:0;
+}
+.tg-avatar.bot{background:#FF6B35;color:#fff;}
+.tg-avatar.father{background:#6C63FF;color:#fff;}
+.tg-avatar.user{background:#4CAF50;color:#fff;}
+.tg-header-info{flex:1;}
+.tg-header-name{font-weight:700;font-size:.95rem;}
+.tg-header-status{font-size:.7rem;opacity:.8;}
+.tg-body{
+  background:#C8D9E6;padding:1rem;min-height:180px;
+  display:flex;flex-direction:column;gap:.5rem;
+  background-image:url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='p' width='20' height='20' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='10' cy='10' r='1' fill='%23b8c9d6' opacity='.3'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23p)'/%3E%3C/svg%3E");
+}
+.tg-msg{
+  max-width:82%;padding:.5rem .8rem;border-radius:10px;font-size:.85rem;
+  line-height:1.6;position:relative;word-break:break-word;
+}
+.tg-msg.sent{background:var(--tg-sent);align-self:flex-end;border-bottom-right-radius:2px;}
+.tg-msg.recv{background:var(--tg-recv);align-self:flex-start;border-bottom-left-radius:2px;box-shadow:0 1px 2px rgba(0,0,0,.08);}
+.tg-msg .tg-time{font-size:.65rem;color:var(--g400);float:right;margin-left:.8rem;margin-top:.3rem;}
+.tg-msg .tg-sender{font-size:.75rem;font-weight:700;color:var(--tg-blue);margin-bottom:.2rem;}
+.tg-msg-system{align-self:center;background:rgba(0,0,0,.15);color:#fff;padding:.2rem .8rem;border-radius:100px;font-size:.7rem;}
+.tg-input-bar{background:var(--white);padding:.5rem .8rem;display:flex;align-items:center;gap:.5rem;border-top:1px solid var(--g200);}
+.tg-input-field{flex:1;background:var(--g50);border:1px solid var(--g200);border-radius:100px;padding:.3rem .8rem;font-size:.8rem;color:var(--g600);}
+.tg-send-btn{width:32px;height:32px;border-radius:50%;background:var(--tg-blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.9rem;}
+
+/* Terminal mockup */
+.terminal-mockup{
+  max-width:820px;width:100%;border-radius:12px;overflow:hidden;
+  border:2px solid var(--g200);margin:.8rem 0;max-height:65vh;overflow:hidden;
+  box-shadow:0 4px 24px rgba(0,0,0,.08);
+}
+.terminal-bar{background:#2D2D2D;padding:.5rem 1rem;display:flex;align-items:center;gap:.6rem;}
+.terminal-body{
+  background:#1E1E1E;padding:1.2rem 1.5rem;font-family:'Fira Code',monospace;
+  font-size:.85rem;line-height:1.9;color:#D4D4D4;min-height:180px;
+}
+.terminal-body .prompt{color:#4EC9B0;}
+.terminal-body .cmd{color:#DCDCAA;}
+.terminal-body .output{color:#9CDCFE;}
+.terminal-body .success{color:#4EC9B0;}
+.terminal-body .warn{color:#F9AB00;}
+.terminal-body .error{color:#F44747;}
+.terminal-body .ai-label{color:#B294F8;font-weight:700;}
+.terminal-body .user-input{color:#CE9178;}
+
+/* Controls */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:var(--white);color:var(--g800);font-size:1.2rem;cursor:pointer;transition:all .15s;}
+.controls button:hover{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
+.controls button:disabled{opacity:.25;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:var(--red-lt);color:var(--red);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
+
+/* QR Code */
+.qr-solo{position:absolute;top:.6rem;right:.8rem;z-index:110;background:var(--white);padding:4px;border-radius:6px;}
+
+.slide.cover h1{font-size:3.5rem;}
+.slide.cover .subtitle{color:rgba(255,255,255,.8);}
+.slide.section-title h1{font-size:2.8rem;}
+.slide.section-title .subtitle{color:rgba(255,255,255,.85);font-size:1.1rem;}
+
+/* Star badge */
+.star-badge{display:inline-block;background:var(--gold-lt);color:var(--gold);padding:.2rem .6rem;border-radius:100px;font-size:.85rem;font-weight:700;margin-bottom:.5rem;}
+
+/* Before/After */
+.ba-container{display:flex;gap:1.5rem;max-width:900px;width:100%;margin-top:.8rem;}
+.ba-box{flex:1;border-radius:12px;overflow:hidden;border:2px solid var(--g200);}
+.ba-label{padding:.4rem 1rem;font-weight:700;font-size:.85rem;text-align:center;}
+.ba-label.before{background:var(--red-lt);color:var(--red);}
+.ba-label.after{background:var(--green-lt);color:var(--green);}
+
+/* Autonomy scale */
+.autonomy-bar{display:flex;width:100%;max-width:860px;margin:1rem 0;border-radius:12px;overflow:hidden;border:2px solid var(--g200);}
+.autonomy-level{padding:.8rem;text-align:center;font-size:.85rem;font-weight:700;transition:all .3s;}
+</style>
+</head>
+<body>
+
+<div class="module-title">OpenClaw 龍蝦</div>
+<div class="module-badge">S05 補充單元</div>
+<div class="slides">
+
+<!-- ===== 0: COVER ===== -->
+<div class="slide cover" data-index="0">
+  <p style="font-size:1.1rem;color:rgba(255,255,255,.6);margin-bottom:1rem;">AI 100 講 ─ 補充單元</p>
+  <h1>OpenClaw 龍蝦<br>打造不下班的 AI</h1>
+  <p class="subtitle" style="margin-top:1rem;font-size:1.3rem;">從第一句話到完全自主</p>
+  <p style="color:rgba(255,255,255,.4);margin-top:3rem;font-size:.9rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- ===== 1: 議程 ===== -->
+<div class="slide" data-index="1">
+  <h2>今天的旅程</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>概念：工具 vs Agent</strong><p>為什麼需要一隻不下班的 AI</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--green);">2</div><div class="step-content"><strong>部署你的龍蝦</strong><p>BotFather 建 Bot → Docker 安裝 → 第一次對話</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--gold);">3</div><div class="step-content"><strong>能力升級</strong><p>搜尋 → 個性化 → 排程 → 資安</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--red);">4</div><div class="step-content"><strong>打通一切 + 五模組大收尾</strong><p>串聯 S01 GAS，回顧五堂課的完整旅程</p></div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     概念：工具 vs Agent
+     ═══════════════════════════════ -->
+
+<!-- ===== 2: Tool vs Agent ===== -->
+<div class="slide" data-index="2">
+  <h2>工具 vs Agent：差在哪？</h2>
+  <div class="two-col" style="margin-top:1.5rem;">
+    <div class="col">
+      <div style="background:var(--blue-lt);border-radius:16px;padding:1.5rem;border:2px solid var(--blue);height:100%;">
+        <h3 class="blue">🔧 Tool（S01 ~ S04）</h3>
+        <p style="font-size:1rem;margin-top:.5rem;">你打開 → AI 做事 → 你關掉 → AI 停</p>
+        <div style="margin-top:1rem;font-size:.9rem;color:var(--g600);line-height:2;">
+          S01: 你按「執行」，GAS 才跑<br>
+          S02: 你下指令，Vibe 才生成<br>
+          S03: 你打字，CLI 才回答<br>
+          S04: 你開 IDE，AI 才輔助
+        </div>
+      </div>
+    </div>
+    <div class="col fragment" data-order="0">
+      <div style="background:var(--red-lt);border-radius:16px;padding:1.5rem;border:2px solid var(--red);height:100%;">
+        <h3 class="red">🦞 Agent（S05）</h3>
+        <p style="font-size:1rem;margin-top:.5rem;">你設規則 → AI 24/7 跑 → 自己行動</p>
+        <div style="margin-top:1rem;font-size:.9rem;color:var(--g600);line-height:2;">
+          你睡著了，它在追新聞<br>
+          你在開會，它在分析問卷<br>
+          你在放假，它在值班<br>
+          <strong style="color:var(--red);">它不需要你叫</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 3: 比喻 ===== -->
+<div class="slide" data-index="3">
+  <div class="info-box analogy" style="max-width:700px;">
+    <div class="label">比喻</div>
+    <p style="font-size:1.4rem;">前四堂請了<strong class="blue">臨時工</strong>，這堂請<strong class="red">正職員工</strong></p>
+    <p style="font-size:1rem;margin-top:.5rem;color:var(--g600);">臨時工：你叫他才來，做完就走<br>正職員工：每天自動打卡上班，主動匯報</p>
+  </div>
+  <div class="fragment" data-order="0" style="margin-top:2rem;text-align:center;">
+    <p style="font-size:1.3rem;font-weight:700;">五堂課 = AI 越來越<span class="red">自主</span></p>
+    <div class="autonomy-bar" style="margin-top:1rem;">
+      <div class="autonomy-level" style="flex:1;background:var(--green-lt);color:var(--green);">S01<br>你按按鈕</div>
+      <div class="autonomy-level" style="flex:1;background:var(--blue-lt);color:var(--blue);">S02<br>你說話</div>
+      <div class="autonomy-level" style="flex:1;background:var(--purple-lt);color:var(--purple);">S03<br>你打字</div>
+      <div class="autonomy-level" style="flex:1;background:var(--gold-lt);color:var(--gold);">S04<br>你指方向</div>
+      <div class="autonomy-level" style="flex:1.3;background:var(--red-lt);color:var(--red);">S05<br>你設規則<br>AI 自己跑</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 4: 什麼是 OpenClaw ===== -->
+<div class="slide" data-index="4">
+  <h2>什麼是 OpenClaw？</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card fragment" data-order="0">
+      <div class="icon">🦞</div>
+      <h3>開源 AI Agent</h3>
+      <p>Peter Steinberger 開發<br>原名 Clawdbot → 改名 OpenClaw<br>GitHub 完全開源</p>
+    </div>
+    <div class="card fragment" data-order="1">
+      <div class="icon">💬</div>
+      <h3>多平台</h3>
+      <p>Telegram / Signal /<br>Discord / WhatsApp<br>住在你的聊天軟體裡</p>
+    </div>
+    <div class="card fragment" data-order="2">
+      <div class="icon">🧠</div>
+      <h3>接任何 LLM</h3>
+      <p>Claude, GPT, Gemini, Groq<br>自由切換，不被綁定</p>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="3" style="margin-top:1rem;">
+    <div class="label">2026 爆紅</div>
+    <p>在中國掀起「養龍蝦」風潮，百萬人在 Telegram 養自己的 AI Agent。</p>
+  </div>
+</div>
+
+<!-- ===== 5: 為什麼叫龍蝦 ===== -->
+<div class="slide" data-index="5">
+  <h2>為什麼叫「龍蝦」？</h2>
+  <div style="text-align:center;margin-top:1rem;">
+    <p style="font-size:3rem;">🦞</p>
+    <p style="font-size:1.2rem;margin-top:1rem;max-width:600px;margin-left:auto;margin-right:auto;">
+      OpenClaw 的 <strong>Claw</strong> = 螯（龍蝦的鉗子）<br>
+      中國用戶暱稱它「龍蝦」→ 養龍蝦 = 養自己的 AI Agent
+    </p>
+  </div>
+  <div class="flow fragment" data-order="0" style="margin-top:2rem;">
+    <div class="flow-box">Clawdbot<br><span class="dim" style="font-size:.75rem;">原名</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--red);background:var(--red-lt);">OpenClaw<br><span class="dim" style="font-size:.75rem;">開源改名</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--gold);background:var(--gold-lt);">🦞 龍蝦<br><span class="dim" style="font-size:.75rem;">中文暱稱</span></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     Demo：講師的龍蝦
+     ═══════════════════════════════ -->
+
+<!-- ===== 6: Demo 1 — 基本問答 ===== -->
+<div class="slide" data-index="6">
+  <h2>Demo：講師的龍蝦</h2>
+  <p class="dim" style="margin-bottom:.5rem;">它住在 Telegram 裡，24 小時待命</p>
+  <div class="tg-mockup">
+    <div class="tg-header">
+      <div class="tg-avatar bot">🦞</div>
+      <div class="tg-header-info">
+        <div class="tg-header-name">小龍 AI 助手</div>
+        <div class="tg-header-status">online</div>
+      </div>
+    </div>
+    <div class="tg-body">
+      <div class="tg-msg sent">今天天氣怎樣？<span class="tg-time">09:15</span></div>
+      <div class="tg-msg recv fragment" data-order="0">
+        <div class="tg-sender">🦞 小龍</div>
+        讓我查一下... 🔍<br><br>
+        📍 台北目前 28°C，多雲。<br>
+        下午 3 點後有 60% 機率降雨，建議帶傘出門。<br>
+        紫外線指數：中等。
+        <span class="tg-time">09:15</span>
+      </div>
+    </div>
+    <div class="tg-input-bar">
+      <div class="tg-input-field">輸入訊息...</div>
+      <div class="tg-send-btn">➤</div>
+    </div>
+  </div>
+  <p class="fragment" data-order="1" style="font-size:1rem;color:var(--green);font-weight:700;">它搜尋了天氣網站，自己找到答案回覆你</p>
+</div>
+
+<!-- ===== 7: Demo 2 — 主動通知 ===== -->
+<div class="slide" data-index="7">
+  <h2>Demo：<span class="red">你沒問，它自己發的</span></h2>
+  <div class="tg-mockup">
+    <div class="tg-header">
+      <div class="tg-avatar bot">🦞</div>
+      <div class="tg-header-info">
+        <div class="tg-header-name">小龍 AI 助手</div>
+        <div class="tg-header-status">online</div>
+      </div>
+    </div>
+    <div class="tg-body" style="min-height:200px;">
+      <div class="tg-msg-system">今天 08:00</div>
+      <div class="tg-msg recv">
+        <div class="tg-sender">🦞 小龍</div>
+        📰 <strong>今日 AI 新聞摘要</strong><br><br>
+        1. Google 發布 Antigravity IDE 免費版，支援 100+ 語言<br>
+        2. OpenClaw 用戶突破千萬，成最受歡迎 AI Agent<br>
+        3. Groq 推出第三代推論晶片，速度提升 5 倍<br><br>
+        有興趣深入了解哪一則嗎？
+        <span class="tg-time">08:00</span>
+      </div>
+    </div>
+    <div class="tg-input-bar">
+      <div class="tg-input-field">輸入訊息...</div>
+      <div class="tg-send-btn">➤</div>
+    </div>
+  </div>
+  <p style="margin-top:.8rem;font-size:1.3rem;font-weight:900;color:var(--red);">沒有人說話，它自己發的。每天早上 8 點準時報到。</p>
+</div>
+
+<!-- ===== 8: Demo 3 — 任務執行 ===== -->
+<div class="slide" data-index="8">
+  <h2>Demo：叫它做事，它真的去做</h2>
+  <div class="tg-mockup">
+    <div class="tg-header">
+      <div class="tg-avatar bot">🦞</div>
+      <div class="tg-header-info">
+        <div class="tg-header-name">小龍 AI 助手</div>
+        <div class="tg-header-status">online</div>
+      </div>
+    </div>
+    <div class="tg-body" style="min-height:220px;">
+      <div class="tg-msg sent">分析最新的問卷結果<span class="tg-time">14:30</span></div>
+      <div class="tg-msg recv fragment" data-order="0">
+        <div class="tg-sender">🦞 小龍</div>
+        正在呼叫問卷分析系統... ⏳
+        <span class="tg-time">14:30</span>
+      </div>
+      <div class="tg-msg recv fragment" data-order="1">
+        <div class="tg-sender">🦞 小龍</div>
+        📊 <strong>分析完成！</strong><br><br>
+        共 28 份回覆，整體滿意度 79%<br>
+        最高分：課程內容（4.2/5）<br>
+        最低分：時間安排（3.5/5）<br><br>
+        📄 <span style="color:var(--blue);text-decoration:underline;">完整報告（Google Docs）→</span>
+        <span class="tg-time">14:31</span>
+      </div>
+    </div>
+    <div class="tg-input-bar">
+      <div class="tg-input-field">輸入訊息...</div>
+      <div class="tg-send-btn">➤</div>
+    </div>
+  </div>
+  <p class="fragment dim" data-order="2" style="margin-top:.5rem;">它呼叫了 S01 做的 GAS 問卷系統，自動分析、產報告、回傳連結</p>
+</div>
+
+<!-- ===== 9: 需求評估 — 你要它做什麼 ===== -->
+<div class="slide" data-index="9">
+  <h2>你要它做什麼？</h2>
+  <div class="qr-solo"><div id="qr-checklist"></div></div>
+  <div style="background:var(--offwhite);border-radius:16px;padding:1.5rem 2rem;max-width:600px;width:100%;margin-top:.5rem;">
+    <h3 style="margin-bottom:.8rem;">需求清單（先想好再養）</h3>
+    <div style="font-size:1.1rem;line-height:2.2;">
+      <div class="fragment" data-order="0">☐ 回答問題（最基本，第一步就能做到）</div>
+      <div class="fragment" data-order="1">☐ 搜尋新聞（需啟用 web-search 技能）</div>
+      <div class="fragment" data-order="2">☐ 提醒行程（需設定排程）</div>
+      <div class="fragment" data-order="3">☐ 分析資料（需串聯 GAS 或 API）</div>
+      <div class="fragment" data-order="4">☐ 翻譯文件 / 寫摘要 / 客服 / 其他</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 10: 費用估算 ===== -->
+<div class="slide" data-index="10">
+  <h2>費用估算</h2>
+  <table class="compare-table" style="margin-top:1rem;">
+    <tr><th>LLM 服務</th><th>月費估算</th><th>說明</th></tr>
+    <tr><td><strong style="color:var(--gold);">⭐ Groq</strong></td><td class="green bold">$0</td><td>完全免費，14400 次/天，入門首選</td></tr>
+    <tr><td><strong>Google Gemini</strong></td><td class="green bold">$0</td><td>有免費額度，多模態（能看圖）</td></tr>
+    <tr><td><strong>Claude</strong></td><td>~$0.5 – 5</td><td>最聰明，但要付費</td></tr>
+    <tr><td><strong>GPT</strong></td><td>~$1 – 10</td><td>功能齊全，費用較高</td></tr>
+  </table>
+  <div class="info-box tip fragment" data-order="0" style="margin-top:1rem;">
+    <div class="label">建議</div>
+    <p>先用 Groq（免費 + 最快），不夠再換。大部分人 Groq 免費額度綽綽有餘。</p>
+  </div>
+</div>
+
+<!-- ===== 11: 決策樹 ===== -->
+<div class="slide" data-index="11">
+  <h2>雲端還是地端？</h2>
+  <div style="max-width:750px;width:100%;margin-top:1.5rem;">
+    <!-- Level 1 -->
+    <div style="text-align:center;">
+      <div style="display:inline-block;background:var(--blue-lt);border:2px solid var(--blue);border-radius:12px;padding:.6rem 1.5rem;font-weight:700;font-size:1.1rem;">你有閒置的舊電腦嗎？</div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:6rem;margin-top:1rem;">
+      <!-- Yes branch -->
+      <div style="text-align:center;" class="fragment" data-order="0">
+        <div style="color:var(--green);font-weight:700;font-size:1rem;">Yes ↓</div>
+        <div style="background:var(--green-lt);border:2px solid var(--green);border-radius:12px;padding:.8rem 1.2rem;margin-top:.3rem;">
+          <strong style="font-size:1.1rem;">地端免費</strong><br>
+          <span style="font-size:.85rem;color:var(--g600);">裝 Docker，電費而已</span>
+        </div>
+      </div>
+      <!-- No branch -->
+      <div style="text-align:center;" class="fragment" data-order="1">
+        <div style="color:var(--red);font-weight:700;font-size:1rem;">No ↓</div>
+        <div style="display:inline-block;background:var(--blue-lt);border:2px solid var(--blue);border-radius:10px;padding:.5rem 1rem;font-weight:700;font-size:.95rem;margin-top:.3rem;">要 24/7 不中斷？</div>
+        <div style="display:flex;justify-content:center;gap:3rem;margin-top:.8rem;">
+          <div style="text-align:center;" class="fragment" data-order="2">
+            <div style="color:var(--green);font-weight:700;font-size:.9rem;">Yes ↓</div>
+            <div style="background:var(--purple-lt);border:2px solid var(--purple);border-radius:10px;padding:.5rem 1rem;">
+              <strong>雲端 Zeabur</strong><br>
+              <span style="font-size:.8rem;">免費方案夠用</span>
+            </div>
+          </div>
+          <div style="text-align:center;" class="fragment" data-order="3">
+            <div style="color:var(--red);font-weight:700;font-size:.9rem;">No ↓</div>
+            <div style="background:var(--gold-lt);border:2px solid var(--gold);border-radius:10px;padding:.5rem 1rem;">
+              <strong>自己電腦跑</strong><br>
+              <span style="font-size:.8rem;">開機才有</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="4" style="margin-top:1rem;">
+    <div class="label">在意隱私？</div>
+    <p>地端 = 資料完全不離開你的電腦。先用雲端入門，有需要再搬回地端。</p>
+  </div>
+</div>
+
+<!-- ===== SECTION: 部署 ===== -->
+<div class="slide section-title" data-index="12">
+  <p class="subtitle">第一段 · 0:25 – 1:00</p>
+  <h1>🦞 部署 — 用 CLI 建你的龍蝦</h1>
+  <p class="subtitle" style="margin-top:.5rem;">BotFather → Docker → 第一次對話</p>
+</div>
+
+<!-- ===== 13: 部署流程概覽 ===== -->
+<div class="slide" data-index="13">
+  <h2>部署五步驟</h2>
+  <div class="flow" style="margin-top:2rem;">
+    <div class="flow-box fragment" data-order="0" style="font-size:1.1rem;">🤖 BotFather<br><span class="dim" style="font-size:.75rem;">建 Bot</span></div>
+    <div class="flow-arrow fragment" data-order="1">→</div>
+    <div class="flow-box fragment" data-order="1" style="font-size:1.1rem;">🔑 拿 Token<br><span class="dim" style="font-size:.75rem;">複製密碼</span></div>
+    <div class="flow-arrow fragment" data-order="2">→</div>
+    <div class="flow-box fragment" data-order="2" style="font-size:1.1rem;">🐳 Docker<br><span class="dim" style="font-size:.75rem;">安裝龍蝦</span></div>
+    <div class="flow-arrow fragment" data-order="3">→</div>
+    <div class="flow-box fragment" data-order="3" style="font-size:1.1rem;">⚙️ 設定<br><span class="dim" style="font-size:.75rem;">Token + Key</span></div>
+    <div class="flow-arrow fragment" data-order="4">→</div>
+    <div class="flow-box fragment" data-order="4" style="border-color:var(--green);background:var(--green-lt);font-size:1.1rem;">💬 對話！<br><span style="font-size:.75rem;color:var(--green);">龍蝦活了</span></div>
+  </div>
+</div>
+
+<!-- ===== 14: BotFather 1 ===== -->
+<div class="slide" data-index="14">
+  <div class="exercise-banner">Step 1 — 找到 BotFather</div>
+  <h2>在 Telegram 搜尋 @BotFather</h2>
+  <div class="qr-solo"><div id="qr-botfather"></div></div>
+  <div class="tg-mockup">
+    <div class="tg-header" style="background:#5B6E7A;">
+      <div style="font-size:1.1rem;">🔍</div>
+      <div class="tg-header-info">
+        <div style="background:var(--white);border-radius:100px;padding:.2rem .8rem;font-size:.85rem;color:var(--g800);">@BotFather</div>
+      </div>
+    </div>
+    <div class="tg-body" style="min-height:120px;background:#fff;padding:.5rem;">
+      <div style="display:flex;align-items:center;gap:.8rem;padding:.8rem;background:var(--blue-lt);border-radius:12px;cursor:default;position:relative;">
+        <div class="tg-avatar father">B</div>
+        <div>
+          <div style="font-weight:700;font-size:.95rem;">BotFather <span style="color:var(--tg-blue);font-size:.8rem;">✓</span></div>
+          <div style="font-size:.8rem;color:var(--g600);">Official Telegram Bot creator</div>
+        </div>
+        <span class="callout arrow-left" style="right:-90px;top:50%;transform:translateY(-50%);">點這個</span>
+      </div>
+    </div>
+  </div>
+  <p class="dim" style="margin-top:.5rem;">認準藍色勾勾 ✓，這是 Telegram 官方工具</p>
+</div>
+
+<!-- ===== 15: BotFather 2 ===== -->
+<div class="slide" data-index="15">
+  <div class="exercise-banner">Step 2 — 建立新 Bot</div>
+  <h2>跟 BotFather 對話</h2>
+  <div class="tg-mockup">
+    <div class="tg-header">
+      <div class="tg-avatar father">B</div>
+      <div class="tg-header-info">
+        <div class="tg-header-name">BotFather <span style="font-size:.75rem;opacity:.6;">✓</span></div>
+        <div class="tg-header-status">bot</div>
+      </div>
+    </div>
+    <div class="tg-body" style="min-height:250px;">
+      <div class="tg-msg sent">/newbot<span class="tg-time">10:01</span></div>
+      <div class="tg-msg recv fragment" data-order="0">
+        <div class="tg-sender">BotFather</div>
+        Alright, a new bot. How are we going to call it? Please choose a name for your bot.
+        <span class="tg-time">10:01</span>
+      </div>
+      <div class="tg-msg sent fragment" data-order="1">我的AI助手<span class="tg-time">10:01</span></div>
+      <div class="tg-msg recv fragment" data-order="2">
+        <div class="tg-sender">BotFather</div>
+        Good. Now let's choose a username for your bot. It must end in 'bot'.
+        <span class="tg-time">10:01</span>
+      </div>
+      <div class="tg-msg sent fragment" data-order="3">myai_helper_bot<span class="tg-time">10:02</span></div>
+    </div>
+    <div class="tg-input-bar">
+      <div class="tg-input-field">輸入訊息...</div>
+      <div class="tg-send-btn">➤</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 16: BotFather 3 — Token ===== -->
+<div class="slide" data-index="16">
+  <div class="exercise-banner">Step 3 — 拿到 Token</div>
+  <h2>你的 Bot 誕生了！</h2>
+  <div class="tg-mockup">
+    <div class="tg-header">
+      <div class="tg-avatar father">B</div>
+      <div class="tg-header-info">
+        <div class="tg-header-name">BotFather <span style="font-size:.75rem;opacity:.6;">✓</span></div>
+        <div class="tg-header-status">bot</div>
+      </div>
+    </div>
+    <div class="tg-body" style="min-height:200px;">
+      <div class="tg-msg recv" style="position:relative;">
+        <div class="tg-sender">BotFather</div>
+        Done! Congratulations on your new bot. 🎉<br><br>
+        You can find it at <strong>t.me/myai_helper_bot</strong><br><br>
+        Use this token to access the HTTP API:<br>
+        <div style="background:var(--gold-lt);border-radius:6px;padding:.3rem .6rem;margin:.4rem 0;font-family:'Fira Code',monospace;font-size:.8rem;position:relative;">
+          1234567890:AAH_xYzAbCdEfGhIjKlMnOpQr
+          <span class="callout arrow-left" style="right:-80px;top:50%;transform:translateY(-50%);font-size:.75rem;">複製這串！</span>
+        </div>
+        <span class="tg-time">10:02</span>
+      </div>
+    </div>
+    <div class="tg-input-bar">
+      <div class="tg-input-field">輸入訊息...</div>
+      <div class="tg-send-btn">➤</div>
+    </div>
+  </div>
+  <div class="info-box warning fragment" data-order="0">
+    <div class="label">這是你 Bot 的密碼</div>
+    <p>拿到 Token 的人可以控制你的 Bot。<strong>不要截圖分享、不要貼在群組裡。</strong></p>
+  </div>
+</div>
+
+<!-- ===== 17: 什麼是 Docker ===== -->
+<div class="slide" data-index="17">
+  <h2>什麼是 Docker？</h2>
+  <div class="info-box analogy" style="margin-top:1rem;">
+    <div class="label">比喻</div>
+    <p style="font-size:1.2rem;">Docker = <strong>外送餐盒</strong></p>
+    <p style="margin-top:.5rem;">廚師（開發者）把菜做好，放進餐盒（Docker image）<br>
+    你只要打開加熱（docker run），不用自己買食材、洗菜、開火</p>
+  </div>
+  <div class="fragment" data-order="0" style="margin-top:1.5rem;max-width:600px;text-align:left;">
+    <p style="font-size:1.1rem;"><strong>不用 Docker：</strong>裝 Python → 裝套件 → 設定環境變數 → 調設定檔 → 祈禱</p>
+    <p style="font-size:1.1rem;margin-top:.5rem;color:var(--green);"><strong>用 Docker：</strong>一行指令，全部搞定</p>
+  </div>
+</div>
+
+<!-- ===== 18: Claude Code 安裝 1 ===== -->
+<div class="slide" data-index="18">
+  <div class="exercise-banner">Step 4 — 用 Claude Code 安裝</div>
+  <h2>讓 AI 幫你裝 OpenClaw</h2>
+  <div class="terminal-mockup">
+    <div class="terminal-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span style="color:var(--g400);font-size:.8rem;margin-left:.5rem;">Terminal</span>
+    </div>
+    <div class="terminal-body">
+      <span class="prompt">you $</span> <span class="cmd">claude</span><br>
+      <span class="ai-label">Claude ></span> 你好！有什麼需要幫忙的嗎？<br><br>
+      <span class="prompt">you ></span> <span class="user-input">幫我安裝 OpenClaw，用 Docker，設定 Telegram，LLM 用 Groq</span><br><br>
+      <span class="ai-label">Claude ></span> 好的，讓我開始設定...<br>
+      <span class="output">  checking Docker... ✅ installed</span><br>
+      <span class="output">  pulling steipete/openclaw... ✅ done (2.1 GB)</span><br>
+      <span class="output">  creating config directory...</span><br><br>
+      <span class="ai-label">Claude ></span> 請提供你的 <span class="warn">Telegram Bot Token</span>：<br>
+      <span class="prompt">you ></span> <span class="user-input">1234567890:AAH_xYz...</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 19: Claude Code 安裝 2 ===== -->
+<div class="slide" data-index="19">
+  <div class="exercise-banner">Step 4（續）</div>
+  <h2>AI 繼續幫你設定</h2>
+  <div class="terminal-mockup">
+    <div class="terminal-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span style="color:var(--g400);font-size:.8rem;margin-left:.5rem;">Terminal</span>
+    </div>
+    <div class="terminal-body">
+      <span class="ai-label">Claude ></span> 請提供你的 <span class="warn">Groq API Key</span>：<br>
+      <span class="prompt">you ></span> <span class="user-input">gsk_aBcDeFgHiJkLmN...</span><br><br>
+      <span class="ai-label">Claude ></span> 設定完成，啟動中...<br>
+      <span class="output">  writing .env file... ✅</span><br>
+      <span class="output">  docker compose up -d... </span><br>
+      <span class="success">  ✅ Container openclaw started</span><br>
+      <span class="success">  ✅ Connected to Telegram API</span><br>
+      <span class="success">  ✅ Groq LLM configured (llama-3.3-70b)</span><br><br>
+      <span class="ai-label">Claude ></span> <span class="success">你的龍蝦已上線！去 Telegram 跟它說話吧。</span>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="0">
+    <div class="label">S01 拿到的 Groq Key，到最後一堂還在用</div>
+    <p>第一堂課申請的免費 Key，貫穿五個模組。一把鑰匙，開五扇門。</p>
+  </div>
+</div>
+
+<!-- ===== 20: 設定檔長這樣 ===== -->
+<div class="slide" data-index="20">
+  <h2>背後的設定檔（AI 幫你寫好了）</h2>
+  <div class="code-block" style="font-size:.9rem;">
+    <span class="cm"># docker-compose.yml (OpenClaw)</span><br>
+    <span class="kw">services</span>:<br>
+    &nbsp;&nbsp;<span class="fn">openclaw</span>:<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;image: <span class="str">steipete/openclaw:latest</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;environment:<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="str">TELEGRAM_BOT_TOKEN=${BOT_TOKEN}</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="str">LLM_PROVIDER=groq</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="str">GROQ_API_KEY=${GROQ_KEY}</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;restart: <span class="str">always</span> <span class="cm"># 掛了自動重啟</span>
+  </div>
+  <div class="info-box analogy fragment" data-order="0">
+    <div class="label">你不需要看懂這個</div>
+    <p>Claude Code 會幫你寫好。你只需要提供 Token 和 Key。<br>
+    但知道「它就是一個設定檔」可以幫你理解架構。</p>
+  </div>
+</div>
+
+<!-- ===== 21: 第一次對話 ===== -->
+<div class="slide" data-index="21">
+  <h2 style="margin-bottom:0;">第一次對話</h2>
+  <div class="star-badge">⭐ 第一顆星</div>
+  <div class="tg-mockup">
+    <div class="tg-header">
+      <div class="tg-avatar bot">🦞</div>
+      <div class="tg-header-info">
+        <div class="tg-header-name">我的AI助手</div>
+        <div class="tg-header-status">online</div>
+      </div>
+    </div>
+    <div class="tg-body">
+      <div class="tg-msg sent">你好<span class="tg-time">10:15</span></div>
+      <div class="tg-msg recv fragment" data-order="0">
+        <div class="tg-sender">🦞 我的AI助手</div>
+        你好！我是你的 AI 助手，有什麼需要幫忙的嗎？😊
+        <span class="tg-time">10:15</span>
+      </div>
+    </div>
+    <div class="tg-input-bar">
+      <div class="tg-input-field">輸入訊息...</div>
+      <div class="tg-send-btn">➤</div>
+    </div>
+  </div>
+  <p class="fragment" data-order="1" style="margin-top:1rem;font-size:2rem;font-weight:900;color:var(--red);">你的龍蝦活了！🦞</p>
+  <p class="fragment dim" data-order="2" style="font-size:1.1rem;">那個感動，跟 S01 第一次在 Sheet 看到 AI 回覆一樣</p>
+</div>
+
+<!-- ===== 22: 第一次對話 — 試更多 ===== -->
+<div class="slide" data-index="22">
+  <h2>試試更多對話</h2>
+  <div class="tg-mockup">
+    <div class="tg-header">
+      <div class="tg-avatar bot">🦞</div>
+      <div class="tg-header-info">
+        <div class="tg-header-name">我的AI助手</div>
+        <div class="tg-header-status">online</div>
+      </div>
+    </div>
+    <div class="tg-body" style="min-height:250px;">
+      <div class="tg-msg sent">幫我寫一封請假信<span class="tg-time">10:16</span></div>
+      <div class="tg-msg recv fragment" data-order="0">
+        <div class="tg-sender">🦞 我的AI助手</div>
+        好的！以下是請假信範本：<br><br>
+        主旨：請假申請<br>
+        主管您好，本人因個人事務，擬請假一天（日期），相關工作已交接完畢，敬請核准。
+        <span class="tg-time">10:16</span>
+      </div>
+      <div class="tg-msg sent fragment" data-order="1">用比較口語的方式<span class="tg-time">10:17</span></div>
+      <div class="tg-msg recv fragment" data-order="2">
+        <div class="tg-sender">🦞 我的AI助手</div>
+        主管好！我明天有事想請一天假，手邊的工作都處理好了，麻煩您了～🙏
+        <span class="tg-time">10:17</span>
+      </div>
+    </div>
+    <div class="tg-input-bar">
+      <div class="tg-input-field">輸入訊息...</div>
+      <div class="tg-send-btn">➤</div>
+    </div>
+  </div>
+  <p class="fragment dim" data-order="3">它記得上下文，能連續修改。跟 ChatGPT 一樣聰明，但住在 Telegram 裡。</p>
+</div>
+
+<!-- ===== 23: BREAK ===== -->
+<div class="slide break-slide" data-index="23">
+  <p style="font-size:5rem;">☕</p>
+  <h2 style="margin-top:1rem;color:var(--g800);">休息 10 分鐘</h2>
+  <p class="dim" style="margin-top:1rem;">回來後：讓龍蝦學新技能</p>
+</div>
+
+<!-- ═══════════════════════════════
+     能力升級
+     ═══════════════════════════════ -->
+<div class="slide section-title" data-index="24">
+  <p class="subtitle">第二段 · 1:10 – 2:00</p>
+  <h1>📈 能力升級</h1>
+  <p class="subtitle" style="margin-top:.5rem;">搜尋 → 個性化 → 排程 → 資安</p>
+</div>
+
+<!-- ===== 25: 升級路線圖 ===== -->
+<div class="slide" data-index="25">
+  <h2>龍蝦升級路線</h2>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step fragment" data-order="0">
+      <div class="step-num" style="background:var(--green);font-size:.7rem;">⭐</div>
+      <div class="step-content"><strong>基本對話</strong><p>你說話它回答 ← 你剛做到了</p></div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--blue);font-size:.6rem;">⭐⭐</div>
+      <div class="step-content"><strong>網路搜尋</strong><p>它可以上網找資料了</p></div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="background:var(--purple);font-size:.5rem;">⭐⭐⭐</div>
+      <div class="step-content"><strong>個性化</strong><p>改名字、改性格、改語言</p></div>
+    </div>
+    <div class="step fragment" data-order="3">
+      <div class="step-num" style="background:var(--gold);font-size:.45rem;">⭐⭐⭐⭐</div>
+      <div class="step-content"><strong>排程任務</strong><p>不用你叫，它自己定時行動</p></div>
+    </div>
+    <div class="step fragment" data-order="4">
+      <div class="step-num" style="background:var(--red);font-size:.35rem;">⭐⭐⭐⭐⭐</div>
+      <div class="step-content"><strong>串聯外部系統</strong><p>呼叫 GAS、API、任何工具</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 26: 啟用 web-search (terminal) ===== -->
+<div class="slide" data-index="26">
+  <h2 style="margin-bottom:0;">啟用網路搜尋</h2>
+  <div class="star-badge">⭐⭐ 第二顆星</div>
+  <div class="terminal-mockup">
+    <div class="terminal-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span style="color:var(--g400);font-size:.8rem;margin-left:.5rem;">Terminal</span>
+    </div>
+    <div class="terminal-body">
+      <span class="prompt">you ></span> <span class="user-input">幫龍蝦開啟 web-search 技能</span><br><br>
+      <span class="ai-label">Claude ></span> 正在修改 OpenClaw 設定...<br>
+      <span class="output">  enabling skill: web-search... ✅</span><br>
+      <span class="output">  restarting container... ✅</span><br><br>
+      <span class="ai-label">Claude ></span> <span class="success">web-search 已啟用！你的龍蝦現在可以搜尋網路了。</span>
+    </div>
+  </div>
+  <p class="dim" style="margin-top:.5rem;">就像手機裝了一個新 App，它現在有手有腳了</p>
+</div>
+
+<!-- ===== 27: Before/After 搜尋 ===== -->
+<div class="slide" data-index="27">
+  <h2>Before / After：搜尋能力</h2>
+  <div class="ba-container">
+    <div class="ba-box">
+      <div class="ba-label before">Before</div>
+      <div class="tg-mockup" style="border:none;border-radius:0;margin:0;box-shadow:none;">
+        <div class="tg-body" style="min-height:140px;">
+          <div class="tg-msg sent">今天有什麼AI新聞？<span class="tg-time">11:00</span></div>
+          <div class="tg-msg recv">
+            <div class="tg-sender">🦞</div>
+            抱歉，我無法搜尋網路。我只能根據已知的資訊回答。
+            <span class="tg-time">11:00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ba-box fragment" data-order="0">
+      <div class="ba-label after">After</div>
+      <div class="tg-mockup" style="border:none;border-radius:0;margin:0;box-shadow:none;">
+        <div class="tg-body" style="min-height:140px;">
+          <div class="tg-msg sent">今天有什麼AI新聞？<span class="tg-time">11:00</span></div>
+          <div class="tg-msg recv">
+            <div class="tg-sender">🦞</div>
+            🔍 搜尋中...<br><br>
+            1. Google 發布 Antigravity IDE<br>
+            2. OpenClaw 用戶突破千萬<br>
+            3. Meta 開源 LLaMA 5
+            <span class="tg-time">11:01</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 28: Skill 概念 ===== -->
+<div class="slide" data-index="28">
+  <h2>Skill = 龍蝦的技能</h2>
+  <div class="info-box analogy">
+    <div class="label">比喻</div>
+    <p style="font-size:1.2rem;">龍蝦像一支空白手機<br>
+    <strong>Skill = 安裝 App</strong>，裝越多，能做越多事</p>
+  </div>
+  <div class="card-grid fragment" data-order="0" style="margin-top:1rem;">
+    <div class="card" style="padding:1.2rem;">
+      <h3>web-search</h3>
+      <p>搜尋網路資訊</p>
+    </div>
+    <div class="card" style="padding:1.2rem;">
+      <h3>image-gen</h3>
+      <p>AI 生成圖片</p>
+    </div>
+    <div class="card" style="padding:1.2rem;">
+      <h3>code-exec</h3>
+      <p>執行程式碼</p>
+    </div>
+    <div class="card" style="padding:1.2rem;">
+      <h3>file-manage</h3>
+      <p>管理檔案</p>
+    </div>
+    <div class="card" style="padding:1.2rem;">
+      <h3>calendar</h3>
+      <p>行事曆整合</p>
+    </div>
+    <div class="card" style="padding:1.2rem;">
+      <h3>custom</h3>
+      <p>自訂任何功能</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 29: 個性化設定 (terminal) ===== -->
+<div class="slide" data-index="29">
+  <h2 style="margin-bottom:0;">個人化設定</h2>
+  <div class="star-badge">⭐⭐⭐ 第三顆星</div>
+  <div class="terminal-mockup">
+    <div class="terminal-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span style="color:var(--g400);font-size:.8rem;margin-left:.5rem;">Terminal</span>
+    </div>
+    <div class="terminal-body">
+      <span class="prompt">you ></span> <span class="user-input">幫龍蝦改名叫小龍，個性熱情有禮，回覆繁體中文，不超過3句</span><br><br>
+      <span class="ai-label">Claude ></span> 正在修改人設...<br>
+      <span class="output">  name: "小龍"</span><br>
+      <span class="output">  personality: "熱情有禮，像鄰居大哥哥"</span><br>
+      <span class="output">  language: "繁體中文"</span><br>
+      <span class="output">  max_reply_length: "3 sentences"</span><br>
+      <span class="success">  ✅ 人設已更新，重啟中...</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 30: Before/After 個性化 ===== -->
+<div class="slide" data-index="30">
+  <h2>Before / After：個性化</h2>
+  <div class="ba-container">
+    <div class="ba-box">
+      <div class="ba-label before">Before</div>
+      <div class="tg-mockup" style="border:none;border-radius:0;margin:0;box-shadow:none;">
+        <div class="tg-body" style="min-height:120px;">
+          <div class="tg-msg sent">Who are you?<span class="tg-time">11:20</span></div>
+          <div class="tg-msg recv">
+            <div class="tg-sender">🦞</div>
+            I am an AI assistant powered by Groq. How can I help you today?
+            <span class="tg-time">11:20</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ba-box fragment" data-order="0">
+      <div class="ba-label after">After</div>
+      <div class="tg-mockup" style="border:none;border-radius:0;margin:0;box-shadow:none;">
+        <div class="tg-body" style="min-height:120px;">
+          <div class="tg-msg sent">你是誰？<span class="tg-time">11:20</span></div>
+          <div class="tg-msg recv">
+            <div class="tg-sender">🦞 小龍</div>
+            我是小龍！你的 AI 好夥伴～有什麼需要幫忙的儘管說！😄
+            <span class="tg-time">11:20</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="fragment" data-order="1" style="margin-top:1rem;font-size:1.2rem;color:var(--blue);font-weight:700;">它記住你的喜好了，認識你了</p>
+</div>
+
+<!-- ===== 31: 更多個性化範例 ===== -->
+<div class="slide" data-index="31">
+  <h2>同學們的龍蝦會長怎樣？</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card fragment" data-order="0" style="border-color:var(--blue);">
+      <div class="icon">👩‍💼</div>
+      <h3>行銷助手</h3>
+      <p>「回覆時加上 emoji，語氣活潑，每次推薦 3 個行銷靈感」</p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:var(--green);">
+      <div class="icon">👨‍🏫</div>
+      <h3>教學助理</h3>
+      <p>「用蘇格拉底式提問，不直接給答案，引導學生思考」</p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-color:var(--purple);">
+      <div class="icon">👨‍💻</div>
+      <h3>技術顧問</h3>
+      <p>「回答程式問題時附上程式碼，用繁體中文，精簡不廢話」</p>
+    </div>
+  </div>
+  <p class="fragment dim" data-order="3" style="margin-top:1rem;">同一個龍蝦，不同人設 = 完全不同的助手。你想要什麼性格？</p>
+</div>
+
+<!-- ===== 32: 排程任務 (terminal) ===== -->
+<div class="slide" data-index="32">
+  <h2 style="margin-bottom:0;">排程任務</h2>
+  <div class="star-badge">⭐⭐⭐⭐ 第四顆星</div>
+  <div class="terminal-mockup">
+    <div class="terminal-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span style="color:var(--g400);font-size:.8rem;margin-left:.5rem;">Terminal</span>
+    </div>
+    <div class="terminal-body">
+      <span class="prompt">you ></span> <span class="user-input">設定排程：每天早上 8 點自動搜尋 AI 新聞，整理 3 條發給我</span><br><br>
+      <span class="ai-label">Claude ></span> 正在設定排程任務...<br>
+      <span class="output">  schedule: "0 8 * * *" (每天 08:00)</span><br>
+      <span class="output">  action: web-search "latest AI news today"</span><br>
+      <span class="output">  format: 整理成 3 條摘要，繁體中文</span><br>
+      <span class="success">  ✅ 排程已啟用，明天 8:00 開始</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 33: 排程結果 ===== -->
+<div class="slide" data-index="33">
+  <h2>第二天早上 ── 你什麼都沒做</h2>
+  <div class="tg-mockup">
+    <div class="tg-header">
+      <div class="tg-avatar bot">🦞</div>
+      <div class="tg-header-info">
+        <div class="tg-header-name">小龍 AI 助手</div>
+        <div class="tg-header-status">online</div>
+      </div>
+    </div>
+    <div class="tg-body" style="min-height:200px;">
+      <div class="tg-msg-system">今天 08:00</div>
+      <div class="tg-msg recv">
+        <div class="tg-sender">🦞 小龍</div>
+        📰 <strong>今日 AI 新聞</strong><br><br>
+        1. 🏢 Apple 宣布 Siri 全面升級，整合 Claude 模型<br>
+        2. 🚀 Groq 新一代晶片效能提升 5 倍，仍維持免費方案<br>
+        3. 🎓 MIT 發布 AI 教育白皮書：建議從小學開始教 AI 素養<br><br>
+        想深入了解哪一則？
+        <span class="tg-time">08:00</span>
+      </div>
+    </div>
+    <div class="tg-input-bar">
+      <div class="tg-input-field">輸入訊息...</div>
+      <div class="tg-send-btn">➤</div>
+    </div>
+  </div>
+  <p style="margin-top:.8rem;font-size:1.3rem;font-weight:900;color:var(--red);">你什麼都沒做，它自己發的。不用你叫了。</p>
+</div>
+
+<!-- ===== 34: Trigger 回呼 ===== -->
+<div class="slide" data-index="34">
+  <h2>S01 的 Trigger，又出現了</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <div style="background:var(--green-lt);border-radius:12px;padding:1.2rem;border:2px solid var(--green);">
+        <h3 class="green">S01 GAS Trigger</h3>
+        <p style="font-size:.95rem;margin-top:.5rem;">
+          在 Google Script 設定<br>
+          「每週一 8:00 執行」<br>
+          → GAS 自動抓 RSS、AI 摘要、寄 Email
+        </p>
+      </div>
+    </div>
+    <div class="col">
+      <div style="background:var(--red-lt);border-radius:12px;padding:1.2rem;border:2px solid var(--red);">
+        <h3 class="red">S05 OpenClaw 排程</h3>
+        <p style="font-size:.95rem;margin-top:.5rem;">
+          在龍蝦設定<br>
+          「每天 8:00 搜尋新聞」<br>
+          → Agent 自動搜尋、整理、發 Telegram
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="info-box analogy fragment" data-order="0" style="margin-top:1rem;">
+    <div class="label">同樣概念，不同載體</div>
+    <p>S01 的排程 = Google 幫你跑。S05 的排程 = 龍蝦幫你跑。<br>概念一樣，但龍蝦住在你的手機裡，互動性更強。</p>
+  </div>
+</div>
+
+<!-- ===== 35: 更多排程範例 ===== -->
+<div class="slide" data-index="35">
+  <h2>排程可以做什麼？</h2>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step fragment" data-order="0">
+      <div class="step-num" style="background:var(--blue);">📰</div>
+      <div class="step-content"><strong>每天 8:00 新聞摘要</strong><p>「搜尋 AI 新聞，整理 3 條」</p></div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--green);">💰</div>
+      <div class="step-content"><strong>每天 9:00 匯率提醒</strong><p>「查美金對台幣匯率，超過 32 就提醒我」</p></div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="background:var(--gold);">📋</div>
+      <div class="step-content"><strong>每週五 17:00 週報整理</strong><p>「搜尋本週我的 Google Calendar，整理成週報」</p></div>
+    </div>
+    <div class="step fragment" data-order="3">
+      <div class="step-num" style="background:var(--purple);">🎂</div>
+      <div class="step-content"><strong>生日提醒</strong><p>「檢查通訊錄，提前一天提醒生日」</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 36: 資安檢查 ===== -->
+<div class="slide" data-index="36">
+  <h2>資安檢查</h2>
+  <div class="terminal-mockup">
+    <div class="terminal-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <span style="color:var(--g400);font-size:.8rem;margin-left:.5rem;">Terminal</span>
+    </div>
+    <div class="terminal-body">
+      <span class="prompt">you ></span> <span class="user-input">檢查我的 OpenClaw 有沒有安全問題</span><br><br>
+      <span class="ai-label">Claude ></span> 正在掃描安全設定...<br>
+      <span class="output">  scanning config files...</span><br>
+      <span class="output">  checking API key storage...</span><br>
+      <span class="output">  reviewing network settings...</span><br><br>
+      <span class="success">  ✅ API Key 加密存儲（.env 檔案）</span><br>
+      <span class="success">  ✅ Docker 網路隔離</span><br>
+      <span class="warn">  ⚠️ 建議啟用 Pairing 限制（目前任何人可私訊）</span><br>
+      <span class="success">  ✅ 無已知漏洞</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 37: 資安三守則 ===== -->
+<div class="slide" data-index="37">
+  <h2>三條資安守則</h2>
+  <div class="card-grid" style="margin-top:1.5rem;">
+    <div class="card fragment" data-order="0">
+      <div class="icon">📧</div>
+      <h3>用備用帳號</h3>
+      <p>不要連主要 Gmail<br>申請一個專用 Telegram 帳號<br>資料隔離最安全</p>
+    </div>
+    <div class="card fragment" data-order="1">
+      <div class="icon">🔒</div>
+      <h3>啟用 Pairing</h3>
+      <p>只有你能跟它對話<br>防止陌生人私訊你的 Bot<br>在設定檔加一行就好</p>
+    </div>
+    <div class="card fragment" data-order="2">
+      <div class="icon">🎯</div>
+      <h3>最小權限</h3>
+      <p>需要什麼才開什麼<br>不用的 Skill 關掉<br>別給超過需要的存取權</p>
+    </div>
+  </div>
+  <div class="info-box warning fragment" data-order="3" style="margin-top:1rem;">
+    <div class="label">S01 教過的 Key 保護，一樣適用</div>
+    <p>Bot Token = 你的密碼。跟 Groq Key 一樣，不能貼在公開的地方。</p>
+  </div>
+</div>
+
+<!-- ===== 38: BREAK ===== -->
+<div class="slide break-slide" data-index="38">
+  <p style="font-size:5rem;">☕</p>
+  <h2 style="margin-top:1rem;color:var(--g800);">休息 10 分鐘</h2>
+  <p class="dim" style="margin-top:1rem;">最後：打通一切 + 五模組大收尾</p>
+</div>
+
+<!-- ═══════════════════════════════
+     ⭐⭐⭐⭐⭐ 打通一切 + 大收尾
+     ═══════════════════════════════ -->
+<div class="slide section-title" data-index="39">
+  <p class="subtitle">第三段 · 2:10 – 3:00</p>
+  <h1>⭐⭐⭐⭐⭐ 打通一切</h1>
+  <p class="subtitle" style="margin-top:.5rem;">串聯 GAS + 五模組大收尾</p>
+</div>
+
+<!-- ===== 40: 串聯 GAS 說明 ===== -->
+<div class="slide" data-index="40">
+  <h2><span class="red">⭐⭐⭐⭐⭐ Grand Finale</span></h2>
+  <p style="font-size:1.3rem;margin-top:.5rem;">把 S01 做的 GAS 問卷系統，接到龍蝦身上</p>
+  <div class="flow" style="margin-top:2rem;">
+    <div class="flow-box" style="border-color:var(--green);background:var(--green-lt);">S01 GAS<br><span class="dim" style="font-size:.75rem;">問卷分析系統</span></div>
+    <div class="flow-arrow">+</div>
+    <div class="flow-box" style="border-color:var(--red);background:var(--red-lt);">S05 龍蝦<br><span class="dim" style="font-size:.75rem;">Telegram Agent</span></div>
+    <div class="flow-arrow">=</div>
+    <div class="flow-box fragment" data-order="0" style="border-color:var(--navy);background:var(--blue-lt);box-shadow:0 0 20px rgba(26,115,232,.3);">
+      <strong>手機一句話<br>自動分析問卷</strong>
+    </div>
+  </div>
+  <p class="fragment" data-order="1" style="margin-top:2rem;font-size:1.3rem;font-weight:700;color:var(--navy);">第一堂做的東西，到最後一堂還在用。</p>
+</div>
+
+<!-- ===== 41: 串聯 GAS — Telegram 對話 ===== -->
+<div class="slide" data-index="41">
+  <h2>Demo：一句話觸發分析</h2>
+  <div class="tg-mockup">
+    <div class="tg-header">
+      <div class="tg-avatar bot">🦞</div>
+      <div class="tg-header-info">
+        <div class="tg-header-name">小龍 AI 助手</div>
+        <div class="tg-header-status">online</div>
+      </div>
+    </div>
+    <div class="tg-body" style="min-height:240px;">
+      <div class="tg-msg sent">幫我分析最新的問卷結果<span class="tg-time">14:30</span></div>
+      <div class="tg-msg recv fragment" data-order="0">
+        <div class="tg-sender">🦞 小龍</div>
+        正在呼叫問卷分析系統... ⏳
+        <span class="tg-time">14:30</span>
+      </div>
+      <div class="tg-msg recv fragment" data-order="1">
+        <div class="tg-sender">🦞 小龍</div>
+        📊 <strong>分析完成！</strong><br><br>
+        共 28 份回覆<br>
+        整體滿意度 <strong style="color:var(--green);">79%</strong><br>
+        最高分：課程內容（4.2/5）<br>
+        最需改進：時間安排（3.5/5）<br><br>
+        📄 <span style="color:var(--blue);text-decoration:underline;">完整報告 → Google Docs</span>
+        <span class="tg-time">14:31</span>
+      </div>
+    </div>
+    <div class="tg-input-bar">
+      <div class="tg-input-field">輸入訊息...</div>
+      <div class="tg-send-btn">➤</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 42: 發生了什麼事 ===== -->
+<div class="slide" data-index="42">
+  <h2>發生了什麼事？</h2>
+  <div class="flow" style="margin-top:1.5rem;">
+    <div class="flow-box" style="border-color:var(--tg-blue);background:var(--tg-bg);">💬 Telegram<br><span class="dim" style="font-size:.75rem;">你說一句話</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--red);background:var(--red-lt);">🦞 OpenClaw<br><span class="dim" style="font-size:.75rem;">理解指令</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--green);background:var(--green-lt);">📊 GAS Web App<br><span class="dim" style="font-size:.75rem;">S01 做的！</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--blue);background:var(--blue-lt);">🤖 AI 分析<br><span class="dim" style="font-size:.75rem;">Groq LLM</span></div>
+  </div>
+  <div class="flow" style="margin-top:.3rem;">
+    <div class="flow-box" style="border-color:var(--blue);background:var(--blue-lt);">🤖 分析結果</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--purple);background:var(--purple-lt);">📝 Docs 報告</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--red);background:var(--red-lt);">🦞 OpenClaw</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--tg-blue);background:var(--tg-bg);">💬 回到手機<br><span class="dim" style="font-size:.75rem;">你收到結果</span></div>
+  </div>
+  <div class="info-box success fragment" data-order="0" style="margin-top:1rem;">
+    <div class="label">一句話 → 六個步驟 → 自動完成</div>
+    <p>S01 做的問卷系統，現在用手機一句話就觸發。你甚至可以設排程讓它每天自動跑。</p>
+  </div>
+</div>
+
+<!-- ===== 43: 想像更多串聯 ===== -->
+<div class="slide" data-index="43">
+  <h2>想像更多可能</h2>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step fragment" data-order="0">
+      <div class="step-num" style="background:var(--green);">💬</div>
+      <div class="step-content"><strong>「幫我看昨天的銷售數據」</strong><p>龍蝦 → 呼叫 GAS → 讀 Sheet → AI 分析 → 回報重點</p></div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--blue);">💬</div>
+      <div class="step-content"><strong>「把這週的客訴整理成報告」</strong><p>龍蝦 → 呼叫 GAS → 讀 Form 回覆 → AI 分類摘要 → 寫進 Docs</p></div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="background:var(--purple);">💬</div>
+      <div class="step-content"><strong>「每天 9 點告訴我今天有哪些會議」</strong><p>龍蝦 → 排程 → 讀 Calendar → AI 摘要 → 主動通知</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 44: 雙系統工作流 ===== -->
+<div class="slide" data-index="44">
+  <h2>雙系統工作流：移動 + 桌面</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <div style="background:var(--blue-lt);border-radius:12px;padding:1.2rem;text-align:center;">
+        <p style="font-size:2rem;">📱</p>
+        <h3 class="blue">移動端 — OpenClaw</h3>
+        <p style="font-size:.95rem;line-height:1.8;margin-top:.5rem;">
+          捷運上有想法 → 直接丟給龍蝦<br>
+          「這方向可行嗎？有什麼風險？」<br>
+          來回討論，方案推進到 <strong>70-80%</strong><br>
+          對話記錄自動同步到電腦
+        </p>
+      </div>
+    </div>
+    <div class="col fragment" data-order="0">
+      <div style="background:var(--green-lt);border-radius:12px;padding:1.2rem;text-align:center;">
+        <p style="font-size:2rem;">💻</p>
+        <h3 class="green">桌面端 — Claude Code</h3>
+        <p style="font-size:.95rem;line-height:1.8;margin-top:.5rem;">
+          到家打開電腦<br>
+          Claude Code 讀取龍蝦的記錄<br>
+          <strong>無縫接手</strong>，細化執行<br>
+          寫程式、部署、上線
+        </p>
+      </div>
+    </div>
+  </div>
+  <p class="fragment dim" data-order="1" style="margin-top:1rem;">想法不再流失 — 移動端捕捉，桌面端執行</p>
+</div>
+
+<!-- ===== 45: 真實成本 — 主機 ===== -->
+<div class="slide" data-index="45">
+  <h2>要花多少錢？① 雲端主機</h2>
+  <p class="dim" style="margin-bottom:.5rem;">讓龍蝦 24 小時跑著的地方</p>
+  <table class="compare-table">
+    <tr><th>方案</th><th>月費</th><th>特色</th></tr>
+    <tr><td><strong style="color:var(--gold);">Oracle Cloud</strong></td><td class="green bold">$0（永久免費）</td><td>4 vCPU + 24GB RAM，業界最大方</td></tr>
+    <tr><td><strong>Hetzner</strong></td><td>~$4</td><td>穩定省心，價格透明</td></tr>
+    <tr><td><strong>Zeabur</strong></td><td>$2/月</td><td>一鍵部署，最方便</td></tr>
+    <tr><td>AWS / GCP</td><td>~$13</td><td></td></tr>
+    <tr><td>Azure</td><td>~$31</td><td>最貴（有 Startups $25K 額度可抵）</td></tr>
+  </table>
+  <div class="info-box tip fragment" data-order="0" style="margin-top:.5rem;">
+    <div class="label">💡 推薦</div>
+    <p><strong>最省</strong>：Oracle 免費方案（要自己設定）<br>
+    <strong>最方便</strong>：Zeabur $5/月（一鍵部署，適合不想碰伺服器的人）<br>
+    <strong>最穩</strong>：Hetzner $4/月</p>
+  </div>
+</div>
+
+<!-- ===== 46: 真實成本 — LLM ===== -->
+<div class="slide" data-index="46">
+  <h2>要花多少錢？② AI 大腦</h2>
+  <p class="dim" style="margin-bottom:.5rem;">龍蝦用什麼模型思考</p>
+  <table class="compare-table">
+    <tr><th>模型</th><th>月費</th><th>備註</th></tr>
+    <tr><td><strong style="color:var(--gold);">Gemini Flash-Lite</strong></td><td class="green bold">$0</td><td>每天 1000 次，輕度夠用</td></tr>
+    <tr><td><strong>Claude Haiku 3</strong></td><td>~$3</td><td>便宜穩定</td></tr>
+    <tr><td><strong>GPT-4.1-mini</strong></td><td>~$4</td><td>性價比之選</td></tr>
+    <tr><td><strong class="blue">Grok Code Fast 1</strong></td><td>可接受</td><td>表現好，幾乎不出錯</td></tr>
+  </table>
+  <div class="info-box success fragment" data-order="0" style="margin-top:.5rem;">
+    <div class="label">組合推薦</div>
+    <p><strong>免費</strong>：Oracle + Gemini Lite → <span class="green bold">$0/月</span><br>
+    <strong>最方便</strong>：Zeabur + Gemini Lite → <span class="blue bold">$2/月</span><br>
+    <strong>超省</strong>：Oracle + Haiku → ~$3/月<br>
+    <strong>穩定</strong>：Hetzner + GPT-4.1-mini → ~$8/月</p>
+  </div>
+</div>
+
+<!-- ===== 47: 模型實測比較 ===== -->
+<div class="slide" data-index="47">
+  <h2>模型怎麼選？實測告訴你</h2>
+  <p class="dim" style="margin-bottom:.5rem;">講師試了 7 種模型的真實心得</p>
+  <div class="step-list" style="font-size:.95rem;">
+    <div class="step"><div class="step-num" style="background:var(--red);">1</div><div class="step-content"><strong>Claude Opus 4.5</strong> — 最強，但一小時費用嚇到<span class="red bold"> ❌</span></div></div>
+    <div class="step"><div class="step-num" style="background:var(--red);">2</div><div class="step-content"><strong>GPT-4o</strong> — 便宜但設定一直出錯 <span class="red bold">❌</span></div></div>
+    <div class="step"><div class="step-num" style="background:var(--red);">3</div><div class="step-content"><strong>本機 Ollama qwen2.5:32b</strong> — 速度慢到放棄 <span class="red bold">❌</span></div></div>
+    <div class="step"><div class="step-num" style="background:var(--gold);">4</div><div class="step-content"><strong>Gemini 2.5 Flash-Lite</strong> — 便宜但連 cron job 都設不好 <span class="gold bold">⚠️</span></div></div>
+    <div class="step"><div class="step-num" style="background:var(--gold);">5</div><div class="step-content"><strong>Gemini 2.5 Flash</strong> — 比 Lite 好但常出錯 <span class="gold bold">⚠️</span></div></div>
+    <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--green);">6</div><div class="step-content"><strong>Gemini 3 Flash Preview</strong> — 幾乎不出錯，快又正確 <span class="green bold">✅</span>（有點貴）</div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--green);">7</div><div class="step-content"><strong class="blue">Grok Code Fast 1</strong> — 表現好、不出錯、費用可接受 <span class="green bold">✅ 推薦</span></div></div>
+  </div>
+</div>
+
+<!-- ===== 48: 模型選擇結論 ===== -->
+<div class="slide" data-index="48">
+  <h2>結論：便宜的做不好事，要挑甜蜜點</h2>
+  <div class="info-box warning" style="margin-top:1rem;">
+    <div class="label">便宜模型的問題</div>
+    <p>GPT-4o、Gemini Lite/Flash 在 OpenClaw 的複雜任務上<strong>表現差</strong>：<br>
+    安裝 Skills 失敗、cron 排程設不好、多步驟任務做到一半就錯</p>
+  </div>
+  <div class="info-box success fragment" data-order="0" style="margin-top:.8rem;">
+    <div class="label">甜蜜點</div>
+    <p><strong>Grok Code Fast 1</strong>（via OpenRouter）<br>
+    表現接近頂級模型，費用合理<br>
+    偶爾回覆出現日文/阿拉伯文，但結果正確<br><br>
+    <strong>Gemini 3 Flash Preview</strong> 也很好，但稍貴</p>
+  </div>
+  <p class="fragment dim" data-order="1" style="margin-top:1rem;">建議：先用免費的 Gemini Lite 試水溫 → 不夠用再升級到 Grok Code Fast</p>
+</div>
+
+<!-- ═══════════════════════════════
+     五模組大收尾
+     ═══════════════════════════════ -->
+<div class="slide section-title" data-index="45">
+  <h1>🎓 五模組大收尾</h1>
+  <p class="subtitle" style="margin-top:.5rem;">回顧你的學習旅程</p>
+</div>
+
+<!-- ===== 46: 學習路徑 ===== -->
+<div class="slide" data-index="46">
+  <h2>你的學習路徑</h2>
+  <div class="flow" style="margin-top:2rem;gap:1rem;">
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);padding:1rem 1.2rem;">
+      <div style="font-size:1.5rem;">🔑</div>
+      S01 GAS<br><span style="font-size:.8rem;color:var(--green);">✅</span>
+    </div>
+    <div class="flow-arrow" style="font-size:2rem;">→</div>
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);padding:1rem 1.2rem;">
+      <div style="font-size:1.5rem;">🎨</div>
+      S02 Vibe<br><span style="font-size:.8rem;color:var(--blue);">✅</span>
+    </div>
+    <div class="flow-arrow" style="font-size:2rem;">→</div>
+    <div class="flow-box" style="background:var(--purple-lt);border-color:var(--purple);padding:1rem 1.2rem;">
+      <div style="font-size:1.5rem;">⌨️</div>
+      S03 CLI<br><span style="font-size:.8rem;color:var(--purple);">✅</span>
+    </div>
+    <div class="flow-arrow" style="font-size:2rem;">→</div>
+    <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);padding:1rem 1.2rem;">
+      <div style="font-size:1.5rem;">🏗️</div>
+      S04 IDE<br><span style="font-size:.8rem;color:var(--gold);">✅</span>
+    </div>
+    <div class="flow-arrow" style="font-size:2rem;">→</div>
+    <div class="flow-box fragment" data-order="0" style="background:var(--red-lt);border-color:var(--red);padding:1rem 1.2rem;box-shadow:0 0 20px rgba(217,48,37,.3);">
+      <div style="font-size:1.5rem;">🦞</div>
+      <strong>S05 Agent</strong><br><span style="font-size:.8rem;color:var(--red);">✅ NOW!</span>
+    </div>
+  </div>
+  <p class="fragment" data-order="1" style="margin-top:2rem;font-size:1.5rem;font-weight:900;color:var(--navy);">五個模組，全部完成。</p>
+</div>
+
+<!-- ===== 47: 你從哪裡來到哪裡去 ===== -->
+<div class="slide" data-index="47">
+  <h2>你從哪裡來，到哪裡去</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <div style="background:var(--g50);border-radius:16px;padding:1.5rem;text-align:center;">
+        <p style="font-size:2.5rem;">😰</p>
+        <h3 style="color:var(--red);">Before</h3>
+        <p style="font-size:1.1rem;margin-top:.5rem;">手動複製貼上程式碼<br>AI 是偶爾用的工具<br>關掉瀏覽器就沒了</p>
+      </div>
+    </div>
+    <div class="col fragment" data-order="0">
+      <div style="background:var(--green-lt);border-radius:16px;padding:1.5rem;text-align:center;border:2px solid var(--green);">
+        <p style="font-size:2.5rem;">🚀</p>
+        <h3 style="color:var(--green);">After</h3>
+        <p style="font-size:1.1rem;margin-top:.5rem;">你有了自己的 AI OS<br>黃仁勳說的 Jarvis<br>24/7 不下班的超級助理</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 48: 每堂一句話 ===== -->
+<div class="slide" data-index="48">
+  <h2>每堂課一句話</h2>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step fragment" data-order="0">
+      <div class="step-num" style="background:var(--green);font-size:.8rem;">S01</div>
+      <div class="step-content"><strong>搬運工</strong> — 拿到 AI 鑰匙，手動貼 code 做自動化<p>API Key + GAS + Trigger</p></div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--blue);font-size:.8rem;">S02</div>
+      <div class="step-content"><strong>老闆</strong> — 說出來就有網站，不寫一行 code<p>Vibe Coding × 三種部署</p></div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="background:var(--purple);font-size:.8rem;">S03</div>
+      <div class="step-content"><strong>建造者</strong> — AI 在你電腦上蓋房子，從零到上線<p>CLI Agent × CLAUDE.md × Skills × MCP</p></div>
+    </div>
+    <div class="step fragment" data-order="3">
+      <div class="step-num" style="background:var(--gold);font-size:.8rem;">S04</div>
+      <div class="step-content"><strong>改造師</strong> — 接手別人的專案，改成你要的<p>VS Code IDE × 找→改→加→修→造</p></div>
+    </div>
+    <div class="step fragment" data-order="4">
+      <div class="step-num" style="background:var(--red);font-size:.8rem;">S05</div>
+      <div class="step-content"><strong>AI OS / Jarvis</strong> — 不下班的超級助理<p>OpenClaw Agent × 24/7 自主運作</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 49: 依角色推薦 ===== -->
+<div class="slide" data-index="49">
+  <h2>依你的角色，推薦下一步</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card fragment" data-order="0" style="border-color:var(--blue);">
+      <div class="icon">📢</div>
+      <h3 class="blue">行銷人</h3>
+      <p>GAS 問卷分析<br>+ OpenClaw 新聞追蹤<br><br><strong>每天自動收到行業動態</strong></p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:var(--green);">
+      <div class="icon">📋</div>
+      <h3 class="green">管理者</h3>
+      <p>OpenClaw 排程報告<br>+ Docs 自動產出<br><br><strong>AI 準時交報告</strong></p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-color:var(--purple);">
+      <div class="icon">💻</div>
+      <h3 class="purple">技術人</h3>
+      <p>CLI + IDE 深入開發<br>+ Agent Skill 自訂<br><br><strong>AI 成為開發夥伴</strong></p>
+    </div>
+    <div class="card fragment" data-order="3" style="border-color:var(--gold);">
+      <div class="icon">🚀</div>
+      <h3 class="gold">創業者</h3>
+      <p>Vibe Coding 快速原型<br>+ GitHub Pages 上線<br><br><strong>一天做出 MVP</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 50: 技能交叉表 ===== -->
+<div class="slide" data-index="50">
+  <h2>所有模組技能交叉</h2>
+  <p class="dim" style="margin-bottom:.5rem;">每一堂學到的東西，都在後面用到了</p>
+  <table class="compare-table">
+    <tr><th>來源</th><th>連結到</th><th>怎麼用</th></tr>
+    <tr>
+      <td><strong style="color:var(--green);">S01</strong> Groq Key</td>
+      <td><strong style="color:var(--red);">S05</strong> LLM 設定</td>
+      <td>同一把 Key，從 GAS 用到 Agent</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--green);">S01</strong> GAS Web App</td>
+      <td><strong style="color:var(--red);">S05</strong> 串聯觸發</td>
+      <td>龍蝦呼叫問卷系統</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--blue);">S02</strong> HTML 作品</td>
+      <td><strong style="color:var(--purple);">S03</strong> 修改素材</td>
+      <td>用 CLI 修改 Vibe 生成的網站</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--purple);">S03</strong> CLI 技能</td>
+      <td><strong style="color:var(--red);">S05</strong> 部署龍蝦</td>
+      <td>用 Claude Code 安裝 OpenClaw</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--gold);">S04</strong> 架構概念</td>
+      <td><strong style="color:var(--red);">S05</strong> Skill 設計</td>
+      <td>理解模組化 → 設計 Agent Skill</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ===== 51: 設計理念 ===== -->
+<div class="slide" data-index="51">
+  <h2>五堂課的設計理念</h2>
+  <div class="info-box success" style="margin-top:1rem;max-width:700px;">
+    <div class="label">不是五個獨立主題</div>
+    <p style="font-size:1.2rem;">是<strong>一條遞進的學習路線</strong>。每一堂都站在前一堂的肩膀上。</p>
+  </div>
+  <div style="margin-top:1.5rem;max-width:700px;text-align:left;">
+    <div class="fragment" data-order="0" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--green-lt);border-radius:12px;border-left:4px solid var(--green);">
+      <strong class="green">S01 → S05</strong>：同一把 Groq Key，從試算表用到 Agent
+    </div>
+    <div class="fragment" data-order="1" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--blue-lt);border-radius:12px;border-left:4px solid var(--blue);">
+      <strong class="blue">S02 → S03</strong>：Vibe 生的網站，用 CLI 繼續修改
+    </div>
+    <div class="fragment" data-order="2" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--purple-lt);border-radius:12px;border-left:4px solid var(--purple);">
+      <strong class="purple">S03 → S05</strong>：CLI 操作經驗，用來部署龍蝦
+    </div>
+    <div class="fragment" data-order="3" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--gold-lt);border-radius:12px;border-left:4px solid var(--gold);">
+      <strong class="gold">S04 → S05</strong>：架構思維，用來設計 Skill
+    </div>
+  </div>
+</div>
+
+<!-- ===== 52: 你帶走了什麼 ===== -->
+<div class="slide" data-index="52">
+  <h2>你帶走了什麼</h2>
+  <div style="max-width:720px;text-align:left;margin-top:1rem;">
+    <div class="fragment" data-order="0" style="padding:.8rem 1.2rem;margin:.4rem 0;background:var(--green-lt);border-radius:12px;border-left:4px solid var(--green);font-size:1.1rem;">
+      <strong class="green">🔑 一把 AI 鑰匙</strong> — Groq API Key，免費用到飽
+    </div>
+    <div class="fragment" data-order="1" style="padding:.8rem 1.2rem;margin:.4rem 0;background:var(--blue-lt);border-radius:12px;border-left:4px solid var(--blue);font-size:1.1rem;">
+      <strong class="blue">🌐 一個作品集</strong> — Vibe Coding 做的網站，已上線
+    </div>
+    <div class="fragment" data-order="2" style="padding:.8rem 1.2rem;margin:.4rem 0;background:var(--purple-lt);border-radius:12px;border-left:4px solid var(--purple);font-size:1.1rem;">
+      <strong class="purple">⌨️ 一個超能力</strong> — CLI 指揮 AI 操作電腦
+    </div>
+    <div class="fragment" data-order="3" style="padding:.8rem 1.2rem;margin:.4rem 0;background:var(--gold-lt);border-radius:12px;border-left:4px solid var(--gold);font-size:1.1rem;">
+      <strong class="gold">🏗️ 一套方法論</strong> — IDE + AI 改造任何專案
+    </div>
+    <div class="fragment" data-order="4" style="padding:.8rem 1.2rem;margin:.4rem 0;background:var(--red-lt);border-radius:12px;border-left:4px solid var(--red);font-size:1.1rem;">
+      <strong class="red">🦞 一個不下班的員工</strong> — OpenClaw Agent，24/7 待命
+    </div>
+  </div>
+</div>
+
+<!-- ===== 53: 最後的數字 ===== -->
+<div class="slide" data-index="53">
+  <h2>五堂課的成果</h2>
+  <div class="card-grid" style="margin-top:1.5rem;">
+    <div class="card fragment" data-order="0" style="text-align:center;">
+      <div class="big-num">5</div>
+      <p style="font-size:1.1rem;font-weight:700;margin-top:.3rem;">模組完成</p>
+      <p>GAS → Vibe → CLI → IDE → Agent</p>
+    </div>
+    <div class="card fragment" data-order="1" style="text-align:center;">
+      <div class="big-num" style="color:var(--green);">1</div>
+      <p style="font-size:1.1rem;font-weight:700;margin-top:.3rem;">把 API Key</p>
+      <p>貫穿五堂課<br>從頭用到尾</p>
+    </div>
+    <div class="card fragment" data-order="2" style="text-align:center;">
+      <div class="big-num" style="color:var(--red);">$0</div>
+      <p style="font-size:1.1rem;font-weight:700;margin-top:.3rem;">花費</p>
+      <p>全部免費工具<br>不需要信用卡</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 54: 最後一句話 ===== -->
+<div class="slide" data-index="54">
+  <div style="text-align:center;max-width:700px;">
+    <p style="font-size:1.2rem;color:var(--g600);margin-bottom:1rem;">從今天開始</p>
+    <p class="fragment" data-order="0" style="font-size:1.8rem;font-weight:900;color:var(--navy);line-height:1.6;">
+      你不再是<span class="dim" style="text-decoration:line-through;">「使用 AI 的人」</span>
+    </p>
+    <p class="fragment" data-order="1" style="font-size:2.2rem;font-weight:900;color:var(--blue);margin-top:1rem;line-height:1.6;">
+      你擁有了自己的 <span style="border-bottom:4px solid var(--blue);">AI OS</span>
+    </p>
+    <p class="fragment" data-order="2" style="font-size:1rem;color:var(--g400);margin-top:2rem;">
+      AI 不會取代你，但會用 AI 的人會取代不會的人。<br>
+      而你，已經會了。
+    </p>
+  </div>
+</div>
+
+<!-- ===== 55: END COVER ===== -->
+<div class="slide cover" data-index="55">
+  <p style="font-size:1.2rem;color:rgba(255,255,255,.6);margin-bottom:1.5rem;">S01 → S02 → S03 → S04 → S05</p>
+  <h1>五個模組，完成！</h1>
+  <p class="subtitle" style="margin-top:1.5rem;font-size:1.4rem;">
+    你已經從「使用 AI」進化到「擁有 AI OS」
+  </p>
+  <div style="margin-top:3rem;color:rgba(255,255,255,.5);font-size:.95rem;">
+    <p>ai100.cooperation.tw</p>
+  </div>
+</div>
+
+</div><!-- /slides -->
+
+<div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>←</button><button id="next">→</button></div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),tot=slides.length;
+let idx=0,fi=-1;
+document.getElementById('total').textContent=tot;
+const gf=el=>el.querySelectorAll('.fragment');
+function go(n){slides.forEach((s,i)=>{s.classList.remove('active','prev');if(i<n)s.classList.add('prev');s.querySelectorAll('.fragment').forEach(f=>f.classList.remove('visible'));});idx=n;fi=-1;slides[idx].classList.add('active');ui();}
+function ui(){document.getElementById('current').textContent=idx+1;document.getElementById('prev').disabled=idx===0&&fi<=0;const f=gf(slides[idx]);document.getElementById('next').disabled=idx===tot-1&&fi>=f.length-1;document.getElementById('progress').style.width=((idx+1)/tot*100)+'%';}
+function adv(){const f=gf(slides[idx]);if(fi<f.length-1){fi++;f[fi].classList.add('visible');ui();}else if(idx<tot-1)go(idx+1);}
+function ret(){const f=gf(slides[idx]);if(fi>=0){f[fi].classList.remove('visible');fi--;ui();}else if(idx>0){go(idx-1);const p=gf(slides[idx]);p.forEach(x=>x.classList.add('visible'));fi=p.length-1;ui();}}
+document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
+document.addEventListener('keydown',e=>{if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}if(e.key==='Home'){e.preventDefault();go(0);}if(e.key==='End'){e.preventDefault();go(tot-1);}if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}});
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
+ui();
+
+// ─── QR Code Generation ───
+const TEMPLATE_URL = 'https://ai10.cooperation.tw/classroom/s05-template.html';
+const qrOpts = {width:240,height:240,colorDark:'#202124',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M};
+
+function makeQR(id,url){
+  const el = document.getElementById(id);
+  if(el && !el.querySelector('canvas')){new QRCode(el,{...qrOpts,text:url});}
+}
+
+makeQR('qr-checklist', TEMPLATE_URL);
+makeQR('qr-botfather','https://t.me/botfather');
+makeQR('qr-cost', TEMPLATE_URL + '#cost');
+</script>
+</body>
+</html>

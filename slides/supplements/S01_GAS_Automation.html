@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S01 — GAS 自動化</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   grow.google 簡潔風 + Reading Glasses
+   投影教學用 (3-10m 觀看距離)
+   ═══════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--white);}
+
+/* Slides */
+.slides{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;opacity:0;transform:translateX(30px);pointer-events:none;transition:opacity .4s,transform .4s ease;background:var(--white);}
+.slide.active{opacity:1;transform:none;pointer-events:auto;}
+.slide.prev{opacity:0;transform:translateX(-30px);}
+.slide.cover{background:var(--navy);color:#fff;text-align:center;}
+.slide.section-title{background:var(--green);color:#fff;text-align:center;}
+.slide.break-slide{background:var(--offwhite);text-align:center;}
+
+/* Typography — 投影加大 */
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:2rem;font-weight:700;color:var(--g900);margin-bottom:1rem;line-height:1.4;}
+h3{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.1rem;line-height:1.8;}
+.subtitle{font-size:1.15rem;color:var(--g600);font-weight:500;}
+.blue{color:var(--blue);}.green{color:var(--green);}.gold{color:var(--gold);}.red{color:var(--red);}.purple{color:var(--purple);}.dim{color:var(--g600);}.bold{font-weight:700;}
+
+/* Fragment */
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* Cards */
+.card-grid{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;margin-top:1.2rem;max-width:1100px;}
+.card{background:var(--white);border:2px solid var(--g100);border-radius:16px;padding:1.8rem;min-width:220px;max-width:300px;flex:1;transition:border-color .2s;}
+.card:hover{border-color:var(--blue);}
+.card .icon{font-size:2.5rem;margin-bottom:.6rem;}
+.card p{font-size:1rem;color:var(--g600);}
+
+/* Steps */
+.step-list{text-align:left;max-width:800px;width:100%;}
+.step{display:flex;gap:1.2rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:40px;height:40px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.1rem;}.step-content p{font-size:1rem;color:var(--g600);margin-top:.15rem;}
+
+/* Code */
+.code-block{background:var(--g50);border:2px solid var(--g200);border-radius:12px;padding:1.3rem 1.8rem;text-align:left;max-width:860px;width:100%;font-family:'Fira Code',monospace;font-size:1rem;line-height:1.8;margin:.8rem 0;color:var(--g900);}
+.code-block .kw{color:#D93025;font-weight:700;}.code-block .str{color:#0F9D8A;}.code-block .fn{color:#7C3AED;}.code-block .cm{color:var(--g400);}
+
+/* Table */
+.compare-table{border-collapse:collapse;font-size:1rem;margin-top:.8rem;width:100%;max-width:860px;}
+.compare-table th{background:var(--navy);color:#fff;padding:.7rem 1rem;text-align:left;font-size:1rem;}
+.compare-table td{padding:.7rem 1rem;border-bottom:1px solid var(--g100);font-size:1rem;}
+.compare-table tr:hover td{background:var(--g50);}
+
+/* Info boxes */
+.info-box{border-radius:12px;padding:1.3rem 1.8rem;max-width:800px;width:100%;text-align:left;margin-top:.8rem;}
+.info-box.analogy{background:var(--blue-lt);border-left:4px solid var(--blue);}
+.info-box.warning{background:var(--red-lt);border-left:4px solid var(--red);}
+.info-box.success{background:var(--green-lt);border-left:4px solid var(--green);}
+.info-box.tip{background:var(--gold-lt);border-left:4px solid var(--gold);}
+.info-box .label{font-weight:700;font-size:1rem;margin-bottom:.4rem;}
+.info-box p{font-size:1.05rem;}
+
+/* Flow */
+.flow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1.2rem 0;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.7rem 1rem;font-size:1rem;font-weight:700;text-align:center;}
+.flow-arrow{color:var(--blue);font-size:1.5rem;font-weight:900;}
+
+/* Banner */
+.exercise-banner{display:inline-block;background:var(--purple);color:#fff;padding:.35rem 1.4rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.8rem;}
+
+/* Two col */
+.two-col{display:flex;gap:2rem;width:100%;max-width:960px;text-align:left;}
+.two-col .col{flex:1;}
+
+/* Big number */
+.big-num{font-size:4.5rem;font-weight:900;color:var(--blue);line-height:1;}
+
+/* ═══════════════════════════════════════
+   MOCKUP UI — 模擬操作畫面
+   ═══════════════════════════════════════ */
+.mockup-browser{
+  max-width:820px;width:100%;border-radius:12px;overflow:hidden;
+  border:2px solid var(--g200);margin:.8rem 0;max-height:65vh;overflow:hidden;
+  box-shadow:0 4px 24px rgba(0,0,0,.08);
+}
+.mockup-bar{
+  background:var(--g50);padding:.5rem 1rem;display:flex;align-items:center;gap:.6rem;
+  border-bottom:1px solid var(--g200);
+}
+.mockup-dots{display:flex;gap:5px;}
+.mockup-dot{width:10px;height:10px;border-radius:50%;}
+.mockup-dot.r{background:#FF5F57;}.mockup-dot.y{background:#FFBD2E;}.mockup-dot.g{background:#28C840;}
+.mockup-url{
+  flex:1;background:var(--white);border:1px solid var(--g200);border-radius:100px;
+  padding:.25rem .8rem;font-size:.8rem;color:var(--g600);font-family:'Fira Code',monospace;
+}
+.mockup-body{background:var(--white);padding:1rem 1.5rem;min-height:auto;max-height:50vh;overflow-y:auto;position:relative;}
+.mockup-body.dark{background:#1E1E1E;color:#D4D4D4;}
+
+/* Mockup UI elements */
+.mock-btn{
+  display:inline-block;padding:.4rem 1.2rem;border-radius:8px;font-weight:700;font-size:.9rem;
+  border:none;cursor:default;
+}
+.mock-btn.primary{background:var(--blue);color:#fff;}
+.mock-btn.green{background:var(--green);color:#fff;}
+.mock-btn.outline{background:transparent;border:2px solid var(--g200);color:var(--g800);}
+.mock-input{
+  border:2px solid var(--g200);border-radius:8px;padding:.4rem .8rem;font-size:.9rem;
+  background:var(--white);color:var(--g800);display:inline-block;min-width:200px;
+}
+.mock-sidebar{
+  background:var(--g50);padding:1rem;border-right:1px solid var(--g200);
+  min-width:160px;font-size:.85rem;
+}
+.mock-sidebar-item{padding:.4rem .6rem;border-radius:6px;margin:.2rem 0;cursor:default;}
+.mock-sidebar-item.active{background:var(--blue-lt);color:var(--blue);font-weight:700;}
+.mock-sidebar-item:hover{background:var(--g100);}
+
+/* Highlight arrow / callout */
+.callout{
+  position:absolute;background:var(--red);color:#fff;padding:.3rem .8rem;
+  border-radius:8px;font-size:.85rem;font-weight:700;
+  animation:pulse 1.5s infinite;z-index:5;
+}
+.callout::after{
+  content:'';position:absolute;border:8px solid transparent;
+}
+.callout.arrow-down::after{top:100%;left:50%;transform:translateX(-50%);border-top-color:var(--red);}
+.callout.arrow-left::after{top:50%;right:100%;transform:translateY(-50%);border-right-color:var(--red);}
+.callout.arrow-right::after{top:50%;left:100%;transform:translateY(-50%);border-left-color:var(--red);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.7;}}
+
+/* Mockup Sheet */
+.mock-sheet{width:100%;border-collapse:collapse;font-size:.9rem;}
+.mock-sheet th{background:var(--g100);padding:.3rem .8rem;text-align:center;font-weight:700;color:var(--g600);border:1px solid var(--g200);}
+.mock-sheet td{padding:.4rem .8rem;border:1px solid var(--g200);min-width:80px;}
+.mock-sheet .row-num{background:var(--g50);color:var(--g600);text-align:center;width:30px;font-size:.8rem;}
+.mock-sheet .input-cell{background:#E8F0FE;font-weight:500;}
+.mock-sheet .output-cell{background:#E6F4F1;color:var(--green);font-weight:500;}
+
+/* Controls */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:var(--white);color:var(--g800);font-size:1.2rem;cursor:pointer;transition:all .15s;}
+.controls button:hover{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
+.controls button:disabled{opacity:.25;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:var(--green-lt);color:var(--green);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;}
+/* 沒有 QR 的頁面顯示 badge，有 QR 的頁面 QR 蓋在上面 */
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
+
+/* QR Code — 取代右上角 badge 位置 */
+.qr-solo{
+  position:absolute;top:.6rem;right:.8rem;z-index:110;
+  background:var(--white);padding:4px;border-radius:6px;
+}
+
+.slide.cover h1{font-size:3.5rem;}
+.slide.cover .subtitle{color:rgba(255,255,255,.8);}
+.slide.section-title h1{font-size:2.8rem;}
+.slide.section-title .subtitle{color:rgba(255,255,255,.85);font-size:1.1rem;}
+</style>
+</head>
+<body>
+
+<div class="module-title">GAS 自動化</div>
+<div class="module-badge">S01 補充單元</div>
+<div class="slides">
+
+<!-- ===== 0: COVER ===== -->
+<div class="slide cover" data-index="0">
+  <p style="font-size:1.1rem;color:rgba(255,255,255,.6);margin-bottom:1rem;">AI 100 講 ─ 補充單元</p>
+  <h1>GAS 自動化</h1>
+  <p class="subtitle" style="margin-top:1rem;font-size:1.3rem;">三小時，從零到自動化</p>
+  <p style="color:rgba(255,255,255,.4);margin-top:3rem;font-size:.9rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- ===== 1: 議程 ===== -->
+<div class="slide" data-index="1">
+  <h2>今天的旅程</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>拿到你的 AI 鑰匙</strong><p>免費申請，不用信用卡</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num">2</div><div class="step-content"><strong>AI 在試算表裡回答你</strong><p>ChatGPT 幫你寫程式，貼上就能跑</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--green);">3</div><div class="step-content"><strong>批量處理 + Google 生態系</strong><p>AI 一次處理 10 筆，串接 Gmail</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--gold);">4</div><div class="step-content"><strong>自動化 + 部署成網站</strong><p>設定排程，把程式變成網址</p></div></div>
+  </div>
+</div>
+
+<!-- ===== 2: 痛點 ===== -->
+<div class="slide" data-index="2">
+  <h2>你每天花多少時間做<span class="red">重複的事</span>？</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0"><div class="icon">📧</div><h3>50 封 Email</h3><p>手動看、判斷、回覆<br>每天 45 分鐘</p></div>
+    <div class="card fragment" data-order="1"><div class="icon">📊</div><h3>客戶回饋整理</h3><p>複製、分類、寫摘要<br>每天 30 分鐘</p></div>
+    <div class="card fragment" data-order="2"><div class="icon">📅</div><h3>行程安排</h3><p>對時間、建行事曆<br>每天 20 分鐘</p></div>
+  </div>
+  <p class="fragment dim" data-order="3" style="margin-top:1.5rem;font-size:1.2rem;">一年 = <span class="blue bold" style="font-size:1.5rem;">580 小時</span> = 整整 24 天</p>
+</div>
+
+<!-- ===== 3: 解法 ===== -->
+<div class="slide" data-index="3">
+  <h2>如果有一個助手…</h2>
+  <div style="margin-top:1.5rem;text-align:left;max-width:600px;">
+    <p class="fragment" data-order="0" style="font-size:1.4rem;padding:.5rem 0;">✅ <strong>24 小時</strong>不休息</p>
+    <p class="fragment" data-order="1" style="font-size:1.4rem;padding:.5rem 0;">✅ 完全<strong>免費</strong></p>
+    <p class="fragment" data-order="2" style="font-size:1.4rem;padding:.5rem 0;">✅ 你<strong>不需要會寫程式</strong></p>
+  </div>
+  <p class="fragment" data-order="3" style="margin-top:2rem;font-size:1.6rem;font-weight:900;color:var(--blue);">今天你就要做到這件事</p>
+</div>
+
+<!-- ===== 4: SECTION ===== -->
+<div class="slide section-title" data-index="4">
+  <p class="subtitle">第一段 · 0:10 – 0:25</p>
+  <h1>🔑 拿到第一把 AI 鑰匙</h1>
+  <p class="subtitle" style="margin-top:.5rem;">免費，不需要信用卡</p>
+</div>
+
+<!-- ===== 5: API 比喻 ===== -->
+<div class="slide" data-index="5">
+  <h2>API Key 是什麼？</h2>
+  <div class="info-box analogy" style="margin-top:1rem;">
+    <div class="label">🍽️ 餐廳比喻</div>
+    <div class="flow" style="margin:1rem 0;">
+      <div class="flow-box">你<br><span class="dim" style="font-size:.85rem;">客人</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="border-color:var(--gold);background:var(--gold-lt);">VIP 卡<br><span style="font-size:.85rem;color:var(--gold);">API Key</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">服務生</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="border-color:var(--green);background:var(--green-lt);">廚房<br><span style="font-size:.85rem;color:var(--green);">AI 伺服器</span></div>
+    </div>
+    <p>有卡就能用，沒卡就不行。卡號不能給別人看。</p>
+  </div>
+</div>
+
+<!-- ===== 6: 為什麼 Groq ===== -->
+<div class="slide" data-index="6">
+  <h2>為什麼選 <span class="blue">Groq</span>？</h2>
+  <table class="compare-table">
+    <tr><th></th><th style="color:var(--gold);">⭐ Groq</th><th>OpenAI</th><th>Gemini</th></tr>
+    <tr><td><strong>免費？</strong></td><td class="green bold">完全免費</td><td class="red">要綁信用卡</td><td class="green">有免費額度</td></tr>
+    <tr><td><strong>註冊</strong></td><td>Google 帳號即可</td><td>需手機驗證</td><td>Google 帳號</td></tr>
+    <tr><td><strong>速度</strong></td><td style="color:var(--gold);font-weight:700;">⚡ 極快</td><td>普通</td><td>普通</td></tr>
+  </table>
+</div>
+
+<!-- ===== 7: 操作畫面 — Groq 首頁 ===== -->
+<div class="slide" data-index="7">
+  <div class="exercise-banner">👨‍💻 跟著做</div>
+  <h2>打開 Groq 網站，建立帳號</h2>
+  <div class="qr-solo"><div id="qr-groq"></div></div>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 console.groq.com</div>
+    </div>
+    <div class="mockup-body" style="text-align:center;padding:2rem;">
+      <p style="font-size:2rem;font-weight:900;color:var(--g900);margin-bottom:.5rem;">Groq Console</p>
+      <p style="font-size:1rem;color:var(--g600);margin-bottom:1.5rem;">The fastest AI inference</p>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:.8rem;">
+        <div class="mock-btn primary" style="padding:.6rem 2rem;font-size:1.1rem;position:relative;">
+          🔵 Sign Up with Google
+          <span class="callout arrow-left" style="left:calc(100% + 12px);top:50%;transform:translateY(-50%);">點這裡</span>
+        </div>
+        <p style="font-size:.85rem;color:var(--g400);">Free · No credit card required</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 8: 操作畫面 — 建立 Key ===== -->
+<div class="slide" data-index="8">
+  <div class="exercise-banner">👨‍💻 跟著做</div>
+  <h2>建立 API Key</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 console.groq.com/keys</div>
+    </div>
+    <div class="mockup-body" style="display:flex;min-height:200px;">
+      <div class="mock-sidebar">
+        <div class="mock-sidebar-item">🏠 Playground</div>
+        <div class="mock-sidebar-item active">🔑 API Keys</div>
+        <div class="mock-sidebar-item">📊 Usage</div>
+        <div class="mock-sidebar-item">⚙️ Settings</div>
+      </div>
+      <div style="flex:1;padding:1.5rem;position:relative;">
+        <p style="font-size:1.2rem;font-weight:700;margin-bottom:1rem;">API Keys</p>
+        <div style="display:flex;align-items:center;gap:.8rem;">
+          <div class="mock-btn primary" style="position:relative;">
+            + Create API Key
+            <span class="callout arrow-down" style="top:calc(100% + 10px);left:50%;transform:translateX(-50%);">點這裡建立</span>
+          </div>
+        </div>
+        <div style="margin-top:2.5rem;padding:.8rem;background:var(--g50);border-radius:8px;font-family:'Fira Code',monospace;font-size:.9rem;">
+          gsk_<span style="color:var(--green);">aBcDeFgHiJkLmNoPqRsTuVwXyZ...</span>
+          <span class="mock-btn outline" style="margin-left:.5rem;padding:.2rem .6rem;font-size:.8rem;">📋 Copy</span>
+        </div>
+        <p style="font-size:.85rem;color:var(--red);margin-top:.5rem;font-weight:500;">⚠️ 只顯示一次！現在就複製！</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 9: Key 是什麼 ===== -->
+<div class="slide" data-index="9">
+  <h2>你拿到的東西</h2>
+  <div class="code-block" style="text-align:center;font-size:1.3rem;padding:1.5rem;">
+    gsk_<span class="str">aBcDeFgHiJkLmNoPqRsT...</span>
+  </div>
+  <p style="margin-top:1.5rem;font-size:1.3rem;">這就是你的 <span class="blue bold">VIP 卡號</span></p>
+  <div class="info-box warning fragment" data-order="0">
+    <div class="label">⚠️ 重要</div>
+    <p>這串就像你的<strong>密碼</strong>，誰拿到就能用你的額度。<br>等等教你怎麼安全保管。</p>
+  </div>
+</div>
+
+<!-- ===== 10: 多模態 ===== -->
+<div class="slide" data-index="10">
+  <h2>加碼：AI 也能<span class="purple">看圖片</span></h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 gemgate（講師提供的網址）</div>
+    </div>
+    <div class="mockup-body" style="text-align:center;padding:2rem;">
+      <div style="border:3px dashed var(--g200);border-radius:16px;padding:2rem;margin-bottom:1rem;">
+        <p style="font-size:2rem;">📷</p>
+        <p style="color:var(--g600);font-size:1rem;">拖放圖片到這裡，或點擊上傳</p>
+      </div>
+      <div class="fragment" data-order="0" style="background:var(--green-lt);border-radius:12px;padding:1rem;text-align:left;">
+        <p style="font-size:.95rem;"><strong style="color:var(--green);">🤖 AI 回覆：</strong>這張圖片是一隻橘色的貓坐在窗台上，背景是城市街景...</p>
+      </div>
+    </div>
+  </div>
+  <p class="fragment dim" data-order="1" style="margin-top:.8rem;">「多模態 AI」— 不只讀文字，還能看圖</p>
+</div>
+
+<!-- ===== 11: SECTION ===== -->
+<div class="slide section-title" data-index="11">
+  <p class="subtitle">第一段 · 0:25 – 0:45</p>
+  <h1>🎉 第一次成功</h1>
+  <p class="subtitle" style="margin-top:.5rem;">AI 在試算表裡回答你</p>
+</div>
+
+<!-- ===== 12: 流程 ===== -->
+<div class="slide" data-index="12">
+  <h2>接下來你要做的</h2>
+  <div class="flow" style="margin-top:2rem;">
+    <div class="flow-box fragment" data-order="0" style="font-size:1.1rem;">💬 問 ChatGPT</div>
+    <div class="flow-arrow fragment" data-order="1">→</div>
+    <div class="flow-box fragment" data-order="1" style="font-size:1.1rem;">📋 複製程式碼</div>
+    <div class="flow-arrow fragment" data-order="2">→</div>
+    <div class="flow-box fragment" data-order="2" style="font-size:1.1rem;">📄 貼到 Google</div>
+    <div class="flow-arrow fragment" data-order="3">→</div>
+    <div class="flow-box fragment" data-order="3" style="border-color:var(--green);background:var(--green-lt);font-size:1.1rem;">▶️ 按執行</div>
+  </div>
+  <p class="fragment" data-order="4" style="margin-top:2rem;font-size:1.3rem;color:var(--blue);font-weight:700;">你一行都不用自己寫</p>
+</div>
+
+<!-- ===== 13: ChatGPT 操作畫面 ===== -->
+<div class="slide" data-index="13">
+  <div class="exercise-banner">👨‍💻 Step 1 — 問 ChatGPT</div>
+  <h2>貼上這段話</h2>
+  <div class="qr-solo"><div id="qr-prompt1"></div></div>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 chatgpt.com</div>
+    </div>
+    <div class="mockup-body" style="padding:1.5rem;">
+      <div style="background:var(--blue-lt);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1rem;font-size:.9rem;line-height:1.7;">
+        <strong>你：</strong>請幫我寫一段 Google Apps Script。<br>
+        功能：A1 輸入問題，執行後 B1 出現 AI 回答。<br>
+        用 Groq API，模型 llama-3.3-70b-versatile<br>
+        API Key 用 PropertiesService，不寫死。加中文註解。
+      </div>
+      <div class="fragment" data-order="0" style="background:var(--g50);border-radius:12px;padding:1rem 1.2rem;font-size:.9rem;line-height:1.7;">
+        <strong>ChatGPT：</strong>好的！以下是程式碼：<br>
+        <div style="background:#1E1E1E;color:#D4D4D4;border-radius:8px;padding:.8rem;margin-top:.5rem;font-family:'Fira Code',monospace;font-size:.8rem;position:relative;">
+          function askAI() {<br>
+          &nbsp;&nbsp;var sheet = SpreadsheetApp...<br>
+          &nbsp;&nbsp;var question = sheet.getRange("A1")...<br>
+          &nbsp;&nbsp;...
+          <span class="callout arrow-left" style="right:-80px;top:10px;">複製這段</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 14: GAS 編輯器畫面 ===== -->
+<div class="slide" data-index="14">
+  <div class="exercise-banner">👨‍💻 Step 2 — 打開 Apps Script</div>
+  <h2>Google Sheet → 擴充功能 → Apps Script</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 docs.google.com/spreadsheets/...</div>
+    </div>
+    <div class="mockup-body" style="padding:0;">
+      <!-- Menu bar -->
+      <div style="background:var(--white);padding:.4rem 1rem;border-bottom:1px solid var(--g200);display:flex;gap:1.5rem;font-size:.85rem;color:var(--g800);">
+        <span>檔案</span><span>編輯</span><span>檢視</span><span>插入</span><span>格式</span>
+        <span style="position:relative;font-weight:700;color:var(--blue);">擴充功能
+          <span class="callout arrow-down" style="top:calc(100% + 6px);left:50%;transform:translateX(-50%);font-size:.8rem;">點這裡</span>
+        </span>
+        <span>說明</span>
+      </div>
+      <!-- Dropdown -->
+      <div class="fragment" data-order="0" style="position:absolute;top:70px;left:340px;background:var(--white);border:1px solid var(--g200);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.1);padding:.5rem 0;z-index:2;font-size:.9rem;">
+        <div style="padding:.5rem 1.2rem;display:flex;justify-content:space-between;gap:2rem;">
+          <span>外掛程式</span><span style="color:var(--g400);">›</span>
+        </div>
+        <div style="padding:.5rem 1.2rem;background:var(--blue-lt);font-weight:700;color:var(--blue);position:relative;">
+          Apps Script
+          <span class="callout arrow-right" style="left:calc(100% + 12px);top:50%;transform:translateY(-50%);font-size:.8rem;">選這個</span>
+        </div>
+      </div>
+      <!-- Sheet -->
+      <table class="mock-sheet" style="margin:1rem;">
+        <tr><th></th><th style="width:200px;">A</th><th style="width:200px;">B</th><th style="width:120px;">C</th></tr>
+        <tr><td class="row-num">1</td><td></td><td></td><td></td></tr>
+        <tr><td class="row-num">2</td><td></td><td></td><td></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 15: GAS 編輯器 — 貼上 ===== -->
+<div class="slide" data-index="15">
+  <div class="exercise-banner">👨‍💻 Step 3 — 貼上程式碼</div>
+  <h2>清空預設 → 貼上 → 存檔</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 script.google.com/home/projects/...</div>
+    </div>
+    <div class="mockup-body" style="display:flex;padding:0;min-height:200px;">
+      <div class="mock-sidebar" style="min-width:140px;">
+        <p style="font-weight:700;margin-bottom:.5rem;font-size:.8rem;">📁 檔案</p>
+        <div class="mock-sidebar-item active">📄 程式碼.gs</div>
+        <p style="font-weight:700;margin-top:1rem;margin-bottom:.5rem;font-size:.8rem;position:relative;">
+          ⚙️ 專案設定
+        </p>
+      </div>
+      <div style="flex:1;background:#1E1E1E;padding:1rem;font-family:'Fira Code',monospace;font-size:.8rem;color:#D4D4D4;line-height:1.8;position:relative;">
+        <div style="position:absolute;top:.5rem;right:.5rem;display:flex;gap:.5rem;">
+          <div class="mock-btn" style="background:var(--blue);color:#fff;padding:.3rem .8rem;font-size:.8rem;position:relative;">
+            ▶️ 執行
+          </div>
+          <div class="mock-btn" style="background:var(--g600);color:#fff;padding:.3rem .8rem;font-size:.8rem;">💾 Ctrl+S</div>
+        </div>
+        <span style="color:#569CD6;">function</span> <span style="color:#DCDCAA;">askAI</span>() {<br>
+        &nbsp;&nbsp;<span style="color:#6A9955;">// 讀取 A1 的問題</span><br>
+        &nbsp;&nbsp;<span style="color:#569CD6;">var</span> sheet = SpreadsheetApp<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;.getActiveSheet();<br>
+        &nbsp;&nbsp;<span style="color:#569CD6;">var</span> question = sheet<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;.getRange(<span style="color:#CE9178;">"A1"</span>).getValue();<br>
+        &nbsp;&nbsp;...<br>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 16: 設定 Key ===== -->
+<div class="slide" data-index="16">
+  <div class="exercise-banner">👨‍💻 Step 4 — Key 鎖進保險箱</div>
+  <h2>專案設定 → 指令碼屬性</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 script.google.com ─ 專案設定</div>
+    </div>
+    <div class="mockup-body" style="padding:1.5rem;">
+      <p style="font-size:1.1rem;font-weight:700;margin-bottom:1rem;">指令碼屬性</p>
+      <div style="display:flex;gap:.8rem;align-items:center;margin-bottom:.8rem;">
+        <div class="mock-input" style="min-width:180px;font-weight:700;color:var(--blue);">GROQ_API_KEY</div>
+        <div class="mock-input" style="min-width:280px;font-family:'Fira Code',monospace;font-size:.85rem;">gsk_aBcDeFgH...</div>
+      </div>
+      <div style="margin-top:1rem;">
+        <div class="mock-btn green" style="position:relative;">
+          💾 儲存屬性
+          <span class="callout arrow-left" style="left:calc(100% + 12px);top:50%;transform:translateY(-50%);">按儲存</span>
+        </div>
+      </div>
+      <div class="fragment" data-order="0" style="margin-top:1rem;background:var(--green-lt);border-radius:8px;padding:.6rem 1rem;">
+        <p style="font-size:.95rem;color:var(--green);font-weight:700;">🔒 Key 現在鎖在 Google 伺服器上了！程式碼裡看不到。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 17: 執行結果 ===== -->
+<div class="slide" data-index="17">
+  <div class="exercise-banner">👨‍💻 Step 5 — 執行！</div>
+  <h2>在 A1 輸入問題 → 按執行 → 看 B1</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 docs.google.com/spreadsheets/...</div>
+    </div>
+    <div class="mockup-body" style="padding:1.5rem;">
+      <table class="mock-sheet">
+        <tr><th></th><th style="width:250px;">A</th><th style="width:350px;">B</th></tr>
+        <tr>
+          <td class="row-num">1</td>
+          <td class="input-cell">什麼是人工智慧？</td>
+          <td class="output-cell fragment" data-order="0">人工智慧是讓電腦能夠模擬人類思考和學習能力的技術，透過大量資料訓練，讓機器能夠做出判斷和預測...</td>
+        </tr>
+        <tr><td class="row-num">2</td><td></td><td></td></tr>
+        <tr><td class="row-num">3</td><td></td><td></td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="fragment" data-order="1" style="margin-top:1rem;font-size:1.5rem;font-weight:900;color:var(--green);">B1 出現 AI 回答了！🎉</p>
+</div>
+
+<!-- ===== 18: 你做了什麼 ===== -->
+<div class="slide" data-index="18">
+  <h2>停一下，你做了什麼？</h2>
+  <div style="margin-top:1.5rem;text-align:left;max-width:700px;">
+    <p class="fragment" data-order="0" style="font-size:1.3rem;padding:.6rem 0;"><span class="green bold">① 拿到鑰匙</span> — API Key</p>
+    <p class="fragment" data-order="1" style="font-size:1.3rem;padding:.6rem 0;"><span class="blue bold">② 請人寫程式</span> — ChatGPT 代筆</p>
+    <p class="fragment" data-order="2" style="font-size:1.3rem;padding:.6rem 0;"><span class="gold bold">③ 放到雲端跑</span> — Google Apps Script</p>
+  </div>
+  <p class="fragment dim" data-order="3" style="margin-top:1.5rem;font-size:1.1rem;">你已經是「會用 AI 自動化」的人了</p>
+</div>
+
+<!-- ===== 19: SECTION — Key 保護 ===== -->
+<div class="slide section-title" data-index="19">
+  <p class="subtitle">0:45 – 1:00</p>
+  <h1>🔒 Key 為什麼要保護？</h1>
+</div>
+
+<!-- ===== 20: 錯誤示範 ===== -->
+<div class="slide" data-index="20">
+  <h2><span class="red">❌ 寫在程式碼裡</span></h2>
+  <div class="code-block" style="font-size:1.1rem;">
+    <span class="kw">const</span> API_KEY = <span class="str">"gsk_aBcDeFgH..."</span>;
+  </div>
+  <div class="info-box warning fragment" data-order="0">
+    <div class="label">🚨 問題</div>
+    <p>分享 Sheet 給同事 → 他就看到你的 Key<br>就像<strong>信用卡號寫在白板上</strong></p>
+  </div>
+</div>
+
+<!-- ===== 21: 正確 ===== -->
+<div class="slide" data-index="21">
+  <h2><span class="green">✅ PropertiesService</span>（保險箱）</h2>
+  <div class="code-block" style="font-size:1.1rem;">
+    <span class="kw">const</span> key = PropertiesService<br>
+    &nbsp;&nbsp;.<span class="fn">getScriptProperties</span>()<br>
+    &nbsp;&nbsp;.<span class="fn">getProperty</span>(<span class="str">'GROQ_API_KEY'</span>);
+  </div>
+  <div class="info-box success fragment" data-order="0">
+    <div class="label">✅ 安全</div>
+    <p>Key 鎖在 Google 伺服器，程式碼裡看不到<br><strong>你剛剛做的就是這個！</strong></p>
+  </div>
+  <p class="fragment" data-order="1" style="margin-top:1.5rem;font-size:1.3rem;font-weight:700;color:var(--blue);">密碼不貼螢幕，Key 不寫 code</p>
+</div>
+
+<!-- ===== 22: BREAK ===== -->
+<div class="slide break-slide" data-index="22">
+  <p style="font-size:5rem;">☕</p>
+  <h2 style="margin-top:1rem;color:var(--g800);">休息 10 分鐘</h2>
+  <p class="dim" style="margin-top:1rem;">回來：AI 一次處理 10 筆</p>
+</div>
+
+<!-- ===== 23: SECTION ===== -->
+<div class="slide section-title" data-index="23">
+  <p class="subtitle">第二段 · 1:10 – 1:40</p>
+  <h1>📊 批量處理</h1>
+  <p class="subtitle" style="margin-top:.5rem;">AI 一次看 10 筆</p>
+</div>
+
+<!-- ===== 24: 場景 — 帶畫面 ===== -->
+<div class="slide" data-index="24">
+  <h2>場景：客戶回饋 → AI 自動分類</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 Google Sheets — 客戶回饋分析</div>
+    </div>
+    <div class="mockup-body" style="padding:1rem;">
+      <table class="mock-sheet">
+        <tr><th></th><th style="width:300px;">A — 回饋原文</th><th style="width:150px;">B — AI 分類</th></tr>
+        <tr><td class="row-num">1</td><td class="input-cell">服務非常好！下次還來</td><td class="output-cell fragment" data-order="0">✅ 正面</td></tr>
+        <tr><td class="row-num">2</td><td class="input-cell">等了三天還沒收到</td><td class="output-cell fragment" data-order="0" style="color:var(--red);">❌ 負面</td></tr>
+        <tr><td class="row-num">3</td><td class="input-cell">品質普通</td><td class="output-cell fragment" data-order="0" style="color:var(--g600);">⚪ 中性</td></tr>
+        <tr><td class="row-num">4</td><td class="input-cell">客服很有耐心，謝謝</td><td class="output-cell fragment" data-order="0">✅ 正面</td></tr>
+        <tr><td class="row-num">5</td><td class="input-cell">退貨流程太複雜了</td><td class="output-cell fragment" data-order="0" style="color:var(--red);">❌ 負面</td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="fragment dim" data-order="1" style="margin-top:.8rem;">5 秒完成，手動要 10 分鐘</p>
+</div>
+
+<!-- ===== 25: Prompt ===== -->
+<div class="slide" data-index="25">
+  <div class="exercise-banner">👨‍💻 跟著做</div>
+  <h2>問 ChatGPT 升級程式碼</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 chatgpt.com</div>
+    </div>
+    <div class="mockup-body" style="padding:1.2rem;">
+      <div style="background:var(--blue-lt);border-radius:12px;padding:1rem;font-size:.95rem;line-height:1.8;">
+        <strong>你：</strong>請修改上面的程式碼：<br>
+        1. 讀取 A1 到 A10 每一格<br>
+        2. 用 AI 判斷「正面」「負面」「中性」<br>
+        3. 結果寫入 B 欄對應格子
+      </div>
+    </div>
+  </div>
+  <p class="fragment" data-order="0" style="margin-top:1rem;font-size:1.1rem;">複製新程式碼 → 貼到 Apps Script → ▶️ 執行</p>
+</div>
+
+<!-- ===== 26: 練習 ===== -->
+<div class="slide" data-index="26">
+  <div class="exercise-banner">👨‍💻 練習時間 — 20 分鐘</div>
+  <h2>在 A 欄填 10 筆資料，執行看結果</h2>
+  <div class="qr-solo"><div id="qr-data"></div></div>
+  <div class="info-box tip">
+    <div class="label">💡 範例資料</div>
+    <p style="line-height:2;">
+      A1: 服務態度非常好 · A2: 配送太慢 · A3: 產品跟描述一樣<br>
+      A4: 退貨超麻煩 · A5: 客服很耐心 · A6~A10 自己寫！
+    </p>
+  </div>
+  <div class="info-box warning fragment" data-order="0" style="margin-top:.8rem;">
+    <div class="label">卡住了？</div>
+    <p><strong>授權失敗</strong> → 點「進階」→「前往」→ 允許<br>
+    <strong>Error 429</strong> → 太快了，等 30 秒<br>
+    <strong>B 欄沒反應</strong> → 看「執行紀錄」紅字 → 貼回 ChatGPT</p>
+  </div>
+</div>
+
+<!-- ===== 27: 成果 ===== -->
+<div class="slide" data-index="27">
+  <h2>手動 vs AI</h2>
+  <div class="two-col" style="margin-top:2rem;text-align:center;">
+    <div class="col">
+      <p class="big-num" style="color:var(--red);">10 min</p>
+      <p style="font-size:1.1rem;margin-top:.5rem;">手動分類 10 筆</p>
+    </div>
+    <div class="col fragment" data-order="0">
+      <p class="big-num" style="color:var(--green);">5 sec</p>
+      <p style="font-size:1.1rem;margin-top:.5rem;">AI 分類 10 筆</p>
+    </div>
+  </div>
+  <p class="fragment" data-order="1" style="margin-top:2rem;font-size:1.3rem;">1000 筆？手動 16 小時 · AI <span class="green bold">5 分鐘</span></p>
+</div>
+
+<!-- ===== 28: SECTION — 案例遞進 ===== -->
+<div class="slide section-title" data-index="28">
+  <p class="subtitle">第二段 · 1:40 – 2:10</p>
+  <h1>🚀 五個案例，逐層升級</h1>
+  <p class="subtitle" style="margin-top:.5rem;">每個案例只加一個新概念</p>
+</div>
+
+<!-- ===== 29: 遞進總覽 ===== -->
+<div class="slide" data-index="29">
+  <h2>案例難度地圖</h2>
+  <div class="step-list" style="margin-top:.5rem;">
+    <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--green);">⭐</div><div class="step-content"><strong>進階分析 — 一個輸入，三欄輸出</strong><p>新概念：更複雜的 AI Prompt 設計</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--blue);">⭐⭐</div><div class="step-content"><strong>問卷產生器 — GAS 做出網頁表單</strong><p>新概念：GAS 不只跑腳本，還能做網頁 UI</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--purple);">⭐⭐⭐</div><div class="step-content"><strong>問卷蒐集 + 即時分析 — 全班互填</strong><p>新概念：事件觸發，有人填就自動跑</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--gold);">⭐⭐⭐⭐</div><div class="step-content"><strong>統計報表 — AI 匯整，產出 Docs</strong><p>新概念：跨服務寫入（Sheet → Google Docs）</p></div></div>
+    <div class="step fragment" data-order="4"><div class="step-num" style="background:var(--red);">⭐⭐⭐⭐⭐</div><div class="step-content"><strong>RSS 週報 — 完整自動化工作流</strong><p>新概念：抓外部資料 + 多服務串聯</p></div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     ⭐ 案例一：進階分析（多欄輸出）
+     ═══════════════════════════════ -->
+
+<!-- ===== 30: ⭐ 案例一 說明 ===== -->
+<div class="slide" data-index="30">
+  <h2><span class="green">⭐ 案例一</span>：進階分析 — 多欄輸出</h2>
+  <p class="dim" style="margin-bottom:1rem;">前面學的：A 欄 → B 欄（一個輸出）。現在升級成三個輸出。</p>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 Google Sheets — 客戶回饋深度分析</div>
+    </div>
+    <div class="mockup-body" style="padding:.8rem;">
+      <table class="mock-sheet">
+        <tr><th></th><th style="width:180px;">A 回饋</th><th style="width:80px;">B 情感</th><th style="width:120px;">C 關鍵字</th><th style="width:150px;">D 建議行動</th></tr>
+        <tr><td class="row-num">1</td><td>退貨太複雜了</td><td class="output-cell" style="color:var(--red);">❌ 負面</td><td class="output-cell">退貨、流程</td><td class="output-cell">簡化退貨步驟</td></tr>
+        <tr><td class="row-num">2</td><td>APP 改版超好用</td><td class="output-cell">✅ 正面</td><td class="output-cell">APP、結帳</td><td class="output-cell">持續優化體驗</td></tr>
+        <tr><td class="row-num">3</td><td>跟其他家差不多</td><td class="output-cell" style="color:var(--g600);">⚪ 中性</td><td class="output-cell">競品比較</td><td class="output-cell">強化差異化</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="0" style="margin-top:.5rem;">
+    <div class="label">🆕 這次多學了什麼？</div>
+    <p>讓 AI 回傳 <strong>JSON 結構</strong>，程式自動拆成多欄。一次呼叫，三種分析。</p>
+  </div>
+</div>
+
+<!-- ===== 31: ⭐ 案例一 操作 ===== -->
+<div class="slide" data-index="31">
+  <div class="exercise-banner">👨‍💻 ⭐ 跟著做 — 15 分鐘</div>
+  <div class="qr-solo"><div id="qr-practice2"></div></div>
+  <h2>用模板資料跑多欄分析</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>掃 QR → 複製 30 筆資料 → 貼到 Sheet A 欄</strong></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num">2</div><div class="step-content"><strong>掃 QR → 複製「⭐⭐ 多欄分析」Prompt → 貼到 ChatGPT</strong></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num">3</div><div class="step-content"><strong>ChatGPT 回傳程式碼 → 貼到 Apps Script → 設 Key → 執行</strong></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num">4</div><div class="step-content"><strong>看 B、C、D 三欄自動填入</strong><p>30 筆 × 3 欄 = 90 格，AI 大約 2 分鐘跑完</p></div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     ⭐⭐ 案例二：問卷產生器
+     ═══════════════════════════════ -->
+
+<!-- ===== 32: ⭐⭐ 問卷產生器 說明 ===== -->
+<div class="slide" data-index="32">
+  <h2><span class="blue">⭐⭐ 案例二</span>：問卷產生器</h2>
+  <p class="dim" style="margin-bottom:1rem;">前面的「部署」是讓程式跑。現在升級：讓 GAS 做出一個<strong>網頁表單</strong>。</p>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 script.google.com/macros/s/AKfyc.../exec</div>
+    </div>
+    <div class="mockup-body" style="padding:1.5rem;max-height:240px;">
+      <p style="font-size:1.2rem;font-weight:900;color:var(--navy);margin-bottom:.8rem;">📋 課程滿意度調查</p>
+      <div style="margin-bottom:.5rem;">
+        <span style="font-size:.85rem;font-weight:500;">姓名</span>
+        <div class="mock-input" style="display:block;width:100%;margin-top:.2rem;">王小明</div>
+      </div>
+      <div style="margin-bottom:.5rem;">
+        <span style="font-size:.85rem;font-weight:500;">整體滿意度</span>
+        <div style="display:flex;gap:.5rem;margin-top:.2rem;font-size:.85rem;">
+          <span style="background:var(--blue-lt);padding:.2rem .6rem;border-radius:100px;color:var(--blue);font-weight:700;">⦿ 非常滿意</span>
+          <span style="padding:.2rem .6rem;">○ 滿意</span>
+          <span style="padding:.2rem .6rem;">○ 普通</span>
+          <span style="padding:.2rem .6rem;">○ 不滿意</span>
+        </div>
+      </div>
+      <div style="margin-bottom:.5rem;">
+        <span style="font-size:.85rem;font-weight:500;">最需要改進的地方</span>
+        <div class="mock-input" style="display:block;width:100%;margin-top:.2rem;">希望多一些實作練習</div>
+      </div>
+      <div class="mock-btn primary" style="margin-top:.5rem;">送出</div>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="0" style="margin-top:.4rem;">
+    <div class="label">🆕 這次多學了什麼？</div>
+    <p>GAS 的 <strong>doGet()</strong> 能回傳 HTML → 部署後就是一個網頁表單，別人可以填寫！</p>
+  </div>
+</div>
+
+<!-- ===== 33: ⭐⭐ 問卷產生器 操作 ===== -->
+<div class="slide" data-index="33">
+  <div class="exercise-banner">👨‍💻 ⭐⭐ 講師示範</div>
+  <h2>建立 → 部署 → 分享</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>掃 QR 複製「問卷產生器」Prompt → 貼到 ChatGPT</strong><p>ChatGPT 會產出 HTML 表單 + doGet/doPost 程式碼</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num">2</div><div class="step-content"><strong>貼到 Apps Script → 部署為網頁應用程式</strong><p>跟之前學的部署步驟一模一樣</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num">3</div><div class="step-content"><strong>取得網址 → 打開 → 一個真的問卷出現了</strong></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num">4</div><div class="step-content"><strong>填一筆試試 → 回 Sheet 看 → 資料自動出現</strong></div></div>
+  </div>
+  <p class="fragment" data-order="4" style="margin-top:1rem;font-size:1.1rem;color:var(--blue);font-weight:700;">接下來，把這個網址分享給全班…</p>
+</div>
+
+<!-- ═══════════════════════════════
+     ⭐⭐⭐ 案例三：全班互填 + 即時分析
+     ═══════════════════════════════ -->
+
+<!-- ===== 34: ⭐⭐⭐ 即時分析 說明 ===== -->
+<div class="slide" data-index="34">
+  <h2><span class="purple">⭐⭐⭐ 案例三</span>：全班互填 + AI 即時分析</h2>
+  <p class="dim" style="margin-bottom:.8rem;">前面都是「你按 ▶️ 才跑」。現在升級：<strong>有人填就自動跑。</strong></p>
+  <div class="flow" style="margin:1rem 0;">
+    <div class="flow-box">👨‍🎓 同學填問卷</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--blue);background:var(--blue-lt);">Sheet 新增一列</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--purple);background:var(--purple-lt);">onChange 觸發</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--green);background:var(--green-lt);">🤖 AI 即時分析</div>
+  </div>
+  <div class="info-box tip fragment" data-order="0">
+    <div class="label">🆕 這次多學了什麼？</div>
+    <p><strong>事件觸發器</strong>（onChange）— 不用手動按執行，有人填就自動跑 AI 分析。<br>
+    你什麼都不用做，Sheet 自己一直在更新。</p>
+  </div>
+</div>
+
+<!-- ===== 35: ⭐⭐⭐ 互填操作 ===== -->
+<div class="slide" data-index="35">
+  <div class="exercise-banner">👨‍💻 ⭐⭐⭐ 全班一起做！</div>
+  <h2>分享問卷 → 同學填寫 → 看即時分析</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>講師把問卷網址投影 / 分享到群組</strong><p>同學用手機或電腦打開填寫</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num">2</div><div class="step-content"><strong>講師投影 Sheet 畫面</strong><p>全班看著資料一列一列自動出現</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num">3</div><div class="step-content"><strong>AI 自動在 G、H 欄填入分析結果</strong><p>每一筆都有情感判斷 + 一句話摘要</p></div></div>
+  </div>
+  <div class="info-box success fragment" data-order="3" style="margin-top:.5rem;">
+    <div class="label">✨ 課堂效果</div>
+    <p>同學填完看到自己寫的文字被 AI 即時分析 → <strong>驚喜感最強的環節</strong></p>
+  </div>
+</div>
+
+<!-- ===== 36: ⭐⭐⭐ Sheet 即時畫面 ===== -->
+<div class="slide" data-index="36">
+  <h2>Sheet 即時更新畫面</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 Google Sheets — 問卷回覆（即時更新中…）</div>
+    </div>
+    <div class="mockup-body" style="padding:.8rem;">
+      <table class="mock-sheet" style="font-size:.85rem;">
+        <tr><th></th><th>B 姓名</th><th>C 滿意度</th><th>D 最喜歡</th><th>E 需改進</th><th>F 分數</th><th style="background:var(--purple);color:#fff;">G AI 情感</th><th style="background:var(--purple);color:#fff;">H AI 摘要</th></tr>
+        <tr><td class="row-num">2</td><td>陳同學</td><td>非常滿意</td><td>實作環節</td><td>時間太短</td><td>9</td><td class="output-cell">✅ 正面</td><td class="output-cell">高度滿意，盼延長實作</td></tr>
+        <tr><td class="row-num">3</td><td>林同學</td><td>滿意</td><td>API 概念</td><td>步驟太快</td><td>7</td><td class="output-cell">✅ 正面</td><td class="output-cell" style="color:var(--gold);">滿意但建議放慢</td></tr>
+        <tr class="fragment" data-order="0"><td class="row-num">4</td><td>王同學</td><td>普通</td><td>沒特別</td><td>跟預期不同</td><td>5</td><td class="output-cell" style="color:var(--red);">⚪ 中性偏負</td><td class="output-cell" style="color:var(--red);">期望落差，需調整</td></tr>
+        <tr class="fragment" data-order="1"><td class="row-num" style="background:var(--gold-lt);">5</td><td style="background:var(--gold-lt);">新填寫中…</td><td style="background:var(--gold-lt);"></td><td style="background:var(--gold-lt);"></td><td style="background:var(--gold-lt);"></td><td style="background:var(--gold-lt);"></td><td style="background:var(--gold-lt);color:var(--g400);">⏳ 等待 AI…</td><td style="background:var(--gold-lt);"></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     ⭐⭐⭐⭐ 案例四：統計報表
+     ═══════════════════════════════ -->
+
+<!-- ===== 37: ⭐⭐⭐⭐ 統計報表 ===== -->
+<div class="slide" data-index="37">
+  <h2><span class="gold">⭐⭐⭐⭐ 案例四</span>：統計報表 → Google Docs</h2>
+  <p class="dim" style="margin-bottom:.8rem;">問卷收齊了。現在升級：AI 匯整所有回覆，<strong>自動產出一份報告。</strong></p>
+  <div class="two-col" style="margin-top:.5rem;">
+    <div class="col">
+      <h3>📊 Sheet 原始資料</h3>
+      <div style="background:var(--g50);border-radius:12px;padding:1rem;font-size:.9rem;line-height:1.8;">
+        填寫人數：28 人<br>
+        非常滿意：14 人（50%）<br>
+        滿意：8 人（29%）<br>
+        普通：4 人（14%）<br>
+        不滿意：2 人（7%）<br>
+        平均推薦分數：7.8 / 10
+      </div>
+    </div>
+    <div class="col fragment" data-order="0">
+      <h3>📝 AI 自動產出 Docs</h3>
+      <div style="background:var(--green-lt);border-radius:12px;padding:1rem;font-size:.9rem;line-height:1.8;">
+        <strong>課程滿意度報告</strong><br>
+        整體滿意度 79%，高於平均。<br>
+        <strong>前三正面：</strong>實作環節、API 概念、講師耐心<br>
+        <strong>前三改進：</strong>速度太快、時間不夠、範例再多<br>
+        <strong>建議：</strong>增加 15 分鐘實作、加入更多案例…<br>
+        <span style="color:var(--green);">— AI 自動生成</span>
+      </div>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="1" style="margin-top:.4rem;">
+    <div class="label">🆕 這次多學了什麼？</div>
+    <p><strong>跨服務寫入</strong>（Sheet → Google Docs）+ AI 做<strong>彙總分析</strong>（不是逐筆，是看整體趨勢）</p>
+  </div>
+</div>
+
+<!-- ===== 38: ⭐⭐⭐⭐ 報表操作 ===== -->
+<div class="slide" data-index="38">
+  <div class="exercise-banner">👨‍💻 ⭐⭐⭐⭐ 講師示範</div>
+  <h2>一鍵產出報告</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>掃 QR 複製「統計報表」Prompt → ChatGPT</strong></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num">2</div><div class="step-content"><strong>貼到 Apps Script → 執行</strong><p>AI 讀取所有問卷 → 統計 → 分析 → 寫 Docs</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num">3</div><div class="step-content"><strong>打開產出的 Google Docs 連結</strong><p>完整報告已經寫好了 → 全班一起看</p></div></div>
+  </div>
+  <p class="fragment" data-order="3" style="margin-top:1rem;font-size:1.1rem;">
+    從問卷建立 → 全班填寫 → AI 分析 → 報告產出<br>
+    <span class="blue bold">整個流程你都做到了</span>
+  </p>
+</div>
+
+<!-- ═══════════════════════════════
+     ⭐⭐⭐⭐⭐ 案例五：RSS 週報
+     ═══════════════════════════════ -->
+
+<!-- ===== 39: ⭐⭐⭐⭐⭐ RSS 說明 ===== -->
+<div class="slide" data-index="39">
+  <h2><span class="red">⭐⭐⭐⭐⭐ 案例五</span>：RSS 週報工作流</h2>
+  <p class="dim" style="margin-bottom:.8rem;">最後大魔王：把前面所有概念串起來，做一條完整自動化流水線。</p>
+  <div class="flow" style="margin:.8rem 0;">
+    <div class="flow-box">🌐 RSS<br><span class="dim" style="font-size:.75rem;">抓外部新聞</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--green);background:var(--green-lt);">🤖 AI 摘要</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--blue);background:var(--blue-lt);">📊 Sheet</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--purple);background:var(--purple-lt);">📝 Docs 週報</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--gold);background:var(--gold-lt);">📧 Email 通知</div>
+  </div>
+  <div class="info-box tip fragment" data-order="0">
+    <div class="label">🆕 這次多學了什麼？</div>
+    <p><strong>UrlFetchApp 抓外部資料</strong>（RSS 新聞）+ <strong>多服務串聯</strong>一條龍<br>
+    GmailApp.sendEmail() 只寄信不讀信，安全無隱私風險</p>
+  </div>
+</div>
+
+<!-- ===== 40: ⭐⭐⭐⭐⭐ RSS 成果 ===== -->
+<div class="slide" data-index="40">
+  <h2>成果：每週一自動收到 AI 週報</h2>
+  <div class="mockup-browser">
+    <div class="mockup-bar">
+      <div class="mockup-dots"><div class="mockup-dot r"></div><div class="mockup-dot y"></div><div class="mockup-dot g"></div></div>
+      <div class="mockup-url">🔒 Gmail — 收件匣</div>
+    </div>
+    <div class="mockup-body" style="padding:1.2rem;">
+      <div style="border:1px solid var(--g200);border-radius:12px;padding:1rem;">
+        <p style="font-size:.85rem;color:var(--g400);">寄件者：我的 GAS &lt;me@gmail.com&gt; · 週一 08:05</p>
+        <p style="font-weight:700;margin:.3rem 0;">📰 AI 科技週報 — 2026/03/24</p>
+        <div style="background:var(--g50);border-radius:8px;padding:.8rem;margin-top:.5rem;font-size:.85rem;line-height:1.8;">
+          <strong>本週重點：</strong><br>
+          1. Google 發布 Antigravity IDE 免費版<br>
+          2. OpenClaw 在中國爆紅，用戶突破千萬<br>
+          3. Groq 推出新一代推論晶片<br><br>
+          📄 <span style="color:var(--blue);text-decoration:underline;">完整報告（Google Docs）→</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="dim fragment" data-order="0" style="margin-top:.5rem;">
+    設定 Trigger 每週一 8 點 → 你什麼都不用做，AI 幫你追新聞
+  </p>
+</div>
+
+<!-- ===== 41: 五案例回顧 ===== -->
+<div class="slide" data-index="41">
+  <h2>五案例回顧：你學會了什麼</h2>
+  <div class="step-list" style="margin-top:.5rem;">
+    <div class="step"><div class="step-num" style="background:var(--green);">⭐</div><div class="step-content"><strong>進階分析</strong><p>學會多欄輸出、JSON Prompt 設計</p></div></div>
+    <div class="step"><div class="step-num" style="background:var(--blue);">⭐⭐</div><div class="step-content"><strong>問卷產生器</strong><p>學會 doGet() 做網頁表單 + 部署分享</p></div></div>
+    <div class="step"><div class="step-num" style="background:var(--purple);">⭐⭐⭐</div><div class="step-content"><strong>即時分析</strong><p>學會事件觸發器，不用手動按</p></div></div>
+    <div class="step"><div class="step-num" style="background:var(--gold);">⭐⭐⭐⭐</div><div class="step-content"><strong>統計報表</strong><p>學會跨服務寫入 Sheet → Docs</p></div></div>
+    <div class="step"><div class="step-num" style="background:var(--red);">⭐⭐⭐⭐⭐</div><div class="step-content"><strong>RSS 週報</strong><p>學會抓外部資料 + 多服務串聯 + Email</p></div></div>
+  </div>
+</div>
+
+<!-- ===== 42: BREAK ===== -->
+<div class="slide break-slide" data-index="42">
+  <p style="font-size:5rem;">☕</p>
+  <h2 style="margin-top:1rem;color:var(--g800);">休息 10 分鐘</h2>
+  <p class="dim" style="margin-top:1rem;">最後：自動化排程 + 總結</p>
+</div>
+
+<!-- ===== SECTION: 收尾 ===== -->
+<div class="slide section-title">
+  <p class="subtitle">2:50 – 3:00</p>
+  <h1>📋 總結</h1>
+</div>
+
+<!-- ===== Recap ===== -->
+<div class="slide">
+  <h2>今天你學會了</h2>
+  <div style="text-align:left;max-width:720px;margin-top:.5rem;">
+    <div class="fragment" data-order="0" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--green-lt);border-radius:12px;border-left:4px solid var(--green);"><strong class="green">API Key</strong> — AI VIP 卡，Groq 免費不綁卡</div>
+    <div class="fragment" data-order="1" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--blue-lt);border-radius:12px;border-left:4px solid var(--blue);"><strong class="blue">AI 寫 code</strong> — ChatGPT 代筆，你複製貼上執行</div>
+    <div class="fragment" data-order="2" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--red-lt);border-radius:12px;border-left:4px solid var(--red);"><strong class="red">Key 保護</strong> — 密碼不貼螢幕，Key 不寫 code</div>
+    <div class="fragment" data-order="3" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--gold-lt);border-radius:12px;border-left:4px solid var(--gold);"><strong class="gold">部署 + 觸發器</strong> — 程式變網址，設排程自動跑</div>
+    <div class="fragment" data-order="4" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--purple-lt);border-radius:12px;border-left:4px solid var(--purple);"><strong class="purple">五案例遞進</strong> — 多欄分析 → 問卷 → 即時觸發 → 報表 → 週報</div>
+  </div>
+</div>
+
+<!-- ===== 42: Prompt 模板 ===== -->
+<div class="slide" data-index="42">
+  <h2>帶走的 Prompt 模板</h2>
+  <div class="code-block" style="font-family:'Noto Sans TC',sans-serif;">
+    請幫我寫一段 Google Apps Script。<br>
+    功能：<span class="str">[你要做的事]</span><br>
+    資料來源：<span class="str">[Sheet / Gmail / Calendar]</span><br>
+    AI 處理：<span class="str">[摘要 / 分類 / 翻譯]</span><br>
+    結果輸出到：<span class="str">[Sheet / Docs / Gmail]</span><br>
+    API：Groq（api.groq.com/openai/v1/...）<br>
+    模型：llama-3.3-70b-versatile<br>
+    Key 用 PropertiesService，不寫死。
+  </div>
+</div>
+
+<!-- ===== 43: 免費資源 ===== -->
+<div class="slide" data-index="43">
+  <h2>免費 AI API 資源（2026.03）</h2>
+  <div class="qr-solo"><div id="qr-api"></div></div>
+  <table class="compare-table">
+    <tr><th>服務</th><th>免費額度</th><th>綁卡？</th><th>特色</th></tr>
+    <tr><td><strong style="color:var(--gold);">⭐ Groq</strong></td><td>14,400 次/天</td><td class="green bold">不用</td><td>速度最快，首選</td></tr>
+    <tr><td><strong>Google Gemini</strong></td><td>60 次/分 · 100 萬 token/天</td><td class="green bold">不用</td><td>多模態（看圖）</td></tr>
+    <tr><td><strong>OpenRouter</strong></td><td>29 個免費模型</td><td class="green bold">不用</td><td>多模型自由切換</td></tr>
+    <tr><td><strong>xAI (Grok)</strong></td><td>$25 免費額度</td><td class="green bold">不用</td><td>新帳號禮金</td></tr>
+  </table>
+  <div class="info-box tip fragment" data-order="0" style="margin-top:.8rem;">
+    <div class="label">💡 建議</div>
+    <p>今天用 Groq（文字處理最快）<br>
+    需要看圖 → 用 Gemini<br>
+    想試不同模型 → 用 OpenRouter（一個 Key 切換 29 個 AI）</p>
+  </div>
+</div>
+
+<!-- ===== 44: 預告 ===== -->
+<div class="slide" data-index="44">
+  <h2>下一堂預告</h2>
+  <p style="font-size:1.2rem;margin-top:1.5rem;line-height:2;">
+    今天你<span class="dim">手動複製貼上</span>程式碼
+  </p>
+  <p style="font-size:1.4rem;margin-top:1rem;line-height:2;">
+    下一堂 <span class="blue bold" style="font-size:1.6rem;">Vibe Coding</span><br>
+    你連貼都不用<br>直接<span class="green bold">「說出來」</span>就好
+  </p>
+  <div class="flow fragment" data-order="0" style="margin-top:2rem;">
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">S01 ✅</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--blue);background:var(--blue-lt);"><strong>S02 Vibe</strong></div>
+    <div class="flow-arrow" style="opacity:.3;">→</div>
+    <div class="flow-box" style="opacity:.3;">S03 CLI</div>
+    <div class="flow-arrow" style="opacity:.3;">→</div>
+    <div class="flow-box" style="opacity:.3;">S04 IDE</div>
+    <div class="flow-arrow" style="opacity:.3;">→</div>
+    <div class="flow-box" style="opacity:.3;">S05 🦞</div>
+  </div>
+</div>
+
+<!-- ===== 45: END ===== -->
+<div class="slide cover" data-index="45">
+  <p style="font-size:1rem;color:rgba(255,255,255,.6);margin-bottom:1rem;">S01 補充單元</p>
+  <h1>完成！</h1>
+  <p class="subtitle" style="margin-top:1.5rem;font-size:1.2rem;">
+    鑰匙 → AI 回答 → 批量處理 → 自動化 → 部署
+  </p>
+  <p style="color:rgba(255,255,255,.4);margin-top:3rem;font-size:.9rem;">ai100.cooperation.tw</p>
+</div>
+
+</div>
+
+<div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>←</button><button id="next">→</button></div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),tot=slides.length;
+let idx=0,fi=-1;
+document.getElementById('total').textContent=tot;
+const gf=el=>el.querySelectorAll('.fragment');
+function go(n){slides.forEach((s,i)=>{s.classList.remove('active','prev');if(i<n)s.classList.add('prev');s.querySelectorAll('.fragment').forEach(f=>f.classList.remove('visible'));});idx=n;fi=-1;slides[idx].classList.add('active');ui();}
+function ui(){document.getElementById('current').textContent=idx+1;document.getElementById('prev').disabled=idx===0&&fi<=0;const f=gf(slides[idx]);document.getElementById('next').disabled=idx===tot-1&&fi>=f.length-1;document.getElementById('progress').style.width=((idx+1)/tot*100)+'%';}
+function adv(){const f=gf(slides[idx]);if(fi<f.length-1){fi++;f[fi].classList.add('visible');ui();}else if(idx<tot-1)go(idx+1);}
+function ret(){const f=gf(slides[idx]);if(fi>=0){f[fi].classList.remove('visible');fi--;ui();}else if(idx>0){go(idx-1);const p=gf(slides[idx]);p.forEach(x=>x.classList.add('visible'));fi=p.length-1;ui();}}
+document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
+document.addEventListener('keydown',e=>{if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}if(e.key==='Home'){e.preventDefault();go(0);}if(e.key==='End'){e.preventDefault();go(tot-1);}if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}});
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
+ui();
+
+// ─── QR Code Generation ───
+const TEMPLATE_URL = 'https://ai100.cooperation.tw/classroom/gas-template.html';
+const qrOpts = {width:240,height:240,colorDark:'#202124',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M};
+
+function makeQR(id,url){
+  const el = document.getElementById(id);
+  if(el && !el.querySelector('canvas')){new QRCode(el,{...qrOpts,text:url});}
+}
+
+// Generate all QR codes
+makeQR('qr-groq','https://console.groq.com');
+makeQR('qr-prompt1', TEMPLATE_URL);
+makeQR('qr-data', TEMPLATE_URL + '#csv-data');
+makeQR('qr-practice2', TEMPLATE_URL);
+makeQR('qr-api', TEMPLATE_URL);
+</script>
+</body>
+</html>
