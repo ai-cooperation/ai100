@@ -111,7 +111,7 @@
     position: fixed;
     bottom: 0; left: 0; right: 0;
     height: 38%;
-    z-index: 40;
+    z-index: 50;
     pointer-events: none;
     display: none;
   }
@@ -271,6 +271,7 @@
 <!-- Slide viewport -->
 <div id="slide-viewport">
   <img id="slide-img" alt="Slide">
+  <iframe id="slide-iframe" style="display:none;position:absolute;inset:0;width:100%;height:100%;border:none;z-index:1;"></iframe>
 </div>
 
 <!-- UI overlays -->
@@ -333,9 +334,11 @@
   var overlayType = 'none';
   var voteListener = null;
   var wallListener = null;
+  var currentMode = 'pptx-slides';
 
   // ── DOM refs ──
   var slideImg = document.getElementById('slide-img');
+  var slideIframe = document.getElementById('slide-iframe');
   var slideCounter = document.getElementById('slide-counter');
   var badgeConnected = document.getElementById('badge-connected');
   var badgeText = document.getElementById('badge-text');
@@ -385,8 +388,52 @@
     db.ref('rooms/' + roomId + '/slideControl').on('value', function(snap) {
       var val = snap.val();
       if (!val) return;
+
+      // In iframe modes, forward control via postMessage instead of PPTX navigation
+      if (currentMode === 'html-slides' || currentMode === 'webpage' || currentMode === 'resource') {
+        if (slideIframe.contentWindow) {
+          slideIframe.contentWindow.postMessage({
+            type: 'slideControl',
+            action: val.action,
+            index: val.index
+          }, '*');
+        }
+        return;
+      }
+
       if (val.action === 'goto' && typeof val.index === 'number') {
         goToSlide(val.index);
+      }
+    });
+
+    // Listen for presentation mode changes (universal frame mode)
+    db.ref('rooms/' + roomId + '/presentation').on('value', function(snap) {
+      var p = snap.val();
+      if (!p) return;
+
+      var mode = p.mode || 'pptx-slides';
+      currentMode = mode;
+
+      if (mode === 'pptx-slides') {
+        slideIframe.style.display = 'none';
+        slideImg.style.display = '';
+        // existing PPTX behavior continues via goToSlide
+      } else {
+        slideImg.style.display = 'none';
+        slideIframe.style.display = 'block';
+
+        var url = '';
+        if (mode === 'html-slides') {
+          url = '/slides/supplements/' + (p.deck || 'S01_GAS_Automation') + '.html';
+        } else if (mode === 'webpage') {
+          url = p.url || '';
+        } else if (mode === 'resource') {
+          url = '/classroom/' + (p.deck || 'gas') + '-template.html';
+        }
+
+        if (url && slideIframe.src !== url) {
+          slideIframe.src = url;
+        }
       }
     });
 
@@ -431,7 +478,7 @@
     } else {
       sections = [{ title: data.title || deckName, startIndex: 0 }];
     }
-    db.ref('rooms/' + roomId + '/presentation').set({
+    db.ref('rooms/' + roomId + '/presentation').update({
       sections: sections,
       current: 0,
       totalSlides: slides.length,

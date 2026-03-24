@@ -1584,6 +1584,26 @@ function makeQR(id,url){
 // Generate all QR codes
 makeQR('qr-install', TEMPLATE_URL);
 makeQR('qr-exercise1', TEMPLATE_URL + '#exercise1');
+
+// ─── postMessage bridge for iframe embedding ───
+window.addEventListener('message', function(e) {
+  if (!e.data || e.data.type !== 'slideControl') return;
+  var d = e.data;
+  if (d.action === 'next') adv();
+  else if (d.action === 'prev') ret();
+  else if (d.action === 'goto' && typeof d.index === 'number') go(d.index);
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'slideState', current: idx, total: tot }, '*');
+  }
+});
+
+var _origGo = go;
+go = function(n) {
+  _origGo(n);
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'slideState', current: idx, total: tot }, '*');
+  }
+};
 </script>
 </body>
 </html>

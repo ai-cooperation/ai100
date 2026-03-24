@@ -1674,6 +1674,26 @@ function makeQR(id,url){
 makeQR('qr-checklist', TEMPLATE_URL);
 makeQR('qr-botfather','https://t.me/botfather');
 makeQR('qr-cost', TEMPLATE_URL + '#cost');
+
+// ─── postMessage bridge for iframe embedding ───
+window.addEventListener('message', function(e) {
+  if (!e.data || e.data.type !== 'slideControl') return;
+  var d = e.data;
+  if (d.action === 'next') adv();
+  else if (d.action === 'prev') ret();
+  else if (d.action === 'goto' && typeof d.index === 'number') go(d.index);
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'slideState', current: idx, total: tot }, '*');
+  }
+});
+
+var _origGo = go;
+go = function(n) {
+  _origGo(n);
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'slideState', current: idx, total: tot }, '*');
+  }
+};
 </script>
 </body>
 </html>

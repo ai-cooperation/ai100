@@ -1418,6 +1418,26 @@ makeQR('qr-gas', TEMPLATE_URL + '#gas-deploy');
 makeQR('qr-github', TEMPLATE_URL + '#github-pages');
 makeQR('qr-free', TEMPLATE_URL + '#free-tools');
 makeQR('qr-all', TEMPLATE_URL);
+
+// ─── postMessage bridge for iframe embedding ───
+window.addEventListener('message', function(e) {
+  if (!e.data || e.data.type !== 'slideControl') return;
+  var d = e.data;
+  if (d.action === 'next') adv();
+  else if (d.action === 'prev') ret();
+  else if (d.action === 'goto' && typeof d.index === 'number') go(d.index);
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'slideState', current: idx, total: tot }, '*');
+  }
+});
+
+var _origGo = go;
+go = function(n) {
+  _origGo(n);
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'slideState', current: idx, total: tot }, '*');
+  }
+};
 </script>
 </body>
 </html>

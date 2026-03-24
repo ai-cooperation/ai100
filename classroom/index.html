@@ -106,6 +106,23 @@
     <span class="ai-badge hidden" id="aiBadge">🤖 AI</span>
     <span class="online" id="dispOnline"></span>
   </div>
+  <!-- Push Content Area -->
+  <div id="pushArea" style="display:none;padding:12px 16px;background:#EDE9FE;border-bottom:2px solid #7C3AED;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span style="font-size:1.2rem;">📌</span>
+      <span id="pushTitle" style="font-weight:700;color:#7C3AED;font-size:0.95rem;"></span>
+    </div>
+    <div id="pushBody" style="background:#fff;border-radius:10px;padding:12px;font-size:0.9rem;line-height:1.6;max-height:120px;overflow-y:auto;"></div>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button id="pushCopy" onclick="copyPush()" style="padding:6px 16px;background:#7C3AED;color:#fff;border:none;border-radius:8px;font-size:0.85rem;font-weight:700;cursor:pointer;display:none;">📋 一鍵複製</button>
+      <button id="pushOpen" onclick="openPush()" style="padding:6px 16px;background:#0F9D8A;color:#fff;border:none;border-radius:8px;font-size:0.85rem;font-weight:700;cursor:pointer;display:none;">🔗 打開連結</button>
+    </div>
+  </div>
+  <!-- Push History (collapsible) -->
+  <div id="pushHistoryBar" style="display:none;padding:6px 16px;background:#F5F7FA;border-bottom:1px solid #e5e7eb;font-size:0.8rem;color:#5F6368;cursor:pointer;" onclick="toggleHistory()">
+    📚 推送歷史 <span id="pushHistoryCount"></span>
+  </div>
+  <div id="pushHistoryList" style="display:none;max-height:200px;overflow-y:auto;background:#F5F7FA;padding:8px 16px;border-bottom:1px solid #e5e7eb;"></div>
   <div class="content hidden" id="wallContent"></div>
   <div class="input-bar hidden" id="wallInput">
     <input type="text" id="wallText" placeholder="輸入訊息..." maxlength="500" autocomplete="off">
@@ -171,6 +188,7 @@ function enterRoom(){
   db.ref(`rooms/${roomId}/presence`).on('value',s=>{document.getElementById('dispOnline').textContent=`${s.numChildren()}人`});
   db.ref(`rooms/${roomId}/config/aiEnabled`).on('value',s=>{document.getElementById('aiBadge').classList.toggle('hidden',!s.val())});
   db.ref(`rooms/${roomId}/config/mode`).on('value',s=>{switchMode(s.val()||'pause')});
+  setupPushListener();
 }
 
 const modeNames={wall:'💬 訊息牆',vote:'📊 投票',qa:'❓ 問答',pause:'⏸ 等待中'};
@@ -248,6 +266,75 @@ function showQA(){
 function sendQuestion(){if(!canSend())return;const i=document.getElementById('qaText'),t=i.value.trim();if(!t||!roomId)return;i.value='';i.focus();startCD('qaSendBtn');
   db.ref(`rooms/${roomId}/qa`).push({text:t,name:userName,role:'student',ts:firebase.database.ServerValue.TIMESTAMP,ups:0}).catch(e=>alert('發送失敗：'+e.message))}
 function upQ(qid){if(myQaUps[qid])return;myQaUps[qid]=true;db.ref(`rooms/${roomId}/qa/${qid}/ups`).transaction(v=>(v||0)+1);db.ref(`rooms/${roomId}/qaUps/${qid}/${odID}`).set(true)}
+
+// Push content state
+let currentPush = null;
+let pushHistory = [];
+
+function setupPushListener() {
+  db.ref('rooms/'+roomId+'/pushContent/current').on('value', snap => {
+    const p = snap.val();
+    if (!p) { document.getElementById('pushArea').style.display='none'; return; }
+    currentPush = p;
+    const area = document.getElementById('pushArea');
+    area.style.display = 'block';
+    document.getElementById('pushTitle').textContent = p.title || '';
+    const body = document.getElementById('pushBody');
+    if (p.type === 'link') {
+      body.innerHTML = '<a href="'+esc(p.content)+'" target="_blank" style="color:#1A73E8;word-break:break-all;">'+esc(p.content)+'</a>';
+      document.getElementById('pushCopy').style.display = 'inline-block';
+      document.getElementById('pushOpen').style.display = 'inline-block';
+    } else if (p.type === 'prompt' || p.type === 'data') {
+      body.innerHTML = '<pre style="white-space:pre-wrap;font-family:inherit;margin:0;">'+esc(p.content)+'</pre>';
+      document.getElementById('pushCopy').style.display = 'inline-block';
+      document.getElementById('pushOpen').style.display = 'none';
+    } else {
+      body.textContent = p.content || '';
+      document.getElementById('pushCopy').style.display = 'none';
+      document.getElementById('pushOpen').style.display = 'none';
+    }
+  });
+  db.ref('rooms/'+roomId+'/pushContent/history').on('child_added', snap => {
+    const item = snap.val();
+    pushHistory.unshift(item);
+    document.getElementById('pushHistoryBar').style.display = 'block';
+    document.getElementById('pushHistoryCount').textContent = '('+pushHistory.length+')';
+    renderHistory();
+  });
+}
+
+function copyPush() {
+  if (!currentPush) return;
+  navigator.clipboard.writeText(currentPush.content).then(() => {
+    const btn = document.getElementById('pushCopy');
+    btn.textContent = '✅ 已複製';
+    setTimeout(() => btn.textContent = '📋 一鍵複製', 2000);
+  });
+}
+
+function openPush() {
+  if (currentPush && currentPush.content) window.open(currentPush.content, '_blank');
+}
+
+function toggleHistory() {
+  const list = document.getElementById('pushHistoryList');
+  list.style.display = list.style.display === 'none' ? 'block' : 'none';
+}
+
+function renderHistory() {
+  const el = document.getElementById('pushHistoryList');
+  el.innerHTML = pushHistory.map(h => {
+    const icon = h.type==='link'?'🔗':h.type==='prompt'?'📝':h.type==='data'?'📊':'💬';
+    const time = timeStr(h.ts);
+    return '<div style="padding:4px 0;border-bottom:1px solid #e5e7eb;font-size:0.82rem;cursor:pointer;" onclick="restorePush(\''+esc(h.content)+'\',\''+esc(h.title)+'\',\''+h.type+'\')">'
+      +icon+' '+time+' — '+esc(h.title)+'</div>';
+  }).join('');
+}
+
+function restorePush(content, title, type) {
+  currentPush = {content:decodeURIComponent(content), title:decodeURIComponent(title), type:type};
+  db.ref('rooms/'+roomId+'/pushContent/current').once('value');
+}
 
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function timeStr(t){if(!t)return '';const d=new Date(t);return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`}

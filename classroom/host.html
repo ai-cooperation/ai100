@@ -231,6 +231,8 @@
     <button class="act-btn" id="btnAgent" onclick="toggleAgentPanel()">🧠</button>
     <button class="act-btn" onclick="toggleSettings()">設定</button>
     <button class="act-btn" onclick="exportData()">匯出</button>
+    <button class="act-btn" onclick="showPushPanel()" title="推送內容">📤 推送</button>
+    <button class="act-btn" onclick="showReport()" title="回饋報告">📊 報告</button>
   </div>
   <div class="main" id="mainContent"></div>
   <div class="host-input hidden" id="hostWallBar">
@@ -299,6 +301,60 @@
   <div class="qr-box" id="qrBox" onclick="event.stopPropagation()"></div>
   <div class="qr-url" id="qrUrl"></div>
   <div class="qr-hint">點擊空白處關閉</div>
+</div>
+
+<!-- Push Content Panel -->
+<div id="pushPanel" style="display:none;position:fixed;top:0;right:0;width:360px;height:100vh;background:#161b22;border-left:1px solid #30363d;z-index:200;flex-direction:column;">
+  <div style="padding:12px 16px;border-bottom:1px solid #30363d;display:flex;align-items:center;justify-content:space-between;">
+    <span style="font-size:0.9rem;font-weight:700;color:#FFC857;">📤 推送到學員</span>
+    <button onclick="hidePushPanel()" style="background:none;color:#7d8590;font-size:1.2rem;border:none;cursor:pointer;">✕</button>
+  </div>
+  <div style="padding:16px;overflow-y:auto;flex:1;">
+    <div style="margin-bottom:12px;">
+      <label style="font-size:0.8rem;color:#7d8590;display:block;margin-bottom:4px;">類型</label>
+      <select id="pushType" style="width:100%;padding:8px;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:0.85rem;">
+        <option value="link">🔗 連結</option>
+        <option value="prompt">📝 Prompt</option>
+        <option value="data">📊 資料</option>
+        <option value="message">💬 公告</option>
+      </select>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:0.8rem;color:#7d8590;display:block;margin-bottom:4px;">標題</label>
+      <input id="pushTitleInput" placeholder="例：打開 Groq 網站" style="width:100%;padding:8px;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:0.85rem;">
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:0.8rem;color:#7d8590;display:block;margin-bottom:4px;">內容</label>
+      <textarea id="pushContentInput" rows="4" placeholder="網址或文字內容" style="width:100%;padding:8px;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:0.85rem;resize:vertical;font-family:inherit;"></textarea>
+    </div>
+    <button onclick="sendPush()" style="width:100%;padding:10px;background:#7C3AED;color:#fff;border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer;">推送給全班</button>
+
+    <div style="margin-top:16px;">
+      <p style="font-size:0.8rem;color:#7d8590;margin-bottom:8px;">快捷推送</p>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        <button onclick="quickPush('link','Groq 申請','https://console.groq.com')" style="padding:4px 10px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:0.75rem;cursor:pointer;">Groq</button>
+        <button onclick="quickPush('link','GitHub','https://github.com')" style="padding:4px 10px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:0.75rem;cursor:pointer;">GitHub</button>
+        <button onclick="quickPush('link','ChatGPT','https://chatgpt.com')" style="padding:4px 10px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:0.75rem;cursor:pointer;">ChatGPT</button>
+        <button onclick="quickPush('link','Google Sheet','https://sheets.new')" style="padding:4px 10px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:0.75rem;cursor:pointer;">Sheet</button>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;" id="pushLog">
+      <p style="font-size:0.8rem;color:#7d8590;margin-bottom:8px;">推送紀錄</p>
+      <div id="pushLogList" style="font-size:0.75rem;color:#7d8590;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Feedback Report Panel -->
+<div id="reportPanel" style="display:none;position:fixed;top:0;right:0;width:420px;height:100vh;background:#161b22;border-left:1px solid #30363d;z-index:200;flex-direction:column;">
+  <div style="padding:12px 16px;border-bottom:1px solid #30363d;display:flex;align-items:center;justify-content:space-between;">
+    <span style="font-size:0.9rem;font-weight:700;color:#FFC857;">📊 課後回饋報告</span>
+    <button onclick="hideReport()" style="background:none;color:#7d8590;font-size:1.2rem;border:none;cursor:pointer;">✕</button>
+  </div>
+  <div id="reportContent" style="padding:16px;overflow-y:auto;flex:1;">
+    <p style="color:#7d8590;text-align:center;padding:2rem;">載入中...</p>
+  </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
@@ -830,6 +886,163 @@ async function exportData(){
 
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function timeStr(t){if(!t)return'';const d=new Date(t);return`${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`}
+
+// ═══ Push Content ═══
+function showPushPanel() {
+  const p = document.getElementById('pushPanel');
+  p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
+}
+function hidePushPanel() {
+  document.getElementById('pushPanel').style.display = 'none';
+}
+
+function sendPush() {
+  if (!roomId) return;
+  const type = document.getElementById('pushType').value;
+  const title = document.getElementById('pushTitleInput').value.trim();
+  const content = document.getElementById('pushContentInput').value.trim();
+  if (!title || !content) { alert('請填寫標題和內容'); return; }
+
+  const pushData = { type, title, content, ts: firebase.database.ServerValue.TIMESTAMP };
+
+  // Set as current push
+  db.ref('rooms/'+roomId+'/pushContent/current').set(pushData);
+  // Add to history
+  db.ref('rooms/'+roomId+'/pushContent/history').push(pushData);
+
+  // Log
+  const log = document.getElementById('pushLogList');
+  const icon = type==='link'?'🔗':type==='prompt'?'📝':type==='data'?'📊':'💬';
+  log.innerHTML = '<div style="padding:3px 0;border-bottom:1px solid #30363d;">'+icon+' '+title+'</div>' + log.innerHTML;
+
+  // Clear inputs
+  document.getElementById('pushTitleInput').value = '';
+  document.getElementById('pushContentInput').value = '';
+}
+
+function quickPush(type, title, content) {
+  if (!roomId) return;
+  const pushData = { type, title, content, ts: firebase.database.ServerValue.TIMESTAMP };
+  db.ref('rooms/'+roomId+'/pushContent/current').set(pushData);
+  db.ref('rooms/'+roomId+'/pushContent/history').push(pushData);
+
+  const log = document.getElementById('pushLogList');
+  const icon = type==='link'?'🔗':'📝';
+  log.innerHTML = '<div style="padding:3px 0;border-bottom:1px solid #30363d;">'+icon+' '+title+'</div>' + log.innerHTML;
+}
+
+// ═══ Feedback Report ═══
+function showReport() {
+  const p = document.getElementById('reportPanel');
+  p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
+  if (p.style.display === 'flex') loadReport();
+}
+function hideReport() {
+  document.getElementById('reportPanel').style.display = 'none';
+}
+
+function loadReport() {
+  if (!roomId) return;
+  db.ref('rooms/'+roomId+'/feedback').once('value', snap => {
+    const data = snap.val();
+    const el = document.getElementById('reportContent');
+    if (!data) { el.innerHTML = '<p style="color:#7d8590;text-align:center;padding:2rem;">尚無回饋資料</p>'; return; }
+
+    const entries = Object.values(data);
+    const total = entries.length;
+
+    // Satisfaction average
+    let satSum = 0, satCount = 0;
+    let recSum = 0, recCount = 0;
+    let emails = [];
+    let wantPdfCount = 0;
+    let helpful = {};
+    let suggestions = [];
+
+    entries.forEach(e => {
+      if (e.ratings) {
+        if (e.ratings.satisfaction) { satSum += e.ratings.satisfaction; satCount++; }
+        if (e.ratings.recommend) { recSum += e.ratings.recommend; recCount++; }
+      }
+      if (e.email) emails.push(e.email);
+      if (e.wantPdf) wantPdfCount++;
+      if (e.answers) {
+        if (e.answers.helpful) {
+          const h = e.answers.helpful;
+          helpful[h] = (helpful[h]||0) + 1;
+        }
+        if (e.answers.suggestion && e.answers.suggestion !== '(跳過)') {
+          suggestions.push(e.answers.suggestion);
+        }
+      }
+    });
+
+    const satAvg = satCount ? (satSum/satCount).toFixed(1) : '-';
+    const recAvg = recCount ? (recSum/recCount).toFixed(1) : '-';
+
+    // Sort helpful
+    const helpfulSorted = Object.entries(helpful).sort((a,b)=>b[1]-a[1]);
+
+    let html = '';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">';
+    html += '<div style="background:#0d1117;border-radius:10px;padding:12px;text-align:center;border:1px solid #30363d;">';
+    html += '<div style="font-size:1.8rem;font-weight:900;color:#0F9D8A;">'+total+'</div>';
+    html += '<div style="font-size:0.75rem;color:#7d8590;">填寫人數</div></div>';
+    html += '<div style="background:#0d1117;border-radius:10px;padding:12px;text-align:center;border:1px solid #30363d;">';
+    html += '<div style="font-size:1.8rem;font-weight:900;color:#FFC857;">'+satAvg+'</div>';
+    html += '<div style="font-size:0.75rem;color:#7d8590;">滿意度 /5</div></div>';
+    html += '<div style="background:#0d1117;border-radius:10px;padding:12px;text-align:center;border:1px solid #30363d;">';
+    html += '<div style="font-size:1.8rem;font-weight:900;color:#1A73E8;">'+recAvg+'</div>';
+    html += '<div style="font-size:0.75rem;color:#7d8590;">推薦度 /5</div></div>';
+    html += '</div>';
+
+    // Helpful sections
+    if (helpfulSorted.length) {
+      html += '<div style="margin-bottom:12px;"><p style="font-size:0.85rem;color:#e6edf3;font-weight:700;margin-bottom:6px;">👍 最有幫助的部分</p>';
+      helpfulSorted.slice(0,5).forEach(([k,v]) => {
+        html += '<div style="display:flex;justify-content:space-between;padding:4px 8px;background:#0d1117;border-radius:6px;margin-bottom:3px;font-size:0.8rem;">';
+        html += '<span style="color:#e6edf3;">'+k+'</span><span style="color:#0F9D8A;font-weight:700;">'+v+'人</span></div>';
+      });
+      html += '</div>';
+    }
+
+    // Suggestions
+    if (suggestions.length) {
+      html += '<div style="margin-bottom:12px;"><p style="font-size:0.85rem;color:#e6edf3;font-weight:700;margin-bottom:6px;">💡 學員建議</p>';
+      suggestions.forEach(s => {
+        html += '<div style="padding:6px 8px;background:#0d1117;border-radius:6px;margin-bottom:3px;font-size:0.8rem;color:#e6edf3;border-left:3px solid #7C3AED;">'+s+'</div>';
+      });
+      html += '</div>';
+    }
+
+    // Emails
+    html += '<div style="margin-bottom:12px;"><p style="font-size:0.85rem;color:#e6edf3;font-weight:700;margin-bottom:6px;">📧 Email 名單 ('+emails.length+'人，'+wantPdfCount+'人要PDF)</p>';
+    if (emails.length) {
+      html += '<div style="background:#0d1117;border-radius:8px;padding:8px;font-size:0.8rem;">';
+      emails.forEach(e => {
+        html += '<div style="padding:2px 0;color:#e6edf3;">'+e+'</div>';
+      });
+      html += '</div>';
+      html += '<button onclick="copyEmails()" style="margin-top:6px;padding:6px 12px;background:#1A73E8;color:#fff;border:none;border-radius:6px;font-size:0.8rem;cursor:pointer;">📋 複製全部 Email</button>';
+    } else {
+      html += '<p style="font-size:0.8rem;color:#7d8590;">尚無人留 email</p>';
+    }
+    html += '</div>';
+
+    el.innerHTML = html;
+
+    // Store emails for copy
+    window._reportEmails = emails;
+  });
+}
+
+function copyEmails() {
+  if (window._reportEmails && window._reportEmails.length) {
+    navigator.clipboard.writeText(window._reportEmails.join('\n')).then(() => {
+      alert('已複製 '+window._reportEmails.length+' 個 email');
+    });
+  }
+}
 </script>
 </body>
 </html>
