@@ -699,7 +699,7 @@ function renderInfoPanel(){
   </div>`;
   html+=`<div class="mat-list"><h3 style="font-size:0.85rem;color:var(--pri);margin-bottom:0.5rem">教材（點擊在新視窗開啟，自動連結遙控）</h3>`;
   materials.forEach(m=>{
-    const url=m.hasSlideControl?`${m.url}?room=${encodeURIComponent(roomId)}`:m.url;
+    let url=m.hasSlideControl?`${m.url}?room=${encodeURIComponent(roomId)}`+`${m.queryExtra||''}`:m.url;
     html+=`<div class="mat-item" onclick="window.open('${url}','_blank')"><span class="mat-icon">${m.icon}</span><span class="mat-title">${m.title}</span><span class="mat-open">開啟 ↗</span></div>`;
   });
   html+='</div>';
@@ -798,8 +798,7 @@ function initAgentPanel(){
 
 // ═══ New Page Links ═══
 function openPresenter(){
-  // Find a deck for this room or use default
-  const deckId=localStorage.getItem(`_deck_${roomId}`)||'demo';
+  const deckId=localStorage.getItem(`_deck_${roomId}`)||'university-talk';
   window.open(`/classroom/presenter?room=${roomId}&deck=${deckId}`,'_blank');
 }
 function openSurvey(){window.open(`/classroom/survey?room=${roomId}`,'_blank')}

@@ -313,10 +313,11 @@
   var roomId = params.get('room');
   var deckName = params.get('deck');
 
-  if (!roomId || !deckName) {
-    showError('Missing Parameters', 'URL must include ?room=xxx&deck=yyy');
+  if (!deckName) {
+    showError('Missing Parameters', 'URL must include ?deck=yyy (e.g. ?deck=university-talk)');
     return;
   }
+  // room is optional — without it, no Firebase sync, just local keyboard control
 
   // ── State ──
   var slides = [];
@@ -339,7 +340,11 @@
   var fsPrompt = document.getElementById('fs-prompt');
 
   // ── Initialize ──
-  initFirebase();
+  if (roomId) { initFirebase(); } else {
+    badgeConnected.style.display = 'flex';
+    badgeText.textContent = '\u{1F3AC} standalone mode (no room)';
+    badgeConnected.style.background = '#5A6B7A';
+  }
   loadSlides();
   setupKeyboard();
   setupClickToggle();
