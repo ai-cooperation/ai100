@@ -68,12 +68,13 @@
     color: #fff;
     padding: 0.3rem 0.8rem;
     border-radius: 6px;
-    font-size: 0.75rem;
+    font-size: 1rem;
     font-weight: 700;
     opacity: 0.85;
     display: flex;
     align-items: center;
     gap: 0.4rem;
+    min-height: 48px;
     pointer-events: auto;
   }
 
@@ -96,10 +97,13 @@
     color: rgba(255, 255, 255, 0.7);
     padding: 0.3rem 0.8rem;
     border-radius: 6px;
-    font-size: 0.8rem;
+    font-size: 1.125rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     pointer-events: auto;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
   }
 
   /* ── Overlay — bottom portion ── */
@@ -130,7 +134,7 @@
 
   /* ── Vote bar chart ── */
   .vote-title {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     font-weight: 900;
     color: var(--gold);
     margin-bottom: 1rem;
@@ -187,7 +191,7 @@
 
   .vote-bar-pct {
     min-width: 60px;
-    font-size: 1rem;
+    font-size: 1.125rem;
     font-weight: 700;
     color: rgba(255,255,255,0.85);
     text-shadow: 0 1px 4px rgba(0,0,0,0.5);
@@ -196,7 +200,7 @@
 
   .vote-bar-count {
     min-width: 40px;
-    font-size: 0.8rem;
+    font-size: 1rem;
     color: var(--dim);
     font-variant-numeric: tabular-nums;
   }
@@ -238,8 +242,8 @@
   #fs-prompt.hidden { display: none; }
 
   #fs-prompt .icon { font-size: 4rem; opacity: 0.7; }
-  #fs-prompt .msg { font-size: 1.4rem; font-weight: 700; }
-  #fs-prompt .sub { font-size: 0.9rem; color: var(--dim); }
+  #fs-prompt .msg { font-size: 1.6rem; font-weight: 700; }
+  #fs-prompt .sub { font-size: 1.25rem; color: var(--dim); }
 
   /* ── Error state ── */
   #error-display {
@@ -258,8 +262,8 @@
 
   #error-display.active { display: flex; }
   #error-display .err-icon { font-size: 3rem; opacity: 0.5; }
-  #error-display .err-title { font-size: 1.3rem; font-weight: 700; color: var(--red); }
-  #error-display .err-detail { font-size: 0.9rem; color: var(--dim); max-width: 500px; }
+  #error-display .err-title { font-size: 1.6rem; font-weight: 700; color: var(--red); }
+  #error-display .err-detail { font-size: 1.375rem; color: var(--dim); max-width: 500px; }
 </style>
 </head>
 <body class="ui-visible">
@@ -746,12 +750,12 @@
     entries = entries.slice(0, 40);
 
     if (entries.length === 0) {
-      area.innerHTML = '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:1.2rem;">Waiting for messages...</div>';
+      area.innerHTML = '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:1.25rem;">Waiting for messages...</div>';
       return;
     }
 
     var maxFreq = entries[0].count;
-    var minSize = 14;
+    var minSize = 16;
     var maxSize = 52;
 
     area.innerHTML = '';
