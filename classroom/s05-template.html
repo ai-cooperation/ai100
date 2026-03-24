@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S05 OpenClaw 龍蝦 — 教學資源</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --white:#FFF;--offwhite:#F8F9FA;--g50:#F1F3F4;--g100:#E8EAED;
+  --g200:#DADCE0;--g400:#9AA0A6;--g600:#5F6368;--g800:#3C4043;--g900:#202124;
+  --blue:#1A73E8;--blue-lt:#E8F0FE;
+  --green:#0F9D8A;--green-lt:#E6F4F1;
+  --gold:#F9AB00;--gold-lt:#FEF7E0;
+  --purple:#7C3AED;--purple-lt:#F3E8FF;
+  --red:#D93025;--red-lt:#FCE8E6;
+  --navy:#0B3C5D;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--offwhite);color:var(--g900);line-height:1.7;font-size:18px;}
+
+.hero{background:var(--navy);color:#fff;padding:3rem 2rem;text-align:center;}
+.hero h1{font-size:2.2rem;font-weight:900;}
+.hero p{color:rgba(255,255,255,.7);margin-top:.5rem;font-size:1.1rem;}
+
+.container{max-width:800px;margin:0 auto;padding:2rem 1.5rem;}
+
+.section{margin-bottom:2.5rem;}
+.section h2{font-size:1.5rem;font-weight:700;color:var(--navy);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:3px solid var(--green);}
+
+.resource-card{
+  background:var(--white);border:2px solid var(--g100);border-radius:16px;
+  padding:1.5rem;margin-bottom:1rem;
+  transition:border-color .2s,box-shadow .2s;
+}
+.resource-card:hover{border-color:var(--blue);box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.resource-card h3{font-size:1.15rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem;}
+.resource-card .badge{
+  display:inline-block;padding:.15rem .6rem;border-radius:100px;font-size:.75rem;font-weight:700;
+}
+.resource-card p{font-size:.95rem;color:var(--g600);margin-bottom:.8rem;}
+.resource-card .action{
+  display:inline-block;padding:.5rem 1.5rem;border-radius:100px;font-weight:700;
+  text-decoration:none;font-size:.95rem;transition:all .15s;
+}
+.resource-card .action.primary{background:var(--blue);color:#fff;}
+.resource-card .action.primary:hover{background:#1557B0;}
+.resource-card .action.outline{border:2px solid var(--g200);color:var(--g800);background:var(--white);}
+.resource-card .action.outline:hover{border-color:var(--blue);color:var(--blue);}
+
+.code-box{
+  background:var(--g50);border:1px solid var(--g200);border-radius:12px;
+  padding:1rem 1.2rem;font-family:'Courier New',monospace;font-size:.85rem;
+  line-height:1.7;overflow-x:auto;position:relative;white-space:pre-wrap;
+  margin:.5rem 0;
+}
+.copy-btn{
+  position:absolute;top:.5rem;right:.5rem;padding:.3rem .8rem;border-radius:8px;
+  background:var(--white);border:1px solid var(--g200);font-size:.8rem;cursor:pointer;
+  color:var(--g600);transition:all .15s;
+}
+.copy-btn:hover{background:var(--blue-lt);color:var(--blue);border-color:var(--blue);}
+
+.star{color:var(--gold);}
+.tag{display:inline-block;padding:.1rem .5rem;border-radius:6px;font-size:.75rem;font-weight:700;margin-right:.3rem;}
+.tag.green{background:var(--green-lt);color:var(--green);}
+.tag.blue{background:var(--blue-lt);color:var(--blue);}
+.tag.purple{background:var(--purple-lt);color:var(--purple);}
+.tag.gold{background:var(--gold-lt);color:var(--gold);}
+.tag.red{background:var(--red-lt);color:var(--red);}
+
+.csv-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:.8rem 0;}
+.csv-table th{background:var(--navy);color:#fff;padding:.5rem .8rem;text-align:left;}
+.csv-table td{padding:.4rem .8rem;border-bottom:1px solid var(--g100);}
+.csv-table tr:hover td{background:var(--g50);}
+.csv-table .pos{color:var(--green);font-weight:500;}
+.csv-table .neg{color:var(--red);font-weight:500;}
+.csv-table .neu{color:var(--g600);}
+
+.step-list{list-style:none;counter-reset:step;}
+.step-list li{counter-increment:step;padding:.8rem 1rem;margin-bottom:.5rem;background:var(--white);border:1px solid var(--g100);border-radius:12px;font-size:.95rem;display:flex;align-items:flex-start;gap:.8rem;}
+.step-list li::before{content:counter(step);background:var(--navy);color:#fff;width:2rem;height:2rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;}
+
+.checklist{list-style:none;padding:0;}
+.checklist li{padding:.5rem 0;border-bottom:1px solid var(--g100);font-size:.95rem;display:flex;align-items:center;gap:.5rem;}
+.checklist li::before{content:"☐";font-size:1.2rem;color:var(--blue);}
+
+footer{text-align:center;padding:2rem;color:var(--g400);font-size:.85rem;}
+footer a{color:var(--green);text-decoration:none;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <p style="font-size:.9rem;opacity:.6;">AI 100 講 · 補充單元 S05</p>
+  <h1>OpenClaw 龍蝦 — 教學資源</h1>
+  <p>安裝、設定、模型選擇、費用</p>
+</div>
+
+<div class="container">
+
+<!-- ═══════ BotFather 步驟 ═══════ -->
+<div class="section">
+  <h2>🤖 BotFather 建立 Bot 步驟</h2>
+
+  <ol class="step-list">
+    <li>打開 Telegram → 搜尋 <strong>@BotFather</strong></li>
+    <li>發送 <code>/newbot</code></li>
+    <li>輸入 Bot 名稱（如「我的AI助手」）</li>
+    <li>輸入 Bot username（如 <code>myai_helper_bot</code>，必須以 <code>_bot</code> 結尾）</li>
+    <li>複製 token（格式：<code>1234567:AAH...</code>）</li>
+    <li><strong style="color:var(--red);">不要分享 token！</strong> 拿到 token 的人可以控制你的 Bot</li>
+  </ol>
+</div>
+
+<!-- ═══════ 安裝指令 ═══════ -->
+<div class="section">
+  <h2>💻 安裝指令</h2>
+
+  <div class="resource-card">
+    <h3><span class="tag blue">Docker</span> 推薦方式（一行搞定）</h3>
+    <p>電腦已有 Docker 的話，最快的安裝方式：</p>
+    <div class="code-box" id="install-docker">docker run -d --name openclaw -v openclaw_data:/data openclaw/openclaw<button class="copy-btn" onclick="copyCode('install-docker')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag green">npm</span> Node.js 安裝</h3>
+    <p>已有 Node.js 環境的話，用 npm 安裝：</p>
+    <div class="code-box" id="install-npm">npm install -g openclaw<button class="copy-btn" onclick="copyCode('install-npm')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag purple">Zeabur</span> 雲端一鍵部署（不用裝任何東西）</h3>
+    <p>完全不碰命令列！前往 Zeabur 點一下就部署好了。</p>
+    <div class="code-box" id="install-zeabur">前往 zeabur.com/templates/VTZ4FX 一鍵部署<button class="copy-btn" onclick="copyCode('install-zeabur')">複製</button></div>
+    <div style="margin-top:.5rem;">
+      <a class="action primary" href="https://zeabur.com/templates/VTZ4FX" target="_blank" rel="noopener">前往 Zeabur 部署 →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ LLM 設定範本 ═══════ -->
+<div class="section">
+  <h2>🧠 LLM 設定範本</h2>
+
+  <div class="resource-card">
+    <h3><span class="tag green">Groq</span> 免費，速度最快</h3>
+    <p>完全免費，14,400 次/天。適合入門體驗。</p>
+    <div class="code-box" id="llm-groq">API URL: https://api.groq.com/openai/v1
+Model: llama-3.3-70b-versatile<button class="copy-btn" onclick="copyCode('llm-groq')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag blue">Gemini</span> Google AI，免費額度大</h3>
+    <p>免費版每分鐘 60 次，每日 1000 次。品質不錯。</p>
+    <div class="code-box" id="llm-gemini">API URL: https://generativelanguage.googleapis.com/v1beta/openai
+Model: gemini-2.5-flash<button class="copy-btn" onclick="copyCode('llm-gemini')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag purple">OpenRouter</span> Grok Code Fast（推薦）</h3>
+    <p>一個 Key 可切換多種模型。Grok Code Fast 性價比最高。</p>
+    <div class="code-box" id="llm-openrouter">API URL: https://openrouter.ai/api/v1
+Model: x-ai/grok-3-fast<button class="copy-btn" onclick="copyCode('llm-openrouter')">複製</button></div>
+  </div>
+</div>
+
+<!-- ═══════ 個人化設定 ═══════ -->
+<div class="section">
+  <h2>🎭 個人化設定範本</h2>
+
+  <div class="resource-card">
+    <h3>Bot 個性設定（貼到 OpenClaw 設定頁）</h3>
+    <p>讓你的 Bot 有自己的個性和風格：</p>
+    <div class="code-box" id="personality">名字：小龍
+語言：繁體中文
+個性：熱情有禮貌
+回覆風格：簡潔，不超過 3 句<button class="copy-btn" onclick="copyCode('personality')">複製</button></div>
+  </div>
+</div>
+
+<!-- ═══════ 模型比較 ═══════ -->
+<div class="section">
+  <h2>📊 模型比較表（實測結果）</h2>
+
+  <table class="csv-table">
+    <tr><th>模型</th><th>實測結果</th><th>費用</th><th>備註</th></tr>
+    <tr><td>Claude Opus 4.5</td><td class="neg">❌ 太貴</td><td>極貴</td><td>品質最好但帳單嚇人</td></tr>
+    <tr><td>GPT-4o</td><td class="neg">❌ 設定常出錯</td><td>便宜</td><td>Function Calling 不穩</td></tr>
+    <tr><td>Gemini 2.5 Flash-Lite</td><td class="neu">⚠️ 簡單任務 OK</td><td>很便宜</td><td>複雜指令會出錯</td></tr>
+    <tr><td>Gemini 2.5 Flash</td><td class="neu">⚠️ 比 Lite 好但常錯</td><td>不貴</td><td>中等複雜度可用</td></tr>
+    <tr><td>Gemini 3 Flash</td><td class="pos">✅ 幾乎不錯</td><td>有點貴</td><td>穩定性大幅提升</td></tr>
+    <tr><td>Grok Code Fast 1</td><td class="pos">✅ 推薦</td><td>可接受</td><td>性價比最高</td></tr>
+  </table>
+</div>
+
+<!-- ═══════ 雲端主機 ═══════ -->
+<div class="section">
+  <h2>☁️ 雲端主機比較</h2>
+
+  <table class="csv-table">
+    <tr><th>主機</th><th>費用</th><th>特色</th><th>推薦理由</th></tr>
+    <tr><td>Oracle Cloud</td><td class="pos">$0/月</td><td>永久免費方案</td><td>最省錢，適合練習</td></tr>
+    <tr><td>Zeabur</td><td>$2/月</td><td>一鍵部署模板</td><td>最方便，不碰命令列</td></tr>
+    <tr><td>Hetzner</td><td>~$4/月</td><td>歐洲老牌主機商</td><td>最穩定，長期使用</td></tr>
+  </table>
+</div>
+
+<!-- ═══════ 安全檢查 ═══════ -->
+<div class="section">
+  <h2>🔒 安全檢查清單</h2>
+
+  <div class="resource-card">
+    <h3>上線前必須確認的 10 件事</h3>
+    <ul class="checklist">
+      <li>API Key 有加密存儲？</li>
+      <li>Pairing 已啟用？</li>
+      <li>不是用主要 Gmail 連接？</li>
+      <li>Skills 權限最小化？</li>
+      <li>Docker 網路設定正確？</li>
+      <li>定期更換 API Key？</li>
+      <li>對話記錄存在安全位置？</li>
+      <li>不分享 Bot Token？</li>
+      <li>不在公開頻道使用？</li>
+      <li>有監控異常活動？</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════ 費用組合 ═══════ -->
+<div class="section">
+  <h2>💰 費用組合推薦</h2>
+
+  <div class="resource-card" style="border-color:var(--green);">
+    <h3><span class="tag green">免費方案</span> Oracle + Gemini Lite</h3>
+    <p><strong style="font-size:1.3rem;color:var(--green);">$0/月</strong> — 完全零成本，適合純體驗</p>
+  </div>
+
+  <div class="resource-card" style="border-color:var(--blue);">
+    <h3><span class="tag blue">最方便</span> Zeabur + Gemini Lite</h3>
+    <p><strong style="font-size:1.3rem;color:var(--blue);">~$2/月</strong> — 一鍵部署，不碰任何命令列</p>
+  </div>
+
+  <div class="resource-card" style="border-color:var(--gold);">
+    <h3><span class="tag gold">超省方案</span> Oracle + Haiku</h3>
+    <p><strong style="font-size:1.3rem;color:var(--gold);">~$3/月</strong> — 免費主機 + 便宜但聰明的模型</p>
+  </div>
+
+  <div class="resource-card" style="border-color:var(--purple);">
+    <h3><span class="tag purple">穩定方案</span> Hetzner + GPT-4.1-mini</h3>
+    <p><strong style="font-size:1.3rem;color:var(--purple);">~$8/月</strong> — 穩定主機 + 可靠模型，長期使用首選</p>
+  </div>
+</div>
+
+</div><!-- .container -->
+
+<footer>
+  <a href="https://ai100.cooperation.tw">← 回到 AI 100 講</a> · S05 OpenClaw 龍蝦 教學資源
+</footer>
+
+<script>
+function copyCode(id) {
+  const el = document.getElementById(id);
+  const btn = el.querySelector('.copy-btn');
+  const text = el.textContent.replace(btn.textContent, '').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✅ 已複製！';
+    setTimeout(() => btn.textContent = '複製', 2000);
+  });
+}
+</script>
+</body>
+</html>

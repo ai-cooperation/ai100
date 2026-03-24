@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S03 CLI Agent — 教學資源</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --white:#FFF;--offwhite:#F8F9FA;--g50:#F1F3F4;--g100:#E8EAED;
+  --g200:#DADCE0;--g400:#9AA0A6;--g600:#5F6368;--g800:#3C4043;--g900:#202124;
+  --blue:#1A73E8;--blue-lt:#E8F0FE;
+  --green:#0F9D8A;--green-lt:#E6F4F1;
+  --gold:#F9AB00;--gold-lt:#FEF7E0;
+  --purple:#7C3AED;--purple-lt:#F3E8FF;
+  --red:#D93025;--red-lt:#FCE8E6;
+  --navy:#0B3C5D;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--offwhite);color:var(--g900);line-height:1.7;font-size:18px;}
+
+.hero{background:var(--navy);color:#fff;padding:3rem 2rem;text-align:center;}
+.hero h1{font-size:2.2rem;font-weight:900;}
+.hero p{color:rgba(255,255,255,.7);margin-top:.5rem;font-size:1.1rem;}
+
+.container{max-width:800px;margin:0 auto;padding:2rem 1.5rem;}
+
+.section{margin-bottom:2.5rem;}
+.section h2{font-size:1.5rem;font-weight:700;color:var(--navy);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:3px solid var(--green);}
+
+.resource-card{
+  background:var(--white);border:2px solid var(--g100);border-radius:16px;
+  padding:1.5rem;margin-bottom:1rem;
+  transition:border-color .2s,box-shadow .2s;
+}
+.resource-card:hover{border-color:var(--blue);box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.resource-card h3{font-size:1.15rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem;}
+.resource-card .badge{
+  display:inline-block;padding:.15rem .6rem;border-radius:100px;font-size:.75rem;font-weight:700;
+}
+.resource-card p{font-size:.95rem;color:var(--g600);margin-bottom:.8rem;}
+.resource-card .action{
+  display:inline-block;padding:.5rem 1.5rem;border-radius:100px;font-weight:700;
+  text-decoration:none;font-size:.95rem;transition:all .15s;
+}
+.resource-card .action.primary{background:var(--blue);color:#fff;}
+.resource-card .action.primary:hover{background:#1557B0;}
+.resource-card .action.outline{border:2px solid var(--g200);color:var(--g800);background:var(--white);}
+.resource-card .action.outline:hover{border-color:var(--blue);color:var(--blue);}
+
+.code-box{
+  background:var(--g50);border:1px solid var(--g200);border-radius:12px;
+  padding:1rem 1.2rem;font-family:'Courier New',monospace;font-size:.85rem;
+  line-height:1.7;overflow-x:auto;position:relative;white-space:pre-wrap;
+  margin:.5rem 0;
+}
+.copy-btn{
+  position:absolute;top:.5rem;right:.5rem;padding:.3rem .8rem;border-radius:8px;
+  background:var(--white);border:1px solid var(--g200);font-size:.8rem;cursor:pointer;
+  color:var(--g600);transition:all .15s;
+}
+.copy-btn:hover{background:var(--blue-lt);color:var(--blue);border-color:var(--blue);}
+
+.star{color:var(--gold);}
+.tag{display:inline-block;padding:.1rem .5rem;border-radius:6px;font-size:.75rem;font-weight:700;margin-right:.3rem;}
+.tag.green{background:var(--green-lt);color:var(--green);}
+.tag.blue{background:var(--blue-lt);color:var(--blue);}
+.tag.purple{background:var(--purple-lt);color:var(--purple);}
+.tag.gold{background:var(--gold-lt);color:var(--gold);}
+.tag.red{background:var(--red-lt);color:var(--red);}
+
+.csv-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:.8rem 0;}
+.csv-table th{background:var(--navy);color:#fff;padding:.5rem .8rem;text-align:left;}
+.csv-table td{padding:.4rem .8rem;border-bottom:1px solid var(--g100);}
+.csv-table tr:hover td{background:var(--g50);}
+.csv-table .pos{color:var(--green);font-weight:500;}
+.csv-table .neg{color:var(--red);font-weight:500;}
+.csv-table .neu{color:var(--g600);}
+
+footer{text-align:center;padding:2rem;color:var(--g400);font-size:.85rem;}
+footer a{color:var(--green);text-decoration:none;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <p style="font-size:.9rem;opacity:.6;">AI 100 講 · 補充單元 S03</p>
+  <h1>CLI Agent — 教學資源</h1>
+  <p>安裝指令、CLAUDE.md 範本、練習任務</p>
+</div>
+
+<div class="container">
+
+<!-- ═══════ 安裝指令 ═══════ -->
+<div class="section">
+  <h2>💻 安裝指令</h2>
+
+  <div class="resource-card">
+    <h3><span class="tag blue">Claude Code</span> Anthropic 官方 CLI Agent</h3>
+    <p>需先安裝 Node.js，然後一行指令安裝。需要 Claude Pro/Max 訂閱。</p>
+    <div class="code-box" id="install1">npm install -g @anthropic-ai/claude-code<button class="copy-btn" onclick="copyCode('install1')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag green">Codex</span> OpenAI 官方 CLI Agent</h3>
+    <p>需先安裝 Node.js，然後一行指令安裝。需要 ChatGPT Plus/Pro 訂閱。</p>
+    <div class="code-box" id="install2">npm install -g @openai/codex<button class="copy-btn" onclick="copyCode('install2')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag purple">Antigravity</span> Google 官方 CLI Agent</h3>
+    <p>完全免費！前往官網下載安裝檔，支援 macOS / Windows / Linux。</p>
+    <div class="code-box" id="install3">前往 antigravity.google 下載<button class="copy-btn" onclick="copyCode('install3')">複製</button></div>
+    <div style="margin-top:.5rem;">
+      <a class="action primary" href="https://antigravity.google" target="_blank" rel="noopener">前往下載 →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ CLAUDE.md 範本 ═══════ -->
+<div class="section">
+  <h2>📝 CLAUDE.md 範本（複製貼到專案根目錄）</h2>
+
+  <div class="resource-card">
+    <h3><span class="tag green">⭐ 基本版</span> 適合完全新手</h3>
+    <p>最基本的三條規則，讓 AI 知道你的需求</p>
+    <div class="code-box" id="claude1">我不是工程師，請用簡單的話解釋每個步驟。
+所有網頁都要有手機版（RWD）。
+程式碼要有中文註解。<button class="copy-btn" onclick="copyCode('claude1')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag blue">⭐⭐ 中等版</span> 多一層保護</h3>
+    <p>加上確認機制和檔案管理規則</p>
+    <div class="code-box" id="claude2">我不是工程師，請用簡單的話解釋每個步驟。
+所有網頁都要有手機版（RWD）。
+程式碼要有中文註解。
+不要用我沒聽過的工具，要用之前先問我。
+每個步驟要先讓我確認才繼續。
+檔案結構要清楚分類，不要全部塞在同一個資料夾。<button class="copy-btn" onclick="copyCode('claude2')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag purple">⭐⭐⭐ 進階版</span> 完整工作規範</h3>
+    <p>加上版本控制和安全性規則</p>
+    <div class="code-box" id="claude3">我不是工程師，請用簡單的話解釋每個步驟。
+所有網頁都要有手機版（RWD）。
+程式碼要有中文註解。
+不要用我沒聽過的工具，要用之前先問我。
+每個步驟要先讓我確認才繼續。
+檔案結構要清楚分類，不要全部塞在同一個資料夾。
+Git commit 訊息用中文。
+API Key 不能寫在程式碼裡，要用環境變數或 .env 檔。
+每次修改前先備份原始檔案。<button class="copy-btn" onclick="copyCode('claude3')">複製</button></div>
+  </div>
+</div>
+
+<!-- ═══════ 練習任務 Prompt ═══════ -->
+<div class="section">
+  <h2>🎯 練習任務 Prompt（由易到難）</h2>
+
+  <div class="resource-card">
+    <h3><span class="star">⭐</span> 看看環境</h3>
+    <p>最簡單的任務：讓 AI 幫你認識電腦裡有什麼</p>
+    <div class="code-box" id="task1">看看桌面有什麼檔案，解釋每個檔案的功能<button class="copy-btn" onclick="copyCode('task1')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="star">⭐⭐</span> 小修改</h3>
+    <p>修改現有檔案，學習 AI 怎麼幫你改 code</p>
+    <div class="code-box" id="task2">把這個網站的標題改成「我的作品集」，加一個 footer 寫版權 2026<button class="copy-btn" onclick="copyCode('task2')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="star">⭐⭐⭐</span> 檔案處理</h3>
+    <p>跨檔案操作，讓 AI 幫你整理資料</p>
+    <div class="code-box" id="task3">把桌面上這三份 Markdown 筆記合併成一份，轉成 PDF<button class="copy-btn" onclick="copyCode('task3')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="star">⭐⭐⭐⭐</span> Git 部署</h3>
+    <p>完整的 Git 工作流，從建 repo 到上傳</p>
+    <div class="code-box" id="task4">幫我在 GitHub 建一個新 repo 叫 my-portfolio，把桌面的 my-site 資料夾推上去<button class="copy-btn" onclick="copyCode('task4')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="star">⭐⭐⭐⭐⭐</span> 完整專案</h3>
+    <p>從零開始建立網站並部署上線</p>
+    <div class="code-box" id="task5">建一個查詢台北天氣的網站，用好看的介面，部署到 GitHub Pages，repo 叫 weather-app<button class="copy-btn" onclick="copyCode('task5')">複製</button></div>
+  </div>
+</div>
+
+<!-- ═══════ Permission 設定 ═══════ -->
+<div class="section">
+  <h2>🔒 Permission 設定參考</h2>
+
+  <div class="resource-card">
+    <h3><span class="tag green">安全模式</span> 每個動作都要確認</h3>
+    <p>適合初學者，AI 做任何事都會先問你</p>
+    <div class="code-box" id="perm1">{
+  "permissions": {
+    "allow": [],
+    "deny": ["Bash(*)", "Write(*)", "Edit(*)"]
+  }
+}<button class="copy-btn" onclick="copyCode('perm1')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag blue">半自動</span> 常用操作自動，危險操作要確認</h3>
+    <p>適合有經驗的使用者，讀取和搜尋自動允許</p>
+    <div class="code-box" id="perm2">{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Read(*)",
+      "Glob(*)",
+      "Grep(*)"
+    ],
+    "deny": ["Bash(rm -rf *)"]
+  }
+}<button class="copy-btn" onclick="copyCode('perm2')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag red">Bypass 模式</span> 全自動（進階用戶）</h3>
+    <p>AI 自動執行所有操作，只有危險指令會被攔截</p>
+    <div class="code-box" id="perm3">{
+  "permissions": {
+    "allow": ["Bash(*)", "Write(*)", "Edit(*)"],
+    "deny": ["Bash(rm -rf /*)"]
+  }
+}<button class="copy-btn" onclick="copyCode('perm3')">複製</button></div>
+  </div>
+</div>
+
+<!-- ═══════ 費用比較 ═══════ -->
+<div class="section">
+  <h2>💰 費用比較</h2>
+
+  <table class="csv-table">
+    <tr><th>工具</th><th>費用</th><th>特色</th><th>適合誰</th></tr>
+    <tr><td>Claude Code</td><td>$20/月 (Pro)</td><td>最強 coding 能力，CLAUDE.md 規範</td><td>認真學的人</td></tr>
+    <tr><td>Codex</td><td>$20/月 (Plus)</td><td>OpenAI 生態系，GPT 整合</td><td>已有 ChatGPT 訂閱者</td></tr>
+    <tr><td>Antigravity</td><td class="pos">免費</td><td>Google 生態系，Gemini 驅動</td><td>預算有限的人</td></tr>
+    <tr><td>混合使用</td><td>$20/月</td><td>付費一個 + 免費 Antigravity</td><td class="pos">最推薦</td></tr>
+  </table>
+</div>
+
+</div><!-- .container -->
+
+<footer>
+  <a href="https://ai100.cooperation.tw">← 回到 AI 100 講</a> · S03 CLI Agent 教學資源
+</footer>
+
+<script>
+function copyCode(id) {
+  const el = document.getElementById(id);
+  const btn = el.querySelector('.copy-btn');
+  const text = el.textContent.replace(btn.textContent, '').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✅ 已複製！';
+    setTimeout(() => btn.textContent = '複製', 2000);
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S04 VS Code IDE — 教學資源</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --white:#FFF;--offwhite:#F8F9FA;--g50:#F1F3F4;--g100:#E8EAED;
+  --g200:#DADCE0;--g400:#9AA0A6;--g600:#5F6368;--g800:#3C4043;--g900:#202124;
+  --blue:#1A73E8;--blue-lt:#E8F0FE;
+  --green:#0F9D8A;--green-lt:#E6F4F1;
+  --gold:#F9AB00;--gold-lt:#FEF7E0;
+  --purple:#7C3AED;--purple-lt:#F3E8FF;
+  --red:#D93025;--red-lt:#FCE8E6;
+  --navy:#0B3C5D;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--offwhite);color:var(--g900);line-height:1.7;font-size:18px;}
+
+.hero{background:var(--navy);color:#fff;padding:3rem 2rem;text-align:center;}
+.hero h1{font-size:2.2rem;font-weight:900;}
+.hero p{color:rgba(255,255,255,.7);margin-top:.5rem;font-size:1.1rem;}
+
+.container{max-width:800px;margin:0 auto;padding:2rem 1.5rem;}
+
+.section{margin-bottom:2.5rem;}
+.section h2{font-size:1.5rem;font-weight:700;color:var(--navy);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:3px solid var(--green);}
+
+.resource-card{
+  background:var(--white);border:2px solid var(--g100);border-radius:16px;
+  padding:1.5rem;margin-bottom:1rem;
+  transition:border-color .2s,box-shadow .2s;
+}
+.resource-card:hover{border-color:var(--blue);box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.resource-card h3{font-size:1.15rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem;}
+.resource-card .badge{
+  display:inline-block;padding:.15rem .6rem;border-radius:100px;font-size:.75rem;font-weight:700;
+}
+.resource-card p{font-size:.95rem;color:var(--g600);margin-bottom:.8rem;}
+.resource-card .action{
+  display:inline-block;padding:.5rem 1.5rem;border-radius:100px;font-weight:700;
+  text-decoration:none;font-size:.95rem;transition:all .15s;
+}
+.resource-card .action.primary{background:var(--blue);color:#fff;}
+.resource-card .action.primary:hover{background:#1557B0;}
+.resource-card .action.outline{border:2px solid var(--g200);color:var(--g800);background:var(--white);}
+.resource-card .action.outline:hover{border-color:var(--blue);color:var(--blue);}
+
+.code-box{
+  background:var(--g50);border:1px solid var(--g200);border-radius:12px;
+  padding:1rem 1.2rem;font-family:'Courier New',monospace;font-size:.85rem;
+  line-height:1.7;overflow-x:auto;position:relative;white-space:pre-wrap;
+  margin:.5rem 0;
+}
+.copy-btn{
+  position:absolute;top:.5rem;right:.5rem;padding:.3rem .8rem;border-radius:8px;
+  background:var(--white);border:1px solid var(--g200);font-size:.8rem;cursor:pointer;
+  color:var(--g600);transition:all .15s;
+}
+.copy-btn:hover{background:var(--blue-lt);color:var(--blue);border-color:var(--blue);}
+
+.star{color:var(--gold);}
+.tag{display:inline-block;padding:.1rem .5rem;border-radius:6px;font-size:.75rem;font-weight:700;margin-right:.3rem;}
+.tag.green{background:var(--green-lt);color:var(--green);}
+.tag.blue{background:var(--blue-lt);color:var(--blue);}
+.tag.purple{background:var(--purple-lt);color:var(--purple);}
+.tag.gold{background:var(--gold-lt);color:var(--gold);}
+.tag.red{background:var(--red-lt);color:var(--red);}
+
+.csv-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:.8rem 0;}
+.csv-table th{background:var(--navy);color:#fff;padding:.5rem .8rem;text-align:left;}
+.csv-table td{padding:.4rem .8rem;border-bottom:1px solid var(--g100);}
+.csv-table tr:hover td{background:var(--g50);}
+.csv-table .pos{color:var(--green);font-weight:500;}
+.csv-table .neg{color:var(--red);font-weight:500;}
+.csv-table .neu{color:var(--g600);}
+
+footer{text-align:center;padding:2rem;color:var(--g400);font-size:.85rem;}
+footer a{color:var(--green);text-decoration:none;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <p style="font-size:.9rem;opacity:.6;">AI 100 講 · 補充單元 S04</p>
+  <h1>VS Code IDE — 教學資源</h1>
+  <p>擴充安裝、推薦專案、快捷鍵</p>
+</div>
+
+<div class="container">
+
+<!-- ═══════ 四大 AI 擴充 ═══════ -->
+<div class="section">
+  <h2>🧩 四大 AI 擴充安裝連結</h2>
+
+  <div class="resource-card">
+    <h3><span class="tag purple">Claude</span> Claude for VS Code</h3>
+    <p>Anthropic 官方擴充，整合 Claude AI 到 VS Code。內建聊天、程式碼生成、重構。</p>
+    <a class="action primary" href="https://marketplace.visualstudio.com/items?itemName=anthropic.claude-for-vscode" target="_blank" rel="noopener">安裝擴充 →</a>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag green">Copilot</span> GitHub Copilot</h3>
+    <p>GitHub 官方 AI 輔助，自動補全程式碼。免費版每月 2000 次補全。</p>
+    <a class="action primary" href="https://marketplace.visualstudio.com/items?itemName=GitHub.copilot" target="_blank" rel="noopener">安裝擴充 →</a>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag blue">Amazon Q</span> Amazon Q Developer</h3>
+    <p>AWS 官方 AI 輔助，免費版每月 50 次請求。支援多種語言。</p>
+    <a class="action primary" href="https://marketplace.visualstudio.com/items?itemName=AmazonWebServices.amazon-q-vscode" target="_blank" rel="noopener">安裝擴充 →</a>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag gold">Continue</span> Continue.dev</h3>
+    <p>開源 AI 擴充，支援自帶模型（Ollama、OpenRouter 等）。完全免費。</p>
+    <a class="action primary" href="https://marketplace.visualstudio.com/items?itemName=Continue.continue" target="_blank" rel="noopener">安裝擴充 →</a>
+  </div>
+</div>
+
+<!-- ═══════ 推薦 Clone 專案 ═══════ -->
+<div class="section">
+  <h2>📦 推薦 Clone 專案（直接拿來改）</h2>
+
+  <table class="csv-table">
+    <tr><th>專案</th><th>用途</th><th>GitHub</th></tr>
+    <tr>
+      <td><strong>HTML5 Boilerplate</strong></td>
+      <td>乾淨的 Landing Page 起點</td>
+      <td><a href="https://github.com/h5bp/html5-boilerplate" target="_blank" style="color:var(--blue);">github.com/h5bp/html5-boilerplate</a></td>
+    </tr>
+    <tr>
+      <td><strong>Tabler</strong></td>
+      <td>Dashboard 管理後台模板</td>
+      <td><a href="https://github.com/tabler/tabler" target="_blank" style="color:var(--blue);">github.com/tabler/tabler</a></td>
+    </tr>
+    <tr>
+      <td><strong>Starter Portfolio</strong></td>
+      <td>個人作品集模板</td>
+      <td><a href="https://github.com/cobiwave/simplefolio" target="_blank" style="color:var(--blue);">github.com/cobiwave/simplefolio</a></td>
+    </tr>
+    <tr>
+      <td><strong>Clean Blog</strong></td>
+      <td>部落格模板</td>
+      <td><a href="https://github.com/StartBootstrap/startbootstrap-clean-blog" target="_blank" style="color:var(--blue);">github.com/StartBootstrap/startbootstrap-clean-blog</a></td>
+    </tr>
+    <tr>
+      <td><strong>TodoMVC</strong></td>
+      <td>Todo App 各框架範例</td>
+      <td><a href="https://github.com/tastejs/todomvc" target="_blank" style="color:var(--blue);">github.com/tastejs/todomvc</a></td>
+    </tr>
+  </table>
+
+  <div class="resource-card" style="background:var(--blue-lt);border-color:var(--blue);">
+    <h3>💡 怎麼 Clone？</h3>
+    <p style="color:var(--g900);">在 VS Code 終端機輸入以下指令，把專案下載到電腦：</p>
+    <div class="code-box" id="clone-cmd">git clone https://github.com/cobiwave/simplefolio.git my-portfolio<button class="copy-btn" onclick="copyCode('clone-cmd')">複製</button></div>
+  </div>
+</div>
+
+<!-- ═══════ 快捷鍵 ═══════ -->
+<div class="section">
+  <h2>⌨️ VS Code 常用快捷鍵</h2>
+
+  <table class="csv-table">
+    <tr><th>快捷鍵</th><th>功能</th><th>說明</th></tr>
+    <tr><td><code>Ctrl+Shift+P</code></td><td>Command Palette</td><td>所有功能的入口，最重要的快捷鍵</td></tr>
+    <tr><td><code>Ctrl+`</code></td><td>Toggle Terminal</td><td>開關終端機面板</td></tr>
+    <tr><td><code>Ctrl+B</code></td><td>Toggle Sidebar</td><td>開關左邊檔案列表</td></tr>
+    <tr><td><code>Ctrl+D</code></td><td>Select Next</td><td>選取下一個相同文字（批量改名神器）</td></tr>
+    <tr><td><code>Alt+↑/↓</code></td><td>Move Line</td><td>上下移動整行程式碼</td></tr>
+    <tr><td><code>Ctrl+/</code></td><td>Toggle Comment</td><td>註解/取消註解該行</td></tr>
+    <tr><td><code>Ctrl+Shift+K</code></td><td>Delete Line</td><td>刪除整行</td></tr>
+    <tr><td><code>Ctrl+P</code></td><td>Quick Open</td><td>快速開啟檔案（輸入檔名）</td></tr>
+  </table>
+
+  <div class="resource-card" style="background:var(--purple-lt);border-color:var(--purple);">
+    <h3>🤖 Claude 專用操作</h3>
+    <p style="color:var(--g900);">
+      <strong>選取程式碼 → 右鍵 → Ask Claude</strong><br>
+      選取任何一段程式碼，右鍵選單中選「Ask Claude」，就能請 AI 解釋、重構、找 bug。<br>
+      也可以用 <code>Ctrl+Shift+P</code> → 輸入「Claude」看到所有 Claude 指令。
+    </p>
+  </div>
+</div>
+
+<!-- ═══════ 額度估算 ═══════ -->
+<div class="section">
+  <h2>💰 額度估算</h2>
+
+  <table class="csv-table">
+    <tr><th>擴充</th><th>費用</th><th>免費額度</th><th>備註</th></tr>
+    <tr><td>Claude for VS Code</td><td>$20/月 (Pro)</td><td>—</td><td>需 Claude 訂閱</td></tr>
+    <tr><td>GitHub Copilot</td><td class="pos">免費版可用</td><td>2000 補全/月</td><td>學生免費升級 Pro</td></tr>
+    <tr><td>Amazon Q</td><td class="pos">免費版可用</td><td>50 請求/月</td><td>AWS 帳號登入</td></tr>
+    <tr><td>Continue.dev</td><td class="pos">完全免費</td><td>無限制</td><td>自帶模型（Ollama 等）</td></tr>
+  </table>
+
+  <div class="resource-card" style="background:var(--green-lt);border-color:var(--green);">
+    <h3>✅ 推薦策略</h3>
+    <p style="color:var(--g900);">
+      <strong>先裝三個免費的</strong>（Copilot Free + Amazon Q + Continue.dev），體驗 AI 輔助開發。<br>
+      如果預算允許，再加 <strong>Claude Pro $20/月</strong>，解鎖最強的程式碼理解和重構能力。
+    </p>
+  </div>
+</div>
+
+<!-- ═══════ 架構範本 ═══════ -->
+<div class="section">
+  <h2>📁 網頁專案架構範本</h2>
+
+  <div class="resource-card">
+    <h3>標準網頁專案結構</h3>
+    <p>開新專案時，建議按照這個結構整理檔案：</p>
+    <div class="code-box" id="structure">project/
+├── index.html      ← 首頁（瀏覽器打開的第一個檔案）
+├── css/
+│   └── style.css   ← 外觀樣式（顏色、排版、字型）
+├── js/
+│   └── main.js     ← 互動行為（按鈕、動畫、表單）
+├── images/         ← 圖片素材
+│   ├── logo.png
+│   └── hero.jpg
+├── CLAUDE.md       ← AI 規則（告訴 AI 怎麼幫你寫 code）
+└── README.md       ← 專案說明（這個專案是什麼）<button class="copy-btn" onclick="copyCode('structure')">複製</button></div>
+  </div>
+
+  <div class="resource-card" style="background:var(--gold-lt);border-color:var(--gold);">
+    <h3>💡 為什麼要分資料夾？</h3>
+    <p style="color:var(--g900);">
+      <strong>不分類</strong>：所有檔案混在一起，10 個檔案以上就會找不到東西。<br>
+      <strong>分類後</strong>：CSS 改外觀去 css/，加功能去 js/，換圖片去 images/。<br>
+      AI 也更容易理解你的專案結構，給出更好的建議。
+    </p>
+  </div>
+</div>
+
+</div><!-- .container -->
+
+<footer>
+  <a href="https://ai100.cooperation.tw">← 回到 AI 100 講</a> · S04 VS Code IDE 教學資源
+</footer>
+
+<script>
+function copyCode(id) {
+  const el = document.getElementById(id);
+  const btn = el.querySelector('.copy-btn');
+  const text = el.textContent.replace(btn.textContent, '').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✅ 已複製！';
+    setTimeout(() => btn.textContent = '複製', 2000);
+  });
+}
+</script>
+</body>
+</html>

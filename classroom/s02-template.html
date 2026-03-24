@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S02 Vibe Coding — 教學資源</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --white:#FFF;--offwhite:#F8F9FA;--g50:#F1F3F4;--g100:#E8EAED;
+  --g200:#DADCE0;--g400:#9AA0A6;--g600:#5F6368;--g800:#3C4043;--g900:#202124;
+  --blue:#1A73E8;--blue-lt:#E8F0FE;
+  --green:#0F9D8A;--green-lt:#E6F4F1;
+  --gold:#F9AB00;--gold-lt:#FEF7E0;
+  --purple:#7C3AED;--purple-lt:#F3E8FF;
+  --red:#D93025;--red-lt:#FCE8E6;
+  --navy:#0B3C5D;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--offwhite);color:var(--g900);line-height:1.7;font-size:18px;}
+
+.hero{background:var(--navy);color:#fff;padding:3rem 2rem;text-align:center;}
+.hero h1{font-size:2.2rem;font-weight:900;}
+.hero p{color:rgba(255,255,255,.7);margin-top:.5rem;font-size:1.1rem;}
+
+.container{max-width:800px;margin:0 auto;padding:2rem 1.5rem;}
+
+.section{margin-bottom:2.5rem;}
+.section h2{font-size:1.5rem;font-weight:700;color:var(--navy);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:3px solid var(--green);}
+
+.resource-card{
+  background:var(--white);border:2px solid var(--g100);border-radius:16px;
+  padding:1.5rem;margin-bottom:1rem;
+  transition:border-color .2s,box-shadow .2s;
+}
+.resource-card:hover{border-color:var(--blue);box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.resource-card h3{font-size:1.15rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem;}
+.resource-card .badge{
+  display:inline-block;padding:.15rem .6rem;border-radius:100px;font-size:.75rem;font-weight:700;
+}
+.resource-card p{font-size:.95rem;color:var(--g600);margin-bottom:.8rem;}
+.resource-card .action{
+  display:inline-block;padding:.5rem 1.5rem;border-radius:100px;font-weight:700;
+  text-decoration:none;font-size:.95rem;transition:all .15s;
+}
+.resource-card .action.primary{background:var(--blue);color:#fff;}
+.resource-card .action.primary:hover{background:#1557B0;}
+.resource-card .action.outline{border:2px solid var(--g200);color:var(--g800);background:var(--white);}
+.resource-card .action.outline:hover{border-color:var(--blue);color:var(--blue);}
+
+.code-box{
+  background:var(--g50);border:1px solid var(--g200);border-radius:12px;
+  padding:1rem 1.2rem;font-family:'Courier New',monospace;font-size:.85rem;
+  line-height:1.7;overflow-x:auto;position:relative;white-space:pre-wrap;
+  margin:.5rem 0;
+}
+.copy-btn{
+  position:absolute;top:.5rem;right:.5rem;padding:.3rem .8rem;border-radius:8px;
+  background:var(--white);border:1px solid var(--g200);font-size:.8rem;cursor:pointer;
+  color:var(--g600);transition:all .15s;
+}
+.copy-btn:hover{background:var(--blue-lt);color:var(--blue);border-color:var(--blue);}
+
+.star{color:var(--gold);}
+.tag{display:inline-block;padding:.1rem .5rem;border-radius:6px;font-size:.75rem;font-weight:700;margin-right:.3rem;}
+.tag.green{background:var(--green-lt);color:var(--green);}
+.tag.blue{background:var(--blue-lt);color:var(--blue);}
+.tag.purple{background:var(--purple-lt);color:var(--purple);}
+.tag.gold{background:var(--gold-lt);color:var(--gold);}
+.tag.red{background:var(--red-lt);color:var(--red);}
+
+.csv-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:.8rem 0;}
+.csv-table th{background:var(--navy);color:#fff;padding:.5rem .8rem;text-align:left;}
+.csv-table td{padding:.4rem .8rem;border-bottom:1px solid var(--g100);}
+.csv-table tr:hover td{background:var(--g50);}
+.csv-table a{color:var(--blue);text-decoration:none;}
+.csv-table a:hover{text-decoration:underline;}
+
+.step-list{counter-reset:step;list-style:none;padding:0;}
+.step-list li{counter-increment:step;padding:.6rem 0 .6rem 2.5rem;position:relative;border-bottom:1px solid var(--g100);}
+.step-list li::before{
+  content:counter(step);position:absolute;left:0;top:.5rem;
+  width:2rem;height:2rem;border-radius:50%;background:var(--green);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;
+}
+.step-list li:last-child{border-bottom:none;}
+
+.iteration-chip{
+  display:inline-block;padding:.4rem 1rem;border-radius:100px;
+  background:var(--white);border:1px solid var(--g200);font-size:.85rem;
+  margin:.3rem;cursor:pointer;transition:all .15s;position:relative;
+}
+.iteration-chip:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-lt);}
+
+footer{text-align:center;padding:2rem;color:var(--g400);font-size:.85rem;}
+footer a{color:var(--green);text-decoration:none;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <p style="font-size:.9rem;opacity:.6;">AI 100 講 · 補充單元 S02</p>
+  <h1>S02 Vibe Coding — 教學資源</h1>
+  <p>Prompt 模板、部署步驟、免費工具</p>
+</div>
+
+<div class="container">
+
+<!-- ═══════ Prompt 模板 ═══════ -->
+<div class="section">
+  <h2>💬 Prompt 模板（直接複製貼到 AI）</h2>
+
+  <div class="resource-card">
+    <h3><span class="tag green">1</span> 個人簡介網站</h3>
+    <p>一頁式個人品牌頁，含動畫與 RWD</p>
+    <div class="code-box" id="prompt1">幫我做一個個人簡介網站，一個完整的 HTML 檔案：
+- 上方大圖區：名字「___」，職稱「___」
+- 關於我：三段自我介紹（請用 placeholder 文字）
+- 專長：3-4 個技能，用卡片排列
+- 聯絡方式：email 和 LinkedIn 連結
+- 手機版導航用漢堡選單
+- 配色：___色系，專業風格
+- 要有 scroll 動畫效果<button class="copy-btn" onclick="copyCode('prompt1')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag green">2</span> 產品銷售頁</h3>
+    <p>Landing Page 含 CTA、價格方案、FAQ</p>
+    <div class="code-box" id="prompt2">做一個產品銷售 Landing Page，一個 HTML 檔案：
+- Hero 區：產品名「___」，一句標語，CTA 按鈕
+- 三個特色卡片，每個有 icon + 標題 + 說明
+- 客戶見證區：3 則推薦（用 placeholder）
+- 價格方案：免費版 / 專業版 / 企業版 三欄
+- 常見問題 FAQ（可展開收合）
+- 底部聯絡表單（姓名/email/訊息）
+- 手機自適應，漢堡選單
+- 配色：___色系<button class="copy-btn" onclick="copyCode('prompt2')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag blue">3</span> 公司形象網站</h3>
+    <p>SPA 風格，anchor 導航，含團隊與服務區塊</p>
+    <div class="code-box" id="prompt3">做一個公司形象網站，一個 HTML 檔案（SPA 風格，用 anchor 切換區塊）：
+- 導航列：首頁 / 關於 / 服務 / 聯絡，固定在上方
+- 首頁區：全幅 Hero + 公司標語 + 了解更多按鈕
+- 關於區：公司簡介 + 團隊成員 3 人（照片 placeholder + 名字 + 職稱）
+- 服務區：6 個服務卡片（icon + 標題 + 簡述）
+- 聯絡區：表單 + 地圖 placeholder
+- 頁尾：版權 + 社群連結
+- 手機版漢堡選單
+- 配色：___色系，專業<button class="copy-btn" onclick="copyCode('prompt3')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag blue">4</span> 活動/課程報名頁</h3>
+    <p>含議程時間軸、倒數計時、報名表單</p>
+    <div class="code-box" id="prompt4">做一個活動報名頁，一個 HTML 檔案：
+- 上方：活動名稱「___」，日期，地點
+- 活動亮點：4 個重點卡片
+- 講師介紹：照片 placeholder + 簡介
+- 議程時間表（時間軸排列）
+- 報名表單（姓名/email/電話/備註）
+- 倒數計時器（顯示距離活動還有幾天）
+- 配色：___色系
+- 手機自適應<button class="copy-btn" onclick="copyCode('prompt4')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag purple">5</span> 數據 Dashboard</h3>
+    <p>KPI 卡片、Chart.js 圖表、深色主題</p>
+    <div class="code-box" id="prompt5">做一個銷售數據 Dashboard，一個 HTML 檔案：
+- 上方 4 個 KPI 卡片：總營收 / 訂單數 / 新客戶 / 退貨率
+- 左半：月營收趨勢折線圖（用 Chart.js CDN）
+- 右半：品類銷售佔比圓餅圖
+- 下方：最近 10 筆訂單表格
+- 可切換「本月 / 本季 / 全年」
+- 深色主題
+- 用假資料即可
+- 手機自適應<button class="copy-btn" onclick="copyCode('prompt5')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag purple">6</span> AI 聊天介面</h3>
+    <p>類 ChatGPT 對話 UI，含打字動畫</p>
+    <div class="code-box" id="prompt6">做一個 AI 聊天機器人網頁，一個 HTML 檔案：
+- 類似 ChatGPT 的對話介面
+- 上方標題列：「AI 助手」+ 設定按鈕
+- 中間對話區：左邊 AI 回覆（灰色氣泡），右邊使用者（藍色氣泡）
+- 底部輸入框 + 送出按鈕
+- 預設顯示 2-3 則範例對話
+- 打字動畫效果
+- 手機自適應
+- 乾淨白色主題<button class="copy-btn" onclick="copyCode('prompt6')">複製</button></div>
+  </div>
+
+</div>
+
+<!-- ═══════ GAS 部署 ═══════ -->
+<div class="section" id="gas-deploy">
+  <h2>🚀 GAS 部署 Prompt</h2>
+  <div class="resource-card">
+    <h3><span class="tag green">GAS</span> 用 Google Apps Script 部署你的網頁</h3>
+    <p>把 HTML 包進 GAS，部署成任何人都能打開的網址</p>
+    <div class="code-box" id="prompt-gas">請幫我寫一個 Google Apps Script。
+功能：用 doGet() 回傳以下 HTML 網頁。
+把整段 HTML 放在 HtmlService.createHtmlOutput() 裡面。
+程式碼要有中文註解。
+
+[在這裡貼上你的 HTML]<button class="copy-btn" onclick="copyCode('prompt-gas')">複製</button></div>
+  </div>
+</div>
+
+<!-- ═══════ GitHub Pages ═══════ -->
+<div class="section" id="github-pages">
+  <h2>📦 GitHub Pages 部署步驟</h2>
+  <div class="resource-card">
+    <h3>免費把你的網頁上線到全世界</h3>
+    <p>不需要伺服器、不需要付錢，8 個步驟搞定</p>
+    <ol class="step-list">
+      <li>前往 <a href="https://github.com" target="_blank" rel="noopener">github.com</a>，註冊帳號（或登入）</li>
+      <li>右上角 <strong>+</strong> → <strong>New repository</strong></li>
+      <li>Repository name 填：<code>你的帳號名.github.io</code></li>
+      <li>選 <strong>Public</strong> → 點 <strong>Create repository</strong></li>
+      <li>點 <strong>"uploading an existing file"</strong> → 拖入你的 <code>index.html</code></li>
+      <li>點 <strong>Commit changes</strong></li>
+      <li>等 1 分鐘 → 打開 <code>你的帳號.github.io</code></li>
+      <li>如果要改內容：直接在 GitHub 上點檔案 → 編輯 → Commit</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ═══════ 迭代話術 ═══════ -->
+<div class="section">
+  <h2>🔄 迭代話術模板（點擊複製）</h2>
+  <p style="color:var(--g600);margin-bottom:1rem;">對 AI 說這些話來微調你的網站，點一下就複製</p>
+
+  <div style="display:flex;flex-wrap:wrap;gap:.3rem;">
+    <span class="iteration-chip" onclick="copyChip(this)">把配色改成暖色系，主色用橘色</span>
+    <span class="iteration-chip" onclick="copyChip(this)">加一個深色模式切換按鈕</span>
+    <span class="iteration-chip" onclick="copyChip(this)">手機版的導航改成漢堡選單</span>
+    <span class="iteration-chip" onclick="copyChip(this)">加入 scroll 時的淡入動畫效果</span>
+    <span class="iteration-chip" onclick="copyChip(this)">把字體改大一點，正文至少 18px</span>
+    <span class="iteration-chip" onclick="copyChip(this)">加一個回到頂部的按鈕</span>
+    <span class="iteration-chip" onclick="copyChip(this)">把三欄排版改成卡片式</span>
+    <span class="iteration-chip" onclick="copyChip(this)">加一個圖片輪播（用 placeholder 圖片）</span>
+  </div>
+</div>
+
+<!-- ═══════ GitHub 星星專案 ═══════ -->
+<div class="section" id="github-stars">
+  <h2>⭐ GitHub 星星專案（靈感來源）</h2>
+  <p style="color:var(--g600);margin-bottom:1rem;">這些開源專案可以 fork 下來改成自己的</p>
+
+  <table class="csv-table">
+    <tr><th>專案</th><th>星星</th><th>適合做</th><th>連結</th></tr>
+    <tr>
+      <td>html5-boilerplate</td><td>56k ⭐</td><td>網站起手式</td>
+      <td><a href="https://github.com/h5bp/html5-boilerplate" target="_blank" rel="noopener">GitHub →</a></td>
+    </tr>
+    <tr>
+      <td>startbootstrap-resume</td><td>2k ⭐</td><td>履歷網站</td>
+      <td><a href="https://github.com/StartBootstrap/startbootstrap-resume" target="_blank" rel="noopener">GitHub →</a></td>
+    </tr>
+    <tr>
+      <td>developer-portfolio</td><td>4k ⭐</td><td>開發者作品集</td>
+      <td><a href="https://github.com/alsiam/developer-portfolio" target="_blank" rel="noopener">GitHub →</a></td>
+    </tr>
+    <tr>
+      <td>hugo-PaperMod</td><td>9k ⭐</td><td>部落格</td>
+      <td><a href="https://github.com/adityatelange/hugo-PaperMod" target="_blank" rel="noopener">GitHub →</a></td>
+    </tr>
+  </table>
+</div>
+
+<!-- ═══════ 免費部署平台 ═══════ -->
+<div class="section" id="free-hosting">
+  <h2>🌐 免費部署平台比較</h2>
+
+  <table class="csv-table">
+    <tr><th>平台</th><th>免費額度</th><th>最適合</th></tr>
+    <tr><td>GitHub Pages</td><td>無限靜態</td><td>個人網站、作品集</td></tr>
+    <tr><td>Cloudflare Pages</td><td>無限靜態</td><td>速度最快</td></tr>
+    <tr><td>Vercel</td><td>100GB/月</td><td>動態網站</td></tr>
+    <tr><td>Netlify</td><td>100GB/月</td><td>表單+靜態</td></tr>
+  </table>
+</div>
+
+<!-- ═══════ 免費 AI 工具 ═══════ -->
+<div class="section" id="free-tools">
+  <h2>🤖 免費 AI 工具</h2>
+
+  <div class="resource-card">
+    <h3><span class="tag green">推薦</span> Google Antigravity</h3>
+    <p>Preview 免費 · Agent-first IDE，AI 直接幫你寫＋跑＋部署</p>
+    <a class="action primary" href="https://antigravity.google" target="_blank" rel="noopener">前往 antigravity.google →</a>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag blue">推薦</span> Amazon Q Developer</h3>
+    <p>50 次/月 · VS Code AI 助手，程式碼補全＋重構</p>
+    <a class="action outline" href="https://aws.amazon.com/q/developer" target="_blank" rel="noopener">前往 aws.amazon.com/q/developer →</a>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag purple">對話式</span> Claude.ai</h3>
+    <p>免費版可用 · 對話式 Vibe Coding，貼需求就產出完整 HTML</p>
+    <a class="action outline" href="https://claude.ai" target="_blank" rel="noopener">前往 claude.ai →</a>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag gold">補全</span> GitHub Copilot</h3>
+    <p>2000 補全/月 · 邊打字邊自動補完程式碼</p>
+    <a class="action outline" href="https://github.com/features/copilot" target="_blank" rel="noopener">前往 github.com/features/copilot →</a>
+  </div>
+</div>
+
+</div><!-- .container -->
+
+<footer>
+  <a href="/">← 回到 AI 100 講</a> · S02 Vibe Coding 教學資源
+</footer>
+
+<script>
+function copyCode(id) {
+  const el = document.getElementById(id);
+  const btn = el.querySelector('.copy-btn');
+  const text = el.textContent.replace(btn.textContent, '').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✅ 已複製！';
+    setTimeout(() => btn.textContent = '複製', 2000);
+  });
+}
+
+function copyChip(el) {
+  const text = el.textContent.trim();
+  navigator.clipboard.writeText(text).then(() => {
+    const original = el.textContent;
+    el.textContent = '✅ 已複製！';
+    el.style.background = 'var(--green-lt)';
+    el.style.borderColor = 'var(--green)';
+    setTimeout(() => {
+      el.textContent = original;
+      el.style.background = '';
+      el.style.borderColor = '';
+    }, 1500);
+  });
+}
+</script>
+</body>
+</html>
