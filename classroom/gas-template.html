@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S01 GAS 自動化 — 教學資源</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --white:#FFF;--offwhite:#F8F9FA;--g50:#F1F3F4;--g100:#E8EAED;
+  --g200:#DADCE0;--g400:#9AA0A6;--g600:#5F6368;--g800:#3C4043;--g900:#202124;
+  --blue:#1A73E8;--blue-lt:#E8F0FE;
+  --green:#0F9D8A;--green-lt:#E6F4F1;
+  --gold:#F9AB00;--gold-lt:#FEF7E0;
+  --purple:#7C3AED;--purple-lt:#F3E8FF;
+  --red:#D93025;--red-lt:#FCE8E6;
+  --navy:#0B3C5D;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--offwhite);color:var(--g900);line-height:1.7;font-size:18px;}
+
+.hero{background:var(--navy);color:#fff;padding:3rem 2rem;text-align:center;}
+.hero h1{font-size:2.2rem;font-weight:900;}
+.hero p{color:rgba(255,255,255,.7);margin-top:.5rem;font-size:1.1rem;}
+
+.container{max-width:800px;margin:0 auto;padding:2rem 1.5rem;}
+
+.section{margin-bottom:2.5rem;}
+.section h2{font-size:1.5rem;font-weight:700;color:var(--navy);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:3px solid var(--green);}
+
+.resource-card{
+  background:var(--white);border:2px solid var(--g100);border-radius:16px;
+  padding:1.5rem;margin-bottom:1rem;
+  transition:border-color .2s,box-shadow .2s;
+}
+.resource-card:hover{border-color:var(--blue);box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.resource-card h3{font-size:1.15rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem;}
+.resource-card .badge{
+  display:inline-block;padding:.15rem .6rem;border-radius:100px;font-size:.75rem;font-weight:700;
+}
+.resource-card p{font-size:.95rem;color:var(--g600);margin-bottom:.8rem;}
+.resource-card .action{
+  display:inline-block;padding:.5rem 1.5rem;border-radius:100px;font-weight:700;
+  text-decoration:none;font-size:.95rem;transition:all .15s;
+}
+.resource-card .action.primary{background:var(--blue);color:#fff;}
+.resource-card .action.primary:hover{background:#1557B0;}
+.resource-card .action.outline{border:2px solid var(--g200);color:var(--g800);background:var(--white);}
+.resource-card .action.outline:hover{border-color:var(--blue);color:var(--blue);}
+
+.code-box{
+  background:var(--g50);border:1px solid var(--g200);border-radius:12px;
+  padding:1rem 1.2rem;font-family:'Courier New',monospace;font-size:.85rem;
+  line-height:1.7;overflow-x:auto;position:relative;white-space:pre-wrap;
+  margin:.5rem 0;
+}
+.copy-btn{
+  position:absolute;top:.5rem;right:.5rem;padding:.3rem .8rem;border-radius:8px;
+  background:var(--white);border:1px solid var(--g200);font-size:.8rem;cursor:pointer;
+  color:var(--g600);transition:all .15s;
+}
+.copy-btn:hover{background:var(--blue-lt);color:var(--blue);border-color:var(--blue);}
+
+.star{color:var(--gold);}
+.tag{display:inline-block;padding:.1rem .5rem;border-radius:6px;font-size:.75rem;font-weight:700;margin-right:.3rem;}
+.tag.green{background:var(--green-lt);color:var(--green);}
+.tag.blue{background:var(--blue-lt);color:var(--blue);}
+.tag.purple{background:var(--purple-lt);color:var(--purple);}
+.tag.gold{background:var(--gold-lt);color:var(--gold);}
+.tag.red{background:var(--red-lt);color:var(--red);}
+
+.csv-table{width:100%;border-collapse:collapse;font-size:.85rem;margin:.8rem 0;}
+.csv-table th{background:var(--navy);color:#fff;padding:.5rem .8rem;text-align:left;}
+.csv-table td{padding:.4rem .8rem;border-bottom:1px solid var(--g100);}
+.csv-table tr:hover td{background:var(--g50);}
+.csv-table .pos{color:var(--green);font-weight:500;}
+.csv-table .neg{color:var(--red);font-weight:500;}
+.csv-table .neu{color:var(--g600);}
+
+footer{text-align:center;padding:2rem;color:var(--g400);font-size:.85rem;}
+footer a{color:var(--green);text-decoration:none;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <p style="font-size:.9rem;opacity:.6;">AI 100 講 · 補充單元 S01</p>
+  <h1>GAS 自動化 — 教學資源</h1>
+  <p>模板、Prompt、程式碼，掃碼就能用</p>
+</div>
+
+<div class="container">
+
+<!-- ═══════ 模板 Sheet ═══════ -->
+<div class="section">
+  <h2>📊 模板 Sheet</h2>
+
+  <div class="resource-card">
+    <h3><span class="star">⭐</span> 客戶回饋分析模板（30 筆資料）</h3>
+    <p>A 欄已填入 30 筆真實感的客戶回饋，B/C/D 欄留空等 AI 分析。<br>點「建立副本」到你自己的 Drive。</p>
+    <div style="display:flex;gap:.8rem;flex-wrap:wrap;">
+      <a class="action primary" href="#" onclick="alert('講師：請將此連結替換為你的 Google Sheet 分享網址（建立副本模式）')">📋 建立副本</a>
+      <a class="action outline" href="#csv-data">📥 看完整資料</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ Prompt 範本 ═══════ -->
+<div class="section">
+  <h2>💬 Prompt 範本（直接複製貼到 ChatGPT）</h2>
+
+  <div class="resource-card">
+    <h3><span class="tag green">⭐ 基礎</span> 單格問答</h3>
+    <p>A1 輸入問題 → B1 出現 AI 回答</p>
+    <div class="code-box" id="prompt1">請幫我寫一段 Google Apps Script。
+功能：我在 A1 格輸入一個問題，執行後 B1 會出現 AI 的回答。
+用 UrlFetchApp 呼叫 Groq API（https://api.groq.com/openai/v1/chat/completions）
+模型用 llama-3.3-70b-versatile
+API Key 要用 PropertiesService 儲存，不要寫死在程式碼裡。
+程式碼要有中文註解。<button class="copy-btn" onclick="copyCode('prompt1')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag green">⭐ 基礎</span> 批量情感分類</h3>
+    <p>A1:A10 → B1:B10 自動分類正面/負面/中性</p>
+    <div class="code-box" id="prompt2">請修改上面的 GAS 程式碼，改成：
+1. 讀取 A1 到 A10 的每一格
+2. 用 AI 判斷該回饋是「正面」「負面」還是「中性」
+3. 結果寫入 B 欄對應的格子
+4. 每處理完一格就在 console.log 顯示進度<button class="copy-btn" onclick="copyCode('prompt2')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag blue">⭐⭐ 進階</span> 多欄分析（情感＋關鍵字＋建議）</h3>
+    <p>A 欄回饋 → B 情感 + C 關鍵字 + D 建議行動</p>
+    <div class="code-box" id="prompt3">請幫我寫一段 Google Apps Script。
+功能：讀取 Sheet 的 A2 到 A31（跳過標題列），每一格是一筆客戶回饋。
+對每筆回饋，用 Groq AI 分析後寫入同一列的 B、C、D 欄：
+  B 欄：情感判斷（正面 / 負面 / 中性）
+  C 欄：2-3 個關鍵字，用頓號分隔
+  D 欄：一句話建議行動
+
+Prompt 設計：請 AI 回傳 JSON 格式 {"sentiment":"正面","keywords":"關鍵字1、關鍵字2","action":"建議"}
+程式碼要 parse JSON 後分別寫入三欄。
+每處理完一筆就 log 進度。
+處理間隔 2 秒避免 rate limit。
+API：Groq（https://api.groq.com/openai/v1/chat/completions）
+模型：llama-3.3-70b-versatile
+API Key 用 PropertiesService，不寫死。
+程式碼要有中文註解。<button class="copy-btn" onclick="copyCode('prompt3')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag purple">⭐⭐⭐</span> 問卷產生器（GAS 建立網頁表單）</h3>
+    <p>GAS doGet() 部署成網頁 → 別人填寫 → 資料自動進 Sheet</p>
+    <div class="code-box" id="prompt4">請幫我寫一段 Google Apps Script，包含兩個部分：
+
+【Part 1: 網頁表單 — doGet()】
+用 HtmlService 回傳一個好看的 HTML 問卷表單。
+問卷標題：「課程滿意度調查」
+包含以下欄位：
+  1. 姓名（文字輸入）
+  2. 整體滿意度（單選：非常滿意/滿意/普通/不滿意）
+  3. 最喜歡的部分（文字輸入）
+  4. 最需要改進的地方（文字輸入）
+  5. 推薦意願 1-10 分（數字滑桿）
+表單要手機友善（RWD），配色乾淨專業。
+送出後顯示「感謝填寫！」
+
+【Part 2: 資料接收 — doPost()】
+表單送出後，將資料寫入 Sheet：
+  A 欄：時間戳記
+  B 欄：姓名
+  C 欄：滿意度
+  D 欄：最喜歡的部分
+  E 欄：需要改進
+  F 欄：推薦分數
+
+不需要 API Key（這個不用 AI，純表單）。
+程式碼要有中文註解。<button class="copy-btn" onclick="copyCode('prompt4')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag purple">⭐⭐⭐</span> 問卷即時 AI 分析（自動觸發）</h3>
+    <p>每收到一筆問卷 → AI 自動分析情感＋摘要</p>
+    <div class="code-box" id="prompt5">請幫我寫一段 Google Apps Script。
+功能：當 Sheet 有新的一列資料出現（onChange 觸發器），自動用 AI 分析該列。
+
+假設 Sheet 結構：
+  A 欄：時間戳記
+  B 欄：姓名
+  C 欄：滿意度
+  D 欄：最喜歡的
+  E 欄：需要改進
+  F 欄：推薦分數
+  G 欄：（空，AI 填）情感判斷
+  H 欄：（空，AI 填）一句話摘要
+
+每次偵測到新列（最後一列是新的），讀取 B-F 欄，
+用 Groq AI 分析後填入 G、H 欄。
+
+API：Groq（https://api.groq.com/openai/v1/chat/completions）
+模型：llama-3.3-70b-versatile
+API Key 用 PropertiesService。
+設定 onChange 觸發器。
+程式碼要有中文註解。<button class="copy-btn" onclick="copyCode('prompt5')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag gold">⭐⭐⭐⭐</span> 統計報表（Sheet → Google Docs）</h3>
+    <p>匯整所有問卷 → AI 產生分析報告 → 自動建立 Docs</p>
+    <div class="code-box" id="prompt6">請幫我寫一段 Google Apps Script。
+功能：讀取 Sheet 所有問卷回覆，用 AI 產生統計報告，寫入 Google Docs。
+
+步驟：
+1. 讀取 Sheet 的 A2 到最後一列（跳過標題）
+2. 統計基本數據：總填寫人數、各滿意度比例、平均推薦分數
+3. 把所有「最喜歡」和「需要改進」的文字打包
+4. 呼叫 Groq AI，Prompt：
+   「以下是課程問卷的所有回覆。請分析並產生：
+    1. 整體滿意度總結（2-3 句）
+    2. 前三大正面意見
+    3. 前三大需要改進的地方
+    4. 給講師的具體建議（3 點）」
+5. 用 DocumentApp.create() 建立新的 Google Docs
+6. 寫入標題、日期、統計數字、AI 分析內容
+7. 在 Sheet 的某格記錄 Docs 連結
+
+API：Groq
+模型：llama-3.3-70b-versatile
+API Key 用 PropertiesService。
+程式碼要有中文註解。<button class="copy-btn" onclick="copyCode('prompt6')">複製</button></div>
+  </div>
+
+  <div class="resource-card">
+    <h3><span class="tag red">⭐⭐⭐⭐⭐</span> RSS 週報工作流</h3>
+    <p>抓新聞 → AI 摘要 → 寫 Sheet → 產出 Docs → 發 Email</p>
+    <div class="code-box" id="prompt7">請幫我寫一段 Google Apps Script，完整的 RSS 週報自動化。
+
+步驟：
+1. 用 UrlFetchApp 抓取以下 RSS 來源（取每個來源最新 3 篇）：
+   - https://feeds.feedburner.com/TheHackersNews（資安新聞）
+   - 其他 RSS URL 我之後會加
+
+2. 解析 XML，取得每篇文章的標題、連結、發布日期、摘要
+
+3. 逐篇呼叫 Groq AI，Prompt：
+   「將以下文章摘要翻譯成繁體中文，並用一句話總結重點」
+
+4. 將結果寫入 Sheet：A 日期、B 來源、C 標題、D 中文摘要、E 連結
+
+5. 呼叫 AI 匯整本次所有新聞，產出「本週 AI/科技重點」（5 條）
+
+6. 用 DocumentApp.create() 建立 Google Docs 週報：
+   標題：「AI 科技週報 — YYYY/MM/DD」
+   內容：本週重點 + 逐篇摘要表
+
+7. 用 GmailApp.sendEmail() 寄信給自己：
+   主旨：「📰 本週 AI 週報已產出」
+   內文包含 Docs 連結
+
+8. 設定 Trigger：每週一早上 8 點自動執行
+
+API：Groq
+模型：llama-3.3-70b-versatile
+API Key 用 PropertiesService。
+程式碼要有中文註解。
+每次 API 呼叫間隔 2 秒避免 rate limit。<button class="copy-btn" onclick="copyCode('prompt7')">複製</button></div>
+  </div>
+
+</div>
+
+<!-- ═══════ 模板資料 ═══════ -->
+<div class="section" id="csv-data">
+  <h2>📋 模板 Sheet 完整資料（30 筆）</h2>
+  <p style="color:var(--g600);margin-bottom:1rem;">可直接複製貼到 Google Sheet 的 A 欄</p>
+
+  <table class="csv-table">
+    <tr><th>#</th><th>A 欄 — 客戶回饋原文</th><th>預期情感</th></tr>
+    <tr><td>1</td><td>你們的 APP 改版之後超好用，結帳流程快很多</td><td class="pos">正面</td></tr>
+    <tr><td>2</td><td>打了三次客服電話都沒人接，非常失望</td><td class="neg">負面</td></tr>
+    <tr><td>3</td><td>東西還行吧，跟其他家差不多</td><td class="neu">中性</td></tr>
+    <tr><td>4</td><td>包裝很精美，送禮很體面，朋友都說讚</td><td class="pos">正面</td></tr>
+    <tr><td>5</td><td>說好三天到貨，結果等了兩週，中間完全沒通知</td><td class="neg">負面</td></tr>
+    <tr><td>6</td><td>希望可以增加超商取貨的選項</td><td class="neu">中性</td></tr>
+    <tr><td>7</td><td>第一次買就愛上了，已經推薦給全辦公室</td><td class="pos">正面</td></tr>
+    <tr><td>8</td><td>退貨要自己付運費，這很不合理</td><td class="neg">負面</td></tr>
+    <tr><td>9</td><td>價格偏高但品質確實不錯，值得</td><td class="pos">正面</td></tr>
+    <tr><td>10</td><td>網站手機版常常卡住，載入超慢</td><td class="neg">負面</td></tr>
+    <tr><td>11</td><td>客服小姐非常有耐心，幫我解決了所有問題</td><td class="pos">正面</td></tr>
+    <tr><td>12</td><td>收到的顏色跟網站圖片差很多</td><td class="neg">負面</td></tr>
+    <tr><td>13</td><td>會員積點制度不錯，有在累積</td><td class="pos">正面</td></tr>
+    <tr><td>14</td><td>產品本身 OK，但物流配合的不好</td><td class="neu">中性</td></tr>
+    <tr><td>15</td><td>已經連續買三年了，品質一直很穩定</td><td class="pos">正面</td></tr>
+    <tr><td>16</td><td>廣告說的功能實際用起來根本沒有</td><td class="neg">負面</td></tr>
+    <tr><td>17</td><td>免運門檻太高了，要湊到 1500 很困難</td><td class="neg">負面</td></tr>
+    <tr><td>18</td><td>介面簡潔好操作，長輩也能輕鬆使用</td><td class="pos">正面</td></tr>
+    <tr><td>19</td><td>沒什麼特別感覺，就是一般的購物經驗</td><td class="neu">中性</td></tr>
+    <tr><td>20</td><td>結帳時一直跳錯誤訊息，試了五次才成功</td><td class="neg">負面</td></tr>
+    <tr><td>21</td><td>客製化服務很讚，完全按照我的需求做</td><td class="pos">正面</td></tr>
+    <tr><td>22</td><td>退款等了一個月還沒收到，催了好幾次</td><td class="neg">負面</td></tr>
+    <tr><td>23</td><td>新推出的訂閱制滿划算的，比單買便宜</td><td class="pos">正面</td></tr>
+    <tr><td>24</td><td>商品描述寫得太簡略，不確定適不適合就不敢買</td><td class="neu">中性</td></tr>
+    <tr><td>25</td><td>同事推薦來的，用了之後確實提升效率</td><td class="pos">正面</td></tr>
+    <tr><td>26</td><td>發票開錯要更正，流程超級複雜</td><td class="neg">負面</td></tr>
+    <tr><td>27</td><td>出貨速度很快，下午下單隔天就到了</td><td class="pos">正面</td></tr>
+    <tr><td>28</td><td>搜尋功能很弱，找個東西要翻好久</td><td class="neg">負面</td></tr>
+    <tr><td>29</td><td>價格跟品質算是符合預期</td><td class="neu">中性</td></tr>
+    <tr><td>30</td><td>換貨流程很順暢，客服主動聯繫追蹤進度，大加分</td><td class="pos">正面</td></tr>
+  </table>
+
+  <div style="margin-top:1rem;display:flex;gap:.8rem;">
+    <button class="copy-btn" style="position:static;padding:.5rem 1.2rem;font-size:.9rem;" onclick="copyCSV()">📋 複製全部（貼到 Sheet A 欄）</button>
+  </div>
+</div>
+
+<!-- ═══════ RSS 來源 ═══════ -->
+<div class="section">
+  <h2>📰 RSS 來源清單（⭐⭐⭐⭐⭐ 週報用）</h2>
+  <table class="csv-table">
+    <tr><th>來源</th><th>RSS URL</th><th>語言</th></tr>
+    <tr><td>The Hacker News</td><td style="font-family:monospace;font-size:.8rem;">https://feeds.feedburner.com/TheHackersNews</td><td>英文</td></tr>
+    <tr><td>The Decoder</td><td style="font-family:monospace;font-size:.8rem;">https://the-decoder.com/feed/</td><td>英文</td></tr>
+    <tr><td>Ars Technica AI</td><td style="font-family:monospace;font-size:.8rem;">https://feeds.arstechnica.com/arstechnica/technology-lab</td><td>英文</td></tr>
+    <tr><td>電腦王阿達</td><td style="font-family:monospace;font-size:.8rem;">https://www.kocpc.com.tw/feed</td><td>中文</td></tr>
+    <tr><td>硬是要學</td><td style="font-family:monospace;font-size:.8rem;">https://www.soft4fun.net/feed</td><td>中文</td></tr>
+  </table>
+</div>
+
+<!-- ═══════ API 申請連結 ═══════ -->
+<div class="section">
+  <h2>🔑 API 申請連結</h2>
+  <div class="resource-card">
+    <h3>⭐ Groq（首選，完全免費）</h3>
+    <p>Google 帳號登入，不需信用卡，14,400 次/天</p>
+    <a class="action primary" href="https://console.groq.com" target="_blank" rel="noopener">前往 console.groq.com →</a>
+  </div>
+  <div class="resource-card">
+    <h3>Google Gemini（多模態，能看圖）</h3>
+    <p>Google 帳號登入，不需信用卡，60 次/分鐘</p>
+    <a class="action outline" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">前往 Google AI Studio →</a>
+  </div>
+  <div class="resource-card">
+    <h3>OpenRouter（29 個免費模型）</h3>
+    <p>一個 Key 切換多種 AI，不需信用卡</p>
+    <a class="action outline" href="https://openrouter.ai" target="_blank" rel="noopener">前往 openrouter.ai →</a>
+  </div>
+</div>
+
+</div><!-- .container -->
+
+<footer>
+  <a href="/">← 回到 AI 100 講</a> · S01 GAS 自動化 教學資源
+</footer>
+
+<script>
+function copyCode(id) {
+  const el = document.getElementById(id);
+  // Get text content excluding the button
+  const btn = el.querySelector('.copy-btn');
+  const text = el.textContent.replace(btn.textContent, '').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✅ 已複製！';
+    setTimeout(() => btn.textContent = '複製', 2000);
+  });
+}
+
+function copyCSV() {
+  const rows = document.querySelectorAll('.csv-table tr');
+  let csv = '';
+  rows.forEach((row, i) => {
+    if (i === 0) return; // skip header
+    const cells = row.querySelectorAll('td');
+    if (cells.length >= 2) csv += cells[1].textContent.trim() + '\n';
+  });
+  // Only get the first table (feedback data, not RSS)
+  const feedbackTable = document.querySelectorAll('.csv-table')[0];
+  const feedbackRows = feedbackTable.querySelectorAll('tr');
+  let feedbackCSV = '';
+  feedbackRows.forEach((row, i) => {
+    if (i === 0) return;
+    const cells = row.querySelectorAll('td');
+    if (cells.length >= 2) feedbackCSV += cells[1].textContent.trim() + '\n';
+  });
+  navigator.clipboard.writeText(feedbackCSV.trim()).then(() => {
+    event.target.textContent = '✅ 已複製 30 筆！';
+    setTimeout(() => event.target.textContent = '📋 複製全部（貼到 Sheet A 欄）', 2000);
+  });
+}
+</script>
+</body>
+</html>
