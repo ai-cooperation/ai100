@@ -411,6 +411,7 @@ def git_commit_and_push(files: list[str]):
         today = datetime.date.today().isoformat()
         msg = f"news: AI 動態更新 {today}\n\nCo-Authored-By: AI News Pipeline <noreply@ai100.dev>"
         subprocess.run(["git", "commit", "-m", msg], check=True, capture_output=True)
+        subprocess.run(["git", "pull", "--rebase"], check=True, capture_output=True)
         subprocess.run(["git", "push"], check=True, capture_output=True)
         log.info("Git push 完成")
     except subprocess.CalledProcessError as e:

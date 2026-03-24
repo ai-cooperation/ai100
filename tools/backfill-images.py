@@ -238,25 +238,35 @@ def main():
     parser.add_argument("--site", choices=["ai100", "s100", "all"], default="ai100",
                         help="站台: ai100, s100, all (預設 ai100)")
     parser.add_argument("--date", help="指定日期 (YYYY-MM-DD)")
+    parser.add_argument("--days", type=int, default=2,
+                        help="往回掃幾天 (預設 2，即今天+昨天)")
     parser.add_argument("--all", action="store_true", help="補所有缺圖文章")
     parser.add_argument("--dry-run", action="store_true", help="只列出不生成")
     parser.add_argument("--no-push", action="store_true", help="不 git push")
     args = parser.parse_args()
 
-    date_filter = None
+    # 決定要掃哪些日期
+    date_filters = []
     if args.date:
-        date_filter = args.date
-    elif not args.all:
-        date_filter = datetime.date.today().isoformat()
+        date_filters = [args.date]
+    elif args.all:
+        date_filters = [None]  # None = scan all
+    else:
+        today = datetime.date.today()
+        date_filters = [
+            (today - datetime.timedelta(days=d)).isoformat()
+            for d in range(args.days)
+        ]
 
     sites = list(SITES.items()) if args.site == "all" else [(args.site, SITES[args.site])]
     missing = []
     for site_name, repo_dir in sites:
-        found = find_missing(repo_dir, date_filter)
-        for a in found:
-            a["site"] = site_name
-            a["repo_dir"] = repo_dir
-        missing.extend(found)
+        for date_filter in date_filters:
+            found = find_missing(repo_dir, date_filter)
+            for a in found:
+                a["site"] = site_name
+                a["repo_dir"] = repo_dir
+            missing.extend(found)
     if not missing:
         log.info("沒有缺圖文章")
         return
@@ -314,8 +324,10 @@ def main():
                 subprocess.run(["git", "add"] + files, check=True, capture_output=True)
                 today = datetime.date.today().isoformat()
                 site_label = os.path.basename(repo_dir)
-                msg = f"backfill: 補圖 {len(files)//2} 篇 ({site_label}, {date_filter or 'all'})"
+                dates_str = ",".join(date_filters) if date_filters and date_filters[0] else "all"
+                msg = f"backfill: 補圖 {len(files)//2} 篇 ({site_label}, {dates_str})"
                 subprocess.run(["git", "commit", "-m", msg], check=True, capture_output=True)
+                subprocess.run(["git", "pull", "--rebase"], check=True, capture_output=True, timeout=120)
                 subprocess.run(["git", "push"], check=True, capture_output=True, timeout=120)
                 log.info(f"Git push 完成: {site_label}")
             except Exception as e:
