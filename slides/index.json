@@ -1,0 +1,16 @@
+[
+  {
+    "id": "demo",
+    "title": "AI 簡報系統 Demo",
+    "totalSlides": 5,
+    "path": "demo",
+    "thumbnail": "demo/slide-01.svg"
+  },
+  {
+    "id": "university-talk",
+    "title": "人駕馭 AI Token — 產生無限可能",
+    "totalSlides": 50,
+    "path": "university-talk",
+    "thumbnail": "university-talk/slide-01-thumb.webp"
+  }
+]

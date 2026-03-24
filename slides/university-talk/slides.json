@@ -1,0 +1,307 @@
+{
+  "id": "university-talk",
+  "title": "人駕馭 AI Token — 產生無限可能",
+  "totalSlides": 50,
+  "slides": [
+    {
+      "index": 1,
+      "image": "slide-01.webp",
+      "thumbnail": "slide-01-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 2,
+      "image": "slide-02.webp",
+      "thumbnail": "slide-02-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 3,
+      "image": "slide-03.webp",
+      "thumbnail": "slide-03-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 4,
+      "image": "slide-04.webp",
+      "thumbnail": "slide-04-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 5,
+      "image": "slide-05.webp",
+      "thumbnail": "slide-05-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 6,
+      "image": "slide-06.webp",
+      "thumbnail": "slide-06-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 7,
+      "image": "slide-07.webp",
+      "thumbnail": "slide-07-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 8,
+      "image": "slide-08.webp",
+      "thumbnail": "slide-08-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 9,
+      "image": "slide-09.webp",
+      "thumbnail": "slide-09-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 10,
+      "image": "slide-10.webp",
+      "thumbnail": "slide-10-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 11,
+      "image": "slide-11.webp",
+      "thumbnail": "slide-11-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 12,
+      "image": "slide-12.webp",
+      "thumbnail": "slide-12-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 13,
+      "image": "slide-13.webp",
+      "thumbnail": "slide-13-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 14,
+      "image": "slide-14.webp",
+      "thumbnail": "slide-14-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 15,
+      "image": "slide-15.webp",
+      "thumbnail": "slide-15-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 16,
+      "image": "slide-16.webp",
+      "thumbnail": "slide-16-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 17,
+      "image": "slide-17.webp",
+      "thumbnail": "slide-17-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 18,
+      "image": "slide-18.webp",
+      "thumbnail": "slide-18-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 19,
+      "image": "slide-19.webp",
+      "thumbnail": "slide-19-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 20,
+      "image": "slide-20.webp",
+      "thumbnail": "slide-20-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 21,
+      "image": "slide-21.webp",
+      "thumbnail": "slide-21-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 22,
+      "image": "slide-22.webp",
+      "thumbnail": "slide-22-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 23,
+      "image": "slide-23.webp",
+      "thumbnail": "slide-23-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 24,
+      "image": "slide-24.webp",
+      "thumbnail": "slide-24-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 25,
+      "image": "slide-25.webp",
+      "thumbnail": "slide-25-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 26,
+      "image": "slide-26.webp",
+      "thumbnail": "slide-26-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 27,
+      "image": "slide-27.webp",
+      "thumbnail": "slide-27-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 28,
+      "image": "slide-28.webp",
+      "thumbnail": "slide-28-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 29,
+      "image": "slide-29.webp",
+      "thumbnail": "slide-29-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 30,
+      "image": "slide-30.webp",
+      "thumbnail": "slide-30-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 31,
+      "image": "slide-31.webp",
+      "thumbnail": "slide-31-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 32,
+      "image": "slide-32.webp",
+      "thumbnail": "slide-32-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 33,
+      "image": "slide-33.webp",
+      "thumbnail": "slide-33-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 34,
+      "image": "slide-34.webp",
+      "thumbnail": "slide-34-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 35,
+      "image": "slide-35.webp",
+      "thumbnail": "slide-35-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 36,
+      "image": "slide-36.webp",
+      "thumbnail": "slide-36-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 37,
+      "image": "slide-37.webp",
+      "thumbnail": "slide-37-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 38,
+      "image": "slide-38.webp",
+      "thumbnail": "slide-38-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 39,
+      "image": "slide-39.webp",
+      "thumbnail": "slide-39-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 40,
+      "image": "slide-40.webp",
+      "thumbnail": "slide-40-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 41,
+      "image": "slide-41.webp",
+      "thumbnail": "slide-41-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 42,
+      "image": "slide-42.webp",
+      "thumbnail": "slide-42-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 43,
+      "image": "slide-43.webp",
+      "thumbnail": "slide-43-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 44,
+      "image": "slide-44.webp",
+      "thumbnail": "slide-44-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 45,
+      "image": "slide-45.webp",
+      "thumbnail": "slide-45-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 46,
+      "image": "slide-46.webp",
+      "thumbnail": "slide-46-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 47,
+      "image": "slide-47.webp",
+      "thumbnail": "slide-47-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 48,
+      "image": "slide-48.webp",
+      "thumbnail": "slide-48-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 49,
+      "image": "slide-49.webp",
+      "thumbnail": "slide-49-thumb.webp",
+      "notes": ""
+    },
+    {
+      "index": 50,
+      "image": "slide-50.webp",
+      "thumbnail": "slide-50-thumb.webp",
+      "notes": ""
+    }
+  ]
+}
