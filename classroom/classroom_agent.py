@@ -1066,76 +1066,75 @@ class ClassroomAgent:
         name = intent["intent"]
         params = intent.get("params", {})
 
-        match name:
-            # Slide control
-            case "slide_next":
-                self.slide_ctrl.next()
-            case "slide_prev":
-                self.slide_ctrl.prev()
-            case "slide_goto":
-                n = params.get("n", 1)
-                self.slide_ctrl.goto(n - 1)  # 0-indexed
+        # Slide control
+        if name == "slide_next":
+            self.slide_ctrl.next()
+        elif name == "slide_prev":
+            self.slide_ctrl.prev()
+        elif name == "slide_goto":
+            n = params.get("n", 1)
+            self.slide_ctrl.goto(n - 1)  # 0-indexed
 
-            # Mode switching
-            case "mode_wall":
+        # Mode switching
+        elif name == "mode_wall":
+            fb_set(f"rooms/{self.room_id}/config/mode", "wall")
+            log("Mode → wall", "🔀")
+        elif name == "mode_qa":
+            fb_set(f"rooms/{self.room_id}/config/mode", "qa")
+            log("Mode → Q&A", "🔀")
+        elif name == "mode_vote":
+            fb_set(f"rooms/{self.room_id}/config/mode", "vote")
+            log("Mode → vote", "🔀")
+        elif name == "mode_pause":
+            fb_set(f"rooms/{self.room_id}/config/mode", "pause")
+            log("Mode → pause", "🔀")
+
+        # AI toggle
+        elif name == "ai_on":
+            self.ai_enabled = True
+            fb_set(f"rooms/{self.room_id}/config/aiEnabled", True)
+            log("AI enabled", "🤖")
+        elif name == "ai_off":
+            self.ai_enabled = False
+            fb_set(f"rooms/{self.room_id}/config/aiEnabled", False)
+            log("AI disabled", "🤖")
+
+        # Vote
+        elif name == "create_vote":
+            self.vote_mgr.create(params["question"], params["options"])
+        elif name == "end_vote":
+            results = self.vote_mgr.end()
+            if results:
+                self.last_vote_results = results
                 fb_set(f"rooms/{self.room_id}/config/mode", "wall")
-                log("Mode → wall", "🔀")
-            case "mode_qa":
-                fb_set(f"rooms/{self.room_id}/config/mode", "qa")
-                log("Mode → Q&A", "🔀")
-            case "mode_vote":
-                fb_set(f"rooms/{self.room_id}/config/mode", "vote")
-                log("Mode → vote", "🔀")
-            case "mode_pause":
-                fb_set(f"rooms/{self.room_id}/config/mode", "pause")
-                log("Mode → pause", "🔀")
 
-            # AI toggle
-            case "ai_on":
-                self.ai_enabled = True
-                fb_set(f"rooms/{self.room_id}/config/aiEnabled", True)
-                log("AI enabled", "🤖")
-            case "ai_off":
-                self.ai_enabled = False
-                fb_set(f"rooms/{self.room_id}/config/aiEnabled", False)
-                log("AI disabled", "🤖")
+        # Interactions
+        elif name == "quiz":
+            speech = "\n".join(self.voice.get_recent_speech(10)) if self.voice else ""
+            self.interaction.create_quiz(speech_context=speech)
+        elif name == "wordcloud":
+            self.interaction.start_wordcloud()
+        elif name == "icebreaker":
+            speech = "\n".join(self.voice.get_recent_speech(5)) if self.voice else ""
+            self.interaction.icebreaker(context=speech)
+        elif name == "summarize":
+            self._do_summary()
 
-            # Vote
-            case "create_vote":
-                self.vote_mgr.create(params["question"], params["options"])
-            case "end_vote":
-                results = self.vote_mgr.end()
-                if results:
-                    self.last_vote_results = results
-                    fb_set(f"rooms/{self.room_id}/config/mode", "wall")
+        # Autopilot
+        elif name == "autopilot_on":
+            self.autopilot.start()
+        elif name == "autopilot_off":
+            self.autopilot.stop()
 
-            # Interactions
-            case "quiz":
-                speech = "\n".join(self.voice.get_recent_speech(10)) if self.voice else ""
-                self.interaction.create_quiz(speech_context=speech)
-            case "wordcloud":
-                self.interaction.start_wordcloud()
-            case "icebreaker":
-                speech = "\n".join(self.voice.get_recent_speech(5)) if self.voice else ""
-                self.interaction.icebreaker(context=speech)
-            case "summarize":
-                self._do_summary()
-
-            # Autopilot
-            case "autopilot_on":
-                self.autopilot.start()
-            case "autopilot_off":
-                self.autopilot.stop()
-
-            # End class
-            case "end_class":
-                fb_set(f"rooms/{self.room_id}/config/mode", "feedback")
-                fb_write(f"rooms/{self.room_id}/wall", {
-                    "text": "📚 課程結束！感謝大家的參與，請填寫課後回饋 💬",
-                    "name": self.agent_name, "role": "ai",
-                    "ts": {".sv": "timestamp"}
-                })
-                log("Class ended → feedback mode", "🏁")
+        # End class
+        elif name == "end_class":
+            fb_set(f"rooms/{self.room_id}/config/mode", "feedback")
+            fb_write(f"rooms/{self.room_id}/wall", {
+                "text": "📚 課程結束！感謝大家的參與，請填寫課後回饋 💬",
+                "name": self.agent_name, "role": "ai",
+                "ts": {".sv": "timestamp"}
+            })
+            log("Class ended → feedback mode", "🏁")
 
     def _do_summary(self):
         """Summarize recent discussion."""
