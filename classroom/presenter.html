@@ -319,11 +319,7 @@
   var roomId = params.get('room');
   var deckName = params.get('deck');
 
-  if (!deckName) {
-    showError('Missing Parameters', 'URL must include ?deck=yyy (e.g. ?deck=university-talk)');
-    return;
-  }
-  // room is optional — without it, no Firebase sync, just local keyboard control
+  // room is required for Firebase mode; deck is optional (can read from Firebase)
 
   // ── State ──
   var slides = [];
@@ -348,12 +344,24 @@
   var fsPrompt = document.getElementById('fs-prompt');
 
   // ── Initialize ──
-  if (roomId) { initFirebase(); } else {
+  if (roomId) {
+    initFirebase();
+    if (deckName) {
+      // URL has deck → load PPTX slides directly
+      loadSlides();
+    }
+    // If no deck in URL, wait for Firebase presentation/ to tell us what to load
+    // (initFirebase's presentation listener will handle it)
+  } else if (deckName) {
+    // No room, has deck → standalone PPTX mode
     badgeConnected.style.display = 'flex';
     badgeText.textContent = '\u{1F3AC} standalone mode (no room)';
     badgeConnected.style.background = '#5A6B7A';
+    loadSlides();
+  } else {
+    showError('需要參數', '請從講師後台「開始上課」啟動，或加上 ?room=xxx 參數');
+    return;
   }
-  loadSlides();
   setupKeyboard();
   setupClickToggle();
   setupFullscreenPrompt();
@@ -418,7 +426,11 @@
       if (mode === 'pptx-slides') {
         slideIframe.style.display = 'none';
         slideImg.style.display = '';
-        // existing PPTX behavior continues via goToSlide
+        // If no deck was in URL, use the one from Firebase
+        if (!deckName && p.deck) {
+          deckName = p.deck;
+          loadSlides();
+        }
       } else {
         slideImg.style.display = 'none';
         slideIframe.style.display = 'block';
@@ -432,8 +444,10 @@
           url = '/classroom/' + (p.deck || 'gas') + '-template.html';
         }
 
-        if (url && slideIframe.src !== url) {
+        if (url && !slideIframe.src.endsWith(url)) {
           slideIframe.src = url;
+          // Update deckName for auto-push
+          if (p.deck) deckName = p.deck;
         }
       }
     });

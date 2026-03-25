@@ -1157,13 +1157,13 @@ function startClass(){
   // Update room config status
   updates[`rooms/${roomId}/config/status`]='live';
 
-  // Write presentation if deck is known
+  // Write presentation state
   if(roomDeck){
     updates[`rooms/${roomId}/presentation`]={
-      mode:roomDeckType||'slides',
+      mode:roomDeckType||'pptx-slides',
       deck:roomDeck,
       current:0,
-      ts:firebase.database.ServerValue.TIMESTAMP
+      totalSlides:0
     };
   }
 
@@ -1173,10 +1173,12 @@ function startClass(){
   }
 
   db.ref().update(updates).then(()=>{
-    // Open presenter window
-    if(roomDeck){
-      window.open(`/classroom/presenter?room=${encodeURIComponent(roomId)}&deck=${encodeURIComponent(roomDeck)}`,'_blank');
+    // Open presenter — only pass deck param for PPTX mode, let Firebase handle html-slides
+    var presUrl='/classroom/presenter?room='+encodeURIComponent(roomId);
+    if(roomDeckType==='pptx-slides'||(!roomDeckType&&roomDeck)){
+      presUrl+='&deck='+encodeURIComponent(roomDeck);
     }
+    window.open(presUrl,'_blank');
     // Toggle buttons
     document.getElementById('btnStartClass').style.display='none';
     document.getElementById('btnEndClass').style.display='inline-flex';
