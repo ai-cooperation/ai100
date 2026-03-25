@@ -881,10 +881,11 @@
     // Use full-screen overlay for feedback QR
     overlayContainer.style.height = '100%';
     overlayContent.innerHTML = [
-      '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:rgba(11,60,93,0.95);color:#fff;text-align:center;">',
-      '  <h1 style="font-size:3rem;font-weight:900;margin-bottom:1rem;">\u611F\u8B1D\u53C3\u52A0\uFF01</h1>',
+      '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:rgba(11,60,93,0.95);color:#fff;text-align:center;position:relative;">',
+      '  <button onclick="hideOverlay()" style="position:absolute;top:1.5rem;right:1.5rem;background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:1.5rem;width:48px;height:48px;border-radius:50%;cursor:pointer;">✕</button>',
+      '  <h1 style="font-size:3rem;font-weight:900;margin-bottom:1rem;">感謝參加！</h1>',
       '  <div id="feedback-qr" style="background:#fff;padding:16px;border-radius:16px;margin:1rem 0;"></div>',
-      '  <p style="font-size:1.3rem;margin-top:1rem;color:#FFC857;">\u638C\u78BC\u586B\u5BEB\u56DE\u994B\uFF0C\u7559 email \u6536\u7C21\u5831</p>',
+      '  <p style="font-size:1.3rem;margin-top:1rem;color:#FFC857;">掃碼填寫回饋，留 email 收簡報</p>',
       '</div>'
     ].join('\n');
 
