@@ -302,6 +302,7 @@
   <div class="err-detail" id="err-detail"></div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
 <script>
@@ -516,6 +517,9 @@
     if (db) {
       db.ref('rooms/' + roomId + '/presentation/current').set(idx);
     }
+
+    // Auto-push for PPTX mode
+    checkAutoPush(deckName, idx);
   }
 
   function applySlide(src) {
@@ -650,6 +654,8 @@
       setupVoteOverlay(overlayData);
     } else if (overlayType === 'wordcloud') {
       setupWordCloudOverlay(overlayData);
+    } else if (overlayType === 'feedback-qr') {
+      setupFeedbackQROverlay(overlayData);
     } else {
       hideOverlay();
     }
@@ -658,6 +664,7 @@
   function hideOverlay() {
     overlayType = 'none';
     overlayContainer.classList.remove('active');
+    overlayContainer.style.height = '';  // Reset height (feedback-qr sets 100%)
     overlayContent.innerHTML = '';
     cleanupOverlayListeners();
   }
@@ -853,6 +860,96 @@
     document.getElementById('err-detail').textContent = detail || '';
     document.getElementById('error-display').classList.add('active');
     document.getElementById('fs-prompt').classList.add('hidden');
+  }
+
+  // ── Feedback QR overlay ──
+  function setupFeedbackQROverlay(overlayData) {
+    // Use full-screen overlay for feedback QR
+    overlayContainer.style.height = '100%';
+    overlayContent.innerHTML = [
+      '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:rgba(11,60,93,0.95);color:#fff;text-align:center;">',
+      '  <h1 style="font-size:3rem;font-weight:900;margin-bottom:1rem;">\u611F\u8B1D\u53C3\u52A0\uFF01</h1>',
+      '  <div id="feedback-qr" style="background:#fff;padding:16px;border-radius:16px;margin:1rem 0;"></div>',
+      '  <p style="font-size:1.3rem;margin-top:1rem;color:#FFC857;">\u638C\u78BC\u586B\u5BEB\u56DE\u994B\uFF0C\u7559 email \u6536\u7C21\u5831</p>',
+      '</div>'
+    ].join('\n');
+
+    if (typeof QRCode !== 'undefined' && overlayData.data && overlayData.data.url) {
+      new QRCode(document.getElementById('feedback-qr'), {
+        text: overlayData.data.url,
+        width: 280,
+        height: 280,
+        colorDark: '#202124',
+        colorLight: '#ffffff'
+      });
+    }
+  }
+
+  // ── Report iframe slideState to Firebase ──
+  window.addEventListener('message', function(e) {
+    if (e.data && e.data.type === 'slideState' && roomId && db) {
+      db.ref('rooms/' + roomId + '/presentation').update({
+        current: e.data.current,
+        totalSlides: e.data.total
+      });
+      // Update local slide counter for iframe modes
+      var c = e.data.current;
+      var t = e.data.total;
+      slideCounter.textContent = (c + 1) + ' / ' + (t || '?');
+      // Check auto-push for iframe deck
+      var iframeDeck = currentDeckName();
+      if (iframeDeck) {
+        checkAutoPush(iframeDeck, c);
+      }
+    }
+  });
+
+  // ── Slide counter for iframe modes ──
+  // When in iframe mode, also listen to Firebase presentation/current for counter updates
+  // (handles cases where slide changes come from remote control, not postMessage)
+  if (roomId) {
+    // This runs after initFirebase sets up db; use interval to wait for db
+    var _iframeCounterSetup = setInterval(function() {
+      if (!db) return;
+      clearInterval(_iframeCounterSetup);
+
+      db.ref('rooms/' + roomId + '/presentation').on('value', function(snap) {
+        var p = snap.val();
+        if (!p) return;
+        if (p.mode && p.mode !== 'pptx-slides') {
+          var c = typeof p.current === 'number' ? p.current : 0;
+          var t = p.totalSlides || '?';
+          slideCounter.textContent = (c + 1) + ' / ' + t;
+        }
+      });
+    }, 100);
+  }
+
+  // ── Auto-push: load map and push content when slide changes ──
+  var slidePushMap = {};
+  fetch('/classroom/slide-push-map.json')
+    .then(function(r) { return r.json(); })
+    .then(function(d) { slidePushMap = d; })
+    .catch(function() { /* map not found, skip auto-push */ });
+
+  function currentDeckName() {
+    // Try to extract deck name from current presentation state
+    // For iframe mode, check slideIframe.src for deck pattern
+    if (slideIframe.src) {
+      var match = slideIframe.src.match(/\/supplements\/([^/.]+)\.html/);
+      if (match) return match[1];
+    }
+    return deckName || null;
+  }
+
+  function checkAutoPush(deck, slideIndex) {
+    if (!slidePushMap[deck]) return;
+    var push = slidePushMap[deck][String(slideIndex)];
+    if (push && roomId && db) {
+      var data = Object.assign({}, push, { ts: Date.now() });
+      db.ref('rooms/' + roomId + '/pushContent/current').set(data);
+      db.ref('rooms/' + roomId + '/pushContent/history').push(data);
+    }
   }
 
 })();

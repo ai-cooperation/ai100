@@ -1,0 +1,26 @@
+{
+  "S01_GAS_Automation": {
+    "7": {"type": "link", "title": "Groq 申請 API Key", "content": "https://console.groq.com"},
+    "12": {"type": "prompt", "title": "第一段 Prompt — 單格問答", "content": "請幫我寫一段 Google Apps Script。\n功能：A1 輸入問題，B1 出現 AI 回答。\n用 Groq API（https://api.groq.com/openai/v1/chat/completions）\n模型 llama-3.3-70b-versatile\nAPI Key 用 PropertiesService，不寫死。加中文註解。"},
+    "25": {"type": "prompt", "title": "批量分析 Prompt", "content": "請修改上面的程式碼：\n1. 讀取 A1 到 A10 每一格\n2. 用 AI 判斷「正面」「負面」「中性」\n3. 結果寫入 B 欄對應格子"},
+    "26": {"type": "link", "title": "模板資料 30 筆", "content": "https://ai100.cooperation.tw/classroom/gas-template.html#csv-data"},
+    "31": {"type": "link", "title": "教學資源頁", "content": "https://ai100.cooperation.tw/classroom/gas-template.html"}
+  },
+  "S02_Vibe_Coding": {
+    "7": {"type": "link", "title": "Claude AI", "content": "https://claude.ai"},
+    "13": {"type": "link", "title": "ChatGPT", "content": "https://chatgpt.com"},
+    "20": {"type": "link", "title": "GitHub 註冊", "content": "https://github.com/signup"}
+  },
+  "S03_CLI_Agent": {
+    "10": {"type": "link", "title": "Claude Code 安裝", "content": "https://ai100.cooperation.tw/classroom/s03-template.html"},
+    "18": {"type": "link", "title": "CLAUDE.md 範本", "content": "https://ai100.cooperation.tw/classroom/s03-template.html#claudemd"}
+  },
+  "S04_VSCode_IDE": {
+    "5": {"type": "link", "title": "VS Code 下載", "content": "https://code.visualstudio.com"},
+    "6": {"type": "link", "title": "Claude Extension", "content": "https://ai100.cooperation.tw/classroom/s04-template.html"}
+  },
+  "S05_OpenClaw": {
+    "12": {"type": "link", "title": "BotFather", "content": "https://t.me/BotFather"},
+    "15": {"type": "link", "title": "教學資源頁", "content": "https://ai100.cooperation.tw/classroom/s05-template.html"}
+  }
+}

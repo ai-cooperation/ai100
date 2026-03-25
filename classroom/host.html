@@ -226,6 +226,10 @@
       <div><div style="font-weight:700;color:#7C3AED;font-size:0.9rem">課後回饋</div><div style="font-size:0.7rem;color:var(--dim)">AI 對話式 · 取代傳統問卷</div></div>
     </a>
   </div>
+  <div id="todayClassSection" style="display:none;margin-bottom:1.5rem;">
+    <h2 style="font-size:1rem;color:var(--gold);margin-bottom:0.8rem">📅 今日課程</h2>
+    <div id="todayClassList"></div>
+  </div>
   <div class="create-section">
     <h2>建立新教室</h2>
     <div class="create-row">
@@ -260,6 +264,8 @@
     <button class="act-btn" onclick="exportData()">匯出</button>
     <button class="act-btn" onclick="showPushPanel()" title="推送內容">📤 推送</button>
     <button class="act-btn" onclick="showReport()" title="回饋報告">📊 報告</button>
+    <button class="act-btn" id="btnStartClass" onclick="startClass()" style="background:var(--pri);color:#fff;border-color:var(--pri);display:none">▶ 開始上課</button>
+    <button class="act-btn" id="btnEndClass" onclick="endClass()" style="background:var(--red);color:#fff;border-color:var(--red);display:none">⏹ 結束課程</button>
   </div>
   <div class="main" id="mainContent"></div>
   <div class="host-input hidden" id="hostWallBar">
@@ -399,6 +405,7 @@ firebase.initializeApp({
 });
 const db=firebase.database(),auth=firebase.auth();
 let currentUser=null,roomId='',roomTitle='',currentMode='wall',aiEnabled=false,listeners=[],voteOpts=['',''];
+let roomCourseId=null,roomSessionId=null,roomDeck=null,roomDeckType=null;
 const VC=['#0F9D8A','#E07A3A','#7C3AED','#06B6D4','#FFC857','#DC2626'];
 
 // Teaching materials
@@ -429,6 +436,7 @@ auth.onAuthStateChanged(user=>{
     const today=new Date();
     document.getElementById('datePrefix').textContent=`${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}-`;
     loadRoomList();
+    loadTodayClasses();
   } else {
     document.getElementById('loginScreen').style.display='flex';
     document.getElementById('lobby').classList.remove('active');
@@ -457,6 +465,29 @@ function loadRoomList(){
   });
 }
 
+// ═══ Today's Classes ═══
+function loadTodayClasses(){
+  const today=new Date();
+  const todayStr=`${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}`;
+  db.ref(`users/${currentUser.uid}/rooms`).once('value',snap=>{
+    const section=document.getElementById('todayClassSection');
+    const list=document.getElementById('todayClassList');
+    const todayRooms=[];
+    snap.forEach(c=>{
+      if(c.key.startsWith(todayStr)){
+        todayRooms.push({id:c.key,...c.val()});
+      }
+    });
+    if(!todayRooms.length){section.style.display='none';return}
+    section.style.display='block';
+    list.innerHTML=todayRooms.map(r=>`<div style="background:var(--surface);border:2px solid var(--gold);border-radius:12px;padding:1rem 1.2rem;margin-bottom:0.6rem;display:flex;align-items:center;gap:1rem;">
+      <span style="font-size:1.5rem">🎓</span>
+      <div style="flex:1"><div style="font-weight:700;color:var(--gold);font-size:1rem">${esc(r.title||r.id)}</div><div style="font-size:0.75rem;color:var(--dim)">${r.id}${r.courseId?' · 已排課':''}</div></div>
+      <button onclick="enterRoom('${r.id}','${esc(r.title||r.id)}')" style="padding:0.5rem 1.2rem;background:var(--gold);color:var(--navy);border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer">進入教室</button>
+    </div>`).join('');
+  });
+}
+
 function createRoom(){
   const prefix=document.getElementById('datePrefix').textContent;
   const suffix=document.getElementById('inputSuffix').value.trim();
@@ -480,10 +511,37 @@ function deleteRoom(rid){
 
 function enterRoom(rid,title){
   roomId=rid;roomTitle=title||rid;
+  roomCourseId=null;roomSessionId=null;roomDeck=null;roomDeckType=null;
   document.getElementById('lobby').classList.remove('active');
   document.getElementById('dash').classList.add('active');
   document.getElementById('dispRoom').textContent=roomTitle;
   loadSettings();
+  // Read room config for planner integration
+  db.ref(`rooms/${roomId}/config`).once('value',s=>{
+    const cfg=s.val()||{};
+    roomCourseId=cfg.courseId||null;
+    roomSessionId=cfg.sessionId||null;
+    roomDeck=cfg.deck||null;
+    roomDeckType=cfg.deckType||null;
+    // Show start/end buttons based on status
+    const status=cfg.status||'';
+    const btnStart=document.getElementById('btnStartClass');
+    const btnEnd=document.getElementById('btnEndClass');
+    if(status==='live'){
+      btnStart.style.display='none';
+      btnEnd.style.display='inline-flex';
+    } else if(status==='post-class'||status==='completed'){
+      btnStart.style.display='none';
+      btnEnd.style.display='none';
+    } else if(roomCourseId&&roomSessionId){
+      // scheduled or preparing — show start button
+      btnStart.style.display='inline-flex';
+      btnEnd.style.display='none';
+    } else {
+      btnStart.style.display='none';
+      btnEnd.style.display='none';
+    }
+  });
   // Online
   db.ref(`rooms/${roomId}/presence`).on('value',s=>{document.getElementById('dispOnline').textContent=`${s.numChildren()} 人`});
   // Mode
@@ -507,7 +565,9 @@ function backToLobby(){
   db.ref(`rooms/${roomId}`).off();
   document.getElementById('dash').classList.remove('active');
   document.getElementById('lobby').classList.add('active');
-  roomId='';
+  document.getElementById('btnStartClass').style.display='none';
+  document.getElementById('btnEndClass').style.display='none';
+  roomId='';roomCourseId=null;roomSessionId=null;roomDeck=null;roomDeckType=null;
 }
 
 // ═══ AI Listener (batched: collect 10s, respond once) ═══
@@ -788,9 +848,9 @@ function renderInfoPanel(){
     <div class="info-card"><h3>📊 教室資訊</h3><p style="font-size:0.8rem;color:var(--text);margin-top:1rem">房間：${esc(roomId)}<br>老師：${esc(currentUser.displayName)}</p></div>
   </div>`;
   html+=`<div class="mat-list"><h3 style="font-size:0.85rem;color:var(--pri);margin-bottom:0.5rem">教材（點擊在新視窗開啟，自動連結遙控）</h3>`;
-  materials.forEach(m=>{
+  materials.forEach((m,idx)=>{
     let url=m.hasSlideControl?`${m.url}?room=${encodeURIComponent(roomId)}`+`${m.queryExtra||''}`:m.url;
-    html+=`<div class="mat-item" onclick="window.open('${url}','_blank')"><span class="mat-icon">${m.icon}</span><span class="mat-title">${m.title}</span><span class="mat-open">開啟 ↗</span></div>`;
+    html+=`<div class="mat-item" onclick="openMaterial(${idx})"><span class="mat-icon">${m.icon}</span><span class="mat-title">${m.title}</span><span class="mat-open">開啟 ↗</span></div>`;
   });
   html+='</div>';
   return html;
@@ -1060,6 +1120,89 @@ function loadReport() {
 
     // Store emails for copy
     window._reportEmails = emails;
+  });
+}
+
+// ═══ Material opening with Firebase write ═══
+function openMaterial(idx){
+  const m=materials[idx];
+  if(!m)return;
+  let url=m.hasSlideControl?`${m.url}?room=${encodeURIComponent(roomId)}`+(m.queryExtra||''):m.url;
+
+  // Extract deckId from queryExtra if present
+  let deckId=null;
+  if(m.queryExtra){
+    const match=m.queryExtra.match(/deck=([^&]+)/);
+    if(match)deckId=match[1];
+  }
+
+  // Write presentation state to Firebase so remote/student pages can sync
+  if(roomId && m.hasSlideControl){
+    const deckType=deckId?'slides':'html';
+    db.ref(`rooms/${roomId}/presentation`).set({
+      mode:deckType,
+      deck:deckId||m.url,
+      current:0,
+      title:m.title,
+      ts:firebase.database.ServerValue.TIMESTAMP
+    });
+  }
+  window.open(url,'_blank');
+}
+
+// ═══ Start / End Class ═══
+function startClass(){
+  if(!roomId)return;
+  const updates={};
+  // Update room config status
+  updates[`rooms/${roomId}/config/status`]='live';
+
+  // Write presentation if deck is known
+  if(roomDeck){
+    updates[`rooms/${roomId}/presentation`]={
+      mode:roomDeckType||'slides',
+      deck:roomDeck,
+      current:0,
+      ts:firebase.database.ServerValue.TIMESTAMP
+    };
+  }
+
+  // Update session status in courses if linked
+  if(roomCourseId&&roomSessionId){
+    updates[`courses/${roomCourseId}/sessions/${roomSessionId}/status`]='live';
+  }
+
+  db.ref().update(updates).then(()=>{
+    // Open presenter window
+    if(roomDeck){
+      window.open(`/classroom/presenter?room=${encodeURIComponent(roomId)}&deck=${encodeURIComponent(roomDeck)}`,'_blank');
+    }
+    // Toggle buttons
+    document.getElementById('btnStartClass').style.display='none';
+    document.getElementById('btnEndClass').style.display='inline-flex';
+  });
+}
+
+function endClass(){
+  if(!roomId)return;
+  if(!confirm('確定結束課程？將切換到課後回饋模式。'))return;
+
+  const feedbackUrl=`${location.origin}/classroom/feedback?room=${encodeURIComponent(roomId)}`;
+  const updates={};
+  updates[`rooms/${roomId}/config/status`]='post-class';
+  updates[`rooms/${roomId}/config/mode`]='feedback';
+  updates[`rooms/${roomId}/overlay`]={type:'feedback-qr',show:true,data:{url:feedbackUrl}};
+
+  if(roomCourseId&&roomSessionId){
+    updates[`courses/${roomCourseId}/sessions/${roomSessionId}/status`]='post-class';
+  }
+
+  db.ref().update(updates).then(()=>{
+    document.getElementById('btnEndClass').style.display='none';
+    // Auto-open report panel
+    const p=document.getElementById('reportPanel');
+    p.style.display='flex';
+    loadReport();
   });
 }
 

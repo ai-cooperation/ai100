@@ -785,6 +785,12 @@ function selectDeck(deckId){
   const path = `courses/${currentCourseId}/sessions/${openSessionId}`;
   db.ref(path).update({ deckId });
   db.ref(`${path}/tasks/deck`).update({ status:'done', deckId });
+
+  // Sync deck to room config if roomId exists
+  const session = sessions[openSessionId];
+  if(session && session.roomId){
+    db.ref(`rooms/${session.roomId}/config`).update({ deck: deckId, deckType: 'slides' });
+  }
   toast(`已選擇簡報: ${deckId}`);
 }
 
@@ -842,9 +848,31 @@ function addSession(){
     }
   };
 
-  db.ref(`courses/${currentCourseId}/sessions/${sessionId}`).set(sessionData).then(() => {
+  // Write session + create Firebase room + register in user's room list
+  const updates = {};
+  updates[`courses/${currentCourseId}/sessions/${sessionId}`] = sessionData;
+  updates[`rooms/${roomId}/config`] = {
+    title: title,
+    deck: deckId || null,
+    deckType: deckId ? 'slides' : null,
+    courseId: currentCourseId,
+    sessionId: sessionId,
+    mode: 'wall',
+    status: 'scheduled',
+    created: firebase.database.ServerValue.TIMESTAMP,
+    hostUid: currentUser.uid,
+    hostName: currentUser.displayName || currentUser.email,
+  };
+  updates[`users/${currentUser.uid}/rooms/${roomId}`] = {
+    title: title,
+    courseId: currentCourseId,
+    sessionId: sessionId,
+    created: firebase.database.ServerValue.TIMESTAMP,
+  };
+
+  db.ref().update(updates).then(() => {
     closeModal('modalAddSession');
-    toast('堂次已新增');
+    toast('堂次已新增，教室已建立');
   });
 }
 
