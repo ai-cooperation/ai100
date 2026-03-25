@@ -1131,3 +1131,233 @@ Phase 2b — Agent 進階（3-4 週）
 | 語音 | jt-live-whisper (TCP) | 本地、免費、低延遲 |
 | 看板 UI | 純 CSS Grid + 拖曳 | 不需要 React/Vue，原生夠用 |
 | 通知 | Telegram Bot | 已有基礎設施 |
+
+---
+
+# AI 課堂互動系統 — 架構規劃 v3（2026-03-25）
+
+> Teaching OS v3：SmallClaw Agent × 雲端部署 × 權限自動化 × 課程全生命週期
+
+## v2 → v3 主要變更
+
+| 項目 | v2 | v3 |
+|------|----|----|
+| AI 助教 | classroom_agent.py（自建，ac-mac） | SmallClaw（OpenClaw 安全配置，雲端）|
+| 部署位置 | ac-mac（10年老機） | Tencent VM（$3/月，與 GemGate 共用）|
+| 權限控制 | 無 | Firebase Rules 綁 Session 狀態 |
+| 簡報格式 | PPTX 圖片 only | PPTX + HTML slides + 網頁 + 資源頁 |
+| 推送功能 | 無 | pushContent 到學員（自動/手動）|
+| 課後 email | 無 | feedback 收 email + GAS 寄 PDF |
+| 講師控制 | 電腦 only | 語音 + Telegram + 電腦 三種 |
+| 未來部署 | GitHub Pages（公開） | Cloudflare Pages + Access（付費教材保護）|
+
+---
+
+## 系統全景圖 v3
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                     Teaching OS v3                                   │
+│                                                                     │
+│  MacBook（講師）                                                     │
+│  ├── Claude Code + mcp-classroom → 課前建課/課後分析                 │
+│  ├── jt-live-whisper → 語音辨識 → Firebase voiceCommands             │
+│  └── 瀏覽器：host.html（控制台）+ presenter.html（投影）             │
+│                                                                     │
+│  Tencent VM $3/月（43.159.131.124）                                  │
+│  ├── GemGate（user: ubuntu, port 8760）← 教學用 AI API              │
+│  └── SmallClaw（user: openclaw）← AI 教學助教                       │
+│       ├── OpenClaw 最小化安全配置                                    │
+│       ├── Classroom Skills（Firebase 操作）                          │
+│       ├── Telegram Bot（講師手機控制）                                │
+│       └── LLM: Groq 免費                                            │
+│                                                                     │
+│  Firebase RTDB（溝通匯流排）                                         │
+│  ├── courses/ sessions/（課程管理）                                   │
+│  ├── rooms/（教室即時互動）                                           │
+│  └── Rules: 權限綁 session status（live 才能寫）                     │
+│                                                                     │
+│  Cloudflare Pages + Access（未來，付費教材保護）                      │
+│  └── ai-classroom private repo                                      │
+│                                                                     │
+│  GAS + Sheet（課後名單管理 + 寄 PDF）                                │
+│                                                                     │
+│  學員：手機/筆電 → 公開頁面（index/feedback/survey）                 │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## SmallClaw 安全架構
+
+### 定義
+SmallClaw = OpenClaw 的最小化安全配置。不是另一個程式碼庫。
+
+### 部署
+- Tencent VM，獨立 Linux user `openclaw`
+- 與 GemGate（user `ubuntu`）檔案權限隔離
+- 不裝瀏覽器（封死資料外洩通道）
+- 記憶體 ~300 MB
+
+### 啟用的功能
+- Telegram 通訊（講師控制）
+- LLM 對話（Groq/Gemini，免費）
+- Classroom Skills（Firebase 讀寫）
+- 排程提醒
+
+### 停用的功能
+- web-search（沒瀏覽器）
+- shell 執行
+- 檔案系統存取
+- email/calendar 整合
+- code-interpreter
+
+### AI 三等級
+
+| Level | 能力 | LLM | 延遲 | 階段 |
+|-------|------|-----|------|------|
+| 1 | 翻頁/推送/切模式 | 不需要（正則） | <100ms | Phase B |
+| 2 | 創建投票/總結/出題 | Gemini Flash | 1-3s | Phase C |
+| 3 | TTS/自動導航/代課 | Claude/GPT | 3-10s | Phase E |
+
+---
+
+## 權限控制：綁在 Session 狀態上
+
+不需要手動開關。講師按「開始/結束上課」= 自動開關。
+
+### Firebase Rules
+
+```
+rooms/{roomId}/ 下：
+
+  config/          → auth != null（只有講師能改）
+  
+  wall/            → status === 'live' 才能寫
+  slideControl/    → status === 'live' 才能寫
+  pushContent/     → status === 'live' 才能寫
+  currentVote/     → status === 'live' 才能寫
+  overlay/         → status === 'live' 才能寫
+  presentation/    → status === 'live' 才能寫
+  
+  feedback/        → status === 'post-class' 才能寫（學員填回饋）
+                   → auth != null 才能讀（講師看報告）
+```
+
+### 流程
+1. 講師按「開始上課」→ status='live' → SmallClaw 能操作
+2. 講師按「結束課程」→ status='completed' → SmallClaw 自動被擋
+3. 不需要進 Firebase Console，不需要 SSH，不需要第三方
+
+### 記憶清洗
+- cron 每天凌晨自動清除對話歷史
+- 或 Telegram 指令「清除記憶」手動觸發
+
+---
+
+## 講師三種控制方式
+
+| 方式 | 路徑 | 場景 |
+|------|------|------|
+| 語音 | jt-live-whisper → Firebase → SmallClaw | 站台上講課 |
+| 手機 | Telegram → SmallClaw → Firebase | 走動巡場 |
+| 電腦 | host.html 按鈕 → Firebase | 坐電腦前 |
+
+---
+
+## presenter.html 萬用畫面框
+
+支援四種模式（Firebase presentation/mode 控制）：
+
+| mode | 載入方式 | 用途 |
+|------|---------|------|
+| html-slides | iframe | S01-S05 HTML 簡報 |
+| pptx-slides | img 切換 | PPTX 轉圖片教材 |
+| webpage | iframe | 任意網頁（Demo 用） |
+| resource | iframe | 教學資源頁 |
+
+覆蓋層（投票/文字雲/回饋 QR）永遠在最上面。
+
+---
+
+## 推送內容到學員
+
+Firebase 結構：
+```
+rooms/{roomId}/pushContent/
+  current/: { type, title, content, ts }
+  history/{pushId}: { type, title, content, ts }
+```
+
+推送方式：
+1. 講師手動（host.html 推送面板）
+2. SmallClaw 語音/Telegram 推送
+3. 自動跟隨翻頁（每頁預設推送設定）
+
+---
+
+## 課後 Email 系統
+
+GAS + Google Sheet：
+- 從 Firebase 讀回饋 → 存到 Sheet（名單總表）
+- 從 Google Drive 讀預生成 PDF
+- GmailApp.sendEmail() 寄出（從講師 Gmail，不進垃圾郵件）
+- 可批次發課程通知
+
+---
+
+## 未來：Cloudflare Pages + Access 部署
+
+功能全部測通後，付費教材搬到 private repo：
+- ai-classroom（private repo）→ Cloudflare Pages 部署
+- Cloudflare Access 保護講師路徑（50 人免費）
+- 學員公開路徑不受影響
+- Firebase Rules 不變
+
+---
+
+## 開發順序
+
+```
+Phase 0 — 基礎建設
+  0a. mcp-classroom MCP server
+  0b. SmallClaw 部署到 Tencent VM
+  0c. Classroom Skills 基本版
+
+Phase A — planner <-> host 串接
+  A1. Claude Code 建課程（MCP）
+  A2. host 顯示今天的課
+  A3. 一鍵開始/結束
+
+Phase B — SmallClaw Level 1
+  B1. 翻頁、推送、模式切換
+  B2. Telegram 控制
+  B3. 語音指令
+
+Phase C — SmallClaw Level 2
+  C1. AI 創建投票
+  C2. AI 總結討論
+  C3. 自動推送跟隨翻頁
+
+Phase D — 完整測試
+  D1. 端到端
+  D2. 三種控制方式
+  D3. 多裝置
+
+Phase E — Level 3（未來）
+  E1. TTS
+  E2. 代課模式
+```
+
+---
+
+## 成本
+
+| 項目 | 月費 |
+|------|------|
+| Tencent VM（GemGate + SmallClaw） | $3 |
+| LLM（Groq 免費） | $0 |
+| Firebase（免費額度） | $0 |
+| Cloudflare Pages（免費） | $0 |
+| GAS 寄信（Gmail 免費） | $0 |
+| **合計** | **$3/月** |
