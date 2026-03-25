@@ -149,6 +149,8 @@
     📚 推送歷史 <span id="pushHistoryCount"></span>
   </div>
   <div id="pushHistoryList" style="display:none;max-height:200px;overflow-y:auto;background:#F5F7FA;padding:8px 16px;border-bottom:1px solid #e5e7eb;"></div>
+  <!-- Vote compact bar (shows after voting, scrolls with wall) -->
+  <div id="voteCompactBar" style="display:none;align-items:center;padding:8px 16px;background:#E8F0FE;border-bottom:1px solid #DADCE0;font-size:0.9rem;color:#1A73E8;font-weight:500;"></div>
   <div class="content hidden" id="wallContent"></div>
   <div class="input-bar hidden" id="wallInput">
     <input type="text" id="wallText" placeholder="輸入訊息..." maxlength="500" autocomplete="off">
@@ -262,7 +264,20 @@ function renderVote(el,data){const vid=data.id,opts=data.options||[];
       if(myVote!==null)h+='<div class="voted-badge">已投票</div>';h+='</div>';el.innerHTML=h});
     listeners.push({ref:vr,event:'value',c:true})})
 }
-function castVote(vid,i){if(myVote!==null)return;myVote=i;db.ref(`rooms/${roomId}/votes/${vid}/${odID}`).set(i)}
+function castVote(vid,i){if(myVote!==null)return;myVote=i;db.ref(`rooms/${roomId}/votes/${vid}/${odID}`).set(i);
+  // Store vote summary for compact display
+  db.ref(`rooms/${roomId}/currentVote`).once('value',s=>{const d=s.val();if(d){
+    window._lastVoteSummary={question:d.question,choice:d.options[i]};
+    // Auto-collapse to wall after 3s
+    setTimeout(()=>{
+      if(currentMode==='vote'){showVoteCompact();showWall();document.getElementById('wallInput').classList.remove('hidden')}
+    },3000)}})
+}
+function showVoteCompact(){
+  const s=window._lastVoteSummary;if(!s)return;
+  const bar=document.getElementById('voteCompactBar');
+  if(bar){bar.style.display='flex';bar.innerHTML='<span style="margin-right:8px">📊</span><span>'+esc(s.question)+' → <strong>'+esc(s.choice)+'</strong></span>';}
+}
 
 // QA with replies
 function showQA(){
