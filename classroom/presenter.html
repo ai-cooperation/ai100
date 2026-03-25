@@ -117,6 +117,7 @@
   }
 
   #overlay-container.active { display: block; }
+  #overlay-container.active.fullscreen { top:0; height:100%; pointer-events:auto; }
 
   #overlay-backdrop {
     position: absolute; inset: 0;
@@ -678,7 +679,7 @@
   function hideOverlay() {
     overlayType = 'none';
     overlayContainer.classList.remove('active');
-    overlayContainer.style.height = '';  // Reset height (feedback-qr sets 100%)
+    overlayContainer.classList.remove('fullscreen');
     overlayContent.innerHTML = '';
     cleanupOverlayListeners();
   }
@@ -878,8 +879,8 @@
 
   // ── Feedback QR overlay ──
   function setupFeedbackQROverlay(overlayData) {
-    // Use full-screen overlay for feedback QR
-    overlayContainer.style.height = '100%';
+    // Use full-screen overlay for feedback QR (needs pointer-events for close button)
+    overlayContainer.classList.add('fullscreen');
     overlayContent.innerHTML = [
       '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:rgba(11,60,93,0.95);color:#fff;text-align:center;position:relative;">',
       '  <button onclick="hideOverlay()" style="position:absolute;top:1.5rem;right:1.5rem;background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:1.5rem;width:48px;height:48px;border-radius:50%;cursor:pointer;">✕</button>',
