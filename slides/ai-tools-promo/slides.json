@@ -1,0 +1,18 @@
+{
+  "id": "ai-tools-promo",
+  "title": "AI工具應用與自動化流程實戰班 課程推廣簡報",
+  "totalSlides": 11,
+  "slides": [
+    {"index": 1, "image": "000.webp", "thumbnail": "000.webp"},
+    {"index": 2, "image": "001.webp", "thumbnail": "001.webp"},
+    {"index": 3, "image": "002.webp", "thumbnail": "002.webp"},
+    {"index": 4, "image": "003.webp", "thumbnail": "003.webp"},
+    {"index": 5, "image": "004.webp", "thumbnail": "004.webp"},
+    {"index": 6, "image": "005.webp", "thumbnail": "005.webp"},
+    {"index": 7, "image": "006.webp", "thumbnail": "006.webp"},
+    {"index": 8, "image": "007.webp", "thumbnail": "007.webp"},
+    {"index": 9, "image": "008.webp", "thumbnail": "008.webp"},
+    {"index": 10, "image": "009.webp", "thumbnail": "009.webp"},
+    {"index": 11, "image": "010.webp", "thumbnail": "010.webp"}
+  ]
+}

@@ -98,6 +98,18 @@ EXT="webp"
 [ "$USE_CWEBP" -eq 0 ] && EXT="png"
 echo "   ✅ $IDX 張 .$EXT"
 
+# ── Step 3.5: 生成 slides.json（presenter 需要）──
+echo "③½ 生成 slides.json..."
+TITLE=$(basename "$PPTX_PATH" .pptx | basename "$(cat /dev/stdin)" .PPTX 2>/dev/null || basename "$PPTX_PATH" .pptx)
+python3 -c "
+import json, sys
+ext, count, deck, title = sys.argv[1], int(sys.argv[2]), sys.argv[3], sys.argv[4]
+slides = [{'index': i+1, 'image': f'{i:03d}.{ext}', 'thumbnail': f'{i:03d}.{ext}'} for i in range(count)]
+data = {'id': deck, 'title': title, 'totalSlides': count, 'slides': slides}
+json.dump(data, open(sys.argv[5], 'w'), ensure_ascii=False, indent=2)
+" "$EXT" "$IDX" "$DECK_NAME" "$TITLE" "$OUT_DIR/slides.json"
+echo "   ✅ slides.json"
+
 # ── Step 4: 清理 ──
 rm -rf "$TMP_DIR"
 
