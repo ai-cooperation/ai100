@@ -6,7 +6,7 @@
 <title>AI 課堂互動 — 講師後台</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  
+
   /* ═══ Reading Glasses Override ═══ */
   html{font-size:20px !important;line-height:1.7 !important}
   button,.act-btn,.mode-btn{min-height:44px !important;font-size:0.85rem !important;padding:0.4rem 0.8rem !important}
@@ -80,20 +80,61 @@
   /* Dashboard */
   .dash{display:none;flex-direction:column;height:100vh}
   .dash.active{display:flex}
-  .toolbar{display:flex;align-items:center;gap:0.5rem;padding:0.6rem 1rem;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
-  .toolbar .room-label{font-size:1rem;color:var(--gold);font-weight:700}
-  .toolbar .online{font-size:0.9rem;color:var(--dim);margin-right:auto}
-  .mode-btn{padding:0.5rem 1rem;border-radius:8px;font-size:0.95rem;font-weight:700;background:var(--bg);color:var(--dim);border:1px solid var(--border);transition:all 0.2s;min-height:40px}
-  .mode-btn.active{background:var(--pri);color:#fff;border-color:var(--pri)}
+
+  /* ═══ Phase Header (shared across all phases) ═══ */
+  .phase-header{display:flex;align-items:center;gap:0.5rem;padding:0.6rem 1rem;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+  .phase-header .room-label{font-size:1rem;color:var(--gold);font-weight:700}
+  .phase-header .online{font-size:0.9rem;color:var(--dim);margin-right:auto}
+  .btn-back{padding:0.5rem 0.8rem;border-radius:8px;font-size:0.9rem;background:none;color:var(--dim);border:1px solid var(--border);min-height:40px}
   .act-btn{padding:0.5rem 0.8rem;border-radius:8px;font-size:0.9rem;background:var(--bg);color:var(--dim);border:1px solid var(--border);min-height:40px}
   .act-btn:hover{border-color:var(--gold);color:var(--gold)}
   .act-btn.ai-on{background:var(--purple);color:#fff;border-color:var(--purple)}
-  .btn-back{padding:0.5rem 0.8rem;border-radius:8px;font-size:0.9rem;background:none;color:var(--dim);border:1px solid var(--border);min-height:40px}
+
+  /* ═══ Phase Containers ═══ */
+  .phase-container{flex:1;overflow-y:auto;display:none;flex-direction:column}
+  .phase-container.active{display:flex}
+
+  /* ═══ Status Bar (Phase 2 Live) ═══ */
+  .status-bar{display:flex;align-items:center;gap:0.6rem;padding:0.4rem 1rem;background:var(--bg);border-bottom:1px solid var(--border);font-size:0.85rem;color:var(--dim);flex-shrink:0;flex-wrap:wrap}
+  .status-bar .status-item{display:flex;align-items:center;gap:0.3rem}
+  .status-bar .dot-live{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;animation:pulse-dot 2s infinite}
+  @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.5}}
+
+  /* ═══ Mode Tabs (Phase 2 segmented control) ═══ */
+  .mode-tabs{display:flex;gap:0;padding:0 1rem;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+  .mode-tab{flex:1;padding:0.6rem 0.5rem;text-align:center;font-size:0.85rem;font-weight:700;color:var(--dim);background:transparent;border:none;border-bottom:3px solid transparent;cursor:pointer;transition:all 0.2s}
+  .mode-tab:hover{color:var(--text)}
+  .mode-tab.active{color:var(--pri);border-bottom-color:var(--pri)}
+  .mode-tab[data-mode="pause"].active{color:var(--gold);border-bottom-color:var(--gold)}
+
+  /* ═══ Tool Row (Phase 2) ═══ */
+  .tool-row{display:flex;gap:0.4rem;padding:0.4rem 1rem;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;align-items:center}
+  .tool-btn{padding:0.35rem 0.7rem;border-radius:6px;font-size:0.8rem;font-weight:700;background:var(--bg);color:var(--dim);border:1px solid var(--border);cursor:pointer;white-space:nowrap;transition:all 0.2s}
+  .tool-btn:hover{border-color:var(--pri);color:var(--pri)}
+  .tool-btn.ai-on{background:var(--purple);color:#fff;border-color:var(--purple)}
+  .deck-label{font-size:0.8rem;color:var(--pri);background:var(--bg);padding:0.2rem 0.6rem;border-radius:6px;border:1px solid var(--border);white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;margin-left:auto}
 
   .main{flex:1;overflow-y:auto;padding:1rem}
 
+  /* ═══ Preparing Phase ═══ */
+  .step-card{background:var(--surface);border-radius:12px;padding:1.2rem 1.5rem;border:1px solid var(--border);margin-bottom:1rem}
+  .step-card .step-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--pri);color:#fff;font-size:0.8rem;font-weight:900;margin-right:0.6rem;flex-shrink:0}
+  .step-card .step-title{font-size:1rem;font-weight:700;color:var(--text);display:flex;align-items:center;margin-bottom:0.8rem}
+  .step-card .step-desc{font-size:0.8rem;color:var(--dim);margin-bottom:0.5rem}
+  .mat-radio{display:flex;align-items:center;gap:0.8rem;padding:0.7rem 1rem;background:var(--bg);border-radius:10px;border:1px solid var(--border);margin-bottom:0.4rem;cursor:pointer;transition:border-color 0.2s}
+  .mat-radio:hover{border-color:var(--pri)}
+  .mat-radio.selected{border-color:var(--pri);background:rgba(15,157,138,0.08)}
+  .mat-radio input[type="radio"]{accent-color:var(--pri);width:18px;height:18px;flex-shrink:0}
+  .mat-radio .mat-icon{font-size:1.2rem;flex-shrink:0}
+  .mat-radio .mat-info{flex:1;min-width:0}
+  .mat-radio .mat-title{font-size:0.85rem;font-weight:700;color:var(--text)}
+  .mat-radio .mat-desc{font-size:0.7rem;color:var(--dim)}
+  .btn-start-class{display:block;width:100%;max-width:500px;margin:1.5rem auto;padding:1rem;font-size:1.1rem;font-weight:900;background:var(--pri);color:#fff;border-radius:12px;border:none;cursor:pointer;transition:all 0.2s}
+  .btn-start-class:hover:not(:disabled){background:var(--pri-d);transform:translateY(-1px)}
+  .btn-start-class:disabled{opacity:0.4;cursor:not-allowed}
+
   /* Info Panel (materials, QR codes) */
-  .info-panel{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem}
+  .info-panel{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
   .info-card{background:var(--surface);border-radius:10px;padding:1.2rem;border:1px solid var(--border);text-align:center}
   .info-card h3{font-size:0.95rem;color:var(--pri);margin-bottom:0.5rem}
   .info-card .qr-small{margin:0.5rem auto;max-width:140px}
@@ -109,7 +150,7 @@
   .mat-item .mat-title{flex:1;font-size:0.85rem}
   .mat-item .mat-open{font-size:0.7rem;color:var(--pri);padding:0.2rem 0.6rem;border:1px solid var(--pri);border-radius:4px}
 
-  /* Wall/Vote/QA styles (same as before) */
+  /* Wall/Vote/QA styles */
   .wall-msg{background:var(--surface);border-radius:10px;padding:0.8rem 1rem;margin-bottom:0.5rem;border-left:3px solid var(--pri);animation:slideIn 0.3s}
   .wall-msg.ai{border-left-color:var(--purple);background:#1a1530}
   .wall-msg.teacher{border-left-color:var(--gold);background:#1f1a0e}
@@ -158,7 +199,22 @@
   /* Agent action toast */
   .action-toast{position:fixed;bottom:4rem;left:50%;transform:translateX(-50%);background:var(--surface);color:var(--text);padding:0.6rem 1.2rem;border-radius:10px;font-size:0.9rem;font-weight:700;border:1px solid var(--pri);box-shadow:0 4px 20px rgba(0,0,0,0.4);z-index:300;opacity:0;transition:opacity 0.3s;pointer-events:none}
   .action-toast.show{opacity:1}
-  .deck-label{font-size:0.8rem;color:var(--pri);background:var(--bg);padding:0.2rem 0.6rem;border-radius:6px;border:1px solid var(--border);white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+
+  /* ═══ Post-class Phase ═══ */
+  .kpi-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.8rem;margin-bottom:1.5rem}
+  .kpi-card{background:var(--surface);border-radius:12px;padding:1.2rem;text-align:center;border:1px solid var(--border)}
+  .kpi-card .kpi-val{font-size:2rem;font-weight:900}
+  .kpi-card .kpi-label{font-size:0.75rem;color:var(--dim);margin-top:0.2rem}
+  .post-section{background:var(--surface);border-radius:12px;padding:1.2rem;border:1px solid var(--border);margin-bottom:1rem}
+  .post-section h3{font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:0.6rem}
+  .post-item{padding:0.4rem 0.6rem;background:var(--bg);border-radius:6px;margin-bottom:0.3rem;font-size:0.85rem;color:var(--text);display:flex;justify-content:space-between}
+  .post-item .count{color:var(--pri);font-weight:700}
+  .post-suggestion{padding:0.5rem 0.8rem;background:var(--bg);border-radius:6px;margin-bottom:0.3rem;font-size:0.85rem;color:var(--text);border-left:3px solid var(--purple)}
+  .post-actions{display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1rem}
+  .post-actions button{flex:1;min-width:120px;padding:0.6rem 1rem;border-radius:8px;font-size:0.85rem;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--text);transition:all 0.2s}
+  .post-actions button:hover{border-color:var(--pri);color:var(--pri)}
+  .btn-end-class{display:block;width:100%;max-width:300px;margin:2rem auto 1rem;padding:0.6rem;font-size:0.85rem;font-weight:700;background:transparent;color:var(--red);border:1px solid var(--red);border-radius:8px;cursor:pointer;opacity:0.6;transition:all 0.2s}
+  .btn-end-class:hover{opacity:1;background:rgba(220,38,38,0.1)}
 
   /* Settings */
   .settings-panel{position:fixed;top:0;right:-360px;width:350px;height:100vh;background:var(--surface);border-left:1px solid var(--border);z-index:200;transition:right 0.3s;display:flex;flex-direction:column}
@@ -195,7 +251,22 @@
   .ap-mod.active{border-color:var(--pri);color:var(--pri)}
 
   .hidden{display:none!important}
-  @media(max-width:700px){.info-panel{grid-template-columns:1fr}.agent-panel{width:100%}}
+
+  /* ═══ Legacy toolbar compat (hidden, needed for JS references) ═══ */
+  .toolbar{display:none}
+  .mode-btn{padding:0.5rem 1rem;border-radius:8px;font-size:0.95rem;font-weight:700;background:var(--bg);color:var(--dim);border:1px solid var(--border);transition:all 0.2s;min-height:40px}
+  .mode-btn.active{background:var(--pri);color:#fff;border-color:var(--pri)}
+
+  @media(max-width:700px){
+    .info-panel{grid-template-columns:1fr}
+    .agent-panel{width:100%}
+    .kpi-grid{grid-template-columns:1fr 1fr 1fr}
+    .mode-tabs{overflow-x:auto}
+    .tool-row{overflow-x:auto}
+    .step-card{padding:1rem}
+    .post-actions{flex-direction:column}
+    .post-actions button{min-width:auto}
+  }
 </style>
 </head>
 <body>
@@ -251,35 +322,161 @@
 
 <!-- Dashboard -->
 <div class="dash" id="dash">
-  <div class="toolbar">
-    <button class="btn-back" onclick="backToLobby()">← 返回</button>
+
+  <!-- Shared Header -->
+  <div class="phase-header" id="dashHeader">
+    <button class="btn-back" id="btnBack" onclick="backToLobby()">← 返回大廳</button>
     <span class="room-label" id="dispRoom"></span>
     <span class="online" id="dispOnline">0</span>
-    <button class="mode-btn active" data-mode="wall" onclick="setMode('wall')">💬</button>
-    <button class="mode-btn" data-mode="vote" onclick="setMode('vote')">📊</button>
-    <button class="mode-btn" data-mode="qa" onclick="setMode('qa')">❓</button>
-    <button class="mode-btn" data-mode="pause" onclick="setMode('pause')">⏸</button>
-    <button class="act-btn" id="btnAI" onclick="toggleAI()">🤖</button>
-    <button class="act-btn" onclick="toggleQR()">QR</button>
-    <button class="act-btn" onclick="openPresenter()">📽</button>
-    <button class="act-btn" onclick="openSurvey()">📝問卷</button>
-    <button class="act-btn" onclick="startFeedback()">💬回饋</button>
-    <button class="act-btn" id="btnAgent" onclick="toggleAgentPanel()">🧠</button>
+    <span id="voiceStatus" style="font-size:0.8rem;color:var(--dim);display:none;"></span>
+    <button class="act-btn" id="btnVoice" onclick="toggleVoice()" title="語音控制" style="font-size:1.1rem;display:none">🎤</button>
     <button class="act-btn" onclick="toggleSettings()">設定</button>
-    <button class="act-btn" onclick="exportData()">匯出</button>
-    <button class="act-btn" onclick="showPushPanel()" title="推送內容">📤 推送</button>
-    <button class="act-btn" onclick="showReport()" title="回饋報告">📊 報告</button>
-    <button class="act-btn" id="btnVoice" onclick="toggleVoice()" title="語音控制（持續監聽）" style="font-size:1.1rem;">🎤</button>
-    <span id="voiceStatus" style="font-size:0.8rem;color:var(--dim);display:none;margin-right:auto;"></span>
-    <span id="currentDeckLabel" class="deck-label" style="display:none"></span>
-    <button class="act-btn" id="btnStartClass" onclick="startClass()" style="background:var(--pri);color:#fff;border-color:var(--pri);display:none">▶ 開始上課</button>
-    <button class="act-btn" id="btnEndClass" onclick="endClass()" style="background:var(--red);color:#fff;border-color:var(--red);display:none">⏹ 結束課程</button>
   </div>
-  <div class="main" id="mainContent"></div>
-  <div class="host-input hidden" id="hostWallBar">
-    <input type="text" id="hostWallText" placeholder="老師發言..." maxlength="500" autocomplete="off">
-    <button onclick="sendTeacherWall()">👨‍🏫 發送</button>
+
+  <!-- ═══ Phase 1: Preparing ═══ -->
+  <div class="phase-container" id="phasePrepare">
+    <div class="main" style="max-width:700px;margin:0 auto;width:100%">
+      <!-- Step 1: Select material -->
+      <div class="step-card">
+        <div class="step-title"><span class="step-num">1</span>選擇教材</div>
+        <div class="step-desc">選擇本次課程使用的教材，開始上課後會自動開啟投影機</div>
+        <div id="prepareMaterialList"></div>
+      </div>
+
+      <!-- Step 2: Student entrance -->
+      <div class="step-card">
+        <div class="step-title"><span class="step-num">2</span>學員入口</div>
+        <div class="step-desc">分享 QR Code 或連結給學員加入教室</div>
+        <div class="info-panel" id="prepareQRPanel">
+          <div class="info-card">
+            <h3>📱 學員掃碼加入</h3>
+            <div class="qr-small" id="qrStudentPrepare"></div>
+            <div class="url-text" id="prepareStudentUrl"></div>
+            <button onclick="copyStudentLink()">複製連結</button>
+          </div>
+          <div class="info-card">
+            <h3>🎮 老師手機遙控</h3>
+            <div class="qr-small" id="qrRemotePrepare"></div>
+            <div class="url-text" id="prepareRemoteUrl"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Pre-class survey -->
+      <div class="step-card">
+        <div class="step-title"><span class="step-num">3</span>課前問卷 <span style="font-size:0.7rem;color:var(--dim);font-weight:400;margin-left:0.5rem">（選填）</span></div>
+        <div class="step-desc">開啟 AI 自動生成問卷，了解學員背景</div>
+        <button class="act-btn" onclick="openSurvey()" style="margin-top:0.5rem">開啟課前問卷 ↗</button>
+      </div>
+
+      <!-- Start class button -->
+      <button class="btn-start-class" id="btnStartClassPrepare" onclick="startClass()" disabled>▶ 開始上課</button>
+      <p id="startClassHint" style="text-align:center;font-size:0.75rem;color:var(--dim);margin-top:0.3rem">請先選擇教材</p>
+    </div>
   </div>
+
+  <!-- ═══ Phase 2: Live ═══ -->
+  <div class="phase-container" id="phaseLive">
+    <!-- Status bar -->
+    <div class="status-bar" id="liveStatusBar">
+      <span class="status-item"><span class="dot-live"></span> 上課中</span>
+      <span class="status-item" id="liveStatusDeck">📚 未選擇教材</span>
+      <span class="status-item" id="liveStatusPage"></span>
+      <span class="status-item" id="liveStatusMode"></span>
+    </div>
+
+    <!-- Mode tabs -->
+    <div class="mode-tabs" id="liveModeTabsBar">
+      <button class="mode-tab active" data-mode="wall" onclick="setMode('wall')">訊息牆</button>
+      <button class="mode-tab" data-mode="vote" onclick="setMode('vote')">投票</button>
+      <button class="mode-tab" data-mode="qa" onclick="setMode('qa')">問答</button>
+      <button class="mode-tab" data-mode="pause" onclick="setMode('pause')">暫停</button>
+    </div>
+
+    <!-- Tool buttons row -->
+    <div class="tool-row" id="liveToolRow">
+      <button class="tool-btn" onclick="showPushPanel()">推送內容</button>
+      <button class="tool-btn" onclick="openPresenter()">開投影機</button>
+      <button class="tool-btn" id="btnAITool" onclick="toggleAI()">AI助教 OFF</button>
+      <button class="tool-btn" onclick="exportData()">匯出</button>
+      <button class="tool-btn" onclick="toggleQR()">QR Code</button>
+      <button class="tool-btn" id="btnAgentTool" onclick="toggleAgentPanel()">Agent</button>
+      <button class="tool-btn" onclick="showReport()">報告</button>
+      <span id="currentDeckLabel" class="deck-label" style="display:none"></span>
+    </div>
+
+    <!-- Content area -->
+    <div class="main" id="mainContent"></div>
+
+    <!-- Teacher input bar -->
+    <div class="host-input hidden" id="hostWallBar">
+      <input type="text" id="hostWallText" placeholder="老師發言..." maxlength="500" autocomplete="off">
+      <button onclick="sendTeacherWall()">👨‍🏫 發送</button>
+    </div>
+
+    <!-- End class button -->
+    <button class="btn-end-class" id="btnEndClassLive" onclick="endClass()">⏹ 結束課程</button>
+  </div>
+
+  <!-- ═══ Phase 3: Post-class ═══ -->
+  <div class="phase-container" id="phasePost">
+    <div class="main" style="max-width:700px;margin:0 auto;width:100%">
+      <!-- KPI cards -->
+      <div class="kpi-grid" id="postKpiGrid">
+        <div class="kpi-card"><div class="kpi-val" id="postKpiCount" style="color:var(--pri)">-</div><div class="kpi-label">填寫人數</div></div>
+        <div class="kpi-card"><div class="kpi-val" id="postKpiSat" style="color:var(--gold)">-</div><div class="kpi-label">滿意度 /5</div></div>
+        <div class="kpi-card"><div class="kpi-val" id="postKpiRec" style="color:#1A73E8">-</div><div class="kpi-label">推薦度 /5</div></div>
+      </div>
+
+      <!-- Helpful aspects -->
+      <div class="post-section" id="postHelpful" style="display:none">
+        <h3>👍 最有幫助的部分</h3>
+        <div id="postHelpfulList"></div>
+      </div>
+
+      <!-- Suggestions -->
+      <div class="post-section" id="postSuggestions" style="display:none">
+        <h3>💡 學員建議</h3>
+        <div id="postSuggestionsList"></div>
+      </div>
+
+      <!-- Send materials -->
+      <div class="post-section">
+        <h3>📧 寄送教材</h3>
+        <div style="margin-bottom:0.6rem">
+          <label style="font-size:0.8rem;color:var(--dim);display:block;margin-bottom:4px;">選擇教材</label>
+          <select id="postDeckSelect" style="width:100%;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;" onchange="postUpdateDeckLink()">
+            <option value="">— 選擇教材 —</option>
+          </select>
+        </div>
+        <div style="margin-bottom:0.6rem">
+          <label style="font-size:0.8rem;color:var(--dim);display:block;margin-bottom:4px;">PDF 連結</label>
+          <input id="postDeckLink" placeholder="https://..." style="width:100%;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;">
+        </div>
+        <button onclick="postOpenEmailPanel()" style="width:100%;padding:0.6rem;background:#1A73E8;color:#fff;border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer">📧 寄送教材</button>
+      </div>
+
+      <!-- More actions -->
+      <div class="post-actions">
+        <button onclick="showReport()">查看完整報告</button>
+        <button onclick="exportData()">匯出 HTML</button>
+        <button onclick="postOpenEmailPanel()">寄送紀錄</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Legacy hidden toolbar for mode-btn references -->
+<div class="toolbar" id="legacyToolbar" style="display:none!important">
+  <button class="mode-btn active" data-mode="wall">💬</button>
+  <button class="mode-btn" data-mode="vote">📊</button>
+  <button class="mode-btn" data-mode="qa">❓</button>
+  <button class="mode-btn" data-mode="pause">⏸</button>
+  <button class="act-btn" id="btnAI">🤖</button>
+  <button class="act-btn" id="btnAgent">🧠</button>
+  <button class="act-btn" id="btnStartClass" style="display:none">▶</button>
+  <button class="act-btn" id="btnEndClass" style="display:none">⏹</button>
 </div>
 
 <div class="ai-status" id="aiStatus">🤖 AI 回答中...</div>
@@ -463,6 +660,8 @@ firebase.initializeApp({
 const db=firebase.database(),auth=firebase.auth();
 let currentUser=null,roomId='',roomTitle='',currentMode='wall',aiEnabled=false,listeners=[],voteOpts=['',''];
 let roomCourseId=null,roomSessionId=null,roomDeck=null,roomDeckType=null;
+let currentPhase='preparing'; // 'preparing' | 'live' | 'post-class'
+let selectedMaterialIdx=null; // Index into materials[] selected in preparing phase
 const VC=['#0F9D8A','#E07A3A','#7C3AED','#06B6D4','#FFC857','#DC2626'];
 
 // Teaching materials
@@ -486,16 +685,226 @@ const materials=[
   {title:'reveal.js 風格示範',icon:'🔀',url:'/demo-revealjs'},
 ];
 
+// ═══ Phase Management ═══
+function showPhase(phase){
+  currentPhase=phase;
+  document.getElementById('phasePrepare').classList.toggle('active',phase==='preparing');
+  document.getElementById('phaseLive').classList.toggle('active',phase==='live');
+  document.getElementById('phasePost').classList.toggle('active',phase==='post-class');
+
+  // Adjust header
+  var btnBack=document.getElementById('btnBack');
+  var btnVoice=document.getElementById('btnVoice');
+  var voiceStatus=document.getElementById('voiceStatus');
+
+  if(phase==='preparing'){
+    btnBack.textContent='← 返回大廳';
+    btnVoice.style.display='none';
+    voiceStatus.style.display='none';
+    renderPreparingPhase();
+  } else if(phase==='live'){
+    btnBack.textContent='← 返回';
+    btnVoice.style.display='';
+    renderContent();
+    updateLiveStatusBar();
+  } else if(phase==='post-class'){
+    btnBack.textContent='← 返回大廳';
+    btnVoice.style.display='none';
+    voiceStatus.style.display='none';
+    renderPostClassPhase();
+  }
+}
+
+// ═══ Preparing Phase Rendering ═══
+function renderPreparingPhase(){
+  var list=document.getElementById('prepareMaterialList');
+  var html='';
+  materials.forEach(function(m,idx){
+    var sel=selectedMaterialIdx===idx;
+    html+='<label class="mat-radio'+(sel?' selected':'')+'" onclick="selectPrepareMaterial('+idx+')">';
+    html+='<input type="radio" name="prepareMat" '+(sel?'checked':'')+' value="'+idx+'">';
+    html+='<span class="mat-icon">'+m.icon+'</span>';
+    html+='<div class="mat-info"><div class="mat-title">'+esc(m.title)+'</div><div class="mat-desc">'+(m.desc||'')+'</div></div>';
+    html+='</label>';
+  });
+  list.innerHTML=html;
+
+  // QR codes
+  var studentUrl=location.origin+'/classroom/?room='+encodeURIComponent(roomId);
+  var remoteUrl=location.origin+'/classroom/remote?room='+encodeURIComponent(roomId);
+  document.getElementById('prepareStudentUrl').textContent=studentUrl;
+  document.getElementById('prepareRemoteUrl').textContent=remoteUrl;
+  setTimeout(function(){
+    makeQR('qrStudentPrepare',studentUrl);
+    makeQR('qrRemotePrepare',remoteUrl);
+  },50);
+
+  // Update start button state
+  updateStartButton();
+}
+
+function selectPrepareMaterial(idx){
+  selectedMaterialIdx=idx;
+  // Update radio UI
+  var radios=document.querySelectorAll('#prepareMaterialList .mat-radio');
+  radios.forEach(function(r,i){
+    r.classList.toggle('selected',i===idx);
+    var inp=r.querySelector('input[type="radio"]');
+    if(inp) inp.checked=(i===idx);
+  });
+  updateStartButton();
+}
+
+function updateStartButton(){
+  var btn=document.getElementById('btnStartClassPrepare');
+  var hint=document.getElementById('startClassHint');
+  if(selectedMaterialIdx!==null){
+    btn.disabled=false;
+    hint.textContent='教材：'+materials[selectedMaterialIdx].title;
+    hint.style.color='var(--pri)';
+  } else {
+    btn.disabled=true;
+    hint.textContent='請先選擇教材';
+    hint.style.color='var(--dim)';
+  }
+}
+
+function copyStudentLink(){
+  var url=location.origin+'/classroom/?room='+encodeURIComponent(roomId);
+  navigator.clipboard.writeText(url).then(function(){
+    showActionToast('已複製學員連結');
+  });
+}
+
+// ═══ Live Phase Status Bar ═══
+function updateLiveStatusBar(){
+  // Deck name
+  var deckEl=document.getElementById('liveStatusDeck');
+  if(window._currentDeckName){
+    deckEl.textContent='📚 '+(window._currentDeckTitle||window._currentDeckName);
+  } else if(selectedMaterialIdx!==null){
+    deckEl.textContent='📚 '+materials[selectedMaterialIdx].title;
+  } else {
+    deckEl.textContent='📚 未選擇教材';
+  }
+
+  // Mode label
+  var modeLabels={wall:'訊息牆',vote:'投票',qa:'問答',pause:'暫停',feedback:'課後回饋'};
+  document.getElementById('liveStatusMode').textContent=modeLabels[currentMode]||currentMode;
+}
+
+// ═══ Post-class Phase Rendering ═══
+function renderPostClassPhase(){
+  if(!roomId)return;
+
+  // Populate deck select for post-class email
+  var sel=document.getElementById('postDeckSelect');
+  if(sel.options.length<=1){
+    var deckOptions=[
+      {name:'S01_GAS_Automation',label:'S01 GAS 自動化'},
+      {name:'S02_Vibe_Coding',label:'S02 Vibe Coding'},
+      {name:'S03_CLI_Agent',label:'S03 CLI Agent'},
+      {name:'S04_VSCode_IDE',label:'S04 VS Code IDE'},
+      {name:'S05_OpenClaw',label:'S05 OpenClaw'},
+      {name:'S07_NotebookLM',label:'S07 NotebookLM'},
+      {name:'S09_FARS_FactCheck',label:'S09 FARS 事實查核'},
+    ];
+    deckOptions.forEach(function(d){
+      var opt=document.createElement('option');
+      opt.value=d.name;
+      opt.textContent=d.label;
+      if(d.name===window._currentDeckName) opt.selected=true;
+      sel.appendChild(opt);
+    });
+  }
+
+  // Load feedback data
+  db.ref('rooms/'+roomId+'/feedback').once('value',function(snap){
+    var data=snap.val();
+    if(!data){
+      document.getElementById('postKpiCount').textContent='0';
+      document.getElementById('postKpiSat').textContent='-';
+      document.getElementById('postKpiRec').textContent='-';
+      document.getElementById('postHelpful').style.display='none';
+      document.getElementById('postSuggestions').style.display='none';
+      return;
+    }
+
+    var entries=Object.values(data);
+    var total=entries.length;
+    var satSum=0,satCount=0,recSum=0,recCount=0;
+    var helpful={};
+    var suggestions=[];
+
+    entries.forEach(function(e){
+      if(e.ratings){
+        if(e.ratings.satisfaction){satSum+=e.ratings.satisfaction;satCount++}
+        if(e.ratings.recommend){recSum+=e.ratings.recommend;recCount++}
+      }
+      if(e.answers){
+        if(e.answers.helpful){
+          var h=e.answers.helpful;
+          helpful[h]=(helpful[h]||0)+1;
+        }
+        if(e.answers.suggestion&&e.answers.suggestion!=='(跳過)'){
+          suggestions.push(e.answers.suggestion);
+        }
+      }
+    });
+
+    document.getElementById('postKpiCount').textContent=total;
+    document.getElementById('postKpiSat').textContent=satCount?(satSum/satCount).toFixed(1):'-';
+    document.getElementById('postKpiRec').textContent=recCount?(recSum/recCount).toFixed(1):'-';
+
+    // Helpful list
+    var helpfulSorted=Object.entries(helpful).sort(function(a,b){return b[1]-a[1]});
+    var helpSection=document.getElementById('postHelpful');
+    var helpList=document.getElementById('postHelpfulList');
+    if(helpfulSorted.length){
+      helpSection.style.display='block';
+      helpList.innerHTML=helpfulSorted.slice(0,5).map(function(h){
+        return '<div class="post-item"><span>'+esc(h[0])+'</span><span class="count">'+h[1]+' 人</span></div>';
+      }).join('');
+    } else {
+      helpSection.style.display='none';
+    }
+
+    // Suggestions list
+    var sugSection=document.getElementById('postSuggestions');
+    var sugList=document.getElementById('postSuggestionsList');
+    if(suggestions.length){
+      sugSection.style.display='block';
+      sugList.innerHTML=suggestions.map(function(s){
+        return '<div class="post-suggestion">'+esc(s)+'</div>';
+      }).join('');
+    } else {
+      sugSection.style.display='none';
+    }
+  });
+}
+
+function postUpdateDeckLink(){
+  var deck=document.getElementById('postDeckSelect').value;
+  if(deck){
+    document.getElementById('postDeckLink').value='https://ai100.cooperation.tw/slides/pdf/'+deck+'.pdf';
+  }
+}
+
+function postOpenEmailPanel(){
+  showReport();
+  switchReportTab('email');
+}
+
 // ═══ Auth ═══
-auth.onAuthStateChanged(user=>{
+auth.onAuthStateChanged(function(user){
   currentUser=user;
   if(user){
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('lobby').classList.add('active');
     document.getElementById('lobbyAvatar').src=user.photoURL||'';
     document.getElementById('lobbyName').textContent=user.displayName||user.email;
-    const today=new Date();
-    document.getElementById('datePrefix').textContent=`${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}-`;
+    var today=new Date();
+    document.getElementById('datePrefix').textContent=today.getFullYear()+String(today.getMonth()+1).padStart(2,'0')+String(today.getDate()).padStart(2,'0')+'-';
     loadRoomList();
     loadTodayClasses();
   } else {
@@ -504,116 +913,133 @@ auth.onAuthStateChanged(user=>{
   }
 });
 function googleLogin(){
-  const provider=new firebase.auth.GoogleAuthProvider();
+  var provider=new firebase.auth.GoogleAuthProvider();
   if(/iPhone|iPad|Android/i.test(navigator.userAgent)){auth.signInWithRedirect(provider)}
-  else{auth.signInWithPopup(provider).catch(e=>alert(e.message))}
+  else{auth.signInWithPopup(provider).catch(function(e){alert(e.message)})}
 }
-function googleLogout(){if(confirm('登出？'))auth.signOut().then(()=>location.reload())}
+function googleLogout(){if(confirm('登出？'))auth.signOut().then(function(){location.reload()})}
 
 // ═══ Room List ═══
 function loadRoomList(){
-  db.ref(`users/${currentUser.uid}/rooms`).on('value',snap=>{
-    const el=document.getElementById('roomListContainer');
-    const rooms=[];
-    snap.forEach(c=>rooms.push({id:c.key,...c.val()}));
-    rooms.sort((a,b)=>(b.created||0)-(a.created||0));
+  db.ref('users/'+currentUser.uid+'/rooms').on('value',function(snap){
+    var el=document.getElementById('roomListContainer');
+    var rooms=[];
+    snap.forEach(function(c){rooms.push({id:c.key,title:c.val().title,created:c.val().created})});
+    rooms.sort(function(a,b){return(b.created||0)-(a.created||0)});
     if(!rooms.length){el.innerHTML='<div class="no-rooms">尚無教室，上方建立一個吧</div>';return}
-    el.innerHTML=rooms.map(r=>`<div class="room-card">
-      <div class="rc-info" onclick="enterRoom('${r.id}','${esc(r.title||r.id)}')"><div class="rc-name">${esc(r.title||r.id)}</div><div class="rc-meta">${r.id}</div></div>
-      <button class="rc-enter" onclick="enterRoom('${r.id}','${esc(r.title||r.id)}')">進入</button>
-      <button class="rc-del" onclick="event.stopPropagation();deleteRoom('${r.id}')">刪除</button>
-    </div>`).join('');
+    el.innerHTML=rooms.map(function(r){return '<div class="room-card">'+
+      '<div class="rc-info" onclick="enterRoom(\''+r.id+'\',\''+esc(r.title||r.id)+'\')"><div class="rc-name">'+esc(r.title||r.id)+'</div><div class="rc-meta">'+r.id+'</div></div>'+
+      '<button class="rc-enter" onclick="enterRoom(\''+r.id+'\',\''+esc(r.title||r.id)+'\')">進入</button>'+
+      '<button class="rc-del" onclick="event.stopPropagation();deleteRoom(\''+r.id+'\')">刪除</button>'+
+    '</div>'}).join('');
   });
 }
 
 // ═══ Today's Classes ═══
 function loadTodayClasses(){
-  const today=new Date();
-  const todayStr=`${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}`;
-  db.ref(`users/${currentUser.uid}/rooms`).once('value',snap=>{
-    const section=document.getElementById('todayClassSection');
-    const list=document.getElementById('todayClassList');
-    const todayRooms=[];
-    snap.forEach(c=>{
+  var today=new Date();
+  var todayStr=today.getFullYear()+String(today.getMonth()+1).padStart(2,'0')+String(today.getDate()).padStart(2,'0');
+  db.ref('users/'+currentUser.uid+'/rooms').once('value',function(snap){
+    var section=document.getElementById('todayClassSection');
+    var list=document.getElementById('todayClassList');
+    var todayRooms=[];
+    snap.forEach(function(c){
       if(c.key.startsWith(todayStr)){
-        todayRooms.push({id:c.key,...c.val()});
+        todayRooms.push({id:c.key,title:c.val().title,created:c.val().created,courseId:c.val().courseId});
       }
     });
     if(!todayRooms.length){section.style.display='none';return}
     section.style.display='block';
-    list.innerHTML=todayRooms.map(r=>`<div style="background:var(--surface);border:2px solid var(--gold);border-radius:12px;padding:1rem 1.2rem;margin-bottom:0.6rem;display:flex;align-items:center;gap:1rem;">
-      <span style="font-size:1.5rem">🎓</span>
-      <div style="flex:1"><div style="font-weight:700;color:var(--gold);font-size:1rem">${esc(r.title||r.id)}</div><div style="font-size:0.75rem;color:var(--dim)">${r.id}${r.courseId?' · 已排課':''}</div></div>
-      <button onclick="enterRoom('${r.id}','${esc(r.title||r.id)}')" style="padding:0.5rem 1.2rem;background:var(--gold);color:var(--navy);border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer">進入教室</button>
-    </div>`).join('');
+    list.innerHTML=todayRooms.map(function(r){return '<div style="background:var(--surface);border:2px solid var(--gold);border-radius:12px;padding:1rem 1.2rem;margin-bottom:0.6rem;display:flex;align-items:center;gap:1rem;">'+
+      '<span style="font-size:1.5rem">🎓</span>'+
+      '<div style="flex:1"><div style="font-weight:700;color:var(--gold);font-size:1rem">'+esc(r.title||r.id)+'</div><div style="font-size:0.75rem;color:var(--dim)">'+r.id+(r.courseId?' · 已排課':'')+'</div></div>'+
+      '<button onclick="enterRoom(\''+r.id+'\',\''+esc(r.title||r.id)+'\')" style="padding:0.5rem 1.2rem;background:var(--gold);color:var(--navy);border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer">進入教室</button>'+
+    '</div>'}).join('');
   });
 }
 
 function createRoom(){
-  const prefix=document.getElementById('datePrefix').textContent;
-  const suffix=document.getElementById('inputSuffix').value.trim();
+  var prefix=document.getElementById('datePrefix').textContent;
+  var suffix=document.getElementById('inputSuffix').value.trim();
   if(!suffix){alert('請輸入教室名稱');return}
   roomId=prefix+suffix;
   roomTitle=suffix;
-  db.ref(`rooms/${roomId}/config`).once('value').then(snap=>{
+  db.ref('rooms/'+roomId+'/config').once('value').then(function(snap){
     if(snap.exists()){alert('此教室代碼已存在，請換一個');return}
-    db.ref(`rooms/${roomId}/config`).set({title:roomTitle,mode:'wall',created:firebase.database.ServerValue.TIMESTAMP,hostUid:currentUser.uid,hostName:currentUser.displayName||currentUser.email});
-    db.ref(`users/${currentUser.uid}/rooms/${roomId}`).set({title:roomTitle,created:firebase.database.ServerValue.TIMESTAMP});
+    db.ref('rooms/'+roomId+'/config').set({title:roomTitle,mode:'wall',created:firebase.database.ServerValue.TIMESTAMP,hostUid:currentUser.uid,hostName:currentUser.displayName||currentUser.email});
+    db.ref('users/'+currentUser.uid+'/rooms/'+roomId).set({title:roomTitle,created:firebase.database.ServerValue.TIMESTAMP});
     document.getElementById('inputSuffix').value='';
     enterRoom(roomId,roomTitle);
   });
 }
 
 function deleteRoom(rid){
-  if(!confirm(`刪除教室「${rid}」？資料也會清除。`))return;
-  db.ref(`rooms/${rid}`).remove();
-  db.ref(`users/${currentUser.uid}/rooms/${rid}`).remove();
+  if(!confirm('刪除教室「'+rid+'」？資料也會清除。'))return;
+  db.ref('rooms/'+rid).remove();
+  db.ref('users/'+currentUser.uid+'/rooms/'+rid).remove();
 }
 
 function enterRoom(rid,title){
   roomId=rid;roomTitle=title||rid;
   roomCourseId=null;roomSessionId=null;roomDeck=null;roomDeckType=null;
+  selectedMaterialIdx=null;
   document.getElementById('lobby').classList.remove('active');
   document.getElementById('dash').classList.add('active');
   document.getElementById('dispRoom').textContent=roomTitle;
   loadSettings();
-  // Read room config for planner integration
-  db.ref(`rooms/${roomId}/config`).once('value',s=>{
-    const cfg=s.val()||{};
+  // Read room config for planner integration and phase detection
+  db.ref('rooms/'+roomId+'/config').once('value',function(s){
+    var cfg=s.val()||{};
     roomCourseId=cfg.courseId||null;
     roomSessionId=cfg.sessionId||null;
     roomDeck=cfg.deck||null;
     roomDeckType=cfg.deckType||null;
-    // Show start/end buttons based on status
-    const status=cfg.status||'';
-    const btnStart=document.getElementById('btnStartClass');
-    const btnEnd=document.getElementById('btnEndClass');
+
+    // Determine phase from status
+    var status=cfg.status||'';
     if(status==='live'){
-      btnStart.style.display='none';
-      btnEnd.style.display='inline-flex';
+      showPhase('live');
     } else if(status==='post-class'||status==='completed'){
-      btnStart.style.display='none';
-      btnEnd.style.display='none';
-    } else if(roomCourseId&&roomSessionId){
-      // scheduled or preparing — show start button
-      btnStart.style.display='inline-flex';
-      btnEnd.style.display='none';
+      showPhase('post-class');
     } else {
-      btnStart.style.display='none';
-      btnEnd.style.display='none';
+      // preparing (default for new rooms or status undefined)
+      showPhase('preparing');
     }
   });
   // Online
-  db.ref(`rooms/${roomId}/presence`).on('value',s=>{document.getElementById('dispOnline').textContent=`${s.numChildren()} 人`});
+  db.ref('rooms/'+roomId+'/presence').on('value',function(s){document.getElementById('dispOnline').textContent=s.numChildren()+' 人'});
   // Mode
-  let lastMode=null;
-  db.ref(`rooms/${roomId}/config/mode`).on('value',s=>{const m=s.val()||'wall';if(m===lastMode)return;lastMode=m;currentMode=m;
-    document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));renderContent()});
+  var lastMode=null;
+  db.ref('rooms/'+roomId+'/config/mode').on('value',function(s){
+    var m=s.val()||'wall';
+    if(m===lastMode)return;lastMode=m;currentMode=m;
+    // Update mode tabs in live phase
+    document.querySelectorAll('.mode-tab').forEach(function(b){b.classList.toggle('active',b.dataset.mode===m)});
+    // Also update legacy mode-btn for compat
+    document.querySelectorAll('.mode-btn').forEach(function(b){b.classList.toggle('active',b.dataset.mode===m)});
+    if(currentPhase==='live'){
+      renderContent();
+      updateLiveStatusBar();
+    }
+  });
   // AI
-  db.ref(`rooms/${roomId}/config/aiEnabled`).on('value',s=>{aiEnabled=!!s.val();
-    document.getElementById('btnAI').classList.toggle('ai-on',aiEnabled);document.getElementById('btnAI').textContent=aiEnabled?'🤖ON':'🤖'});
+  db.ref('rooms/'+roomId+'/config/aiEnabled').on('value',function(s){
+    aiEnabled=!!s.val();
+    // Update tool button in live phase
+    var btnAITool=document.getElementById('btnAITool');
+    if(btnAITool){
+      btnAITool.textContent=aiEnabled?'AI助教 ON':'AI助教 OFF';
+      btnAITool.classList.toggle('ai-on',aiEnabled);
+    }
+    // Update legacy hidden button
+    var btnAI=document.getElementById('btnAI');
+    if(btnAI){
+      btnAI.classList.toggle('ai-on',aiEnabled);
+      btnAI.textContent=aiEnabled?'🤖ON':'🤖';
+    }
+  });
   // Keyboard
-  document.getElementById('hostWallText').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendTeacherWall()}});
+  document.getElementById('hostWallText').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();sendTeacherWall()}});
   // Start AI listener
   startAIListener();
   // Start Agent panel
@@ -625,33 +1051,39 @@ function enterRoom(rid,title){
 
 function backToLobby(){
   // Detach all listeners
-  listeners.forEach(l=>l.ref.off(l.event));listeners=[];
-  db.ref(`rooms/${roomId}`).off();
+  listeners.forEach(function(l){l.ref.off(l.event)});listeners=[];
+  db.ref('rooms/'+roomId).off();
   document.getElementById('dash').classList.remove('active');
   document.getElementById('lobby').classList.add('active');
-  document.getElementById('btnStartClass').style.display='none';
-  document.getElementById('btnEndClass').style.display='none';
+  // Hide all phases
+  document.getElementById('phasePrepare').classList.remove('active');
+  document.getElementById('phaseLive').classList.remove('active');
+  document.getElementById('phasePost').classList.remove('active');
   roomId='';roomCourseId=null;roomSessionId=null;roomDeck=null;roomDeckType=null;
+  selectedMaterialIdx=null;
+  currentPhase='preparing';
+  // Stop voice if active
+  if(voiceActive) stopVoice();
 }
 
 // ═══ AI Listener (batched: collect 10s, respond once) ═══
-let aiBatchWall=[], aiBatchQa=[], aiBatchTimer=null;
-const AI_BATCH_INTERVAL=10000; // 10 seconds
+var aiBatchWall=[], aiBatchQa=[], aiBatchTimer=null;
+var AI_BATCH_INTERVAL=10000; // 10 seconds
 
 function startAIListener(){
-  let aiReady=false;
-  setTimeout(()=>{aiReady=true;console.log('[AI] listener ready')},3000);
+  var aiReady=false;
+  setTimeout(function(){aiReady=true;console.log('[AI] listener ready')},3000);
 
-  db.ref(`rooms/${roomId}/wall`).on('child_added',s=>{
+  db.ref('rooms/'+roomId+'/wall').on('child_added',function(s){
     if(!aiReady||!aiEnabled)return;
-    const d=s.val();
+    var d=s.val();
     if(d.role==='ai'||d.role==='teacher')return;
     aiBatchWall.push({text:d.text,name:d.name});
     scheduleAIBatch();
   });
-  db.ref(`rooms/${roomId}/qa`).on('child_added',s=>{
+  db.ref('rooms/'+roomId+'/qa').on('child_added',function(s){
     if(!aiReady||!aiEnabled)return;
-    const d=s.val();
+    var d=s.val();
     if(d.role==='ai'||d.role==='teacher')return;
     aiBatchQa.push({text:d.text,name:d.name,id:s.key});
     scheduleAIBatch();
@@ -661,120 +1093,102 @@ function startAIListener(){
 function scheduleAIBatch(){
   if(aiBatchTimer)return; // already scheduled
   console.log('[AI] batch scheduled, waiting 10s...');
-  aiBatchTimer=setTimeout(()=>{
+  aiBatchTimer=setTimeout(function(){
     aiBatchTimer=null;
     processAIBatch();
   },AI_BATCH_INTERVAL);
 }
 
 async function processAIBatch(){
-  const wallItems=[...aiBatchWall], qaItems=[...aiBatchQa];
+  var wallItems=[].concat(aiBatchWall), qaItems=[].concat(aiBatchQa);
   aiBatchWall=[]; aiBatchQa=[];
   if(!wallItems.length&&!qaItems.length)return;
-  const apiKey=localStorage.getItem('_ai_key');
+  var apiKey=localStorage.getItem('_ai_key');
   if(!apiKey)return;
 
-  console.log(`[AI] processing batch: ${wallItems.length} wall, ${qaItems.length} qa`);
+  console.log('[AI] processing batch: '+wallItems.length+' wall, '+qaItems.length+' qa');
   document.getElementById('aiStatus').style.display='block';
   document.getElementById('aiError').style.display='none';
 
   try{
-    // Wall and QA are handled separately — no fragile splitting
+    // Wall and QA are handled separately
     if(wallItems.length){
-      let prompt='以下是學員在訊息牆的新訊息：\n\n';
-      wallItems.forEach(m=>{prompt+=`${m.name}：${m.text}\n`});
+      var prompt='以下是學員在訊息牆的新訊息：\n\n';
+      wallItems.forEach(function(m){prompt+=m.name+'：'+m.text+'\n'});
       prompt+='\n請用一則回覆統一回應。可以分段回應不同人。如果全部都是不需要回答的閒聊，回 [SKIP]。';
-      const answer=await callGemini(apiKey,prompt);
+      var answer=await callGemini(apiKey,prompt);
       if(answer&&!answer.includes('[SKIP]')){
-        await db.ref(`rooms/${roomId}/wall`).push({text:answer.trim(),name:'AI 助教',role:'ai',ts:firebase.database.ServerValue.TIMESTAMP});
+        await db.ref('rooms/'+roomId+'/wall').push({text:answer.trim(),name:'AI 助教',role:'ai',ts:firebase.database.ServerValue.TIMESTAMP});
       }
     }
 
     if(qaItems.length){
-      // Each QA question gets its own API call for clean replies
-      for(const q of qaItems){
-        const prompt=`學員 ${q.name} 提問：${q.text}\n\n請回答這個問題。如果不需要回答，回 [SKIP]。`;
-        const answer=await callGemini(apiKey,prompt);
-        if(answer&&!answer.includes('[SKIP]')){
-          await db.ref(`rooms/${roomId}/qaReplies/${q.id}`).push({text:answer.trim(),name:'AI 助教',role:'ai',ts:firebase.database.ServerValue.TIMESTAMP});
+      for(var qi=0;qi<qaItems.length;qi++){
+        var q=qaItems[qi];
+        var prompt2='學員 '+q.name+' 提問：'+q.text+'\n\n請回答這個問題。如果不需要回答，回 [SKIP]。';
+        var answer2=await callGemini(apiKey,prompt2);
+        if(answer2&&!answer2.includes('[SKIP]')){
+          await db.ref('rooms/'+roomId+'/qaReplies/'+q.id).push({text:answer2.trim(),name:'AI 助教',role:'ai',ts:firebase.database.ServerValue.TIMESTAMP});
         }
       }
     }
     console.log('[AI] batch posted');
   }catch(e){
     console.error('[AI] batch error:',e);
-    const errEl=document.getElementById('aiError');
+    var errEl=document.getElementById('aiError');
     errEl.textContent='AI 錯誤：'+e.message;errEl.style.display='block';
-    setTimeout(()=>{errEl.style.display='none'},5000);
+    setTimeout(function(){errEl.style.display='none'},5000);
   }
   document.getElementById('aiStatus').style.display='none';
 }
 
-const AI_MODELS=['gemini-2.5-pro','gemini-2.5-flash'];
+var AI_MODELS=['gemini-2.5-pro','gemini-2.5-flash'];
 
 // Build conversation context from recent classroom activity
 async function buildContext(){
-  const wallSnap=await db.ref(`rooms/${roomId}/wall`).orderByChild('ts').limitToLast(100).once('value');
-  const qaSnap=await db.ref(`rooms/${roomId}/qa`).orderByChild('ts').limitToLast(50).once('value');
-  const repliesSnap=await db.ref(`rooms/${roomId}/qaReplies`).once('value');
-  const presSnap=await db.ref(`rooms/${roomId}/presence`).once('value');
-  const studentCount=presSnap.numChildren();
-  const replies=repliesSnap.val()||{};
+  var wallSnap=await db.ref('rooms/'+roomId+'/wall').orderByChild('ts').limitToLast(100).once('value');
+  var qaSnap=await db.ref('rooms/'+roomId+'/qa').orderByChild('ts').limitToLast(50).once('value');
+  var repliesSnap=await db.ref('rooms/'+roomId+'/qaReplies').once('value');
+  var presSnap=await db.ref('rooms/'+roomId+'/presence').once('value');
+  var studentCount=presSnap.numChildren();
+  var replies=repliesSnap.val()||{};
 
-  let ctx=`【教室狀況】${studentCount} 位學員在線\n\n`;
+  var ctx='【教室狀況】'+studentCount+' 位學員在線\n\n';
 
   // Recent wall messages
-  const msgs=[];
-  wallSnap.forEach(c=>{const d=c.val();msgs.push(d)});
+  var msgs=[];
+  wallSnap.forEach(function(c){msgs.push(c.val())});
   if(msgs.length){
     ctx+='【最近的訊息牆對話】\n';
-    msgs.forEach(m=>{
-      const role=m.role==='teacher'?'👨‍🏫老師':m.role==='ai'?'🤖AI助教':'學員'+m.name;
-      ctx+=`${role}：${m.text}\n`;
+    msgs.forEach(function(m){
+      var role=m.role==='teacher'?'👨‍🏫老師':m.role==='ai'?'🤖AI助教':'學員'+m.name;
+      ctx+=role+'：'+m.text+'\n';
     });
     ctx+='\n';
   }
 
   // Recent QA
-  const qas=[];
-  qaSnap.forEach(c=>qas.push({id:c.key,...c.val()}));
+  var qas=[];
+  qaSnap.forEach(function(c){qas.push({id:c.key,text:c.val().text,name:c.val().name,ups:c.val().ups})});
   if(qas.length){
     ctx+='【學員提問區】\n';
-    qas.forEach(q=>{
-      ctx+=`[${q.ups||0}票] ${q.name}問：${q.text}\n`;
-      const r=replies[q.id];
-      if(r)Object.values(r).forEach(rp=>{ctx+=`  → ${rp.role==='teacher'?'老師':'AI'}回覆：${rp.text}\n`});
+    qas.forEach(function(q){
+      ctx+='['+(q.ups||0)+'票] '+q.name+'問：'+q.text+'\n';
+      var r=replies[q.id];
+      if(r)Object.values(r).forEach(function(rp){ctx+='  → '+(rp.role==='teacher'?'老師':'AI')+'回覆：'+rp.text+'\n'});
     });
   }
   return ctx;
 }
 
 async function callGemini(apiKey,question){
-  const context=await buildContext();
-  const sysPrompt=`你是「小助」，${currentUser.displayName||'老師'}的課堂 AI 助教。課程：${roomTitle}。
+  var context=await buildContext();
+  var sysPrompt='你是「小助」，'+(currentUser.displayName||'老師')+'的課堂 AI 助教。課程：'+roomTitle+'。\n\n你的風格像一個很會教的學長姐 — 熱情、幽默、有料。你會用比喻、舉生活化的例子、甚至開個小玩笑讓課堂氣氛活潑。你不是維基百科，你是一個有溫度的助教。\n\n回答時：\n- 先肯定提問（「好問題！」「這個很多人搞混」「哦這題有意思」）\n- 用白話文解釋，像跟朋友聊天一樣\n- 舉具體例子或比喻（「想像你在點外送...」「就像你用 Google Maps...」）\n- 如果對話紀錄裡老師剛講過相關的，引用老師的話（「剛剛老師有提到...」）\n- 如果多人問類似問題，歸納起來一起答\n- 回答完可以反問一句帶動互動（「大家覺得呢？」「有沒有人遇過類似的？」）\n\n長度：放心寫，200-500字都可以，重要的是講清楚、講得有趣。不要惜字如金。\n\n只有一種情況回 [SKIP]：訊息完全不需要回應（純粹的「OK」「收到」「+1」「哈哈」）。其他都盡量回應，哪怕只是接個話聊兩句。\n\n用繁體中文。\n\n以下是目前教室的對話紀錄，讓你了解上課脈絡：\n'+context;
 
-你的風格像一個很會教的學長姐 — 熱情、幽默、有料。你會用比喻、舉生活化的例子、甚至開個小玩笑讓課堂氣氛活潑。你不是維基百科，你是一個有溫度的助教。
-
-回答時：
-- 先肯定提問（「好問題！」「這個很多人搞混」「哦這題有意思」）
-- 用白話文解釋，像跟朋友聊天一樣
-- 舉具體例子或比喻（「想像你在點外送...」「就像你用 Google Maps...」）
-- 如果對話紀錄裡老師剛講過相關的，引用老師的話（「剛剛老師有提到...」）
-- 如果多人問類似問題，歸納起來一起答
-- 回答完可以反問一句帶動互動（「大家覺得呢？」「有沒有人遇過類似的？」）
-
-長度：放心寫，200-500字都可以，重要的是講清楚、講得有趣。不要惜字如金。
-
-只有一種情況回 [SKIP]：訊息完全不需要回應（純粹的「OK」「收到」「+1」「哈哈」）。其他都盡量回應，哪怕只是接個話聊兩句。
-
-用繁體中文。
-
-以下是目前教室的對話紀錄，讓你了解上課脈絡：
-${context}`;
-
-  for(const model of AI_MODELS){
-    console.log(`[AI] trying ${model}...`);
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,{
+  for(var mi=0;mi<AI_MODELS.length;mi++){
+    var model=AI_MODELS[mi];
+    console.log('[AI] trying '+model+'...');
+    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+apiKey,{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         systemInstruction:{parts:[{text:sysPrompt}]},
@@ -782,70 +1196,71 @@ ${context}`;
         generationConfig:{maxOutputTokens:2048,temperature:0.9}
       })
     });
-    if(res.status===429){console.log(`[AI] ${model} 429, fallback...`);continue}
-    if(!res.ok){const err=await res.text();throw new Error(`${model} HTTP ${res.status}: ${err.slice(0,100)}`)}
-    const data=await res.json();
-    const answer=data.candidates?.[0]?.content?.parts?.[0]?.text;
-    console.log(`[AI] ${model} response:`,answer?.slice(0,50));
+    if(res.status===429){console.log('[AI] '+model+' 429, fallback...');continue}
+    if(!res.ok){var err=await res.text();throw new Error(model+' HTTP '+res.status+': '+err.slice(0,100))}
+    var data=await res.json();
+    var answer=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]?data.candidates[0].content.parts[0].text:null;
+    console.log('[AI] '+model+' response:',(answer||'').slice(0,50));
     return answer;
   }
   throw new Error('所有模型都超過速率限制，請稍後再試');
 }
 
 async function handleAIRequest(question,source,qaId){
-  const apiKey=localStorage.getItem('_ai_key');
+  var apiKey=localStorage.getItem('_ai_key');
   if(!apiKey||!question){console.log('[AI] skip: no key or empty question');return}
   document.getElementById('aiStatus').style.display='block';
   document.getElementById('aiError').style.display='none';
   try{
-    const answer=await callGemini(apiKey,question);
+    var answer=await callGemini(apiKey,question);
     if(!answer||answer.trim()==='[SKIP]'||answer.includes('[SKIP]')){document.getElementById('aiStatus').style.display='none';return}
     if(source==='wall'){
-      await db.ref(`rooms/${roomId}/wall`).push({text:answer,name:'AI 助教',role:'ai',ts:firebase.database.ServerValue.TIMESTAMP});
+      await db.ref('rooms/'+roomId+'/wall').push({text:answer,name:'AI 助教',role:'ai',ts:firebase.database.ServerValue.TIMESTAMP});
     }else if(source==='qa'&&qaId){
-      await db.ref(`rooms/${roomId}/qaReplies/${qaId}`).push({text:answer,name:'AI 助教',role:'ai',ts:firebase.database.ServerValue.TIMESTAMP});
+      await db.ref('rooms/'+roomId+'/qaReplies/'+qaId).push({text:answer,name:'AI 助教',role:'ai',ts:firebase.database.ServerValue.TIMESTAMP});
     }
     console.log('[AI] response posted');
   }catch(e){
     console.error('[AI] error:',e);
-    const errEl=document.getElementById('aiError');
+    var errEl=document.getElementById('aiError');
     errEl.textContent='AI 錯誤：'+e.message;errEl.style.display='block';
-    setTimeout(()=>{errEl.style.display='none'},5000);
+    setTimeout(function(){errEl.style.display='none'},5000);
   }
   document.getElementById('aiStatus').style.display='none';
 }
 
 // Test AI Key
 async function testAIKey(){
-  const key=document.getElementById('inputAIKey').value.trim()||localStorage.getItem('_ai_key');
-  const status=document.getElementById('aiKeyStatus');
+  var key=document.getElementById('inputAIKey').value.trim()||localStorage.getItem('_ai_key');
+  var status=document.getElementById('aiKeyStatus');
   if(!key){status.textContent='❌ 請先填入 Key';status.style.color='var(--red)';return}
   status.textContent='⏳ 測試中...';status.style.color='var(--dim)';
   try{
-    let model='gemini-2.5-pro',text='';
-    for(const m of AI_MODELS){
-      const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${key}`,{
+    var model='gemini-2.5-pro',text='';
+    for(var mi=0;mi<AI_MODELS.length;mi++){
+      var m=AI_MODELS[mi];
+      var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent?key='+key,{
         method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({contents:[{parts:[{text:'說「AI助教已上線」這五個字'}]}],generationConfig:{maxOutputTokens:20}})
       });
       if(res.status===429){continue}
       if(!res.ok)throw new Error(m+' HTTP '+res.status);
-      const data=await res.json();
-      text=data.candidates?.[0]?.content?.parts?.[0]?.text||'(無回應)';
+      var data=await res.json();
+      text=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]?data.candidates[0].content.parts[0].text:'(無回應)';
       model=m;break;
     }
     if(!text)throw new Error('所有模型 429');
-    status.textContent=`✅ ${model}：${text.trim()}`;status.style.color='var(--pri)';
+    status.textContent='✅ '+model+'：'+text.trim();status.style.color='var(--pri)';
   }catch(e){
     status.textContent='❌ 失敗：'+e.message;status.style.color='var(--red)';
   }
 }
 
 // ═══ Mode ═══
-function setMode(m){db.ref(`rooms/${roomId}/config/mode`).set(m)}
+function setMode(m){db.ref('rooms/'+roomId+'/config/mode').set(m)}
 function renderContent(){
-  listeners.forEach(l=>l.ref.off(l.event));listeners=[];
-  const el=document.getElementById('mainContent');
+  listeners.forEach(function(l){l.ref.off(l.event)});listeners=[];
+  var el=document.getElementById('mainContent');
   document.getElementById('hostWallBar').classList.toggle('hidden',currentMode!=='wall');
   if(currentMode==='wall')renderWall(el);
   else if(currentMode==='vote')renderVoteHost(el);
@@ -858,131 +1273,114 @@ function renderContent(){
 // ═══ Wall ═══
 function renderWall(el){
   el.innerHTML='';
-  const ref=db.ref(`rooms/${roomId}/wall`).orderByChild('ts').limitToLast(200);
-  ref.on('child_added',s=>{const d=s.val(),r=d.role||'student';
-    const div=document.createElement('div');div.className=`wall-msg ${r}`;
-    const icon=r==='ai'?'🤖 ':r==='teacher'?'👨‍🏫 ':'';
-    div.innerHTML=`<span class="wm-name ${r}">${icon}${esc(d.name)}</span> <span class="wm-time">${timeStr(d.ts)}</span><div class="wm-text">${esc(d.text)}</div>`;
+  var ref=db.ref('rooms/'+roomId+'/wall').orderByChild('ts').limitToLast(200);
+  ref.on('child_added',function(s){var d=s.val(),r=d.role||'student';
+    var div=document.createElement('div');div.className='wall-msg '+r;
+    var icon=r==='ai'?'🤖 ':r==='teacher'?'👨‍🏫 ':'';
+    div.innerHTML='<span class="wm-name '+r+'">'+icon+esc(d.name)+'</span> <span class="wm-time">'+timeStr(d.ts)+'</span><div class="wm-text">'+esc(d.text)+'</div>';
     el.appendChild(div);el.scrollTop=el.scrollHeight});
-  listeners.push({ref,event:'child_added'});
+  listeners.push({ref:ref,event:'child_added'});
 }
-function sendTeacherWall(){const i=document.getElementById('hostWallText'),t=i.value.trim();if(!t)return;i.value='';
-  db.ref(`rooms/${roomId}/wall`).push({text:t,name:currentUser.displayName||'老師',role:'teacher',ts:firebase.database.ServerValue.TIMESTAMP})}
+function sendTeacherWall(){var i=document.getElementById('hostWallText'),t=i.value.trim();if(!t)return;i.value='';
+  db.ref('rooms/'+roomId+'/wall').push({text:t,name:currentUser.displayName||'老師',role:'teacher',ts:firebase.database.ServerValue.TIMESTAMP})}
 
 // ═══ Vote ═══
-function renderVoteHost(el){const ref=db.ref(`rooms/${roomId}/currentVote`);ref.on('value',s=>{s.val()?renderVR(el,s.val()):renderVF(el)});listeners.push({ref,event:'value'})}
-function renderVR(el,data){const id=data.id,opts=data.options||[];const ref=db.ref(`rooms/${roomId}/votes/${id}`);
-  ref.on('value',s=>{const R=s.val()||{},C={};let T=0;opts.forEach((_,i)=>C[i]=0);Object.values(R).forEach(v=>{if(typeof v==='number'){C[v]=(C[v]||0)+1;T++}});const mx=Math.max(...Object.values(C),1);
-    let h=`<div class="vote-panel"><div class="vote-q">${esc(data.question)}</div>`;
-    opts.forEach((o,i)=>{const p=T?Math.round(C[i]/T*100):0,w=Math.round(C[i]/mx*100);h+=`<div class="vote-row"><div class="vote-label">${esc(o)}</div><div class="vote-bar-outer"><div class="vote-bar-fill" style="width:${w}%;background:${VC[i%6]}"><span>${p}%</span></div></div><div class="vote-count">${C[i]}</div></div>`});
-    h+=`<div class="vote-total">共 ${T} 人</div><div style="text-align:center;margin-top:1rem"><button class="act-btn" onclick="endVote()" style="padding:0.5rem 1.5rem">結束投票</button></div></div>`;el.innerHTML=h});
-  listeners.push({ref,event:'value'})}
+function renderVoteHost(el){var ref=db.ref('rooms/'+roomId+'/currentVote');ref.on('value',function(s){s.val()?renderVR(el,s.val()):renderVF(el)});listeners.push({ref:ref,event:'value'})}
+function renderVR(el,data){var id=data.id,opts=data.options||[];var ref=db.ref('rooms/'+roomId+'/votes/'+id);
+  ref.on('value',function(s){var R=s.val()||{},C={},T=0;opts.forEach(function(_,i){C[i]=0});Object.values(R).forEach(function(v){if(typeof v==='number'){C[v]=(C[v]||0)+1;T++}});var mx=Math.max.apply(null,Object.values(C).concat([1]));
+    var h='<div class="vote-panel"><div class="vote-q">'+esc(data.question)+'</div>';
+    opts.forEach(function(o,i){var p=T?Math.round(C[i]/T*100):0,w=Math.round(C[i]/mx*100);h+='<div class="vote-row"><div class="vote-label">'+esc(o)+'</div><div class="vote-bar-outer"><div class="vote-bar-fill" style="width:'+w+'%;background:'+VC[i%6]+'"><span>'+p+'%</span></div></div><div class="vote-count">'+C[i]+'</div></div>'});
+    h+='<div class="vote-total">共 '+T+' 人</div><div style="text-align:center;margin-top:1rem"><button class="act-btn" onclick="endVote()" style="padding:0.5rem 1.5rem">結束投票</button></div></div>';el.innerHTML=h});
+  listeners.push({ref:ref,event:'value'})}
 function renderVF(el){voteOpts=['',''];el.innerHTML=buildVF()}
-function buildVF(){let h=`<div class="vote-form"><h3>建立新投票</h3><input type="text" id="voteQuestion" placeholder="問題">`;
-  voteOpts.forEach((o,i)=>{h+=`<div class="opt-row"><input type="text" class="voi" data-idx="${i}" placeholder="選項${i+1}" value="${esc(o)}" oninput="voteOpts[${i}]=this.value">${voteOpts.length>2?`<button onclick="removeOpt(${i})">✕</button>`:'<button style="visibility:hidden">✕</button>'}</div>`});
-  return h+`<button class="btn-add-opt" onclick="addOpt()">+ 新增</button><button class="btn-start-vote" onclick="startVote()">開始投票</button></div>`}
+function buildVF(){var h='<div class="vote-form"><h3>建立新投票</h3><input type="text" id="voteQuestion" placeholder="問題">';
+  voteOpts.forEach(function(o,i){h+='<div class="opt-row"><input type="text" class="voi" data-idx="'+i+'" placeholder="選項'+(i+1)+'" value="'+esc(o)+'" oninput="voteOpts['+i+']=this.value">'+(voteOpts.length>2?'<button onclick="removeOpt('+i+')">✕</button>':'<button style="visibility:hidden">✕</button>')+'</div>'});
+  return h+'<button class="btn-add-opt" onclick="addOpt()">+ 新增</button><button class="btn-start-vote" onclick="startVote()">開始投票</button></div>'}
 function addOpt(){voteOpts.push('');document.getElementById('mainContent').innerHTML=buildVF()}
 function removeOpt(i){voteOpts.splice(i,1);document.getElementById('mainContent').innerHTML=buildVF()}
-function startVote(){document.querySelectorAll('.voi').forEach(i=>{voteOpts[+i.dataset.idx]=i.value});const q=document.getElementById('voteQuestion').value.trim(),o=voteOpts.map(x=>x.trim()).filter(x=>x);if(!q||o.length<2){alert('需要問題和至少兩個選項');return}db.ref(`rooms/${roomId}/currentVote`).set({question:q,options:o,id:'v'+Date.now()})}
-function endVote(){db.ref(`rooms/${roomId}/currentVote`).remove()}
+function startVote(){document.querySelectorAll('.voi').forEach(function(i){voteOpts[+i.dataset.idx]=i.value});var q=document.getElementById('voteQuestion').value.trim(),o=voteOpts.map(function(x){return x.trim()}).filter(function(x){return x});if(!q||o.length<2){alert('需要問題和至少兩個選項');return}db.ref('rooms/'+roomId+'/currentVote').set({question:q,options:o,id:'v'+Date.now()})}
+function endVote(){db.ref('rooms/'+roomId+'/currentVote').remove()}
 
 // ═══ QA ═══
 function renderQA(el){el.innerHTML='';
-  const ref=db.ref(`rooms/${roomId}/qa`);
-  ref.on('value',snap=>{const items=[];snap.forEach(c=>items.push({id:c.key,...c.val()}));items.sort((a,b)=>(b.ups||0)-(a.ups||0));
+  var ref=db.ref('rooms/'+roomId+'/qa');
+  ref.on('value',function(snap){var items=[];snap.forEach(function(c){items.push({id:c.key,text:c.val().text,name:c.val().name,ts:c.val().ts,ups:c.val().ups,role:c.val().role})});items.sort(function(a,b){return(b.ups||0)-(a.ups||0)});
     if(!items.length){el.innerHTML='<div class="pause-display"><p style="color:var(--dim)">等待學員提問...</p></div>';return}
-    db.ref(`rooms/${roomId}/qaReplies`).once('value').then(rs=>{const allR=rs.val()||{};
-      el.innerHTML=items.map(q=>{const replies=allR[q.id]?Object.values(allR[q.id]).sort((a,b)=>a.ts-b.ts):[];
-        let rh=replies.map(r=>`<div class="qa-reply ${r.role}"><div class="rp-name ${r.role}">${r.role==='ai'?'🤖 AI':'👨‍🏫 '+(r.name||'老師')}</div>${esc(r.text)}</div>`).join('');
-        return `<div class="qa-card"><div class="qa-top"><div class="qa-votes"><div class="num">${q.ups||0}</div><div class="lbl">票</div></div>
-          <div style="flex:1"><div class="q-text">${esc(q.text)}</div><div class="q-meta">${esc(q.name)} · ${timeStr(q.ts)}</div><button class="btn-reply" onclick="showReply('${q.id}')">回覆</button></div>
-        </div>${rh?`<div class="qa-replies">${rh}</div>`:''}<div class="reply-box hidden" id="rb-${q.id}"><input id="ri-${q.id}" placeholder="回覆..." onkeydown="if(event.key==='Enter')replyQ('${q.id}')"><button onclick="replyQ('${q.id}')">送出</button></div></div>`}).join('')})});
-  listeners.push({ref,event:'value'})}
-function showReply(qid){document.getElementById(`rb-${qid}`).classList.toggle('hidden');document.getElementById(`ri-${qid}`).focus()}
-function replyQ(qid){const i=document.getElementById(`ri-${qid}`),t=i.value.trim();if(!t)return;i.value='';
-  db.ref(`rooms/${roomId}/qaReplies/${qid}`).push({text:t,name:currentUser.displayName||'老師',role:'teacher',ts:firebase.database.ServerValue.TIMESTAMP})}
+    db.ref('rooms/'+roomId+'/qaReplies').once('value').then(function(rs){var allR=rs.val()||{};
+      el.innerHTML=items.map(function(q){var replies=allR[q.id]?Object.values(allR[q.id]).sort(function(a,b){return a.ts-b.ts}):[];
+        var rh=replies.map(function(r){return '<div class="qa-reply '+r.role+'"><div class="rp-name '+r.role+'">'+(r.role==='ai'?'🤖 AI':'👨‍🏫 '+(r.name||'老師'))+'</div>'+esc(r.text)+'</div>'}).join('');
+        return '<div class="qa-card"><div class="qa-top"><div class="qa-votes"><div class="num">'+(q.ups||0)+'</div><div class="lbl">票</div></div>'+
+          '<div style="flex:1"><div class="q-text">'+esc(q.text)+'</div><div class="q-meta">'+esc(q.name)+' · '+timeStr(q.ts)+'</div><button class="btn-reply" onclick="showReply(\''+q.id+'\')">回覆</button></div>'+
+        '</div>'+(rh?'<div class="qa-replies">'+rh+'</div>':'')+'<div class="reply-box hidden" id="rb-'+q.id+'"><input id="ri-'+q.id+'" placeholder="回覆..." onkeydown="if(event.key===\'Enter\')replyQ(\''+q.id+'\')"><button onclick="replyQ(\''+q.id+'\')">送出</button></div></div>'}).join('')})});
+  listeners.push({ref:ref,event:'value'})}
+function showReply(qid){document.getElementById('rb-'+qid).classList.toggle('hidden');document.getElementById('ri-'+qid).focus()}
+function replyQ(qid){var i=document.getElementById('ri-'+qid),t=i.value.trim();if(!t)return;i.value='';
+  db.ref('rooms/'+roomId+'/qaReplies/'+qid).push({text:t,name:currentUser.displayName||'老師',role:'teacher',ts:firebase.database.ServerValue.TIMESTAMP})}
+// Alias for backwards compat
+var replyToQA=replyQ;
 
 // ═══ Info/Materials (rendered first time entering room) ═══
 function renderInfoPanel(){
-  const studentUrl=`${location.origin}/classroom/?room=${encodeURIComponent(roomId)}`;
-  const remoteUrl=`${location.origin}/classroom/remote?room=${encodeURIComponent(roomId)}`;
-  let html=`<div class="info-panel">
-    <div class="info-card"><h3>📱 學員 QR Code</h3><div class="qr-small" id="qrStudent"></div><div class="url-text">${studentUrl}</div></div>
-    <div class="info-card"><h3>🎮 老師手機遙控</h3><div class="qr-small" id="qrRemote"></div><div class="url-text">${remoteUrl}</div></div>
-    <div class="info-card"><h3>📊 教室資訊</h3><p style="font-size:0.8rem;color:var(--text);margin-top:1rem">房間：${esc(roomId)}<br>老師：${esc(currentUser.displayName)}</p></div>
-  </div>`;
-  html+=`<div class="mat-list"><h3 style="font-size:0.85rem;color:var(--pri);margin-bottom:0.5rem">教材（點擊在新視窗開啟，自動連結遙控）</h3>`;
-  materials.forEach((m,idx)=>{
-    let url=m.hasSlideControl?`${m.url}?room=${encodeURIComponent(roomId)}`+`${m.queryExtra||''}`:m.url;
-    html+=`<div class="mat-item" onclick="openMaterial(${idx})"><span class="mat-icon">${m.icon}</span><span class="mat-title">${m.title}</span><span class="mat-open">開啟 ↗</span></div>`;
+  var studentUrl=location.origin+'/classroom/?room='+encodeURIComponent(roomId);
+  var remoteUrl=location.origin+'/classroom/remote?room='+encodeURIComponent(roomId);
+  var html='<div class="info-panel">'+
+    '<div class="info-card"><h3>📱 學員 QR Code</h3><div class="qr-small" id="qrStudent"></div><div class="url-text">'+studentUrl+'</div></div>'+
+    '<div class="info-card"><h3>🎮 老師手機遙控</h3><div class="qr-small" id="qrRemote"></div><div class="url-text">'+remoteUrl+'</div></div>'+
+  '</div>';
+  html+='<div class="mat-list"><h3 style="font-size:0.85rem;color:var(--pri);margin-bottom:0.5rem">教材（點擊在新視窗開啟，自動連結遙控）</h3>';
+  materials.forEach(function(m,idx){
+    html+='<div class="mat-item" onclick="openMaterial('+idx+')"><span class="mat-icon">'+m.icon+'</span><span class="mat-title">'+m.title+'</span><span class="mat-open">開啟 ↗</span></div>';
   });
   html+='</div>';
   return html;
 }
 
-// Insert info panel at top of main content when entering room
-const origRenderContent=renderContent;
-renderContent=function(){
-  origRenderContent();
-  // Prepend info panel in wall/qa/pause modes
-  const el=document.getElementById('mainContent');
-  if(currentMode!=='vote'){
-    const infoDiv=document.createElement('div');
-    infoDiv.innerHTML=renderInfoPanel();
-    el.insertBefore(infoDiv,el.firstChild);
-    // Generate QR codes
-    setTimeout(()=>{
-      makeQR('qrStudent',`${location.origin}/classroom/?room=${encodeURIComponent(roomId)}`);
-      makeQR('qrRemote',`${location.origin}/classroom/remote?room=${encodeURIComponent(roomId)}`);
-    },50);
-  }
-};
-
 // ═══ Settings ═══
-const DEFAULT_GAS_URL='https://script.google.com/macros/s/AKfycbxGE9i-742LPKD-zXcmfmzY4pt2UL8kbJgAI7kzEaQt3upYL1U55C-P_NHRWfUpLuj9FA/exec';
+var DEFAULT_GAS_URL='https://script.google.com/macros/s/AKfycbxGE9i-742LPKD-zXcmfmzY4pt2UL8kbJgAI7kzEaQt3upYL1U55C-P_NHRWfUpLuj9FA/exec';
 function loadSettings(){
-  db.ref(`rooms/${roomId}/config/password`).once('value').then(s=>{const p=s.val();document.getElementById('chkPassword').checked=!!p;if(p){document.getElementById('inputPassword').value=p;document.getElementById('inputPassword').classList.remove('hidden')}});
-  const k=localStorage.getItem('_ai_key');if(k)document.getElementById('inputAIKey').value=k;
+  db.ref('rooms/'+roomId+'/config/password').once('value').then(function(s){var p=s.val();document.getElementById('chkPassword').checked=!!p;if(p){document.getElementById('inputPassword').value=p;document.getElementById('inputPassword').classList.remove('hidden')}});
+  var k=localStorage.getItem('_ai_key');if(k)document.getElementById('inputAIKey').value=k;
   if(!localStorage.getItem('_gas_url'))localStorage.setItem('_gas_url',DEFAULT_GAS_URL);
   document.getElementById('inputGasUrl').value=localStorage.getItem('_gas_url');
 }
 function toggleSettings(){document.getElementById('settingsPanel').classList.toggle('open');document.getElementById('settingsOverlay').classList.toggle('show')}
-function savePassword(){const on=document.getElementById('chkPassword').checked,pwd=document.getElementById('inputPassword').value.trim();if(on&&!pwd){alert('請輸入密碼');return}db.ref(`rooms/${roomId}/config/password`).set(on?pwd:null).then(()=>alert(on?'密碼已設定':'密碼已關閉'))}
-function saveAIKey(){const k=document.getElementById('inputAIKey').value.trim();if(!k){localStorage.removeItem('_ai_key');alert('Key 已清除');return}localStorage.setItem('_ai_key',k);alert('Key 已儲存')}
-function toggleAI(){if(!localStorage.getItem('_ai_key')&&!aiEnabled){alert('請先在設定中填入 Gemini API Key 並測試');toggleSettings();return}db.ref(`rooms/${roomId}/config/aiEnabled`).set(!aiEnabled)}
-function clearRoom(){if(!confirm('清除所有互動資料？'))return;db.ref(`rooms/${roomId}`).update({wall:null,votes:null,currentVote:null,qa:null,qaUps:null,qaReplies:null})}
-function saveGasUrl(){const u=document.getElementById('inputGasUrl').value.trim();if(!u){localStorage.removeItem('_gas_url');document.getElementById('gasUrlStatus').textContent='已清除';return}localStorage.setItem('_gas_url',u);document.getElementById('gasUrlStatus').textContent='✅ 已儲存'}
-function testGasUrl(){const u=localStorage.getItem('_gas_url');if(!u){document.getElementById('gasUrlStatus').textContent='❌ 請先儲存 URL';return}document.getElementById('gasUrlStatus').textContent='測試中...';fetch(u).then(r=>r.json()).then(d=>{document.getElementById('gasUrlStatus').textContent=d.status==='ok'?'✅ 連線成功':'❌ 回應異常'}).catch(e=>{document.getElementById('gasUrlStatus').textContent='❌ '+e.message})}
+function savePassword(){var on=document.getElementById('chkPassword').checked,pwd=document.getElementById('inputPassword').value.trim();if(on&&!pwd){alert('請輸入密碼');return}db.ref('rooms/'+roomId+'/config/password').set(on?pwd:null).then(function(){alert(on?'密碼已設定':'密碼已關閉')})}
+function saveAIKey(){var k=document.getElementById('inputAIKey').value.trim();if(!k){localStorage.removeItem('_ai_key');alert('Key 已清除');return}localStorage.setItem('_ai_key',k);alert('Key 已儲存')}
+function toggleAI(){if(!localStorage.getItem('_ai_key')&&!aiEnabled){alert('請先在設定中填入 Gemini API Key 並測試');toggleSettings();return}db.ref('rooms/'+roomId+'/config/aiEnabled').set(!aiEnabled)}
+function clearRoom(){if(!confirm('清除所有互動資料？'))return;db.ref('rooms/'+roomId).update({wall:null,votes:null,currentVote:null,qa:null,qaUps:null,qaReplies:null})}
+function saveGasUrl(){var u=document.getElementById('inputGasUrl').value.trim();if(!u){localStorage.removeItem('_gas_url');document.getElementById('gasUrlStatus').textContent='已清除';return}localStorage.setItem('_gas_url',u);document.getElementById('gasUrlStatus').textContent='✅ 已儲存'}
+function testGasUrl(){var u=localStorage.getItem('_gas_url');if(!u){document.getElementById('gasUrlStatus').textContent='❌ 請先儲存 URL';return}document.getElementById('gasUrlStatus').textContent='測試中...';fetch(u).then(function(r){return r.json()}).then(function(d){document.getElementById('gasUrlStatus').textContent=d.status==='ok'?'✅ 連線成功':'❌ 回應異常'}).catch(function(e){document.getElementById('gasUrlStatus').textContent='❌ '+e.message})}
 
 // ═══ QR ═══
-function makeQR(elId,url){const el=document.getElementById(elId);if(!el)return;const qr=qrcode(0,'M');qr.addData(url);qr.make();el.innerHTML=qr.createSvgTag({cellSize:3,margin:2})}
+function makeQR(elId,url){var el=document.getElementById(elId);if(!el)return;var qr=qrcode(0,'M');qr.addData(url);qr.make();el.innerHTML=qr.createSvgTag({cellSize:3,margin:2})}
 function toggleQR(){
-  const url=`${location.origin}/classroom/?room=${encodeURIComponent(roomId)}`;
+  var url=location.origin+'/classroom/?room='+encodeURIComponent(roomId);
   document.getElementById('qrUrl').textContent=url;
-  const el=document.getElementById('qrBox');const qr=qrcode(0,'M');qr.addData(url);qr.make();el.innerHTML=qr.createSvgTag({cellSize:6,margin:4});
+  var el=document.getElementById('qrBox');var qr=qrcode(0,'M');qr.addData(url);qr.make();el.innerHTML=qr.createSvgTag({cellSize:6,margin:4});
   document.getElementById('qrOverlay').classList.toggle('show')}
 
 // ═══ Agent Panel ═══
 function toggleAgentPanel(){document.getElementById('agentPanel').classList.toggle('open')}
 function initAgentPanel(){
   // Update command display
-  document.getElementById('agentCmdDisplay').textContent=`python3 classroom_agent.py ${roomId} --key YOUR_KEY --voice`;
+  document.getElementById('agentCmdDisplay').textContent='python3 classroom_agent.py '+roomId+' --key YOUR_KEY --voice';
   // Listen for agent status
-  const ref=db.ref(`rooms/${roomId}/agentStatus`);
-  ref.on('value',s=>{
-    const d=s.val();
-    const dot=document.getElementById('agentDot');
-    const txt=document.getElementById('agentStatusText');
-    const mods=document.getElementById('agentModules');
-    const voiceCard=document.getElementById('agentVoiceCard');
-    const voiceTxt=document.getElementById('agentVoiceText');
+  var ref=db.ref('rooms/'+roomId+'/agentStatus');
+  ref.on('value',function(s){
+    var d=s.val();
+    var dot=document.getElementById('agentDot');
+    var txt=document.getElementById('agentStatusText');
+    var mods=document.getElementById('agentModules');
+    var voiceCard=document.getElementById('agentVoiceCard');
+    var voiceTxt=document.getElementById('agentVoiceText');
+    var btnAgent=document.getElementById('btnAgent');
+    var btnAgentTool=document.getElementById('btnAgentTool');
     if(d&&d.online){
       dot.classList.add('online');
-      txt.textContent=`${d.name||'Agent'} 已上線`;
-      document.getElementById('btnAgent').style.background='var(--purple)';
-      document.getElementById('btnAgent').style.color='#fff';
-      document.getElementById('btnAgent').style.borderColor='var(--purple)';
-      if(d.modules){mods.innerHTML=d.modules.map(m=>`<span class="ap-mod active">${m}</span>`).join('')}
+      txt.textContent=(d.name||'Agent')+' 已上線';
+      if(btnAgent){btnAgent.style.background='var(--purple)';btnAgent.style.color='#fff';btnAgent.style.borderColor='var(--purple)'}
+      if(btnAgentTool){btnAgentTool.style.background='var(--purple)';btnAgentTool.style.color='#fff';btnAgentTool.style.borderColor='var(--purple)'}
+      if(d.modules){mods.innerHTML=d.modules.map(function(m){return '<span class="ap-mod active">'+m+'</span>'}).join('')}
       if(d.voice!==undefined){
         voiceCard.style.display='block';
         voiceTxt.textContent=d.voice?'✅ 已連線 jt-live-whisper':'⏳ 等待語音連線...';
@@ -990,23 +1388,22 @@ function initAgentPanel(){
     } else {
       dot.classList.remove('online');
       txt.textContent='未連線';
-      document.getElementById('btnAgent').style.background='';
-      document.getElementById('btnAgent').style.color='';
-      document.getElementById('btnAgent').style.borderColor='';
+      if(btnAgent){btnAgent.style.background='';btnAgent.style.color='';btnAgent.style.borderColor=''}
+      if(btnAgentTool){btnAgentTool.style.background='';btnAgentTool.style.color='';btnAgentTool.style.borderColor=''}
       mods.innerHTML='';
       voiceCard.style.display='none';
     }
   });
-  listeners.push({ref,event:'value'});
+  listeners.push({ref:ref,event:'value'});
   // Listen for teaching advice
-  const advRef=db.ref(`rooms/${roomId}/agentAdvice`);
-  advRef.on('value',s=>{
-    const d=s.val();
-    const card=document.getElementById('agentAdviceCard');
-    const txt=document.getElementById('agentAdviceText');
+  var advRef=db.ref('rooms/'+roomId+'/agentAdvice');
+  advRef.on('value',function(s){
+    var d=s.val();
+    var card=document.getElementById('agentAdviceCard');
+    var txt=document.getElementById('agentAdviceText');
     if(d&&d.text){
       card.style.display='block';
-      card.className='ap-card '+(d.signals&&d.signals.some(s=>s==='low_accuracy')?'alert':'warn');
+      card.className='ap-card '+(d.signals&&d.signals.some(function(sg){return sg==='low_accuracy'})?'alert':'warn');
       txt.textContent=d.text;
     } else {
       card.style.display='none';
@@ -1017,35 +1414,38 @@ function initAgentPanel(){
 
 // ═══ New Page Links ═══
 function openPresenter(){
-  const deckId=localStorage.getItem(`_deck_${roomId}`)||'university-talk';
-  window.open(`/classroom/presenter?room=${roomId}&deck=${deckId}`,'_blank');
+  var deckId=localStorage.getItem('_deck_'+roomId)||'university-talk';
+  window.open('/classroom/presenter?room='+roomId+'&deck='+deckId,'_blank');
 }
-function openSurvey(){window.open(`/classroom/survey?room=${roomId}`,'_blank')}
+function openSurvey(){window.open('/classroom/survey?room='+roomId,'_blank')}
 function startFeedback(){
   if(confirm('切換到課後回饋模式？學員將看到回饋介面。')){
-    db.ref(`rooms/${roomId}/config/mode`).set('feedback');
-    window.open(`/classroom/feedback?room=${roomId}`,'_blank');
+    db.ref('rooms/'+roomId+'/config/mode').set('feedback');
+    window.open('/classroom/feedback?room='+roomId,'_blank');
   }
 }
 
 // ═══ Export ═══
 async function exportData(){
-  const [ws,qs,cvs,ps]=await Promise.all([db.ref(`rooms/${roomId}/wall`).orderByChild('ts').once('value'),db.ref(`rooms/${roomId}/qa`).once('value'),db.ref(`rooms/${roomId}/currentVote`).once('value'),db.ref(`rooms/${roomId}/presence`).once('value')]);
-  const rps=(await db.ref(`rooms/${roomId}/qaReplies`).once('value')).val()||{};
-  let vH='';const cv=cvs.val();
-  if(cv){const vs=await db.ref(`rooms/${roomId}/votes/${cv.id}`).once('value');const R=vs.val()||{},C={};let T=0;(cv.options||[]).forEach((_,i)=>C[i]=0);Object.values(R).forEach(v=>{if(typeof v==='number'){C[v]=(C[v]||0)+1;T++}});vH=`<div class="section"><h2>📊 ${esc(cv.question)}</h2>`;(cv.options||[]).forEach((o,i)=>{const p=T?Math.round(C[i]/T*100):0;vH+=`<div class="vr"><span class="vr-l">${esc(o)}</span><div class="vr-b"><div class="vr-f" style="width:${p}%;background:${VC[i%6]}">${p}%</div></div><span class="vr-c">${C[i]}</span></div>`});vH+=`<p class="vr-t">共${T}人</p></div>`}
-  const msgs=[];ws.forEach(c=>msgs.push(c.val()));let wH='';if(msgs.length){wH=`<div class="section"><h2>💬 訊息牆(${msgs.length})</h2>`;msgs.forEach(m=>{const r=m.role||'student';wH+=`<div class="msg ${r}"><b class="${r}">${r==='ai'?'🤖':r==='teacher'?'👨‍🏫':''}${esc(m.name)}</b> <small>${timeStr(m.ts)}</small><p>${esc(m.text)}</p></div>`});wH+='</div>'}
-  const qas=[];qs.forEach(c=>qas.push({id:c.key,...c.val()}));qas.sort((a,b)=>(b.ups||0)-(a.ups||0));let qH='';if(qas.length){qH=`<div class="section"><h2>❓ 問答(${qas.length})</h2>`;qas.forEach(q=>{qH+=`<div class="qa"><b>▲${q.ups||0}</b> ${esc(q.text)} <small>—${esc(q.name)}</small>`;const replies=rps[q.id]?Object.values(rps[q.id]).sort((a,b)=>a.ts-b.ts):[];replies.forEach(r=>{qH+=`<div class="rp ${r.role}"><b>${r.role==='ai'?'🤖':'👨‍🏫'}${esc(r.name)}</b> ${esc(r.text)}</div>`});qH+='</div>'});qH+='</div>'}
-  const ds=new Date().toISOString().slice(0,10);
-  const html=`<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${esc(roomTitle)} 成果</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans TC',system-ui,sans-serif;background:#F5F7FA;color:#1A1A1A;padding:2rem;max-width:900px;margin:0 auto}.hd{background:#0B3C5D;color:#fff;padding:2rem;border-radius:12px;margin-bottom:2rem;text-align:center}.hd h1{color:#FFC857;font-size:1.8rem}.hd .m{color:#D4F0EB;margin-top:0.5rem}.section{background:#fff;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06)}.section h2{color:#0B3C5D;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid #D4F0EB}.msg{padding:0.5rem 0;border-bottom:1px solid #eee}.msg.ai{background:#EDE9FE;padding:0.5rem;border-radius:6px;margin:0.2rem 0}.msg.teacher{background:#FEF3C7;padding:0.5rem;border-radius:6px;margin:0.2rem 0}.msg b.ai{color:#7C3AED}.msg b.teacher{color:#d4a632}.msg p{margin-top:0.2rem;white-space:pre-wrap}.vr{display:flex;align-items:center;gap:0.8rem;margin-bottom:0.5rem}.vr-l{min-width:100px;font-weight:700}.vr-b{flex:1;height:24px;background:#eee;border-radius:4px;overflow:hidden}.vr-f{height:100%;border-radius:4px;color:#fff;font-size:0.75rem;display:flex;align-items:center;justify-content:flex-end;padding-right:0.4rem}.vr-c{color:#666}.vr-t{text-align:center;color:#666}.qa{padding:0.6rem 0;border-bottom:1px solid #eee}.rp{padding:0.4rem 0.6rem;margin:0.3rem 0 0.3rem 2rem;border-radius:6px}.rp.ai{background:#EDE9FE}.rp.teacher{background:#FEF3C7}</style></head><body><div class="hd"><h1>${esc(roomTitle)}</h1><div class="m">${ds} · ${ps.numChildren()}人 · ${esc(roomId)}</div></div>${vH}${wH}${qH}<div style="text-align:center;color:#999;font-size:0.8rem;margin-top:2rem">AI 課堂互動成果</div></body></html>`;
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=`${roomId}.html`;a.click()}
+  var ws=await db.ref('rooms/'+roomId+'/wall').orderByChild('ts').once('value');
+  var qs=await db.ref('rooms/'+roomId+'/qa').once('value');
+  var cvs=await db.ref('rooms/'+roomId+'/currentVote').once('value');
+  var ps=await db.ref('rooms/'+roomId+'/presence').once('value');
+  var rps=(await db.ref('rooms/'+roomId+'/qaReplies').once('value')).val()||{};
+  var vH='';var cv=cvs.val();
+  if(cv){var vs=await db.ref('rooms/'+roomId+'/votes/'+cv.id).once('value');var R=vs.val()||{},C={},T=0;(cv.options||[]).forEach(function(_,i){C[i]=0});Object.values(R).forEach(function(v){if(typeof v==='number'){C[v]=(C[v]||0)+1;T++}});vH='<div class="section"><h2>📊 '+esc(cv.question)+'</h2>';(cv.options||[]).forEach(function(o,i){var p=T?Math.round(C[i]/T*100):0;vH+='<div class="vr"><span class="vr-l">'+esc(o)+'</span><div class="vr-b"><div class="vr-f" style="width:'+p+'%;background:'+VC[i%6]+'">'+p+'%</div></div><span class="vr-c">'+C[i]+'</span></div>'});vH+='<p class="vr-t">共'+T+'人</p></div>'}
+  var msgs=[];ws.forEach(function(c){msgs.push(c.val())});var wH='';if(msgs.length){wH='<div class="section"><h2>💬 訊息牆('+msgs.length+')</h2>';msgs.forEach(function(m){var r=m.role||'student';wH+='<div class="msg '+r+'"><b class="'+r+'">'+(r==='ai'?'🤖':r==='teacher'?'👨‍🏫':'')+esc(m.name)+'</b> <small>'+timeStr(m.ts)+'</small><p>'+esc(m.text)+'</p></div>'});wH+='</div>'}
+  var qas=[];qs.forEach(function(c){qas.push({id:c.key,text:c.val().text,name:c.val().name,ts:c.val().ts,ups:c.val().ups})});qas.sort(function(a,b){return(b.ups||0)-(a.ups||0)});var qH='';if(qas.length){qH='<div class="section"><h2>❓ 問答('+qas.length+')</h2>';qas.forEach(function(q){qH+='<div class="qa"><b>▲'+(q.ups||0)+'</b> '+esc(q.text)+' <small>—'+esc(q.name)+'</small>';var replies=rps[q.id]?Object.values(rps[q.id]).sort(function(a,b){return a.ts-b.ts}):[];replies.forEach(function(r){qH+='<div class="rp '+r.role+'"><b>'+(r.role==='ai'?'🤖':'👨‍🏫')+esc(r.name)+'</b> '+esc(r.text)+'</div>'});qH+='</div>'});qH+='</div>'}
+  var ds=new Date().toISOString().slice(0,10);
+  var html='<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>'+esc(roomTitle)+' 成果</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:\'Noto Sans TC\',system-ui,sans-serif;background:#F5F7FA;color:#1A1A1A;padding:2rem;max-width:900px;margin:0 auto}.hd{background:#0B3C5D;color:#fff;padding:2rem;border-radius:12px;margin-bottom:2rem;text-align:center}.hd h1{color:#FFC857;font-size:1.8rem}.hd .m{color:#D4F0EB;margin-top:0.5rem}.section{background:#fff;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06)}.section h2{color:#0B3C5D;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid #D4F0EB}.msg{padding:0.5rem 0;border-bottom:1px solid #eee}.msg.ai{background:#EDE9FE;padding:0.5rem;border-radius:6px;margin:0.2rem 0}.msg.teacher{background:#FEF3C7;padding:0.5rem;border-radius:6px;margin:0.2rem 0}.msg b.ai{color:#7C3AED}.msg b.teacher{color:#d4a632}.msg p{margin-top:0.2rem;white-space:pre-wrap}.vr{display:flex;align-items:center;gap:0.8rem;margin-bottom:0.5rem}.vr-l{min-width:100px;font-weight:700}.vr-b{flex:1;height:24px;background:#eee;border-radius:4px;overflow:hidden}.vr-f{height:100%;border-radius:4px;color:#fff;font-size:0.75rem;display:flex;align-items:center;justify-content:flex-end;padding-right:0.4rem}.vr-c{color:#666}.vr-t{text-align:center;color:#666}.qa{padding:0.6rem 0;border-bottom:1px solid #eee}.rp{padding:0.4rem 0.6rem;margin:0.3rem 0 0.3rem 2rem;border-radius:6px}.rp.ai{background:#EDE9FE}.rp.teacher{background:#FEF3C7}</style></head><body><div class="hd"><h1>'+esc(roomTitle)+'</h1><div class="m">'+ds+' · '+ps.numChildren()+'人 · '+esc(roomId)+'</div></div>'+vH+wH+qH+'<div style="text-align:center;color:#999;font-size:0.8rem;margin-top:2rem">AI 課堂互動成果</div></body></html>';
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=roomId+'.html';a.click()}
 
-function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
-function timeStr(t){if(!t)return'';const d=new Date(t);return`${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`}
+function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function timeStr(t){if(!t)return'';var d=new Date(t);return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')}
 
 // ═══ Push Content ═══
 function showPushPanel() {
-  const p = document.getElementById('pushPanel');
+  var p = document.getElementById('pushPanel');
   p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
 }
 function hidePushPanel() {
@@ -1054,12 +1454,12 @@ function hidePushPanel() {
 
 function sendPush() {
   if (!roomId) return;
-  const type = document.getElementById('pushType').value;
-  const title = document.getElementById('pushTitleInput').value.trim();
-  const content = document.getElementById('pushContentInput').value.trim();
+  var type = document.getElementById('pushType').value;
+  var title = document.getElementById('pushTitleInput').value.trim();
+  var content = document.getElementById('pushContentInput').value.trim();
   if (!title || !content) { alert('請填寫標題和內容'); return; }
 
-  const pushData = { type, title, content, ts: firebase.database.ServerValue.TIMESTAMP };
+  var pushData = { type:type, title:title, content:content, ts: firebase.database.ServerValue.TIMESTAMP };
 
   // Set as current push
   db.ref('rooms/'+roomId+'/pushContent/current').set(pushData);
@@ -1067,8 +1467,8 @@ function sendPush() {
   db.ref('rooms/'+roomId+'/pushContent/history').push(pushData);
 
   // Log
-  const log = document.getElementById('pushLogList');
-  const icon = type==='link'?'🔗':type==='prompt'?'📝':type==='data'?'📊':'💬';
+  var log = document.getElementById('pushLogList');
+  var icon = type==='link'?'🔗':type==='prompt'?'📝':type==='data'?'📊':'💬';
   log.innerHTML = '<div style="padding:3px 0;border-bottom:1px solid #30363d;">'+icon+' '+title+'</div>' + log.innerHTML;
 
   // Clear inputs
@@ -1078,18 +1478,18 @@ function sendPush() {
 
 function quickPush(type, title, content) {
   if (!roomId) return;
-  const pushData = { type, title, content, ts: firebase.database.ServerValue.TIMESTAMP };
+  var pushData = { type:type, title:title, content:content, ts: firebase.database.ServerValue.TIMESTAMP };
   db.ref('rooms/'+roomId+'/pushContent/current').set(pushData);
   db.ref('rooms/'+roomId+'/pushContent/history').push(pushData);
 
-  const log = document.getElementById('pushLogList');
-  const icon = type==='link'?'🔗':'📝';
+  var log = document.getElementById('pushLogList');
+  var icon = type==='link'?'🔗':'📝';
   log.innerHTML = '<div style="padding:3px 0;border-bottom:1px solid #30363d;">'+icon+' '+title+'</div>' + log.innerHTML;
 }
 
 // ═══ Feedback Report ═══
 function showReport() {
-  const p = document.getElementById('reportPanel');
+  var p = document.getElementById('reportPanel');
   p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
   if (p.style.display === 'flex') loadReport();
 }
@@ -1099,23 +1499,23 @@ function hideReport() {
 
 function loadReport() {
   if (!roomId) return;
-  db.ref('rooms/'+roomId+'/feedback').once('value', snap => {
-    const data = snap.val();
-    const el = document.getElementById('reportContent');
+  db.ref('rooms/'+roomId+'/feedback').once('value', function(snap) {
+    var data = snap.val();
+    var el = document.getElementById('reportContent');
     if (!data) { el.innerHTML = '<p style="color:#7d8590;text-align:center;padding:2rem;">尚無回饋資料</p>'; return; }
 
-    const entries = Object.values(data);
-    const total = entries.length;
+    var entries = Object.values(data);
+    var total = entries.length;
 
     // Satisfaction average
-    let satSum = 0, satCount = 0;
-    let recSum = 0, recCount = 0;
-    let emails = [];
-    let wantPdfCount = 0;
-    let helpful = {};
-    let suggestions = [];
+    var satSum = 0, satCount = 0;
+    var recSum = 0, recCount = 0;
+    var emails = [];
+    var wantPdfCount = 0;
+    var helpful = {};
+    var suggestions = [];
 
-    entries.forEach(e => {
+    entries.forEach(function(e) {
       if (e.ratings) {
         if (e.ratings.satisfaction) { satSum += e.ratings.satisfaction; satCount++; }
         if (e.ratings.recommend) { recSum += e.ratings.recommend; recCount++; }
@@ -1124,7 +1524,7 @@ function loadReport() {
       if (e.wantPdf) wantPdfCount++;
       if (e.answers) {
         if (e.answers.helpful) {
-          const h = e.answers.helpful;
+          var h = e.answers.helpful;
           helpful[h] = (helpful[h]||0) + 1;
         }
         if (e.answers.suggestion && e.answers.suggestion !== '(跳過)') {
@@ -1133,13 +1533,13 @@ function loadReport() {
       }
     });
 
-    const satAvg = satCount ? (satSum/satCount).toFixed(1) : '-';
-    const recAvg = recCount ? (recSum/recCount).toFixed(1) : '-';
+    var satAvg = satCount ? (satSum/satCount).toFixed(1) : '-';
+    var recAvg = recCount ? (recSum/recCount).toFixed(1) : '-';
 
     // Sort helpful
-    const helpfulSorted = Object.entries(helpful).sort((a,b)=>b[1]-a[1]);
+    var helpfulSorted = Object.entries(helpful).sort(function(a,b){return b[1]-a[1]});
 
-    let html = '';
+    var html = '';
     html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">';
     html += '<div style="background:#0d1117;border-radius:10px;padding:12px;text-align:center;border:1px solid #30363d;">';
     html += '<div style="font-size:1.8rem;font-weight:900;color:#0F9D8A;">'+total+'</div>';
@@ -1155,9 +1555,9 @@ function loadReport() {
     // Helpful sections
     if (helpfulSorted.length) {
       html += '<div style="margin-bottom:12px;"><p style="font-size:0.85rem;color:#e6edf3;font-weight:700;margin-bottom:6px;">👍 最有幫助的部分</p>';
-      helpfulSorted.slice(0,5).forEach(([k,v]) => {
+      helpfulSorted.slice(0,5).forEach(function(kv) {
         html += '<div style="display:flex;justify-content:space-between;padding:4px 8px;background:#0d1117;border-radius:6px;margin-bottom:3px;font-size:0.8rem;">';
-        html += '<span style="color:#e6edf3;">'+k+'</span><span style="color:#0F9D8A;font-weight:700;">'+v+'人</span></div>';
+        html += '<span style="color:#e6edf3;">'+kv[0]+'</span><span style="color:#0F9D8A;font-weight:700;">'+kv[1]+'人</span></div>';
       });
       html += '</div>';
     }
@@ -1165,7 +1565,7 @@ function loadReport() {
     // Suggestions
     if (suggestions.length) {
       html += '<div style="margin-bottom:12px;"><p style="font-size:0.85rem;color:#e6edf3;font-weight:700;margin-bottom:6px;">💡 學員建議</p>';
-      suggestions.forEach(s => {
+      suggestions.forEach(function(s) {
         html += '<div style="padding:6px 8px;background:#0d1117;border-radius:6px;margin-bottom:3px;font-size:0.8rem;color:#e6edf3;border-left:3px solid #7C3AED;">'+s+'</div>';
       });
       html += '</div>';
@@ -1175,7 +1575,7 @@ function loadReport() {
     html += '<div style="margin-bottom:12px;"><p style="font-size:0.85rem;color:#e6edf3;font-weight:700;margin-bottom:6px;">📧 Email 名單 ('+emails.length+'人，'+wantPdfCount+'人要PDF)</p>';
     if (emails.length) {
       html += '<div style="background:#0d1117;border-radius:8px;padding:8px;font-size:0.8rem;">';
-      emails.forEach(e => {
+      emails.forEach(function(e) {
         html += '<div style="padding:2px 0;color:#e6edf3;">'+e+'</div>';
       });
       html += '</div>';
@@ -1201,21 +1601,21 @@ function loadReport() {
 
 // ═══ Material opening with Firebase write ═══
 function openMaterial(idx){
-  const m=materials[idx];
+  var m=materials[idx];
   if(!m)return;
-  let url=m.hasSlideControl?`${m.url}?room=${encodeURIComponent(roomId)}`+(m.queryExtra||''):m.url;
+  var url=m.hasSlideControl?m.url+'?room='+encodeURIComponent(roomId)+(m.queryExtra||''):m.url;
 
   // Extract deckId from queryExtra if present
-  let deckId=null;
+  var deckId=null;
   if(m.queryExtra){
-    const match=m.queryExtra.match(/deck=([^&]+)/);
+    var match=m.queryExtra.match(/deck=([^&]+)/);
     if(match)deckId=match[1];
   }
 
   // Write presentation state to Firebase so remote/student pages can sync
   if(roomId && m.hasSlideControl){
-    const deckType=deckId?'slides':'html';
-    db.ref(`rooms/${roomId}/presentation`).set({
+    var deckType=deckId?'slides':'html';
+    db.ref('rooms/'+roomId+'/presentation').set({
       mode:deckType,
       deck:deckId||m.url,
       current:0,
@@ -1229,13 +1629,32 @@ function openMaterial(idx){
 // ═══ Start / End Class ═══
 function startClass(){
   if(!roomId)return;
-  const updates={};
+  var updates={};
   // Update room config status
-  updates[`rooms/${roomId}/config/status`]='live';
+  updates['rooms/'+roomId+'/config/status']='live';
 
-  // Write presentation state
-  if(roomDeck){
-    updates[`rooms/${roomId}/presentation`]={
+  // Use selected material from preparing phase, or fallback to planner deck
+  var matIdx=selectedMaterialIdx;
+  if(matIdx!==null){
+    var m=materials[matIdx];
+    // Extract deck id
+    var deckId=null;
+    if(m.queryExtra){
+      var match=m.queryExtra.match(/deck=([^&]+)/);
+      if(match)deckId=match[1];
+    }
+    if(m.hasSlideControl){
+      var deckType=deckId?'slides':'html';
+      updates['rooms/'+roomId+'/presentation']={
+        mode:deckType,
+        deck:deckId||m.url,
+        current:0,
+        title:m.title,
+        ts:firebase.database.ServerValue.TIMESTAMP
+      };
+    }
+  } else if(roomDeck){
+    updates['rooms/'+roomId+'/presentation']={
       mode:roomDeckType||'pptx-slides',
       deck:roomDeck,
       current:0,
@@ -1245,19 +1664,30 @@ function startClass(){
 
   // Update session status in courses if linked
   if(roomCourseId&&roomSessionId){
-    updates[`courses/${roomCourseId}/sessions/${roomSessionId}/status`]='live';
+    updates['courses/'+roomCourseId+'/sessions/'+roomSessionId+'/status']='live';
   }
 
-  db.ref().update(updates).then(()=>{
-    // Open presenter — only pass deck param for PPTX mode, let Firebase handle html-slides
+  db.ref().update(updates).then(function(){
+    // Open presenter
     var presUrl='/classroom/presenter?room='+encodeURIComponent(roomId);
-    if(roomDeckType==='pptx-slides'||(!roomDeckType&&roomDeck)){
+    if(matIdx!==null){
+      var m2=materials[matIdx];
+      var dk=null;
+      if(m2.queryExtra){var mt=m2.queryExtra.match(/deck=([^&]+)/);if(mt)dk=mt[1]}
+      if(dk){
+        presUrl+='&deck='+encodeURIComponent(dk);
+      } else if(m2.hasSlideControl && m2.url!=='/classroom/presenter'){
+        // HTML-based slides — open the material URL directly
+        var mUrl=m2.url+'?room='+encodeURIComponent(roomId)+(m2.queryExtra||'');
+        window.open(mUrl,'_blank');
+        showPhase('live');
+        return;
+      }
+    } else if(roomDeckType==='pptx-slides'||(!roomDeckType&&roomDeck)){
       presUrl+='&deck='+encodeURIComponent(roomDeck);
     }
     window.open(presUrl,'_blank');
-    // Toggle buttons
-    document.getElementById('btnStartClass').style.display='none';
-    document.getElementById('btnEndClass').style.display='inline-flex';
+    showPhase('live');
   });
 }
 
@@ -1265,28 +1695,24 @@ function endClass(){
   if(!roomId)return;
   if(!confirm('確定結束課程？將切換到課後回饋模式。'))return;
 
-  const feedbackUrl=`${location.origin}/classroom/feedback?room=${encodeURIComponent(roomId)}`;
-  const updates={};
-  updates[`rooms/${roomId}/config/status`]='post-class';
-  updates[`rooms/${roomId}/config/mode`]='feedback';
-  updates[`rooms/${roomId}/overlay`]={type:'feedback-qr',show:true,data:{url:feedbackUrl}};
+  var feedbackUrl=location.origin+'/classroom/feedback?room='+encodeURIComponent(roomId);
+  var updates={};
+  updates['rooms/'+roomId+'/config/status']='post-class';
+  updates['rooms/'+roomId+'/config/mode']='feedback';
+  updates['rooms/'+roomId+'/overlay']={type:'feedback-qr',show:true,data:{url:feedbackUrl}};
 
   if(roomCourseId&&roomSessionId){
-    updates[`courses/${roomCourseId}/sessions/${roomSessionId}/status`]='post-class';
+    updates['courses/'+roomCourseId+'/sessions/'+roomSessionId+'/status']='post-class';
   }
 
-  db.ref().update(updates).then(()=>{
-    document.getElementById('btnEndClass').style.display='none';
-    // Auto-open report panel
-    const p=document.getElementById('reportPanel');
-    p.style.display='flex';
-    loadReport();
+  db.ref().update(updates).then(function(){
+    showPhase('post-class');
   });
 }
 
 function copyEmails() {
   if (window._reportEmails && window._reportEmails.length) {
-    navigator.clipboard.writeText(window._reportEmails.join('\n')).then(() => {
+    navigator.clipboard.writeText(window._reportEmails.join('\n')).then(function() {
       alert('已複製 '+window._reportEmails.length+' 個 email');
     });
   }
@@ -1297,7 +1723,7 @@ function switchReportTab(tab) {
   document.getElementById('reportContent').style.display = tab === 'report' ? 'block' : 'none';
   document.getElementById('emailContent').style.display = tab === 'email' ? 'block' : 'none';
   document.getElementById('historyContent').style.display = tab === 'history' ? 'block' : 'none';
-  const activeStyle = 'padding:6px 14px;border-radius:6px;font-size:0.85rem;font-weight:700;cursor:pointer;border:none;';
+  var activeStyle = 'padding:6px 14px;border-radius:6px;font-size:0.85rem;font-weight:700;cursor:pointer;border:none;';
   document.getElementById('tabReport').style.cssText = activeStyle + (tab === 'report' ? 'background:#0F9D8A;color:#fff;' : 'background:#0d1117;color:#7d8590;border:1px solid #30363d;');
   document.getElementById('tabEmail').style.cssText = activeStyle + (tab === 'email' ? 'background:#1A73E8;color:#fff;' : 'background:#0d1117;color:#7d8590;border:1px solid #30363d;');
   document.getElementById('tabHistory').style.cssText = activeStyle + (tab === 'history' ? 'background:#7C3AED;color:#fff;' : 'background:#0d1117;color:#7d8590;border:1px solid #30363d;');
@@ -1306,13 +1732,13 @@ function switchReportTab(tab) {
 }
 
 // ═══ Email Panel ═══
-let _feedbackRecipients = { wantPdf: [], all: [] };
+var _feedbackRecipients = { wantPdf: [], all: [] };
 
 function initEmailPanel() {
   if (!roomId) return;
   // Populate deck select
-  const sel = document.getElementById('emailDeckSelect');
-  const deckOptions = [
+  var sel = document.getElementById('emailDeckSelect');
+  var deckOptions = [
     { name: 'S01_GAS_Automation', label: 'S01 GAS 自動化' },
     { name: 'S02_Vibe_Coding', label: 'S02 Vibe Coding' },
     { name: 'S03_CLI_Agent', label: 'S03 CLI Agent' },
@@ -1322,8 +1748,8 @@ function initEmailPanel() {
     { name: 'S09_FARS_FactCheck', label: 'S09 FARS 事實查核' },
   ];
   if (sel.options.length <= 1) {
-    deckOptions.forEach(d => {
-      const opt = document.createElement('option');
+    deckOptions.forEach(function(d) {
+      var opt = document.createElement('option');
       opt.value = d.name;
       opt.textContent = d.label;
       if (d.name === window._currentDeckName) opt.selected = true;
@@ -1332,11 +1758,11 @@ function initEmailPanel() {
   }
 
   // Load recipients from Firebase
-  db.ref('rooms/' + roomId + '/feedback').once('value', snap => {
-    const data = snap.val();
+  db.ref('rooms/' + roomId + '/feedback').once('value', function(snap) {
+    var data = snap.val();
     _feedbackRecipients = { wantPdf: [], all: [] };
     if (data) {
-      Object.values(data).forEach(e => {
+      Object.values(data).forEach(function(e) {
         if (e.email) {
           _feedbackRecipients.all.push({ email: e.email, name: e.name || '' });
           if (e.wantPdf) _feedbackRecipients.wantPdf.push({ email: e.email, name: e.name || '' });
@@ -1347,32 +1773,32 @@ function initEmailPanel() {
   });
 
   // Set default body template
-  const body = document.getElementById('emailBody');
+  var body = document.getElementById('emailBody');
   if (!body.value.trim()) {
     body.value = 'Hi {name}，\n\n感謝你參加課程！\n\n📎 簡報連結：{link}\n\n⚠️ 此為課程教材，請保護版權，勿公開散布。\n如有問題歡迎回信。\n\n— AI 100 講 講師';
   }
 }
 
 function updateEmailCount() {
-  const target = document.querySelector('input[name="emailTarget"]:checked').value;
-  const list = _feedbackRecipients[target] || [];
+  var target = document.querySelector('input[name="emailTarget"]:checked').value;
+  var list = _feedbackRecipients[target] || [];
   document.getElementById('emailCount').textContent = list.length + ' 人';
 }
 
 function updateEmailLink() {
-  const deck = document.getElementById('emailDeckSelect').value;
+  var deck = document.getElementById('emailDeckSelect').value;
   if (deck) {
     document.getElementById('emailLink').value = 'https://ai100.cooperation.tw/slides/pdf/' + deck + '.pdf';
   }
 }
 
 function getEmailRecipients() {
-  const target = document.querySelector('input[name="emailTarget"]:checked').value;
+  var target = document.querySelector('input[name="emailTarget"]:checked').value;
   return _feedbackRecipients[target] || [];
 }
 
 function buildEmailHtml(bodyText, link) {
-  const lines = bodyText.replace(/\{link\}/g, link ? '<a href="' + link + '" style="color:#0F9D8A;">' + link + '</a>' : '（未設定連結）');
+  var lines = bodyText.replace(/\{link\}/g, link ? '<a href="' + link + '" style="color:#0F9D8A;">' + link + '</a>' : '（未設定連結）');
   return '<div style="font-family:Noto Sans TC,sans-serif;max-width:600px;margin:0 auto;padding:20px;">'
     + '<div style="background:#0B3C5D;color:#fff;padding:20px;border-radius:12px 12px 0 0;text-align:center;">'
     + '<h1 style="margin:0;font-size:1.3rem;">AI 100 講</h1>'
@@ -1383,39 +1809,39 @@ function buildEmailHtml(bodyText, link) {
 }
 
 function previewEmail() {
-  const body = document.getElementById('emailBody').value;
-  const link = document.getElementById('emailLink').value;
-  const html = buildEmailHtml(body, link).replace(/\{name\}/g, '小明');
-  const el = document.getElementById('emailPreview');
+  var body = document.getElementById('emailBody').value;
+  var link = document.getElementById('emailLink').value;
+  var html = buildEmailHtml(body, link).replace(/\{name\}/g, '小明');
+  var el = document.getElementById('emailPreview');
   el.innerHTML = html;
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
 function sendEmail() {
-  const gasUrl = localStorage.getItem('_gas_url');
+  var gasUrl = localStorage.getItem('_gas_url');
   if (!gasUrl) {
     alert('請先設定 GAS URL：\n設定 → GAS Email Relay URL');
     return;
   }
-  const recipients = getEmailRecipients();
+  var recipients = getEmailRecipients();
   if (!recipients.length) { alert('沒有收件人'); return; }
 
-  const subject = document.getElementById('emailSubject').value.trim();
-  const bodyText = document.getElementById('emailBody').value;
-  const link = document.getElementById('emailLink').value;
+  var subject = document.getElementById('emailSubject').value.trim();
+  var bodyText = document.getElementById('emailBody').value;
+  var link = document.getElementById('emailLink').value;
   if (!subject) { alert('請填寫主題'); return; }
   if (!confirm('確定發送給 ' + recipients.length + ' 人？')) return;
 
-  const htmlBody = buildEmailHtml(bodyText, link);
-  const btn = document.getElementById('btnSendEmail');
-  const status = document.getElementById('emailStatus');
+  var htmlBody = buildEmailHtml(bodyText, link);
+  var btn = document.getElementById('btnSendEmail');
+  var status = document.getElementById('emailStatus');
   btn.disabled = true;
   btn.textContent = '⏳ 寄送中...';
   status.textContent = '';
 
   fetch(gasUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'text/plain' }, // GAS doesn't support CORS for application/json
+    headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify({
       recipients: recipients,
       subject: subject,
@@ -1423,15 +1849,15 @@ function sendEmail() {
       senderName: 'AI 100 講'
     })
   })
-  .then(r => r.json())
-  .then(d => {
+  .then(function(r) { return r.json() })
+  .then(function(d) {
     btn.disabled = false;
     if (d.success) {
       btn.textContent = '✅ 寄送完成';
       status.textContent = '成功 ' + d.sent + ' 封' + (d.failed ? '，失敗 ' + d.failed + ' 封' : '');
       status.style.color = '#0F9D8A';
       // Save to Firebase history
-      const deck = document.getElementById('emailDeckSelect').value;
+      var deck = document.getElementById('emailDeckSelect').value;
       db.ref('rooms/' + roomId + '/emailHistory').push({
         deck: deck || '(自訂)',
         subject: subject,
@@ -1447,7 +1873,7 @@ function sendEmail() {
       status.style.color = '#DC2626';
     }
   })
-  .catch(e => {
+  .catch(function(e) {
     btn.disabled = false;
     btn.textContent = '📧 重試';
     status.textContent = '❌ 網路錯誤: ' + e.message;
@@ -1458,16 +1884,16 @@ function sendEmail() {
 // ═══ Email History ═══
 function loadEmailHistory() {
   if (!roomId) return;
-  const el = document.getElementById('historyContent');
-  db.ref('rooms/' + roomId + '/emailHistory').orderByChild('ts').once('value', snap => {
-    const data = snap.val();
+  var el = document.getElementById('historyContent');
+  db.ref('rooms/' + roomId + '/emailHistory').orderByChild('ts').once('value', function(snap) {
+    var data = snap.val();
     if (!data) { el.innerHTML = '<p style="color:#7d8590;text-align:center;padding:2rem;">尚無寄送紀錄</p>'; return; }
-    const entries = Object.values(data).sort((a, b) => (b.ts || 0) - (a.ts || 0));
-    let html = '';
-    entries.forEach(e => {
-      const d = e.ts ? new Date(e.ts) : null;
-      const dateStr = d ? (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0') : '';
-      const statusIcon = e.failed ? '⚠️' : '✅';
+    var entries = Object.values(data).sort(function(a, b) { return (b.ts || 0) - (a.ts || 0) });
+    var html = '';
+    entries.forEach(function(e) {
+      var d = e.ts ? new Date(e.ts) : null;
+      var dateStr = d ? (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0') : '';
+      var statusIcon = e.failed ? '⚠️' : '✅';
       html += '<div style="padding:8px;background:#0d1117;border-radius:8px;margin-bottom:6px;border:1px solid #30363d;">';
       html += '<div style="display:flex;justify-content:space-between;font-size:0.85rem;">';
       html += '<span style="color:#e6edf3;font-weight:700;">' + statusIcon + ' ' + (e.deck || '') + '</span>';
@@ -1481,54 +1907,66 @@ function loadEmailHistory() {
   });
 }
 
-// ═══ Action Toast — 螢幕顯示動作回饋 ═══
-let toastTimer = null;
+// ═══ Action Toast ═══
+var toastTimer = null;
 function showActionToast(msg) {
-  const el = document.getElementById('actionToast');
+  var el = document.getElementById('actionToast');
   el.textContent = msg;
   el.classList.add('show');
   if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+  toastTimer = setTimeout(function() { el.classList.remove('show') }, 3000);
 }
 
 function initAgentActionListener() {
   if (!roomId) return;
-  const ref = db.ref('rooms/' + roomId + '/agentActions/latest');
-  ref.on('value', s => {
-    const d = s.val();
+  var ref = db.ref('rooms/' + roomId + '/agentActions/latest');
+  ref.on('value', function(s) {
+    var d = s.val();
     if (!d || !d.text) return;
     // Only show if recent (within 10s)
     if (d.ts && Date.now() - d.ts < 10000) {
       showActionToast(d.text);
     }
   });
-  listeners.push({ref, event:'value'});
+  listeners.push({ref:ref, event:'value'});
 }
 
 // ═══ Current Deck Label ═══
 window._currentDeckName = '';
+window._currentDeckTitle = '';
 function initDeckLabel() {
   if (!roomId) return;
-  const ref = db.ref('rooms/' + roomId + '/presentation');
-  ref.on('value', s => {
-    const d = s.val();
-    const label = document.getElementById('currentDeckLabel');
+  var ref = db.ref('rooms/' + roomId + '/presentation');
+  ref.on('value', function(s) {
+    var d = s.val();
+    var label = document.getElementById('currentDeckLabel');
     if (d && d.deck) {
-      const name = d.title || d.deck.replace(/_/g, ' ');
+      var name = d.title || d.deck.replace(/_/g, ' ');
       label.textContent = '📚 ' + name;
       label.style.display = 'inline';
       window._currentDeckName = d.deck;
+      window._currentDeckTitle = d.title || '';
+      // Update live status bar if in live phase
+      if(currentPhase==='live'){
+        var deckEl=document.getElementById('liveStatusDeck');
+        if(deckEl) deckEl.textContent='📚 '+name;
+        // Update page info
+        var pageEl=document.getElementById('liveStatusPage');
+        if(pageEl && d.current!==undefined && d.totalSlides){
+          pageEl.textContent='第'+(d.current+1)+'/'+d.totalSlides+'頁';
+        }
+      }
     } else {
       label.style.display = 'none';
       window._currentDeckName = '';
+      window._currentDeckTitle = '';
     }
   });
-  listeners.push({ref, event:'value'});
+  listeners.push({ref:ref, event:'value'});
 }
 
-// ═══ Voice Alias Map — 語音辨識前處理 ═══
-const VOICE_ALIASES = {
-  // 英文工具名→中文別名（Chrome zh-TW 辨識差）
+// ═══ Voice Alias Map ═══
+var VOICE_ALIASES = {
   '免費':'推 groq', '免費的':'推 groq', '免費平台':'推 groq',
   'groove':'推 groq', 'grok':'推 groq', 'grow':'推 groq', 'groc':'推 groq',
   '吉他':'推 github', 'get hub':'推 github', 'kit hub':'推 github',
@@ -1537,39 +1975,36 @@ const VOICE_ALIASES = {
   'ai studio':'推 gemini', 'ai 工作室':'推 gemini',
   '試算表':'推 sheet', '新表格':'推 sheet',
   '反重力':'推 antigravity',
-  // 教材快捷
   '第一課':'教材 s01', '第二課':'教材 s02', '第三課':'教材 s03', '第四課':'教材 s04', '第五課':'教材 s05',
   '第一單元':'教材 s01', '第二單元':'教材 s02', '第三單元':'教材 s03', '第四單元':'教材 s04', '第五單元':'教材 s05',
 };
 
 function applyVoiceAlias(text) {
-  const t = text.trim().toLowerCase();
-  // Exact alias match
+  var t = text.trim().toLowerCase();
   if (VOICE_ALIASES[t]) return VOICE_ALIASES[t];
-  // Partial match: check if alias key is a substring
-  for (const [key, val] of Object.entries(VOICE_ALIASES)) {
-    if (t.includes(key)) return val;
+  for (var key in VOICE_ALIASES) {
+    if (VOICE_ALIASES.hasOwnProperty(key) && t.indexOf(key) !== -1) return VOICE_ALIASES[key];
   }
-  return text; // no alias matched
+  return text;
 }
 
-// ═══ Voice Control — 持續監聽，免按鍵 ═══
-let voiceRecognition = null;
-let voiceActive = false;
+// ═══ Voice Control ═══
+var voiceRecognition = null;
+var voiceActive = false;
 
 function toggleVoice() {
   if (voiceActive) { stopVoice(); return; }
 
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) { alert('此瀏覽器不支援語音辨識，請用 Chrome'); return; }
 
   voiceRecognition = new SR();
   voiceRecognition.lang = 'zh-TW';
-  voiceRecognition.continuous = true;      // 持續監聽
-  voiceRecognition.interimResults = false; // 只要最終結果
+  voiceRecognition.continuous = true;
+  voiceRecognition.interimResults = false;
   voiceRecognition.maxAlternatives = 1;
 
-  voiceRecognition.onstart = () => {
+  voiceRecognition.onstart = function() {
     voiceActive = true;
     document.getElementById('btnVoice').style.background = 'var(--red)';
     document.getElementById('btnVoice').style.color = '#fff';
@@ -1578,18 +2013,16 @@ function toggleVoice() {
     document.getElementById('voiceStatus').textContent = '🔴 監聽中...';
   };
 
-  voiceRecognition.onresult = (e) => {
-    for (let i = e.resultIndex; i < e.results.length; i++) {
+  voiceRecognition.onresult = function(e) {
+    for (var i = e.resultIndex; i < e.results.length; i++) {
       if (e.results[i].isFinal) {
-        const text = e.results[i][0].transcript.trim();
+        var text = e.results[i][0].transcript.trim();
         if (text.length < 2) continue;
 
-        // 套用別名（英文辨識差的補救）
-        const processed = applyVoiceAlias(text);
+        var processed = applyVoiceAlias(text);
         console.log('[voice]', text, processed !== text ? '→ ' + processed : '');
         document.getElementById('voiceStatus').textContent = '🎤 ' + (processed !== text ? processed + ' (' + text + ')' : text);
 
-        // 送 Firebase，讓 SmallClaw 判斷是不是指令
         if (roomId) {
           db.ref('rooms/' + roomId + '/voiceCommands').push({
             text: processed,
@@ -1600,19 +2033,17 @@ function toggleVoice() {
     }
   };
 
-  voiceRecognition.onerror = (e) => {
+  voiceRecognition.onerror = function(e) {
     console.error('[voice] error:', e.error);
     if (e.error === 'not-allowed') {
       alert('請允許麥克風權限');
       stopVoice();
     }
-    // network/no-speech errors → auto restart
   };
 
-  voiceRecognition.onend = () => {
-    // 持續模式：自動重啟（除非手動停止）
+  voiceRecognition.onend = function() {
     if (voiceActive) {
-      setTimeout(() => { try { voiceRecognition.start(); } catch(e) {} }, 300);
+      setTimeout(function() { try { voiceRecognition.start(); } catch(e) {} }, 300);
     }
   };
 
