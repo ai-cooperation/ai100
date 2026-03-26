@@ -331,6 +331,71 @@
   .mode-btn{padding:0.5rem 1rem;border-radius:8px;font-size:0.95rem;font-weight:700;background:var(--bg);color:var(--dim);border:1px solid var(--border);transition:all 0.2s;min-height:40px}
   .mode-btn.active{background:var(--pri);color:#fff;border-color:var(--pri)}
 
+  /* ═══ Survey Editor ═══ */
+  .survey-editor{max-width:700px;margin:0 auto;width:100%;padding:1rem}
+  .se-header{display:flex;align-items:center;gap:0.8rem;margin-bottom:1rem;flex-wrap:wrap}
+  .se-header h2{font-size:1rem;font-weight:700;color:var(--gold);flex:1}
+  .se-header select{padding:0.5rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem}
+  .se-question{background:var(--surface);border-radius:10px;padding:1rem;border:1px solid var(--border);margin-bottom:0.6rem;position:relative}
+  .se-question .se-q-header{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.6rem}
+  .se-question .se-q-num{width:24px;height:24px;border-radius:50%;background:var(--pri);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:900;flex-shrink:0}
+  .se-question .se-q-text{flex:1;padding:0.4rem 0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.85rem;outline:none}
+  .se-question .se-q-text:focus{border-color:var(--pri)}
+  .se-question .se-q-del{padding:0.3rem 0.5rem;background:none;color:var(--dim);border:1px solid var(--border);border-radius:6px;font-size:0.75rem;cursor:pointer}
+  .se-question .se-q-del:hover{color:var(--red);border-color:var(--red)}
+  .se-q-row{display:flex;gap:0.5rem;align-items:center;margin-bottom:0.4rem;flex-wrap:wrap}
+  .se-q-row select{padding:0.35rem 0.5rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem}
+  .se-q-row label{font-size:0.8rem;color:var(--dim);display:flex;align-items:center;gap:0.3rem}
+  .se-q-row label input[type="checkbox"]{accent-color:var(--pri)}
+  .se-type-badge{font-size:0.72rem;padding:0.2rem 0.5rem;border-radius:4px;background:var(--bg);color:var(--dim);border:1px solid var(--border)}
+  .se-options{margin-top:0.5rem;padding-left:1.8rem}
+  .se-opt-row{display:flex;gap:0.4rem;margin-bottom:0.3rem;align-items:center}
+  .se-opt-row input{flex:1;padding:0.3rem 0.5rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem;outline:none}
+  .se-opt-row input:focus{border-color:var(--pri)}
+  .se-opt-row button{width:24px;height:24px;border-radius:6px;background:none;color:var(--dim);border:1px solid var(--border);font-size:0.7rem;cursor:pointer;flex-shrink:0}
+  .se-opt-row button:hover{color:var(--red);border-color:var(--red)}
+  .se-add-opt{font-size:0.75rem;color:var(--pri);background:none;border:1px dashed var(--pri);border-radius:6px;padding:0.25rem 0.5rem;cursor:pointer;margin-top:0.2rem}
+  .se-actions{display:flex;gap:0.5rem;margin-top:1rem;flex-wrap:wrap}
+  .se-actions button{flex:1;min-width:100px;padding:0.6rem;border-radius:8px;font-size:0.85rem;font-weight:700;cursor:pointer;border:none}
+  .se-btn-save{background:var(--pri);color:#fff}
+  .se-btn-save:hover{background:var(--pri-d)}
+  .se-btn-preview{background:var(--bg);color:var(--text);border:1px solid var(--border) !important}
+  .se-btn-preview:hover{border-color:var(--gold) !important;color:var(--gold)}
+  .se-btn-back{background:var(--bg);color:var(--dim);border:1px solid var(--border) !important}
+  .se-btn-back:hover{color:var(--text);border-color:var(--text) !important}
+  .se-add-q{width:100%;padding:0.6rem;background:var(--bg);color:var(--pri);border:1px dashed var(--pri);border-radius:8px;font-size:0.85rem;cursor:pointer;margin-bottom:0.5rem}
+  .se-add-q:hover{background:rgba(15,157,138,0.08)}
+
+  /* Survey Preview */
+  .survey-preview{max-width:500px;margin:1rem auto;background:#fff;border-radius:16px;padding:1.5rem;color:#1a1a1a}
+  .survey-preview h3{font-size:1rem;font-weight:700;margin-bottom:1rem;color:#0B3C5D}
+  .sp-question{margin-bottom:1.2rem}
+  .sp-question .sp-label{font-size:0.9rem;font-weight:700;margin-bottom:0.4rem;color:#333}
+  .sp-question .sp-label .sp-req{color:#DC2626;margin-left:2px}
+  .sp-stars{display:flex;gap:0.3rem}
+  .sp-stars span{font-size:1.5rem;color:#ccc;cursor:default}
+  .sp-radio-group{display:flex;flex-direction:column;gap:0.3rem}
+  .sp-radio{display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.6rem;background:#f5f5f5;border-radius:8px;font-size:0.85rem}
+  .sp-radio input[type="radio"]{accent-color:#0F9D8A}
+  .sp-text{width:100%;padding:0.6rem;border:1px solid #ddd;border-radius:8px;font-size:0.85rem;background:#f9f9f9;resize:vertical}
+  .sp-email{width:100%;padding:0.6rem;border:1px solid #ddd;border-radius:8px;font-size:0.85rem;background:#f9f9f9}
+  .sp-boolean{display:flex;gap:1rem}
+  .sp-boolean label{display:flex;align-items:center;gap:0.3rem;font-size:0.85rem}
+
+  /* Survey config status in prepare phase */
+  .survey-status{display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap}
+  .survey-status .ss-label{font-size:0.85rem;color:var(--text)}
+  .survey-status .ss-ok{color:var(--pri);font-weight:700}
+  .survey-status .ss-no{color:var(--dim)}
+  .survey-status button{padding:0.3rem 0.7rem;border-radius:6px;font-size:0.78rem;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--text)}
+  .survey-status button:hover{border-color:var(--pri);color:var(--pri)}
+
+  /* Course list month group */
+  .month-divider{font-size:0.8rem;color:var(--dim);padding:0.8rem 0 0.3rem;border-bottom:1px solid var(--border);margin-bottom:0.5rem;font-weight:700}
+  .course-card .cc-prep{font-size:0.7rem;color:var(--dim);margin-top:0.2rem}
+  .course-card .cc-prep .prep-ok{color:var(--pri)}
+  .course-card .cc-prep .prep-no{color:var(--dim);opacity:0.5}
+
   @media(max-width:700px){
     .info-panel{grid-template-columns:1fr}
     .agent-panel{width:100%}
@@ -348,6 +413,8 @@
     .phase-card{border-left:none;border-bottom:3px solid transparent;padding:0.6rem 1rem;white-space:nowrap}
     .phase-card.active{border-left-color:transparent;border-bottom-color:var(--pri)}
     .cs-footer{display:none}
+    .survey-editor{padding:0.5rem}
+    .se-actions{flex-direction:column}
   }
 </style>
 </head>
@@ -502,8 +569,24 @@
       <!-- Step 3: Pre-class survey -->
       <div class="step-card">
         <div class="step-title"><span class="step-num">3</span>課前問卷 <span style="font-size:0.7rem;color:var(--dim);font-weight:400;margin-left:0.5rem">（選填）</span></div>
-        <div class="step-desc">開啟 AI 自動生成問卷，了解學員背景</div>
-        <button class="act-btn" onclick="openSurvey()" style="margin-top:0.5rem">開啟課前問卷 ↗</button>
+        <div class="step-desc">設定課前問卷，了解學員背景</div>
+        <div class="survey-status" id="preSurveyStatus">
+          <span class="ss-label ss-no" id="preSurveyLabel">尚未設定</span>
+          <button onclick="openSurveyEditor('pre',roomId)">設定</button>
+          <button onclick="previewSurveyConfig('pre',roomId)">預覽</button>
+          <button class="act-btn" onclick="openSurvey()" style="font-size:0.78rem;padding:0.3rem 0.7rem">開啟舊版 ↗</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Post-class survey -->
+      <div class="step-card">
+        <div class="step-title"><span class="step-num">4</span>課後問卷 <span style="font-size:0.7rem;color:var(--dim);font-weight:400;margin-left:0.5rem">（選填）</span></div>
+        <div class="step-desc">設定課後問卷，收集回饋與 Email</div>
+        <div class="survey-status" id="postSurveyStatus">
+          <span class="ss-label ss-no" id="postSurveyLabel">尚未設定</span>
+          <button onclick="openSurveyEditor('post',roomId)">設定</button>
+          <button onclick="previewSurveyConfig('post',roomId)">預覽</button>
+        </div>
       </div>
 
       <!-- Start class button -->
@@ -575,6 +658,17 @@
       <div class="post-section" id="postSuggestions" style="display:none">
         <h3>💡 學員建議</h3>
         <div id="postSuggestionsList"></div>
+      </div>
+
+      <!-- Post-class survey management -->
+      <div class="post-section" id="postSurveyMgmt">
+        <h3>📝 課後問卷管理</h3>
+        <div class="survey-status" id="postSurveyMgmtStatus">
+          <span class="ss-label ss-no" id="postSurveyMgmtLabel">載入中...</span>
+          <button onclick="openSurveyEditor('post',roomId)">編輯</button>
+          <button onclick="previewSurveyConfig('post',roomId)">預覽</button>
+        </div>
+        <div id="postSurveyMgmtCount" style="font-size:0.8rem;color:var(--dim);margin-top:0.4rem"></div>
       </div>
 
       <!-- Send materials -->
@@ -838,6 +932,414 @@ var deckOptions=[
   {name:'S09_FARS_FactCheck',label:'S09 FARS 事實查核'},
 ];
 
+// ═══ Survey Templates ═══
+var SURVEY_TEMPLATES = {
+  'post-general': {
+    name: '通用課後問卷',
+    questions: [
+      {id:'satisfaction', text:'整體滿意度', type:'rating', required:true},
+      {id:'recommend', text:'推薦給朋友的意願', type:'rating', required:true},
+      {id:'helpful', text:'最有幫助的部分', type:'single', options:['實作練習','案例分析','講師講解','互動討論','教材內容'], required:true},
+      {id:'unclear', text:'不清楚的地方', type:'text', required:false},
+      {id:'pacing', text:'課程節奏', type:'single', options:['太快','剛好','太慢'], required:true},
+      {id:'suggestion', text:'建議與回饋', type:'text', required:false},
+      {id:'email', text:'Email（收教材用）', type:'email', required:false},
+      {id:'wantPdf', text:'是否要簡報 PDF', type:'boolean', required:false}
+    ]
+  },
+  'post-tech': {
+    name: '技術課程問卷',
+    questions: [
+      {id:'satisfaction', text:'整體滿意度', type:'rating', required:true},
+      {id:'difficulty', text:'課程難度', type:'single', options:['太簡單','適中','偏難','太難'], required:true},
+      {id:'helpful', text:'最有幫助的部分', type:'single', options:['Live Demo','實作練習','程式碼範例','工具介紹','Q&A 討論'], required:true},
+      {id:'apply', text:'預計如何應用在工作中', type:'text', required:false},
+      {id:'suggestion', text:'建議', type:'text', required:false},
+      {id:'email', text:'Email', type:'email', required:false},
+      {id:'wantPdf', text:'是否要簡報 PDF', type:'boolean', required:false}
+    ]
+  },
+  'pre-general': {
+    name: '通用課前問卷',
+    questions: [
+      {id:'background', text:'你的背景', type:'single', options:['學生','上班族','自由工作者','主管','其他'], required:true},
+      {id:'experience', text:'相關經驗', type:'single', options:['完全沒有','略有了解','有一些經驗','很熟悉'], required:true},
+      {id:'expect', text:'最想學到什麼', type:'text', required:true},
+      {id:'concern', text:'最擔心什麼', type:'text', required:false}
+    ]
+  }
+};
+
+// ═══ Survey Config Firebase Helpers ═══
+function loadSurveyConfig(roomIdParam, type, callback) {
+  var path = type === 'pre' ? 'surveyConfig' : 'feedbackConfig';
+  db.ref('rooms/' + roomIdParam + '/' + path).once('value', function(snap) {
+    callback(snap.val());
+  });
+}
+
+function saveSurveyConfig(roomIdParam, type, config) {
+  var path = type === 'pre' ? 'surveyConfig' : 'feedbackConfig';
+  return db.ref('rooms/' + roomIdParam + '/' + path).set(config);
+}
+
+// ═══ Survey Editor State ═══
+var _seQuestions = [];
+var _seType = '';
+var _seRoomId = '';
+var _seTemplateName = '';
+
+function openSurveyEditor(type, editorRoomId) {
+  _seType = type;
+  _seRoomId = editorRoomId;
+  if (!editorRoomId) { alert('請先建立教室'); return; }
+
+  // Load existing config or default template
+  loadSurveyConfig(editorRoomId, type, function(existing) {
+    if (existing && existing.questions) {
+      _seQuestions = JSON.parse(JSON.stringify(existing.questions));
+      _seTemplateName = existing.templateName || '';
+    } else {
+      // Pick default template
+      var defaultKey = type === 'pre' ? 'pre-general' : 'post-general';
+      var tmpl = SURVEY_TEMPLATES[defaultKey];
+      _seQuestions = JSON.parse(JSON.stringify(tmpl.questions));
+      _seTemplateName = defaultKey;
+    }
+    renderSurveyEditor();
+  });
+}
+
+function renderSurveyEditor() {
+  // Render into the appropriate area based on context
+  var target = null;
+  // If in dashboard preparing phase
+  var prepareEl = document.getElementById('phasePrepare');
+  if (prepareEl && prepareEl.classList.contains('active')) {
+    target = prepareEl.querySelector('.main');
+  }
+  // If in course view
+  var cvBody = document.getElementById('cvMainBody');
+  if (!target && cvBody && document.getElementById('courseView').classList.contains('active')) {
+    target = cvBody;
+  }
+  // If in post-class phase
+  var postEl = document.getElementById('phasePost');
+  if (!target && postEl && postEl.classList.contains('active')) {
+    target = postEl.querySelector('.main');
+  }
+  if (!target) {
+    // Fallback: use preparing phase main
+    target = document.querySelector('#phasePrepare .main');
+  }
+  if (!target) return;
+
+  var typeLabel = _seType === 'pre' ? '課前問卷' : '課後問卷';
+  var typeTemplates = _seType === 'pre' ? ['pre-general'] : ['post-general', 'post-tech'];
+
+  var html = '<div class="survey-editor">';
+  html += '<div class="se-header">';
+  html += '<h2>' + typeLabel + ' 編輯器</h2>';
+  html += '<select id="seTemplateSelect" onchange="applySurveyTemplate(this.value)">';
+  html += '<option value="">— 套用模板 —</option>';
+  typeTemplates.forEach(function(key) {
+    var sel = _seTemplateName === key ? ' selected' : '';
+    html += '<option value="' + key + '"' + sel + '>' + esc(SURVEY_TEMPLATES[key].name) + '</option>';
+  });
+  html += '</select>';
+  html += '</div>';
+
+  // Questions
+  _seQuestions.forEach(function(q, idx) {
+    html += '<div class="se-question" data-idx="' + idx + '">';
+    html += '<div class="se-q-header">';
+    html += '<span class="se-q-num">' + (idx + 1) + '</span>';
+    html += '<input class="se-q-text" value="' + esc(q.text) + '" onchange="updateSeQuestion(' + idx + ',\'text\',this.value)">';
+    html += '<button class="se-q-del" onclick="deleteSeQuestion(' + idx + ')">刪除</button>';
+    html += '</div>';
+    html += '<div class="se-q-row">';
+    html += '<select onchange="updateSeQuestion(' + idx + ',\'type\',this.value);renderSurveyEditor()">';
+    ['rating', 'single', 'text', 'email', 'boolean'].forEach(function(t) {
+      html += '<option value="' + t + '"' + (q.type === t ? ' selected' : '') + '>' + getTypeLabel(t) + '</option>';
+    });
+    html += '</select>';
+    html += '<label><input type="checkbox"' + (q.required ? ' checked' : '') + ' onchange="updateSeQuestion(' + idx + ',\'required\',this.checked)"> 必填</label>';
+    html += '<span class="se-type-badge">' + getTypeLabel(q.type) + '</span>';
+    html += '</div>';
+
+    // Options for 'single' type
+    if (q.type === 'single') {
+      var opts = q.options || [];
+      html += '<div class="se-options">';
+      opts.forEach(function(o, oi) {
+        html += '<div class="se-opt-row">';
+        html += '<input value="' + esc(o) + '" onchange="updateSeOption(' + idx + ',' + oi + ',this.value)" placeholder="選項 ' + (oi + 1) + '">';
+        if (opts.length > 2) {
+          html += '<button onclick="removeSeOption(' + idx + ',' + oi + ')">✕</button>';
+        } else {
+          html += '<button style="visibility:hidden">✕</button>';
+        }
+        html += '</div>';
+      });
+      html += '<button class="se-add-opt" onclick="addSeOption(' + idx + ')">+ 新增選項</button>';
+      html += '</div>';
+    }
+
+    html += '</div>';
+  });
+
+  html += '<button class="se-add-q" onclick="addSeQuestion()">+ 新增問題</button>';
+
+  html += '<div class="se-actions">';
+  html += '<button class="se-btn-back" onclick="closeSurveyEditor()">← 返回</button>';
+  html += '<button class="se-btn-preview" onclick="previewSurveyFromEditor()">預覽</button>';
+  html += '<button class="se-btn-save" onclick="saveSurveyFromEditor()">儲存</button>';
+  html += '</div>';
+  html += '</div>';
+
+  target.innerHTML = html;
+}
+
+function getTypeLabel(type) {
+  var labels = { rating: '1-5 星評分', single: '單選', text: '自由文字', email: 'Email 欄位', boolean: '是/否' };
+  return labels[type] || type;
+}
+
+function updateSeQuestion(idx, field, value) {
+  if (_seQuestions[idx]) {
+    _seQuestions[idx] = Object.assign({}, _seQuestions[idx]);
+    _seQuestions[idx][field] = value;
+  }
+}
+
+function deleteSeQuestion(idx) {
+  _seQuestions = _seQuestions.filter(function(_, i) { return i !== idx; });
+  renderSurveyEditor();
+}
+
+function addSeQuestion() {
+  _seQuestions = _seQuestions.concat([{
+    id: 'q' + Date.now(),
+    text: '新問題',
+    type: 'text',
+    required: false
+  }]);
+  renderSurveyEditor();
+}
+
+function updateSeOption(qIdx, optIdx, value) {
+  if (_seQuestions[qIdx] && _seQuestions[qIdx].options) {
+    var newOpts = _seQuestions[qIdx].options.slice();
+    newOpts[optIdx] = value;
+    _seQuestions[qIdx] = Object.assign({}, _seQuestions[qIdx], { options: newOpts });
+  }
+}
+
+function removeSeOption(qIdx, optIdx) {
+  if (_seQuestions[qIdx] && _seQuestions[qIdx].options) {
+    var newOpts = _seQuestions[qIdx].options.filter(function(_, i) { return i !== optIdx; });
+    _seQuestions[qIdx] = Object.assign({}, _seQuestions[qIdx], { options: newOpts });
+    renderSurveyEditor();
+  }
+}
+
+function addSeOption(qIdx) {
+  if (_seQuestions[qIdx]) {
+    var newOpts = (_seQuestions[qIdx].options || []).concat(['']);
+    _seQuestions[qIdx] = Object.assign({}, _seQuestions[qIdx], { options: newOpts });
+    renderSurveyEditor();
+  }
+}
+
+function applySurveyTemplate(key) {
+  if (!key || !SURVEY_TEMPLATES[key]) return;
+  if (_seQuestions.length > 0 && !confirm('套用模板將覆蓋目前的問題，確定？')) {
+    document.getElementById('seTemplateSelect').value = _seTemplateName || '';
+    return;
+  }
+  _seTemplateName = key;
+  _seQuestions = JSON.parse(JSON.stringify(SURVEY_TEMPLATES[key].questions));
+  renderSurveyEditor();
+}
+
+function saveSurveyFromEditor() {
+  if (!_seRoomId) { alert('無法儲存：缺少 roomId'); return; }
+  var config = {
+    questions: _seQuestions,
+    templateName: _seTemplateName,
+    updatedAt: firebase.database.ServerValue.TIMESTAMP
+  };
+  saveSurveyConfig(_seRoomId, _seType, config).then(function() {
+    showActionToast((_seType === 'pre' ? '課前' : '課後') + '問卷已儲存（' + _seQuestions.length + ' 題）');
+    closeSurveyEditor();
+  }).catch(function(e) {
+    alert('儲存失敗：' + e.message);
+  });
+}
+
+function closeSurveyEditor() {
+  // Restore the original view
+  if (currentPhase === 'preparing') {
+    renderPreparingPhase();
+  } else if (currentPhase === 'post-class') {
+    renderPostClassPhase();
+  } else if (document.getElementById('courseView').classList.contains('active')) {
+    // Back to course session list or prepare view
+    if (cvSelectedSessionIdx !== null && cvSelectedPhase === 'prepare') {
+      renderCVPrepare(cvSessions[cvSelectedSessionIdx]);
+    } else if (cvSelectedSessionIdx !== null && cvSelectedPhase === 'post') {
+      renderCVPost(cvSessions[cvSelectedSessionIdx]);
+    } else {
+      renderSessionList();
+    }
+  }
+}
+
+// ═══ Survey Preview ═══
+function previewSurveyConfig(type, previewRoomId) {
+  if (!previewRoomId) { alert('請先建立教室'); return; }
+  loadSurveyConfig(previewRoomId, type, function(config) {
+    var questions = [];
+    if (config && config.questions) {
+      questions = config.questions;
+    } else {
+      var defaultKey = type === 'pre' ? 'pre-general' : 'post-general';
+      questions = SURVEY_TEMPLATES[defaultKey].questions;
+    }
+    renderSurveyPreview(questions, type);
+  });
+}
+
+function previewSurveyFromEditor() {
+  renderSurveyPreview(_seQuestions, _seType);
+}
+
+function renderSurveyPreview(questions, type) {
+  var target = null;
+  var prepareEl = document.getElementById('phasePrepare');
+  if (prepareEl && prepareEl.classList.contains('active')) {
+    target = prepareEl.querySelector('.main');
+  }
+  var cvBody = document.getElementById('cvMainBody');
+  if (!target && cvBody && document.getElementById('courseView').classList.contains('active')) {
+    target = cvBody;
+  }
+  var postEl = document.getElementById('phasePost');
+  if (!target && postEl && postEl.classList.contains('active')) {
+    target = postEl.querySelector('.main');
+  }
+  if (!target) target = document.querySelector('#phasePrepare .main');
+  if (!target) return;
+
+  var typeLabel = type === 'pre' ? '課前問卷' : '課後問卷';
+
+  var html = '<div style="max-width:700px;margin:0 auto;padding:1rem">';
+  html += '<div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:1rem">';
+  html += '<button class="se-btn-back" onclick="closeSurveyPreview()" style="padding:0.4rem 0.8rem;border-radius:6px;font-size:0.85rem;background:var(--bg);color:var(--dim);border:1px solid var(--border);cursor:pointer">← 返回</button>';
+  html += '<h2 style="font-size:1rem;color:var(--gold)">' + typeLabel + ' 預覽</h2>';
+  html += '<span style="font-size:0.8rem;color:var(--dim)">（學員視角）</span>';
+  html += '</div>';
+
+  html += '<div class="survey-preview">';
+  html += '<h3>' + typeLabel + '</h3>';
+
+  questions.forEach(function(q, idx) {
+    html += '<div class="sp-question">';
+    html += '<div class="sp-label">' + (idx + 1) + '. ' + esc(q.text);
+    if (q.required) html += '<span class="sp-req">*</span>';
+    html += '</div>';
+
+    if (q.type === 'rating') {
+      html += '<div class="sp-stars">';
+      for (var s = 1; s <= 5; s++) {
+        html += '<span>&#9734;</span>';
+      }
+      html += '</div>';
+    } else if (q.type === 'single') {
+      html += '<div class="sp-radio-group">';
+      (q.options || []).forEach(function(opt, oi) {
+        html += '<label class="sp-radio"><input type="radio" name="preview_q' + idx + '" disabled> ' + esc(opt) + '</label>';
+      });
+      html += '</div>';
+    } else if (q.type === 'text') {
+      html += '<textarea class="sp-text" rows="2" disabled placeholder="學員輸入..."></textarea>';
+    } else if (q.type === 'email') {
+      html += '<input class="sp-email" type="email" disabled placeholder="name@example.com">';
+    } else if (q.type === 'boolean') {
+      html += '<div class="sp-boolean">';
+      html += '<label><input type="radio" name="preview_q' + idx + '" disabled> 是</label>';
+      html += '<label><input type="radio" name="preview_q' + idx + '" disabled> 否</label>';
+      html += '</div>';
+    }
+
+    html += '</div>';
+  });
+
+  html += '</div>';
+  html += '</div>';
+
+  target.innerHTML = html;
+}
+
+function closeSurveyPreview() {
+  // If we were in the editor, go back to editor
+  if (_seQuestions.length > 0 && _seRoomId) {
+    renderSurveyEditor();
+    return;
+  }
+  closeSurveyEditor();
+}
+
+// ═══ Survey Status Helpers ═══
+function refreshSurveyStatuses() {
+  if (!roomId) return;
+  loadSurveyConfig(roomId, 'pre', function(config) {
+    var label = document.getElementById('preSurveyLabel');
+    if (!label) return;
+    if (config && config.questions && config.questions.length) {
+      label.textContent = '✓ 已設定（' + config.questions.length + ' 題）';
+      label.className = 'ss-label ss-ok';
+    } else {
+      label.textContent = '尚未設定';
+      label.className = 'ss-label ss-no';
+    }
+  });
+  loadSurveyConfig(roomId, 'post', function(config) {
+    var label = document.getElementById('postSurveyLabel');
+    if (!label) return;
+    if (config && config.questions && config.questions.length) {
+      label.textContent = '✓ 已設定（' + config.questions.length + ' 題）';
+      label.className = 'ss-label ss-ok';
+    } else {
+      label.textContent = '尚未設定';
+      label.className = 'ss-label ss-no';
+    }
+    // Also update post-class management label
+    var mgmtLabel = document.getElementById('postSurveyMgmtLabel');
+    if (mgmtLabel) {
+      if (config && config.questions && config.questions.length) {
+        var tmplName = config.templateName ? (SURVEY_TEMPLATES[config.templateName] ? SURVEY_TEMPLATES[config.templateName].name : config.templateName) : '自訂';
+        mgmtLabel.textContent = tmplName + '（' + config.questions.length + ' 題）';
+        mgmtLabel.className = 'ss-label ss-ok';
+      } else {
+        mgmtLabel.textContent = '尚未設定';
+        mgmtLabel.className = 'ss-label ss-no';
+      }
+    }
+  });
+}
+
+function refreshPostSurveyMgmtCount() {
+  if (!roomId) return;
+  db.ref('rooms/' + roomId + '/feedback').once('value', function(snap) {
+    var count = snap.numChildren();
+    var el = document.getElementById('postSurveyMgmtCount');
+    if (el) {
+      el.textContent = count > 0 ? '已收到 ' + count + ' 份回饋' : '尚無回饋';
+    }
+  });
+}
+
 // ═══ Phase Management ═══
 function showPhase(phase){
   currentPhase=phase;
@@ -894,6 +1396,9 @@ function renderPreparingPhase(){
 
   // Update start button state
   updateStartButton();
+
+  // Refresh survey statuses
+  refreshSurveyStatuses();
 }
 
 function selectPrepareMaterial(idx){
@@ -908,12 +1413,21 @@ function selectPrepareMaterial(idx){
   updateStartButton();
 }
 
+function getMaterialTypeLabel(m){
+  if(!m)return'';
+  if(m.url==='/classroom/presenter' && m.queryExtra){return'PPTX 投影片'}
+  if(m.hasSlideControl && m.url!=='/classroom/presenter'){return'HTML 簡報'}
+  if(!m.hasSlideControl){return'外部連結'}
+  return'投影片';
+}
+
 function updateStartButton(){
   var btn=document.getElementById('btnStartClassPrepare');
   var hint=document.getElementById('startClassHint');
   if(selectedMaterialIdx!==null){
+    var m=materials[selectedMaterialIdx];
     btn.disabled=false;
-    hint.textContent='教材：'+materials[selectedMaterialIdx].title;
+    hint.textContent='教材：'+m.title+' ('+getMaterialTypeLabel(m)+')';
     hint.style.color='var(--pri)';
   } else {
     btn.disabled=true;
@@ -961,6 +1475,10 @@ function renderPostClassPhase(){
       sel.appendChild(opt);
     });
   }
+
+  // Refresh survey management section
+  refreshSurveyStatuses();
+  refreshPostSurveyMgmtCount();
 
   // Load feedback data
   db.ref('rooms/'+roomId+'/feedback').once('value',function(snap){
@@ -1069,21 +1587,119 @@ function loadCourseList(){
   db.ref('courses').orderByChild('config/teacherUid').equalTo(currentUser.uid).on('value',function(snap){
     var el=document.getElementById('courseListContainer');
     var courses=[];
+    var now=new Date();
+    var todayStr=now.getFullYear()+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0');
+
     snap.forEach(function(c){
       var cfg=c.val().config||{};
       var sessions=c.val().sessions||{};
-      var sessionCount=Object.keys(sessions).length;
-      courses.push({id:c.key,title:cfg.title||c.key,created:cfg.created||0,sessionCount:sessionCount});
+      var sessionArr=Object.keys(sessions).map(function(sk){
+        var s=sessions[sk];
+        return {id:sk,title:s.title||'',date:s.date||'',deckId:s.deckId||'',roomId:s.roomId||'',status:s.status||'preparing',shareLink:s.shareLink||'',duration:s.duration||3};
+      });
+      // Sort sessions by date
+      sessionArr.sort(function(a,b){return(a.date||'').localeCompare(b.date||'')});
+
+      // Find nearest session
+      var nearestSession=null;
+      var nearestDistance=Infinity;
+      // First look for upcoming sessions
+      sessionArr.forEach(function(s){
+        if(s.date>=todayStr){
+          var dist=parseInt(s.date)-parseInt(todayStr);
+          if(dist<nearestDistance){nearestDistance=dist;nearestSession=s}
+        }
+      });
+      // If no upcoming, use most recent past session
+      if(!nearestSession && sessionArr.length){
+        nearestSession=sessionArr[sessionArr.length-1];
+        nearestDistance=parseInt(todayStr)-parseInt(nearestSession.date||todayStr);
+      }
+
+      // Determine sort key: upcoming sessions get negative distance (sort first), past get positive
+      var sortKey=nearestSession?(nearestSession.date>=todayStr?-nearestDistance:nearestDistance):999999;
+
+      courses.push({
+        id:c.key,
+        title:cfg.title||c.key,
+        created:cfg.created||0,
+        sessionCount:sessionArr.length,
+        sessions:sessionArr,
+        nearestSession:nearestSession,
+        sortKey:sortKey,
+        nearestMonth:nearestSession?nearestSession.date.substring(0,6):''
+      });
     });
-    courses.sort(function(a,b){return(b.created||0)-(a.created||0)});
+
+    // Sort by nearest session date (upcoming first, then past by recency)
+    courses.sort(function(a,b){return a.sortKey-b.sortKey});
+
     if(!courses.length){el.innerHTML='<div class="no-rooms">尚無課程，下方建立一個吧</div>';return}
-    el.innerHTML=courses.map(function(c){
-      return '<div class="course-card">'+
-        '<div class="cc-info" onclick="enterCourseView(\''+esc(c.id)+'\',\''+esc(c.title)+'\')"><div class="cc-name">'+esc(c.title)+'</div><div class="cc-meta">'+c.sessionCount+' 堂次</div></div>'+
+
+    // Group by month
+    var html='';
+    var lastMonth='';
+    courses.forEach(function(c){
+      var month=c.nearestMonth;
+      if(month && month!==lastMonth){
+        lastMonth=month;
+        var yr=month.substring(0,4);
+        var mo=parseInt(month.substring(4,6));
+        html+='<div class="month-divider">── '+yr+'年'+mo+'月 ──</div>';
+      }
+
+      // Build nearest session display
+      var sessionInfo='';
+      if(c.nearestSession){
+        var ns=c.nearestSession;
+        var dateDisplay=ns.date?formatDateDisplay(ns.date):'';
+        var statusLabels={preparing:'準備中',live:'上課中','post-class':'已完成',completed:'已完成'};
+        sessionInfo='次回：'+dateDisplay+' '+esc(ns.title||'');
+        if(ns.duration) sessionInfo+=' ('+ns.duration+'hr)';
+      } else {
+        sessionInfo=c.sessionCount+' 堂次';
+      }
+
+      // Preparation completeness
+      var prepHtml='';
+      if(c.nearestSession){
+        var ns2=c.nearestSession;
+        var hasDeck=!!ns2.deckId;
+        var hasShare=!!ns2.shareLink;
+        prepHtml='<div class="cc-prep">';
+        prepHtml+='<span class="'+(hasDeck?'prep-ok':'prep-no')+'">教材 '+(hasDeck?'✓':'✗')+'</span>  ';
+        prepHtml+='<span class="prep-no" id="ccPrep_'+esc(c.id)+'_survey">問卷 ...</span>  ';
+        prepHtml+='<span class="'+(hasShare?'prep-ok':'prep-no')+'">分享 '+(hasShare?'✓':'✗')+'</span>';
+        prepHtml+='</div>';
+      }
+
+      html+='<div class="course-card">'+
+        '<div class="cc-info" onclick="enterCourseView(\''+esc(c.id)+'\',\''+esc(c.title)+'\')"><div class="cc-name">'+esc(c.title)+'</div><div class="cc-meta">'+sessionInfo+'</div>'+prepHtml+'</div>'+
         '<button class="cc-enter" onclick="enterCourseView(\''+esc(c.id)+'\',\''+esc(c.title)+'\')">進入</button>'+
         '<button class="cc-del" onclick="event.stopPropagation();deleteCourse(\''+esc(c.id)+'\',\''+esc(c.title)+'\')">刪除</button>'+
       '</div>';
-    }).join('');
+    });
+    el.innerHTML=html;
+
+    // Async check survey configs for nearest sessions
+    courses.forEach(function(c){
+      if(c.nearestSession && c.nearestSession.roomId){
+        var prepEl=document.getElementById('ccPrep_'+c.id+'_survey');
+        if(!prepEl)return;
+        var rid=c.nearestSession.roomId;
+        // Check both pre and post survey configs
+        var preOk=false,postOk=false;
+        db.ref('rooms/'+rid+'/surveyConfig').once('value',function(s1){
+          preOk=!!(s1.val()&&s1.val().questions&&s1.val().questions.length);
+          db.ref('rooms/'+rid+'/feedbackConfig').once('value',function(s2){
+            postOk=!!(s2.val()&&s2.val().questions&&s2.val().questions.length);
+            var anyOk=preOk||postOk;
+            prepEl.className=anyOk?'prep-ok':'prep-no';
+            prepEl.textContent='問卷 '+(anyOk?'✓':'✗');
+          });
+        });
+      }
+    });
   });
 }
 
@@ -1277,7 +1893,19 @@ function renderCVPrepare(sess){
 
   html+='<div class="step-card"><div class="step-title"><span class="step-num">3</span>課前問卷（選填）</div>';
   if(sess.roomId){
-    html+='<button class="act-btn" onclick="window.open(\'/classroom/survey?room='+encodeURIComponent(sess.roomId)+'\',\'_blank\')">開啟課前問卷 ↗</button>';
+    html+='<div class="survey-status" id="cvPreSurveyStatus"><span class="ss-label ss-no" id="cvPreSurveyLabel">載入中...</span>';
+    html+='<button onclick="openSurveyEditor(\'pre\',\''+esc(sess.roomId)+'\')">設定</button>';
+    html+='<button onclick="previewSurveyConfig(\'pre\',\''+esc(sess.roomId)+'\')">預覽</button></div>';
+  } else {
+    html+='<div style="font-size:0.85rem;color:var(--dim)">需先建立教室</div>';
+  }
+  html+='</div>';
+
+  html+='<div class="step-card"><div class="step-title"><span class="step-num">4</span>課後問卷（選填）</div>';
+  if(sess.roomId){
+    html+='<div class="survey-status" id="cvPostSurveyStatus"><span class="ss-label ss-no" id="cvPostSurveyLabel">載入中...</span>';
+    html+='<button onclick="openSurveyEditor(\'post\',\''+esc(sess.roomId)+'\')">設定</button>';
+    html+='<button onclick="previewSurveyConfig(\'post\',\''+esc(sess.roomId)+'\')">預覽</button></div>';
   } else {
     html+='<div style="font-size:0.85rem;color:var(--dim)">需先建立教室</div>';
   }
@@ -1297,6 +1925,30 @@ function renderCVPrepare(sess){
       makeQR('cvQrStudent',location.origin+'/classroom/?room='+encodeURIComponent(sess.roomId));
       makeQR('cvQrRemote',location.origin+'/classroom/remote?room='+encodeURIComponent(sess.roomId));
     },50);
+
+    // Load survey statuses
+    loadSurveyConfig(sess.roomId, 'pre', function(config) {
+      var label = document.getElementById('cvPreSurveyLabel');
+      if (!label) return;
+      if (config && config.questions && config.questions.length) {
+        label.textContent = '✓ 已設定（' + config.questions.length + ' 題）';
+        label.className = 'ss-label ss-ok';
+      } else {
+        label.textContent = '尚未設定';
+        label.className = 'ss-label ss-no';
+      }
+    });
+    loadSurveyConfig(sess.roomId, 'post', function(config) {
+      var label = document.getElementById('cvPostSurveyLabel');
+      if (!label) return;
+      if (config && config.questions && config.questions.length) {
+        label.textContent = '✓ 已設定（' + config.questions.length + ' 題）';
+        label.className = 'ss-label ss-ok';
+      } else {
+        label.textContent = '尚未設定';
+        label.className = 'ss-label ss-no';
+      }
+    });
   }
 }
 
@@ -1333,12 +1985,34 @@ function renderCVPost(sess){
     h+='<div class="kpi-card"><div class="kpi-val" style="color:#1A73E8">'+recAvg+'</div><div class="kpi-label">推薦度 /5</div></div>';
     h+='</div>';
 
+    h+='<div class="post-section" style="margin-top:1rem">';
+    h+='<h3>📝 課後問卷管理</h3>';
+    h+='<div class="survey-status"><span class="ss-label ss-no" id="cvPostMgmtLabel">載入中...</span>';
+    h+='<button onclick="openSurveyEditor(\'post\',\''+esc(sess.roomId)+'\')">編輯</button>';
+    h+='<button onclick="previewSurveyConfig(\'post\',\''+esc(sess.roomId)+'\')">預覽</button></div>';
+    h+='<div id="cvPostMgmtCount" style="font-size:0.8rem;color:var(--dim);margin-top:0.4rem">已收到 '+total+' 份回饋</div>';
+    h+='</div>';
+
     h+='<div class="post-actions">';
     h+='<button onclick="enterSessionRoom(cvSessions['+cvSelectedSessionIdx+'],\'post-class\')">進入教室查看詳情</button>';
     h+='<button onclick="window.open(\'/classroom/feedback?room='+encodeURIComponent(sess.roomId)+'\',\'_blank\')">查看回饋頁</button>';
     h+='</div>';
 
     body.innerHTML=h;
+
+    // Load survey config status
+    loadSurveyConfig(sess.roomId, 'post', function(config) {
+      var label = document.getElementById('cvPostMgmtLabel');
+      if (!label) return;
+      if (config && config.questions && config.questions.length) {
+        var tmplName = config.templateName ? (SURVEY_TEMPLATES[config.templateName] ? SURVEY_TEMPLATES[config.templateName].name : config.templateName) : '自訂';
+        label.textContent = tmplName + '（' + config.questions.length + ' 題）';
+        label.className = 'ss-label ss-ok';
+      } else {
+        label.textContent = '尚未設定';
+        label.className = 'ss-label ss-no';
+      }
+    });
   });
 }
 
@@ -2261,14 +2935,17 @@ function startClass(){
 
   // Use selected material from preparing phase, or fallback to planner deck
   var matIdx=selectedMaterialIdx;
+  var openUrl=null; // The URL to open after update
+
   if(matIdx!==null){
     var m=materials[matIdx];
-    // Extract deck id
+    // Extract deck id from queryExtra (for PPTX decks)
     var deckId=null;
     if(m.queryExtra){
       var match=m.queryExtra.match(/deck=([^&]+)/);
       if(match)deckId=match[1];
     }
+
     if(m.hasSlideControl){
       var deckType=deckId?'slides':'html';
       updates['rooms/'+roomId+'/presentation']={
@@ -2279,6 +2956,21 @@ function startClass(){
         ts:firebase.database.ServerValue.TIMESTAMP
       };
     }
+
+    // Determine what URL to open
+    if(m.url==='/classroom/presenter' && deckId){
+      // PPTX decks (university-talk, demo) — use presenter with deck param
+      openUrl='/classroom/presenter?room='+encodeURIComponent(roomId)+'&deck='+encodeURIComponent(deckId);
+    } else if(m.hasSlideControl && m.url!=='/classroom/presenter'){
+      // HTML slides (S01-S09, ai-pptx-routes) — open the HTML slide directly with room param
+      openUrl=m.url+'?room='+encodeURIComponent(roomId)+(m.queryExtra||'');
+    } else if(!m.hasSlideControl){
+      // No slide control — just open the URL
+      openUrl=m.url;
+    } else {
+      // Fallback: use presenter
+      openUrl='/classroom/presenter?room='+encodeURIComponent(roomId);
+    }
   } else if(roomDeck){
     updates['rooms/'+roomId+'/presentation']={
       mode:roomDeckType||'pptx-slides',
@@ -2286,6 +2978,7 @@ function startClass(){
       current:0,
       totalSlides:0
     };
+    openUrl='/classroom/presenter?room='+encodeURIComponent(roomId)+'&deck='+encodeURIComponent(roomDeck);
   }
 
   // Update session status in courses if linked
@@ -2294,25 +2987,7 @@ function startClass(){
   }
 
   db.ref().update(updates).then(function(){
-    // Open presenter
-    var presUrl='/classroom/presenter?room='+encodeURIComponent(roomId);
-    if(matIdx!==null){
-      var m2=materials[matIdx];
-      var dk=null;
-      if(m2.queryExtra){var mt=m2.queryExtra.match(/deck=([^&]+)/);if(mt)dk=mt[1]}
-      if(dk){
-        presUrl+='&deck='+encodeURIComponent(dk);
-      } else if(m2.hasSlideControl && m2.url!=='/classroom/presenter'){
-        // HTML-based slides — open the material URL directly
-        var mUrl=m2.url+'?room='+encodeURIComponent(roomId)+(m2.queryExtra||'');
-        window.open(mUrl,'_blank');
-        showPhase('live');
-        return;
-      }
-    } else if(roomDeckType==='pptx-slides'||(!roomDeckType&&roomDeck)){
-      presUrl+='&deck='+encodeURIComponent(roomDeck);
-    }
-    window.open(presUrl,'_blank');
+    if(openUrl) window.open(openUrl,'_blank');
     showPhase('live');
   });
 }
