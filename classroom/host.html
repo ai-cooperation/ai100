@@ -939,10 +939,12 @@ renderContent=function(){
 };
 
 // ═══ Settings ═══
+const DEFAULT_GAS_URL='https://script.google.com/macros/s/AKfycbxGE9i-742LPKD-zXcmfmzY4pt2UL8kbJgAI7kzEaQt3upYL1U55C-P_NHRWfUpLuj9FA/exec';
 function loadSettings(){
   db.ref(`rooms/${roomId}/config/password`).once('value').then(s=>{const p=s.val();document.getElementById('chkPassword').checked=!!p;if(p){document.getElementById('inputPassword').value=p;document.getElementById('inputPassword').classList.remove('hidden')}});
   const k=localStorage.getItem('_ai_key');if(k)document.getElementById('inputAIKey').value=k;
-  const g=localStorage.getItem('_gas_url');if(g)document.getElementById('inputGasUrl').value=g;
+  if(!localStorage.getItem('_gas_url'))localStorage.setItem('_gas_url',DEFAULT_GAS_URL);
+  document.getElementById('inputGasUrl').value=localStorage.getItem('_gas_url');
 }
 function toggleSettings(){document.getElementById('settingsPanel').classList.toggle('open');document.getElementById('settingsOverlay').classList.toggle('show')}
 function savePassword(){const on=document.getElementById('chkPassword').checked,pwd=document.getElementById('inputPassword').value.trim();if(on&&!pwd){alert('請輸入密碼');return}db.ref(`rooms/${roomId}/config/password`).set(on?pwd:null).then(()=>alert(on?'密碼已設定':'密碼已關閉'))}
