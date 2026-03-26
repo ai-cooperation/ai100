@@ -1,0 +1,37 @@
+name: Generate PDF from HTML Slides
+
+on:
+  push:
+    paths:
+      - 'slides/supplements/*.html'
+  workflow_dispatch:
+    inputs:
+      slide:
+        description: 'Specific slide to convert (e.g. S01_GAS_Automation), or "all"'
+        required: false
+        default: 'all'
+
+jobs:
+  pdf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Puppeteer
+        run: npm install puppeteer
+
+      - name: Generate PDFs
+        run: |
+          node scripts/html-to-pdf.js "${{ github.event.inputs.slide || 'changed' }}"
+
+      - name: Commit PDFs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add slides/pdf/
+          git diff --cached --quiet || git commit -m "chore: auto-generate PDF from HTML slides"
+          git push

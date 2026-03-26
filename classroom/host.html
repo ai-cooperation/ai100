@@ -155,6 +155,11 @@
   .ai-status{position:fixed;bottom:1rem;right:1rem;background:var(--purple);color:#fff;padding:0.4rem 0.8rem;border-radius:8px;font-size:0.8rem;display:none;z-index:50}
   .ai-error{position:fixed;bottom:1rem;left:1rem;background:var(--red);color:#fff;padding:0.4rem 0.8rem;border-radius:8px;font-size:0.75rem;display:none;z-index:50;max-width:300px}
 
+  /* Agent action toast */
+  .action-toast{position:fixed;bottom:4rem;left:50%;transform:translateX(-50%);background:var(--surface);color:var(--text);padding:0.6rem 1.2rem;border-radius:10px;font-size:0.9rem;font-weight:700;border:1px solid var(--pri);box-shadow:0 4px 20px rgba(0,0,0,0.4);z-index:300;opacity:0;transition:opacity 0.3s;pointer-events:none}
+  .action-toast.show{opacity:1}
+  .deck-label{font-size:0.8rem;color:var(--pri);background:var(--bg);padding:0.2rem 0.6rem;border-radius:6px;border:1px solid var(--border);white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+
   /* Settings */
   .settings-panel{position:fixed;top:0;right:-360px;width:350px;height:100vh;background:var(--surface);border-left:1px solid var(--border);z-index:200;transition:right 0.3s;display:flex;flex-direction:column}
   .settings-panel.open{right:0}
@@ -266,6 +271,7 @@
     <button class="act-btn" onclick="showReport()" title="回饋報告">📊 報告</button>
     <button class="act-btn" id="btnVoice" onclick="toggleVoice()" title="語音控制（持續監聽）" style="font-size:1.1rem;">🎤</button>
     <span id="voiceStatus" style="font-size:0.8rem;color:var(--dim);display:none;margin-right:auto;"></span>
+    <span id="currentDeckLabel" class="deck-label" style="display:none"></span>
     <button class="act-btn" id="btnStartClass" onclick="startClass()" style="background:var(--pri);color:#fff;border-color:var(--pri);display:none">▶ 開始上課</button>
     <button class="act-btn" id="btnEndClass" onclick="endClass()" style="background:var(--red);color:#fff;border-color:var(--red);display:none">⏹ 結束課程</button>
   </div>
@@ -278,6 +284,7 @@
 
 <div class="ai-status" id="aiStatus">🤖 AI 回答中...</div>
 <div class="ai-error" id="aiError"></div>
+<div class="action-toast" id="actionToast"></div>
 
 <!-- Agent Panel -->
 <div class="agent-panel" id="agentPanel">
@@ -326,6 +333,14 @@
       <button class="sp-btn test" onclick="testAIKey()">測試 AI 連線</button>
       <p style="margin-top:0.3rem">Key 只存你的瀏覽器，不上傳</p>
       <p id="aiKeyStatus" style="color:var(--pri);font-weight:700"></p>
+    </div>
+    <div class="sp-section">
+      <h4>📧 GAS Email Relay</h4>
+      <p>部署 GAS 後貼上 URL，用於課後寄信</p>
+      <input type="url" id="inputGasUrl" placeholder="https://script.google.com/macros/s/.../exec">
+      <button class="sp-btn save" onclick="saveGasUrl()">儲存</button>
+      <button class="sp-btn test" onclick="testGasUrl()">測試連線</button>
+      <p id="gasUrlStatus" style="color:var(--pri);font-weight:700"></p>
     </div>
     <div class="sp-section"><h4>危險操作</h4><button class="sp-btn clear" onclick="clearRoom()">清除所有互動資料</button></div>
   </div>
@@ -381,13 +396,53 @@
   </div>
 </div>
 
-<!-- Feedback Report Panel -->
-<div id="reportPanel" style="display:none;position:fixed;top:0;right:0;width:420px;height:100vh;background:#161b22;border-left:1px solid #30363d;z-index:200;flex-direction:column;">
-  <div style="padding:12px 16px;border-bottom:1px solid #30363d;display:flex;align-items:center;justify-content:space-between;">
-    <span style="font-size:0.9rem;font-weight:700;color:#FFC857;">📊 課後回饋報告</span>
+<!-- Feedback Report + Email Panel -->
+<div id="reportPanel" style="display:none;position:fixed;top:0;right:0;width:440px;height:100vh;background:#161b22;border-left:1px solid #30363d;z-index:200;flex-direction:column;">
+  <div style="padding:8px 16px;border-bottom:1px solid #30363d;display:flex;align-items:center;gap:4px;">
+    <button id="tabReport" onclick="switchReportTab('report')" style="padding:6px 14px;border-radius:6px;font-size:0.85rem;font-weight:700;background:#0F9D8A;color:#fff;border:none;cursor:pointer;">📊 報告</button>
+    <button id="tabEmail" onclick="switchReportTab('email')" style="padding:6px 14px;border-radius:6px;font-size:0.85rem;font-weight:700;background:#0d1117;color:#7d8590;border:1px solid #30363d;cursor:pointer;">📧 寄信</button>
+    <button id="tabHistory" onclick="switchReportTab('history')" style="padding:6px 14px;border-radius:6px;font-size:0.85rem;font-weight:700;background:#0d1117;color:#7d8590;border:1px solid #30363d;cursor:pointer;">📋 紀錄</button>
+    <span style="flex:1"></span>
     <button onclick="hideReport()" style="background:none;color:#7d8590;font-size:1.2rem;border:none;cursor:pointer;">✕</button>
   </div>
+  <!-- Tab: Report -->
   <div id="reportContent" style="padding:16px;overflow-y:auto;flex:1;">
+    <p style="color:#7d8590;text-align:center;padding:2rem;">載入中...</p>
+  </div>
+  <!-- Tab: Email -->
+  <div id="emailContent" style="padding:16px;overflow-y:auto;flex:1;display:none;">
+    <div style="margin-bottom:12px;">
+      <label style="font-size:0.8rem;color:#7d8590;display:block;margin-bottom:4px;">收件人</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <label style="font-size:0.8rem;color:#e6edf3;"><input type="radio" name="emailTarget" value="wantPdf" checked onchange="updateEmailCount()"> 要 PDF 的</label>
+        <label style="font-size:0.8rem;color:#e6edf3;"><input type="radio" name="emailTarget" value="all" onchange="updateEmailCount()"> 全部有 email</label>
+      </div>
+      <p id="emailCount" style="font-size:0.8rem;color:#0F9D8A;margin-top:4px;">0 人</p>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:0.8rem;color:#7d8590;display:block;margin-bottom:4px;">📎 教材連結（PDF 或網址）</label>
+      <select id="emailDeckSelect" style="width:100%;padding:8px;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:0.85rem;margin-bottom:6px;" onchange="updateEmailLink()">
+        <option value="">— 選擇教材 —</option>
+      </select>
+      <input id="emailLink" placeholder="或直接貼上 Google Drive / 其他連結" style="width:100%;padding:8px;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:0.85rem;">
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:0.8rem;color:#7d8590;display:block;margin-bottom:4px;">主題</label>
+      <input id="emailSubject" value="AI 100 講 — 課程簡報" style="width:100%;padding:8px;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:0.85rem;">
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:0.8rem;color:#7d8590;display:block;margin-bottom:4px;">內文</label>
+      <textarea id="emailBody" rows="6" style="width:100%;padding:8px;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:0.85rem;resize:vertical;font-family:inherit;line-height:1.6;"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="previewEmail()" style="flex:1;padding:10px;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:8px;font-size:0.85rem;font-weight:700;cursor:pointer;">👁 預覽</button>
+      <button id="btnSendEmail" onclick="sendEmail()" style="flex:1;padding:10px;background:#1A73E8;color:#fff;border:none;border-radius:8px;font-size:0.85rem;font-weight:700;cursor:pointer;">📧 發送</button>
+    </div>
+    <div id="emailPreview" style="display:none;margin-top:12px;background:#fff;border-radius:8px;padding:12px;max-height:200px;overflow-y:auto;"></div>
+    <p id="emailStatus" style="font-size:0.8rem;margin-top:8px;"></p>
+  </div>
+  <!-- Tab: History -->
+  <div id="historyContent" style="padding:16px;overflow-y:auto;flex:1;display:none;">
     <p style="color:#7d8590;text-align:center;padding:2rem;">載入中...</p>
   </div>
 </div>
@@ -563,6 +618,9 @@ function enterRoom(rid,title){
   startAIListener();
   // Start Agent panel
   initAgentPanel();
+  // Start deck label + action toast
+  initDeckLabel();
+  initAgentActionListener();
 }
 
 function backToLobby(){
@@ -884,12 +942,15 @@ renderContent=function(){
 function loadSettings(){
   db.ref(`rooms/${roomId}/config/password`).once('value').then(s=>{const p=s.val();document.getElementById('chkPassword').checked=!!p;if(p){document.getElementById('inputPassword').value=p;document.getElementById('inputPassword').classList.remove('hidden')}});
   const k=localStorage.getItem('_ai_key');if(k)document.getElementById('inputAIKey').value=k;
+  const g=localStorage.getItem('_gas_url');if(g)document.getElementById('inputGasUrl').value=g;
 }
 function toggleSettings(){document.getElementById('settingsPanel').classList.toggle('open');document.getElementById('settingsOverlay').classList.toggle('show')}
 function savePassword(){const on=document.getElementById('chkPassword').checked,pwd=document.getElementById('inputPassword').value.trim();if(on&&!pwd){alert('請輸入密碼');return}db.ref(`rooms/${roomId}/config/password`).set(on?pwd:null).then(()=>alert(on?'密碼已設定':'密碼已關閉'))}
 function saveAIKey(){const k=document.getElementById('inputAIKey').value.trim();if(!k){localStorage.removeItem('_ai_key');alert('Key 已清除');return}localStorage.setItem('_ai_key',k);alert('Key 已儲存')}
 function toggleAI(){if(!localStorage.getItem('_ai_key')&&!aiEnabled){alert('請先在設定中填入 Gemini API Key 並測試');toggleSettings();return}db.ref(`rooms/${roomId}/config/aiEnabled`).set(!aiEnabled)}
 function clearRoom(){if(!confirm('清除所有互動資料？'))return;db.ref(`rooms/${roomId}`).update({wall:null,votes:null,currentVote:null,qa:null,qaUps:null,qaReplies:null})}
+function saveGasUrl(){const u=document.getElementById('inputGasUrl').value.trim();if(!u){localStorage.removeItem('_gas_url');document.getElementById('gasUrlStatus').textContent='已清除';return}localStorage.setItem('_gas_url',u);document.getElementById('gasUrlStatus').textContent='✅ 已儲存'}
+function testGasUrl(){const u=localStorage.getItem('_gas_url');if(!u){document.getElementById('gasUrlStatus').textContent='❌ 請先儲存 URL';return}document.getElementById('gasUrlStatus').textContent='測試中...';fetch(u).then(r=>r.json()).then(d=>{document.getElementById('gasUrlStatus').textContent=d.status==='ok'?'✅ 連線成功':'❌ 回應異常'}).catch(e=>{document.getElementById('gasUrlStatus').textContent='❌ '+e.message})}
 
 // ═══ QR ═══
 function makeQR(elId,url){const el=document.getElementById(elId);if(!el)return;const qr=qrcode(0,'M');qr.addData(url);qr.make();el.innerHTML=qr.createSvgTag({cellSize:3,margin:2})}
@@ -1122,6 +1183,13 @@ function loadReport() {
     }
     html += '</div>';
 
+    // Quick link to email tab
+    if (wantPdfCount > 0) {
+      html += '<div style="margin-top:16px;padding-top:12px;border-top:1px solid #30363d;">';
+      html += '<button onclick="switchReportTab(\'email\')" style="width:100%;padding:10px;background:#1A73E8;color:#fff;border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer;">📧 寄送教材給 ' + wantPdfCount + ' 人 →</button>';
+      html += '</div>';
+    }
+
     el.innerHTML = html;
 
     // Store emails for copy
@@ -1222,6 +1290,267 @@ function copyEmails() {
   }
 }
 
+// ═══ Report Panel Tabs ═══
+function switchReportTab(tab) {
+  document.getElementById('reportContent').style.display = tab === 'report' ? 'block' : 'none';
+  document.getElementById('emailContent').style.display = tab === 'email' ? 'block' : 'none';
+  document.getElementById('historyContent').style.display = tab === 'history' ? 'block' : 'none';
+  const activeStyle = 'padding:6px 14px;border-radius:6px;font-size:0.85rem;font-weight:700;cursor:pointer;border:none;';
+  document.getElementById('tabReport').style.cssText = activeStyle + (tab === 'report' ? 'background:#0F9D8A;color:#fff;' : 'background:#0d1117;color:#7d8590;border:1px solid #30363d;');
+  document.getElementById('tabEmail').style.cssText = activeStyle + (tab === 'email' ? 'background:#1A73E8;color:#fff;' : 'background:#0d1117;color:#7d8590;border:1px solid #30363d;');
+  document.getElementById('tabHistory').style.cssText = activeStyle + (tab === 'history' ? 'background:#7C3AED;color:#fff;' : 'background:#0d1117;color:#7d8590;border:1px solid #30363d;');
+  if (tab === 'email') initEmailPanel();
+  if (tab === 'history') loadEmailHistory();
+}
+
+// ═══ Email Panel ═══
+let _feedbackRecipients = { wantPdf: [], all: [] };
+
+function initEmailPanel() {
+  if (!roomId) return;
+  // Populate deck select
+  const sel = document.getElementById('emailDeckSelect');
+  const deckOptions = [
+    { name: 'S01_GAS_Automation', label: 'S01 GAS 自動化' },
+    { name: 'S02_Vibe_Coding', label: 'S02 Vibe Coding' },
+    { name: 'S03_CLI_Agent', label: 'S03 CLI Agent' },
+    { name: 'S04_VSCode_IDE', label: 'S04 VS Code IDE' },
+    { name: 'S05_OpenClaw', label: 'S05 OpenClaw' },
+    { name: 'S07_NotebookLM', label: 'S07 NotebookLM' },
+    { name: 'S09_FARS_FactCheck', label: 'S09 FARS 事實查核' },
+  ];
+  if (sel.options.length <= 1) {
+    deckOptions.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.name;
+      opt.textContent = d.label;
+      if (d.name === window._currentDeckName) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+
+  // Load recipients from Firebase
+  db.ref('rooms/' + roomId + '/feedback').once('value', snap => {
+    const data = snap.val();
+    _feedbackRecipients = { wantPdf: [], all: [] };
+    if (data) {
+      Object.values(data).forEach(e => {
+        if (e.email) {
+          _feedbackRecipients.all.push({ email: e.email, name: e.name || '' });
+          if (e.wantPdf) _feedbackRecipients.wantPdf.push({ email: e.email, name: e.name || '' });
+        }
+      });
+    }
+    updateEmailCount();
+  });
+
+  // Set default body template
+  const body = document.getElementById('emailBody');
+  if (!body.value.trim()) {
+    body.value = 'Hi {name}，\n\n感謝你參加課程！\n\n📎 簡報連結：{link}\n\n⚠️ 此為課程教材，請保護版權，勿公開散布。\n如有問題歡迎回信。\n\n— AI 100 講 講師';
+  }
+}
+
+function updateEmailCount() {
+  const target = document.querySelector('input[name="emailTarget"]:checked').value;
+  const list = _feedbackRecipients[target] || [];
+  document.getElementById('emailCount').textContent = list.length + ' 人';
+}
+
+function updateEmailLink() {
+  const deck = document.getElementById('emailDeckSelect').value;
+  if (deck) {
+    document.getElementById('emailLink').value = 'https://ai100.cooperation.tw/slides/pdf/' + deck + '.pdf';
+  }
+}
+
+function getEmailRecipients() {
+  const target = document.querySelector('input[name="emailTarget"]:checked').value;
+  return _feedbackRecipients[target] || [];
+}
+
+function buildEmailHtml(bodyText, link) {
+  const lines = bodyText.replace(/\{link\}/g, link ? '<a href="' + link + '" style="color:#0F9D8A;">' + link + '</a>' : '（未設定連結）');
+  return '<div style="font-family:Noto Sans TC,sans-serif;max-width:600px;margin:0 auto;padding:20px;">'
+    + '<div style="background:#0B3C5D;color:#fff;padding:20px;border-radius:12px 12px 0 0;text-align:center;">'
+    + '<h1 style="margin:0;font-size:1.3rem;">AI 100 講</h1>'
+    + '<p style="margin:5px 0 0;color:#FFC857;">課程簡報</p></div>'
+    + '<div style="background:#F8F9FA;padding:24px;border-radius:0 0 12px 12px;">'
+    + '<div style="font-size:1rem;line-height:1.8;white-space:pre-wrap;">' + lines.replace(/\n/g, '<br>') + '</div>'
+    + '</div></div>';
+}
+
+function previewEmail() {
+  const body = document.getElementById('emailBody').value;
+  const link = document.getElementById('emailLink').value;
+  const html = buildEmailHtml(body, link).replace(/\{name\}/g, '小明');
+  const el = document.getElementById('emailPreview');
+  el.innerHTML = html;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function sendEmail() {
+  const gasUrl = localStorage.getItem('_gas_url');
+  if (!gasUrl) {
+    alert('請先設定 GAS URL：\n設定 → GAS Email Relay URL');
+    return;
+  }
+  const recipients = getEmailRecipients();
+  if (!recipients.length) { alert('沒有收件人'); return; }
+
+  const subject = document.getElementById('emailSubject').value.trim();
+  const bodyText = document.getElementById('emailBody').value;
+  const link = document.getElementById('emailLink').value;
+  if (!subject) { alert('請填寫主題'); return; }
+  if (!confirm('確定發送給 ' + recipients.length + ' 人？')) return;
+
+  const htmlBody = buildEmailHtml(bodyText, link);
+  const btn = document.getElementById('btnSendEmail');
+  const status = document.getElementById('emailStatus');
+  btn.disabled = true;
+  btn.textContent = '⏳ 寄送中...';
+  status.textContent = '';
+
+  fetch(gasUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' }, // GAS doesn't support CORS for application/json
+    body: JSON.stringify({
+      recipients: recipients,
+      subject: subject,
+      body: htmlBody,
+      senderName: 'AI 100 講'
+    })
+  })
+  .then(r => r.json())
+  .then(d => {
+    btn.disabled = false;
+    if (d.success) {
+      btn.textContent = '✅ 寄送完成';
+      status.textContent = '成功 ' + d.sent + ' 封' + (d.failed ? '，失敗 ' + d.failed + ' 封' : '');
+      status.style.color = '#0F9D8A';
+      // Save to Firebase history
+      const deck = document.getElementById('emailDeckSelect').value;
+      db.ref('rooms/' + roomId + '/emailHistory').push({
+        deck: deck || '(自訂)',
+        subject: subject,
+        link: link,
+        recipientCount: recipients.length,
+        sent: d.sent,
+        failed: d.failed || 0,
+        ts: firebase.database.ServerValue.TIMESTAMP
+      });
+    } else {
+      btn.textContent = '📧 重試';
+      status.textContent = '❌ ' + d.message;
+      status.style.color = '#DC2626';
+    }
+  })
+  .catch(e => {
+    btn.disabled = false;
+    btn.textContent = '📧 重試';
+    status.textContent = '❌ 網路錯誤: ' + e.message;
+    status.style.color = '#DC2626';
+  });
+}
+
+// ═══ Email History ═══
+function loadEmailHistory() {
+  if (!roomId) return;
+  const el = document.getElementById('historyContent');
+  db.ref('rooms/' + roomId + '/emailHistory').orderByChild('ts').once('value', snap => {
+    const data = snap.val();
+    if (!data) { el.innerHTML = '<p style="color:#7d8590;text-align:center;padding:2rem;">尚無寄送紀錄</p>'; return; }
+    const entries = Object.values(data).sort((a, b) => (b.ts || 0) - (a.ts || 0));
+    let html = '';
+    entries.forEach(e => {
+      const d = e.ts ? new Date(e.ts) : null;
+      const dateStr = d ? (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0') : '';
+      const statusIcon = e.failed ? '⚠️' : '✅';
+      html += '<div style="padding:8px;background:#0d1117;border-radius:8px;margin-bottom:6px;border:1px solid #30363d;">';
+      html += '<div style="display:flex;justify-content:space-between;font-size:0.85rem;">';
+      html += '<span style="color:#e6edf3;font-weight:700;">' + statusIcon + ' ' + (e.deck || '') + '</span>';
+      html += '<span style="color:#7d8590;">' + dateStr + '</span></div>';
+      html += '<div style="font-size:0.8rem;color:#7d8590;margin-top:4px;">';
+      html += e.sent + '/' + e.recipientCount + ' 封成功';
+      if (e.link) html += ' · <a href="' + e.link + '" target="_blank" style="color:#0F9D8A;">連結</a>';
+      html += '</div></div>';
+    });
+    el.innerHTML = html;
+  });
+}
+
+// ═══ Action Toast — 螢幕顯示動作回饋 ═══
+let toastTimer = null;
+function showActionToast(msg) {
+  const el = document.getElementById('actionToast');
+  el.textContent = msg;
+  el.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function initAgentActionListener() {
+  if (!roomId) return;
+  const ref = db.ref('rooms/' + roomId + '/agentActions/latest');
+  ref.on('value', s => {
+    const d = s.val();
+    if (!d || !d.text) return;
+    // Only show if recent (within 10s)
+    if (d.ts && Date.now() - d.ts < 10000) {
+      showActionToast(d.text);
+    }
+  });
+  listeners.push({ref, event:'value'});
+}
+
+// ═══ Current Deck Label ═══
+window._currentDeckName = '';
+function initDeckLabel() {
+  if (!roomId) return;
+  const ref = db.ref('rooms/' + roomId + '/presentation');
+  ref.on('value', s => {
+    const d = s.val();
+    const label = document.getElementById('currentDeckLabel');
+    if (d && d.deck) {
+      const name = d.title || d.deck.replace(/_/g, ' ');
+      label.textContent = '📚 ' + name;
+      label.style.display = 'inline';
+      window._currentDeckName = d.deck;
+    } else {
+      label.style.display = 'none';
+      window._currentDeckName = '';
+    }
+  });
+  listeners.push({ref, event:'value'});
+}
+
+// ═══ Voice Alias Map — 語音辨識前處理 ═══
+const VOICE_ALIASES = {
+  // 英文工具名→中文別名（Chrome zh-TW 辨識差）
+  '免費':'推 groq', '免費的':'推 groq', '免費平台':'推 groq',
+  'groove':'推 groq', 'grok':'推 groq', 'grow':'推 groq', 'groc':'推 groq',
+  '吉他':'推 github', 'get hub':'推 github', 'kit hub':'推 github',
+  'chat gpt':'推 chatgpt', 'chat gbt':'推 chatgpt', '差gpt':'推 chatgpt',
+  '古德':'推 claude', 'cloud':'推 claude', '可樂的':'推 claude',
+  'ai studio':'推 gemini', 'ai 工作室':'推 gemini',
+  '試算表':'推 sheet', '新表格':'推 sheet',
+  '反重力':'推 antigravity',
+  // 教材快捷
+  '第一課':'教材 s01', '第二課':'教材 s02', '第三課':'教材 s03', '第四課':'教材 s04', '第五課':'教材 s05',
+  '第一單元':'教材 s01', '第二單元':'教材 s02', '第三單元':'教材 s03', '第四單元':'教材 s04', '第五單元':'教材 s05',
+};
+
+function applyVoiceAlias(text) {
+  const t = text.trim().toLowerCase();
+  // Exact alias match
+  if (VOICE_ALIASES[t]) return VOICE_ALIASES[t];
+  // Partial match: check if alias key is a substring
+  for (const [key, val] of Object.entries(VOICE_ALIASES)) {
+    if (t.includes(key)) return val;
+  }
+  return text; // no alias matched
+}
+
 // ═══ Voice Control — 持續監聽，免按鍵 ═══
 let voiceRecognition = null;
 let voiceActive = false;
@@ -1253,13 +1582,15 @@ function toggleVoice() {
         const text = e.results[i][0].transcript.trim();
         if (text.length < 2) continue;
 
-        console.log('[voice]', text);
-        document.getElementById('voiceStatus').textContent = '🎤 ' + text;
+        // 套用別名（英文辨識差的補救）
+        const processed = applyVoiceAlias(text);
+        console.log('[voice]', text, processed !== text ? '→ ' + processed : '');
+        document.getElementById('voiceStatus').textContent = '🎤 ' + (processed !== text ? processed + ' (' + text + ')' : text);
 
-        // 全部送 Firebase，讓 SmallClaw 的 LLM 判斷是不是指令
+        // 送 Firebase，讓 SmallClaw 判斷是不是指令
         if (roomId) {
           db.ref('rooms/' + roomId + '/voiceCommands').push({
-            text: text,
+            text: processed,
             ts: firebase.database.ServerValue.TIMESTAMP
           });
         }
