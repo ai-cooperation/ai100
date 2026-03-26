@@ -22,6 +22,9 @@ defaults:
     values:
       layout: "post"
 
+include:
+  - slides/pdf
+
 exclude:
   - scripts/
   - "*.py"
