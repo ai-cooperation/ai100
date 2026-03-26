@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S08 — Prompt Upgrade Compare: v1 vs v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --dark:#12121f; --dark2:#1a1a2e;
+  --gold:#F9AB00; --blue:#1A73E8; --green:#0F9D8A; --red:#D93025;
+  --white:#FFF; --g400:#9AA0A6; --g600:#5F6368;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:'Noto Sans TC',sans-serif;color:#fff;background:var(--dark);overflow:hidden;}
+
+/* ── Slide System ── */
+.slides{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 3rem;opacity:0;transform:translateX(30px);pointer-events:none;transition:opacity .5s,transform .5s ease;overflow:hidden;background:var(--dark);}
+.slide.active{opacity:1;transform:none;pointer-events:auto;}
+.slide.prev{opacity:0;transform:translateX(-30px);}
+
+/* ── Title Slide ── */
+.title-slide{text-align:center;}
+.title-slide h1{font-size:2.8rem;font-weight:900;line-height:1.3;margin-bottom:1rem;}
+.title-slide h1 span{color:var(--gold);}
+.title-slide .subtitle{font-size:1.2rem;color:var(--g400);font-weight:500;}
+
+/* ── Compare Layout ── */
+.compare-wrap{width:100%;max-width:1400px;display:flex;flex-direction:column;gap:.8rem;}
+.compare-header{text-align:center;}
+.compare-header h2{font-size:1.6rem;font-weight:900;margin-bottom:.3rem;}
+.compare-header .scene{font-size:1rem;color:var(--gold);font-weight:700;}
+.compare-row{display:flex;gap:1rem;flex:1;min-height:0;}
+.compare-col{flex:1;display:flex;flex-direction:column;gap:.4rem;}
+.compare-col .version-tag{font-size:.85rem;font-weight:900;text-align:center;padding:.3rem .8rem;border-radius:8px;align-self:center;}
+.version-tag.v1{background:rgba(255,255,255,.08);color:var(--g400);}
+.version-tag.v2{background:rgba(249,171,0,.15);color:var(--gold);}
+.compare-col img{width:100%;flex:1;object-fit:cover;border-radius:12px;min-height:0;}
+.prompt-diff{display:flex;gap:1rem;margin-top:.4rem;}
+.prompt-box{flex:1;background:rgba(255,255,255,.04);border-radius:10px;padding:.8rem 1rem;font-size:.7rem;line-height:1.6;color:rgba(255,255,255,.55);font-family:'Fira Code',monospace;max-height:120px;overflow-y:auto;}
+.prompt-box.v2{border:1px solid rgba(249,171,0,.2);}
+.prompt-box mark{background:rgba(249,171,0,.25);color:var(--gold);border-radius:2px;padding:0 2px;}
+
+/* ── Score Badge ── */
+.score-row{display:flex;justify-content:center;gap:2rem;margin-top:.3rem;}
+.score-item{text-align:center;}
+.score-item .label{font-size:.75rem;color:var(--g400);}
+.score-item .val{font-size:1.8rem;font-weight:900;}
+.score-item .val.low{color:var(--g400);}
+.score-item .val.high{color:var(--gold);}
+.score-item .delta{font-size:.8rem;color:var(--green);font-weight:700;}
+
+/* ── Summary Slide ── */
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;max-width:1200px;width:100%;}
+.summary-card{background:rgba(255,255,255,.04);border-radius:12px;overflow:hidden;text-align:center;}
+.summary-card .thumbs{display:flex;height:90px;}
+.summary-card .thumbs img{flex:1;object-fit:cover;min-width:0;}
+.summary-card .thumbs .sep{width:2px;background:var(--gold);flex-shrink:0;}
+.summary-card .card-label{padding:.4rem;font-size:.75rem;font-weight:700;color:rgba(255,255,255,.7);}
+
+/* ── Methodology Slide ── */
+.method-list{text-align:left;max-width:900px;width:100%;}
+.method-item{display:flex;gap:1rem;padding:.8rem 0;border-bottom:1px solid rgba(255,255,255,.06);}
+.method-item:last-child{border:none;}
+.method-icon{flex-shrink:0;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:900;}
+.method-icon.cam{background:rgba(26,115,232,.15);color:var(--blue);}
+.method-icon.film{background:rgba(249,171,0,.15);color:var(--gold);}
+.method-icon.light{background:rgba(15,157,138,.15);color:var(--green);}
+.method-icon.ref{background:rgba(124,58,237,.15);color:#7C3AED;}
+.method-icon.mat{background:rgba(217,48,37,.15);color:var(--red);}
+.method-text{flex:1;}
+.method-text strong{font-size:1rem;display:block;margin-bottom:.15rem;}
+.method-text p{font-size:.9rem;color:rgba(255,255,255,.6);line-height:1.6;}
+
+/* ── Controls ── */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--gold);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid rgba(255,255,255,.15);border-radius:12px;background:rgba(0,0,0,.4);color:rgba(255,255,255,.8);font-size:1.2rem;cursor:pointer;transition:all .15s;backdrop-filter:blur(8px);}
+.controls button:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff;}
+.controls button:disabled{opacity:.2;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;left:1.2rem;z-index:100;color:rgba(255,255,255,.35);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:rgba(249,171,0,.15);color:var(--gold);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;backdrop-filter:blur(8px);}
+
+/* ── Mobile ── */
+@media(max-width:768px){
+  html,body{font-size:14px;}
+  .slide{padding:1rem .8rem;}
+  .title-slide h1{font-size:1.6rem;}
+  .compare-row{flex-direction:column;gap:.5rem;}
+  .compare-col img{max-height:30vh;}
+  .prompt-diff{flex-direction:column;gap:.5rem;}
+  .prompt-box{max-height:80px;font-size:.6rem;}
+  .summary-grid{grid-template-columns:repeat(2,1fr);gap:.5rem;}
+  .summary-card .thumbs{height:60px;}
+  .method-item{gap:.6rem;padding:.5rem 0;}
+  .controls button{width:40px;height:40px;font-size:1rem;}
+  .score-row{gap:1rem;}
+  .score-item .val{font-size:1.3rem;}
+}
+</style>
+</head>
+<body>
+<div class="slides">
+
+<!-- ═══ Slide 0: Title ═══ -->
+<div class="slide title-slide active" data-index="0">
+  <h1>Prompt Engineering<br><span>電影海報級</span>升級實測</h1>
+  <p class="subtitle">S08「AI 與人：8 萬人的真心話」— 8 張配圖 v1 vs v2 比對</p>
+  <p style="margin-top:1.5rem;font-size:.95rem;color:rgba(255,255,255,.5);">升級方法：攝影機+鏡頭規格 / 膠片模擬+調色LUT / 物理光學細節 / 導演風格引用</p>
+</div>
+
+<!-- ═══ Slide 1: Methodology ═══ -->
+<div class="slide" data-index="1">
+  <h2 style="margin-bottom:1.2rem;">Prompt 升級方法論 — 5 個維度</h2>
+  <div class="method-list">
+    <div class="method-item">
+      <div class="method-icon cam">1</div>
+      <div class="method-text">
+        <strong>攝影機 + 鏡頭規格</strong>
+        <p>ARRI Alexa 65 / RED V-Raptor + Panavision Ultra Vista / Cooke S7/i — 指定焦距、光圈 T-stop、景深特性</p>
+      </div>
+    </div>
+    <div class="method-item">
+      <div class="method-icon film">2</div>
+      <div class="method-text">
+        <strong>膠片模擬 + 調色 LUT</strong>
+        <p>Kodak Vision3 500T / Fujifilm Eterna / Ektachrome — 指定 push/pull stops、色調偏移、grain 特性</p>
+      </div>
+    </div>
+    <div class="method-item">
+      <div class="method-icon light">3</div>
+      <div class="method-text">
+        <strong>物理光學細節</strong>
+        <p>Tyndall 散射、焦散光紋 (caustics)、色散 (chromatic aberration)、anamorphic 橢圓散景、體積光粒子</p>
+      </div>
+    </div>
+    <div class="method-item">
+      <div class="method-icon mat">4</div>
+      <div class="method-text">
+        <strong>材質物理描述</strong>
+        <p>指定物體表面特性 — 銅鍋反射率、棉布織紋、混凝土骨材紋理、雨滴表面張力</p>
+      </div>
+    </div>
+    <div class="method-item">
+      <div class="method-icon ref">5</div>
+      <div class="method-text">
+        <strong>導演 / 攝影師風格錨點</strong>
+        <p>Roger Deakins + Emmanuel Lubezki + Wong Kar-wai — 每張指定 2-3 個風格交叉引用</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Slide 2: Cover compare ═══ -->
+<div class="slide" data-index="2">
+  <div class="compare-wrap">
+    <div class="compare-header">
+      <h2>1/8 — Cover 封面：群眾仰望光芒</h2>
+      <div class="scene">Crowd + Crepuscular Light + Brutalist Architecture</div>
+    </div>
+    <div class="compare-row">
+      <div class="compare-col">
+        <span class="version-tag v1">v1 — 基礎 Prompt</span>
+        <img src="img/s08/cover.png" alt="cover v1">
+      </div>
+      <div class="compare-col">
+        <span class="version-tag v2">v2 — 電影海報級</span>
+        <img src="img/s08/cover_v2.png" alt="cover v2">
+      </div>
+    </div>
+    <div class="prompt-diff">
+      <div class="prompt-box">Cinematic wide shot, 16:9. A vast crowd... anamorphic lens flare. Color grading: teal shadows with warm amber highlights, inspired by Blade Runner 2049. Photorealistic, 8K.</div>
+      <div class="prompt-box v2">Shot on <mark>ARRI Alexa 65</mark> with <mark>Panavision Ultra Vista 40mm, T2.8</mark>... <mark>Kodak Vision3 500T 5219 pushed one stop</mark> — deep teal-cyan shadows (#1a3a4a), <mark>halated warm highlights bleeding at edges</mark>. <mark>Fine film grain ISO 500</mark>. <mark>Chromatic aberration at frame edges</mark>. Ref: <mark>Lubezki + Deakins + Villeneuve</mark>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Slide 3: Cooking compare ═══ -->
+<div class="slide" data-index="3">
+  <div class="compare-wrap">
+    <div class="compare-header">
+      <h2>2/8 — Cooking 母女廚房</h2>
+      <div class="scene">Golden Hour Backlight + Steam Tyndall + Copper Pot</div>
+    </div>
+    <div class="compare-row">
+      <div class="compare-col">
+        <span class="version-tag v1">v1 — 基礎 Prompt</span>
+        <img src="img/s08/cooking.png" alt="cooking v1">
+      </div>
+      <div class="compare-col">
+        <span class="version-tag v2">v2 — 電影海報級</span>
+        <img src="img/s08/cooking_v2.png" alt="cooking v2">
+      </div>
+    </div>
+    <div class="prompt-diff">
+      <div class="prompt-box">Cinematic golden hour photograph, 16:9. A parent holding child's hand... Warm backlit silhouette with lens flare. Color palette: rich warm amber, honey gold.</div>
+      <div class="prompt-box v2">Shot on <mark>ARRI Alexa Mini LF</mark> with <mark>Cooke S7/i 32mm, T2.0</mark>... steam catches golden backlight creating <mark>Tyndall scattering</mark>. <mark>Copper pot</mark> with <mark>hand-blown glass caustic patterns</mark>. <mark>Fujifilm Eterna Vivid 500D</mark>. Ref: <mark>Ang Lee's "Eat Drink Man Woman" + Terrence Malick</mark>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Slide 4: Triptych compare ═══ -->
+<div class="slide" data-index="4">
+  <div class="compare-wrap">
+    <div class="compare-header">
+      <h2>3/8 — Triptych 三聯畫</h2>
+      <div class="scene">Three Color Worlds + Material Texture + Emotional Lighting</div>
+    </div>
+    <div class="compare-row">
+      <div class="compare-col">
+        <span class="version-tag v1">v1 — 基礎 Prompt</span>
+        <img src="img/s08/triptych.png" alt="triptych v1">
+      </div>
+      <div class="compare-col">
+        <span class="version-tag v2">v2 — 電影海報級</span>
+        <img src="img/s08/triptych_v2.png" alt="triptych v2">
+      </div>
+    </div>
+    <div class="prompt-diff">
+      <div class="prompt-box">Cinematic triptych, 16:9, three vertical panels. LEFT: soldier in bunker, blue glow. CENTER: elderly man with laptop, warm lamp. RIGHT: young woman at computer, rain window.</div>
+      <div class="prompt-box v2">Shot on <mark>RED V-Raptor 8K</mark> with <mark>Zeiss Supreme Prime 35mm, T1.5</mark>. <mark>Dog tags catching glint</mark>. Grandfather's <mark>gnarled arthritic hands with visible tremor</mark>. <mark>Ceramic filament bulb, mended elbow patch</mark>. <mark>Crumpled energy drink can</mark>. <mark>Kodak 5219 500T pushed two stops</mark>. Ref: <mark>Iñárritu + Wong Kar-wai + Fincher</mark>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Slide 5: Light-Shadow compare ═══ -->
+<div class="slide" data-index="5">
+  <div class="compare-wrap">
+    <div class="compare-header">
+      <h2>4/8 — Light-Shadow 光影分界</h2>
+      <div class="scene">Volumetric Dust Motes + Penumbra Gradient + Cross-Process</div>
+    </div>
+    <div class="compare-row">
+      <div class="compare-col">
+        <span class="version-tag v1">v1 — 基礎 Prompt</span>
+        <img src="img/s08/light-shadow.png" alt="light-shadow v1">
+      </div>
+      <div class="compare-col">
+        <span class="version-tag v2">v2 — 電影海報級</span>
+        <img src="img/s08/light-shadow_v2.png" alt="light-shadow v2">
+      </div>
+    </div>
+    <div class="prompt-diff">
+      <div class="prompt-box">Cinematic medium shot, 16:9. A person at boundary of warm light and cold shadow in cathedral-like space. Left: golden volumetric light. Right: deep blue-black shadow. Long shadow connects both.</div>
+      <div class="prompt-box v2">Shot on <mark>ARRI Alexa 65</mark> with <mark>Panavision C-Series 50mm, T2.3</mark>. <mark>Dust motes with diffraction rings</mark>. <mark>Caustic light from imperfect glass</mark>. <mark>30cm penumbra gradient</mark>. <mark>Kodak Ektachrome warm + Fujifilm Provia cool cross-processed at boundary</mark>. Ref: <mark>Deakins + Kamiński + Vittorio Storaro</mark>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Slide 6: Rescue compare ═══ -->
+<div class="slide" data-index="6">
+  <div class="compare-wrap">
+    <div class="compare-header">
+      <h2>5/8 — Rescue 深夜求助</h2>
+      <div class="scene">Caravaggio Chiaroscuro + Rain Bokeh + Skin Detail</div>
+    </div>
+    <div class="compare-row">
+      <div class="compare-col">
+        <span class="version-tag v1">v1 — 基礎 Prompt</span>
+        <img src="img/s08/rescue.png" alt="rescue v1">
+      </div>
+      <div class="compare-col">
+        <span class="version-tag v2">v2 — 電影海報級</span>
+        <img src="img/s08/rescue_v2.png" alt="rescue v2">
+      </div>
+    </div>
+    <div class="prompt-diff">
+      <div class="prompt-box">Cinematic intimate shot, 16:9. A young man on bed at 3 AM, holding phone close to chest. Relief mixed with exhaustion, tears. Warm amber phone light, deep dark blue shadows. Rain window.</div>
+      <div class="prompt-box v2">Shot on <mark>ARRI Alexa Mini</mark> with <mark>Leica Summilux-C 29mm, T1.4</mark>. <mark>Tear tracks glistening on stubbled cheeks</mark>. Rain — <mark>each raindrop individually resolved as tiny lens creating inverted bokeh</mark>. <mark>Caravaggio-like chiaroscuro uplight, 4:1 contrast ratio</mark>. <mark>Kodak 250D cross-processed with 500T, ISO 1600 pushed</mark>. Ref: <mark>Xavier Dolan + Park Chan-wook + Barry Jenkins</mark>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Slide 7: Risk compare ═══ -->
+<div class="slide" data-index="7">
+  <div class="compare-wrap">
+    <div class="compare-header">
+      <h2>6/8 — Risk 深夜筆電</h2>
+      <div class="scene">Color Temperature Boundary + Anamorphic Bokeh + Sheet Texture</div>
+    </div>
+    <div class="compare-row">
+      <div class="compare-col">
+        <span class="version-tag v1">v1 — 基礎 Prompt</span>
+        <img src="img/s08/risk.png" alt="risk v1">
+      </div>
+      <div class="compare-col">
+        <span class="version-tag v2">v2 — 電影海報級</span>
+        <img src="img/s08/risk_v2.png" alt="risk v2">
+      </div>
+    </div>
+    <div class="prompt-diff">
+      <div class="prompt-box">Cinematic medium shot, 16:9. Person in bed at night, face lit by laptop, partner sleeping with back turned. Cool blue vs warm distant partner. Emotional infidelity with technology.</div>
+      <div class="prompt-box v2">Shot on <mark>Sony Venice 2</mark> with <mark>Cooke Anamorphic/i SF 50mm, T2.3</mark>. <mark>400-thread-count cotton weave texture</mark>. <mark>Color temperature boundary on sheets between them is the visual thesis</mark>. <mark>Phone notification pulsing faint green dot</mark>. <mark>Fujifilm Eterna 500T</mark>. Ref: <mark>Wong Kar-wai + Sofia Coppola + David Fincher</mark>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Slide 8: East-West compare ═══ -->
+<div class="slide" data-index="8">
+  <div class="compare-wrap">
+    <div class="compare-header">
+      <h2>7/8 — East-West 東西對比</h2>
+      <div class="scene">Wabi-sabi vs Techno-optimism + Split Color Grade + Motion Blur</div>
+    </div>
+    <div class="compare-row">
+      <div class="compare-col">
+        <span class="version-tag v1">v1 — 基礎 Prompt</span>
+        <img src="img/s08/east-west.png" alt="east-west v1">
+      </div>
+      <div class="compare-col">
+        <span class="version-tag v2">v2 — 電影海報級</span>
+        <img src="img/s08/east-west_v2.png" alt="east-west v2">
+      </div>
+    </div>
+    <div class="prompt-diff">
+      <div class="prompt-box">Cinematic split-screen, 16:9, vertical center divide. LEFT: East Asian person in minimalist room, paper lantern, warm tones. RIGHT: soaring atrium, dozens of people, cool LED light, geometric patterns.</div>
+      <div class="prompt-box v2">Shot on <mark>ARRI Alexa 65</mark> with <mark>Panavision Ultra Vista 65mm</mark>. LEFT: <mark>washi paper fiber texture shadows on tatami</mark>. <mark>Individually resolved pine needles on bonsai</mark>. RIGHT: <mark>1/15s motion blur on people = relentless velocity</mark>. <mark>Geodesic dome structure</mark>. LEFT: <mark>Fujifilm Velvia 50</mark>, RIGHT: <mark>bleach bypass</mark>. Ref: <mark>Yasujirō Ozu + Christopher Nolan + Ridley Scott</mark>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Slide 9: Crossroads compare ═══ -->
+<div class="slide" data-index="9">
+  <div class="compare-wrap">
+    <div class="compare-header">
+      <h2>8/8 — Crossroads 岔路抉擇</h2>
+      <div class="scene">Wildflower Species + Volumetric God Rays + Aurora Voronoi</div>
+    </div>
+    <div class="compare-row">
+      <div class="compare-col">
+        <span class="version-tag v1">v1 — 基礎 Prompt</span>
+        <img src="img/s08/crossroads.png" alt="crossroads v1">
+      </div>
+      <div class="compare-col">
+        <span class="version-tag v2">v2 — 電影海報級</span>
+        <img src="img/s08/crossroads_v2.png" alt="crossroads v2">
+      </div>
+    </div>
+    <div class="prompt-diff">
+      <div class="prompt-box">Cinematic aerial wide, 16:9, epic landscape. Lone figure at crossroads. LEFT: golden sunrise, lush wildflowers, god rays. RIGHT: deep blue luminous fog, geometric aurora. Hope vs uncertainty.</div>
+      <div class="prompt-box v2">Shot on <mark>ARRI Alexa 65</mark> with <mark>Panavision System 65 24mm ultra-wide</mark>. <mark>Visible species: lupines, poppies, buttercups with dew specular highlights showing surface tension</mark>. RIGHT: <mark>obsidian-like path surface reflecting aurora</mark>, <mark>Voronoi light tessellations</mark>. LEFT: <mark>Kodak Ektachrome 100 VS</mark>, RIGHT: <mark>Fujifilm Provia pushed two stops</mark>. Ref: <mark>Malick + Villeneuve + Tarkovsky</mark>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Slide 10: Summary ═══ -->
+<div class="slide" data-index="10">
+  <h2 style="margin-bottom:1rem;">8 張總覽比對</h2>
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="thumbs"><img src="img/s08/cover.png" alt="v1"><div class="sep"></div><img src="img/s08/cover_v2.png" alt="v2"></div>
+      <div class="card-label">1. Cover 群眾</div>
+    </div>
+    <div class="summary-card">
+      <div class="thumbs"><img src="img/s08/cooking.png" alt="v1"><div class="sep"></div><img src="img/s08/cooking_v2.png" alt="v2"></div>
+      <div class="card-label">2. Cooking 廚房</div>
+    </div>
+    <div class="summary-card">
+      <div class="thumbs"><img src="img/s08/triptych.png" alt="v1"><div class="sep"></div><img src="img/s08/triptych_v2.png" alt="v2"></div>
+      <div class="card-label">3. Triptych 三聯</div>
+    </div>
+    <div class="summary-card">
+      <div class="thumbs"><img src="img/s08/light-shadow.png" alt="v1"><div class="sep"></div><img src="img/s08/light-shadow_v2.png" alt="v2"></div>
+      <div class="card-label">4. Light-Shadow</div>
+    </div>
+    <div class="summary-card">
+      <div class="thumbs"><img src="img/s08/rescue.png" alt="v1"><div class="sep"></div><img src="img/s08/rescue_v2.png" alt="v2"></div>
+      <div class="card-label">5. Rescue 求助</div>
+    </div>
+    <div class="summary-card">
+      <div class="thumbs"><img src="img/s08/risk.png" alt="v1"><div class="sep"></div><img src="img/s08/risk_v2.png" alt="v2"></div>
+      <div class="card-label">6. Risk 筆電</div>
+    </div>
+    <div class="summary-card">
+      <div class="thumbs"><img src="img/s08/east-west.png" alt="v1"><div class="sep"></div><img src="img/s08/east-west_v2.png" alt="v2"></div>
+      <div class="card-label">7. East-West</div>
+    </div>
+    <div class="summary-card">
+      <div class="thumbs"><img src="img/s08/crossroads.png" alt="v1"><div class="sep"></div><img src="img/s08/crossroads_v2.png" alt="v2"></div>
+      <div class="card-label">8. Crossroads</div>
+    </div>
+  </div>
+  <p style="margin-top:1rem;font-size:.9rem;color:var(--g400);">每格左邊 = v1（基礎 prompt），右邊 = v2（電影海報級 prompt）</p>
+</div>
+
+<!-- ═══ Slide 11: Takeaway ═══ -->
+<div class="slide title-slide" data-index="11">
+  <h1>Prompt 差異 =<br><span>攝影知識的密度</span></h1>
+  <p class="subtitle" style="max-width:700px;margin:1rem auto 0;">v1 告訴 AI「拍什麼」— v2 告訴 AI「怎麼拍」<br>鏡頭、膠片、光學物理、材質描述、導演引用<br>每一層都在壓縮 AI 的自由度，把它推向電影級品質</p>
+  <div style="margin-top:2rem;display:flex;gap:3rem;justify-content:center;">
+    <div style="text-align:center;">
+      <div style="font-size:2.5rem;font-weight:900;color:var(--g400);">~50</div>
+      <div style="font-size:.85rem;color:var(--g400);">v1 平均字數</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:2.5rem;font-weight:900;color:var(--gold);">~250</div>
+      <div style="font-size:.85rem;color:var(--gold);">v2 平均字數</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:2.5rem;font-weight:900;color:var(--green);">5x</div>
+      <div style="font-size:.85rem;color:var(--green);">資訊密度提升</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /slides -->
+
+<!-- Controls -->
+<div class="module-badge">S08 Prompt Compare</div>
+<div class="slide-counter"><span id="cur">1</span> / <span id="tot">12</span></div>
+<div class="progress" id="prog"></div>
+<div class="controls">
+  <button id="btnPrev" onclick="go(-1)">&#9664;</button>
+  <button id="btnNext" onclick="go(1)">&#9654;</button>
+</div>
+
+<script>
+const slides=document.querySelectorAll('.slide');
+let idx=0;
+function show(n){
+  slides.forEach((s,i)=>{
+    s.classList.remove('active','prev');
+    if(i===n)s.classList.add('active');
+    else if(i<n)s.classList.add('prev');
+  });
+  idx=n;
+  document.getElementById('cur').textContent=n+1;
+  document.getElementById('tot').textContent=slides.length;
+  document.getElementById('prog').style.width=((n+1)/slides.length*100)+'%';
+  document.getElementById('btnPrev').disabled=n===0;
+  document.getElementById('btnNext').disabled=n===slides.length-1;
+}
+function go(d){show(Math.max(0,Math.min(slides.length-1,idx+d)));}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' ')go(1);
+  if(e.key==='ArrowLeft')go(-1);
+});
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;});
+document.addEventListener('touchend',e=>{const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50){d<0?go(1):go(-1);}});
+show(0);
+</script>
+</body>
+</html>
