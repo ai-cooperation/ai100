@@ -264,6 +264,8 @@
     <button class="act-btn" onclick="exportData()">匯出</button>
     <button class="act-btn" onclick="showPushPanel()" title="推送內容">📤 推送</button>
     <button class="act-btn" onclick="showReport()" title="回饋報告">📊 報告</button>
+    <button class="act-btn" id="btnVoice" onclick="toggleVoice()" title="語音控制（持續監聽）" style="font-size:1.1rem;">🎤</button>
+    <span id="voiceStatus" style="font-size:0.8rem;color:var(--dim);display:none;margin-right:auto;"></span>
     <button class="act-btn" id="btnStartClass" onclick="startClass()" style="background:var(--pri);color:#fff;border-color:var(--pri);display:none">▶ 開始上課</button>
     <button class="act-btn" id="btnEndClass" onclick="endClass()" style="background:var(--red);color:#fff;border-color:var(--red);display:none">⏹ 結束課程</button>
   </div>
@@ -1218,6 +1220,83 @@ function copyEmails() {
       alert('已複製 '+window._reportEmails.length+' 個 email');
     });
   }
+}
+
+// ═══ Voice Control — 持續監聽，免按鍵 ═══
+let voiceRecognition = null;
+let voiceActive = false;
+
+function toggleVoice() {
+  if (voiceActive) { stopVoice(); return; }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('此瀏覽器不支援語音辨識，請用 Chrome'); return; }
+
+  voiceRecognition = new SR();
+  voiceRecognition.lang = 'zh-TW';
+  voiceRecognition.continuous = true;      // 持續監聽
+  voiceRecognition.interimResults = false; // 只要最終結果
+  voiceRecognition.maxAlternatives = 1;
+
+  voiceRecognition.onstart = () => {
+    voiceActive = true;
+    document.getElementById('btnVoice').style.background = 'var(--red)';
+    document.getElementById('btnVoice').style.color = '#fff';
+    document.getElementById('btnVoice').style.borderColor = 'var(--red)';
+    document.getElementById('voiceStatus').style.display = 'inline';
+    document.getElementById('voiceStatus').textContent = '🔴 監聽中...';
+  };
+
+  voiceRecognition.onresult = (e) => {
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        const text = e.results[i][0].transcript.trim();
+        if (text.length < 2) continue;
+
+        console.log('[voice]', text);
+        document.getElementById('voiceStatus').textContent = '🎤 ' + text;
+
+        // 全部送 Firebase，讓 SmallClaw 的 LLM 判斷是不是指令
+        if (roomId) {
+          db.ref('rooms/' + roomId + '/voiceCommands').push({
+            text: text,
+            ts: firebase.database.ServerValue.TIMESTAMP
+          });
+        }
+      }
+    }
+  };
+
+  voiceRecognition.onerror = (e) => {
+    console.error('[voice] error:', e.error);
+    if (e.error === 'not-allowed') {
+      alert('請允許麥克風權限');
+      stopVoice();
+    }
+    // network/no-speech errors → auto restart
+  };
+
+  voiceRecognition.onend = () => {
+    // 持續模式：自動重啟（除非手動停止）
+    if (voiceActive) {
+      setTimeout(() => { try { voiceRecognition.start(); } catch(e) {} }, 300);
+    }
+  };
+
+  try {
+    voiceRecognition.start();
+  } catch(e) {
+    alert('無法啟動語音：' + e.message);
+  }
+}
+
+function stopVoice() {
+  voiceActive = false;
+  if (voiceRecognition) { try { voiceRecognition.stop(); } catch(e) {} }
+  document.getElementById('btnVoice').style.background = '';
+  document.getElementById('btnVoice').style.color = '';
+  document.getElementById('btnVoice').style.borderColor = '';
+  document.getElementById('voiceStatus').style.display = 'none';
 }
 </script>
 </body>
