@@ -56,7 +56,7 @@
   .lobby-header .user img{width:28px;height:28px;border-radius:50%}
   .lobby-header .logout{color:var(--red);cursor:pointer;font-size:0.7rem}
 
-  /* Create room */
+  /* Create room / course */
   .create-section{background:var(--surface);border-radius:12px;padding:1.5rem;border:1px solid var(--border);margin-bottom:2rem}
   .create-section h2{font-size:1rem;color:var(--pri);margin-bottom:1rem}
   .create-row{display:flex;gap:0.5rem;align-items:center}
@@ -76,6 +76,80 @@
   .room-card .rc-del{padding:0.4rem 0.6rem;background:none;color:var(--dim);font-size:0.8rem;border-radius:8px;border:1px solid var(--border)}
   .room-card .rc-del:hover{color:var(--red);border-color:var(--red)}
   .no-rooms{color:var(--dim);font-size:0.9rem;text-align:center;padding:2rem}
+
+  /* ═══ Course Card (lobby) ═══ */
+  .course-card{background:var(--surface);border-radius:12px;padding:1rem 1.2rem;border:1px solid var(--border);margin-bottom:0.6rem;display:flex;align-items:center;gap:1rem;transition:border-color 0.2s;cursor:pointer}
+  .course-card:hover{border-color:var(--gold)}
+  .course-card .cc-info{flex:1}
+  .course-card .cc-name{font-weight:700;color:var(--text)}
+  .course-card .cc-meta{font-size:0.75rem;color:var(--dim)}
+  .course-card .cc-enter{padding:0.4rem 1rem;background:var(--gold);color:var(--navy);border-radius:8px;font-size:0.8rem;font-weight:700}
+  .course-card .cc-del{padding:0.4rem 0.6rem;background:none;color:var(--dim);font-size:0.8rem;border-radius:8px;border:1px solid var(--border)}
+  .course-card .cc-del:hover{color:var(--red);border-color:var(--red)}
+
+  /* ═══ Course View (left-right layout) ═══ */
+  .course-view{display:none;height:100vh;flex-direction:row}
+  .course-view.active{display:flex}
+  .course-sidebar{width:280px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface)}
+  .cs-header{padding:0.8rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.5rem}
+  .cs-header .cs-back{padding:0.4rem 0.6rem;border-radius:6px;font-size:0.85rem;background:none;color:var(--dim);border:1px solid var(--border);cursor:pointer}
+  .cs-header .cs-back:hover{color:var(--text);border-color:var(--text)}
+  .cs-header .cs-title{flex:1;font-size:0.85rem;font-weight:700;color:var(--gold);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cs-phases{flex:1;overflow-y:auto;padding:0.5rem 0}
+  .phase-card{padding:1rem 1.2rem;cursor:pointer;border-left:3px solid transparent;transition:all 0.2s;display:flex;align-items:center;gap:0.8rem}
+  .phase-card:hover{background:rgba(255,255,255,0.03)}
+  .phase-card.active{border-left-color:var(--pri);background:var(--bg)}
+  .phase-card.disabled{opacity:0.4;pointer-events:none}
+  .phase-card .pc-icon{font-size:1.2rem;flex-shrink:0}
+  .phase-card .pc-info{flex:1}
+  .phase-card .pc-label{font-size:0.9rem;font-weight:700;color:var(--text)}
+  .phase-card .pc-desc{font-size:0.7rem;color:var(--dim)}
+  .cs-footer{padding:0.8rem 1rem;border-top:1px solid var(--border);font-size:0.75rem;color:var(--dim);display:flex;justify-content:space-between;align-items:center}
+  .cs-footer button{padding:0.3rem 0.6rem;border-radius:6px;font-size:0.75rem;background:none;color:var(--dim);border:1px solid var(--border);cursor:pointer}
+  .cs-footer button:hover{color:var(--text);border-color:var(--text)}
+
+  .course-main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+  .cm-header{padding:0.6rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.5rem;flex-shrink:0;background:var(--surface)}
+  .cm-header h2{font-size:0.95rem;font-weight:700;color:var(--gold);flex:1}
+  .cm-header .online{font-size:0.8rem;color:var(--dim)}
+  .cm-body{flex:1;overflow-y:auto;padding:1rem}
+
+  /* Session row */
+  .session-row{display:flex;padding:0.8rem 1rem;border-bottom:1px solid var(--border);cursor:pointer;align-items:center;gap:0.8rem;transition:all 0.2s}
+  .session-row:hover{background:rgba(255,255,255,0.03)}
+  .session-row.active{background:var(--bg);border-left:3px solid var(--gold)}
+  .session-row .sr-num{width:28px;height:28px;border-radius:50%;background:var(--border);color:var(--dim);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0}
+  .session-row.active .sr-num{background:var(--gold);color:var(--navy)}
+  .session-row .sr-info{flex:1;min-width:0}
+  .session-row .sr-title{font-size:0.9rem;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .session-row .sr-meta{font-size:0.72rem;color:var(--dim)}
+  .session-row .sr-deck{font-size:0.72rem;color:var(--pri);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .session-row .sr-status{font-size:0.72rem;padding:0.15rem 0.5rem;border-radius:4px;white-space:nowrap}
+  .sr-status.preparing{background:rgba(15,157,138,0.15);color:var(--pri)}
+  .sr-status.live{background:rgba(34,197,94,0.15);color:#22c55e}
+  .sr-status.post-class{background:rgba(255,200,87,0.15);color:var(--gold)}
+  .sr-status.completed{background:rgba(125,133,144,0.15);color:var(--dim)}
+
+  .btn-add-session{display:flex;align-items:center;gap:0.5rem;padding:0.8rem 1rem;color:var(--pri);font-size:0.85rem;cursor:pointer;border:none;background:none;width:100%;transition:background 0.2s}
+  .btn-add-session:hover{background:rgba(15,157,138,0.08)}
+
+  /* New session form */
+  .new-session-form{background:var(--surface);border-radius:12px;padding:1.5rem;border:1px solid var(--border);margin:1rem}
+  .new-session-form h3{font-size:1rem;font-weight:700;color:var(--pri);margin-bottom:1rem}
+  .nsf-field{margin-bottom:1rem}
+  .nsf-field label{display:block;font-size:0.8rem;color:var(--dim);margin-bottom:0.3rem}
+  .nsf-field input,.nsf-field select{width:100%;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;outline:none}
+  .nsf-field input:focus,.nsf-field select:focus{border-color:var(--pri)}
+  .nsf-radio-group{display:flex;flex-direction:column;gap:0.4rem}
+  .nsf-radio{display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.8rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:border-color 0.2s}
+  .nsf-radio:hover{border-color:var(--pri)}
+  .nsf-radio.selected{border-color:var(--pri);background:rgba(15,157,138,0.08)}
+  .nsf-radio input[type="radio"]{accent-color:var(--pri)}
+  .nsf-radio .nr-label{font-size:0.85rem;font-weight:700}
+  .nsf-radio .nr-sub{font-size:0.7rem;color:var(--dim)}
+  .nsf-submit{width:100%;padding:0.7rem;background:var(--pri);color:#fff;border-radius:8px;font-size:0.9rem;font-weight:700;border:none;cursor:pointer}
+  .nsf-submit:hover{background:var(--pri-d)}
+  .nsf-cancel{width:100%;padding:0.5rem;background:none;color:var(--dim);border:1px solid var(--border);border-radius:8px;font-size:0.85rem;margin-top:0.5rem;cursor:pointer}
 
   /* Dashboard */
   .dash{display:none;flex-direction:column;height:100vh}
@@ -266,6 +340,14 @@
     .step-card{padding:1rem}
     .post-actions{flex-direction:column}
     .post-actions button{min-width:auto}
+    /* Course view responsive */
+    .course-view.active{flex-direction:column}
+    .course-sidebar{width:100%;flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid var(--border);max-height:none}
+    .cs-header{border-bottom:none;padding:0.5rem}
+    .cs-phases{display:flex;flex-direction:row;overflow-x:auto;padding:0}
+    .phase-card{border-left:none;border-bottom:3px solid transparent;padding:0.6rem 1rem;white-space:nowrap}
+    .phase-card.active{border-left-color:transparent;border-bottom-color:var(--pri)}
+    .cs-footer{display:none}
   }
 </style>
 </head>
@@ -306,21 +388,84 @@
     <h2 style="font-size:1rem;color:var(--gold);margin-bottom:0.8rem">📅 今日課程</h2>
     <div id="todayClassList"></div>
   </div>
+
+  <!-- My Courses -->
+  <div class="room-list" style="margin-bottom:2rem">
+    <h2>我的課程</h2>
+    <div id="courseListContainer"><div class="no-rooms">載入中...</div></div>
+  </div>
+
+  <!-- Create new course -->
   <div class="create-section">
-    <h2>建立新教室</h2>
+    <h2>建立新課程</h2>
+    <div class="create-row">
+      <input type="text" id="inputCourseName" placeholder="課程名稱（例如：AI工具應用班）" autocomplete="off" style="flex:2">
+      <button onclick="createCourse()">建立</button>
+    </div>
+  </div>
+
+  <!-- Quick room (backward compat) -->
+  <div class="create-section" style="border-style:dashed;opacity:0.7">
+    <h2 style="color:var(--dim)">快速建立教室（不歸屬課程）</h2>
     <div class="create-row">
       <span class="prefix" id="datePrefix"></span>
       <input type="text" id="inputSuffix" placeholder="教室名稱（例如 ai100）" autocomplete="off">
-      <button onclick="createRoom()">建立</button>
+      <button onclick="createRoom()" style="background:var(--dim)">建立</button>
     </div>
   </div>
-  <div class="room-list">
-    <h2>我的教室</h2>
+
+  <!-- Standalone rooms -->
+  <div class="room-list" id="standaloneRoomSection" style="display:none">
+    <h2>其他教室</h2>
     <div id="roomListContainer"><div class="no-rooms">尚無教室</div></div>
   </div>
 </div>
 
-<!-- Dashboard -->
+<!-- ═══ Course View (left-right layout) ═══ -->
+<div class="course-view" id="courseView">
+  <!-- Left sidebar -->
+  <div class="course-sidebar">
+    <div class="cs-header">
+      <button class="cs-back" onclick="backToCourseList()">← 返回</button>
+      <span class="cs-title" id="cvCourseName"></span>
+    </div>
+    <div class="cs-phases">
+      <div class="phase-card disabled" id="cvPhase1" onclick="selectCoursePhase('prepare')">
+        <span class="pc-icon">📋</span>
+        <div class="pc-info"><div class="pc-label">課前準備</div><div class="pc-desc">教材 · QR · 問卷</div></div>
+      </div>
+      <div class="phase-card disabled" id="cvPhase2" onclick="selectCoursePhase('live')">
+        <span class="pc-icon">🎯</span>
+        <div class="pc-info"><div class="pc-label">課中互動</div><div class="pc-desc">訊息牆 · 投票 · 問答</div></div>
+      </div>
+      <div class="phase-card disabled" id="cvPhase3" onclick="selectCoursePhase('post')">
+        <span class="pc-icon">📊</span>
+        <div class="pc-info"><div class="pc-label">課後收尾</div><div class="pc-desc">回饋 · 寄信 · 匯出</div></div>
+      </div>
+      <div class="phase-card disabled" id="cvPhase4" onclick="selectCoursePhase('report')">
+        <span class="pc-icon">📈</span>
+        <div class="pc-info"><div class="pc-label">教學報告</div><div class="pc-desc">出席 · 互動 · 匯出</div></div>
+      </div>
+    </div>
+    <div class="cs-footer">
+      <span id="cvSessionCount">0 堂次</span>
+      <button onclick="openCourseSettings()">⚙ 設定</button>
+    </div>
+  </div>
+
+  <!-- Right main area -->
+  <div class="course-main">
+    <div class="cm-header">
+      <h2 id="cvMainTitle">📅 課程排程</h2>
+      <span class="online" id="cvOnline"></span>
+    </div>
+    <div class="cm-body" id="cvMainBody">
+      <!-- Session list or phase content rendered here -->
+    </div>
+  </div>
+</div>
+
+<!-- Dashboard (for standalone rooms + course session live view) -->
 <div class="dash" id="dash">
 
   <!-- Shared Header -->
@@ -664,6 +809,11 @@ let currentPhase='preparing'; // 'preparing' | 'live' | 'post-class'
 let selectedMaterialIdx=null; // Index into materials[] selected in preparing phase
 const VC=['#0F9D8A','#E07A3A','#7C3AED','#06B6D4','#FFC857','#DC2626'];
 
+// ═══ Course View State ═══
+let cvCourseId=null,cvCourseName='',cvSessions=[],cvSelectedSessionIdx=null,cvSelectedPhase=null;
+let cvListeners=[];
+let cvFromCourse=false; // true when dashboard entered from course view
+
 // Teaching materials
 const materials=[
   // ─── 補充單元 S01-S05（簡報） ───
@@ -685,6 +835,17 @@ const materials=[
   {title:'reveal.js 風格示範',icon:'🔀',url:'/demo-revealjs'},
 ];
 
+// Deck options for selects
+var deckOptions=[
+  {name:'S01_GAS_Automation',label:'S01 GAS 自動化'},
+  {name:'S02_Vibe_Coding',label:'S02 Vibe Coding'},
+  {name:'S03_CLI_Agent',label:'S03 CLI Agent'},
+  {name:'S04_VSCode_IDE',label:'S04 VS Code IDE'},
+  {name:'S05_OpenClaw',label:'S05 OpenClaw'},
+  {name:'S07_NotebookLM',label:'S07 NotebookLM'},
+  {name:'S09_FARS_FactCheck',label:'S09 FARS 事實查核'},
+];
+
 // ═══ Phase Management ═══
 function showPhase(phase){
   currentPhase=phase;
@@ -698,17 +859,17 @@ function showPhase(phase){
   var voiceStatus=document.getElementById('voiceStatus');
 
   if(phase==='preparing'){
-    btnBack.textContent='← 返回大廳';
+    btnBack.textContent=cvFromCourse?'← 返回課程':'← 返回大廳';
     btnVoice.style.display='none';
     voiceStatus.style.display='none';
     renderPreparingPhase();
   } else if(phase==='live'){
-    btnBack.textContent='← 返回';
+    btnBack.textContent=cvFromCourse?'← 返回課程':'← 返回';
     btnVoice.style.display='';
     renderContent();
     updateLiveStatusBar();
   } else if(phase==='post-class'){
-    btnBack.textContent='← 返回大廳';
+    btnBack.textContent=cvFromCourse?'← 返回課程':'← 返回大廳';
     btnVoice.style.display='none';
     voiceStatus.style.display='none';
     renderPostClassPhase();
@@ -800,15 +961,6 @@ function renderPostClassPhase(){
   // Populate deck select for post-class email
   var sel=document.getElementById('postDeckSelect');
   if(sel.options.length<=1){
-    var deckOptions=[
-      {name:'S01_GAS_Automation',label:'S01 GAS 自動化'},
-      {name:'S02_Vibe_Coding',label:'S02 Vibe Coding'},
-      {name:'S03_CLI_Agent',label:'S03 CLI Agent'},
-      {name:'S04_VSCode_IDE',label:'S04 VS Code IDE'},
-      {name:'S05_OpenClaw',label:'S05 OpenClaw'},
-      {name:'S07_NotebookLM',label:'S07 NotebookLM'},
-      {name:'S09_FARS_FactCheck',label:'S09 FARS 事實查核'},
-    ];
     deckOptions.forEach(function(d){
       var opt=document.createElement('option');
       opt.value=d.name;
@@ -905,6 +1057,7 @@ auth.onAuthStateChanged(function(user){
     document.getElementById('lobbyName').textContent=user.displayName||user.email;
     var today=new Date();
     document.getElementById('datePrefix').textContent=today.getFullYear()+String(today.getMonth()+1).padStart(2,'0')+String(today.getDate()).padStart(2,'0')+'-';
+    loadCourseList();
     loadRoomList();
     loadTodayClasses();
   } else {
@@ -919,14 +1072,485 @@ function googleLogin(){
 }
 function googleLogout(){if(confirm('登出？'))auth.signOut().then(function(){location.reload()})}
 
-// ═══ Room List ═══
+// ═══ Course List ═══
+function loadCourseList(){
+  db.ref('courses').orderByChild('config/teacherUid').equalTo(currentUser.uid).on('value',function(snap){
+    var el=document.getElementById('courseListContainer');
+    var courses=[];
+    snap.forEach(function(c){
+      var cfg=c.val().config||{};
+      var sessions=c.val().sessions||{};
+      var sessionCount=Object.keys(sessions).length;
+      courses.push({id:c.key,title:cfg.title||c.key,created:cfg.created||0,sessionCount:sessionCount});
+    });
+    courses.sort(function(a,b){return(b.created||0)-(a.created||0)});
+    if(!courses.length){el.innerHTML='<div class="no-rooms">尚無課程，下方建立一個吧</div>';return}
+    el.innerHTML=courses.map(function(c){
+      return '<div class="course-card">'+
+        '<div class="cc-info" onclick="enterCourseView(\''+esc(c.id)+'\',\''+esc(c.title)+'\')"><div class="cc-name">'+esc(c.title)+'</div><div class="cc-meta">'+c.sessionCount+' 堂次</div></div>'+
+        '<button class="cc-enter" onclick="enterCourseView(\''+esc(c.id)+'\',\''+esc(c.title)+'\')">進入</button>'+
+        '<button class="cc-del" onclick="event.stopPropagation();deleteCourse(\''+esc(c.id)+'\',\''+esc(c.title)+'\')">刪除</button>'+
+      '</div>';
+    }).join('');
+  });
+}
+
+function createCourse(){
+  var name=document.getElementById('inputCourseName').value.trim();
+  if(!name){alert('請輸入課程名稱');return}
+  var courseId=name.replace(/\s+/g,'-');
+  db.ref('courses/'+courseId+'/config').once('value').then(function(snap){
+    if(snap.exists()){alert('此課程名稱已存在');return}
+    db.ref('courses/'+courseId+'/config').set({
+      title:name,
+      teacherUid:currentUser.uid,
+      teacherName:currentUser.displayName||currentUser.email,
+      created:firebase.database.ServerValue.TIMESTAMP,
+      plannedSessions:0
+    });
+    document.getElementById('inputCourseName').value='';
+  });
+}
+
+function deleteCourse(courseId,title){
+  if(!confirm('刪除課程「'+title+'」？所有堂次資料也會清除。'))return;
+  // Also delete associated rooms
+  db.ref('courses/'+courseId+'/sessions').once('value',function(snap){
+    snap.forEach(function(s){
+      var sess=s.val();
+      if(sess.roomId){
+        db.ref('rooms/'+sess.roomId).remove();
+        db.ref('users/'+currentUser.uid+'/rooms/'+sess.roomId).remove();
+      }
+    });
+    db.ref('courses/'+courseId).remove();
+  });
+}
+
+// ═══ Course View ═══
+function enterCourseView(courseId,title){
+  cvCourseId=courseId;
+  cvCourseName=title;
+  cvSelectedSessionIdx=null;
+  cvSelectedPhase=null;
+
+  document.getElementById('lobby').classList.remove('active');
+  document.getElementById('courseView').classList.add('active');
+  document.getElementById('cvCourseName').textContent=title;
+
+  // Disable phase cards
+  setPhaseCardsEnabled(false);
+
+  // Load sessions
+  loadCourseSessions();
+}
+
+function backToCourseList(){
+  // Detach course listeners
+  cvListeners.forEach(function(l){l.ref.off(l.event)});
+  cvListeners=[];
+  cvCourseId=null;cvCourseName='';cvSessions=[];cvSelectedSessionIdx=null;cvSelectedPhase=null;
+  document.getElementById('courseView').classList.remove('active');
+  document.getElementById('lobby').classList.add('active');
+}
+
+function loadCourseSessions(){
+  var ref=db.ref('courses/'+cvCourseId+'/sessions');
+  ref.on('value',function(snap){
+    cvSessions=[];
+    snap.forEach(function(c){
+      var s=c.val();
+      cvSessions.push({id:c.key,title:s.title||'',date:s.date||'',deckId:s.deckId||'',duration:s.duration||3,roomId:s.roomId||'',status:s.status||'preparing',shareLink:s.shareLink||''});
+    });
+    // Sort by date
+    cvSessions.sort(function(a,b){return(a.date||'').localeCompare(b.date||'')});
+    document.getElementById('cvSessionCount').textContent=cvSessions.length+' 堂次';
+    renderSessionList();
+  });
+  cvListeners.push({ref:ref,event:'value'});
+}
+
+function renderSessionList(){
+  var body=document.getElementById('cvMainBody');
+  document.getElementById('cvMainTitle').textContent='📅 課程排程 — '+cvCourseName;
+  document.getElementById('cvOnline').textContent='';
+
+  var statusLabels={preparing:'準備中',live:'上課中','post-class':'已完成',completed:'已完成'};
+  var html='';
+
+  if(!cvSessions.length){
+    html+='<div style="text-align:center;padding:3rem;color:var(--dim)"><p style="font-size:1.2rem;margin-bottom:0.5rem">尚無堂次</p><p>點擊下方「新增堂次」開始規劃</p></div>';
+  } else {
+    html+='<div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem">';
+    cvSessions.forEach(function(s,idx){
+      var isActive=cvSelectedSessionIdx===idx;
+      var dateDisplay=s.date?formatDateDisplay(s.date):'未設定';
+      var statusClass=s.status||'preparing';
+      if(statusClass==='completed')statusClass='post-class';
+      html+='<div class="session-row'+(isActive?' active':'')+'" onclick="selectSession('+idx+')">';
+      html+='<div class="sr-num">'+(idx+1)+'</div>';
+      html+='<div class="sr-info"><div class="sr-title">'+esc(s.title||'未命名')+'</div><div class="sr-meta">'+dateDisplay+(s.duration?' · '+s.duration+'hr':'')+'</div></div>';
+      if(s.deckId){html+='<span class="sr-deck">'+esc(s.deckId)+'</span>'}
+      html+='<span class="sr-status '+statusClass+'">'+esc(statusLabels[s.status]||s.status)+'</span>';
+      html+='</div>';
+    });
+    html+='</div>';
+  }
+
+  html+='<button class="btn-add-session" onclick="showNewSessionForm()"><span style="font-size:1.2rem">＋</span> 新增堂次</button>';
+  body.innerHTML=html;
+}
+
+function formatDateDisplay(dateStr){
+  // dateStr: YYYYMMDD or YYYY-MM-DD
+  var d=dateStr.replace(/-/g,'');
+  if(d.length===8){
+    return d.substring(4,6)+'/'+d.substring(6,8);
+  }
+  return dateStr;
+}
+
+function selectSession(idx){
+  cvSelectedSessionIdx=idx;
+  setPhaseCardsEnabled(true);
+
+  // Highlight active session
+  renderSessionList();
+
+  // Auto-select phase based on session status
+  var sess=cvSessions[idx];
+  if(sess.status==='live'){
+    selectCoursePhase('live');
+  } else if(sess.status==='post-class'||sess.status==='completed'){
+    selectCoursePhase('post');
+  } else {
+    selectCoursePhase('prepare');
+  }
+}
+
+function setPhaseCardsEnabled(enabled){
+  ['cvPhase1','cvPhase2','cvPhase3','cvPhase4'].forEach(function(id){
+    document.getElementById(id).classList.toggle('disabled',!enabled);
+  });
+  if(!enabled){
+    ['cvPhase1','cvPhase2','cvPhase3','cvPhase4'].forEach(function(id){
+      document.getElementById(id).classList.remove('active');
+    });
+  }
+}
+
+function selectCoursePhase(phase){
+  cvSelectedPhase=phase;
+  document.getElementById('cvPhase1').classList.toggle('active',phase==='prepare');
+  document.getElementById('cvPhase2').classList.toggle('active',phase==='live');
+  document.getElementById('cvPhase3').classList.toggle('active',phase==='post');
+  document.getElementById('cvPhase4').classList.toggle('active',phase==='report');
+
+  var sess=cvSessions[cvSelectedSessionIdx];
+  if(!sess)return;
+
+  if(phase==='prepare'){
+    renderCVPrepare(sess);
+  } else if(phase==='live'){
+    // Enter the room dashboard in live mode
+    enterSessionRoom(sess,'live');
+  } else if(phase==='post'){
+    renderCVPost(sess);
+  } else if(phase==='report'){
+    renderCVReport(sess);
+  }
+}
+
+function renderCVPrepare(sess){
+  var body=document.getElementById('cvMainBody');
+  document.getElementById('cvMainTitle').textContent='📋 課前準備 — '+esc(sess.title||'');
+
+  var studentUrl=sess.roomId?location.origin+'/classroom/?room='+encodeURIComponent(sess.roomId):'(建立堂次後生成)';
+  var deckLabel=sess.deckId||'未選擇';
+
+  var html='';
+  html+='<div class="step-card"><div class="step-title"><span class="step-num">1</span>教材</div>';
+  html+='<div style="font-size:0.9rem;color:var(--text)">'+esc(deckLabel)+'</div>';
+  if(sess.shareLink){html+='<div style="font-size:0.8rem;color:var(--dim);margin-top:0.3rem">分享連結：<a href="'+esc(sess.shareLink)+'" target="_blank">'+esc(sess.shareLink)+'</a></div>'}
+  html+='</div>';
+
+  html+='<div class="step-card"><div class="step-title"><span class="step-num">2</span>學員入口</div>';
+  if(sess.roomId){
+    html+='<div style="font-size:0.8rem;color:var(--dim);margin-bottom:0.5rem;word-break:break-all">'+esc(studentUrl)+'</div>';
+    html+='<div style="display:flex;gap:0.5rem"><div class="qr-small" id="cvQrStudent" style="max-width:120px"></div><div class="qr-small" id="cvQrRemote" style="max-width:120px"></div></div>';
+  } else {
+    html+='<div style="font-size:0.85rem;color:var(--dim)">教室將在建立堂次時自動生成</div>';
+  }
+  html+='</div>';
+
+  html+='<div class="step-card"><div class="step-title"><span class="step-num">3</span>課前問卷（選填）</div>';
+  if(sess.roomId){
+    html+='<button class="act-btn" onclick="window.open(\'/classroom/survey?room='+encodeURIComponent(sess.roomId)+'\',\'_blank\')">開啟課前問卷 ↗</button>';
+  } else {
+    html+='<div style="font-size:0.85rem;color:var(--dim)">需先建立教室</div>';
+  }
+  html+='</div>';
+
+  if(sess.roomId && (sess.status==='preparing'||!sess.status)){
+    html+='<button class="btn-start-class" onclick="enterSessionRoom(cvSessions['+cvSelectedSessionIdx+'],\'preparing\')">▶ 進入教室準備上課</button>';
+  } else if(sess.roomId){
+    html+='<button class="btn-start-class" style="background:var(--gold);color:var(--navy)" onclick="enterSessionRoom(cvSessions['+cvSelectedSessionIdx+'],\''+sess.status+'\')">進入教室</button>';
+  }
+
+  body.innerHTML=html;
+
+  // Render QR codes after DOM update
+  if(sess.roomId){
+    setTimeout(function(){
+      makeQR('cvQrStudent',location.origin+'/classroom/?room='+encodeURIComponent(sess.roomId));
+      makeQR('cvQrRemote',location.origin+'/classroom/remote?room='+encodeURIComponent(sess.roomId));
+    },50);
+  }
+}
+
+function renderCVPost(sess){
+  var body=document.getElementById('cvMainBody');
+  document.getElementById('cvMainTitle').textContent='📊 課後收尾 — '+esc(sess.title||'');
+
+  if(!sess.roomId){
+    body.innerHTML='<div style="text-align:center;padding:3rem;color:var(--dim)">此堂次尚未建立教室</div>';
+    return;
+  }
+
+  var html='<div style="text-align:center;padding:1rem;color:var(--dim)">載入中...</div>';
+  body.innerHTML=html;
+
+  db.ref('rooms/'+sess.roomId+'/feedback').once('value',function(snap){
+    var data=snap.val();
+    var entries=data?Object.values(data):[];
+    var total=entries.length;
+    var satSum=0,satCount=0,recSum=0,recCount=0;
+    entries.forEach(function(e){
+      if(e.ratings){
+        if(e.ratings.satisfaction){satSum+=e.ratings.satisfaction;satCount++}
+        if(e.ratings.recommend){recSum+=e.ratings.recommend;recCount++}
+      }
+    });
+    var satAvg=satCount?(satSum/satCount).toFixed(1):'-';
+    var recAvg=recCount?(recSum/recCount).toFixed(1):'-';
+
+    var h='';
+    h+='<div class="kpi-grid">';
+    h+='<div class="kpi-card"><div class="kpi-val" style="color:var(--pri)">'+total+'</div><div class="kpi-label">填寫人數</div></div>';
+    h+='<div class="kpi-card"><div class="kpi-val" style="color:var(--gold)">'+satAvg+'</div><div class="kpi-label">滿意度 /5</div></div>';
+    h+='<div class="kpi-card"><div class="kpi-val" style="color:#1A73E8">'+recAvg+'</div><div class="kpi-label">推薦度 /5</div></div>';
+    h+='</div>';
+
+    h+='<div class="post-actions">';
+    h+='<button onclick="enterSessionRoom(cvSessions['+cvSelectedSessionIdx+'],\'post-class\')">進入教室查看詳情</button>';
+    h+='<button onclick="window.open(\'/classroom/feedback?room='+encodeURIComponent(sess.roomId)+'\',\'_blank\')">查看回饋頁</button>';
+    h+='</div>';
+
+    body.innerHTML=h;
+  });
+}
+
+function renderCVReport(sess){
+  var body=document.getElementById('cvMainBody');
+  document.getElementById('cvMainTitle').textContent='📈 教學報告 — '+esc(sess.title||'');
+
+  if(!sess.roomId){
+    body.innerHTML='<div style="text-align:center;padding:3rem;color:var(--dim)">此堂次尚未建立教室</div>';
+    return;
+  }
+
+  body.innerHTML='<div style="text-align:center;padding:1rem;color:var(--dim)">載入中...</div>';
+
+  Promise.all([
+    db.ref('rooms/'+sess.roomId+'/presence').once('value'),
+    db.ref('rooms/'+sess.roomId+'/wall').once('value'),
+    db.ref('rooms/'+sess.roomId+'/qa').once('value'),
+    db.ref('rooms/'+sess.roomId+'/votes').once('value'),
+    db.ref('rooms/'+sess.roomId+'/feedback').once('value')
+  ]).then(function(results){
+    var presCount=results[0].numChildren();
+    var wallCount=results[1].numChildren();
+    var qaCount=results[2].numChildren();
+    var voteCount=results[3].numChildren();
+    var feedbackCount=results[4].numChildren();
+
+    var h='';
+    h+='<div class="kpi-grid" style="grid-template-columns:1fr 1fr">';
+    h+='<div class="kpi-card"><div class="kpi-val" style="color:var(--pri)">'+presCount+'</div><div class="kpi-label">出席人數</div></div>';
+    h+='<div class="kpi-card"><div class="kpi-val" style="color:var(--gold)">'+wallCount+'</div><div class="kpi-label">訊息牆留言</div></div>';
+    h+='<div class="kpi-card"><div class="kpi-val" style="color:var(--purple)">'+qaCount+'</div><div class="kpi-label">提問數</div></div>';
+    h+='<div class="kpi-card"><div class="kpi-val" style="color:#06B6D4">'+voteCount+'</div><div class="kpi-label">投票數</div></div>';
+    h+='</div>';
+
+    h+='<div style="margin-top:1rem;text-align:center"><p style="color:var(--dim);font-size:0.85rem;margin-bottom:0.5rem">回饋填寫：'+feedbackCount+' 人</p>';
+    h+='<button class="act-btn" style="margin:0.5rem" onclick="enterSessionRoom(cvSessions['+cvSelectedSessionIdx+'],\'live\');setTimeout(function(){exportData()},500)">匯出完整 HTML 報告</button>';
+    h+='</div>';
+
+    body.innerHTML=h;
+  });
+}
+
+function enterSessionRoom(sess,phaseOverride){
+  if(!sess||!sess.roomId)return;
+  cvFromCourse=true;
+  // Hide course view, show dash
+  document.getElementById('courseView').classList.remove('active');
+  enterRoom(sess.roomId,sess.title||sess.roomId,phaseOverride);
+}
+
+// ═══ New Session Form ═══
+function showNewSessionForm(){
+  var body=document.getElementById('cvMainBody');
+  document.getElementById('cvMainTitle').textContent='＋ 新增堂次';
+
+  var today=new Date();
+  var todayStr=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+
+  var html='<div class="new-session-form">';
+  html+='<h3>新增堂次</h3>';
+
+  html+='<div class="nsf-field"><label>日期</label><input type="date" id="nsDate" value="'+todayStr+'"></div>';
+  html+='<div class="nsf-field"><label>主題</label><input type="text" id="nsTitle" placeholder="例：碳盤查實務"></div>';
+  html+='<div class="nsf-field"><label>時長（小時）</label><input type="number" id="nsDuration" value="3" min="1" max="8"></div>';
+
+  html+='<div class="nsf-field"><label>教材</label>';
+  html+='<div class="nsf-radio-group" id="nsMaterialRadios">';
+  html+='<div class="nsf-radio selected" onclick="selectNsMaterial(this,\'builtin\')"><input type="radio" name="nsMat" value="builtin" checked><div><div class="nr-label">內建教材</div><div class="nr-sub">從補充單元選擇</div></div></div>';
+  html+='<div class="nsf-radio" onclick="selectNsMaterial(this,\'pptx\')"><input type="radio" name="nsMat" value="pptx"><div><div class="nr-label">已轉檔 PPTX</div><div class="nr-sub">從已上傳的簡報選擇</div></div></div>';
+  html+='<div class="nsf-radio" onclick="selectNsMaterial(this,\'external\')"><input type="radio" name="nsMat" value="external"><div><div class="nr-label">外部連結</div><div class="nr-sub">貼上外部簡報連結</div></div></div>';
+  html+='<div class="nsf-radio" onclick="selectNsMaterial(this,\'none\')"><input type="radio" name="nsMat" value="none"><div><div class="nr-label">自行投影</div><div class="nr-sub">不需遙控簡報</div></div></div>';
+  html+='</div>';
+  html+='</div>';
+
+  // Builtin deck select
+  html+='<div class="nsf-field" id="nsBuiltinField"><label>選擇內建教材</label><select id="nsBuiltinDeck">';
+  deckOptions.forEach(function(d){html+='<option value="'+d.name+'">'+d.label+'</option>'});
+  html+='</select></div>';
+
+  // PPTX select (placeholder)
+  html+='<div class="nsf-field" id="nsPptxField" style="display:none"><label>選擇已轉檔簡報</label><select id="nsPptxDeck"><option value="university-talk">大學演講</option><option value="demo">Demo</option></select></div>';
+
+  // External link
+  html+='<div class="nsf-field" id="nsExternalField" style="display:none"><label>外部連結</label><input type="url" id="nsExternalUrl" placeholder="https://..."></div>';
+
+  html+='<div class="nsf-field"><label>課後分享連結（選填）</label><input type="url" id="nsShareLink" placeholder="Google Drive 連結"></div>';
+
+  html+='<button class="nsf-submit" onclick="submitNewSession()">建立堂次</button>';
+  html+='<button class="nsf-cancel" onclick="renderSessionList()">取消</button>';
+  html+='</div>';
+
+  body.innerHTML=html;
+}
+
+function selectNsMaterial(el,type){
+  document.querySelectorAll('#nsMaterialRadios .nsf-radio').forEach(function(r){r.classList.remove('selected')});
+  el.classList.add('selected');
+  el.querySelector('input[type="radio"]').checked=true;
+  document.getElementById('nsBuiltinField').style.display=type==='builtin'?'':'none';
+  document.getElementById('nsPptxField').style.display=type==='pptx'?'':'none';
+  document.getElementById('nsExternalField').style.display=type==='external'?'':'none';
+}
+
+function submitNewSession(){
+  var date=document.getElementById('nsDate').value.replace(/-/g,'');
+  var title=document.getElementById('nsTitle').value.trim();
+  var duration=parseInt(document.getElementById('nsDuration').value)||3;
+  var shareLink=document.getElementById('nsShareLink').value.trim();
+
+  if(!title){alert('請填寫主題');return}
+  if(!date){alert('請選擇日期');return}
+
+  var matType=document.querySelector('input[name="nsMat"]:checked').value;
+  var deckId='',deckType='';
+  if(matType==='builtin'){
+    deckId=document.getElementById('nsBuiltinDeck').value;
+    deckType='slides';
+  } else if(matType==='pptx'){
+    deckId=document.getElementById('nsPptxDeck').value;
+    deckType='pptx-slides';
+  } else if(matType==='external'){
+    deckId=document.getElementById('nsExternalUrl').value.trim();
+    deckType='external';
+  }
+
+  // Generate roomId and sessionId
+  var simpleName=cvCourseName.replace(/\s+/g,'').substring(0,20);
+  var roomIdNew=date+'-'+simpleName;
+  var sessionId=date+'-'+title.replace(/\s+/g,'').substring(0,20);
+
+  // Check if room exists
+  db.ref('rooms/'+roomIdNew+'/config').once('value').then(function(snap){
+    if(snap.exists()){
+      // Add suffix
+      roomIdNew=roomIdNew+'-'+Math.random().toString(36).substring(2,6);
+      sessionId=sessionId+'-'+Math.random().toString(36).substring(2,6);
+    }
+
+    var updates={};
+    // Session
+    updates['courses/'+cvCourseId+'/sessions/'+sessionId]={
+      title:title,
+      date:date,
+      deckId:deckId,
+      deckType:deckType,
+      duration:duration,
+      roomId:roomIdNew,
+      status:'preparing',
+      shareLink:shareLink
+    };
+    // Room config
+    updates['rooms/'+roomIdNew+'/config']={
+      title:title,
+      mode:'wall',
+      status:'preparing',
+      created:firebase.database.ServerValue.TIMESTAMP,
+      hostUid:currentUser.uid,
+      hostName:currentUser.displayName||currentUser.email,
+      courseId:cvCourseId,
+      sessionId:sessionId,
+      deck:deckId||null,
+      deckType:deckType||null
+    };
+    // User rooms
+    updates['users/'+currentUser.uid+'/rooms/'+roomIdNew]={
+      title:title,
+      created:firebase.database.ServerValue.TIMESTAMP,
+      courseId:cvCourseId
+    };
+
+    db.ref().update(updates).then(function(){
+      renderSessionList();
+    });
+  });
+}
+
+// ═══ Course Settings ═══
+function openCourseSettings(){
+  if(!cvCourseId)return;
+  var newTitle=prompt('修改課程名稱：',cvCourseName);
+  if(newTitle&&newTitle.trim()&&newTitle.trim()!==cvCourseName){
+    db.ref('courses/'+cvCourseId+'/config/title').set(newTitle.trim());
+    cvCourseName=newTitle.trim();
+    document.getElementById('cvCourseName').textContent=cvCourseName;
+  }
+}
+
+// ═══ Room List (standalone rooms only) ═══
 function loadRoomList(){
   db.ref('users/'+currentUser.uid+'/rooms').on('value',function(snap){
     var el=document.getElementById('roomListContainer');
+    var section=document.getElementById('standaloneRoomSection');
     var rooms=[];
-    snap.forEach(function(c){rooms.push({id:c.key,title:c.val().title,created:c.val().created})});
+    snap.forEach(function(c){
+      var val=c.val();
+      // Only show rooms without courseId (standalone)
+      if(!val.courseId){
+        rooms.push({id:c.key,title:val.title,created:val.created});
+      }
+    });
     rooms.sort(function(a,b){return(b.created||0)-(a.created||0)});
-    if(!rooms.length){el.innerHTML='<div class="no-rooms">尚無教室，上方建立一個吧</div>';return}
+    if(!rooms.length){section.style.display='none';return}
+    section.style.display='block';
     el.innerHTML=rooms.map(function(r){return '<div class="room-card">'+
       '<div class="rc-info" onclick="enterRoom(\''+r.id+'\',\''+esc(r.title||r.id)+'\')"><div class="rc-name">'+esc(r.title||r.id)+'</div><div class="rc-meta">'+r.id+'</div></div>'+
       '<button class="rc-enter" onclick="enterRoom(\''+r.id+'\',\''+esc(r.title||r.id)+'\')">進入</button>'+
@@ -979,7 +1603,7 @@ function deleteRoom(rid){
   db.ref('users/'+currentUser.uid+'/rooms/'+rid).remove();
 }
 
-function enterRoom(rid,title){
+function enterRoom(rid,title,phaseOverride){
   roomId=rid;roomTitle=title||rid;
   roomCourseId=null;roomSessionId=null;roomDeck=null;roomDeckType=null;
   selectedMaterialIdx=null;
@@ -996,7 +1620,7 @@ function enterRoom(rid,title){
     roomDeckType=cfg.deckType||null;
 
     // Determine phase from status
-    var status=cfg.status||'';
+    var status=phaseOverride||cfg.status||'';
     if(status==='live'){
       showPhase('live');
     } else if(status==='post-class'||status==='completed'){
@@ -1054,7 +1678,17 @@ function backToLobby(){
   listeners.forEach(function(l){l.ref.off(l.event)});listeners=[];
   db.ref('rooms/'+roomId).off();
   document.getElementById('dash').classList.remove('active');
-  document.getElementById('lobby').classList.add('active');
+
+  // If came from course view, go back there
+  if(cvFromCourse&&cvCourseId){
+    cvFromCourse=false;
+    document.getElementById('courseView').classList.add('active');
+    // Refresh session list
+    renderSessionList();
+  } else {
+    document.getElementById('lobby').classList.add('active');
+  }
+
   // Hide all phases
   document.getElementById('phasePrepare').classList.remove('active');
   document.getElementById('phaseLive').classList.remove('active');
@@ -1738,15 +2372,6 @@ function initEmailPanel() {
   if (!roomId) return;
   // Populate deck select
   var sel = document.getElementById('emailDeckSelect');
-  var deckOptions = [
-    { name: 'S01_GAS_Automation', label: 'S01 GAS 自動化' },
-    { name: 'S02_Vibe_Coding', label: 'S02 Vibe Coding' },
-    { name: 'S03_CLI_Agent', label: 'S03 CLI Agent' },
-    { name: 'S04_VSCode_IDE', label: 'S04 VS Code IDE' },
-    { name: 'S05_OpenClaw', label: 'S05 OpenClaw' },
-    { name: 'S07_NotebookLM', label: 'S07 NotebookLM' },
-    { name: 'S09_FARS_FactCheck', label: 'S09 FARS 事實查核' },
-  ];
   if (sel.options.length <= 1) {
     deckOptions.forEach(function(d) {
       var opt = document.createElement('option');

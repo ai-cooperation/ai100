@@ -199,13 +199,34 @@ function joinRoom(){
   roomId=room;userName=name;localStorage.setItem('_name',name);
   document.getElementById('btnJoin').disabled=true;
   db.ref(`rooms/${roomId}/config`).once('value').then(s=>{
-    if(!s.exists()){showError('找不到這個房間');document.getElementById('btnJoin').disabled=false;return}
+    if(!s.exists()){showWaitingRoom(roomId);return}
     const c=s.val();
     if(c.password){const pf=document.getElementById('inputPassword');if(pf.classList.contains('hidden')){pf.classList.remove('hidden');pf.focus();document.getElementById('btnJoin').disabled=false;return}if(pf.value!==c.password){showError('密碼錯誤');document.getElementById('btnJoin').disabled=false;return}}
     enterRoom();
   }).catch(e=>{showError('連線失敗：'+e.message);document.getElementById('btnJoin').disabled=false});
 }
 function showError(m){const e=document.getElementById('joinError');e.textContent=m;e.classList.remove('hidden');setTimeout(()=>e.classList.add('hidden'),3000)}
+
+function showWaitingRoom(room){
+  const box=document.getElementById('joinScreen').querySelector('.join-box');
+  box.innerHTML=`
+    <div style="font-size:2.5rem;margin-bottom:1rem;animation:pulse 2s infinite">⏳</div>
+    <h1 style="color:var(--navy);margin-bottom:0.5rem">課程尚未開始</h1>
+    <p style="color:var(--dim);font-size:0.95rem;margin-bottom:1.5rem">講師正在準備中，請稍候</p>
+    <p style="color:var(--dim);font-size:0.8rem;background:var(--bg);padding:0.5rem 1rem;border-radius:8px;display:inline-block">房間代碼：<strong>${esc(room)}</strong></p>
+    <p style="color:var(--dim);font-size:0.75rem;margin-top:1.2rem" id="waitCountdown">10 秒後自動重試…</p>
+  `;
+  let sec=10;
+  const iv=setInterval(()=>{
+    sec--;const el=document.getElementById('waitCountdown');
+    if(sec<=0){clearInterval(iv);if(el)el.textContent='重新檢查中…';
+      db.ref('rooms/'+room+'/config').once('value').then(s=>{
+        if(s.exists()){location.reload()}
+        else{sec=10;if(el)el.textContent='10 秒後自動重試…'}
+      }).catch(()=>{sec=10;if(el)el.textContent='10 秒後自動重試…'});
+    }else{if(el)el.textContent=sec+' 秒後自動重試…'}
+  },1000);
+}
 
 function enterRoom(){
   document.getElementById('joinScreen').style.display='none';
