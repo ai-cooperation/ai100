@@ -1,0 +1,3139 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 1 — 開場 × AI 素養 × 工具全體驗</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════
+   Reading Glasses + Safe Zone + grow.google 風格
+   產投班 Day1 — 投影教學用 (3-10m 觀看距離)
+
+   Safe Zone 規則：
+   - padding-top: 3.5rem（清除 module-badge top:1rem）
+   - padding-bottom: 4.5rem（清除 controls bottom:1.2rem + progress）
+   - justify-content: flex-start + ::before/::after 偽元素置中
+   - 安全內容高度 ≤ 30rem (660px)
+
+   Reading Glasses 規格：
+   - 正文 22px, 最小 16px, CJK 行高 ≥ 1.7
+   - 字重 ≥ 400, 按鈕 ≥ 48px
+   - 內容最大寬度 720px
+   ═══════════════════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+  --orange:#EA580C; --orange-lt:#FFF7ED;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--white);}
+
+/* ── Slide Layout (Safe Zone) ── */
+.slides{width:100%;height:100%;position:relative;}
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-start;          /* 不用 center，用偽元素置中 */
+  padding:3.5rem 4rem 6rem;             /* 上 3.5rem 清 badge, 下 6rem 清 controls+progress+buffer */
+  opacity:0;transform:translateX(30px);pointer-events:none;
+  transition:opacity .4s,transform .4s ease;
+  background:var(--white);
+  overflow-y:auto;                     /* 長內容可捲動 */
+}
+/* 偽元素置中：短內容居中，長內容正常捲動 */
+.slide::before{content:'';flex:1 1 0px;min-height:0;}
+.slide::after{content:'';flex:1 1 0px;min-height:0;}
+
+.slide.active{opacity:1;transform:none;pointer-events:auto;}
+.slide.prev{opacity:0;transform:translateX(-30px);}
+.slide.cover{background:var(--navy);color:#fff;text-align:center;}
+.slide.cover h2{color:#fff;}
+.slide.section-title{background:var(--green);color:#fff;text-align:center;}
+.slide.section-title h2{color:#fff;}
+.slide.break-slide{background:var(--offwhite);text-align:center;}
+
+/* ── Typography (Reading Glasses) ── */
+h1{font-size:2.8rem;font-weight:900;line-height:1.3;}           /* 投影 h1 */
+h2{font-size:1.8rem;font-weight:700;color:var(--g900);margin-bottom:.8rem;line-height:1.4;}  /* h2 ≥ 28px */
+h3{font-size:1.2rem;font-weight:700;margin-bottom:.4rem;}       /* h3 ≥ 24px */
+p,li{font-size:1.05rem;line-height:1.8;}                        /* 正文 ~23px */
+.subtitle{font-size:1.05rem;color:var(--g600);font-weight:500;}
+small,.caption{font-size:max(16px,0.75rem);}                    /* 最小 16px 保護 */
+.blue{color:var(--blue);}.green{color:var(--green);}.gold{color:var(--gold);}
+.red{color:var(--red);}.purple{color:var(--purple);}.dim{color:var(--g600);}.bold{font-weight:700;}
+
+/* ── Fragment animation (≤300ms) ── */
+.fragment{opacity:0;transform:translateY(8px);transition:opacity .25s,transform .25s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* ── Cards ── */
+.card-grid{display:flex;gap:1.2rem;flex-wrap:wrap;justify-content:center;margin-top:1rem;max-width:720px;}
+.card{background:var(--white);border:2px solid var(--g100);border-radius:16px;padding:1.4rem;min-width:140px;max-width:260px;flex:1;}
+.card:hover{border-color:var(--blue);}
+.card .icon{font-size:2rem;margin-bottom:.4rem;}
+.card h3{font-size:1.1rem;}
+.card p{font-size:.95rem;color:var(--g600);line-height:1.7;}
+
+/* ── Steps ── */
+.step-list{text-align:left;max-width:720px;width:100%;}
+.step{display:flex;gap:1rem;align-items:flex-start;padding:.6rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.05rem;}.step-content p{font-size:.95rem;color:var(--g600);margin-top:.1rem;}
+
+/* ── Code ── */
+.code-block{background:var(--g50);border:2px solid var(--g200);border-radius:12px;padding:1.2rem 1.5rem;text-align:left;max-width:720px;width:100%;font-family:'Fira Code',monospace;font-size:.9rem;line-height:1.8;margin:.6rem 0;color:var(--g900);white-space:pre-wrap;}
+
+/* ── Table ── */
+.compare-table{border-collapse:collapse;font-size:.95rem;margin-top:.6rem;width:100%;max-width:720px;}
+.compare-table th{background:var(--navy);color:#fff;padding:.5rem .8rem;text-align:left;font-size:.95rem;}
+.compare-table td{padding:.5rem .8rem;border-bottom:1px solid var(--g100);font-size:.95rem;}
+.compare-table tr:hover td{background:var(--g50);}
+
+/* ── Info boxes ── */
+.info-box{border-radius:12px;padding:1rem 1.5rem;max-width:720px;width:100%;text-align:left;margin-top:.6rem;}
+.info-box.analogy{background:var(--blue-lt);border-left:4px solid var(--blue);}
+.info-box.warning{background:var(--red-lt);border-left:4px solid var(--red);}
+.info-box.success{background:var(--green-lt);border-left:4px solid var(--green);}
+.info-box.tip{background:var(--gold-lt);border-left:4px solid var(--gold);}
+.info-box .label{font-weight:700;font-size:.95rem;margin-bottom:.3rem;}
+.info-box p{font-size:1rem;}
+
+/* ── Flow ── */
+.flow{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:center;margin:1rem 0;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.5rem .8rem;font-size:.95rem;font-weight:700;text-align:center;min-width:80px;}
+.flow-arrow{color:var(--blue);font-size:1.3rem;font-weight:900;}
+
+/* ── Two col ── */
+.two-col{display:flex;gap:1.5rem;width:100%;max-width:720px;text-align:left;}
+.two-col .col{flex:1;}
+
+/* ── Big number ── */
+.big-num{font-size:4rem;font-weight:900;color:var(--blue);line-height:1;}
+
+/* ── Banners ── */
+.exercise-banner{display:inline-block;background:var(--purple);color:#fff;padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:.95rem;margin-bottom:.6rem;}
+.demo-banner{display:inline-block;background:var(--blue);color:#fff;padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:.95rem;margin-bottom:.6rem;}
+.case-banner{display:inline-block;background:var(--orange);color:#fff;padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:.95rem;margin-bottom:.6rem;}
+
+/* ── Quote ── */
+.quote-box{max-width:720px;width:100%;background:var(--g50);border-left:5px solid var(--navy);border-radius:0 12px 12px 0;padding:1.2rem 1.5rem;margin:.6rem 0;text-align:left;}
+.quote-box .quote-text{font-size:1.2rem;font-weight:700;line-height:1.6;color:var(--navy);}
+.quote-box .quote-src{font-size:.9rem;color:var(--g600);margin-top:.4rem;}
+
+/* ── Mockup (simplified) ── */
+.mockup{max-width:720px;width:100%;border:2px solid var(--g200);border-radius:12px;overflow:hidden;margin:.6rem 0;text-align:left;background:var(--white);}
+.mockup-bar{background:var(--g100);padding:.4rem 1rem;font-size:.8rem;font-weight:700;color:var(--g600);border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:.4rem;}
+.mockup-bar::before{content:'● ● ●';font-size:.5rem;color:var(--g400);letter-spacing:3px;}
+.mockup-content{padding:1rem 1.2rem;}
+.chat-bubble{padding:.6rem 1rem;border-radius:12px;margin:.4rem 0;max-width:85%;font-size:.95rem;line-height:1.7;}
+.chat-bubble.user{background:var(--blue);color:#fff;margin-left:auto;border-bottom-right-radius:4px;}
+.chat-bubble.ai{background:var(--g50);color:var(--g900);margin-right:auto;border-bottom-left-radius:4px;}
+
+/* ── Copy button ── */
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:.3rem .8rem;font-size:.8rem;font-weight:700;cursor:pointer;opacity:.7;transition:opacity .2s;}
+.copy-btn:hover{opacity:1;}
+.copy-btn.copied{background:var(--green);}
+.code-block{position:relative;}
+
+/* ── Timer ── */
+.timer{display:inline-flex;align-items:center;gap:.5rem;background:var(--purple-lt);color:var(--purple);padding:.3rem 1rem;border-radius:100px;font-weight:700;font-size:1rem;margin-top:.5rem;}
+.timer::before{content:'⏱';}
+
+/* ── Push marker ── */
+[data-push]::before{content:'📲 推送';position:absolute;top:3.5rem;left:1rem;background:var(--green-lt);color:var(--green);padding:.2rem .6rem;border-radius:100px;font-size:.75rem;font-weight:700;z-index:10;}
+[data-push]{position:relative;}
+
+/* ── Typing animation ── */
+.typing .chat-bubble.ai{overflow:hidden;white-space:nowrap;border-right:3px solid var(--g400);animation:typing 2s steps(40) 0.5s forwards,blink .5s step-end infinite alternate;}
+@keyframes typing{from{max-width:0;opacity:1;}to{max-width:100%;opacity:1;}}
+@keyframes blink{50%{border-color:transparent;}}
+
+/* ── Cinematic dark slides ── */
+.slide.cinematic{background:var(--g900);color:#fff;}
+.slide.cinematic h2{color:#fff;}
+.slide.cinematic .subtitle{color:var(--g400);}
+
+/* ── Callout arrow ── */
+.callout{color:var(--red);font-weight:700;font-size:.95rem;margin-top:.4rem;}
+.callout::before{content:'👆 ';}
+
+/* ── Vote marker ── */
+.vote-slide{position:relative;}
+.vote-slide::after{content:'🗳️ 投票題';position:absolute;top:3.5rem;right:1rem;background:var(--gold-lt);color:#B45309;padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;z-index:10;}
+
+/* ── Section nav (left-bottom dropdown) ── */
+.section-nav{position:fixed;bottom:1.2rem;left:1.2rem;z-index:200;}
+.section-nav-btn{background:var(--white);border:2px solid var(--g200);border-radius:12px;padding:.4rem .8rem;font-size:.85rem;font-weight:600;color:var(--g600);cursor:pointer;display:flex;align-items:center;gap:.4rem;transition:all .15s;min-height:48px;}
+.section-nav-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-lt);}
+.section-nav-btn .nav-counter{font-weight:400;color:var(--g400);}
+.section-nav-menu{position:absolute;bottom:calc(100% + .5rem);left:0;background:var(--white);border:2px solid var(--g200);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:60vh;overflow-y:auto;min-width:280px;display:none;padding:.4rem;}
+.section-nav-menu.open{display:block;}
+.section-nav-item{display:flex;align-items:center;gap:.6rem;padding:.5rem .8rem;border-radius:8px;cursor:pointer;font-size:.85rem;color:var(--g600);transition:background .1s;}
+.section-nav-item:hover{background:var(--g50);}
+.section-nav-item.active{background:var(--blue-lt);color:var(--blue);font-weight:700;}
+.section-nav-item .nav-idx{width:24px;height:24px;border-radius:50%;background:var(--g100);color:var(--g600);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0;}
+.section-nav-item.active .nav-idx{background:var(--blue);color:#fff;}
+.section-nav-item .nav-title{flex:1;}
+
+/* ── Fixed overlays ── */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.8rem;}
+.controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:var(--white);color:var(--g800);font-size:1.2rem;cursor:pointer;transition:all .15s;}
+.controls button:hover{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
+.controls button:disabled{opacity:.25;cursor:default;}
+/* slide-counter replaced by section-nav */
+.module-badge{position:fixed;top:.8rem;right:1rem;z-index:100;background:var(--blue-lt);color:var(--blue);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;}
+.module-title{position:fixed;top:.8rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
+
+/* ── RWD ── */
+@media(max-width:768px){
+  html{font-size:16px;}
+  .slide{padding:3rem 1.2rem 5.5rem;}
+  h1{font-size:1.8rem;}h2{font-size:1.4rem;}p,li{font-size:.95rem;}
+  .card-grid{flex-direction:column;align-items:center;}
+  .card{max-width:100%;min-width:auto;}
+  .two-col{flex-direction:column;}
+  .mockup{max-width:100%;}
+  .controls button{width:40px;height:40px;}
+  .flow{gap:.3rem;}.flow-box{font-size:.85rem;padding:.4rem .6rem;min-width:65px;}
+}
+@media(max-width:480px){
+  h1{font-size:1.5rem;}
+  .big-num{font-size:2.8rem;}
+  .flow-box{min-width:55px;font-size:.8rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="module-title">Day 1 — 開場 × AI 素養 × 工具全體驗</div>
+<div class="module-badge">產投班</div>
+<div class="slides">
+<!-- Day1 Part 1: Slides 0-57 -->
+<!-- ============================================================ -->
+<!-- A. 開場與分組 (slides 0-11) -->
+<!-- ============================================================ -->
+
+<!-- ===== 0: COVER ===== -->
+<div class="slide cover" data-index="0">
+  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:.8rem;">產投班 36 小時實戰課程</p>
+  <h1>AI 工具應用與<br>自動化流程實戰班</h1>
+  <p class="subtitle" style="margin-top:1.2rem;font-size:1.3rem;">Day 1 — 開場 × AI 素養 × 工具全體驗</p>
+  <div style="margin-top:2.5rem;display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;">
+    <span style="background:rgba(255,255,255,.15);padding:.4rem 1.2rem;border-radius:100px;font-size:.95rem;">講師：陳重光</span>
+    <span style="background:rgba(255,255,255,.15);padding:.4rem 1.2rem;border-radius:100px;font-size:.95rem;">36 小時</span>
+    <span style="background:rgba(255,255,255,.15);padding:.4rem 1.2rem;border-radius:100px;font-size:.95rem;">5 個週日</span>
+    <span style="background:rgba(255,255,255,.15);padding:.4rem 1.2rem;border-radius:100px;font-size:.95rem;">分組實作</span>
+  </div>
+  <p style="color:rgba(255,255,255,.35);margin-top:3rem;font-size:.85rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- ===== 1: 掃碼加入教室 ===== -->
+<div class="slide" data-index="1">
+  <h2>📱 拿出手機，掃描 QR Code 加入教室</h2>
+  <div style="display:flex;align-items:center;gap:3rem;margin-top:1.5rem;">
+    <div style="width:200px;height:200px;background:var(--g100);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--g400);border:3px dashed var(--g200);">
+      QR Code<br>教室連結
+    </div>
+    <div class="step-list" style="max-width:500px;">
+      <div class="step fragment" data-order="0">
+        <div class="step-num">1</div>
+        <div class="step-content"><strong>掃碼</strong><p>用手機相機掃描左邊的 QR Code</p></div>
+      </div>
+      <div class="step fragment" data-order="1">
+        <div class="step-num">2</div>
+        <div class="step-content"><strong>輸入暱稱</strong><p>取一個讓大家認得的名字</p></div>
+      </div>
+      <div class="step fragment" data-order="2">
+        <div class="step-num">3</div>
+        <div class="step-content"><strong>進入訊息牆</strong><p>成功後會看到即時訊息牆畫面</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 2: 講師介紹 ===== -->
+<div class="slide" data-index="2">
+  <h2>講師介紹</h2>
+  <div style="display:flex;align-items:center;gap:2.5rem;margin-top:1.2rem;">
+    <div style="width:140px;height:140px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:2.5rem;font-weight:900;">陳</div>
+    <div style="text-align:left;">
+      <h3 style="font-size:1.8rem;margin-bottom:.6rem;">陳重光</h3>
+      <p style="font-size:1.15rem;color:var(--g600);line-height:2;">
+        台灣智綠科技 營運長<br>
+        臺灣科技大學 智慧製造所 博士候選人
+      </p>
+      <div style="display:flex;gap:1rem;margin-top:1rem;flex-wrap:wrap;">
+        <span style="background:var(--blue-lt);color:var(--blue);padding:.3rem 1rem;border-radius:100px;font-size:.95rem;font-weight:600;">AI 工具應用</span>
+        <span style="background:var(--green-lt);color:var(--green);padding:.3rem 1rem;border-radius:100px;font-size:.95rem;font-weight:600;">自動化流程設計</span>
+        <span style="background:var(--gold-lt);color:var(--gold);padding:.3rem 1rem;border-radius:100px;font-size:.95rem;font-weight:600;">智慧製造</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 3: 五天路線圖 ===== -->
+<div class="slide" data-index="3">
+  <h2>五天旅程，一步一步來</h2>
+  <div class="flow" style="margin-top:1.5rem;">
+    <div class="flow-box fragment" data-order="0" style="background:var(--blue-lt);border-color:var(--blue);min-width:140px;">
+      <div style="font-size:1.5rem;">📖</div>
+      <div style="font-size:.85rem;color:var(--g600);">Day 1</div>
+      <div style="font-size:1rem;">認識 AI</div>
+    </div>
+    <div class="flow-arrow fragment" data-order="1">→</div>
+    <div class="flow-box fragment" data-order="1" style="min-width:140px;">
+      <div style="font-size:1.5rem;">💬</div>
+      <div style="font-size:.85rem;color:var(--g600);">Day 2</div>
+      <div style="font-size:1rem;">精準對話</div>
+    </div>
+    <div class="flow-arrow fragment" data-order="2">→</div>
+    <div class="flow-box fragment" data-order="2" style="min-width:140px;">
+      <div style="font-size:1.5rem;">🤖</div>
+      <div style="font-size:.85rem;color:var(--g600);">Day 3</div>
+      <div style="font-size:1rem;">打造助手</div>
+    </div>
+    <div class="flow-arrow fragment" data-order="3">→</div>
+    <div class="flow-box fragment" data-order="3" style="min-width:140px;">
+      <div style="font-size:1.5rem;">⚡</div>
+      <div style="font-size:.85rem;color:var(--g600);">Day 4</div>
+      <div style="font-size:1rem;">自動化</div>
+    </div>
+    <div class="flow-arrow fragment" data-order="4">→</div>
+    <div class="flow-box fragment" data-order="4" style="background:var(--green-lt);border-color:var(--green);min-width:140px;">
+      <div style="font-size:1.5rem;">🎯</div>
+      <div style="font-size:.85rem;color:var(--g600);">Day 5</div>
+      <div style="font-size:1rem;">整合發表</div>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="5" style="margin-top:1.5rem;">
+    <p>每一天都會疊加前一天的技能，最後一天組合起來就是你的專題</p>
+  </div>
+</div>
+
+<!-- ===== 4: 分組互學說明 ===== -->
+<div class="slide" data-index="4">
+  <h2>分組互學 — 不怕跟不上</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card fragment" data-order="0" style="text-align:center;border-top:4px solid var(--blue);">
+      <div style="font-size:2rem;">👥</div>
+      <h3>5 人一組 × 5 組</h3>
+      <p>混搭不同程度</p>
+    </div>
+    <div class="card fragment" data-order="1" style="text-align:center;border-top:4px solid var(--green);">
+      <div style="font-size:2rem;">🎯</div>
+      <h3>每組有小教練</h3>
+      <p>有經驗的帶新手</p>
+    </div>
+    <div class="card fragment" data-order="2" style="text-align:center;border-top:4px solid var(--gold);">
+      <div style="font-size:2rem;">🤝</div>
+      <h3>互相學更快</h3>
+      <p>不同視角、互相補強</p>
+    </div>
+  </div>
+  <p class="fragment" data-order="3" style="margin-top:1rem;font-size:1.1rem;font-weight:700;color:var(--green);">放心跟著做就好，每天疊一層，最後一天自然組好</p>
+</div>
+
+<!-- ===== 5: 專題進度預告（輕量版）===== -->
+<div class="slide" data-index="5">
+  <h2>五天會做出什麼？</h2>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step fragment" data-order="0">
+      <div class="step-num" style="background:var(--navy);">1</div>
+      <div class="step-content"><strong>Day 1 — 選題</strong><p>挑一個你工作上「重複又花時間」的任務</p></div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>Day 2 — 拆解</strong><p>把任務拆成步驟，寫出精準的提示詞</p></div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>Day 3 — 打造助手</strong><p>用 GPTs / Gems 做出專屬 AI 助手</p></div>
+    </div>
+    <div class="step fragment" data-order="3">
+      <div class="step-num">4</div>
+      <div class="step-content"><strong>Day 4 — 自動化</strong><p>用 Make / Zapier 串接，一鍵跑完流程</p></div>
+    </div>
+    <div class="step fragment" data-order="4">
+      <div class="step-num" style="background:var(--green);">5</div>
+      <div class="step-content"><strong>Day 5 — 整合發表</strong><p>組合所有技能，上台分享你的 AI 工作流</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 6: 分組說明 ===== -->
+<div class="slide" data-index="6">
+  <h2>分組：混搭更好學</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card fragment" data-order="0" style="text-align:center;">
+      <div class="icon">👥</div>
+      <h3>5 人一組</h3>
+      <p>共 5 組，坐在一起</p>
+    </div>
+    <div class="card fragment" data-order="1" style="text-align:center;">
+      <div class="icon">🔀</div>
+      <h3>混搭編組</h3>
+      <p>新手 + 有經驗 + 進階<br>不同背景，互相學更快</p>
+    </div>
+    <div class="card fragment" data-order="2" style="text-align:center;">
+      <div class="icon">🏅</div>
+      <h3>小教練制</h3>
+      <p>每組安排一位小教練<br>跟不上時隨時問</p>
+    </div>
+  </div>
+  <div class="info-box analogy fragment" data-order="3" style="margin-top:1.5rem;">
+    <div class="label">為什麼要混搭？</div>
+    <p>研究顯示，「教別人」是最好的學習方式。有經驗的人教新手，自己也會更熟練。</p>
+  </div>
+</div>
+
+<!-- ===== 7: 互動體驗：訊息牆 ===== -->
+<div class="slide" data-index="7">
+  <h2>🎤 在訊息牆打一句自我介紹！</h2>
+  <div class="mockup" style="margin-top:1.2rem;">
+    <div class="mockup-bar">
+      <span style="color:var(--g600);font-size:.8rem;">classroom.ai100.tw</span>
+    </div>
+    <div class="mockup-content" style="min-height:280px;padding:1.2rem;">
+      <div style="background:var(--offwhite);border-radius:12px;padding:.8rem 1rem;margin-bottom:.6rem;text-align:left;">
+        <span style="font-weight:700;color:var(--blue);">小明</span>
+        <span style="color:var(--g400);font-size:.85rem;margin-left:.5rem;">08:35</span>
+        <p style="font-size:1rem;margin-top:.3rem;">大家好，我是小明，在電子業做品管，完全沒用過 AI 😅</p>
+      </div>
+      <div style="background:var(--offwhite);border-radius:12px;padding:.8rem 1rem;margin-bottom:.6rem;text-align:left;">
+        <span style="font-weight:700;color:var(--green);">Amy</span>
+        <span style="color:var(--g400);font-size:.85rem;margin-left:.5rem;">08:36</span>
+        <p style="font-size:1rem;margin-top:.3rem;">Hi！我是 Amy，行銷企劃，平常用 ChatGPT 寫文案</p>
+      </div>
+      <div style="background:var(--offwhite);border-radius:12px;padding:.8rem 1rem;margin-bottom:.6rem;text-align:left;">
+        <span style="font-weight:700;color:var(--purple);">阿華</span>
+        <span style="color:var(--g400);font-size:.85rem;margin-left:.5rem;">08:36</span>
+        <p style="font-size:1rem;margin-top:.3rem;">我是阿華，HR 部門，想學用 AI 整理面試紀錄</p>
+      </div>
+      <div style="text-align:center;color:var(--g400);font-size:.95rem;padding:1rem 0;">
+        💬 輪到你了！打一句自我介紹...
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 8: 互動體驗：投票 ===== -->
+<div class="slide vote-slide" data-index="8" data-vote="true">
+  <h2>📊 你目前用過哪些 AI 工具？</h2>
+  <p style="color:var(--g600);margin-bottom:1.5rem;">在手機上投票！可以多選</p>
+  <div style="display:flex;flex-direction:column;gap:1rem;max-width:600px;width:100%;">
+    <div style="background:var(--blue-lt);border:2px solid var(--blue);border-radius:12px;padding:1rem 1.5rem;font-size:1.15rem;font-weight:600;display:flex;align-items:center;gap:1rem;">
+      <span style="font-size:1.5rem;">🟦</span> ChatGPT
+    </div>
+    <div style="background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:1rem 1.5rem;font-size:1.15rem;font-weight:600;display:flex;align-items:center;gap:1rem;">
+      <span style="font-size:1.5rem;">🟧</span> Claude
+    </div>
+    <div style="background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:1rem 1.5rem;font-size:1.15rem;font-weight:600;display:flex;align-items:center;gap:1rem;">
+      <span style="font-size:1.5rem;">🟩</span> Gemini
+    </div>
+    <div style="background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:1rem 1.5rem;font-size:1.15rem;font-weight:600;display:flex;align-items:center;gap:1rem;">
+      <span style="font-size:1.5rem;">⬜</span> 都沒用過
+    </div>
+    <div style="background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:1rem 1.5rem;font-size:1.15rem;font-weight:600;display:flex;align-items:center;gap:1rem;">
+      <span style="font-size:1.5rem;">🟪</span> 其他（Copilot、Perplexity...）
+    </div>
+  </div>
+</div>
+
+<!-- ===== 9: 互動體驗：AI 助教 ===== -->
+<div class="slide" data-index="9">
+  <h2>🤖 跟「小助」打個招呼！</h2>
+  <p style="color:var(--g600);margin-bottom:1rem;">在訊息牆輸入任何問題，AI 助教「小助」會即時回答</p>
+  <div class="mockup" style="margin-top:.8rem;">
+    <div class="mockup-bar">
+      <span style="color:var(--g600);font-size:.8rem;">classroom.ai100.tw</span>
+    </div>
+    <div class="mockup-content" style="min-height:240px;padding:1.2rem;">
+      <div style="background:var(--offwhite);border-radius:12px;padding:.8rem 1rem;margin-bottom:.6rem;text-align:left;">
+        <span style="font-weight:700;color:var(--blue);">小明</span>
+        <span style="color:var(--g400);font-size:.85rem;margin-left:.5rem;">08:38</span>
+        <p style="font-size:1rem;margin-top:.3rem;">小助，什麼是生成式 AI？</p>
+      </div>
+      <div style="background:var(--purple-lt);border-radius:12px;padding:.8rem 1rem;margin-bottom:.6rem;text-align:left;border-left:3px solid var(--purple);">
+        <span style="font-weight:700;color:var(--purple);">🤖 小助</span>
+        <span style="color:var(--g400);font-size:.85rem;margin-left:.5rem;">08:38</span>
+        <p style="font-size:1rem;margin-top:.3rem;">生成式 AI 是一種能「創造新內容」的人工智慧，像是寫文章、畫圖、寫程式。你現在常聽到的 ChatGPT 就是其中一種！今天的課程會帶大家實際體驗 😊</p>
+      </div>
+      <div style="text-align:center;color:var(--g400);font-size:.95rem;padding:.8rem 0;">
+        試試看問小助一個問題吧！
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 10: 今天的行程 ===== -->
+<div class="slide" data-index="10">
+  <h2>📋 今天的行程</h2>
+  <table class="compare-table" style="margin-top:1rem;">
+    <thead>
+      <tr><th style="width:160px;">時間</th><th>內容</th></tr>
+    </thead>
+    <tbody>
+      <tr class="fragment" data-order="0"><td style="font-weight:700;color:var(--blue);">08:30 – 09:30</td><td>開場分組 + 互動體驗</td></tr>
+      <tr class="fragment" data-order="1"><td style="font-weight:700;color:var(--blue);">09:30 – 10:30</td><td>單元一：AI 是什麼？</td></tr>
+      <tr class="fragment" data-order="2"><td style="font-weight:700;color:var(--green);">10:30 – 12:00</td><td>單元二：AI 安全與風險</td></tr>
+      <tr class="fragment" data-order="3" style="background:var(--offwhite);"><td style="font-weight:700;color:var(--g400);">12:00 – 13:30</td><td style="color:var(--g400);">🍱 午餐休息</td></tr>
+      <tr class="fragment" data-order="4"><td style="font-weight:700;color:var(--blue);">13:30 – 15:30</td><td>單元三：三大工具 PK</td></tr>
+      <tr class="fragment" data-order="5"><td style="font-weight:700;color:var(--green);">15:30 – 17:10</td><td>單元四：提示詞暖身</td></tr>
+      <tr class="fragment" data-order="6"><td style="font-weight:700;color:var(--navy);">17:10 – 17:30</td><td>專題選題 + 回家作業</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 11: 五天帶走清單 ===== -->
+<div class="slide" data-index="11">
+  <h2>🎁 五天，你會帶走這些</h2>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step fragment" data-order="0">
+      <div class="step-num" style="background:var(--navy);">1</div>
+      <div class="step-content"><strong>Day 1 — AI 工具選擇能力 + 使用底線清單</strong><p>知道什麼能問、什麼不能問，選對工具</p></div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>Day 2 — 提示詞模板庫</strong><p>一套可以直接複製貼上的萬用提示詞</p></div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>Day 3 — 專屬 AI 助手</strong><p>為你的工作量身打造的 GPTs / Gems</p></div>
+    </div>
+    <div class="step fragment" data-order="3">
+      <div class="step-num">4</div>
+      <div class="step-content"><strong>Day 4 — 自動化流程</strong><p>用 Make / Zapier 串出一鍵工作流</p></div>
+    </div>
+    <div class="step fragment" data-order="4">
+      <div class="step-num" style="background:var(--green);">5</div>
+      <div class="step-content"><strong>Day 5 — 整合專題方案</strong><p>一份完整的「AI 改善工作流程」提案</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- B. 單元一：AI 是什麼？(slides 12-33) -->
+<!-- ============================================================ -->
+
+<!-- ===== 12: Section Title ===== -->
+<div class="slide section-title" data-index="12">
+  <p style="font-size:1rem;color:rgba(255,255,255,.6);margin-bottom:.5rem;">09:30 – 10:30</p>
+  <h1>單元一<br>AI 是協作夥伴</h1>
+  <p class="subtitle" style="margin-top:1rem;">認識 AI、看見可能、體驗超能力</p>
+</div>
+
+<!-- ===== 13: 什麼是 AI？ ===== -->
+<div class="slide" data-index="13">
+  <h2>什麼是 AI？</h2>
+  <p style="font-size:1.3rem;font-weight:700;color:var(--blue);margin:1rem 0;max-width:800px;text-align:center;">
+    AI = 讓電腦從大量資料中學習規律<br>然後做判斷或產出內容
+  </p>
+  <div class="info-box analogy fragment" data-order="0" style="margin-top:1rem;">
+    <div class="label">🎯 比喻</div>
+    <p style="font-size:1.15rem;">就像一個<strong>讀了幾十億本書的實習生</strong> — 知識量驚人，但需要你給方向、下指令、檢查成果。</p>
+  </div>
+</div>
+
+<!-- ===== 14: 生成式 AI ===== -->
+<div class="slide" data-index="14">
+  <h2>生成式 AI = 能「產出」新內容的 AI</h2>
+  <div class="card-grid" style="margin-top:1.2rem;">
+    <div class="card fragment" data-order="0" style="text-align:center;">
+      <div class="icon">📝</div>
+      <h3>文字</h3>
+      <p>ChatGPT、Claude、Gemini<br>寫報告、翻譯、摘要</p>
+    </div>
+    <div class="card fragment" data-order="1" style="text-align:center;">
+      <div class="icon">🎨</div>
+      <h3>圖片</h3>
+      <p>Midjourney、DALL-E<br>設計圖、插畫、海報</p>
+    </div>
+    <div class="card fragment" data-order="2" style="text-align:center;">
+      <div class="icon">💻</div>
+      <h3>程式碼</h3>
+      <p>GitHub Copilot<br>自動寫程式</p>
+    </div>
+    <div class="card fragment" data-order="3" style="text-align:center;">
+      <div class="icon">🎬</div>
+      <h3>音樂 / 影片</h3>
+      <p>Suno、Sora<br>生成影音內容</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 15: 身邊的 AI ===== -->
+<div class="slide" data-index="15">
+  <h2>你身邊已經在用 AI 了</h2>
+  <div class="card-grid" style="margin-top:1.2rem;">
+    <div class="card fragment" data-order="0" style="text-align:center;border-color:var(--blue);">
+      <div class="icon">🔍</div>
+      <h3>Google 搜尋</h3>
+      <p>猜你想搜什麼<br>自動補完關鍵字</p>
+    </div>
+    <div class="card fragment" data-order="1" style="text-align:center;border-color:var(--red);">
+      <div class="icon">📺</div>
+      <h3>YouTube 推薦</h3>
+      <p>知道你愛看什麼<br>越看越停不下來</p>
+    </div>
+    <div class="card fragment" data-order="2" style="text-align:center;border-color:var(--green);">
+      <div class="icon">📷</div>
+      <h3>手機修圖</h3>
+      <p>自動美肌、去背<br>一鍵就搞定</p>
+    </div>
+    <div class="card fragment" data-order="3" style="text-align:center;border-color:var(--gold);">
+      <div class="icon">📧</div>
+      <h3>垃圾信過濾</h3>
+      <p>Gmail 自動分類<br>擋住詐騙信件</p>
+    </div>
+  </div>
+  <p class="fragment" data-order="4" style="margin-top:1.2rem;color:var(--g600);font-size:1.05rem;">這些都是 AI —— 只是你沒注意到而已</p>
+</div>
+
+<!-- ===== 16: AI 職場情境 ===== -->
+<div class="slide" data-index="16">
+  <h2>AI 能做什麼？— 職場四大情境</h2>
+  <div class="card-grid" style="margin-top:1.2rem;">
+    <div class="card fragment" data-order="0" style="text-align:left;">
+      <div class="icon">📋</div>
+      <h3 style="color:var(--blue);">行政</h3>
+      <p>Email 草稿、會議紀錄<br>報告整理、表格填寫</p>
+    </div>
+    <div class="card fragment" data-order="1" style="text-align:left;">
+      <div class="icon">📢</div>
+      <h3 style="color:var(--green);">行銷</h3>
+      <p>文案發想、社群貼文<br>企劃書、競品分析</p>
+    </div>
+    <div class="card fragment" data-order="2" style="text-align:left;">
+      <div class="icon">🎧</div>
+      <h3 style="color:var(--purple);">客服</h3>
+      <p>FAQ 回覆、客訴分析<br>回信模板、情緒判斷</p>
+    </div>
+    <div class="card fragment" data-order="3" style="text-align:left;">
+      <div class="icon">🏭</div>
+      <h3 style="color:var(--gold);">製造</h3>
+      <p>品管報告、排程建議<br>異常偵測、SOP 撰寫</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 17: Demo Banner ===== -->
+<div class="slide" data-index="17">
+  <div class="demo-banner" style="display:inline-block;background:var(--blue);color:#fff;padding:.5rem 2rem;border-radius:100px;font-weight:700;font-size:1.1rem;margin-bottom:1rem;">👨‍🏫 講師示範</div>
+  <h2>AI 能幫你做什麼？</h2>
+  <p style="font-size:1.15rem;color:var(--g600);margin-top:.8rem;">接下來四個真實職場場景<br>看 AI 怎麼在 30 秒內搞定</p>
+  <div class="flow" style="margin-top:2rem;">
+    <div class="flow-box fragment" data-order="0">催款 Email</div>
+    <div class="flow-arrow fragment" data-order="1">→</div>
+    <div class="flow-box fragment" data-order="1">會議摘要</div>
+    <div class="flow-arrow fragment" data-order="2">→</div>
+    <div class="flow-box fragment" data-order="2">合約翻譯</div>
+    <div class="flow-arrow fragment" data-order="3">→</div>
+    <div class="flow-box fragment" data-order="3">數據分析</div>
+  </div>
+</div>
+
+<!-- ===== 18: Demo — 催款 Email ===== -->
+<div class="slide" data-index="18">
+  <div class="demo-banner" style="display:inline-block;background:var(--blue);color:#fff;padding:.35rem 1.4rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.6rem;">👨‍🏫 講師示範 1/4</div>
+  <h2>請 AI 寫一封催款 Email</h2>
+  <div class="mockup" style="margin-top:.8rem;">
+    <div class="mockup-bar">
+      <span style="color:var(--g600);font-size:.8rem;">chatgpt.com</span>
+    </div>
+    <div class="mockup-content" style="padding:1rem 1.5rem;">
+      <div class="chat-bubble user" style="background:var(--blue);color:#fff;border-radius:12px;padding:.8rem 1.2rem;margin-bottom:.8rem;margin-left:auto;max-width:80%;text-align:left;">
+        <p style="font-size:.95rem;">幫我寫一封催款信，對象是長期合作客戶「宏達科技」，金額 15 萬，已逾期 30 天，語氣要禮貌但堅定</p>
+      </div>
+      <div class="chat-bubble ai" style="background:var(--offwhite);border-radius:12px;padding:.8rem 1.2rem;max-width:90%;text-align:left;">
+        <p style="font-size:.95rem;line-height:1.7;">
+          <strong>主旨：敬請協助處理逾期款項 — 訂單 #2024-0387</strong><br><br>
+          宏達科技 財務部 負責人 您好：<br><br>
+          感謝貴公司長期以來的合作與支持。茲就訂單 #2024-0387 之款項（新台幣 150,000 元），原訂付款日為 2 月 25 日，至今已逾期 30 天，尚未收到款項入帳。<br><br>
+          懇請協助確認付款進度，若有任何問題歡迎隨時與我聯繫。<br><br>
+          敬祝 商祺<br>
+          [您的姓名]
+        </p>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top:.6rem;font-size:1.1rem;font-weight:700;color:var(--green);">⏱ 30 秒，一封完整的催款信</p>
+  <p class="fragment" data-order="0" style="color:var(--red);font-weight:700;font-size:.95rem;margin-top:.4rem;">👆 30 秒完成 — 這就是 AI 的速度</p>
+</div>
+
+<!-- ===== 19: Demo — 會議重點 ===== -->
+<div class="slide" data-index="19">
+  <div class="demo-banner" style="display:inline-block;background:var(--blue);color:#fff;padding:.35rem 1.4rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.6rem;">👨‍🏫 講師示範 2/4</div>
+  <h2>請 AI 整理會議重點</h2>
+  <div class="two-col" style="margin-top:.8rem;gap:1.5rem;">
+    <div class="col">
+      <h3 style="color:var(--red);font-size:1rem;">❌ 原始筆記（亂）</h3>
+      <div style="background:var(--offwhite);border-radius:12px;padding:1rem;font-size:.95rem;line-height:1.8;margin-top:.5rem;border:1px solid var(--g200);">
+        老闆說 Q2 要衝業績 客戶 A 的案子要加快<br>
+        小王負責報價 下週三前給<br>
+        行銷那邊海報還沒好 催一下<br>
+        預算可能要追加 先找財務談<br>
+        下次會議改週五 10 點
+      </div>
+    </div>
+    <div class="col">
+      <h3 style="color:var(--green);font-size:1rem;">✅ AI 整理後（清楚）</h3>
+      <div style="background:var(--green-lt);border-radius:12px;padding:1rem;font-size:.95rem;line-height:1.8;margin-top:.5rem;border:1px solid var(--green);">
+        <strong>會議摘要 — 2024/3/18</strong><br>
+        <strong>📌 決議事項：</strong><br>
+        1. Q2 業績目標：加速推進客戶 A 案<br>
+        2. 預算追加：需與財務部協商<br>
+        <strong>📋 待辦：</strong><br>
+        • 小王：客戶 A 報價 → 3/20（三）前<br>
+        • 行銷部：海報完稿 → 盡快<br>
+        <strong>📅 下次會議：</strong>週五 10:00
+      </div>
+    </div>
+  </div>
+  <p style="margin-top:.6rem;font-size:1.1rem;font-weight:700;color:var(--green);">⏱ 從雜亂筆記 → 結構化摘要</p>
+  <p class="fragment" data-order="0" style="color:var(--red);font-weight:700;font-size:.95rem;margin-top:.4rem;">👆 亂七八糟的筆記，AI 瞬間整理成專業格式</p>
+</div>
+
+<!-- ===== 20: Demo — 合約翻譯 ===== -->
+<div class="slide" data-index="20">
+  <div class="demo-banner" style="display:inline-block;background:var(--blue);color:#fff;padding:.35rem 1.4rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.6rem;">👨‍🏫 講師示範 3/4</div>
+  <h2>請 AI 翻譯英文合約條款</h2>
+  <div class="mockup" style="margin-top:.8rem;">
+    <div class="mockup-bar">
+      <span style="color:var(--g600);font-size:.8rem;">chatgpt.com</span>
+    </div>
+    <div class="mockup-content" style="padding:1rem 1.5rem;">
+      <div class="chat-bubble user" style="background:var(--blue);color:#fff;border-radius:12px;padding:.8rem 1.2rem;margin-bottom:.8rem;margin-left:auto;max-width:85%;text-align:left;">
+        <p style="font-size:.95rem;">翻譯以下合約條款，並用白話文解釋重點：<br><br>"The Seller shall not be liable for any indirect, incidental, or consequential damages arising from the use of the product."</p>
+      </div>
+      <div class="chat-bubble ai" style="background:var(--offwhite);border-radius:12px;padding:.8rem 1.2rem;max-width:90%;text-align:left;">
+        <p style="font-size:.95rem;line-height:1.7;">
+          <strong>中文翻譯：</strong><br>
+          「賣方不對因使用本產品所導致的任何間接性、附帶性或衍生性損害承擔責任。」<br><br>
+          <strong>🗣 白話文解釋：</strong><br>
+          產品出問題造成的「連鎖損失」（例如因產品故障導致你的客戶跑掉），賣方不負責。只有產品本身的問題才算。<br><br>
+          <strong>⚠️ 注意：</strong>這條對買方不利，建議加上「重大過失除外」的條件。
+        </p>
+      </div>
+    </div>
+  </div>
+  <p class="fragment" data-order="0" style="color:var(--red);font-weight:700;font-size:.95rem;margin-top:.4rem;">👆 翻譯 + 白話解釋 + 風險提醒，一次到位</p>
+</div>
+
+<!-- ===== 21: Demo — 銷售數據分析 ===== -->
+<div class="slide" data-index="21">
+  <div class="demo-banner" style="display:inline-block;background:var(--blue);color:#fff;padding:.35rem 1.4rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.6rem;">👨‍🏫 講師示範 4/4</div>
+  <h2>請 AI 分析一份銷售數據</h2>
+  <div class="mockup" style="margin-top:.8rem;">
+    <div class="mockup-bar">
+      <span style="color:var(--g600);font-size:.8rem;">chatgpt.com</span>
+    </div>
+    <div class="mockup-content" style="padding:1rem 1.5rem;">
+      <div class="chat-bubble user" style="background:var(--blue);color:#fff;border-radius:12px;padding:.8rem 1.2rem;margin-bottom:.8rem;margin-left:auto;max-width:80%;text-align:left;">
+        <p style="font-size:.95rem;">分析這份 Q1 銷售數據：<br>1月 120萬 / 2月 85萬 / 3月 145萬<br>主力產品 A 佔 60%，產品 B 佔 25%</p>
+      </div>
+      <div class="chat-bubble ai" style="background:var(--offwhite);border-radius:12px;padding:.8rem 1.2rem;max-width:90%;text-align:left;">
+        <p style="font-size:.95rem;line-height:1.7;">
+          <strong>📊 Q1 銷售分析</strong><br><br>
+          <strong>整體表現：</strong>Q1 總營收 350 萬，月均 116.7 萬<br>
+          <strong>趨勢：</strong>2 月明顯下滑（-29%），可能受春節影響；3 月強力回彈（+71%）<br><br>
+          <strong>⚠️ 風險：</strong>產品 A 佔比過高（60%），若該產品出問題，營收波動大<br>
+          <strong>💡 建議：</strong>提高產品 B 行銷力度，降低單一產品依賴
+        </p>
+      </div>
+    </div>
+  </div>
+  <p class="fragment" data-order="0" style="color:var(--red);font-weight:700;font-size:.95rem;margin-top:.4rem;">👆 不只算數字，還能抓風險、給建議</p>
+</div>
+
+<!-- ===== 22: AI 能力邊界 ===== -->
+<div class="slide" data-index="22">
+  <h2>AI 能力邊界 — 擅長 vs 不擅長</h2>
+  <table class="compare-table" style="margin-top:1rem;">
+    <thead>
+      <tr><th style="background:var(--green);">✅ 擅長</th><th style="background:var(--red);">❌ 不擅長</th></tr>
+    </thead>
+    <tbody>
+      <tr class="fragment" data-order="0"><td>文字生成（Email、報告、文案）</td><td>即時資訊（今天的股價、新聞）</td></tr>
+      <tr class="fragment" data-order="1"><td>摘要整理（長文變重點）</td><td>精確計算（複雜數學、財務）</td></tr>
+      <tr class="fragment" data-order="2"><td>翻譯（多國語言互譯）</td><td>主觀判斷（法律裁定、醫療診斷）</td></tr>
+      <tr class="fragment" data-order="3"><td>分類（情緒分析、歸類）</td><td>保密資料（它不會幫你保密）</td></tr>
+      <tr class="fragment" data-order="4"><td>格式轉換（JSON、表格、Markdown）</td><td>100% 正確（它會出錯！）</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 23: AI 是協作夥伴 ===== -->
+<div class="slide" data-index="23">
+  <h2>AI 是協作夥伴，不是權威答案</h2>
+  <div class="quote-box fragment" data-order="0" style="background:var(--offwhite);border-left:4px solid var(--blue);border-radius:12px;padding:2rem 2.5rem;margin-top:1.5rem;max-width:800px;">
+    <p style="font-size:1.6rem;font-weight:700;color:var(--navy);line-height:1.6;">
+      「AI 給的是<span style="color:var(--blue);">『建議草稿』</span>，<br>不是<span style="color:var(--red);">『標準答案』</span>。」
+    </p>
+  </div>
+  <p class="fragment" data-order="1" style="margin-top:1.5rem;font-size:1.15rem;color:var(--g600);">你是主管，AI 是助理。<br>最終決定權在你手上。</p>
+</div>
+
+<!-- ===== 24: 誤區 1 — 電影式破迷思 ===== -->
+<div class="slide" data-index="24">
+  <p style="font-size:.95rem;color:var(--g400);margin-bottom:.8rem;letter-spacing:.1em;">迷思破解 ① / 3</p>
+  <div style="background:var(--red-lt);padding:1.2rem 2rem;border-radius:12px;max-width:720px;width:100%;text-align:center;">
+    <p style="font-size:.9rem;color:var(--red);font-weight:700;">❌ 迷思</p>
+    <h2 style="color:var(--red);font-size:1.8rem;margin-bottom:0;">AI 什麼都知道</h2>
+  </div>
+  <div class="fragment" data-order="0" style="margin-top:1.5rem;max-width:720px;width:100%;">
+    <div style="background:var(--green-lt);padding:1.2rem 2rem;border-radius:12px;text-align:center;">
+      <p style="font-size:.9rem;color:var(--green);font-weight:700;">✅ 事實</p>
+      <p style="font-size:1.2rem;font-weight:700;color:var(--green);">AI 的知識有截止日期，而且會「幻覺」</p>
+    </div>
+  </div>
+  <div class="fragment" data-order="1" style="margin-top:1.2rem;text-align:center;max-width:720px;">
+    <p style="font-size:1.05rem;color:var(--g600);">問 AI：「台灣今天天氣怎麼樣？」</p>
+    <p style="font-size:1.2rem;font-weight:700;color:var(--red);margin-top:.4rem;">它會回答，但答案是編的。</p>
+  </div>
+</div>
+
+<!-- ===== 25: 誤區 2 — 電影式破迷思 ===== -->
+<div class="slide" data-index="25">
+  <p style="font-size:.95rem;color:var(--g400);margin-bottom:.8rem;letter-spacing:.1em;">迷思破解 ② / 3</p>
+  <div style="background:var(--red-lt);padding:1.2rem 2rem;border-radius:12px;max-width:720px;width:100%;text-align:center;">
+    <p style="font-size:.9rem;color:var(--red);font-weight:700;">❌ 迷思</p>
+    <h2 style="color:var(--red);font-size:1.8rem;margin-bottom:0;">AI 是客觀的</h2>
+  </div>
+  <div class="fragment" data-order="0" style="margin-top:1.5rem;max-width:720px;width:100%;">
+    <div style="background:var(--green-lt);padding:1.2rem 2rem;border-radius:12px;text-align:center;">
+      <p style="font-size:.9rem;color:var(--green);font-weight:700;">✅ 事實</p>
+      <p style="font-size:1.2rem;font-weight:700;color:var(--green);">AI 會反映訓練資料中的偏差</p>
+    </div>
+  </div>
+  <div class="two-col fragment" data-order="1" style="margin-top:1.2rem;">
+    <div class="col" style="text-align:center;">
+      <div style="background:var(--blue-lt);border-radius:12px;padding:1rem;">
+        <p style="font-weight:700;color:var(--blue);">ChatGPT 的回答</p>
+        <p style="font-size:.95rem;margin-top:.5rem;">「建議使用 A 方案...」</p>
+      </div>
+    </div>
+    <div class="col" style="text-align:center;">
+      <div style="background:var(--green-lt);border-radius:12px;padding:1rem;">
+        <p style="font-weight:700;color:var(--green);">Gemini 的回答</p>
+        <p style="font-size:.95rem;margin-top:.5rem;">「建議使用 B 方案...」</p>
+      </div>
+    </div>
+  </div>
+  <p class="fragment" data-order="2" style="margin-top:1rem;font-size:1.1rem;color:var(--g600);text-align:center;">同一個問題，不同 AI 不同答案 → 你需要自己判斷</p>
+</div>
+
+<!-- ===== 26: 誤區 3 — 電影式破迷思 ===== -->
+<div class="slide" data-index="26">
+  <p style="font-size:.95rem;color:var(--g400);margin-bottom:.8rem;letter-spacing:.1em;">迷思破解 ③ / 3</p>
+  <div style="background:var(--red-lt);padding:1.2rem 2rem;border-radius:12px;max-width:720px;width:100%;text-align:center;">
+    <p style="font-size:.9rem;color:var(--red);font-weight:700;">❌ 迷思</p>
+    <h2 style="color:var(--red);font-size:1.8rem;margin-bottom:0;">AI 會取代所有工作</h2>
+  </div>
+  <div class="fragment" data-order="0" style="margin-top:1.5rem;max-width:720px;width:100%;">
+    <div style="background:var(--green-lt);padding:1.2rem 2rem;border-radius:12px;text-align:center;">
+      <p style="font-size:.9rem;color:var(--green);font-weight:700;">✅ 事實</p>
+      <p style="font-size:1.2rem;font-weight:700;color:var(--green);">AI 改變工作方式，不是消滅工作</p>
+    </div>
+  </div>
+  <div class="fragment" data-order="1" style="margin-top:1.2rem;max-width:720px;width:100%;">
+    <div class="quote-box" style="background:var(--offwhite);border-left:4px solid var(--green);border-radius:12px;padding:1.5rem 2rem;">
+      <p style="font-size:1.4rem;font-weight:700;color:var(--navy);text-align:center;">
+        「不是 AI 取代你，<br>是<span style="color:var(--green);">會用 AI 的人</span>取代<span style="color:var(--red);">不會用的人</span>。」
+      </p>
+    </div>
+  </div>
+  <p class="fragment" data-order="2" style="margin-top:1rem;font-size:1.05rem;color:var(--g600);text-align:center;">所以你來上這堂課，就是最好的投資。</p>
+</div>
+
+<!-- ===== 27: 投票 ===== -->
+<div class="slide vote-slide" data-index="27" data-vote="true">
+  <h2>📊 投票：你覺得 AI 最能幫你做什麼？</h2>
+  <p style="color:var(--g600);margin-bottom:1.5rem;">在手機上選一個！</p>
+  <div style="display:flex;flex-direction:column;gap:1rem;max-width:550px;width:100%;">
+    <div style="background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.9rem 1.5rem;font-size:1.15rem;font-weight:600;">📝 寫文件（Email、報告、企劃）</div>
+    <div style="background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.9rem 1.5rem;font-size:1.15rem;font-weight:600;">📊 整理資料（摘要、分類、表格）</div>
+    <div style="background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.9rem 1.5rem;font-size:1.15rem;font-weight:600;">🌐 翻譯（中英日韓互譯）</div>
+    <div style="background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.9rem 1.5rem;font-size:1.15rem;font-weight:600;">💡 發想創意（腦力激盪、靈感）</div>
+    <div style="background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.9rem 1.5rem;font-size:1.15rem;font-weight:600;">💬 回覆客戶（客服、業務信件）</div>
+  </div>
+</div>
+
+<!-- ===== 28: AI 應用情境卡 ===== -->
+<div class="slide" data-index="28">
+  <h2>你的行業，AI 也能幫</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card fragment" data-order="0" style="text-align:left;">
+      <h3 style="color:var(--blue);">🏭 製造業</h3>
+      <p>• 品管異常通知信<br>• 生產日報自動摘要<br>• SOP 文件翻譯</p>
+    </div>
+    <div class="card fragment" data-order="1" style="text-align:left;">
+      <h3 style="color:var(--green);">🏪 零售服務</h3>
+      <p>• 商品描述撰寫<br>• 客訴回覆模板<br>• 促銷文案生成</p>
+    </div>
+    <div class="card fragment" data-order="2" style="text-align:left;">
+      <h3 style="color:var(--purple);">🏢 行政人資</h3>
+      <p>• 面試問題設計<br>• 公告信件草擬<br>• 教育訓練規劃</p>
+    </div>
+    <div class="card fragment" data-order="3" style="text-align:left;">
+      <h3 style="color:var(--gold);">💰 財務會計</h3>
+      <p>• 報表數據解讀<br>• 費用分類整理<br>• 稅務法規查詢</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 29: 案例 ⭐ ===== -->
+<div class="slide" data-index="29">
+  <div class="exercise-banner">實作練習</div>
+  <div class="case-banner" style="display:inline-block;background:var(--gold-lt);color:var(--gold);padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.6rem;margin-left:.5rem;">案例 ⭐ 全班跟著做</div>
+  <h2>請 AI 寫一段自我介紹</h2>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step fragment" data-order="0">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>打開 AI 工具</strong><p>ChatGPT、Gemini 或 Claude，任一個都行</p></div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>輸入提示詞</strong>
+        <div class="code-block" style="margin-top:.4rem;font-size:.95rem;">幫我寫一段 50 字的職場自我介紹，<br>我在 [你的產業] 做 [你的工作]，<br>工作年資 [N] 年。</div>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>看結果 → 貼到訊息牆</strong><p>把 AI 幫你寫的自我介紹貼到訊息牆！</p></div>
+    </div>
+  </div>
+  <p style="margin-top:.8rem;color:var(--g400);font-size:.95rem;">⏱ 限時 3 分鐘</p>
+</div>
+
+<!-- ===== 30: 案例 ⭐⭐ ===== -->
+<div class="slide" data-index="30">
+  <span class="exercise-banner">實作練習</span>
+  <span class="case-banner">⭐⭐ 自己試</span>
+  <h2>請 AI 改寫你的工作描述</h2>
+  <div class="flow fragment" data-order="0" style="margin-top:.8rem;">
+    <div class="flow-box">貼上工作描述</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);">AI 改寫</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">專業版本</div>
+  </div>
+  <div class="code-block fragment" data-order="1" style="margin-top:.8rem;">我目前的工作內容是：[貼上你的工作描述]
+
+請幫我用更專業、更有條理的方式重新撰寫，
+適合放在 LinkedIn 或履歷上。</div>
+  <p class="fragment" data-order="2" style="margin-top:.8rem;font-size:1.05rem;">💡 比較改寫前後的差異 — 哪些變好了？</p>
+  <p style="margin-top:.4rem;color:var(--g400);">⏱ 5 分鐘</p>
+</div>
+
+<!-- ===== 31: 案例 ⭐⭐⭐ ===== -->
+<div class="slide" data-index="31">
+  <span class="exercise-banner">實作練習</span>
+  <span class="case-banner">⭐⭐⭐ 挑戰</span>
+  <h2>請 AI 分析一段客戶抱怨信</h2>
+  <div class="flow fragment" data-order="0" style="margin-top:.6rem;">
+    <div class="flow-box">貼抱怨信</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--red-lt);border-color:var(--red);">情緒分析</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);">問題列表</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">回覆建議</div>
+  </div>
+  <div class="code-block fragment" data-order="1" style="font-size:.9rem;">以下是一封客戶抱怨信，請幫我：
+1. 分析客戶的情緒（1-10 分）
+2. 列出客戶提到的所有問題
+3. 建議回覆方向
+
+---
+「你們的出貨速度真的太誇張了！我等了兩個禮拜都還沒收到貨，打客服電話永遠沒人接，線上客服回覆超慢。再這樣我就換別家了！」</div>
+  <p style="margin-top:.6rem;">💡 進階：請 AI 直接幫你寫回覆信</p>
+  <p style="color:var(--g400);">⏱ 8 分鐘</p>
+</div>
+
+<!-- ===== 32: 模組成果 ===== -->
+<div class="slide" data-index="32">
+  <h2>單元一 完成！你學會了...</h2>
+  <div style="max-width:600px;margin-top:1.5rem;">
+    <div class="fragment" data-order="0" style="display:flex;align-items:center;gap:1rem;padding:.8rem 0;border-bottom:1px solid var(--g100);">
+      <span style="font-size:1.5rem;">✅</span>
+      <p style="font-size:1.15rem;font-weight:600;">知道 AI 是什麼、能做什麼</p>
+    </div>
+    <div class="fragment" data-order="1" style="display:flex;align-items:center;gap:1rem;padding:.8rem 0;border-bottom:1px solid var(--g100);">
+      <span style="font-size:1.5rem;">✅</span>
+      <p style="font-size:1.15rem;font-weight:600;">認識三大誤區（全知、客觀、取代）</p>
+    </div>
+    <div class="fragment" data-order="2" style="display:flex;align-items:center;gap:1rem;padding:.8rem 0;border-bottom:1px solid var(--g100);">
+      <span style="font-size:1.5rem;">✅</span>
+      <p style="font-size:1.15rem;font-weight:600;">完成第一次 AI 對話實作</p>
+    </div>
+    <div class="fragment" data-order="3" style="display:flex;align-items:center;gap:1rem;padding:.8rem 0;">
+      <span style="font-size:1.5rem;">✅</span>
+      <p style="font-size:1.15rem;font-weight:600;">體驗 AI 在職場的四大應用場景</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 33: 過渡頁 ===== -->
+<div class="slide" data-index="33">
+  <p style="font-size:1.1rem;color:var(--g400);margin-bottom:1rem;">下一站</p>
+  <h2 style="font-size:2rem;">知道了 AI 能做什麼<br><span class="fragment" data-order="0" style="color:var(--blue);">→ 接下來要問：怎麼用才安全？</span></h2>
+  <div class="flow fragment" data-order="1" style="margin-top:2rem;">
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">✅ AI 是什麼</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);font-size:1.1rem;">⬇️ 安全與風險</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">工具 PK</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">提示詞</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- C. 單元二：AI 安全與風險 (slides 34-56) -->
+<!-- ============================================================ -->
+
+<!-- ===== 34: Section Title ===== -->
+<div class="slide section-title" data-index="34">
+  <p style="font-size:1rem;color:rgba(255,255,255,.6);margin-bottom:.5rem;">10:30 – 12:00</p>
+  <h1>單元二<br>安全與風險</h1>
+  <p class="subtitle" style="margin-top:1rem;">知道底線、辨識幻覺、學會驗證</p>
+</div>
+
+<!-- ===== 35: 用 AI 之前先知道底線 ===== -->
+<div class="slide" data-index="35">
+  <h2>用 AI 之前，先知道「底線」</h2>
+  <div class="quote-box" style="background:var(--offwhite);border-left:4px solid var(--red);border-radius:12px;padding:2rem 2.5rem;margin-top:1.5rem;max-width:800px;">
+    <p style="font-size:1.5rem;font-weight:700;color:var(--navy);text-align:center;">
+      「AI 很好用，<br>但<span style="color:var(--red);">用錯了比不用更糟</span>。」
+    </p>
+  </div>
+  <p style="margin-top:1.5rem;font-size:1.1rem;color:var(--g600);">接下來你會學到：什麼可以問、什麼不能問、怎麼驗證答案</p>
+</div>
+
+<!-- ===== 36: 資料敏感四級制 ===== -->
+<div class="slide" data-index="36">
+  <h2>資料敏感四級制</h2>
+  <table class="compare-table" style="margin-top:1rem;">
+    <thead>
+      <tr><th style="width:80px;">等級</th><th style="width:180px;">類型</th><th style="width:200px;">舉例</th><th>能不能給 AI？</th></tr>
+    </thead>
+    <tbody>
+      <tr class="fragment" data-order="0">
+        <td style="font-size:1.3rem;text-align:center;">🟢</td>
+        <td style="font-weight:700;">公開資料</td>
+        <td>新聞、公開政策、產品說明</td>
+        <td style="color:var(--green);font-weight:700;">放心用</td>
+      </tr>
+      <tr class="fragment" data-order="1">
+        <td style="font-size:1.3rem;text-align:center;">🟡</td>
+        <td style="font-weight:700;">內部資料</td>
+        <td>內部流程、會議紀錄、簡報</td>
+        <td style="color:var(--gold);font-weight:700;">小心用（去掉敏感部分）</td>
+      </tr>
+      <tr class="fragment" data-order="2">
+        <td style="font-size:1.3rem;text-align:center;">🔴</td>
+        <td style="font-weight:700;">機密資料</td>
+        <td>客戶資料、財務報表、合約</td>
+        <td style="color:var(--red);font-weight:700;">不要用</td>
+      </tr>
+      <tr class="fragment" data-order="3">
+        <td style="font-size:1.3rem;text-align:center;">⛔</td>
+        <td style="font-weight:700;">極機密</td>
+        <td>密碼、個資、營業秘密</td>
+        <td style="color:var(--red);font-weight:900;">絕對不能用</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 37: Demo — 什麼可以問？ ===== -->
+<div class="slide" data-index="37">
+  <div class="demo-banner" style="display:inline-block;background:var(--blue);color:#fff;padding:.35rem 1.4rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.6rem;">👨‍🏫 講師示範</div>
+  <h2>哪些東西可以問 AI？</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col fragment" data-order="0">
+      <h3 style="color:var(--green);font-size:1.1rem;">✅ 可以問</h3>
+      <div style="background:var(--green-lt);border-radius:12px;padding:1rem;font-size:1rem;line-height:2;margin-top:.5rem;">
+        • 「幫我寫一封感謝信模板」<br>
+        • 「解釋什麼是區塊鏈」<br>
+        • 「寫一段產品介紹文案」<br>
+        • 「翻譯這段英文公開報導」<br>
+        • 「整理這份公開法規重點」
+      </div>
+    </div>
+    <div class="col fragment" data-order="1">
+      <h3 style="color:var(--red);font-size:1.1rem;">❌ 不能問</h3>
+      <div style="background:var(--red-lt);border-radius:12px;padding:1rem;font-size:1rem;line-height:2;margin-top:.5rem;">
+        • 「分析這份客戶名單」<br>
+        • 「幫我看這份薪資表」<br>
+        • 「這是我們的營業秘密...」<br>
+        • 「我的密碼忘了，幫我...」<br>
+        • 「幫我查某某人的個資」
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 38: 什麼絕對不能丟？ ===== -->
+<div class="slide" data-index="38">
+  <div class="demo-banner" style="display:inline-block;background:var(--blue);color:#fff;padding:.35rem 1.4rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.6rem;">👨‍🏫 講師示範</div>
+  <h2>這些絕對不能丟給 AI</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card fragment" data-order="0" style="text-align:center;border-color:var(--red);">
+      <div class="icon">🔑</div>
+      <h3>帳號密碼</h3>
+      <p>任何登入憑證<br>API Key、Token</p>
+    </div>
+    <div class="card fragment" data-order="1" style="text-align:center;border-color:var(--red);">
+      <div class="icon">👤</div>
+      <h3>個人資料</h3>
+      <p>身分證字號、地址<br>電話、信用卡號</p>
+    </div>
+    <div class="card fragment" data-order="2" style="text-align:center;border-color:var(--red);">
+      <div class="icon">📑</div>
+      <h3>商業機密</h3>
+      <p>未公開財報<br>客戶合約、報價單</p>
+    </div>
+    <div class="card fragment" data-order="3" style="text-align:center;border-color:var(--red);">
+      <div class="icon">💻</div>
+      <h3>公司原始碼</h3>
+      <p>內部系統程式碼<br>演算法、配方</p>
+    </div>
+  </div>
+  <div class="info-box warning fragment" data-order="4" style="margin-top:1rem;">
+    <p style="font-size:1.05rem;">你貼給 AI 的東西，可能會被用來訓練模型。<strong>一旦送出就收不回來。</strong></p>
+  </div>
+</div>
+
+<!-- ===== 39: 三星案例 ===== -->
+<div class="slide" data-index="39" style="background:var(--g900);">
+  <p style="color:var(--red);font-size:1rem;font-weight:700;letter-spacing:2px;">⚠️ 真實事件</p>
+  <h2 style="color:#fff;font-size:2.2rem;margin-top:.5rem;">三星員工把機密程式碼<br>丟給了 ChatGPT</h2>
+  <div class="fragment" data-order="0" style="margin-top:1.5rem;max-width:600px;">
+    <div style="background:rgba(255,255,255,.1);padding:1.2rem;border-radius:12px;border-left:4px solid var(--red);">
+      <p style="color:var(--g200);font-size:1.05rem;line-height:1.8;">
+        2023 年，三星半導體員工在 ChatGPT 中貼上了內部原始碼。<br>
+        AI 記住了這些資料，可能被其他用戶的回答引用。
+      </p>
+    </div>
+  </div>
+  <div class="fragment" data-order="1" style="margin-top:1rem;">
+    <p style="color:var(--gold);font-size:1.3rem;font-weight:700;">後果：三星全面禁止員工使用 ChatGPT</p>
+  </div>
+  <div class="fragment" data-order="2" style="margin-top:1rem;">
+    <p style="color:var(--g400);font-size:1.05rem;">教訓：方便的工具用錯場景 = 公司的災難</p>
+  </div>
+</div>
+
+<!-- ===== 40: 投票 — 情境判斷 ===== -->
+<div class="slide vote-slide" data-index="40" data-vote="true">
+  <h2>📊 投票：以下哪些可以問 AI？</h2>
+  <p style="color:var(--g600);margin-bottom:1rem;">覺得「可以」就投票，「不行」就不投</p>
+  <div style="display:flex;flex-direction:column;gap:.8rem;max-width:700px;width:100%;">
+    <div style="background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.8rem 1.5rem;font-size:1.05rem;display:flex;align-items:center;gap:1rem;">
+      <span style="font-weight:700;color:var(--blue);min-width:25px;">A</span> 「幫我寫一封生日祝福信給同事」
+    </div>
+    <div style="background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.8rem 1.5rem;font-size:1.05rem;display:flex;align-items:center;gap:1rem;">
+      <span style="font-weight:700;color:var(--blue);min-width:25px;">B</span> 「分析這份包含客戶姓名和電話的名單」
+    </div>
+    <div style="background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.8rem 1.5rem;font-size:1.05rem;display:flex;align-items:center;gap:1rem;">
+      <span style="font-weight:700;color:var(--blue);min-width:25px;">C</span> 「幫我把這段公開新聞翻成英文」
+    </div>
+    <div style="background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.8rem 1.5rem;font-size:1.05rem;display:flex;align-items:center;gap:1rem;">
+      <span style="font-weight:700;color:var(--blue);min-width:25px;">D</span> 「這是我們公司的報價單，幫我整理」
+    </div>
+    <div style="background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.8rem 1.5rem;font-size:1.05rem;display:flex;align-items:center;gap:1rem;">
+      <span style="font-weight:700;color:var(--blue);min-width:25px;">E</span> 「請解釋勞基法第 38 條的特休規定」
+    </div>
+  </div>
+</div>
+
+<!-- ===== 41: 解答揭曉 ===== -->
+<div class="slide" data-index="41">
+  <h2>解答揭曉</h2>
+  <div style="display:flex;flex-direction:column;gap:.8rem;max-width:700px;width:100%;margin-top:1rem;">
+    <div class="fragment" data-order="0" style="background:var(--green-lt);border:2px solid var(--green);border-radius:12px;padding:.8rem 1.5rem;font-size:1.05rem;display:flex;align-items:center;gap:1rem;">
+      <span style="font-weight:700;color:var(--green);font-size:1.3rem;">✅ A</span> 生日祝福信 — <strong>可以</strong>，不涉及機密
+    </div>
+    <div class="fragment" data-order="1" style="background:var(--red-lt);border:2px solid var(--red);border-radius:12px;padding:.8rem 1.5rem;font-size:1.05rem;display:flex;align-items:center;gap:1rem;">
+      <span style="font-weight:700;color:var(--red);font-size:1.3rem;">❌ B</span> 客戶姓名電話 — <strong>不行</strong>，涉及個資
+    </div>
+    <div class="fragment" data-order="2" style="background:var(--green-lt);border:2px solid var(--green);border-radius:12px;padding:.8rem 1.5rem;font-size:1.05rem;display:flex;align-items:center;gap:1rem;">
+      <span style="font-weight:700;color:var(--green);font-size:1.3rem;">✅ C</span> 公開新聞翻譯 — <strong>可以</strong>，公開資料
+    </div>
+    <div class="fragment" data-order="3" style="background:var(--red-lt);border:2px solid var(--red);border-radius:12px;padding:.8rem 1.5rem;font-size:1.05rem;display:flex;align-items:center;gap:1rem;">
+      <span style="font-weight:700;color:var(--red);font-size:1.3rem;">❌ D</span> 公司報價單 — <strong>不行</strong>，商業機密
+    </div>
+    <div class="fragment" data-order="4" style="background:var(--green-lt);border:2px solid var(--green);border-radius:12px;padding:.8rem 1.5rem;font-size:1.05rem;display:flex;align-items:center;gap:1rem;">
+      <span style="font-weight:700;color:var(--green);font-size:1.3rem;">✅ E</span> 勞基法規定 — <strong>可以</strong>，公開法規（但要驗證！）
+    </div>
+  </div>
+</div>
+
+<!-- ===== 42: AI 幻覺 ===== -->
+<div class="slide" data-index="42">
+  <h2>什麼是 AI 幻覺（Hallucination）？</h2>
+  <div class="info-box warning" style="margin-top:1.5rem;">
+    <div class="label">定義</div>
+    <p style="font-size:1.2rem;">AI 用<strong>很自信的語氣</strong>，告訴你<strong>完全錯誤的事情</strong>。</p>
+  </div>
+  <div class="info-box analogy fragment" data-order="0" style="margin-top:1rem;">
+    <div class="label">🎯 比喻</div>
+    <p style="font-size:1.1rem;">就像一個很會編故事的人 — 你問他「巴黎鐵塔有幾層？」他可能回答「7 層」，語氣非常肯定，但其實只有 3 層。<br><br>AI 不是故意騙你，它只是在<strong>「預測下一個最可能的字」</strong>，有時候就預測錯了。</p>
+  </div>
+</div>
+
+<!-- ===== 43: 律師假判例 ===== -->
+<div class="slide" data-index="43" style="background:var(--g900);">
+  <p style="color:var(--red);font-size:1rem;font-weight:700;letter-spacing:2px;">⚠️ 真實事件</p>
+  <h2 style="color:#fff;font-size:2rem;margin-top:.5rem;">美國律師引用 AI 編造的<br>6 個假判例</h2>
+  <div class="fragment" data-order="0" style="margin-top:1.5rem;max-width:600px;">
+    <div style="background:rgba(255,255,255,.1);padding:1.2rem;border-radius:12px;border-left:4px solid var(--red);">
+      <p style="color:var(--g200);font-size:1.05rem;line-height:1.8;">
+        律師用 ChatGPT 搜尋判例，AI 自信地給出 6 個案例。<br>
+        律師沒查證就提交法院 — 案號、法官、判決全是假的。
+      </p>
+    </div>
+  </div>
+  <div class="fragment" data-order="1" style="margin-top:1rem;">
+    <p style="color:var(--gold);font-size:1.3rem;font-weight:700;">後果：罰款 5,000 美金，面臨停業處分</p>
+  </div>
+  <div class="fragment" data-order="2" style="margin-top:1rem;">
+    <p style="color:var(--red);font-size:1.2rem;font-weight:700;">AI 產出的東西，一定要自己驗證！</p>
+  </div>
+</div>
+
+<!-- ===== 44: 假學術論文 ===== -->
+<div class="slide" data-index="44" style="background:var(--g900);">
+  <p style="color:var(--red);font-size:1rem;font-weight:700;letter-spacing:2px;">⚠️ 學術界震驚</p>
+  <h2 style="color:#fff;font-size:2rem;margin-top:.5rem;">AI 編造不存在的學術論文<br>格式完美、內容全假</h2>
+  <div class="fragment" data-order="0" style="margin-top:1.5rem;max-width:620px;">
+    <div style="background:rgba(255,255,255,.1);padding:1.2rem;border-radius:12px;border-left:4px solid var(--red);">
+      <p style="color:var(--g300);font-size:.95rem;line-height:1.7;">
+        <span style="color:var(--red);text-decoration:line-through;">Smith, J. (2022). "AI-Driven Quality Control..." Journal of Industrial AI, 15(3)</span><br>
+        <span style="color:var(--red);text-decoration:line-through;">Chen, L. et al. (2023). "Deep Learning for Defect Detection" Manufacturing Letters, 8(2)</span>
+      </p>
+      <p style="color:var(--red);font-size:.9rem;font-weight:700;margin-top:.5rem;">作者、期刊、頁碼一應俱全 — 但全部是 AI 編的</p>
+    </div>
+  </div>
+  <div class="fragment" data-order="1" style="margin-top:1rem;">
+    <p style="color:var(--gold);font-size:1.2rem;font-weight:700;">AI 不是故意騙你，它只是在「預測下一個最可能的字」</p>
+  </div>
+</div>
+
+<!-- ===== 45: Demo — 讓 AI 出錯 ===== -->
+<div class="slide" data-index="45">
+  <div class="demo-banner" style="display:inline-block;background:var(--blue);color:#fff;padding:.35rem 1.4rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.6rem;">👨‍🏫 講師示範</div>
+  <h2>讓 AI 出錯給你看</h2>
+  <p style="color:var(--g600);margin-bottom:1rem;">講師會故意問一個 AI 容易出錯的問題</p>
+  <div class="mockup" style="margin-top:.5rem;">
+    <div class="mockup-bar">
+      <span style="color:var(--g600);font-size:.8rem;">AI 工具</span>
+    </div>
+    <div class="mockup-content" style="padding:1rem 1.5rem;">
+      <div class="chat-bubble user" style="background:var(--blue);color:#fff;border-radius:12px;padding:.8rem 1.2rem;margin-bottom:.8rem;margin-left:auto;max-width:80%;text-align:left;">
+        <p style="font-size:.95rem;">台灣第一家便利商店是哪一年開的？是哪個品牌？第一家店在哪裡？</p>
+      </div>
+      <div class="chat-bubble ai" style="background:var(--offwhite);border-radius:12px;padding:.8rem 1.2rem;max-width:90%;text-align:left;">
+        <p style="font-size:.95rem;line-height:1.7;color:var(--g600);">
+          （AI 即時回答 — 很可能混淆 7-ELEVEN 和統一超商的細節，或給出錯誤的地址和年份）
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <div class="label">🔍 觀察重點</div>
+    <p>AI 的回答語氣有多自信？但細節可能錯了。這就是「幻覺」。</p>
+  </div>
+</div>
+
+<!-- ===== 46: Demo — Google 交叉比對 ===== -->
+<div class="slide" data-index="46">
+  <div class="demo-banner" style="display:inline-block;background:var(--blue);color:#fff;padding:.35rem 1.4rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.6rem;">👨‍🏫 講師示範</div>
+  <h2>怎麼驗證？用 Google 交叉比對</h2>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step fragment" data-order="0">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>複製 AI 回答中的關鍵事實</strong><p>例如「統一超商 1978 年成立」</p></div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>貼到 Google 搜尋</strong><p>看搜尋結果是否能找到相同資訊</p></div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>比對至少兩個來源</strong><p>維基百科 + 官方網站 or 新聞報導</p></div>
+    </div>
+  </div>
+  <div class="info-box success" style="margin-top:1rem;">
+    <div class="label">原則</div>
+    <p style="font-size:1.1rem;"><strong>「AI 說的 + Google 查不到 = 很可能是假的」</strong></p>
+  </div>
+</div>
+
+<!-- ===== 47: 五步驗證法 Step 1 ===== -->
+<div class="slide" data-index="47">
+  <h2>五步驗證法</h2>
+  <div style="display:flex;align-items:center;gap:1.5rem;margin-top:1.5rem;">
+    <div style="background:var(--blue);color:#fff;width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:900;flex-shrink:0;">1</div>
+    <div style="text-align:left;">
+      <h3 style="font-size:1.5rem;">看來源 — AI 有沒有說出處？</h3>
+      <p style="font-size:1.1rem;color:var(--g600);margin-top:.5rem;line-height:1.8;">
+        如果 AI 說「根據某某研究」「依照某某法規」，<br>
+        先問自己：<strong>它有給出具體的來源嗎？</strong><br>
+        沒有來源 = 可信度大打折扣。
+      </p>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="0" style="margin-top:1.5rem;">
+    <div class="label">💡 小技巧</div>
+    <p>可以直接追問：「你剛才引用的資料，來源是什麼？」AI 如果開始模糊帶過，就知道有問題。</p>
+  </div>
+</div>
+
+<!-- ===== 48: 五步驗證法 Step 2 ===== -->
+<div class="slide" data-index="48">
+  <h2>五步驗證法</h2>
+  <div style="display:flex;align-items:center;gap:1.5rem;margin-top:1.5rem;">
+    <div style="background:var(--blue);color:#fff;width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:900;flex-shrink:0;">2</div>
+    <div style="text-align:left;">
+      <h3 style="font-size:1.5rem;">搜一下 — Google 能找到嗎？</h3>
+      <p style="font-size:1.1rem;color:var(--g600);margin-top:.5rem;line-height:1.8;">
+        把 AI 回答中的<strong>關鍵事實</strong>貼到 Google 搜尋。<br>
+        找得到 → 再比對內容是否一致<br>
+        找不到 → 很可能是 AI 編的
+      </p>
+    </div>
+  </div>
+  <div class="info-box analogy fragment" data-order="0" style="margin-top:1.5rem;">
+    <div class="label">🎯 比喻</div>
+    <p>就像買東西先上網查評價 — AI 的回答也需要「查評價」。</p>
+  </div>
+</div>
+
+<!-- ===== 49: 五步驗證法 Step 3 ===== -->
+<div class="slide" data-index="49">
+  <h2>五步驗證法</h2>
+  <div style="display:flex;align-items:center;gap:1.5rem;margin-top:1.5rem;">
+    <div style="background:var(--blue);color:#fff;width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:900;flex-shrink:0;">3</div>
+    <div style="text-align:left;">
+      <h3 style="font-size:1.5rem;">問兩次 — 換個方式再問一次</h3>
+      <p style="font-size:1.1rem;color:var(--g600);margin-top:.5rem;line-height:1.8;">
+        用不同的方式問同一個問題，看答案是否一致。<br>
+        甚至可以用<strong>另一個 AI 工具</strong>問同樣的問題。<br>
+        兩次答案不同 → 需要進一步查證。
+      </p>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="0" style="margin-top:1.5rem;">
+    <div class="label">💡 小技巧</div>
+    <p>開一個新對話再問同樣的問題。AI 在不同對話中可能給出不同答案 — 這就是幻覺的線索。</p>
+  </div>
+</div>
+
+<!-- ===== 50: 五步驗證法 Step 4 ===== -->
+<div class="slide" data-index="50">
+  <h2>五步驗證法</h2>
+  <div style="display:flex;align-items:center;gap:1.5rem;margin-top:1.5rem;">
+    <div style="background:var(--blue);color:#fff;width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:900;flex-shrink:0;">4</div>
+    <div style="text-align:left;">
+      <h3 style="font-size:1.5rem;">問專家 — 關鍵決策不能只靠 AI</h3>
+      <p style="font-size:1.1rem;color:var(--g600);margin-top:.5rem;line-height:1.8;">
+        涉及<strong>法律、財務、醫療、安全</strong>等重大決策，<br>
+        AI 的回答只能當「參考起點」。<br>
+        最終一定要諮詢專業人士。
+      </p>
+    </div>
+  </div>
+  <div class="info-box warning fragment" data-order="0" style="margin-top:1.5rem;">
+    <p style="font-size:1.05rem;">AI 可以幫你快速整理資料，但<strong>不能替你做決定</strong>。法律問題問律師，健康問題問醫生。</p>
+  </div>
+</div>
+
+<!-- ===== 51: 五步驗證法 Step 5 ===== -->
+<div class="slide" data-index="51">
+  <h2>五步驗證法</h2>
+  <div style="display:flex;align-items:center;gap:1.5rem;margin-top:1.5rem;">
+    <div style="background:var(--blue);color:#fff;width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:900;flex-shrink:0;">5</div>
+    <div style="text-align:left;">
+      <h3 style="font-size:1.5rem;">標記 — 凡是 AI 產出的都要標註</h3>
+      <p style="font-size:1.1rem;color:var(--g600);margin-top:.5rem;line-height:1.8;">
+        在文件中加上「本段由 AI 協助產出」的註記。<br>
+        這不是丟臉的事，而是<strong>負責任的態度</strong>。<br>
+        讓後續讀者知道需要進一步查證。
+      </p>
+    </div>
+  </div>
+  <div class="info-box success fragment" data-order="0" style="margin-top:1.5rem;">
+    <div class="label">好處</div>
+    <p>標註 AI 產出 → 讀者知道要雙重確認 → 避免錯誤擴散 → 建立團隊信任。</p>
+  </div>
+</div>
+
+<!-- ===== 52: 驗證檢核表 ===== -->
+<div class="slide" data-index="52">
+  <h2>📋 五步驗證法 — 帶走版檢核表</h2>
+  <div style="background:var(--offwhite);border:2px solid var(--g200);border-radius:16px;padding:1.8rem 2rem;max-width:700px;margin-top:1rem;text-align:left;">
+    <div class="fragment" data-order="0" style="display:flex;align-items:center;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--g100);">
+      <div style="background:var(--blue);color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">1</div>
+      <p style="font-size:1.1rem;"><strong>看來源</strong> — AI 有給出具體的引用來源嗎？</p>
+    </div>
+    <div class="fragment" data-order="1" style="display:flex;align-items:center;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--g100);">
+      <div style="background:var(--blue);color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">2</div>
+      <p style="font-size:1.1rem;"><strong>搜一下</strong> — Google 能找到相同的資訊嗎？</p>
+    </div>
+    <div class="fragment" data-order="2" style="display:flex;align-items:center;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--g100);">
+      <div style="background:var(--blue);color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">3</div>
+      <p style="font-size:1.1rem;"><strong>問兩次</strong> — 換方式問或用別的 AI，答案一致嗎？</p>
+    </div>
+    <div class="fragment" data-order="3" style="display:flex;align-items:center;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--g100);">
+      <div style="background:var(--blue);color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">4</div>
+      <p style="font-size:1.1rem;"><strong>問專家</strong> — 重大決策有找專業人士確認嗎？</p>
+    </div>
+    <div class="fragment" data-order="4" style="display:flex;align-items:center;gap:1rem;padding:.7rem 0;">
+      <div style="background:var(--blue);color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">5</div>
+      <p style="font-size:1.1rem;"><strong>標記</strong> — 有註明「AI 協助產出」嗎？</p>
+    </div>
+  </div>
+  <p style="margin-top:.8rem;color:var(--g400);font-size:.95rem;">拍照存起來，以後每次用 AI 都跑一遍！</p>
+</div>
+
+<!-- ===== 53: 案例 ⭐ — AI 照妖鏡 ===== -->
+<div class="slide" data-index="53">
+  <div class="exercise-banner">實作練習</div>
+  <div class="case-banner" style="display:inline-block;background:var(--gold-lt);color:var(--gold);padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.6rem;margin-left:.5rem;">案例 ⭐ 全班跟著做</div>
+  <h2>AI 照妖鏡：找出一個錯誤</h2>
+  <div style="background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:1.2rem 1.5rem;max-width:800px;margin-top:.8rem;text-align:left;">
+    <p style="font-size:.85rem;color:var(--g400);margin-bottom:.5rem;">以下是 AI 產出的一段介紹文：</p>
+    <p style="font-size:1.05rem;line-height:1.8;">
+      「台積電（TSMC）由張忠謀於 <strong>1985 年</strong>在新竹科學園區創立，是全球第一家專業晶圓代工廠。公司目前的先進製程已達 <strong>2 奈米</strong>量產，全球市佔率超過 50%。台積電的總部位於<strong>台北市</strong>，員工人數超過 7 萬人。」
+    </p>
+  </div>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <div class="label">任務</div>
+    <p>這段文字中至少有 <strong>1 個明顯的事實錯誤</strong>。用 Google 搜尋找出來，並在訊息牆回報！</p>
+  </div>
+  <p style="margin-top:.5rem;color:var(--g400);font-size:.95rem;">⏱ 限時 3 分鐘 ｜ 提示：查查創立年份和總部地點</p>
+</div>
+
+<!-- ===== 54: 案例 ⭐⭐ ===== -->
+<div class="slide" data-index="54">
+  <div class="exercise-banner">實作練習</div>
+  <div class="case-banner" style="display:inline-block;background:var(--gold-lt);color:var(--gold);padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.6rem;margin-left:.5rem;">案例 ⭐⭐ 自己試</div>
+  <h2>找出三個可疑之處</h2>
+  <div style="background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:1.2rem 1.5rem;max-width:800px;margin-top:.8rem;text-align:left;">
+    <p style="font-size:.85rem;color:var(--g400);margin-bottom:.5rem;">以下是 AI 產出的一段產業分析：</p>
+    <p style="font-size:1rem;line-height:1.8;">
+      「根據 IDC 2024 年報告，全球 AI 市場規模已達 <strong>8,000 億美元</strong>，預計 2027 年將突破 2 兆美元。台灣在全球 AI 競爭力排名中位列<strong>第 3 名</strong>，僅次於美國和中國。台灣目前有超過 <strong>500 家</strong> AI 新創公司，其中以影像辨識和自然語言處理為主要應用領域。根據<strong>麥肯錫研究</strong>，導入 AI 的企業平均生產力提升 <strong>40%</strong>。」
+    </p>
+  </div>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <div class="label">任務</div>
+    <p>用五步驗證法，找出 <strong>3 個可疑的數據或說法</strong>。在訊息牆回報你查到了什麼！</p>
+  </div>
+  <p style="margin-top:.5rem;color:var(--g400);font-size:.95rem;">⏱ 限時 5 分鐘 ｜ 提示：市場規模、排名、生產力數據都值得查</p>
+</div>
+
+<!-- ===== 55: 案例 ⭐⭐⭐ ===== -->
+<div class="slide" data-index="55">
+  <div class="exercise-banner">實作練習</div>
+  <div class="case-banner" style="display:inline-block;background:var(--gold-lt);color:var(--gold);padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.6rem;margin-left:.5rem;">案例 ⭐⭐⭐ 挑戰</div>
+  <h2>完整驗證一段 AI 產出</h2>
+  <div class="info-box analogy" style="margin-top:.8rem;">
+    <div class="label">任務</div>
+    <p>打開 AI 工具，問它：<strong>「請介紹台灣勞基法中的特別休假規定」</strong>。然後用五步驗證法逐一檢查。</p>
+  </div>
+  <div style="background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:1rem 1.5rem;max-width:800px;margin-top:.8rem;text-align:left;">
+    <p style="font-size:1rem;line-height:2;">
+      <strong>Step 1 看來源：</strong>AI 有引用法條嗎？ → 記下來<br>
+      <strong>Step 2 搜一下：</strong>Google 搜「勞基法 38 條」→ 比對<br>
+      <strong>Step 3 問兩次：</strong>用另一個 AI 工具問同樣問題 → 比較<br>
+      <strong>Step 4 問專家：</strong>如果是真正要用，要問 HR 或律師<br>
+      <strong>Step 5 標記：</strong>在筆記上註明「此內容由 AI 產出，需查證」
+    </p>
+  </div>
+  <p style="margin-top:.5rem;color:var(--g400);font-size:.95rem;">⏱ 限時 10 分鐘 ｜ 把驗證結果整理成 3 句話，貼到訊息牆</p>
+</div>
+
+<!-- ===== 56: 解答 + 模組成果 ===== -->
+<div class="slide" data-index="56">
+  <h2>單元二 完成！你學會了...</h2>
+  <div style="max-width:600px;margin-top:1.5rem;">
+    <div class="fragment" data-order="0" style="display:flex;align-items:center;gap:1rem;padding:.8rem 0;border-bottom:1px solid var(--g100);">
+      <span style="font-size:1.5rem;">✅</span>
+      <p style="font-size:1.15rem;font-weight:600;">資料分級判斷力 — 綠黃紅黑四級</p>
+    </div>
+    <div class="fragment" data-order="1" style="display:flex;align-items:center;gap:1rem;padding:.8rem 0;border-bottom:1px solid var(--g100);">
+      <span style="font-size:1.5rem;">✅</span>
+      <p style="font-size:1.15rem;font-weight:600;">AI 幻覺辨識力 — 知道 AI 會自信地說錯</p>
+    </div>
+    <div class="fragment" data-order="2" style="display:flex;align-items:center;gap:1rem;padding:.8rem 0;border-bottom:1px solid var(--g100);">
+      <span style="font-size:1.5rem;">✅</span>
+      <p style="font-size:1.15rem;font-weight:600;">五步驗證法 — 看來源、搜、問兩次、問專家、標記</p>
+    </div>
+    <div class="fragment" data-order="3" style="display:flex;align-items:center;gap:1rem;padding:.8rem 0;">
+      <span style="font-size:1.5rem;">✅</span>
+      <p style="font-size:1.15rem;font-weight:600;">實戰經驗 — 親手抓到 AI 的錯誤</p>
+    </div>
+  </div>
+  <div class="info-box success" style="margin-top:1rem;">
+    <p style="font-size:1.1rem;text-align:center;"><strong>你現在比 80% 的 AI 使用者更有安全意識！</strong></p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Lunch Break -->
+<!-- ============================================================ -->
+
+<!-- ===== 57: 午餐休息 ===== -->
+<div class="slide break-slide" data-index="57">
+  <p style="font-size:3rem;margin-bottom:1rem;">🍱</p>
+  <h2 style="color:var(--navy);">午餐休息</h2>
+  <p style="font-size:1rem;color:var(--g400);margin-top:.3rem;">12:00 – 13:30</p>
+  <div style="background:var(--white);border:2px solid var(--blue);border-radius:16px;padding:1.5rem 2rem;margin-top:2rem;max-width:600px;">
+    <h3 style="color:var(--blue);font-size:1.2rem;margin-bottom:.6rem;">🧠 午餐任務</h3>
+    <p style="font-size:1.15rem;line-height:1.8;">吃飯的時候想一個：</p>
+    <p style="font-size:1.4rem;font-weight:700;color:var(--navy);margin-top:.8rem;line-height:1.5;">
+      你工作上<br>
+      <span style="color:var(--blue);">最重複</span>、<span style="color:var(--red);">最花時間</span>的事
+    </p>
+    <p style="font-size:1.15rem;margin-top:1rem;color:var(--g600);">下午回來，我們用 AI 處理它 💪</p>
+  </div>
+</div>
+<!-- Day1 Part 2: Slides 58-109 -->
+<!-- ============================================== -->
+<!-- D. 單元三：三大 AI 工具深度 PK (58-87)          -->
+<!-- ============================================== -->
+
+<div class="slide section-title" data-index="58">
+  <h1>單元三<br>三大 AI 工具深度 PK</h1>
+  <p class="subtitle" style="margin-top:1.5rem;font-size:1.3rem;">ChatGPT vs Claude vs Gemini</p>
+  <p class="subtitle">13:30 – 15:30</p>
+</div>
+
+<div class="slide" data-index="59">
+  <h2>為什麼要認識三個工具？</h2>
+  <p style="font-size:1.2rem;color:var(--g600);margin-bottom:1.5rem;">不同工具有不同強項，選對工具事半功倍</p>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-top:4px solid var(--green);">
+      <div class="icon">🤖</div>
+      <h3>ChatGPT</h3>
+      <p><strong>全才型</strong><br>什麼都能做，生態系最完整</p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-top:4px solid var(--purple);">
+      <div class="icon">🧠</div>
+      <h3>Claude</h3>
+      <p><strong>深度思考型</strong><br>長文分析、謹慎回答</p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-top:4px solid var(--blue);">
+      <div class="icon">🔍</div>
+      <h3>Gemini</h3>
+      <p><strong>Google 整合型</strong><br>搜尋、Gmail、Drive 一條龍</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 60: ChatGPT 介面導覽 -->
+<div class="slide" data-index="60">
+  <span class="demo-banner">講師示範</span>
+  <h2>ChatGPT 介面導覽</h2>
+  <div class="mockup" style="max-width:820px;width:100%;position:relative;">
+    <div class="mockup-bar"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:6px;"></span>ChatGPT — chat.openai.com</div>
+    <div style="display:flex;min-height:260px;">
+      <div style="background:var(--g50);width:180px;padding:1rem;border-right:1px solid var(--g200);font-size:.85rem;">
+        <div style="padding:.5rem;background:var(--blue-lt);border-radius:8px;margin-bottom:.5rem;font-weight:700;color:var(--blue);">+ 新對話</div>
+        <div style="padding:.4rem .5rem;color:var(--g600);">昨天的對話</div>
+        <div style="padding:.4rem .5rem;color:var(--g600);">上週報告草稿</div>
+        <div style="padding:.4rem .5rem;color:var(--g600);">旅遊規劃...</div>
+      </div>
+      <div style="flex:1;padding:1.5rem;display:flex;flex-direction:column;justify-content:space-between;">
+        <div style="text-align:center;color:var(--g400);font-size:1rem;padding:2rem 0;">在這裡開始對話...</div>
+        <div style="display:flex;gap:.5rem;align-items:center;">
+          <div style="flex:1;border:2px solid var(--g200);border-radius:12px;padding:.6rem 1rem;font-size:.9rem;color:var(--g400);">傳送訊息給 ChatGPT...</div>
+          <div style="background:var(--g800);color:#fff;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;">↑</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card fragment" data-order="0" style="padding:1rem;min-width:180px;">
+      <p><strong>① 新對話</strong><br>每次新話題開新對話</p>
+    </div>
+    <div class="card fragment" data-order="1" style="padding:1rem;min-width:180px;">
+      <p><strong>② 輸入框</strong><br>打字 + 可拖檔案進去</p>
+    </div>
+    <div class="card fragment" data-order="2" style="padding:1rem;min-width:180px;">
+      <p><strong>③ 模型選擇</strong><br>免費版可用 GPT-4o mini</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 61: ChatGPT 三個必知功能 -->
+<div class="slide" data-index="61">
+  <h2>ChatGPT 三個必知功能</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="1">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <strong>可以上傳檔案</strong>
+        <p>圖片、PDF、Excel 都能丟進去，AI 幫你讀</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <strong>可以產出圖片</strong>
+        <p>用文字描述，AI 幫你畫出來（免費版也可以）</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="3">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <strong>記得之前的對話內容</strong>
+        <p>同一個對話視窗裡，AI 會記住前面聊過什麼</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 62: Claude 介面導覽 -->
+<div class="slide" data-index="62">
+  <span class="demo-banner">講師示範</span>
+  <h2>Claude 介面導覽</h2>
+  <div class="mockup" style="max-width:820px;width:100%;position:relative;">
+    <div class="mockup-bar" style="background:#F3E8FF;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--purple);margin-right:6px;"></span>Claude — claude.ai</div>
+    <div style="display:flex;min-height:260px;">
+      <div style="background:#FAF5FF;width:180px;padding:1rem;border-right:1px solid #E9D5FF;font-size:.85rem;">
+        <div style="padding:.5rem;background:var(--purple-lt);border-radius:8px;margin-bottom:.5rem;font-weight:700;color:var(--purple);">Projects</div>
+        <div style="padding:.4rem .5rem;color:var(--g600);">工作專案</div>
+        <div style="padding:.4rem .5rem;color:var(--g600);">合約審查</div>
+        <div style="padding:.4rem .5rem;color:var(--g600);">讀書筆記</div>
+      </div>
+      <div style="flex:1;padding:1.5rem;display:flex;flex-direction:column;justify-content:space-between;">
+        <div style="text-align:center;padding:1rem;">
+          <div style="background:var(--purple-lt);display:inline-block;padding:.8rem 1.5rem;border-radius:12px;font-size:.9rem;color:var(--purple);font-weight:700;">Artifacts — 即時預覽區</div>
+        </div>
+        <div style="display:flex;gap:.5rem;align-items:center;">
+          <div style="flex:1;border:2px solid #E9D5FF;border-radius:12px;padding:.6rem 1rem;font-size:.9rem;color:var(--g400);">跟 Claude 說話...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card fragment" data-order="0" style="padding:1rem;min-width:180px;border-color:#E9D5FF;">
+      <p><strong>① Projects</strong><br>把相關對話分組管理</p>
+    </div>
+    <div class="card fragment" data-order="1" style="padding:1rem;min-width:180px;border-color:#E9D5FF;">
+      <p><strong>② Artifacts</strong><br>即時產出文件、預覽</p>
+    </div>
+    <div class="card fragment" data-order="2" style="padding:1rem;min-width:180px;border-color:#E9D5FF;">
+      <p><strong>③ 長文處理</strong><br>可以上傳很長的文件</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 63: Claude 三個必知功能 -->
+<div class="slide" data-index="63">
+  <h2>Claude 三個必知功能</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--purple);">1</div>
+      <div class="step-content">
+        <strong>擅長長文分析</strong>
+        <p>合約、報告、論文 — 丟一整份進去都能消化</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="background:var(--purple);">2</div>
+      <div class="step-content">
+        <strong>Artifacts 即時產出文件</strong>
+        <p>表格、文件、程式碼，邊聊邊產出，右側即時預覽</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="3">
+      <div class="step-num" style="background:var(--purple);">3</div>
+      <div class="step-content">
+        <strong>回答更謹慎、較少幻覺</strong>
+        <p>不確定的事會說「我不確定」，比較不會亂掰</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 64: Gemini 介面導覽 -->
+<div class="slide" data-index="64">
+  <span class="demo-banner">講師示範</span>
+  <h2>Gemini 介面導覽</h2>
+  <div class="mockup" style="max-width:820px;width:100%;position:relative;">
+    <div class="mockup-bar" style="background:#E8F0FE;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:6px;"></span>Gemini — gemini.google.com</div>
+    <div style="display:flex;min-height:260px;">
+      <div style="background:#F0F4FF;width:180px;padding:1rem;border-right:1px solid var(--g200);font-size:.85rem;">
+        <div style="padding:.5rem;display:flex;align-items:center;gap:.4rem;">
+          <span style="font-size:1.2rem;">G</span>
+          <span style="font-weight:700;color:var(--blue);">Google 帳號</span>
+        </div>
+        <div style="padding:.4rem .5rem;color:var(--g600);margin-top:.5rem;">Gems（自訂角色）</div>
+        <div style="padding:.4rem .5rem;color:var(--g600);">連結 Gmail</div>
+        <div style="padding:.4rem .5rem;color:var(--g600);">連結 Drive</div>
+      </div>
+      <div style="flex:1;padding:1.5rem;display:flex;flex-direction:column;justify-content:space-between;">
+        <div style="text-align:center;color:var(--g400);font-size:1rem;padding:2rem 0;">有什麼我可以幫忙的嗎？</div>
+        <div style="display:flex;gap:.5rem;align-items:center;">
+          <div style="flex:1;border:2px solid var(--g200);border-radius:24px;padding:.6rem 1rem;font-size:.9rem;color:var(--g400);">在這裡輸入...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card fragment" data-order="0" style="padding:1rem;min-width:180px;border-color:var(--blue-lt);">
+      <p><strong>① Google 帳號直接進</strong><br>不用另外註冊</p>
+    </div>
+    <div class="card fragment" data-order="1" style="padding:1rem;min-width:180px;border-color:var(--blue-lt);">
+      <p><strong>② 連結 Gmail/Drive</strong><br>搜尋你的信件和檔案</p>
+    </div>
+    <div class="card fragment" data-order="2" style="padding:1rem;min-width:180px;border-color:var(--blue-lt);">
+      <p><strong>③ Gems</strong><br>自訂 AI 角色（像捷徑）</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 65: Gemini 三個必知功能 -->
+<div class="slide" data-index="65">
+  <h2>Gemini 三個必知功能</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--blue);">1</div>
+      <div class="step-content">
+        <strong>免費用 Google 帳號</strong>
+        <p>有 Gmail 就能用，不用另外註冊或記密碼</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="background:var(--blue);">2</div>
+      <div class="step-content">
+        <strong>直接整合 Gmail、Docs、Sheets</strong>
+        <p>「幫我找上週王經理寄的那封信」— 它真的能找到</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="3">
+      <div class="step-num" style="background:var(--blue);">3</div>
+      <div class="step-content">
+        <strong>可以搜尋即時網路資訊</strong>
+        <p>今天的新聞、最新匯率、天氣 — 都能即時查</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 66: 三大工具比較總表 -->
+<div class="slide" data-index="66">
+  <h2>三大工具比較總表</h2>
+  <table class="compare-table" style="font-size:.95rem;">
+    <tr>
+      <th style="width:20%;">比較項目</th>
+      <th style="width:27%;background:var(--green);">ChatGPT</th>
+      <th style="width:27%;background:var(--purple);">Claude</th>
+      <th style="width:27%;background:var(--blue);">Gemini</th>
+    </tr>
+    <tr class="fragment" data-order="0">
+      <td><strong>免費版功能</strong></td>
+      <td>GPT-4o mini，功能齊全</td>
+      <td>Claude 3.5，有用量限制</td>
+      <td>Gemini 2.0 Flash，很大方</td>
+    </tr>
+    <tr class="fragment" data-order="1">
+      <td><strong>上傳檔案</strong></td>
+      <td>圖片/PDF/Excel</td>
+      <td>圖片/PDF/長文</td>
+      <td>圖片/PDF/影片</td>
+    </tr>
+    <tr class="fragment" data-order="2">
+      <td><strong>圖片生成</strong></td>
+      <td style="color:var(--green);font-weight:700;">強（DALL-E）</td>
+      <td style="color:var(--g400);">無</td>
+      <td>有（Imagen）</td>
+    </tr>
+    <tr class="fragment" data-order="3">
+      <td><strong>網路搜尋</strong></td>
+      <td>有</td>
+      <td>有（較新版）</td>
+      <td style="color:var(--blue);font-weight:700;">強（Google 搜尋）</td>
+    </tr>
+    <tr class="fragment" data-order="4">
+      <td><strong>中文能力</strong></td>
+      <td>優秀</td>
+      <td>優秀</td>
+      <td>良好</td>
+    </tr>
+    <tr class="fragment" data-order="5">
+      <td><strong>最大優勢</strong></td>
+      <td style="font-weight:700;">生態系完整、外掛多</td>
+      <td style="font-weight:700;">長文理解、回答謹慎</td>
+      <td style="font-weight:700;">Google 服務無縫整合</td>
+    </tr>
+    <tr class="fragment" data-order="6">
+      <td><strong>適合場景</strong></td>
+      <td>寫文件、畫圖、萬用</td>
+      <td>分析合約、審報告</td>
+      <td>搜資訊、整合 Google</td>
+    </tr>
+  </table>
+</div>
+
+<!-- Slide 67: PK 規則 -->
+<div class="slide" data-index="67">
+  <h2>PK 大賽規則</h2>
+  <p style="font-size:1.3rem;color:var(--blue);font-weight:700;margin-bottom:1.5rem;">同一個問題，同時丟給三個工具，比誰答得好！</p>
+  <div class="step-list">
+    <div class="step fragment" data-order="1">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <strong>講師即時操作展示</strong>
+        <p>三個視窗並排，同時送出同一個問題</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <strong>各組投票選最好的</strong>
+        <p>看完結果後，每組選出你們覺得最好的回答</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="3">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <strong>統計全班結果</strong>
+        <p>看看大家的選擇是否一致 — 通常不會！</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 68: PK 任務 1 — 文書撰寫 -->
+<div class="slide" data-index="68">
+  <span class="demo-banner">講師示範</span>
+  <h2>PK 任務 1 — 文書撰寫</h2>
+  <div class="code-block" style="margin-bottom:1rem;">
+    <span class="cm">/* 三個工具都收到同一個指令 */</span><br>
+    請幫我寫一封 200 字左右的公司年會邀請信。<br>
+    對象是全體員工，年會時間 3 月 28 日晚上 6 點，<br>
+    地點在台北君悅酒店，有晚宴和抽獎。<br>
+    語氣要溫暖但正式。
+  </div>
+  <div class="info-box tip">
+    <div class="label">觀察重點</div>
+    <p>注意三個工具的：① 篇幅長短 ② 語氣風格 ③ 排版格式</p>
+  </div>
+</div>
+
+<!-- Slide 69: ChatGPT 的回答（文書） -->
+<div class="slide" data-index="69">
+  <h2 style="font-size:1.5rem;">ChatGPT 的回答 — 文書撰寫</h2>
+  <div class="mockup" style="max-width:780px;width:100%;">
+    <div class="mockup-bar"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:6px;"></span>ChatGPT</div>
+    <div class="chat-bubble user">請幫我寫一封 200 字左右的公司年會邀請信...</div>
+    <div class="chat-bubble ai">
+      <strong>【2026 年度盛會邀請函】</strong><br><br>
+      親愛的同仁們，大家好：<br><br>
+      時光飛逝，又到了一年一度歡聚的時刻！誠摯邀請您出席本年度公司年會，與我們共度美好的夜晚。<br><br>
+      <strong>活動資訊</strong><br>
+      日期：2026 年 3 月 28 日（六）<br>
+      時間：晚上 6:00 入場<br>
+      地點：台北君悅酒店 3F 宴會廳<br><br>
+      當晚備有精緻晚宴與豐富抽獎活動，獎品包括最新 3C 產品、旅遊券等驚喜好禮。<br><br>
+      這一年來感謝每位夥伴的辛勤付出，讓我們一起舉杯慶祝、展望未來！<br><br>
+      期待與您相見。<br>
+      人力資源部 敬邀
+    </div>
+  </div>
+</div>
+
+<!-- Slide 70: Claude 的回答（文書） -->
+<div class="slide" data-index="70">
+  <h2 style="font-size:1.5rem;">Claude 的回答 — 文書撰寫</h2>
+  <div class="mockup" style="max-width:780px;width:100%;">
+    <div class="mockup-bar" style="background:#F3E8FF;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--purple);margin-right:6px;"></span>Claude</div>
+    <div class="chat-bubble user">請幫我寫一封 200 字左右的公司年會邀請信...</div>
+    <div class="chat-bubble ai">
+      各位親愛的同仁：<br><br>
+      一年的努力值得一場盛大的慶祝。我們誠摯邀請您參加 2026 年度公司年會，一同回顧這一年來的豐碩成果。<br><br>
+      <strong>時間：</strong>3 月 28 日（六）晚間 6 時<br>
+      <strong>地點：</strong>台北君悅酒店<br>
+      <strong>內容：</strong>精緻晚宴 ＆ 驚喜抽獎<br><br>
+      過去一年，正是因為有每一位夥伴的投入與堅持，我們才能走到今天。年會不只是一場晚宴，更是屬於我們共同的慶祝時刻。<br><br>
+      請撥冗出席，讓我們一起用最溫暖的方式為這一年畫下完美句點。<br><br>
+      靜候您的蒞臨。
+    </div>
+  </div>
+</div>
+
+<!-- Slide 71: Gemini 的回答（文書） -->
+<div class="slide" data-index="71">
+  <h2 style="font-size:1.5rem;">Gemini 的回答 — 文書撰寫</h2>
+  <div class="mockup" style="max-width:780px;width:100%;">
+    <div class="mockup-bar" style="background:#E8F0FE;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:6px;"></span>Gemini</div>
+    <div class="chat-bubble user">請幫我寫一封 200 字左右的公司年會邀請信...</div>
+    <div class="chat-bubble ai">
+      主旨：邀請您參加 2026 公司年度晚會<br><br>
+      各位同仁好：<br><br>
+      感謝大家這一年來的辛苦付出！為了慶祝我們共同的成績，公司將舉辦年度晚會，誠摯邀請您一同參與。<br><br>
+      活動詳情如下：<br>
+      - 日期：2026/3/28（六）<br>
+      - 時間：18:00<br>
+      - 地點：台北君悅酒店<br>
+      - 活動：晚宴、抽獎<br><br>
+      這是一個放鬆身心、與同事們歡聚交流的好機會。我們準備了豐盛的餐點和精彩的抽獎環節，期待在現場見到每一位夥伴！<br><br>
+      敬祝 順心<br>
+      人資部 謹啟
+    </div>
+  </div>
+</div>
+
+<!-- Slide 72: 投票 — 文書撰寫 -->
+<div class="slide vote-slide" data-index="72" data-vote="true">
+  <h2 style="font-size:2.2rem;">文書撰寫，誰最好？</h2>
+  <p style="font-size:1.1rem;color:var(--g600);margin-bottom:2rem;">請各組討論 30 秒，舉手投票！</p>
+  <div class="card-grid">
+    <div class="card" style="text-align:center;border-top:4px solid var(--green);padding:2rem;">
+      <div style="font-size:3rem;">A</div>
+      <h3>ChatGPT</h3>
+    </div>
+    <div class="card" style="text-align:center;border-top:4px solid var(--purple);padding:2rem;">
+      <div style="font-size:3rem;">B</div>
+      <h3>Claude</h3>
+    </div>
+    <div class="card" style="text-align:center;border-top:4px solid var(--blue);padding:2rem;">
+      <div style="font-size:3rem;">C</div>
+      <h3>Gemini</h3>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 73: PK 任務 2 — 翻譯摘要 -->
+<div class="slide" data-index="73">
+  <span class="demo-banner">講師示範</span>
+  <h2>PK 任務 2 — 翻譯摘要</h2>
+  <div class="code-block" style="font-size:.9rem;">請把以下英文產品說明翻成中文，200 字以內：
+
+"Our AI-powered analytics platform helps businesses
+transform raw data into actionable insights in minutes.
+Teams can make data-driven decisions 10x faster.
+Trusted by 500+ enterprises across 30 countries."</div>
+  <p style="margin-top:.6rem;font-size:1rem;">👀 觀察：① 通順度 ② 數字保留 ③ 行銷語感</p>
+</div>
+
+<!-- Slide 74: 翻譯結果對比 -->
+<div class="slide" data-index="74">
+  <h2>三工具翻譯結果對比</h2>
+  <table class="compare-table" style="font-size:.9rem;">
+    <tr>
+      <th style="width:15%;">工具</th>
+      <th style="width:55%;">翻譯摘要</th>
+      <th style="width:30%;">風格特色</th>
+    </tr>
+    <tr class="fragment" data-order="0">
+      <td><strong style="color:var(--green);">ChatGPT</strong></td>
+      <td>「AI 數據分析平台，讓企業在幾分鐘內將原始資料轉化為可執行的洞察。決策速度提升 10 倍。」</td>
+      <td>流暢自然、行銷感強</td>
+    </tr>
+    <tr class="fragment" data-order="1">
+      <td><strong style="color:var(--purple);">Claude</strong></td>
+      <td>「以 AI 驅動的分析平台，協助企業將龐雜數據化為具體可行的商業洞見。數據決策快上十倍。」</td>
+      <td>用詞精準、書面文雅</td>
+    </tr>
+    <tr class="fragment" data-order="2">
+      <td><strong style="color:var(--blue);">Gemini</strong></td>
+      <td>「AI 分析平台幫助企業在幾分鐘內將原始資料轉化為可行動洞察。深受 30 多國、逾 500 家企業信賴。」</td>
+      <td>忠實原文、數字完整</td>
+    </tr>
+  </table>
+</div>
+
+<!-- Slide 75: 投票 — 翻譯摘要 -->
+<div class="slide vote-slide" data-index="75" data-vote="true">
+  <h2 style="font-size:2.2rem;">翻譯摘要，誰最好？</h2>
+  <p style="font-size:1.1rem;color:var(--g600);margin-bottom:2rem;">考慮放在公司官網，哪個翻譯最適合？</p>
+  <div class="card-grid">
+    <div class="card" style="text-align:center;border-top:4px solid var(--green);padding:2rem;">
+      <div style="font-size:3rem;">A</div>
+      <h3>ChatGPT</h3>
+    </div>
+    <div class="card" style="text-align:center;border-top:4px solid var(--purple);padding:2rem;">
+      <div style="font-size:3rem;">B</div>
+      <h3>Claude</h3>
+    </div>
+    <div class="card" style="text-align:center;border-top:4px solid var(--blue);padding:2rem;">
+      <div style="font-size:3rem;">C</div>
+      <h3>Gemini</h3>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 76: PK 任務 3 — 數據分析 -->
+<div class="slide" data-index="76">
+  <span class="demo-banner">講師示範</span>
+  <h2>PK 任務 3 — 數據分析</h2>
+  <div class="code-block" style="font-size:.9rem;">本季銷售額：1月 320萬、2月 280萬、3月 410萬
+去年同期：1月 290萬、2月 310萬、3月 350萬
+
+請分析趨勢、找出問題，給 3 個改善建議。
+用表格整理關鍵數字。</div>
+  <p style="margin-top:.6rem;font-size:1rem;">👀 觀察：① 年增率 ② 2 月下滑 ③ 建議具體度</p>
+</div>
+
+<!-- Slide 77: 數據分析結果對比 -->
+<div class="slide" data-index="77">
+  <h2>三工具數據分析結果對比</h2>
+  <table class="compare-table" style="font-size:.9rem;">
+    <tr>
+      <th style="width:22%;">分析維度</th>
+      <th style="width:26%;background:var(--green);">ChatGPT</th>
+      <th style="width:26%;background:var(--purple);">Claude</th>
+      <th style="width:26%;background:var(--blue);">Gemini</th>
+    </tr>
+    <tr class="fragment" data-order="0">
+      <td><strong>年增率</strong></td>
+      <td>有，逐月算</td>
+      <td>有，含整季比較</td>
+      <td>有，百分比表格</td>
+    </tr>
+    <tr class="fragment" data-order="1">
+      <td><strong>發現問題</strong></td>
+      <td>提到春節因素</td>
+      <td style="font-weight:700;color:var(--purple);">深入分析同期反降</td>
+      <td>簡要帶過</td>
+    </tr>
+    <tr class="fragment" data-order="2">
+      <td><strong>建議具體度</strong></td>
+      <td>給方向</td>
+      <td style="font-weight:700;color:var(--purple);">���執行步驟</td>
+      <td>偏通用</td>
+    </tr>
+  </table>
+  <p style="margin-top:.6rem;color:var(--red);font-weight:700;font-size:.95rem;">👆 注意「發現問題」和「建議具體度」的差異</p>
+  <p style="margin-top:.4rem;font-size:1.1rem;font-weight:700;color:var(--purple);">💡 數據分析是 Claude 的強項 — 它會自己挖更深</p>
+</div>
+
+<!-- Slide 78: 投票 — 數據分析 -->
+<div class="slide vote-slide" data-index="78" data-vote="true">
+  <h2 style="font-size:2.2rem;">數據分析，誰最好？</h2>
+  <p style="font-size:1.1rem;color:var(--g600);margin-bottom:2rem;">如果要交給老闆看，你選哪個？</p>
+  <div class="card-grid">
+    <div class="card" style="text-align:center;border-top:4px solid var(--green);padding:2rem;">
+      <div style="font-size:3rem;">A</div>
+      <h3>ChatGPT</h3>
+    </div>
+    <div class="card" style="text-align:center;border-top:4px solid var(--purple);padding:2rem;">
+      <div style="font-size:3rem;">B</div>
+      <h3>Claude</h3>
+    </div>
+    <div class="card" style="text-align:center;border-top:4px solid var(--blue);padding:2rem;">
+      <div style="font-size:3rem;">C</div>
+      <h3>Gemini</h3>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 79: PK 任務 4 — 創意發想 -->
+<div class="slide" data-index="79">
+  <span class="demo-banner">講師示範</span>
+  <h2>PK 任務 4 — 創意發想</h2>
+  <div class="code-block" style="margin-bottom:1rem;">
+    <span class="cm">/* 考驗創意能力 */</span><br>
+    公司要辦員工運動日（約 80 人），預算 5 萬元。<br>
+    請想 5 個有創意的團隊活動點子，<br>
+    每個要包含：活動名稱、玩法、需要的器材、預算。<br>
+    要有趣又能促進跨部門交流。
+  </div>
+  <div class="info-box tip">
+    <div class="label">觀察重點</div>
+    <p>① 點子是否新穎（不只是拔河、接力跑） ② 是否算了預算 ③ 是否好執行</p>
+  </div>
+</div>
+
+<!-- Slide 80: 創意結果對比 -->
+<div class="slide" data-index="80">
+  <h2 style="font-size:1.5rem;">三工具創意結果對比</h2>
+  <table class="compare-table" style="font-size:.9rem;">
+    <tr>
+      <th style="width:22%;">評比維度</th>
+      <th style="width:26%;background:var(--green);">ChatGPT</th>
+      <th style="width:26%;background:var(--purple);">Claude</th>
+      <th style="width:26%;background:var(--blue);">Gemini</th>
+    </tr>
+    <tr class="fragment" data-order="0">
+      <td><strong>創意度</strong></td>
+      <td style="font-weight:700;color:var(--green);">高：泡泡足球、密室逃脫式闖關</td>
+      <td>中：有創意但偏務實</td>
+      <td>中高：融入最新潮流</td>
+    </tr>
+    <tr class="fragment" data-order="1">
+      <td><strong>預算明細</strong></td>
+      <td>有，每項列數字</td>
+      <td style="font-weight:700;color:var(--purple);">精細，含供應商建議</td>
+      <td>有，粗估</td>
+    </tr>
+    <tr class="fragment" data-order="2">
+      <td><strong>可執行度</strong></td>
+      <td>高</td>
+      <td>高，有注意事項</td>
+      <td>中，有些需要較多準備</td>
+    </tr>
+    <tr class="fragment" data-order="3">
+      <td><strong>跨部門設計</strong></td>
+      <td>有，隨機分組</td>
+      <td>有，刻意打散部門</td>
+      <td>有，團隊積分制</td>
+    </tr>
+    <tr class="fragment" data-order="4">
+      <td><strong>額外加分</strong></td>
+      <td>附了時程規劃表</td>
+      <td>提醒了安全注意事項</td>
+      <td>搜到近期流行活動</td>
+    </tr>
+  </table>
+</div>
+
+<!-- Slide 81: 投票 — 創意發想 -->
+<div class="slide vote-slide" data-index="81" data-vote="true">
+  <h2 style="font-size:2.2rem;">創意發想，誰最好？</h2>
+  <p style="font-size:1.1rem;color:var(--g600);margin-bottom:2rem;">如果你是活動負責人，你會採用哪份方案？</p>
+  <div class="card-grid">
+    <div class="card" style="text-align:center;border-top:4px solid var(--green);padding:2rem;">
+      <div style="font-size:3rem;">A</div>
+      <h3>ChatGPT</h3>
+    </div>
+    <div class="card" style="text-align:center;border-top:4px solid var(--purple);padding:2rem;">
+      <div style="font-size:3rem;">B</div>
+      <h3>Claude</h3>
+    </div>
+    <div class="card" style="text-align:center;border-top:4px solid var(--blue);padding:2rem;">
+      <div style="font-size:3rem;">C</div>
+      <h3>Gemini</h3>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 82: PK 結果彙整 -->
+<div class="slide" data-index="82">
+  <h2>PK 結果彙整</h2>
+  <table class="compare-table" style="font-size:1rem;margin-bottom:1.2rem;">
+    <tr>
+      <th>任務</th>
+      <th style="background:var(--green);">ChatGPT</th>
+      <th style="background:var(--purple);">Claude</th>
+      <th style="background:var(--blue);">Gemini</th>
+    </tr>
+    <tr class="fragment" data-order="0">
+      <td>文書撰寫</td>
+      <td style="text-align:center;">—</td>
+      <td style="text-align:center;">—</td>
+      <td style="text-align:center;">—</td>
+    </tr>
+    <tr class="fragment" data-order="1">
+      <td>翻譯摘要</td>
+      <td style="text-align:center;">—</td>
+      <td style="text-align:center;">—</td>
+      <td style="text-align:center;">—</td>
+    </tr>
+    <tr class="fragment" data-order="2">
+      <td>數據分析</td>
+      <td style="text-align:center;">—</td>
+      <td style="text-align:center;">—</td>
+      <td style="text-align:center;">—</td>
+    </tr>
+    <tr class="fragment" data-order="3">
+      <td>創意發想</td>
+      <td style="text-align:center;">—</td>
+      <td style="text-align:center;">—</td>
+      <td style="text-align:center;">—</td>
+    </tr>
+  </table>
+  <p style="font-size:.9rem;color:var(--g400);margin-bottom:1rem;">（投票結果即時填入上表）</p>
+  <div class="info-box success fragment" data-order="4" style="text-align:center;">
+    <p style="font-size:1.4rem;font-weight:700;">沒有最好的工具，只有最適合的工具</p>
+  </div>
+</div>
+
+<!-- Slide 83: 工具選擇策略 -->
+<div class="slide" data-index="83">
+  <h2>我的工具選擇策略</h2>
+  <p style="color:var(--g600);margin-bottom:1.2rem;">記住這張表，以後不用煩惱該用哪個</p>
+  <div class="step-list">
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--green);">C</div>
+      <div class="step-content">
+        <strong>寫文件、寫信 → ChatGPT 或 Claude</strong>
+        <p>兩個都很會寫，選你順手的</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="background:var(--purple);">C</div>
+      <div class="step-content">
+        <strong>分析長文件（合約、報告） → Claude</strong>
+        <p>Claude 讀長文最穩，不會漏細節</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="3">
+      <div class="step-num" style="background:var(--blue);">G</div>
+      <div class="step-content">
+        <strong>搜尋最新資訊、整合 Google → Gemini</strong>
+        <p>要查即時資訊，Gemini 有搜尋引擎加持</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="4">
+      <div class="step-num" style="background:var(--green);">C</div>
+      <div class="step-content">
+        <strong>生成圖片 → ChatGPT</strong>
+        <p>目前圖片生成品質最好的免費選項</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 84: 案例 ⭐ — 寫 Email -->
+<div class="slide" data-index="84">
+  <span class="exercise-banner">實作練習</span>
+  <span class="case-banner">⭐ 跟著做</span>
+  <h2>用你最喜歡的工具，寫一封 Email</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <strong>打開你剛才最喜歡的工具</strong>
+        <p>ChatGPT、Claude 或 Gemini 都可以</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <strong>輸入這段指令</strong>
+        <p>「請幫我寫一封通知同事下週三部門會議的 Email，時間下午 2 點，地點 3F 會議室，請大家準備上週的工作報告」</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <strong>看看結果，覺得好就複製貼上</strong>
+        <p>不滿意？等一下教你怎麼改指令讓它更好</p>
+      </div>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:1rem;">
+    <div class="label">時間：5 分鐘</div>
+    <p>做完的同學，試著改一下語氣（正式 vs 輕鬆），看看結果有什麼不同</p>
+  </div>
+</div>
+
+<!-- Slide 85: 案例 ⭐⭐ — 雙工具比較 -->
+<div class="slide" data-index="85">
+  <span class="exercise-banner">實作練習</span>
+  <span class="case-banner">⭐⭐ 自己試</span>
+  <h2>同一件事，用兩個工具做</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <strong>選一個你工作上常做的事</strong>
+        <p>例如：整理會議紀錄、翻譯客戶來信、寫週報摘要</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <strong>用 ChatGPT 做一次</strong>
+        <p>把結果存下來（截圖或複製）</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <strong>同樣的指令，用 Gemini 或 Claude 再做一次</strong>
+        <p>比較：哪個結果更接近你想要的？</p>
+      </div>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:1rem;">
+    <div class="label">時間：8 分鐘</div>
+    <p>把你的比較心得貼到訊息牆，讓大家看看你的發現！</p>
+  </div>
+</div>
+
+<!-- Slide 86: 案例 ⭐⭐⭐ — 三工具全試 -->
+<div class="slide" data-index="86">
+  <span class="exercise-banner">實作練習</span>
+  <span class="case-banner">⭐⭐⭐ 挑戰</span>
+  <h2>三工具全試，寫「我的工具選擇報告」</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <strong>選一個工作任務，三個工具各做一次</strong>
+        <p>同樣的指令、同樣的需求</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <strong>比較三個結果，記下優缺點</strong>
+        <p>速度？品質？格式？哪個最像你要的？</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <strong>寫一段 50 字結論</strong>
+        <p>「做 OOO 任務時，我會選 XXX，因為 ...」</p>
+      </div>
+    </div>
+  </div>
+  <div class="info-box success" style="margin-top:1rem;">
+    <div class="label">目標</div>
+    <p>回到工作崗位後，你已經知道手邊哪個工具最適合你的任務</p>
+  </div>
+</div>
+
+<!-- Slide 87: 模組成果 + 轉場 -->
+<div class="slide" data-index="87">
+  <h2>單元三完成！</h2>
+  <div class="step-list" style="margin-bottom:1.5rem;">
+    <div class="step fragment" data-order="0">
+      <div class="step-num" style="background:var(--green);font-size:1.2rem;">&#10003;</div>
+      <div class="step-content"><strong>認識三大工具的介面和特色</strong></div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--green);font-size:1.2rem;">&#10003;</div>
+      <div class="step-content"><strong>知道各自強項：ChatGPT 萬用、Claude 深度、Gemini 整合</strong></div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="background:var(--green);font-size:1.2rem;">&#10003;</div>
+      <div class="step-content"><strong>有了自己的工具偏好和選擇策略</strong></div>
+    </div>
+  </div>
+  <div class="flow">
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">會用工具了</div>
+    <div class="flow-arrow">&#10140;</div>
+    <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);font-size:1.1rem;">接下來：怎麼「問」<br>才能問出好結果？</div>
+  </div>
+  <p style="color:var(--g400);margin-top:1.5rem;font-size:1rem;">休息 10 分鐘後繼續</p>
+</div>
+
+<!-- ============================================== -->
+<!-- E. 單元四：初階提示詞暖身 (88-103)              -->
+<!-- ============================================== -->
+
+<div class="slide section-title" data-index="88">
+  <h1>單元四<br>初階提示詞暖身</h1>
+  <p class="subtitle" style="margin-top:1.5rem;font-size:1.3rem;">你怎麼問，AI 就怎麼答</p>
+  <p class="subtitle">15:30 – 17:10</p>
+</div>
+
+<!-- Slide 89: 你怎麼問，AI 就怎麼答 -->
+<div class="slide" data-index="89">
+  <div class="big-num" style="margin-bottom:1rem;">80%</div>
+  <h2 style="font-size:2rem;">AI 的回答品質<br>取決於你的問法</h2>
+  <p style="font-size:1.15rem;color:var(--g600);margin-top:1.5rem;">同一個 AI 工具，不同人問，結果天差地別</p>
+  <div class="info-box analogy" style="margin-top:1.5rem;">
+    <div class="label">想像一下</div>
+    <p>AI 就像一個超強實習生 — 能力很強，但你指令不清楚，他就只能猜你要什麼</p>
+  </div>
+</div>
+
+<!-- Slide 90: 爛指令 vs 好指令 -->
+<div class="slide" data-index="90">
+  <h2>爛指令 vs 好指令</h2>
+  <div class="two-col" style="max-width:900px;">
+    <div class="col" style="background:var(--red-lt);padding:1.5rem;border-radius:16px;border:2px solid var(--red);">
+      <h3 style="color:var(--red);font-size:1.3rem;margin-bottom:1rem;">&#10060; 爛指令</h3>
+      <div class="code-block" style="background:#fff;border-color:var(--red);font-size:.95rem;">
+        幫我寫個報告
+      </div>
+      <p style="margin-top:1rem;color:var(--g600);font-size:.95rem;">AI 的反應：什麼報告？給誰看？多長？什麼主題？...只好瞎猜一通</p>
+    </div>
+    <div class="col" style="background:var(--green-lt);padding:1.5rem;border-radius:16px;border:2px solid var(--green);">
+      <h3 style="color:var(--green);font-size:1.3rem;margin-bottom:1rem;">&#10004; 好指令</h3>
+      <div class="code-block" style="background:#fff;border-color:var(--green);font-size:.95rem;">
+        你是資深行銷經理，<br>
+        幫我寫一份 300 字的<br>
+        月行銷報告摘要，<br>
+        用表格整理 KPI 數據，<br>
+        語氣專業。
+      </div>
+      <p style="margin-top:1rem;color:var(--g600);font-size:.95rem;">AI 的反應：目標明確，精準產出！</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 91: 指令進化 Round 1 -->
+<div class="slide" data-index="91">
+  <span class="demo-banner">講師示範</span>
+  <h2>指令進化 Round 1 — 原始版</h2>
+  <div class="mockup" style="max-width:780px;width:100%;border-color:var(--red);">
+    <div class="mockup-bar">ChatGPT</div>
+    <div class="chat-bubble user">幫我寫 Email</div>
+    <div class="chat-bubble ai fragment" data-order="0">
+      好的，以下是一封通用的 Email 範本：<br><br>
+      主旨：[請填入主旨]<br><br>
+      您好：<br><br>
+      我想跟您聯繫關於 [主題] 的事宜。[在此處填寫詳細內容]<br><br>
+      如有任何問題，歡迎隨時聯繫。<br><br>
+      此致<br>
+      [您的姓名]
+    </div>
+  </div>
+  <div class="info-box warning fragment" data-order="1" style="margin-top:.8rem;">
+    <div class="label">問題</div>
+    <p>太模糊了！AI 只能給你一堆 [括號]，等於沒寫</p>
+  </div>
+</div>
+
+<!-- Slide 92: Round 2 — 加角色 -->
+<div class="slide" data-index="92">
+  <span class="demo-banner">講師示範</span>
+  <h2>Round 2 — 加角色</h2>
+  <div class="mockup" style="max-width:780px;width:100%;border-color:var(--orange);">
+    <div class="mockup-bar">ChatGPT</div>
+    <div class="chat-bubble user"><strong style="color:var(--blue);">你是客服主管，</strong>幫我寫 Email</div>
+    <div class="chat-bubble ai fragment" data-order="0">
+      主旨：關於您的服務體驗<br><br>
+      親愛的客戶您好：<br><br>
+      感謝您一直以來對我們的支持。我代表客服團隊向您致意，想了解您近期使用我們服務的體驗。<br><br>
+      如果在使用過程中遇到任何問題，請隨時與我們聯繫，我們將竭誠為您處理。<br><br>
+      祝您順心<br>
+      客服部 主管
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="1" style="margin-top:.8rem;">
+    <div class="label">進步了</div>
+    <p>有客服語氣了，但還是不知道「要寫什麼事」</p>
+  </div>
+</div>
+
+<!-- Slide 93: Round 3 — 加格式 -->
+<div class="slide" data-index="93">
+  <span class="demo-banner">講師示範</span>
+  <h2>Round 3 — 加格式</h2>
+  <div class="mockup" style="max-width:780px;width:100%;border-color:var(--gold);">
+    <div class="mockup-bar">ChatGPT</div>
+    <div class="chat-bubble user">你是客服主管，幫我寫 Email 回覆客訴，<strong style="color:var(--blue);">用條列式整理處理進度</strong></div>
+    <div class="chat-bubble ai fragment" data-order="0">
+      主旨：關於您反映問題的處理進度<br><br>
+      親愛的客戶您好：<br><br>
+      感謝您的來信反映，我們非常重視您的意見。以下是目前的處理進度：<br><br>
+      1. <strong>問題確認：</strong>已收到您的反映並記錄<br>
+      2. <strong>原因調查：</strong>技術團隊正在釐清中<br>
+      3. <strong>預計回覆：</strong>將於 3 個工作日內回覆完整結果<br><br>
+      如有緊急需求，歡迎致電客服專線。<br><br>
+      客服部 主管 敬上
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="1" style="margin-top:.8rem;">
+    <div class="label">又更好了</div>
+    <p>有結構了！但「客訴什麼」還是模糊的</p>
+  </div>
+</div>
+
+<!-- Slide 94: Round 4 — 加限制 -->
+<div class="slide" data-index="94">
+  <span class="demo-banner">講師示範</span>
+  <h2>Round 4 — 加限制（完美版）</h2>
+  <div class="mockup" style="max-width:780px;width:100%;border-color:var(--green);">
+    <div class="mockup-bar">ChatGPT</div>
+    <div class="chat-bubble user">你是客服主管，幫我寫一封<strong style="color:var(--blue);">200 字以內的道歉 Email</strong>，回覆客戶投訴出貨延遲的問題。<strong style="color:var(--blue);">語氣溫和但專業</strong>，條列式說明處理進度。</div>
+    <div class="chat-bubble ai fragment" data-order="0">
+      主旨：關於您訂單延遲的說明與致歉<br><br>
+      親愛的客戶您好：<br><br>
+      非常抱歉因出貨延遲造成您的不便。以下是我們的處理進度：<br><br>
+      1. <strong>原因：</strong>近期訂單量大增，物流端作業延遲<br>
+      2. <strong>現況：</strong>您的訂單已重新排程，預計明日出貨<br>
+      3. <strong>補償：</strong>我們將提供下次購物 9 折優惠券<br><br>
+      再次向您致歉，感謝您的耐心與體諒。<br><br>
+      客服部 敬上
+    </div>
+  </div>
+  <div class="info-box success fragment" data-order="1" style="margin-top:.8rem;">
+    <div class="label">完美！</div>
+    <p>角色 + 任務 + 格式 + 限制 = 精準結果，可以直接用</p>
+  </div>
+</div>
+
+<!-- Slide 95: RTFC 四要素預告 -->
+<div class="slide" data-index="95">
+  <h2 style="margin-bottom:1.5rem;">提示詞四要素：RTFC</h2>
+  <div class="flow" style="gap:1rem;">
+    <div class="flow-box fragment" data-order="0" style="background:var(--blue-lt);border-color:var(--blue);padding:1rem 1.5rem;min-width:120px;">
+      <div style="font-size:2rem;font-weight:900;color:var(--blue);">R</div>
+      <div style="font-size:.9rem;">角色 Role</div>
+      <div style="font-size:.8rem;color:var(--g600);margin-top:.3rem;">「你是...」</div>
+    </div>
+    <div class="flow-arrow fragment" data-order="0">+</div>
+    <div class="flow-box fragment" data-order="1" style="background:var(--green-lt);border-color:var(--green);padding:1rem 1.5rem;min-width:120px;">
+      <div style="font-size:2rem;font-weight:900;color:var(--green);">T</div>
+      <div style="font-size:.9rem;">任務 Task</div>
+      <div style="font-size:.8rem;color:var(--g600);margin-top:.3rem;">「幫我做...」</div>
+    </div>
+    <div class="flow-arrow fragment" data-order="1">+</div>
+    <div class="flow-box fragment" data-order="2" style="background:var(--gold-lt);border-color:var(--gold);padding:1rem 1.5rem;min-width:120px;">
+      <div style="font-size:2rem;font-weight:900;color:var(--gold);">F</div>
+      <div style="font-size:.9rem;">格式 Format</div>
+      <div style="font-size:.8rem;color:var(--g600);margin-top:.3rem;">「用表格 / 條列...」</div>
+    </div>
+    <div class="flow-arrow fragment" data-order="2">+</div>
+    <div class="flow-box fragment" data-order="3" style="background:var(--purple-lt);border-color:var(--purple);padding:1rem 1.5rem;min-width:120px;">
+      <div style="font-size:2rem;font-weight:900;color:var(--purple);">C</div>
+      <div style="font-size:.9rem;">限制 Constraint</div>
+      <div style="font-size:.8rem;color:var(--g600);margin-top:.3rem;">「200字內 / 語氣...」</div>
+    </div>
+  </div>
+  <div class="info-box analogy fragment" data-order="4" style="margin-top:1.5rem;">
+    <div class="label">明天 Day2 會深入每個要素</div>
+    <p>今天先體會差異：從「一句話」進化到「四要素」，結果完全不同</p>
+  </div>
+</div>
+
+<!-- Slide 96: RTFC 一頁圖解 -->
+<div class="slide" data-index="96">
+  <h2>RTFC 一頁圖解</h2>
+  <div class="flow" style="margin-bottom:1.5rem;">
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);">
+      <strong style="color:var(--blue);">R 角色</strong><br>
+      <span style="font-size:.9rem;">你是客服主管</span>
+    </div>
+    <div class="flow-arrow">+</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">
+      <strong style="color:var(--green);">T 任務</strong><br>
+      <span style="font-size:.9rem;">寫道歉 Email</span>
+    </div>
+    <div class="flow-arrow">+</div>
+    <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);">
+      <strong style="color:var(--gold);">F 格式</strong><br>
+      <span style="font-size:.9rem;">條列式進度</span>
+    </div>
+    <div class="flow-arrow">+</div>
+    <div class="flow-box" style="background:var(--purple-lt);border-color:var(--purple);">
+      <strong style="color:var(--purple);">C 限制</strong><br>
+      <span style="font-size:.9rem;">200字、溫和專業</span>
+    </div>
+  </div>
+  <div class="flow">
+    <div class="flow-arrow" style="font-size:2rem;">&#11015;</div>
+  </div>
+  <div style="background:var(--green-lt);border:2px solid var(--green);border-radius:16px;padding:1.5rem;max-width:600px;text-align:center;margin-top:1rem;">
+    <p style="font-size:1.3rem;font-weight:700;color:var(--green);">精準、可用的 AI 回答</p>
+    <p style="font-size:1rem;color:var(--g600);">不用來回修改，一次到位</p>
+  </div>
+</div>
+
+<!-- Slide 97: 完整四要素範例 -->
+<div class="slide" data-index="97">
+  <h2>完整四要素範例</h2>
+  <div class="two-col">
+    <div class="col">
+      <h3 style="color:var(--red);">❌ Before</h3>
+      <div class="code-block" style="border-color:var(--red);font-size:1.1rem;">幫我寫會議紀錄</div>
+    </div>
+    <div class="col">
+      <h3 style="color:var(--green);">✅ After（RTFC）</h3>
+      <div class="code-block" style="border-color:var(--green);font-size:.9rem;"><strong>[R]</strong> 你是專業的會議記錄秘書
+<strong>[T]</strong> 根據以下會議內容，寫會議紀錄
+<strong>[F]</strong> 日期、出席者、討論事項、決議、待辦
+<strong>[C]</strong> 500 字以內，語氣正式</div>
+    </div>
+  </div>
+  <p style="margin-top:.8rem;font-size:1.1rem;font-weight:700;">Before：AI 猜 10 件事 → After：AI 只需執行</p>
+</div>
+
+<!-- Slide 98: 案例 ⭐ — 改寫加角色 -->
+<div class="slide" data-index="98" data-push="你是行政助理，幫我寫一封通知全公司週五下午茶時間的 Email">
+  <span class="exercise-banner">實作練習</span>
+  <span class="case-banner">⭐ 跟著做</span>
+  <h2>改寫「幫我寫 Email」— 加角色</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <strong>打開任一個 AI 工具</strong>
+        <p>用你剛才最喜歡的那個</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <strong>先輸入原始版：「幫我寫 Email」</strong>
+        <p>看看 AI 給你什麼（應該很模糊）</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <strong>加上角色，再試一次</strong>
+        <p>「<strong style="color:var(--blue);">你是行政助理，</strong>幫我寫一封通知全公司週五下午茶時間的 Email」</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="3">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <strong>比較兩次結果</strong>
+        <p>是不是差很多？</p>
+      </div>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="4" style="margin-top:.8rem;">
+    <p>重點：體會「加一句角色」帶來的差異</p>
+    <div class="timer" data-minutes="3">3:00</div>
+  </div>
+</div>
+
+<!-- Slide 99: 案例 ⭐⭐ — 加格式+限制 -->
+<div class="slide" data-index="99" data-push="幫我整理以下資料，用表格呈現，欄位：城市、溫度、天氣，加一欄穿衣建議，每個建議 10 字以內。資料：台北 25 度晴天、台中 28 度多雲、高雄 30 度晴天、花蓮 22 度下雨">
+  <span class="exercise-banner">實作練習</span>
+  <span class="case-banner">⭐⭐ 自己試</span>
+  <h2>改寫「幫我整理資料」— 加格式 + 限制</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <strong>先輸入原始版</strong>
+        <p>「幫我整理以下資料：台北 25 度晴天、台中 28 度多雲、高雄 30 度晴天、花蓮 22 度下雨」</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <strong>加上格式和限制，再試</strong>
+        <p>「幫我整理以下資料，<strong style="color:var(--gold);">用表格呈現</strong>，欄位：城市、溫度、天氣、<strong style="color:var(--purple);">加一欄穿衣建議，每個建議 10 字以內</strong>」</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <strong>比較結果</strong>
+        <p>第二版是不是直接可以貼到簡報裡？</p>
+      </div>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="3" style="margin-top:.8rem;">
+    <p>關鍵：格式 + 限制讓 AI 產出直接可用</p>
+    <div class="timer" data-minutes="5">5:00</div>
+  </div>
+</div>
+
+<!-- Slide 100: 案例 ⭐⭐⭐ — 完整四要素 -->
+<div class="slide" data-index="100">
+  <span class="exercise-banner">實作練習</span>
+  <span class="case-banner">⭐⭐⭐ 挑戰</span>
+  <h2>從零寫一個完整 RTFC Prompt</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0">
+      <div class="step-num" style="background:var(--blue);">R</div>
+      <div class="step-content">
+        <strong>選一個角色</strong>
+        <p>你希望 AI 扮演什麼專家？（行銷主管、HR、財務分析師...）</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--green);">T</div>
+      <div class="step-content">
+        <strong>定義任務</strong>
+        <p>選一個你工作上真實的任務（越具體越好）</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="background:var(--gold);">F</div>
+      <div class="step-content">
+        <strong>指定格式</strong>
+        <p>表格？條列？段落？Email 格式？</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="3">
+      <div class="step-num" style="background:var(--purple);">C</div>
+      <div class="step-content">
+        <strong>設定限制</strong>
+        <p>字數？語氣？不要出現的內容？</p>
+      </div>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="4" style="margin-top:.8rem;">
+    <p>寫完送出去，看看結果！把 Prompt 和結果都貼到訊息牆</p>
+    <div class="timer" data-minutes="8">8:00</div>
+  </div>
+</div>
+
+<!-- Slide 101: 案例 ⭐⭐⭐⭐ — 挑戰講師 -->
+<div class="slide" data-index="101">
+  <span class="exercise-banner">實作練習</span>
+  <span class="case-banner">⭐⭐⭐⭐ 超級挑戰</span>
+  <h2>寫出比講師 demo 更好的結果！</h2>
+  <div class="step-list">
+    <div class="step">
+      <div class="step-num" style="background:var(--red);">!</div>
+      <div class="step-content">
+        <strong>挑戰目標</strong>
+        <p>用 RTFC 框架，寫出一個 Prompt，讓 AI 的回答比講師剛才示範的更好</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="0">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <strong>選同一個任務（出貨延遲道歉 Email）</strong>
+        <p>或者選你自己的工作任務也行</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <strong>寫你的 Prompt，送出去看結果</strong>
+        <p>可以加更多細節、更具體的限制</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <strong>把你的 Prompt 貼到訊息牆</strong>
+        <p>全班投票選出「今日最佳 Prompt 獎」！</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 102: Before / After 比較 -->
+<div class="slide" data-index="102">
+  <h2>一天的進化</h2>
+  <div class="two-col" style="max-width:900px;">
+    <div class="col">
+      <h3 style="color:var(--red);margin-bottom:1rem;">早上的你</h3>
+      <div class="mockup" style="max-width:400px;">
+        <div class="mockup-bar">AI 工具</div>
+        <div class="chat-bubble user" style="font-size:.95rem;">幫我寫報告</div>
+        <div class="chat-bubble ai" style="font-size:.95rem;">
+          [一堆模糊的廢話]<br>
+          [需要你填一堆括號]<br>
+          [完全不能直接用]
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3 style="color:var(--green);margin-bottom:1rem;">現在的你</h3>
+      <div class="mockup" style="max-width:400px;">
+        <div class="mockup-bar">AI 工具</div>
+        <div class="chat-bubble user" style="font-size:.95rem;">你是行銷經理，幫我寫 300 字月報摘要，表格整理 KPI...</div>
+        <div class="chat-bubble ai" style="font-size:.95rem;">
+          <strong>2026 年 3 月行銷月報</strong><br>
+          [精準、有格式、直接可用的內容]
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 103: 提示詞三原則 -->
+<div class="slide" data-index="103">
+  <h2>提示詞三原則</h2>
+  <p style="color:var(--g600);margin-bottom:1.5rem;">帶走這三句話，明天繼續深化</p>
+  <div class="step-list">
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="font-size:1.5rem;width:50px;height:50px;">1</div>
+      <div class="step-content">
+        <strong style="font-size:1.3rem;">越具體越好</strong>
+        <p style="font-size:1.05rem;">別讓 AI 猜 — 角色、任務、格式、限制都說清楚</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="font-size:1.5rem;width:50px;height:50px;">2</div>
+      <div class="step-content">
+        <strong style="font-size:1.3rem;">分步驟下指令</strong>
+        <p style="font-size:1.05rem;">一次要太多 AI 會亂 — 拆開來一步一步問</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="3">
+      <div class="step-num" style="font-size:1.5rem;width:50px;height:50px;">3</div>
+      <div class="step-content">
+        <strong style="font-size:1.3rem;">迭代改進</strong>
+        <p style="font-size:1.05rem;">第一次不完美很正常 — 告訴 AI 哪裡不好，讓它改</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== -->
+<!-- F. 專題選題 + 收尾 (104-109)                    -->
+<!-- ============================================== -->
+
+<!-- Slide 104: Day 2 預告 -->
+<div class="slide" data-index="104">
+  <h2>Day 2 預告</h2>
+  <p style="font-size:1.1rem;color:var(--g600);margin-bottom:1.5rem;">明天我們要把今天學的全部升級</p>
+  <div class="card-grid">
+    <div class="card" style="border-top:4px solid var(--blue);">
+      <div class="icon">&#128200;</div>
+      <h3>四要素深入</h3>
+      <p>RTFC 每個要素的進階技巧 + 範本庫</p>
+    </div>
+    <div class="card" style="border-top:4px solid var(--green);">
+      <div class="icon">&#128188;</div>
+      <h3>四大職場情境</h3>
+      <p>Email 溝通、會議紀錄、數據分析、報告撰寫</p>
+    </div>
+    <div class="card" style="border-top:4px solid var(--gold);">
+      <div class="icon">&#127942;</div>
+      <h3>專題實作</h3>
+      <p>用你選的痛點，做出真正能用的 AI 流程</p>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:1.5rem;">
+    <div class="label">回家作業（選做）</div>
+    <p>帶著你今天寫的 Prompt 來，明天繼續進化它！</p>
+  </div>
+</div>
+
+<!-- Slide 105: 專題選題說明 -->
+<div class="slide" data-index="105">
+  <h2>專題選題說明</h2>
+  <p style="font-size:1.2rem;color:var(--blue);font-weight:700;margin-bottom:1.5rem;">每組選一個「真實工作痛點」</p>
+  <div class="two-col" style="max-width:880px;">
+    <div class="col" style="background:var(--green-lt);padding:1.5rem;border-radius:16px;">
+      <h3 style="color:var(--green);margin-bottom:.8rem;">&#10004; 好選題</h3>
+      <p style="font-size:1.05rem;line-height:2;">
+        「每月手動整理 50 封客戶 Email」<br>
+        「每週花 3 小時做週報」<br>
+        「客訴回信每封都要想很久」<br>
+        「翻譯國外供應商來信很花時間」
+      </p>
+    </div>
+    <div class="col" style="background:var(--red-lt);padding:1.5rem;border-radius:16px;">
+      <h3 style="color:var(--red);margin-bottom:.8rem;">&#10060; 不適合</h3>
+      <p style="font-size:1.05rem;line-height:2;">
+        「想學 AI」（太抽象）<br>
+        「公司系統不好用」（不是 AI 能解的）<br>
+        「想要 AI 幫我上班」（太廣泛）<br>
+        「資安問題」（超出課程範圍）
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 106: 三個選題方向 -->
+<div class="slide" data-index="106">
+  <h2>三個選題方向</h2>
+  <p style="color:var(--g600);margin-bottom:1.5rem;">想不出來？從這三個方向去想</p>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-top:4px solid var(--blue);text-align:center;padding:2rem;">
+      <div style="font-size:3rem;">&#128257;</div>
+      <h3 style="margin-top:.5rem;">重複性高</h3>
+      <p style="font-size:1.05rem;">每天或每週都要做的事<br><br><em style="color:var(--blue);">例：每天回覆類似的客戶問題</em></p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-top:4px solid var(--gold);text-align:center;padding:2rem;">
+      <div style="font-size:3rem;">&#9203;</div>
+      <h3 style="margin-top:.5rem;">很花時間</h3>
+      <p style="font-size:1.05rem;">做完就累了、佔掉大半天<br><br><em style="color:var(--gold);">例：每月整理各部門的數據報表</em></p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-top:4px solid var(--red);text-align:center;padding:2rem;">
+      <div style="font-size:3rem;">&#9888;</div>
+      <h3 style="margin-top:.5rem;">容易出錯</h3>
+      <p style="font-size:1.05rem;">手動容易漏或錯<br><br><em style="color:var(--red);">例：核對合約條款、計算報價單</em></p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 107: 各組討論 + 選題 -->
+<div class="slide" data-index="107">
+  <span class="exercise-banner">小組討論</span>
+  <h2>各組討論 + 選題</h2>
+  <div class="step-list" style="margin-bottom:1.5rem;">
+    <div class="step fragment" data-order="0">
+      <div class="step-num" style="background:var(--gold);">1</div>
+      <div class="step-content">
+        <strong>每人說一個工作痛點</strong>
+        <p>輪流分享：你工作上最想讓 AI 幫忙的一件事？（每人 1 分鐘）</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--gold);">2</div>
+      <div class="step-content">
+        <strong>投票選最有感的一個</strong>
+        <p>哪個痛點最多人有共鳴？選它當組別專題</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="background:var(--gold);">3</div>
+      <div class="step-content">
+        <strong>把結果貼到訊息牆</strong>
+        <p>格式：「第 X 組：[痛點描述]」</p>
+      </div>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="3">
+    <p>明天 Day2 下午的專題實作，就做這個題目！</p>
+    <div class="timer" data-minutes="15">15:00</div>
+  </div>
+</div>
+
+<!-- Slide 108: Day 1 總回顧 -->
+<div class="slide cinematic" data-index="108">
+  <div class="big-num fragment" data-order="0" style="color:var(--gold);font-size:5rem;margin-bottom:.5rem;">4</div>
+  <h2 style="margin-bottom:.3rem;">你今天完成了 4 個單元</h2>
+  <p class="subtitle" style="margin-bottom:1.5rem;">從零到能跟 AI 對話 — 這就是今天的成就</p>
+  <div class="step-list" style="max-width:640px;">
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--green);font-size:1.2rem;">&#10003;</div>
+      <div class="step-content">
+        <strong style="font-size:1.15rem;">AI 是什麼、能做什麼、不能做什麼</strong>
+        <p style="color:var(--g400);">AI 不是萬能的，但用對地方真的很強</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="background:var(--green);font-size:1.2rem;">&#10003;</div>
+      <div class="step-content">
+        <strong style="font-size:1.15rem;">AI 安全底線 + 五步驗證法</strong>
+        <p style="color:var(--g400);">機密不給 AI、結果一定要驗證</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="3">
+      <div class="step-num" style="background:var(--green);font-size:1.2rem;">&#10003;</div>
+      <div class="step-content">
+        <strong style="font-size:1.15rem;">三大工具比較 + 工具選擇策略</strong>
+        <p style="color:var(--g400);">ChatGPT 萬用、Claude 深度、Gemini 整合</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="4">
+      <div class="step-num" style="background:var(--green);font-size:1.2rem;">&#10003;</div>
+      <div class="step-content">
+        <strong style="font-size:1.15rem;">提示詞四要素 RTFC 初體驗</strong>
+        <p style="color:var(--g400);">角色 + 任務 + 格式 + 限制 = 精準結果</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 109: 明天見！ -->
+<div class="slide cover" data-index="109">
+  <p style="font-size:1.1rem;color:rgba(255,255,255,.6);margin-bottom:1rem;">AI 工具應用與自動化流程實戰班</p>
+  <h1 style="font-size:3.2rem;">明天見！</h1>
+  <p class="subtitle" style="margin-top:1.5rem;font-size:1.4rem;">Day 2 — 提示詞系統化實戰</p>
+  <div style="margin-top:2.5rem;text-align:center;">
+    <p style="color:rgba(255,255,255,.7);font-size:1.1rem;">帶著你的 Prompt 和痛點來！</p>
+    <p style="color:rgba(255,255,255,.9);font-size:1.3rem;font-weight:700;margin-top:1rem;">09:00 準時開始</p>
+  </div>
+</div>
+
+</div>
+
+<div class="section-nav">
+  <button class="section-nav-btn" id="navBtn" onclick="toggleNav()">
+    <span id="navSection">開場</span>
+    <span class="nav-counter"><span id="current">1</span>/<span id="total"></span></span>
+  </button>
+  <div class="section-nav-menu" id="navMenu"></div>
+</div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>←</button><button id="next">→</button></div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),tot=slides.length;
+let idx=0,fi=-1;
+document.getElementById('total').textContent=tot;
+const gf=el=>[...el.querySelectorAll('.fragment')].sort((a,b)=>(+(a.dataset.order||0))-(+(b.dataset.order||0)));
+
+function go(n){
+  if(n<0)n=0;if(n>=tot)n=tot-1;
+  slides.forEach((s,i)=>{s.classList.remove('active','prev');if(i<n)s.classList.add('prev');s.querySelectorAll('.fragment').forEach(f=>f.classList.remove('visible'));});
+  idx=n;fi=-1;slides[idx].classList.add('active');ui();
+}
+function ui(){
+  document.getElementById('current').textContent=idx+1;
+  document.getElementById('prev').disabled=idx===0&&fi<=0;
+  const f=gf(slides[idx]);
+  document.getElementById('next').disabled=idx===tot-1&&fi>=f.length-1;
+  document.getElementById('progress').style.width=((idx+1)/tot*100)+'%';
+}
+function adv(){
+  const f=gf(slides[idx]);
+  if(fi<f.length-1){
+    fi++;const ord=f[fi].dataset.order;
+    f[fi].classList.add('visible');
+    while(fi<f.length-1&&f[fi+1].dataset.order===ord){fi++;f[fi].classList.add('visible');}
+    ui();
+  }else if(idx<tot-1)go(idx+1);
+}
+function ret(){
+  const f=gf(slides[idx]);
+  if(fi>=0){
+    const ord=f[fi].dataset.order;
+    f[fi].classList.remove('visible');fi--;
+    while(fi>=0&&f[fi].dataset.order===ord){f[fi].classList.remove('visible');fi--;}
+    ui();
+  }else if(idx>0){go(idx-1);const p=gf(slides[idx]);p.forEach(x=>x.classList.add('visible'));fi=p.length-1;ui();}
+}
+
+document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
+document.addEventListener('keydown',e=>{
+  if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}
+  if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}
+  if(e.key==='Home'){e.preventDefault();go(0);}
+  if(e.key==='End'){e.preventDefault();go(tot-1);}
+  if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
+  // number keys for quick jump to sections
+  if(e.key==='1')go(0);   // 開場
+  if(e.key==='2')go(12);  // 單元一
+  if(e.key==='3')go(34);  // 單元二
+  if(e.key==='4')go(58);  // 單元三
+  if(e.key==='5')go(88);  // 單元四
+  if(e.key==='6')go(104); // 收尾
+});
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});
+document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
+
+// Copy-to-clipboard for code blocks
+document.querySelectorAll('.code-block').forEach(function(block) {
+  if (block.textContent.trim().length > 20) {
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = '複製';
+    btn.onclick = function(e) {
+      e.stopPropagation();
+      navigator.clipboard.writeText(block.textContent.trim()).then(function() {
+        btn.textContent = '已複製 ✓';
+        btn.classList.add('copied');
+        setTimeout(function() { btn.textContent = '複製'; btn.classList.remove('copied'); }, 2000);
+      });
+    };
+    block.appendChild(btn);
+  }
+});
+
+// Countdown timer for exercise slides
+document.querySelectorAll('.timer[data-minutes]').forEach(function(el) {
+  var mins = parseInt(el.dataset.minutes);
+  el.innerHTML = mins + ':00';
+  el.style.cursor = 'pointer';
+  el.title = '點擊開始計時';
+  el.onclick = function() {
+    var total = mins * 60;
+    el.style.background = 'var(--purple)';
+    el.style.color = '#fff';
+    var iv = setInterval(function() {
+      total--;
+      if (total <= 0) { clearInterval(iv); el.innerHTML = '時間到！'; el.style.background = 'var(--red)'; return; }
+      var m = Math.floor(total / 60), s = total % 60;
+      el.innerHTML = m + ':' + (s < 10 ? '0' : '') + s;
+    }, 1000);
+  };
+});
+
+// Auto-push notification when entering a push slide
+var _origGo2 = go;
+go = function(n) {
+  _origGo2(n);
+  var slide = slides[idx];
+  if (slide.dataset.push) {
+    console.log('[PUSH]', slide.dataset.push);
+    // Future: connect to classroom Firebase
+  }
+};
+
+// ── Section navigation ──
+var sections = [
+  { title: '封面', idx: 0 },
+  { title: 'A. 開場與分組', idx: 1 },
+  { title: 'B. 單元一：AI 是協作夥伴', idx: 12 },
+  { title: '　 講師示範：AI 能做什麼', idx: 17 },
+  { title: '　 三大誤區', idx: 24 },
+  { title: '　 案例練習 ⭐⭐⭐', idx: 29 },
+  { title: 'C. 單元二：安全與風險', idx: 34 },
+  { title: '　 三星案例', idx: 39 },
+  { title: '　 AI 幻覺', idx: 42 },
+  { title: '　 五步驗證法', idx: 47 },
+  { title: '　 案例練習 ⭐⭐⭐', idx: 53 },
+  { title: '午休', idx: 57 },
+  { title: 'D. 單元三：三大工具 PK', idx: 58 },
+  { title: '　 ChatGPT 導覽', idx: 60 },
+  { title: '　 Claude 導覽', idx: 62 },
+  { title: '　 Gemini 導覽', idx: 64 },
+  { title: '　 PK 任務 1：文書', idx: 68 },
+  { title: '　 PK 任務 2：翻譯', idx: 73 },
+  { title: '　 PK 任務 3：數據', idx: 76 },
+  { title: '　 PK 任務 4：創意', idx: 79 },
+  { title: '　 PK 結果彙整', idx: 82 },
+  { title: '　 案例練習 ⭐⭐⭐', idx: 84 },
+  { title: 'E. 單元四：提示詞暖身', idx: 88 },
+  { title: '　 指令進化 Demo', idx: 91 },
+  { title: '　 RTFC 四要素', idx: 95 },
+  { title: '　 案例練習 ⭐⭐⭐⭐', idx: 98 },
+  { title: 'F. 專題選題 + 收尾', idx: 104 },
+  { title: '　 Day1 總回顧', idx: 108 },
+];
+
+var navMenu = document.getElementById('navMenu');
+var navBtn = document.getElementById('navBtn');
+var navSection = document.getElementById('navSection');
+
+// Build menu
+sections.forEach(function(s, i) {
+  var item = document.createElement('div');
+  item.className = 'section-nav-item';
+  item.dataset.secIdx = i;
+  item.innerHTML = '<div class="nav-idx">' + (s.idx + 1) + '</div><div class="nav-title">' + s.title + '</div>';
+  item.onclick = function() { go(s.idx); navMenu.classList.remove('open'); };
+  navMenu.appendChild(item);
+});
+
+function toggleNav() {
+  navMenu.classList.toggle('open');
+}
+
+// Close menu on click outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.section-nav')) navMenu.classList.remove('open');
+});
+
+// Update current section label
+function updateSectionLabel() {
+  var current = '';
+  for (var i = sections.length - 1; i >= 0; i--) {
+    if (idx >= sections[i].idx) { current = sections[i].title.replace(/^　 /, ''); break; }
+  }
+  navSection.textContent = current || '封面';
+  // Update active state in menu
+  navMenu.querySelectorAll('.section-nav-item').forEach(function(item, i) {
+    var isActive = idx >= sections[i].idx && (i === sections.length - 1 || idx < sections[i + 1].idx);
+    item.classList.toggle('active', isActive);
+  });
+}
+
+// Patch ui() to also update section label
+var _origUi = ui;
+ui = function() { _origUi(); updateSectionLabel(); };
+
+go(0);
+
+// postMessage bridge for iframe embedding (classroom integration)
+window.addEventListener('message', function(e) {
+  if (!e.data || e.data.type !== 'slideControl') return;
+  var d = e.data;
+  if (d.action === 'next') adv();
+  else if (d.action === 'prev') ret();
+  else if (d.action === 'goto' && typeof d.index === 'number') go(d.index);
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'slideState', current: idx, total: tot }, '*');
+  }
+});
+var _origGo = go;
+go = function(n) {
+  _origGo(n);
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'slideState', current: idx, total: tot }, '*');
+  }
+};
+</script>
+</body>
+</html>

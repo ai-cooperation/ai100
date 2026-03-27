@@ -1,0 +1,1950 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 5 — 整合實戰 × 成果發表</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════
+   Reading Glasses + Safe Zone + grow.google 風格
+   產投班 Day5 — 投影教學用 (3-10m 觀看距離)
+
+   Safe Zone 規則：
+   - padding-top: 3.5rem（清除 module-badge top:1rem）
+   - padding-bottom: 4.5rem（清除 controls bottom:1.2rem + progress）
+   - justify-content: flex-start + ::before/::after 偽元素置中
+   - 安全內容高度 ≤ 30rem (660px)
+
+   Reading Glasses 規格：
+   - 正文 22px, 最小 16px, CJK 行高 ≥ 1.7
+   - 字重 ≥ 400, 按鈕 ≥ 48px
+   - 內容最大寬度 720px
+   ═══════════════════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+  --orange:#EA580C; --orange-lt:#FFF7ED;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--white);}
+
+/* ── Slide Layout (Safe Zone) ── */
+.slides{width:100%;height:100%;position:relative;}
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-start;
+  padding:3.5rem 4rem 6rem;
+  display:none;
+  background:var(--white);
+  overflow-y:auto;
+}
+/* Removed ::before/::after centering — was pushing short content off screen */
+
+.slide.active{display:flex;}
+/* .slide.prev removed — using display:none/flex */
+.slide.cover{background:var(--navy);color:#fff;text-align:center;}
+.slide.cover h2{color:#fff;}
+.slide.section-title{background:var(--green);color:#fff;text-align:center;}
+.slide.section-title h2{color:#fff;}
+.slide.break-slide{background:var(--offwhite);text-align:center;}
+
+/* ── Typography (Reading Glasses) ── */
+h1{font-size:2.8rem;font-weight:900;line-height:1.3;}
+h2{font-size:1.8rem;font-weight:700;color:var(--g900);margin-bottom:.8rem;line-height:1.4;}
+h3{font-size:1.2rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.05rem;line-height:1.8;}
+.subtitle{font-size:1.05rem;color:var(--g600);font-weight:500;}
+small,.caption{font-size:max(16px,0.75rem);}
+.blue{color:var(--blue);}.green{color:var(--green);}.gold{color:var(--gold);}
+.red{color:var(--red);}.purple{color:var(--purple);}.dim{color:var(--g600);}.bold{font-weight:700;}
+
+/* ── Fragment animation (≤300ms) ── */
+.fragment{opacity:0;transform:translateY(8px);transition:opacity .25s,transform .25s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* ── Cards ── */
+.card-grid{display:flex;gap:1.2rem;flex-wrap:wrap;justify-content:center;margin-top:1rem;max-width:960px;}
+.card{background:var(--white);border:2px solid var(--g100);border-radius:16px;padding:1.4rem;min-width:140px;max-width:260px;flex:1;}
+.card:hover{border-color:var(--blue);}
+.card .icon{font-size:2rem;margin-bottom:.4rem;}
+.card h3{font-size:1.1rem;}
+.card p{font-size:.95rem;color:var(--g600);line-height:1.7;}
+
+/* ── Steps ── */
+.step-list{text-align:left;max-width:960px;width:100%;}
+.step{display:flex;gap:1rem;align-items:flex-start;padding:.6rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.05rem;}.step-content p{font-size:.95rem;color:var(--g600);margin-top:.1rem;}
+
+/* ── Code ── */
+.code-block{background:var(--g50);border:2px solid var(--g200);border-radius:12px;padding:1.2rem 1.5rem;text-align:left;max-width:960px;width:100%;font-family:'Fira Code',monospace;font-size:.9rem;line-height:1.8;margin:.6rem 0;color:var(--g900);white-space:pre-wrap;}
+
+/* ── Table ── */
+.compare-table{border-collapse:collapse;font-size:.95rem;margin-top:.6rem;width:100%;max-width:960px;}
+.compare-table th{background:var(--navy);color:#fff;padding:.5rem .8rem;text-align:left;font-size:.95rem;}
+.compare-table td{padding:.5rem .8rem;border-bottom:1px solid var(--g100);font-size:.95rem;}
+.compare-table tr:hover td{background:var(--g50);}
+
+/* ── Info boxes ── */
+.info-box{border-radius:12px;padding:1rem 1.5rem;max-width:960px;width:100%;text-align:left;margin-top:.6rem;}
+.info-box.analogy{background:var(--blue-lt);border-left:4px solid var(--blue);}
+.info-box.warning{background:var(--red-lt);border-left:4px solid var(--red);}
+.info-box.success{background:var(--green-lt);border-left:4px solid var(--green);}
+.info-box.tip{background:var(--gold-lt);border-left:4px solid var(--gold);}
+.info-box .label{font-weight:700;font-size:.95rem;margin-bottom:.3rem;}
+.info-box p{font-size:1rem;}
+
+/* ── Flow ── */
+.flow{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:center;margin:1rem 0;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.5rem .8rem;font-size:.95rem;font-weight:700;text-align:center;min-width:80px;}
+.flow-arrow{color:var(--blue);font-size:1.3rem;font-weight:900;}
+
+/* ── Two col ── */
+.two-col{display:flex;gap:1.5rem;width:100%;max-width:960px;text-align:left;}
+.two-col .col{flex:1;}
+
+/* ── Big number ── */
+.big-num{font-size:4rem;font-weight:900;color:var(--blue);line-height:1;}
+
+/* ── Banners ── */
+.exercise-banner{display:inline-block;background:var(--purple);color:#fff;padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:.95rem;margin-bottom:.6rem;}
+.demo-banner{display:inline-block;background:var(--blue);color:#fff;padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:.95rem;margin-bottom:.6rem;}
+.case-banner{display:inline-block;background:var(--orange);color:#fff;padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:.95rem;margin-bottom:.6rem;}
+
+/* ── Quote ── */
+.quote-box{max-width:960px;width:100%;background:var(--g50);border-left:5px solid var(--navy);border-radius:0 12px 12px 0;padding:1.2rem 1.5rem;margin:.6rem 0;text-align:left;}
+.quote-box .quote-text{font-size:1.2rem;font-weight:700;line-height:1.6;color:var(--navy);}
+.quote-box .quote-src{font-size:.9rem;color:var(--g600);margin-top:.4rem;}
+
+/* ── Mockup (simplified) ── */
+.mockup{max-width:960px;width:100%;border:2px solid var(--g200);border-radius:12px;overflow:hidden;margin:.6rem 0;text-align:left;background:var(--white);}
+.mockup-bar{background:var(--g100);padding:.4rem 1rem;font-size:.8rem;font-weight:700;color:var(--g600);border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:.4rem;}
+.mockup-bar::before{content:'● ● ●';font-size:.5rem;color:var(--g400);letter-spacing:3px;}
+.mockup-content{padding:1rem 1.2rem;}
+.chat-bubble{padding:.6rem 1rem;border-radius:12px;margin:.4rem 0;max-width:85%;font-size:.95rem;line-height:1.7;}
+.chat-bubble.user{background:var(--blue);color:#fff;margin-left:auto;border-bottom-right-radius:4px;}
+.chat-bubble.ai{background:var(--g50);color:var(--g900);margin-right:auto;border-bottom-left-radius:4px;}
+
+/* ── Copy button ── */
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:.3rem .8rem;font-size:.8rem;font-weight:700;cursor:pointer;opacity:.7;transition:opacity .2s;}
+.copy-btn:hover{opacity:1;}
+.copy-btn.copied{background:var(--green);}
+.code-block{position:relative;}
+
+/* ── Timer ── */
+.timer{display:inline-flex;align-items:center;gap:.5rem;background:var(--purple-lt);color:var(--purple);padding:.3rem 1rem;border-radius:100px;font-weight:700;font-size:1rem;margin-top:.5rem;}
+.timer::before{content:'⏱';}
+
+/* ── Push marker ── */
+[data-push]::before{content:'📲 推送';position:absolute;top:3.5rem;left:1rem;background:var(--green-lt);color:var(--green);padding:.2rem .6rem;border-radius:100px;font-size:.75rem;font-weight:700;z-index:10;}
+[data-push]{position:relative;}
+
+/* ── Typing animation ── */
+.typing .chat-bubble.ai{overflow:hidden;white-space:nowrap;border-right:3px solid var(--g400);animation:typing 2s steps(40) 0.5s forwards,blink .5s step-end infinite alternate;}
+@keyframes typing{from{max-width:0;opacity:1;}to{max-width:100%;opacity:1;}}
+@keyframes blink{50%{border-color:transparent;}}
+
+/* ── Cinematic dark slides ── */
+.slide.cinematic{background:var(--g900);color:#fff;}
+.slide.cinematic h2{color:#fff;}
+.slide.cinematic .subtitle{color:var(--g400);}
+
+/* ── Callout arrow ── */
+.callout{color:var(--red);font-weight:700;font-size:.95rem;margin-top:.4rem;}
+.callout::before{content:'👆 ';}
+
+/* ── Vote marker ── */
+.vote-slide{position:relative;}
+.vote-slide::after{content:'🗳️ 投票題';position:absolute;top:3.5rem;right:1rem;background:var(--gold-lt);color:#B45309;padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;z-index:10;}
+
+/* ── iPAS 術語大補帖 gold accent ── */
+.slide.glossary{border:4px solid var(--gold);background:linear-gradient(135deg,#FFFDF5 0%,#FFF 100%);}
+.glossary-badge{display:inline-block;background:linear-gradient(135deg,var(--gold),#E6960E);color:#fff;padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:.95rem;margin-bottom:.6rem;box-shadow:0 2px 8px rgba(249,171,0,.3);}
+.glossary-card{background:var(--white);border:2px solid var(--gold);border-radius:12px;padding:1rem;flex:1;min-width:180px;max-width:220px;text-align:left;}
+.glossary-card h3{color:var(--navy);font-size:1rem;margin-bottom:.2rem;}
+.glossary-card p{font-size:.85rem;color:var(--g600);line-height:1.6;margin-bottom:.2rem;}
+.glossary-card .ref{font-size:.75rem;color:var(--blue);font-weight:600;}
+
+/* ── Checklist ── */
+.checklist{text-align:left;max-width:960px;width:100%;list-style:none;padding:0;}
+.checklist li{padding:.4rem 0;font-size:1rem;border-bottom:1px solid var(--g100);}
+.checklist li::before{content:'☐ ';color:var(--blue);font-weight:700;}
+.checklist li:last-child{border:none;}
+
+/* ── Group timer ── */
+.group-timer{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-top:1rem;}
+.group-slot{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.8rem 1.2rem;min-width:120px;text-align:center;}
+.group-slot.active-group{border-color:var(--blue);background:var(--blue-lt);}
+.group-slot h3{font-size:1rem;margin-bottom:.2rem;}
+.group-slot .group-time{font-size:1.5rem;font-weight:900;color:var(--blue);}
+
+/* ── Achievement ── */
+.achievement{display:flex;align-items:center;gap:1rem;background:var(--green-lt);border:2px solid var(--green);border-radius:12px;padding:.8rem 1.2rem;max-width:960px;width:100%;margin:.3rem 0;text-align:left;}
+.achievement .ach-icon{font-size:2rem;flex-shrink:0;}
+.achievement .ach-text{flex:1;}
+.achievement .ach-text strong{font-size:1rem;}
+.achievement .ach-text p{font-size:.85rem;color:var(--g600);margin:0;}
+
+/* ── Section nav (left-bottom dropdown) ── */
+.section-nav{position:fixed;bottom:1.2rem;left:1.2rem;z-index:200;}
+.section-nav-btn{background:var(--white);border:2px solid var(--g200);border-radius:12px;padding:.4rem .8rem;font-size:.85rem;font-weight:600;color:var(--g600);cursor:pointer;display:flex;align-items:center;gap:.4rem;transition:all .15s;min-height:48px;}
+.section-nav-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-lt);}
+.section-nav-btn .nav-counter{font-weight:400;color:var(--g400);}
+.section-nav-menu{position:absolute;bottom:calc(100% + .5rem);left:0;background:var(--white);border:2px solid var(--g200);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:60vh;overflow-y:auto;min-width:280px;display:none;padding:.4rem;}
+.section-nav-menu.open{display:block;}
+.section-nav-item{display:flex;align-items:center;gap:.6rem;padding:.5rem .8rem;border-radius:8px;cursor:pointer;font-size:.85rem;color:var(--g600);transition:background .1s;}
+.section-nav-item:hover{background:var(--g50);}
+.section-nav-item.active{background:var(--blue-lt);color:var(--blue);font-weight:700;}
+.section-nav-item .nav-idx{width:24px;height:24px;border-radius:50%;background:var(--g100);color:var(--g600);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0;}
+.section-nav-item.active .nav-idx{background:var(--blue);color:#fff;}
+.section-nav-item .nav-title{flex:1;}
+
+/* ── Fixed overlays ── */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.8rem;}
+.controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:var(--white);color:var(--g800);font-size:1.2rem;cursor:pointer;transition:all .15s;}
+.controls button:hover{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
+.controls button:disabled{opacity:.25;cursor:default;}
+/* ── G key nav overlay (from ui-html-slides) ── */
+#navOverlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);overflow-y:auto;padding:2rem;}
+#navGrid{display:grid;grid-template-columns:repeat(6,1fr);gap:.8rem;max-width:960px;margin:0 auto;}
+.nav-card{cursor:pointer;border-radius:10px;overflow:hidden;border:2px solid var(--g200);transition:border-color .15s;background:var(--white);}
+.nav-card:hover{border-color:var(--gold);}
+.nav-card.current{border-color:var(--blue);}
+.nav-card-top{height:50px;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--g400);background:var(--offwhite);}
+.nav-card-top.dark{background:var(--navy);color:rgba(255,255,255,.4);}
+.nav-card-bottom{padding:.4rem;font-size:.65rem;}
+.nav-card-act{color:var(--blue);font-weight:700;margin-bottom:.1rem;}
+.nav-card-title{color:var(--g600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.module-badge{position:fixed;top:.8rem;right:1rem;z-index:100;background:var(--blue-lt);color:var(--blue);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;}
+.module-title{position:fixed;top:.8rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
+
+/* ── RWD ── */
+@media(max-width:768px){
+  html{font-size:16px;}
+  .slide{padding:3rem 1.2rem 5.5rem;}
+  h1{font-size:1.8rem;}h2{font-size:1.4rem;}p,li{font-size:.95rem;}
+  .card-grid{flex-direction:column;align-items:center;}
+  .card{max-width:100%;min-width:auto;}
+  .two-col{flex-direction:column;}
+  .mockup{max-width:100%;}
+  .controls button{width:40px;height:40px;}
+  .flow{gap:.3rem;}.flow-box{font-size:.85rem;padding:.4rem .6rem;min-width:65px;}
+  .glossary-card{max-width:100%;min-width:auto;}
+}
+@media(max-width:480px){
+  h1{font-size:1.5rem;}
+  .big-num{font-size:2.8rem;}
+  .flow-box{min-width:55px;font-size:.8rem;}
+}
+/* 2x2 grid standard */
+.grid-2x2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;max-width:800px;width:100%;margin:1rem auto;}
+.grid-2x2 .card{min-height:0;}
+</style>
+</head>
+<body>
+
+<div class="module-title">Day 5 — 整合實戰 × 成果發表</div>
+<div class="module-badge">產投班</div>
+<div class="slides">
+
+<!-- ═══════════════════════════════════════════════════
+     A. 暖身 + 五天回顧 (slides 0-9)  data-act="暖身"
+     ═══════════════════════════════════════════════════ -->
+
+<!-- 0: Cover -->
+<div class="slide cover" data-act="暖身">
+  <h1 style="font-size:2.4rem;margin-bottom:.4rem;">Day 5</h1>
+  <h2 style="font-size:1.8rem;color:rgba(255,255,255,.9);">整合實戰 × 成果發表</h2>
+  <p style="color:rgba(255,255,255,.6);font-size:1rem;margin-top:1rem;">AI 工具應用與自動化流程實戰班</p>
+  <p style="color:rgba(255,255,255,.4);font-size:.9rem;margin-top:.3rem;">09:00 — 17:00</p>
+</div>
+
+<!-- 1: 最後一天！ -->
+<div class="slide" data-act="暖身">
+  <div style="font-size:4rem;margin-bottom:.4rem;">🏔️</div>
+  <h2>最後一天 — 你已經走了很遠</h2>
+  <p class="subtitle">從第一天的「AI 是什麼」到今天的「改造工作」</p>
+  <div class="info-box success" style="margin-top:1rem;">
+    <p style="font-size:1.1rem;">今天的任務：<br><strong>把四天學的全部串起來，做出你的成果</strong></p>
+  </div>
+</div>
+
+<!-- 2: 五天旅程回顧 — 視覺 -->
+<div class="slide" data-act="暖身">
+  <h2>五天旅程 — 一步步升級</h2>
+  <div class="flow" style="flex-wrap:nowrap;gap:.3rem;">
+    <div class="flow-box fragment" style="background:var(--blue-lt);border-color:var(--blue);font-size:.85rem;">Day 1<br><small style="font-weight:400;">認識 AI</small></div>
+    <div class="flow-arrow fragment">→</div>
+    <div class="flow-box fragment" style="background:var(--green-lt);border-color:var(--green);font-size:.85rem;">Day 2<br><small style="font-weight:400;">對話技巧</small></div>
+    <div class="flow-arrow fragment">→</div>
+    <div class="flow-box fragment" style="background:var(--purple-lt);border-color:var(--purple);font-size:.85rem;">Day 3<br><small style="font-weight:400;">打造助手</small></div>
+    <div class="flow-arrow fragment">→</div>
+    <div class="flow-box fragment" style="background:var(--orange-lt);border-color:var(--orange);font-size:.85rem;">Day 4<br><small style="font-weight:400;">自動化</small></div>
+    <div class="flow-arrow fragment">→</div>
+    <div class="flow-box fragment" style="background:var(--gold-lt);border-color:var(--gold);font-size:.85rem;">Day 5<br><small style="font-weight:400;">整合發表</small></div>
+  </div>
+  <p class="fragment dim" style="margin-top:1rem;font-size:.95rem;">用工具 → 精準用 → 選工具 → 創工具 → <strong class="gold">改造工作</strong></p>
+</div>
+
+<!-- 3: Day1 回顧卡 -->
+<div class="slide" data-act="暖身">
+  <div style="font-size:2rem;">📘</div>
+  <h2>Day 1 回顧 — AI 素養 × 工具全體驗</h2>
+  <div class="card-grid">
+    <div class="card fragment" style="border-top:3px solid var(--blue);">
+      <h3>AI 是協作夥伴</h3>
+      <p>不是魔法、不是搜尋引擎</p>
+    </div>
+    <div class="card fragment" style="border-top:3px solid var(--red);">
+      <h3>安全與風險</h3>
+      <p>幻覺、隱私、五步驗證法</p>
+    </div>
+    <div class="card fragment" style="border-top:3px solid var(--green);">
+      <h3>三大工具 PK</h3>
+      <p>ChatGPT / Claude / Gemini</p>
+    </div>
+  </div>
+</div>
+
+<!-- 4: Day2 回顧卡 -->
+<div class="slide" data-act="暖身">
+  <div style="font-size:2rem;">✍️</div>
+  <h2>Day 2 回顧 — 提示詞系統化</h2>
+  <div class="card-grid">
+    <div class="card fragment" style="border-top:3px solid var(--blue);">
+      <h3>RTFC 四要素</h3>
+      <p>角色、任務、格式、脈絡</p>
+    </div>
+    <div class="card fragment" style="border-top:3px solid var(--green);">
+      <h3>鏈式拆解</h3>
+      <p>大任務拆成小步驟</p>
+    </div>
+    <div class="card fragment" style="border-top:3px solid var(--purple);">
+      <h3>多輪對話策略</h3>
+      <p>追問、引導、修正</p>
+    </div>
+  </div>
+</div>
+
+<!-- 5: Day3 回顧卡 -->
+<div class="slide" data-act="暖身">
+  <div style="font-size:2rem;">🤖</div>
+  <h2>Day 3 回顧 — AI 助手設計</h2>
+  <div class="card-grid">
+    <div class="card fragment" style="border-top:3px solid var(--purple);">
+      <h3>GPTs / Gems</h3>
+      <p>打造專屬 AI 助手</p>
+    </div>
+    <div class="card fragment" style="border-top:3px solid var(--blue);">
+      <h3>知識庫上傳</h3>
+      <p>讓 AI 懂你的業務</p>
+    </div>
+    <div class="card fragment" style="border-top:3px solid var(--orange);">
+      <h3>指令調校</h3>
+      <p>System Prompt 設計</p>
+    </div>
+  </div>
+</div>
+
+<!-- 6: Day4 回顧卡 -->
+<div class="slide" data-act="暖身">
+  <div style="font-size:2rem;">⚙️</div>
+  <h2>Day 4 回顧 — AI 自動化流程</h2>
+  <div class="card-grid">
+    <div class="card fragment" style="border-top:3px solid var(--green);">
+      <h3>Google Apps Script</h3>
+      <p>用對話讓 AI 寫自動化</p>
+    </div>
+    <div class="card fragment" style="border-top:3px solid var(--blue);">
+      <h3>表單 + AI 分析</h3>
+      <p>資料自動進、AI 自動判</p>
+    </div>
+    <div class="card fragment" style="border-top:3px solid var(--gold);">
+      <h3>觸發器設定</h3>
+      <p>定時執行 / 事件觸發</p>
+    </div>
+  </div>
+</div>
+
+<!-- 7: Day5 回顧卡 -->
+<div class="slide" data-act="暖身">
+  <div style="font-size:2rem;">🎯</div>
+  <h2>Day 5 — 把一切串起來</h2>
+  <div class="card-grid">
+    <div class="card fragment" style="border-top:3px solid var(--gold);">
+      <h3>迭代升級</h3>
+      <p>從能動到專業</p>
+    </div>
+    <div class="card fragment" style="border-top:3px solid var(--purple);">
+      <h3>專題衝刺</h3>
+      <p>完成你的方案</p>
+    </div>
+    <div class="card fragment" style="border-top:3px solid var(--green);">
+      <h3>成果發表</h3>
+      <p>展示 × 互評 × 頒獎</p>
+    </div>
+  </div>
+</div>
+
+<!-- 8: 今日行程 -->
+<div class="slide" data-act="暖身">
+  <h2>今日行程</h2>
+  <div class="step-list">
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--blue);">上</div>
+      <div class="step-content"><strong>09:00 — 從能動到專業</strong><p>高級版示範 → 30 分鐘改版挑戰 → 專題重啟</p></div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--g400);">午</div>
+      <div class="step-content"><strong>12:00 — 午休</strong><p>補充能量，下午要衝刺！</p></div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--purple);">下</div>
+      <div class="step-content"><strong>13:00 — 專題衝刺</strong><p>各組完成最終方案</p></div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--green);">發</div>
+      <div class="step-content"><strong>14:00 — 期末專題發表</strong><p>每組 10-12 分鐘上台</p></div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--gold);">結</div>
+      <div class="step-content"><strong>15:30 — 課程總結 + 回饋</strong><p>能力盤點 × 術語大補帖 × 展望未來</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- 9: 暖身互動 -->
+<div class="slide" data-act="暖身" data-push="warmup">
+  <div style="font-size:3rem;">🔥</div>
+  <h2>暖身：五天最大的收穫？</h2>
+  <p class="subtitle">用一句話，分享你在這五天學到最有用的一件事</p>
+  <div class="info-box tip" style="margin-top:1rem;">
+    <p style="font-size:1rem;">💡 送到訊息牆，待會我們一起看</p>
+  </div>
+  <div class="timer" data-minutes="2">2:00</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     B. 上午：迭代升級 + 專題重啟 (slides 10-34)
+     A. 講師示範高級版 (09:00-09:30)  data-act="高級版示範"
+     B. 改版挑戰 (09:30-10:00)        data-act="改版挑戰"
+     C. 展示 + 迭代 (10:00-10:30)     data-act="迭代思維"
+     D. 專題重啟 (10:30-12:00)        data-act="專題重啟"
+     ═══════════════════════════════════════════════════ -->
+
+<!-- 10: Section Title — 高級版示範 -->
+<div class="slide section-title" data-act="高級版示範">
+  <h1 style="color:#fff;font-size:2.2rem;">從「能動」到「專業」</h1>
+  <h2 style="font-size:1.4rem;color:rgba(255,255,255,.85);">09:00 — 講師示範高級版</h2>
+  <p style="color:rgba(255,255,255,.6);font-size:1rem;margin-top:.5rem;">昨天你做到了「能動」— 今天要做到「好用」</p>
+</div>
+
+<!-- 11: 昨天 vs 今天 -->
+<div class="slide" data-act="高級版示範">
+  <h2>Day 4 vs Day 5 — 心態升級</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <h3 style="color:var(--orange);">昨天 Day 4</h3>
+      <p style="font-size:.95rem;">目標：<strong>能動就好</strong><br>表單能收、Script 能跑<br>AI 有回應就算成功<br>「先求有，再求好」</p>
+    </div>
+    <div class="col">
+      <h3 style="color:var(--green);">今天 Day 5</h3>
+      <p style="font-size:.95rem;">目標：<strong>要更好、更專業</strong><br>問卷設計更貼心<br>自動回覆更個人化<br>「從草稿變成作品」</p>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <p style="font-size:.95rem;">💡 專業與業餘的差距，往往不在技術，而在<strong>細節與打磨</strong></p>
+  </div>
+</div>
+
+<!-- 12: Demo Banner - 高級版情境 -->
+<div class="slide" data-act="高級版示範">
+  <div class="demo-banner">🎬 講師 Demo</div>
+  <h2>高級版：客戶回饋自動處理系統</h2>
+  <div class="info-box analogy" style="margin-top:.8rem;">
+    <div class="label">情境</div>
+    <p>這是昨天大家做的「表單 + AI 分析」的<strong>精裝版</strong><br>
+    同樣的技術骨架，但加上了專業級的打磨</p>
+  </div>
+  <p  style="margin-top:.8rem;font-size:1.05rem;font-weight:700;color:var(--navy);">接下來看看「同一件事」做到極致是什麼樣子</p>
+</div>
+
+<!-- 13: 高級版全流程 -->
+<div class="slide" data-act="高級版示範">
+  <div class="demo-banner">完整流程</div>
+  <h2>五步驟全自動</h2>
+  <div class="flow" style="margin-top:1rem;">
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);">📋 精美表單<br><small style="font-weight:400;">專業問卷設計</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">📊 自動分類<br><small style="font-weight:400;">Sheet 即時整理</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--purple-lt);border-color:var(--purple);">🤖 情緒分析<br><small style="font-weight:400;">AI 判斷語氣</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--orange-lt);border-color:var(--orange);">📬 智慧回覆<br><small style="font-weight:400;">依情緒客製</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--gold);border-color:var(--gold);color:#fff;">📈 儀表板</div>
+  </div>
+</div>
+
+<!-- 14: 高級版 - 表單設計 -->
+<div class="slide" data-act="高級版示範">
+  <div class="demo-banner">亮點 1 — 問卷設計</div>
+  <h2>精心設計的 Google 表單</h2>
+  <div class="two-col" style="margin-top:.8rem;">
+    <div class="col">
+      <h3 class="red">❌ 昨天的版本</h3>
+      <p style="font-size:.9rem;">
+        Q1: 滿意嗎？（是/否）<br>
+        Q2: 建議？（自由填寫）<br>
+        <span class="dim" style="font-size:.85rem;">→ 答案太粗，AI 分析不出什麼</span>
+      </p>
+    </div>
+    <div class="col">
+      <h3 class="green">✅ 高級版</h3>
+      <p style="font-size:.9rem;">
+        Q1: 整體滿意度（1-5 星）<br>
+        Q2: 最滿意的環節？（多選）<br>
+        Q3: 最需改善的？（多選）<br>
+        Q4: 一句話建議（限 100 字）<br>
+        <span style="color:var(--green);font-size:.85rem;">→ 結構化數據 + AI 好分析</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- 15: 高級版 - AI 情緒分析 -->
+<div class="slide" data-act="高級版示範">
+  <div class="demo-banner">亮點 2 — AI 情緒分析</div>
+  <h2>不只分類，還判斷情緒</h2>
+  <div class="code-block" style="font-size:.8rem;">{
+  "分類": "負面回饋",
+  "情緒": "失望但理性",
+  "緊急度": 3,
+  "摘要": "對服務速度不滿，但肯定產品品質",
+  "建議回覆策略": "感謝 + 承諾改善 + 補償方案",
+  "負責人": "客服主管"
+}</div>
+  <div class="info-box analogy" style="margin-top:.6rem;">
+    <p style="font-size:.9rem;">「失望但理性」和「憤怒要投訴」需要完全不同的回覆語氣<br>— 這就是 AI 情緒分析的價值</p>
+  </div>
+</div>
+
+<!-- 16: 高級版 - 智慧回覆 -->
+<div class="slide" data-act="高級版示範">
+  <div class="demo-banner">亮點 3 — 智慧自動回覆</div>
+  <h2>依情緒自動客製回信</h2>
+  <div class="step-list" style="margin-top:.8rem;">
+    <div class="step">
+      <div class="step-num" style="background:var(--green);">😊</div>
+      <div class="step-content"><strong>正面回饋</strong><p>感謝信 + 邀請分享好評 + 優惠券</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--gold);">😐</div>
+      <div class="step-content"><strong>中性回饋</strong><p>感謝 + 追問具體改善方向</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--red);">😤</div>
+      <div class="step-content"><strong>負面回饋</strong><p>致歉 + 升級通知主管 + 48 小時內專人跟進</p></div>
+    </div>
+  </div>
+  <p class="fragment callout">每封回覆都用客戶的名字、引用具體內容 — 不是罐頭信！</p>
+</div>
+
+<!-- 17: 高級版 - 儀表板 -->
+<div class="slide" data-act="高級版示範">
+  <div class="demo-banner">亮點 4 — 自動儀表板</div>
+  <h2>即時數據摘要</h2>
+  <div class="mockup" style="margin-top:.8rem;">
+    <div class="mockup-bar">Google 試算表 — 回饋儀表板</div>
+    <div class="mockup-content" style="font-size:.8rem;line-height:1.6;">
+      <table style="width:100%;border-collapse:collapse;">
+        <tr style="background:var(--g50);font-weight:700;"><td style="padding:.3rem;">指標</td><td>本週</td><td>趨勢</td></tr>
+        <tr><td style="padding:.3rem;font-size:.8rem;">回饋總數</td><td style="font-size:.8rem;font-weight:700;">47 筆</td><td style="font-size:.8rem;color:var(--green);">↑ 12%</td></tr>
+        <tr><td style="padding:.3rem;font-size:.8rem;">平均滿意度</td><td style="font-size:.8rem;font-weight:700;">4.2 / 5</td><td style="font-size:.8rem;color:var(--green);">↑ 0.3</td></tr>
+        <tr><td style="padding:.3rem;font-size:.8rem;">負面回饋比例</td><td style="font-size:.8rem;font-weight:700;">8.5%</td><td style="font-size:.8rem;color:var(--green);">↓ 2%</td></tr>
+        <tr><td style="padding:.3rem;font-size:.8rem;">最常提到</td><td style="font-size:.8rem;" colspan="2">「出貨速度」「包裝品質」「客服態度」</td></tr>
+      </table>
+    </div>
+  </div>
+  <p  style="margin-top:.6rem;font-size:.95rem;color:var(--green);font-weight:700;">老闆每天早上打開就看到 — 不用任何人整理</p>
+</div>
+
+<!-- 18: 高級版 vs 昨天 -->
+<div class="slide" data-act="高級版示範">
+  <h2>同樣的技術，不同的精緻度</h2>
+  <table class="compare-table" style="margin-top:.8rem;">
+    <tr><th>面向</th><th>Day 4 版本</th><th>高級版</th></tr>
+    <tr ><td>問卷</td><td>3 題基本款</td><td style="color:var(--green);font-weight:700;">結構化 + 引導式設計</td></tr>
+    <tr ><td>AI 分析</td><td>正面/負面</td><td style="color:var(--green);font-weight:700;">情緒光譜 + 緊急度 + 策略建議</td></tr>
+    <tr ><td>回覆</td><td>統一通知</td><td style="color:var(--green);font-weight:700;">依情緒客製 + 引用具體內容</td></tr>
+    <tr ><td>報表</td><td>原始數據</td><td style="color:var(--green);font-weight:700;">自動統計 + 趨勢 + 關鍵字</td></tr>
+    <tr ><td>技術難度</td><td colspan="2" style="text-align:center;font-weight:700;">幾乎一樣！差在提示詞品質和設計思維</td></tr>
+  </table>
+</div>
+
+<!-- 19: Section Title — 改版挑戰 -->
+<div class="slide section-title" data-act="改版挑戰">
+  <h1 style="color:#fff;font-size:2.2rem;">30 分鐘改版挑戰</h1>
+  <h2 style="font-size:1.4rem;color:rgba(255,255,255,.85);">09:30 — 升級你昨天的作品</h2>
+  <p style="color:rgba(255,255,255,.6);font-size:1rem;margin-top:.5rem;">從「能動」進化到「好用」</p>
+</div>
+
+<!-- 20: 改版目標 -->
+<div class="slide" data-act="改版挑戰">
+  <div class="exercise-banner">改版挑戰</div>
+  <h2>升級你的 Day 4 作品</h2>
+  <p class="subtitle">選擇至少 2 個方向改進</p>
+  <div class="card-grid" style="margin-top:.8rem;">
+    <div class="card" style="border-top:3px solid var(--blue);text-align:center;">
+      <div class="icon">📋</div>
+      <h3>問卷升級</h3>
+      <p>更好的問題設計<br>更有結構的選項</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--purple);text-align:center;">
+      <div class="icon">✉️</div>
+      <h3>回覆升級</h3>
+      <p>更個人化的文案<br>依情境客製內容</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--green);text-align:center;">
+      <div class="icon">📊</div>
+      <h3>分析升級</h3>
+      <p>不只收集，還要分析<br>加上統計和趨勢</p>
+    </div>
+  </div>
+</div>
+
+<!-- 21: 改版提示 -->
+<div class="slide" data-act="改版挑戰">
+  <div class="exercise-banner">改版秘訣</div>
+  <h2>用 AI 幫你升級</h2>
+  <div class="mockup" style="margin-top:.8rem;">
+    <div class="mockup-bar">你最愛的 AI 工具</div>
+    <div class="mockup-content">
+      <div class="chat-bubble user" style="font-size:.85rem;">我昨天做了一個 Google 表單收集客戶回饋，目前只有 3 題基本問題。請幫我重新設計問卷，要能收集到更有分析價值的數據，並且讓填寫者願意認真填。</div>
+      <div class="chat-bubble ai" style="font-size:.85rem;">好的！以下是升級版問卷設計...<br>關鍵改進：引導式問題、限定字數、多選 + 簡答搭配</div>
+    </div>
+  </div>
+  <div class="info-box tip">
+    <p style="font-size:.95rem;">💡 <strong>Day2 的提示詞技巧</strong>用在這裡：告訴 AI 你的現狀 + 你要達到的目標</p>
+  </div>
+</div>
+
+<!-- 22: 倒數計時 -->
+<div class="slide" data-act="改版挑戰">
+  <div style="font-size:3rem;">🔨</div>
+  <h2>改版進行中！</h2>
+  <p class="subtitle">拿出昨天的作品，開始打磨</p>
+  <div class="info-box tip" style="margin-top:1rem;">
+    <div class="label">目標</div>
+    <p style="font-size:.95rem;">
+      ✅ 至少改 2 個地方<br>
+      ✅ 截圖留存「改版前」的樣子（等等要比較）<br>
+      ✅ 30 分鐘後展示你的 Before / After
+    </p>
+  </div>
+  <div class="timer" data-minutes="30">30:00</div>
+</div>
+
+<!-- 23: Section Title — 迭代思維 -->
+<div class="slide section-title" data-act="迭代思維">
+  <h1 style="color:#fff;font-size:2.2rem;">展示 × 迭代思維</h1>
+  <h2 style="font-size:1.4rem;color:rgba(255,255,255,.85);">10:00 — Before / After 大比拼</h2>
+</div>
+
+<!-- 24: Before/After 展示 -->
+<div class="slide" data-act="迭代思維" data-push="before-after">
+  <div style="font-size:3rem;">🔄</div>
+  <h2>Before / After — 誰的改版幅度最大？</h2>
+  <p class="subtitle">每組 2 分鐘：展示昨天 vs 今天的差異</p>
+  <div class="step-list" style="margin-top:.8rem;">
+    <div class="step">
+      <div class="step-num" style="background:var(--orange);">前</div>
+      <div class="step-content"><strong>Before</strong><p>昨天的版本長什麼樣？</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--green);">後</div>
+      <div class="step-content"><strong>After</strong><p>改了什麼？為什麼這樣改？</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--blue);">學</div>
+      <div class="step-content"><strong>學到什麼</strong><p>改版過程中最大的發現是？</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- 25: 投票 -->
+<div class="slide vote-slide" data-act="迭代思維" data-push="vote-upgrade">
+  <h2>投票：最佳改版獎！</h2>
+  <p class="subtitle">哪一組的進步最讓你驚豔？</p>
+  <div class="info-box tip" style="margin-top:1rem;">
+    <p style="font-size:1rem;">投票送到訊息牆：「我覺得___組的改版最厲害，因為___」</p>
+  </div>
+</div>
+
+<!-- 26: 迭代核心概念 -->
+<div class="slide" data-act="迭代思維">
+  <h2>核心概念：迭代</h2>
+  <div class="quote-box" style="margin-top:.8rem;">
+    <div class="quote-text">「第一版永遠是草稿。<br>好的系統是改出來的，不是一次做對的。」</div>
+  </div>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card" style="border-top:3px solid var(--blue);text-align:center;">
+      <h3>Day 1-2</h3>
+      <p>Prompt 也是迭代的<br>第一次寫的一定要改</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--purple);text-align:center;">
+      <h3>Day 3</h3>
+      <p>AI 助手需要調校<br>上線後持續優化</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--orange);text-align:center;">
+      <h3>Day 4-5</h3>
+      <p>自動化流程<br>從能動到好用</p>
+    </div>
+  </div>
+</div>
+
+<!-- 27: 閃卡 — 過擬合/欠擬合（迭代語境） -->
+<div class="slide" data-act="迭代思維">
+  <div style="background:var(--blue-lt);padding:.3rem 1rem;border-radius:100px;font-size:.85rem;font-weight:700;color:var(--blue);display:inline-block;margin-bottom:.6rem;">📘 iPAS 術語閃卡</div>
+  <h2 style="color:var(--blue);">過擬合 vs 欠擬合</h2>
+  <div class="two-col" style="margin-top:.8rem;">
+    <div class="col">
+      <h3 style="color:var(--red);">過擬合 Overfitting</h3>
+      <p style="font-size:.95rem;">AI 在測試資料很準<br>但實際使用不行</p>
+      <div class="info-box analogy" style="margin-top:.5rem;">
+        <p style="font-size:.9rem;">🎯 就像<strong>死背考古題</strong><br>考試分數很高，但換個說法就不會</p>
+      </div>
+    </div>
+    <div class="col">
+      <h3 style="color:var(--orange);">欠擬合 Underfitting</h3>
+      <p style="font-size:.95rem;">AI 什麼都學不好<br>測試和實際都差</p>
+      <div class="info-box analogy" style="margin-top:.5rem;">
+        <p style="font-size:.9rem;">📖 就像<strong>上課都在睡覺</strong><br>考古題也不會，新題更不會</p>
+      </div>
+    </div>
+  </div>
+  <div class="info-box warning" style="margin-top:.5rem;">
+    <p style="font-size:.9rem;"><strong>跟迭代的關係：</strong>Day4 做的東西在課堂上能動 = 測試集表現好。<br>但拿到真實工作環境可能不行 = 過擬合！所以才需要迭代改進。</p>
+  </div>
+</div>
+
+<!-- 28: Section Title — 專題重啟 -->
+<div class="slide section-title" data-act="專題重啟">
+  <h1 style="color:#fff;font-size:2.2rem;">打掉重做</h1>
+  <h2 style="font-size:1.4rem;color:rgba(255,255,255,.85);">10:30 — 分組專題重啟</h2>
+  <p style="color:rgba(255,255,255,.6);font-size:1rem;margin-top:.5rem;">推翻原計劃是正常的 — 專業人士天天在做這件事</p>
+</div>
+
+<!-- 29: 心態轉換 -->
+<div class="slide" data-act="專題重啟">
+  <div style="font-size:3rem;">🧠</div>
+  <h2>心態轉換的關鍵時刻</h2>
+  <div class="quote-box" style="margin-top:.8rem;">
+    <div class="quote-text">「有了四天的經驗，你現在知道什麼是可行的、什麼是困難的。」</div>
+  </div>
+  <div class="info-box success" style="margin-top:.8rem;">
+    <p style="font-size:1rem;">
+      <strong>你比四天前強了 100 倍：</strong><br>
+      ✅ 知道 AI 擅長什麼、不擅長什麼<br>
+      ✅ 知道自動化的可能性和限制<br>
+      ✅ 知道從 0 到 1 需要多少時間<br>
+      ✅ 知道「能動」和「好用」的差距在哪
+    </p>
+  </div>
+</div>
+
+<!-- 30: 推翻是正常的 -->
+<div class="slide cinematic" data-act="專題重啟">
+  <div class="big-num" style="color:var(--gold);">v2</div>
+  <h2>推翻原計劃 = 進步的證據</h2>
+  <p style="color:var(--g400);font-size:1rem;margin-top:.6rem;">
+    軟體工程師平均每個專案重寫 <strong style="color:#fff;">2-3 次</strong><br>
+    創業者平均 pivot <strong style="color:#fff;">3-5 次</strong> 才找到方向<br>
+    你的第一版<strong style="color:var(--gold);">本來就該被推翻</strong>
+  </p>
+</div>
+
+<!-- 31: 重啟規則 -->
+<div class="slide" data-act="專題重啟">
+  <div class="exercise-banner">專題重啟</div>
+  <h2>分組重新規劃專題</h2>
+  <div class="step-list" style="margin-top:.8rem;">
+    <div class="step">
+      <div class="step-num" style="background:var(--red);">1</div>
+      <div class="step-content"><strong>回顧 Day4 的原始計劃</strong><p>什麼做到了？什麼卡住了？什麼根本想錯了？</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--blue);">2</div>
+      <div class="step-content"><strong>重新定義問題</strong><p>用這四天學到的眼光，重新看你要解決的痛點</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--green);">3</div>
+      <div class="step-content"><strong>設計升級版架構</strong><p>用所有學過的技術：提示詞 + AI 助手 + 自動化</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--purple);">4</div>
+      <div class="step-content"><strong>分工執行</strong><p>下午 13:00 前要能 Demo！</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- 32: 專題設計模板 -->
+<div class="slide" data-act="專題重啟">
+  <h2>專題設計模板</h2>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <div class="label">每組填寫</div>
+    <p style="font-size:.95rem;">
+      <strong>1. 痛點（重新定義）</strong>：經過四天，你對這個問題的理解有什麼改變？<br>
+      <strong>2. 方案架構</strong>：用了哪些 Day1-4 的技術？怎麼串起來？<br>
+      <strong>3. 比昨天進步在哪</strong>：具體列出 3 個升級點<br>
+      <strong>4. Demo 計劃</strong>：下午要展示什麼？誰負責什麼？<br>
+      <strong>5. 預期成果</strong>：能省多少時間？解決什麼問題？
+    </p>
+  </div>
+</div>
+
+<!-- 33: 講師巡場（上午） -->
+<div class="slide" data-act="專題重啟">
+  <div style="font-size:3rem;">🚶‍♂️</div>
+  <h2>各組重啟中 — 講師 + AI 助教巡場</h2>
+  <p class="subtitle">有問題隨時舉手！</p>
+  <div class="info-box tip" style="margin-top:1rem;">
+    <div class="label">講師巡場重點</div>
+    <p style="font-size:.95rem;">
+      ✅ 確認每組有明確的「升級方向」<br>
+      ✅ 幫卡住的組快速解法<br>
+      ✅ 提醒：不要貪多，做好一件事比三件半成品好
+    </p>
+  </div>
+  <div class="timer" data-minutes="60">60:00</div>
+</div>
+
+<!-- 34: 午休 -->
+<div class="slide break-slide" data-act="專題重啟">
+  <div style="font-size:4rem;">🍱</div>
+  <h2 style="color:var(--g800);">午休時間</h2>
+  <p class="subtitle">12:00 — 13:00</p>
+  <p style="margin-top:1rem;font-size:1rem;">下午要衝刺專題 + 上台發表<br>好好休息，補充能量！</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     C. 專題衝刺 (slides 35-44)  data-act="專題衝刺"
+     ═══════════════════════════════════════════════════ -->
+
+<!-- 35: Section Title -->
+<div class="slide section-title" data-act="專題衝刺">
+  <h1 style="color:#fff;font-size:2.2rem;">專題衝刺</h1>
+  <h2 style="font-size:1.4rem;color:rgba(255,255,255,.85);">13:00 — 14:00</h2>
+  <p style="color:rgba(255,255,255,.6);font-size:1rem;margin-top:.5rem;">各組完成最終方案，準備上台！</p>
+</div>
+
+<!-- 36: 專題完成 Checklist -->
+<div class="slide" data-act="專題衝刺">
+  <h2>專題完成 Checklist</h2>
+  <ul class="checklist" style="margin-top:.8rem;">
+    <li ><strong>問題定義</strong> — 你要解決什麼工作痛點？（2 句話說清楚）</li>
+    <li ><strong>方案設計</strong> — 用了哪些 AI 工具 + 怎麼串接？</li>
+    <li ><strong>Demo 準備</strong> — 可以現場展示的東西（畫面截圖也 OK）</li>
+    <li ><strong>成果數據</strong> — 省了多少時間？提升多少效率？</li>
+    <li ><strong>發表分工</strong> — 誰講什麼？每人至少說一段</li>
+  </ul>
+</div>
+
+<!-- 37: 發表模板 -->
+<div class="slide" data-act="專題衝刺">
+  <h2>發表模板：4 段式</h2>
+  <div class="step-list" style="margin-top:.8rem;">
+    <div class="step">
+      <div class="step-num" style="background:var(--red);">痛</div>
+      <div class="step-content"><strong>問題痛點</strong>（2 分鐘）<p>我們每天/週在___上花___時間，經常___出錯</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--blue);">方</div>
+      <div class="step-content"><strong>解決方案</strong>（3 分鐘）<p>我們用了___工具，設計了___流程</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--green);">做</div>
+      <div class="step-content"><strong>Demo 展示</strong>（4 分鐘）<p>現場操作 / 畫面截圖走一遍</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--gold);">果</div>
+      <div class="step-content"><strong>成果與反思</strong>（2 分鐘）<p>省了多少時間？學到什麼？未來怎麼改進？</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- 38: 評分標準 -->
+<div class="slide" data-act="專題衝刺">
+  <h2>評分標準</h2>
+  <table class="compare-table" style="margin-top:.8rem;">
+    <tr><th>面向</th><th>說明</th><th>比重</th></tr>
+    <tr ><td>🎯 問題價值</td><td>痛點真實、有改善空間</td><td>20%</td></tr>
+    <tr ><td>🤖 AI 運用</td><td>合理使用 AI 工具，不是為用而用</td><td>25%</td></tr>
+    <tr ><td>⚙️ 整合程度</td><td>有串接自動化，不是單純對話</td><td>25%</td></tr>
+    <tr ><td>🎤 表達清晰</td><td>聽眾能快速理解方案</td><td>15%</td></tr>
+    <tr ><td>🌟 創意加分</td><td>有意想不到的巧思</td><td>15%</td></tr>
+  </table>
+</div>
+
+<!-- 39: 衝刺提示 -->
+<div class="slide" data-act="專題衝刺">
+  <h2>衝刺小技巧</h2>
+  <div class="card-grid" style="margin-top:.8rem;">
+    <div class="card" style="border-top:3px solid var(--blue);text-align:center;">
+      <div class="icon">🎯</div>
+      <h3>聚焦核心</h3>
+      <p>做好一件事<br>比做三件半成品好</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--green);text-align:center;">
+      <div class="icon">📸</div>
+      <h3>截圖備份</h3>
+      <p>Demo 萬一掛掉<br>截圖是你的救命稻草</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--purple);text-align:center;">
+      <div class="icon">🗣️</div>
+      <h3>排練一次</h3>
+      <p>計時走一遍<br>確保不超時</p>
+    </div>
+  </div>
+</div>
+
+<!-- 40: 講師巡場 -->
+<div class="slide" data-act="專題衝刺">
+  <div style="font-size:3rem;">🚶‍♂️</div>
+  <h2>各組衝刺中 — 講師 + AI 助教巡場</h2>
+  <p class="subtitle">有問題隨時舉手！</p>
+  <div class="info-box tip" style="margin-top:1rem;">
+    <div class="label">講師巡場重點</div>
+    <p style="font-size:.95rem;">
+      ✅ 確認每組都有可 Demo 的東西<br>
+      ✅ 幫卡住的組快速解法<br>
+      ✅ 提醒時間（每 15 分鐘倒數）
+    </p>
+  </div>
+  <div class="timer" data-minutes="45">45:00</div>
+</div>
+
+<!-- 41: 倒數 30 分鐘 -->
+<div class="slide" data-act="專題衝刺">
+  <div class="big-num" style="color:var(--orange);">30</div>
+  <h2>還有 30 分鐘</h2>
+  <p class="subtitle">如果 Demo 還沒準備好 → 先用截圖</p>
+</div>
+
+<!-- 42: 倒數 15 分鐘 -->
+<div class="slide" data-act="專題衝刺">
+  <div class="big-num" style="color:var(--red);">15</div>
+  <h2>還有 15 分鐘</h2>
+  <p class="subtitle">開始排練！確認誰講什麼</p>
+</div>
+
+<!-- 43: 倒數 5 分鐘 -->
+<div class="slide" data-act="專題衝刺">
+  <div class="big-num" style="color:var(--red);">5</div>
+  <h2>最後 5 分鐘</h2>
+  <p class="subtitle">收尾！準備上台</p>
+</div>
+
+<!-- 44: 衝刺結束 -->
+<div class="slide" data-act="專題衝刺">
+  <div style="font-size:3rem;">✅</div>
+  <h2>衝刺結束！</h2>
+  <p style="font-size:1.1rem;margin-top:.6rem;">接下來 — 各組上台發表</p>
+  <p class="dim" style="margin-top:.4rem;">每組 10-12 分鐘（含 Q&A）</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     D. 期末專題發表 (slides 45-64)  data-act="專題發表"
+     ═══════════════════════════════════════════════════ -->
+
+<!-- 45: Section Title -->
+<div class="slide section-title" data-act="專題發表">
+  <h1 style="color:#fff;font-size:2.2rem;">期末專題發表</h1>
+  <h2 style="font-size:1.4rem;color:rgba(255,255,255,.85);">14:00 — 15:20</h2>
+  <p style="color:rgba(255,255,255,.6);font-size:1rem;margin-top:.5rem;">每組 10-12 分鐘 × 5 組</p>
+</div>
+
+<!-- 46: 發表流程說明 -->
+<div class="slide" data-act="專題發表">
+  <h2>發表流程</h2>
+  <div class="step-list" style="margin-top:.8rem;">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>上台發表</strong>（8-10 分鐘）<p>痛點 → 方案 → Demo → 成果</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>Q&A</strong>（2 分鐘）<p>講師 + 同學提問</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>全場投票</strong>（1 分鐘）<p>每組結束後，大家投「最喜歡的亮點」</p></div>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:.6rem;">
+    <p style="font-size:.95rem;">💡 觀眾任務：記下每組最讓你驚豔的一個點，待會投票用</p>
+  </div>
+</div>
+
+<!-- 47: 第 1 組 -->
+<div class="slide" data-act="專題發表">
+  <div class="big-num" style="color:var(--blue);">第 1 組</div>
+  <h2 style="margin-top:.4rem;">上台發表</h2>
+  <div class="group-timer" style="margin-top:1rem;">
+    <div class="group-slot active-group"><h3>發表</h3><div class="group-time">10:00</div></div>
+    <div class="group-slot"><h3>Q&A</h3><div class="group-time">2:00</div></div>
+  </div>
+  <div class="timer" data-minutes="12">12:00</div>
+</div>
+
+<!-- 48: 第 1 組投票 -->
+<div class="slide vote-slide" data-act="專題發表" data-push="vote-group1">
+  <h2>第 1 組 — 最喜歡的亮點？</h2>
+  <p class="subtitle">投票送到訊息牆！</p>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <p style="font-size:1rem;">用一句話寫下：第 1 組最讓你驚豔的是___</p>
+  </div>
+</div>
+
+<!-- 49: 第 2 組 -->
+<div class="slide" data-act="專題發表">
+  <div class="big-num" style="color:var(--green);">第 2 組</div>
+  <h2 style="margin-top:.4rem;">上台發表</h2>
+  <div class="group-timer" style="margin-top:1rem;">
+    <div class="group-slot active-group"><h3>發表</h3><div class="group-time">10:00</div></div>
+    <div class="group-slot"><h3>Q&A</h3><div class="group-time">2:00</div></div>
+  </div>
+  <div class="timer" data-minutes="12">12:00</div>
+</div>
+
+<!-- 50: 第 2 組投票 -->
+<div class="slide vote-slide" data-act="專題發表" data-push="vote-group2">
+  <h2>第 2 組 — 最喜歡的亮點？</h2>
+  <p class="subtitle">投票送到訊息牆！</p>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <p style="font-size:1rem;">用一句話寫下：第 2 組最讓你驚豔的是___</p>
+  </div>
+</div>
+
+<!-- 51: 第 3 組 -->
+<div class="slide" data-act="專題發表">
+  <div class="big-num" style="color:var(--purple);">第 3 組</div>
+  <h2 style="margin-top:.4rem;">上台發表</h2>
+  <div class="group-timer" style="margin-top:1rem;">
+    <div class="group-slot active-group"><h3>發表</h3><div class="group-time">10:00</div></div>
+    <div class="group-slot"><h3>Q&A</h3><div class="group-time">2:00</div></div>
+  </div>
+  <div class="timer" data-minutes="12">12:00</div>
+</div>
+
+<!-- 52: 第 3 組投票 -->
+<div class="slide vote-slide" data-act="專題發表" data-push="vote-group3">
+  <h2>第 3 組 — 最喜歡的亮點？</h2>
+  <p class="subtitle">投票送到訊息牆！</p>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <p style="font-size:1rem;">用一句話寫下：第 3 組最讓你驚豔的是___</p>
+  </div>
+</div>
+
+<!-- 53: 第 4 組 -->
+<div class="slide" data-act="專題發表">
+  <div class="big-num" style="color:var(--orange);">第 4 組</div>
+  <h2 style="margin-top:.4rem;">上台發表</h2>
+  <div class="group-timer" style="margin-top:1rem;">
+    <div class="group-slot active-group"><h3>發表</h3><div class="group-time">10:00</div></div>
+    <div class="group-slot"><h3>Q&A</h3><div class="group-time">2:00</div></div>
+  </div>
+  <div class="timer" data-minutes="12">12:00</div>
+</div>
+
+<!-- 54: 第 4 組投票 -->
+<div class="slide vote-slide" data-act="專題發表" data-push="vote-group4">
+  <h2>第 4 組 — 最喜歡的亮點？</h2>
+  <p class="subtitle">投票送到訊息牆！</p>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <p style="font-size:1rem;">用一句話寫下：第 4 組最讓你驚豔的是___</p>
+  </div>
+</div>
+
+<!-- 55: 第 5 組 -->
+<div class="slide" data-act="專題發表">
+  <div class="big-num" style="color:var(--gold);">第 5 組</div>
+  <h2 style="margin-top:.4rem;">上台發表</h2>
+  <div class="group-timer" style="margin-top:1rem;">
+    <div class="group-slot active-group"><h3>發表</h3><div class="group-time">10:00</div></div>
+    <div class="group-slot"><h3>Q&A</h3><div class="group-time">2:00</div></div>
+  </div>
+  <div class="timer" data-minutes="12">12:00</div>
+</div>
+
+<!-- 56: 第 5 組投票 -->
+<div class="slide vote-slide" data-act="專題發表" data-push="vote-group5">
+  <h2>第 5 組 — 最喜歡的亮點？</h2>
+  <p class="subtitle">投票送到訊息牆！</p>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <p style="font-size:1rem;">用一句話寫下：第 5 組最讓你驚豔的是___</p>
+  </div>
+</div>
+
+<!-- 57: 講師點評 -->
+<div class="slide" data-act="專題發表">
+  <div style="font-size:3rem;">👨‍🏫</div>
+  <h2>講師點評</h2>
+  <div class="step-list" style="margin-top:.8rem;">
+    <div class="step">
+      <div class="step-num" style="background:var(--green);">讚</div>
+      <div class="step-content"><strong>每組的亮點</strong><p>具體指出做得好的地方</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--blue);">進</div>
+      <div class="step-content"><strong>可以更好的方向</strong><p>給出實際可操作的建議</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--gold);">共</div>
+      <div class="step-content"><strong>共同觀察</strong><p>大家都展現的進步 + 常見誤區</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- 58: 全場最佳 -->
+<div class="slide" data-act="專題發表" data-push="best-project">
+  <div style="font-size:4rem;">🏆</div>
+  <h2>全場票選結果</h2>
+  <p class="subtitle">恭喜所有團隊！每一組都交出了精彩的成果</p>
+  <div class="info-box success" style="margin-top:1rem;">
+    <p style="font-size:1.1rem;">🏆 <strong>最佳整合獎</strong>：___組<br>
+    🌟 <strong>最佳創意獎</strong>：___組<br>
+    💪 <strong>最佳進步獎</strong>：___組</p>
+  </div>
+</div>
+
+<!-- 59: 休息 -->
+<div class="slide break-slide" data-act="專題發表">
+  <div style="font-size:3rem;">☕</div>
+  <h2 style="color:var(--g800);">短暫休息</h2>
+  <p class="subtitle">10 分鐘</p>
+  <p style="margin-top:.6rem;font-size:.95rem;">接下來 — 課程總結 + 未來方向</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     E. 課程總結 + 回饋 (slides 60-94)  data-act="總結"
+     ═══════════════════════════════════════════════════ -->
+
+<!-- 60: Section Title -->
+<div class="slide section-title" data-act="總結">
+  <h1 style="color:#fff;font-size:2.2rem;">課程總結</h1>
+  <h2 style="font-size:1.4rem;color:rgba(255,255,255,.85);">五天能力盤點 × 未來方向</h2>
+</div>
+
+<!-- 61: 五天能力盤點 -->
+<div class="slide" data-act="總結">
+  <h2>🏆 五天，你解鎖了這些能力</h2>
+  <div style="max-width:960px;width:100%;margin-top:.6rem;">
+    <div class="achievement">
+      <div class="ach-icon">📘</div>
+      <div class="ach-text"><strong>AI 素養</strong><p>理解 AI 能力邊界、識別風險、五步驗證</p></div>
+    </div>
+    <div class="achievement">
+      <div class="ach-icon">✍️</div>
+      <div class="ach-text"><strong>提示詞系統化</strong><p>RTFC 四要素、鏈式拆解、多輪修正</p></div>
+    </div>
+    <div class="achievement">
+      <div class="ach-icon">🤖</div>
+      <div class="ach-text"><strong>AI 助手設計</strong><p>GPTs/Gems 建立、知識庫上傳、指令調校</p></div>
+    </div>
+    <div class="achievement">
+      <div class="ach-icon">⚙️</div>
+      <div class="ach-text"><strong>自動化流程</strong><p>GAS 串接、觸發器、AI + 表單 + Email</p></div>
+    </div>
+    <div class="achievement">
+      <div class="ach-icon">🚀</div>
+      <div class="ach-text"><strong>整合實戰</strong><p>從痛點到上線的完整能力</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- 62: 能力升級視覺 -->
+<div class="slide" data-act="總結">
+  <h2>你的 AI 能力升級路徑</h2>
+  <div style="text-align:center;margin-top:1rem;">
+    <div style="font-size:1.8rem;letter-spacing:.2rem;">
+      <span >🚶 起步</span>
+      <span  style="color:var(--g400);"> → </span>
+      <span >🥾 探索</span>
+      <span  style="color:var(--g400);"> → </span>
+      <span  style="color:var(--blue);font-weight:700;">🧗 應用</span>
+      <span  style="color:var(--g400);"> → </span>
+      <span  style="color:var(--green);font-weight:700;">⛷️ 整合</span>
+      <span  style="color:var(--g400);"> → </span>
+      <span  style="color:var(--gold);font-weight:700;">🏔️ 系統</span>
+    </div>
+  </div>
+  <div class="info-box success" style="margin-top:1.2rem;">
+    <p style="font-size:1.1rem;">經過五天，大多數同學已從<strong>「探索」</strong>升級到<strong>「應用～整合」</strong>階段！</p>
+  </div>
+</div>
+
+<!-- 63: 閃卡 — 5V 大數據 -->
+<div class="slide" data-act="總結">
+  <div style="background:var(--blue-lt);padding:.3rem 1rem;border-radius:100px;font-size:.85rem;font-weight:700;color:var(--blue);display:inline-block;margin-bottom:.6rem;">📘 iPAS 術語閃卡</div>
+  <h2 style="color:var(--blue);">5V 大數據框架</h2>
+  <div class="card-grid" style="margin-top:.8rem;">
+    <div class="card" style="border-top:3px solid var(--blue);text-align:center;min-width:110px;max-width:140px;padding:1rem;">
+      <h3>Volume</h3><p style="font-size:.85rem;">資料量大</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--green);text-align:center;min-width:110px;max-width:140px;padding:1rem;">
+      <h3>Velocity</h3><p style="font-size:.85rem;">產生速度快</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--purple);text-align:center;min-width:110px;max-width:140px;padding:1rem;">
+      <h3>Variety</h3><p style="font-size:.85rem;">類型多樣</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--orange);text-align:center;min-width:110px;max-width:140px;padding:1rem;">
+      <h3>Veracity</h3><p style="font-size:.85rem;">真實性</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--gold);text-align:center;min-width:110px;max-width:140px;padding:1rem;">
+      <h3>Value</h3><p style="font-size:.85rem;">商業價值</p>
+    </div>
+  </div>
+  <div class="info-box analogy" style="margin-top:.6rem;">
+    <p style="font-size:.9rem;">🎯 想成<strong>自來水廠</strong>：水量大(V)、水流快(V)、來源雜(V)、要驗水質(V)、最後要能喝(V)</p>
+  </div>
+  <p  style="margin-top:.4rem;font-size:.9rem;color:var(--g600);">📖 深入學習 → <a href="https://ai100.cooperation.tw/classroom/learn" target="_blank" style="color:var(--blue);">AI100 M08 大數據概論</a></p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     iPAS 術語大補帖（5 頁，金色邊框）
+     ═══════════════════════════════════════════════════ -->
+
+<!-- 64: 大補帖 intro -->
+<div class="slide cinematic" data-act="總結">
+  <div style="font-size:3rem;">📖</div>
+  <h2 style="font-size:2rem;">iPAS 術語大補帖</h2>
+  <p style="color:var(--g400);font-size:1.05rem;margin-top:.4rem;">五天 15 個閃卡術語 — 帶走版速查</p>
+  <p style="color:var(--gold);font-size:.95rem;margin-top:.8rem;font-weight:700;">拍照存起來！考前複習用</p>
+</div>
+
+<!-- 65: 大補帖 Page 1 — AI 基礎 -->
+<div class="slide glossary" data-act="總結">
+  <div class="glossary-badge">📖 iPAS 大補帖 1/5 — AI 基礎</div>
+  <div class="card-grid" style="margin-top:.8rem;gap:1rem;">
+    <div class="glossary-card">
+      <h3>🔷 AI 四分類</h3>
+      <p>規則式 → 機器學習 → 深度學習 → 生成式 AI，四層遞進</p>
+      <div class="ref">→ M01 AI 思維與治理</div>
+    </div>
+    <div class="glossary-card">
+      <h3>🧩 Token</h3>
+      <p>AI 的計費單位，一個中文字 ≈ 2-3 tokens，用越多花越多</p>
+      <div class="ref">→ M05 生成式 AI</div>
+    </div>
+    <div class="glossary-card">
+      <h3>🚮 GIGO</h3>
+      <p>Garbage In, Garbage Out — 垃圾進、垃圾出，輸入品質決定輸出品質</p>
+      <div class="ref">→ M02 資料分析</div>
+    </div>
+  </div>
+</div>
+
+<!-- 66: 大補帖 Page 2 — AI 治理 -->
+<div class="slide glossary" data-act="總結">
+  <div class="glossary-badge">📖 iPAS 大補帖 2/5 — AI 治理</div>
+  <div class="card-grid" style="margin-top:.8rem;gap:1rem;">
+    <div class="glossary-card">
+      <h3>⚖️ AI 基本法七原則</h3>
+      <p>永續、人權、安全、隱私、透明、公平、問責 — 台灣 AI 治理基石</p>
+      <div class="ref">→ M01 AI 思維與治理</div>
+    </div>
+    <div class="glossary-card">
+      <h3>🤝 人機協作三模式</h3>
+      <p>AI 建議人決定 / AI 執行人監督 / AI 自主人兜底</p>
+      <div class="ref">→ M01 AI 思維與治理</div>
+    </div>
+    <div class="glossary-card">
+      <h3>⚠️ AI 偏見三來源</h3>
+      <p>資料偏見（歷史歧視）、演算法偏見（設計缺陷）、互動偏見（回饋循環）</p>
+      <div class="ref">→ M01 AI 思維與治理</div>
+    </div>
+  </div>
+</div>
+
+<!-- 67: 大補帖 Page 3 — 生成式 AI -->
+<div class="slide glossary" data-act="總結">
+  <div class="glossary-badge">📖 iPAS 大補帖 3/5 — 生成式 AI</div>
+  <div class="card-grid" style="margin-top:.8rem;gap:1rem;">
+    <div class="glossary-card">
+      <h3>📚 RAG</h3>
+      <p>檢索增強生成 — 讓 AI 先查資料再回答，減少幻覺</p>
+      <div class="ref">→ M05 生成式 AI</div>
+    </div>
+    <div class="glossary-card">
+      <h3>🔢 Embedding</h3>
+      <p>把文字轉成數字向量，讓 AI 能計算「語意相似度」</p>
+      <div class="ref">→ M05 生成式 AI</div>
+    </div>
+    <div class="glossary-card">
+      <h3>🎯 Fine-tuning</h3>
+      <p>用自己的資料微調模型，讓 AI 更懂你的領域</p>
+      <div class="ref">→ M05 生成式 AI</div>
+    </div>
+  </div>
+</div>
+
+<!-- 68: 大補帖 Page 4 — 資料與分析 -->
+<div class="slide glossary" data-act="總結">
+  <div class="glossary-badge">📖 iPAS 大補帖 4/5 — 資料與分析</div>
+  <div class="card-grid" style="margin-top:.8rem;gap:1rem;">
+    <div class="glossary-card">
+      <h3>📊 DIKW 金字塔</h3>
+      <p>Data→Information→Knowledge→Wisdom，資料要轉化才有價值</p>
+      <div class="ref">→ M02 資料分析</div>
+    </div>
+    <div class="glossary-card">
+      <h3>🌊 5V 大數據</h3>
+      <p>Volume / Velocity / Variety / Veracity / Value</p>
+      <div class="ref">→ M08 大數據概論</div>
+    </div>
+    <div class="glossary-card">
+      <h3>🔄 CRISP-DM</h3>
+      <p>資料探勘標準流程：業務理解→資料→準備→建模→評估→部署</p>
+      <div class="ref">→ M02 資料分析</div>
+    </div>
+  </div>
+</div>
+
+<!-- 69: 大補帖 Page 5 — 應用 -->
+<div class="slide glossary" data-act="總結">
+  <div class="glossary-badge">📖 iPAS 大補帖 5/5 — 應用</div>
+  <div class="card-grid" style="margin-top:.8rem;gap:1rem;">
+    <div class="glossary-card">
+      <h3>💰 ROI / TCO</h3>
+      <p>投資報酬率 / 總擁有成本 — AI 專案不只看效果，要算成本</p>
+      <div class="ref">→ M09 AI 應用規劃</div>
+    </div>
+    <div class="glossary-card">
+      <h3>👁️ NLP / CV / 多模態</h3>
+      <p>自然語言 / 電腦視覺 / 多模態 — AI 的三大感知能力</p>
+      <div class="ref">→ M04 NLP · M06 CV</div>
+    </div>
+    <div class="glossary-card">
+      <h3>📈 過擬合 / 欠擬合</h3>
+      <p>過擬合＝死背考古題（測試準實際差）、欠擬合＝上課在睡覺</p>
+      <div class="ref">→ M03 機器學習基礎</div>
+    </div>
+  </div>
+</div>
+
+<!-- 70: AI 趨勢展望 — intro -->
+<div class="slide cinematic" data-act="總結">
+  <div style="font-size:3rem;">🔮</div>
+  <h2 style="font-size:2rem;">AI 趨勢展望</h2>
+  <p style="color:var(--g400);font-size:1.05rem;">你學的只是起點，AI 的未來正在加速</p>
+</div>
+
+<!-- 71: Agent 趨勢 -->
+<div class="slide" data-act="總結">
+  <h2>趨勢 1：AI Agent — 自主助理</h2>
+  <div class="info-box analogy" style="margin-top:.8rem;">
+    <p style="font-size:1rem;">現在的 AI 像<strong>實習生</strong> — 你給指令，它做事<br>
+    未來的 AI Agent 像<strong>資深同事</strong> — 你說目標，它自己想辦法</p>
+  </div>
+  <div class="card-grid" style="margin-top:.8rem;">
+    <div class="card" style="border-top:3px solid var(--blue);text-align:center;">
+      <h3>自主規劃</h3>
+      <p>AI 自己拆解步驟</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--green);text-align:center;">
+      <h3>工具調用</h3>
+      <p>自動上網、查資料、寫程式</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--purple);text-align:center;">
+      <h3>多步推理</h3>
+      <p>遇錯自動修正</p>
+    </div>
+  </div>
+</div>
+
+<!-- 72: MCP 趨勢 -->
+<div class="slide" data-act="總結">
+  <h2>趨勢 2：MCP — AI 的萬用插頭</h2>
+  <div class="info-box analogy" style="margin-top:.8rem;">
+    <p style="font-size:1rem;">USB-C 讓所有裝置用同一個接頭<br>
+    <strong>MCP</strong>（Model Context Protocol）讓所有 AI 用同一個方式連接工具</p>
+  </div>
+  <div class="flow" style="margin-top:.8rem;">
+    <div class="flow-box">ChatGPT</div>
+    <div class="flow-arrow">↔</div>
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);">MCP</div>
+    <div class="flow-arrow">↔</div>
+    <div class="flow-box">Gmail / Slack / 你的系統</div>
+  </div>
+  <p class=" dim" style="margin-top:.6rem;">Day4 學的 GAS 串接，未來會被 MCP 大幅簡化</p>
+</div>
+
+<!-- 73: 多模態趨勢 -->
+<div class="slide" data-act="總結">
+  <h2>趨勢 3：多模態 — 看圖說話寫程式</h2>
+  <div class="card-grid" style="margin-top:.8rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div class="icon">📝</div>
+      <h3>文字</h3>
+      <p>對話、寫作、翻譯</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">🖼️</div>
+      <h3>圖像</h3>
+      <p>生圖、看圖、編輯</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--purple);">
+      <div class="icon">🎵</div>
+      <h3>語音</h3>
+      <p>聽說、即時翻譯</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--orange);">
+      <div class="icon">🎬</div>
+      <h3>影片</h3>
+      <p>生成、理解、剪輯</p>
+    </div>
+  </div>
+  <p class="fragment dim" style="margin-top:.6rem;">未來的 AI 不只「讀」文字，還能「看」「聽」「說」全方位協作</p>
+</div>
+
+<!-- 74: 學習資源 — AI100 -->
+<div class="slide" data-act="總結">
+  <h2>📚 學習資源彙整</h2>
+  <div class="step-list" style="margin-top:.8rem;">
+    <div class="step">
+      <div class="step-num" style="background:var(--blue);">1</div>
+      <div class="step-content"><strong>AI 100 講學習地圖</strong><p>ai100.cooperation.tw/classroom/learn — 九大模組系統學習</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--green);">2</div>
+      <div class="step-content"><strong>Google AI Essentials</strong><p>免費線上課，Google 官方 AI 入門</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--purple);">3</div>
+      <div class="step-content"><strong>Anthropic Prompt Library</strong><p>Claude 官方提示詞範本庫</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--orange);">4</div>
+      <div class="step-content"><strong>OpenAI Cookbook</strong><p>ChatGPT / GPT 進階應用教程</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- 75: 免費工具清單 -->
+<div class="slide" data-act="總結">
+  <h2>🛠️ 免費 AI 工具清單</h2>
+  <table class="compare-table" style="margin-top:.8rem;">
+    <tr><th>工具</th><th>用途</th><th>免費額度</th></tr>
+    <tr ><td>ChatGPT</td><td>對話、寫作、GPTs</td><td>GPT-4o mini 無限</td></tr>
+    <tr ><td>Claude</td><td>長文分析、程式碼</td><td>每日對話額度</td></tr>
+    <tr ><td>Gemini</td><td>Google 整合、多模態</td><td>大方免費額度</td></tr>
+    <tr ><td>NotebookLM</td><td>文件分析、Podcast</td><td>完全免費</td></tr>
+    <tr ><td>Gamma</td><td>AI 簡報生成</td><td>每月 10 份</td></tr>
+    <tr ><td>Canva AI</td><td>設計 + AI 圖片</td><td>免費版可用</td></tr>
+  </table>
+</div>
+
+<!-- 76: iPAS 考試路徑 -->
+<div class="slide" data-act="總結">
+  <h2>🎓 iPAS AI 應用規劃師 — 考試路徑</h2>
+  <div class="step-list" style="margin-top:.8rem;">
+    <div class="step">
+      <div class="step-num" style="background:var(--blue);">1</div>
+      <div class="step-content"><strong>了解考試範圍</strong><p>九大模組：AI 思維、資料分析、ML、NLP、生成式 AI、CV...</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--green);">2</div>
+      <div class="step-content"><strong>系統學習</strong><p>AI100 學習地圖 + 官方參考書籍</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--purple);">3</div>
+      <div class="step-content"><strong>術語記憶</strong><p>大補帖 15 個核心術語 + 模組延伸</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--gold);">4</div>
+      <div class="step-content"><strong>報名考試</strong><p>iPAS 官網報名，通過即獲經濟部認證</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- 77: 你已經有基礎了 -->
+<div class="slide" data-act="總結">
+  <h2>這五天的課，已經覆蓋 iPAS 核心概念</h2>
+  <table class="compare-table" style="margin-top:.6rem;font-size:.85rem;">
+    <tr><th>iPAS 模組</th><th>課程對應</th><th>閃卡</th></tr>
+    <tr><td>M01 AI 思維與治理</td><td>Day1 AI 素養</td><td>四分類、基本法、人機協作、偏見</td></tr>
+    <tr><td>M02 資料分析</td><td>Day2 提示詞</td><td>GIGO、DIKW、CRISP-DM</td></tr>
+    <tr><td>M03 機器學習</td><td>Day5 整合</td><td>過擬合/欠擬合</td></tr>
+    <tr><td>M04 NLP</td><td>Day2-3</td><td>—</td></tr>
+    <tr><td>M05 生成式 AI</td><td>Day1-3</td><td>Token、RAG、Embedding、Fine-tuning</td></tr>
+    <tr><td>M06 CV</td><td>Day3 多模態</td><td>—</td></tr>
+    <tr><td>M08 大數據</td><td>Day5 總結</td><td>5V</td></tr>
+    <tr><td>M09 應用規劃</td><td>Day4-5</td><td>ROI/TCO</td></tr>
+  </table>
+</div>
+
+<!-- 78: AI100 QR -->
+<div class="slide" data-act="總結">
+  <h2>📱 掃碼開始學習</h2>
+  <div style="text-align:center;margin-top:1rem;">
+    <div style="font-size:5rem;">📱</div>
+    <p style="font-size:1.2rem;font-weight:700;color:var(--blue);margin-top:.6rem;">ai100.cooperation.tw/classroom/learn</p>
+    <p class="dim" style="margin-top:.4rem;">九大模組 × 100+ 知識點 × 免費學習</p>
+  </div>
+</div>
+
+<!-- 79: AI 對話式回饋引導 -->
+<div class="slide" data-act="總結" data-push="feedback">
+  <h2>💬 課程回饋 — AI 對話式</h2>
+  <p class="subtitle">不用填問卷！跟 AI 聊聊你的感受</p>
+  <div class="mockup" style="margin-top:.8rem;">
+    <div class="mockup-bar">AI 課程助教</div>
+    <div class="mockup-content">
+      <div class="chat-bubble ai">嗨！恭喜你完成五天的課程 🎉 我想聽聽你的感受：這五天最大的收穫是什麼？</div>
+      <div class="chat-bubble user">我學會用 AI 幫我寫自動化程式，以前完全不敢想...</div>
+      <div class="chat-bubble ai">太棒了！還有什麼地方你覺得可以改善嗎？</div>
+    </div>
+  </div>
+  <div class="timer" data-minutes="5">5:00</div>
+</div>
+
+<!-- 80: 回饋提示 -->
+<div class="slide" data-act="總結">
+  <h2>回饋重點</h2>
+  <div class="card-grid" style="margin-top:.8rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">🌟</div>
+      <h3>最有收穫</h3>
+      <p>哪個單元 / 哪個練習讓你最有感？</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--orange);">
+      <div class="icon">🔧</div>
+      <h3>可以改善</h3>
+      <p>節奏、難度、練習時間？</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div class="icon">💡</div>
+      <h3>未來想學</h3>
+      <p>還想了解什麼？進階課程？</p>
+    </div>
+  </div>
+</div>
+
+<!-- 81: 頒發學習完成證明 -->
+<div class="slide cinematic" data-act="總結">
+  <div style="font-size:4rem;">🎓</div>
+  <h2 style="font-size:2rem;margin-top:.4rem;">恭喜完成 36 小時 AI 實戰培訓！</h2>
+  <p style="color:var(--g400);font-size:1rem;margin-top:.6rem;">頒發「AI 工具應用與自動化流程實戰班」學習完成證明</p>
+  <div style="margin-top:1.2rem;border:2px solid var(--gold);border-radius:16px;padding:1.2rem 2rem;display:inline-block;">
+    <p style="color:var(--gold);font-size:1.2rem;font-weight:700;">🏆 學習完成證明</p>
+    <p style="color:rgba(255,255,255,.7);font-size:.9rem;margin-top:.3rem;">AI 工具應用與自動化流程實戰班 — 36 小時</p>
+  </div>
+</div>
+
+<!-- 82: 繼續前行 -->
+<div class="slide" data-act="總結">
+  <h2>結業不是結束，是新的開始</h2>
+  <div class="step-list" style="margin-top:.8rem;">
+    <div class="step">
+      <div class="step-num" style="background:var(--blue);">1</div>
+      <div class="step-content"><strong>本週就開始用</strong><p>挑一個今天學的技能，用在明天的工作上</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--green);">2</div>
+      <div class="step-content"><strong>每週一個小自動化</strong><p>累積起來，一年後你的工作會完全不同</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--purple);">3</div>
+      <div class="step-content"><strong>挑戰 iPAS 認證</strong><p>把知識轉化為正式資格</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--gold);">4</div>
+      <div class="step-content"><strong>成為 AI 推手</strong><p>帶動同事、團隊一起升級</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- 83: 相關vs因果（補充閃卡概念，已在大補帖外） -->
+<div class="slide" data-act="總結">
+  <h2>提醒：相關 ≠ 因果</h2>
+  <div class="info-box warning" style="margin-top:.8rem;">
+    <div class="label">常見陷阱</div>
+    <p style="font-size:1rem;">「冰淇淋銷量上升，溺水事件也上升」<br>→ 不代表冰淇淋造成溺水！（共同原因：夏天）</p>
+  </div>
+  <div class="info-box tip" style="margin-top:.6rem;">
+    <p style="font-size:.95rem;">AI 找到的「關聯」不代表「因果」<br>做決策前，永遠問：<strong>是真的有因果關係嗎？</strong></p>
+  </div>
+  <p  style="margin-top:.4rem;font-size:.9rem;color:var(--g600);">📖 深入學習 → <a href="https://ai100.cooperation.tw/classroom/learn" target="_blank" style="color:var(--blue);">AI100 M02 資料分析</a></p>
+</div>
+
+<!-- 84: Data Drift 概念 -->
+<div class="slide" data-act="總結">
+  <h2>提醒：AI 也會「過時」</h2>
+  <div class="info-box analogy" style="margin-top:.8rem;">
+    <div class="label">Data Drift（資料漂移）</div>
+    <p style="font-size:1rem;">AI 模型是用<strong>過去的資料</strong>訓練的<br>
+    當現實世界改變（疫情、政策、市場），AI 的判斷就會失準<br>
+    → 需要定期「再訓練」或「加新資料」</p>
+  </div>
+  <p  style="margin-top:.8rem;font-size:.95rem;font-weight:700;color:var(--navy);">你建的 AI 助手也要定期更新知識庫！</p>
+</div>
+
+<!-- 85: 可解釋性 -->
+<div class="slide" data-act="總結">
+  <h2>提醒：AI 的可解釋性</h2>
+  <div class="two-col" style="margin-top:.8rem;">
+    <div class="col">
+      <h3 class="blue">可解釋 AI</h3>
+      <p style="font-size:.95rem;">「這封信被分類為客訴，因為包含『瑕疵』『退貨』關鍵字，且語氣負面」</p>
+      <p style="font-size:.85rem;color:var(--green);margin-top:.3rem;">✅ 可以理解、可以檢查</p>
+    </div>
+    <div class="col">
+      <h3 class="red">黑盒 AI</h3>
+      <p style="font-size:.95rem;">「這封信被分類為客訴」<br>（為什麼？不知道）</p>
+      <p style="font-size:.85rem;color:var(--red);margin-top:.3rem;">⚠️ 難以信任、難以除錯</p>
+    </div>
+  </div>
+  <p  style="margin-top:.6rem;font-size:.9rem;color:var(--g600);">📖 深入學習 → <a href="https://ai100.cooperation.tw/classroom/learn" target="_blank" style="color:var(--blue);">AI100 M01 AI 思維與治理</a></p>
+</div>
+
+<!-- 86: 金句 -->
+<div class="slide cinematic" data-act="總結">
+  <div class="quote-box" style="background:rgba(255,255,255,.05);border-color:var(--gold);">
+    <div class="quote-text" style="color:#fff;font-size:1.6rem;">「AI 不會取代你，<br>但<span style="color:var(--gold);">會用 AI 的人</span>會。」</div>
+    <div class="quote-src" style="color:var(--g400);">— 你已經是會用 AI 的人了</div>
+  </div>
+</div>
+
+<!-- 87: 第二金句 -->
+<div class="slide cinematic" data-act="總結">
+  <div class="quote-box" style="background:rgba(255,255,255,.05);border-color:var(--green);">
+    <div class="quote-text" style="color:#fff;font-size:1.4rem;">「最好的學習方式，<br>是<span style="color:var(--green);">明天就開始用</span>。」</div>
+    <div class="quote-src" style="color:var(--g400);">— 不要等到完美，先開始就對了</div>
+  </div>
+</div>
+
+<!-- 88: 同學互相加油 -->
+<div class="slide" data-act="總結" data-push="final-message">
+  <div style="font-size:3rem;">🤝</div>
+  <h2>最後一件事 — 給同組的夥伴一句話</h2>
+  <p class="subtitle">感謝五天的互學、互助</p>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <p style="font-size:1rem;">送到訊息牆：你想對同組夥伴說什麼？</p>
+  </div>
+  <div class="timer" data-minutes="3">3:00</div>
+</div>
+
+<!-- 89: 講師聯絡 -->
+<div class="slide" data-act="總結">
+  <h2>📬 保持聯繫</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div class="icon">🌐</div>
+      <h3>AI100 網站</h3>
+      <p>ai100.cooperation.tw</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">📧</div>
+      <h3>Email</h3>
+      <p>有問題隨時來信</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--purple);">
+      <div class="icon">💬</div>
+      <h3>學習社群</h3>
+      <p>加入同學 LINE 群組</p>
+    </div>
+  </div>
+</div>
+
+<!-- 90: 五天旅程完成 -->
+<div class="slide" data-act="總結">
+  <div style="font-size:1.6rem;letter-spacing:.3rem;margin-bottom:.8rem;">
+    🚶 → 🥾 → 🧗 → ⛷️ → <span style="font-size:2.2rem;">🏔️</span>
+  </div>
+  <h2>恭喜登頂！</h2>
+  <p class="subtitle" style="margin-top:.4rem;">從 AI 新手到 AI 實戰者</p>
+  <div class="info-box success" style="margin-top:1rem;">
+    <p style="font-size:1.1rem;"><strong>36 小時的學習，是你 AI 旅程的第一步</strong><br>
+    接下來的每一天，都是實戰練習</p>
+  </div>
+</div>
+
+<!-- 91: 感謝頁 -->
+<div class="slide cover" data-act="總結">
+  <div style="font-size:3rem;">🙏</div>
+  <h2 style="font-size:2rem;margin-top:.6rem;">謝謝每一位同學</h2>
+  <p style="color:rgba(255,255,255,.7);font-size:1.05rem;margin-top:.4rem;">你們的投入和創意，讓這五天充滿驚喜</p>
+  <p style="color:rgba(255,255,255,.5);font-size:.95rem;margin-top:1rem;">AI 工具應用與自動化流程實戰班</p>
+  <p style="color:rgba(255,255,255,.3);font-size:.85rem;margin-top:.3rem;">— 我們下次見 —</p>
+</div>
+
+</div><!-- end .slides -->
+
+<!-- ── Fixed UI ── -->
+<div class="section-nav">
+  <button class="section-nav-btn" id="navBtn" onclick="toggleNav()">
+    <span id="navSection">封面</span>
+    <span class="nav-counter"><span id="current">1</span>/<span id="total"></span></span>
+  </button>
+  <div class="section-nav-menu" id="navMenu"></div>
+</div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>←</button><button id="next">→</button></div>
+
+<!-- G key nav overlay -->
+<div id="navOverlay">
+  <div style="max-width:960px;margin:0 auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <h2 style="color:#fff;font-size:1.3rem;font-weight:700;">快速導覽 <span style="color:rgba(255,255,255,.3);font-size:.85rem;">(點擊跳頁 / ESC 關閉)</span></h2>
+      <button id="navClose" style="background:none;border:2px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;font-size:1rem;padding:.3rem .8rem;cursor:pointer;">✕</button>
+    </div>
+    <div id="navGrid"></div>
+  </div>
+</div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),tot=slides.length;
+let idx=0,fi=-1;
+document.getElementById('total').textContent=tot;
+const gf=el=>[...el.querySelectorAll('.fragment')].sort((a,b)=>(+(a.dataset.order||0))-(+(b.dataset.order||0)));
+
+function go(n){
+  if(n<0)n=0;if(n>=tot)n=tot-1;
+  slides.forEach((s)=>{s.classList.remove('active');s.querySelectorAll('.fragment').forEach(f=>f.classList.remove('visible'));});
+  idx=n;fi=-1;slides[idx].classList.add('active');ui();
+}
+function ui(){
+  document.getElementById('current').textContent=idx+1;
+  document.getElementById('prev').disabled=idx===0&&fi<=0;
+  const f=gf(slides[idx]);
+  document.getElementById('next').disabled=idx===tot-1&&fi>=f.length-1;
+  document.getElementById('progress').style.width=((idx+1)/tot*100)+'%';
+}
+function adv(){
+  const f=gf(slides[idx]);
+  if(fi<f.length-1){
+    fi++;const ord=f[fi].dataset.order;
+    f[fi].classList.add('visible');
+    while(fi<f.length-1&&f[fi+1].dataset.order===ord){fi++;f[fi].classList.add('visible');}
+    ui();
+  }else if(idx<tot-1)go(idx+1);
+}
+function ret(){
+  const f=gf(slides[idx]);
+  if(fi>=0){
+    const ord=f[fi].dataset.order;
+    f[fi].classList.remove('visible');fi--;
+    while(fi>=0&&f[fi].dataset.order===ord){f[fi].classList.remove('visible');fi--;}
+    ui();
+  }else if(idx>0){go(idx-1);const p=gf(slides[idx]);p.forEach(x=>x.classList.add('visible'));fi=p.length-1;ui();}
+}
+
+document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
+document.addEventListener('keydown',e=>{
+  if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}
+  if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}
+  if(e.key==='Home'){e.preventDefault();go(0);}
+  if(e.key==='End'){e.preventDefault();go(tot-1);}
+  if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
+  // number keys for quick jump to sections
+  if(e.key==='1')go(0);   // 暖身
+  if(e.key==='2')go(10);  // 高級版示範
+  if(e.key==='3')go(35);  // 專題衝刺
+  if(e.key==='4')go(45);  // 專題發表
+  if(e.key==='5')go(60);  // 總結
+});
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});
+document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
+
+// Copy-to-clipboard for code blocks
+document.querySelectorAll('.code-block').forEach(function(block) {
+  if (block.textContent.trim().length > 20) {
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = '複製';
+    btn.onclick = function(e) {
+      e.stopPropagation();
+      navigator.clipboard.writeText(block.textContent.trim()).then(function() {
+        btn.textContent = '已複製 ✓';
+        btn.classList.add('copied');
+        setTimeout(function() { btn.textContent = '複製'; btn.classList.remove('copied'); }, 2000);
+      });
+    };
+    block.appendChild(btn);
+  }
+});
+
+// Countdown timer for exercise slides
+document.querySelectorAll('.timer[data-minutes]').forEach(function(el) {
+  var mins = parseInt(el.dataset.minutes);
+  el.innerHTML = mins + ':00';
+  el.style.cursor = 'pointer';
+  el.title = '點擊開始計時';
+  el.onclick = function() {
+    var total = mins * 60;
+    el.style.background = 'var(--purple)';
+    el.style.color = '#fff';
+    var iv = setInterval(function() {
+      total--;
+      if (total <= 0) { clearInterval(iv); el.innerHTML = '時間到！'; el.style.background = 'var(--red)'; return; }
+      var m = Math.floor(total / 60), s = total % 60;
+      el.innerHTML = m + ':' + (s < 10 ? '0' : '') + s;
+    }, 1000);
+  };
+});
+
+// Auto-push notification when entering a push slide
+var _origGo2 = go;
+go = function(n) {
+  _origGo2(n);
+  var slide = slides[idx];
+  if (slide.dataset.push) {
+    console.log('[PUSH]', slide.dataset.push);
+  }
+};
+
+// ── Section navigation ──
+var sections = [
+  { title: '封面', idx: 0 },
+  { title: 'A. 暖身 + 五天回顧', idx: 1 },
+  { title: '　 五天旅程回顧', idx: 2 },
+  { title: '　 今日行程', idx: 8 },
+  { title: 'B. 講師示範高級版', idx: 10 },
+  { title: '　 高級版全流程', idx: 13 },
+  { title: '　 同技術不同精緻度', idx: 18 },
+  { title: '　 30 分鐘改版挑戰', idx: 19 },
+  { title: '　 改版進行中', idx: 22 },
+  { title: '　 Before/After 展示', idx: 23 },
+  { title: '　 迭代核心概念', idx: 26 },
+  { title: '　 閃卡: 過擬合/欠擬合', idx: 27 },
+  { title: '　 專題重啟', idx: 28 },
+  { title: '　 重啟進行中', idx: 33 },
+  { title: '午休', idx: 34 },
+  { title: 'C. 專題衝刺', idx: 35 },
+  { title: '　 Checklist + 模板', idx: 36 },
+  { title: '　 衝刺中', idx: 40 },
+  { title: 'D. 專題發表', idx: 45 },
+  { title: '　 第 1 組', idx: 47 },
+  { title: '　 第 2 組', idx: 49 },
+  { title: '　 第 3 組', idx: 51 },
+  { title: '　 第 4 組', idx: 53 },
+  { title: '　 第 5 組', idx: 55 },
+  { title: '　 講師點評 + 頒獎', idx: 57 },
+  { title: 'E. 課程總結', idx: 60 },
+  { title: '　 能力盤點', idx: 61 },
+  { title: '　 閃卡: 5V 大數據', idx: 63 },
+  { title: '　 iPAS 術語大補帖', idx: 64 },
+  { title: '　 AI 趨勢展望', idx: 70 },
+  { title: '　 學習資源 + iPAS', idx: 74 },
+  { title: '　 回饋 + 頒證', idx: 79 },
+  { title: '　 金句 + 感謝', idx: 86 },
+];
+
+var navMenu = document.getElementById('navMenu');
+var navBtn = document.getElementById('navBtn');
+var navSection = document.getElementById('navSection');
+
+// Build menu
+sections.forEach(function(s, i) {
+  var item = document.createElement('div');
+  item.className = 'section-nav-item';
+  item.dataset.secIdx = i;
+  item.innerHTML = '<div class="nav-idx">' + (s.idx + 1) + '</div><div class="nav-title">' + s.title + '</div>';
+  item.onclick = function() { go(s.idx); navMenu.classList.remove('open'); };
+  navMenu.appendChild(item);
+});
+
+function toggleNav() {
+  navMenu.classList.toggle('open');
+}
+
+// Close menu on click outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.section-nav')) navMenu.classList.remove('open');
+});
+
+// Update current section label
+function updateSectionLabel() {
+  var current = '';
+  for (var i = sections.length - 1; i >= 0; i--) {
+    if (idx >= sections[i].idx) { current = sections[i].title.replace(/^　 /, ''); break; }
+  }
+  navSection.textContent = current || '封面';
+  // Update active state in menu
+  navMenu.querySelectorAll('.section-nav-item').forEach(function(item, i) {
+    var isActive = idx >= sections[i].idx && (i === sections.length - 1 || idx < sections[i + 1].idx);
+    item.classList.toggle('active', isActive);
+  });
+}
+
+// Patch ui() to also update section label
+var _origUi = ui;
+ui = function() { _origUi(); updateSectionLabel(); };
+
+// ── G key Quick Nav Overlay ──
+var navOverlay = document.getElementById('navOverlay');
+var navGrid = document.getElementById('navGrid');
+function buildNavGrid() {
+  navGrid.innerHTML = '';
+  slides.forEach(function(s, i) {
+    var act = s.dataset.act || '';
+    var isDark = s.classList.contains('cover') || s.classList.contains('section-title') || s.classList.contains('cinematic');
+    var t = s.querySelector('h1,h2');
+    var label = t ? t.textContent.replace(/\n/g, ' ').substring(0, 18) : 'Slide ' + (i + 1);
+    var card = document.createElement('div');
+    card.className = 'nav-card' + (i === idx ? ' current' : '');
+    card.innerHTML = '<div class="nav-card-top' + (isDark ? ' dark' : '') + '">' + (i + 1) + '</div>' +
+      '<div class="nav-card-bottom"><div class="nav-card-act">' + act + '</div><div class="nav-card-title">' + label + '</div></div>';
+    card.onclick = function() { go(i); closeNavOverlay(); };
+    navGrid.appendChild(card);
+  });
+}
+function openNavOverlay() { buildNavGrid(); navOverlay.style.display = 'block'; }
+function closeNavOverlay() { navOverlay.style.display = 'none'; }
+document.getElementById('navClose').onclick = closeNavOverlay;
+navOverlay.onclick = function(e) { if (e.target === navOverlay) closeNavOverlay(); };
+
+// Patch keyboard to add G key
+document.addEventListener('keydown', function(e) {
+  if (navOverlay.style.display === 'block') {
+    if (e.key === 'Escape' || e.key === 'g' || e.key === 'G') { e.preventDefault(); closeNavOverlay(); }
+    return;
+  }
+  if (e.key === 'g' || e.key === 'G') { e.preventDefault(); openNavOverlay(); return; }
+}, true);
+
+go(0);
+
+// postMessage bridge for iframe embedding (classroom integration)
+window.addEventListener('message', function(e) {
+  if (!e.data || e.data.type !== 'slideControl') return;
+  var d = e.data;
+  if (d.action === 'next') adv();
+  else if (d.action === 'prev') ret();
+  else if (d.action === 'goto' && typeof d.index === 'number') go(d.index);
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'slideState', current: idx, total: tot }, '*');
+  }
+});
+var _origGo3 = go;
+go = function(n) {
+  _origGo3(n);
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'slideState', current: idx, total: tot }, '*');
+  }
+};
+</script>
+</body>
+</html>

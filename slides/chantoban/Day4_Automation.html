@@ -1,0 +1,2794 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 4 — AI 自動化流程實作</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════
+   Reading Glasses + Safe Zone + grow.google 風格
+   產投班 Day4 — 投影教學用 (3-10m 觀看距離)
+
+   Safe Zone 規則：
+   - padding-top: 3.5rem（清除 module-badge top:1rem）
+   - padding-bottom: 4.5rem（清除 controls bottom:1.2rem + progress）
+   - justify-content: flex-start + ::before/::after 偽元素置中
+   - 安全內容高度 ≤ 30rem (660px)
+
+   Reading Glasses 規格：
+   - 正文 22px, 最小 16px, CJK 行高 ≥ 1.7
+   - 字重 ≥ 400, 按鈕 ≥ 48px
+   - 內容最大寬度 720px
+   ═══════════════════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+  --orange:#EA580C; --orange-lt:#FFF7ED;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--white);}
+
+/* ── Slide Layout (Safe Zone) ── */
+.slides{width:100%;height:100%;position:relative;}
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-start;
+  padding:3.5rem 4rem 6rem;
+  display:none;
+  background:var(--white);
+  overflow-y:auto;
+}
+/* Removed ::before/::after centering — was pushing short content off screen */
+
+.slide.active{display:flex;}
+/* .slide.prev removed — using display:none/flex */
+.slide.cover{background:var(--navy);color:#fff;text-align:center;}
+.slide.cover h2{color:#fff;}
+.slide.section-title{background:var(--green);color:#fff;text-align:center;}
+.slide.section-title h2{color:#fff;}
+.slide.break-slide{background:var(--offwhite);text-align:center;}
+
+/* ── Typography (Reading Glasses) ── */
+h1{font-size:2.8rem;font-weight:900;line-height:1.3;}
+h2{font-size:1.8rem;font-weight:700;color:var(--g900);margin-bottom:.8rem;line-height:1.4;}
+h3{font-size:1.2rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.05rem;line-height:1.8;}
+.subtitle{font-size:1.05rem;color:var(--g600);font-weight:500;}
+small,.caption{font-size:max(16px,0.75rem);}
+.blue{color:var(--blue);}.green{color:var(--green);}.gold{color:var(--gold);}
+.red{color:var(--red);}.purple{color:var(--purple);}.dim{color:var(--g600);}.bold{font-weight:700;}
+
+/* ── Fragment animation (≤300ms) ── */
+.fragment{opacity:0;transform:translateY(8px);transition:opacity .25s,transform .25s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* ── Cards ── */
+.card-grid{display:flex;gap:1.2rem;flex-wrap:wrap;justify-content:center;margin-top:1rem;max-width:960px;}
+.card{background:var(--white);border:2px solid var(--g100);border-radius:16px;padding:1.4rem;min-width:140px;max-width:260px;flex:1;}
+.card:hover{border-color:var(--blue);}
+.card .icon{font-size:2rem;margin-bottom:.4rem;}
+.card h3{font-size:1.1rem;}
+.card p{font-size:.95rem;color:var(--g600);line-height:1.7;}
+
+/* ── Steps ── */
+.step-list{text-align:left;max-width:960px;width:100%;}
+.step{display:flex;gap:1rem;align-items:flex-start;padding:.6rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.05rem;}.step-content p{font-size:.95rem;color:var(--g600);margin-top:.1rem;}
+
+/* ── Code ── */
+.code-block{background:var(--g50);border:2px solid var(--g200);border-radius:12px;padding:1.2rem 1.5rem;text-align:left;max-width:960px;width:100%;font-family:'Fira Code',monospace;font-size:.9rem;line-height:1.8;margin:.6rem 0;color:var(--g900);white-space:pre-wrap;}
+
+/* ── Table ── */
+.compare-table{border-collapse:collapse;font-size:.95rem;margin-top:.6rem;width:100%;max-width:960px;}
+.compare-table th{background:var(--navy);color:#fff;padding:.5rem .8rem;text-align:left;font-size:.95rem;}
+.compare-table td{padding:.5rem .8rem;border-bottom:1px solid var(--g100);font-size:.95rem;}
+.compare-table tr:hover td{background:var(--g50);}
+
+/* ── Info boxes ── */
+.info-box{border-radius:12px;padding:1rem 1.5rem;max-width:960px;width:100%;text-align:left;margin-top:.6rem;}
+.info-box.analogy{background:var(--blue-lt);border-left:4px solid var(--blue);}
+.info-box.warning{background:var(--red-lt);border-left:4px solid var(--red);}
+.info-box.success{background:var(--green-lt);border-left:4px solid var(--green);}
+.info-box.tip{background:var(--gold-lt);border-left:4px solid var(--gold);}
+.info-box .label{font-weight:700;font-size:.95rem;margin-bottom:.3rem;}
+.info-box p{font-size:1rem;}
+
+/* ── Flow ── */
+.flow{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:center;margin:1rem 0;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.5rem .8rem;font-size:.95rem;font-weight:700;text-align:center;min-width:80px;}
+.flow-arrow{color:var(--blue);font-size:1.3rem;font-weight:900;}
+
+/* ── Two col ── */
+.two-col{display:flex;gap:1.5rem;width:100%;max-width:960px;text-align:left;}
+.two-col .col{flex:1;}
+
+/* ── Big number ── */
+.big-num{font-size:4rem;font-weight:900;color:var(--blue);line-height:1;}
+
+/* ── Banners ── */
+.exercise-banner{display:inline-block;background:var(--purple);color:#fff;padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:.95rem;margin-bottom:.6rem;}
+.demo-banner{display:inline-block;background:var(--blue);color:#fff;padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:.95rem;margin-bottom:.6rem;}
+.case-banner{display:inline-block;background:var(--orange);color:#fff;padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:.95rem;margin-bottom:.6rem;}
+
+/* ── Quote ── */
+.quote-box{max-width:960px;width:100%;background:var(--g50);border-left:5px solid var(--navy);border-radius:0 12px 12px 0;padding:1.2rem 1.5rem;margin:.6rem 0;text-align:left;}
+.quote-box .quote-text{font-size:1.2rem;font-weight:700;line-height:1.6;color:var(--navy);}
+.quote-box .quote-src{font-size:.9rem;color:var(--g600);margin-top:.4rem;}
+
+/* ── Mockup (simplified) ── */
+.mockup{max-width:960px;width:100%;border:2px solid var(--g200);border-radius:12px;overflow:hidden;margin:.6rem 0;text-align:left;background:var(--white);}
+.mockup-bar{background:var(--g100);padding:.4rem 1rem;font-size:.8rem;font-weight:700;color:var(--g600);border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:.4rem;}
+.mockup-bar::before{content:'● ● ●';font-size:.5rem;color:var(--g400);letter-spacing:3px;}
+.mockup-content{padding:1rem 1.2rem;}
+.chat-bubble{padding:.6rem 1rem;border-radius:12px;margin:.4rem 0;max-width:85%;font-size:.95rem;line-height:1.7;}
+.chat-bubble.user{background:var(--blue);color:#fff;margin-left:auto;border-bottom-right-radius:4px;}
+.chat-bubble.ai{background:var(--g50);color:var(--g900);margin-right:auto;border-bottom-left-radius:4px;}
+
+/* ── Copy button ── */
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:.3rem .8rem;font-size:.8rem;font-weight:700;cursor:pointer;opacity:.7;transition:opacity .2s;}
+.copy-btn:hover{opacity:1;}
+.copy-btn.copied{background:var(--green);}
+.code-block{position:relative;}
+
+/* ── Timer ── */
+.timer{display:inline-flex;align-items:center;gap:.5rem;background:var(--purple-lt);color:var(--purple);padding:.3rem 1rem;border-radius:100px;font-weight:700;font-size:1rem;margin-top:.5rem;}
+.timer::before{content:'⏱';}
+
+/* ── Push marker ── */
+[data-push]::before{content:'📲 推送';position:absolute;top:3.5rem;left:1rem;background:var(--green-lt);color:var(--green);padding:.2rem .6rem;border-radius:100px;font-size:.75rem;font-weight:700;z-index:10;}
+[data-push]{position:relative;}
+
+/* ── Typing animation ── */
+.typing .chat-bubble.ai{overflow:hidden;white-space:nowrap;border-right:3px solid var(--g400);animation:typing 2s steps(40) 0.5s forwards,blink .5s step-end infinite alternate;}
+@keyframes typing{from{max-width:0;opacity:1;}to{max-width:100%;opacity:1;}}
+@keyframes blink{50%{border-color:transparent;}}
+
+/* ── Cinematic dark slides ── */
+.slide.cinematic{background:var(--g900);color:#fff;}
+.slide.cinematic h2{color:#fff;}
+.slide.cinematic .subtitle{color:var(--g400);}
+
+/* ── Callout arrow ── */
+.callout{color:var(--red);font-weight:700;font-size:.95rem;margin-top:.4rem;}
+.callout::before{content:'👆 ';}
+
+/* ── Vote marker ── */
+.vote-slide{position:relative;}
+.vote-slide::after{content:'🗳️ 投票題';position:absolute;top:3.5rem;right:1rem;background:var(--gold-lt);color:#B45309;padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;z-index:10;}
+
+/* ── Section nav (left-bottom dropdown) ── */
+.section-nav{position:fixed;bottom:1.2rem;left:1.2rem;z-index:200;}
+.section-nav-btn{background:var(--white);border:2px solid var(--g200);border-radius:12px;padding:.4rem .8rem;font-size:.85rem;font-weight:600;color:var(--g600);cursor:pointer;display:flex;align-items:center;gap:.4rem;transition:all .15s;min-height:48px;}
+.section-nav-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-lt);}
+.section-nav-btn .nav-counter{font-weight:400;color:var(--g400);}
+.section-nav-menu{position:absolute;bottom:calc(100% + .5rem);left:0;background:var(--white);border:2px solid var(--g200);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:60vh;overflow-y:auto;min-width:280px;display:none;padding:.4rem;}
+.section-nav-menu.open{display:block;}
+.section-nav-item{display:flex;align-items:center;gap:.6rem;padding:.5rem .8rem;border-radius:8px;cursor:pointer;font-size:.85rem;color:var(--g600);transition:background .1s;}
+.section-nav-item:hover{background:var(--g50);}
+.section-nav-item.active{background:var(--blue-lt);color:var(--blue);font-weight:700;}
+.section-nav-item .nav-idx{width:24px;height:24px;border-radius:50%;background:var(--g100);color:var(--g600);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0;}
+.section-nav-item.active .nav-idx{background:var(--blue);color:#fff;}
+.section-nav-item .nav-title{flex:1;}
+
+/* ── Fixed overlays ── */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.8rem;}
+.controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:var(--white);color:var(--g800);font-size:1.2rem;cursor:pointer;transition:all .15s;}
+.controls button:hover{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
+.controls button:disabled{opacity:.25;cursor:default;}
+/* ── G key nav overlay (from ui-html-slides) ── */
+#navOverlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);overflow-y:auto;padding:2rem;}
+#navGrid{display:grid;grid-template-columns:repeat(6,1fr);gap:.8rem;max-width:960px;margin:0 auto;}
+.nav-card{cursor:pointer;border-radius:10px;overflow:hidden;border:2px solid var(--g200);transition:border-color .15s;background:var(--white);}
+.nav-card:hover{border-color:var(--gold);}
+.nav-card.current{border-color:var(--blue);}
+.nav-card-top{height:50px;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--g400);background:var(--offwhite);}
+.nav-card-top.dark{background:var(--navy);color:rgba(255,255,255,.4);}
+.nav-card-bottom{padding:.4rem;font-size:.65rem;}
+.nav-card-act{color:var(--blue);font-weight:700;margin-bottom:.1rem;}
+.nav-card-title{color:var(--g600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.module-badge{position:fixed;top:.8rem;right:1rem;z-index:100;background:var(--blue-lt);color:var(--blue);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;}
+.module-title{position:fixed;top:.8rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
+
+/* ── RWD ── */
+@media(max-width:768px){
+  html{font-size:16px;}
+  .slide{padding:3rem 1.2rem 5.5rem;}
+  h1{font-size:1.8rem;}h2{font-size:1.4rem;}p,li{font-size:.95rem;}
+  .card-grid{flex-direction:column;align-items:center;}
+  .card{max-width:100%;min-width:auto;}
+  .two-col{flex-direction:column;}
+  .mockup{max-width:100%;}
+  .controls button{width:40px;height:40px;}
+  .flow{gap:.3rem;}.flow-box{font-size:.85rem;padding:.4rem .6rem;min-width:65px;}
+}
+@media(max-width:480px){
+  h1{font-size:1.5rem;}
+  .big-num{font-size:2.8rem;}
+  .flow-box{min-width:55px;font-size:.8rem;}
+}
+/* 2x2 grid standard */
+.grid-2x2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;max-width:800px;width:100%;margin:1rem auto;}
+.grid-2x2 .card{min-height:0;}
+</style>
+</head>
+<body>
+
+<div class="module-title">Day 4 — AI 自動化流程實作</div>
+<div class="module-badge">產投班</div>
+<div class="slides">
+
+<!-- ============================================================ -->
+<!-- A. 暖身 + 基礎觀念 (slides 0-9) -->
+<!-- ============================================================ -->
+
+<!-- ===== 0: COVER ===== -->
+<div class="slide cover" data-act="暖身">
+  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:.8rem;">產投班 36 小時實戰課程</p>
+  <h1>AI 工具應用與<br>自動化流程實戰班</h1>
+  <p class="subtitle" style="margin-top:1.2rem;font-size:1.3rem;color:rgba(255,255,255,.85);">Day 4 — AI 自動化流程實作</p>
+  <div style="margin-top:2.5rem;display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;">
+    <span style="background:rgba(255,255,255,.15);padding:.4rem 1.2rem;border-radius:100px;font-size:.95rem;">講師：陳重光</span>
+    <span style="background:rgba(255,255,255,.15);padding:.4rem 1.2rem;border-radius:100px;font-size:.95rem;">09:00 - 17:00</span>
+    <span style="background:rgba(255,255,255,.15);padding:.4rem 1.2rem;border-radius:100px;font-size:.95rem;">GAS 自動化</span>
+    <span style="background:rgba(255,255,255,.15);padding:.4rem 1.2rem;border-radius:100px;font-size:.95rem;">跨服務串接</span>
+  </div>
+  <p style="color:rgba(255,255,255,.35);margin-top:3rem;font-size:.85rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- ===== 1: Day3 回顧 ===== -->
+<div class="slide" data-act="暖身">
+  <h2>📝 Day 3 回顧 — 你學到了什麼？</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card fragment" style="border-top:3px solid var(--blue);text-align:center;">
+      <div class="icon">📊</div>
+      <h3>單元七</h3>
+      <p>AI 數據分析<br>試算表 × AI 協作</p>
+    </div>
+    <div class="card fragment" style="border-top:3px solid var(--green);text-align:center;">
+      <div class="icon">🖼️</div>
+      <h3>單元八</h3>
+      <p>AI 視覺生成<br>圖片 × 簡報設計</p>
+    </div>
+    <div class="card fragment" style="border-top:3px solid var(--purple);text-align:center;">
+      <div class="icon">🎯</div>
+      <h3>單元九</h3>
+      <p>AI 專案管理<br>規劃 × 評估</p>
+    </div>
+  </div>
+  <p class="fragment" style="margin-top:1rem;font-size:1.1rem;font-weight:700;color:var(--navy);">今天的主題：讓 AI 幫你<span class="blue">自動做</span>，不是手動做</p>
+</div>
+
+<!-- ===== 2: 今日行程 ===== -->
+<div class="slide" data-act="暖身">
+  <h2>今日行程</h2>
+  <div class="step-list" style="margin-top:.8rem;">
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--gold);">上</div>
+      <div class="step-content"><strong>09:00 暖身 + 基礎觀念</strong><p>腳本、觸發器、API 是什麼？</p></div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--blue);">十</div>
+      <div class="step-content"><strong>09:30 單元十：GAS 入門</strong><p>Google Apps Script — 三步驟啟動自動化</p></div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--green);">十一</div>
+      <div class="step-content"><strong>10:40 單元十一：跨服務串接</strong><p>Gmail + 日曆 + 試算表 全串聯</p></div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--g400);">午</div>
+      <div class="step-content"><strong>12:00 午休</strong></div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--purple);">十二</div>
+      <div class="step-content"><strong>13:00 單元十二：自動化設計思維</strong><p>從痛點到自動化的完整框架</p></div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--orange);">專</div>
+      <div class="step-content"><strong>14:30 專題工作時間 + 收尾</strong><p>把自動化整合進各組專題</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 3: 為什麼要自動化？ ===== -->
+<div class="slide cinematic" data-act="暖身">
+  <h2 style="font-size:2rem;">你每天花多少時間做<span style="color:var(--gold);">重複的事</span>？</h2>
+  <div style="margin-top:1.5rem;display:flex;gap:2rem;justify-content:center;flex-wrap:wrap;">
+    <div style="text-align:center;">
+      <div class="big-num" style="color:var(--gold);">2.5</div>
+      <p style="color:var(--g400);">小時/天</p>
+      <p style="font-size:.9rem;color:var(--g400);">花在重複性工作</p>
+    </div>
+    <div style="text-align:center;">
+      <div class="big-num" style="color:var(--red);">550</div>
+      <p style="color:var(--g400);">小時/年</p>
+      <p style="font-size:.9rem;color:var(--g400);">相當於 69 個工作天</p>
+    </div>
+  </div>
+  <p style="margin-top:1.5rem;font-size:1.2rem;color:rgba(255,255,255,.8);">如果能把其中 <span style="color:var(--green);font-weight:900;">50%</span> 自動化？<br>你一年多出 <span style="color:var(--green);font-weight:900;">275 小時</span> 做更重要的事</p>
+</div>
+
+<!-- ===== 4: 什麼是腳本 ===== -->
+<div class="slide" data-act="暖身">
+  <h2>🤔 什麼是「腳本」（Script）？</h2>
+  <div class="info-box analogy" style="margin-top:1rem;">
+    <div class="label">白話比喻</div>
+    <p>腳本 = <strong>預寫好的指令清單</strong><br>
+    就像你寫給同事的 SOP：「先開信箱 → 找到報表 → 複製數字 → 貼到表格」<br>
+    只不過這份 SOP 是給<strong>電腦</strong>看的</p>
+  </div>
+  <div class="two-col " style="margin-top:1rem;">
+    <div class="col">
+      <h3 style="color:var(--red);">沒有腳本</h3>
+      <p style="font-size:.95rem;">每天手動打開 → 手動找 → 手動複製 → 手動貼上<br><strong>重複 100 次</strong></p>
+    </div>
+    <div class="col">
+      <h3 style="color:var(--green);">有腳本</h3>
+      <p style="font-size:.95rem;">寫好一次 → 電腦自己跑<br><strong>0 次手動操作</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 5: 什麼是觸發器 ===== -->
+<div class="slide" data-act="暖身">
+  <h2>⏰ 什麼是「觸發器」（Trigger）？</h2>
+  <div class="info-box analogy" style="margin-top:1rem;">
+    <div class="label">白話比喻</div>
+    <p>觸發器 = <strong>告訴電腦「何時」執行</strong><br>
+    就像設定鬧鐘：到了指定時間，鬧鐘自動響</p>
+  </div>
+  <div class="card-grid " style="margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div class="icon">⏰</div>
+      <h3>定時觸發</h3>
+      <p>每天早上 9 點<br>每週一上午</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">📝</div>
+      <h3>事件觸發</h3>
+      <p>有人填表單時<br>收到新信件時</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--gold);">
+      <div class="icon">👆</div>
+      <h3>手動觸發</h3>
+      <p>按一個按鈕<br>選單點一下</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 6: 什麼是 API ===== -->
+<div class="slide" data-act="暖身">
+  <h2>🔌 什麼是 API？</h2>
+  <div class="info-box analogy" style="margin-top:1rem;">
+    <div class="label">白話比喻</div>
+    <p>API = <strong>程式之間溝通的橋樑</strong><br>
+    就像餐廳的服務生：你（程式 A）跟服務生說要什麼 → 服務生去廚房（程式 B）拿 → 端回來給你</p>
+  </div>
+  <div class="flow " style="margin-top:1.5rem;">
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);">你的程式</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);font-size:1.1rem;">API<br><span style="font-size:.75rem;font-weight:400;">（服務生）</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">另一個服務</div>
+  </div>
+  <p style="margin-top:1rem;font-size:.95rem;color:var(--g600);">例：GAS 透過 Gmail API 幫你寄信 / 透過 Calendar API 建立行程</p>
+</div>
+
+<!-- ===== 7: 自動化三要素 ===== -->
+<div class="slide" data-act="暖身">
+  <h2>自動化三要素</h2>
+  <div class="flow" style="margin-top:1.5rem;">
+    <div class="flow-box " style="background:var(--blue-lt);border-color:var(--blue);min-width:160px;padding:.8rem;">
+      <div style="font-size:1.5rem;">⏰</div>
+      <div style="font-size:1.1rem;margin-top:.3rem;">觸發</div>
+      <div style="font-size:.8rem;font-weight:400;color:var(--g600);">何時啟動？</div>
+    </div>
+    <div class="flow-arrow ">→</div>
+    <div class="flow-box " style="background:var(--green-lt);border-color:var(--green);min-width:160px;padding:.8rem;">
+      <div style="font-size:1.5rem;">📜</div>
+      <div style="font-size:1.1rem;margin-top:.3rem;">腳本</div>
+      <div style="font-size:.8rem;font-weight:400;color:var(--g600);">做什麼事？</div>
+    </div>
+    <div class="flow-arrow ">→</div>
+    <div class="flow-box " style="background:var(--gold-lt);border-color:var(--gold);min-width:160px;padding:.8rem;">
+      <div style="font-size:1.5rem;">🎯</div>
+      <div style="font-size:1.1rem;margin-top:.3rem;">目標</div>
+      <div style="font-size:.8rem;font-weight:400;color:var(--g600);">結果送到哪？</div>
+    </div>
+  </div>
+  <div class="info-box success " style="margin-top:1rem;">
+    <p style="font-size:1.05rem;">例：<strong>每天早上 9 點</strong>（觸發）→ <strong>把昨天訂單彙整成報表</strong>（腳本）→ <strong>寄到主管信箱</strong>（目標）</p>
+  </div>
+</div>
+
+<!-- ===== 8: 今天的工具：Google Apps Script ===== -->
+<div class="slide" data-act="暖身">
+  <h2>今天的武器：Google Apps Script</h2>
+  <div style="text-align:center;margin:1rem 0;">
+    <span style="font-size:3rem;">⚡</span>
+  </div>
+  <div class="card-grid grid-2x2">
+    <div class="card " style="text-align:center;border-top:3px solid var(--blue);">
+      <h3>免費</h3>
+      <p>Google 帳號<br>就能用</p>
+    </div>
+    <div class="card " style="text-align:center;border-top:3px solid var(--green);">
+      <h3>內建</h3>
+      <p>不用安裝<br>不用設定</p>
+    </div>
+    <div class="card " style="text-align:center;border-top:3px solid var(--gold);">
+      <h3>中文 OK</h3>
+      <p>AI 可以幫你<br>產生程式碼</p>
+    </div>
+    <div class="card " style="text-align:center;border-top:3px solid var(--purple);">
+      <h3>全串接</h3>
+      <p>Gmail + 日曆<br>+ 雲端硬碟</p>
+    </div>
+  </div>
+  <p style="margin-top:1rem;font-size:1rem;color:var(--g600);">你<strong>不需要會寫程式</strong> — 只要會對 AI 描述需求</p>
+</div>
+
+<!-- ===== 9: 心態調整 ===== -->
+<div class="slide" data-act="暖身">
+  <div class="quote-box">
+    <div class="quote-text">「自動化不是取代你的工作，<br>而是讓你不再做不值得做的事。」</div>
+  </div>
+  <div class="info-box tip fragment" style="margin-top:1.2rem;">
+    <div class="label">今天的學習心態</div>
+    <p>1. <strong>不怕出錯</strong> — 腳本跑壞了，刪掉重來就好<br>
+    2. <strong>先求有，再求好</strong> — 先讓它動起來，再慢慢優化<br>
+    3. <strong>AI 是你的助手</strong> — 不會寫？問 AI！</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- B. 單元十：GAS 入門 (slides 10-39) -->
+<!-- ============================================================ -->
+
+<!-- ===== 10: 單元十封面 ===== -->
+<div class="slide section-title" data-act="GAS 入門">
+  <p style="font-size:1rem;color:rgba(255,255,255,.6);">單元十</p>
+  <h1 style="color:#fff;">Google Apps Script 入門</h1>
+  <p style="margin-top:1rem;font-size:1.2rem;color:rgba(255,255,255,.8);">Google 內建的免費自動化功能</p>
+</div>
+
+<!-- ===== 11: GAS 是什麼 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <h2>GAS 是什麼？</h2>
+  <div class="info-box analogy" style="margin-top:.8rem;">
+    <div class="label">一句話解釋</div>
+    <p>GAS = Google 幫你在<strong>雲端跑腳本</strong>的免費工具<br>
+    不需要自己的電腦開著，Google 的伺服器幫你 24 小時執行</p>
+  </div>
+  <div class="flow" style="margin-top:1rem;">
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);">你寫腳本</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);">設定觸發</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">Google 自動跑</div>
+  </div>
+  <p style="margin-top:.8rem;font-size:.95rem;color:var(--g600);">類似 Excel 的 VBA 巨集，但更強大 — 能跨 Google 全家桶</p>
+</div>
+
+<!-- ===== 12: GAS 能做什麼 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <h2>GAS 能做什麼？常見場景</h2>
+  <div class="card-grid grid-2x2" style="margin-top:.8rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div class="icon">📧</div>
+      <h3>自動寄信</h3>
+      <p>客製化群發<br>合約到期提醒</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">📊</div>
+      <h3>報表彙整</h3>
+      <p>每日銷售日報<br>自動計算統計</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--gold);">
+      <div class="icon">📝</div>
+      <h3>表單處理</h3>
+      <p>填表自動通知<br>分類歸檔</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--purple);">
+      <div class="icon">🗂️</div>
+      <h3>檔案管理</h3>
+      <p>定時備份<br>自動整理資料夾</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 13: Before / After ===== -->
+<div class="slide" data-act="GAS 入門">
+  <h2>自動化前 vs 自動化後</h2>
+  <table class="compare-table" style="margin-top:1rem;">
+    <thead>
+      <tr><th>工作項目</th><th style="color:var(--red);">手動（Before）</th><th style="color:var(--green);">自動化（After）</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>每月客戶生日信</strong></td>
+        <td>逐筆查 → 逐封寫 → 逐封寄<br>30 分鐘/月</td>
+        <td>腳本自動比對 → 自動寄送<br><strong>0 分鐘/月</strong></td>
+      </tr>
+      <tr>
+        <td><strong>每日銷售報表</strong></td>
+        <td>手動抓數字 → 手動填表<br>20 分鐘/天</td>
+        <td>自動彙整 → 寄到群組<br><strong>0 分鐘/天</strong></td>
+      </tr>
+      <tr>
+        <td><strong>表單回覆通知</strong></td>
+        <td>反覆刷新 → 看到才回<br>不定時</td>
+        <td>填完即通知 → 即時回應<br><strong>即時</strong></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 14: 三步驟啟動 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <h2>三步驟啟動你的第一個自動化</h2>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>對 AI 描述需求</strong><p>「我想在每天早上自動寄出昨天的訂單摘要」</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>AI 產生 GAS 程式碼</strong><p>AI 會幫你寫好完整腳本，你只需要複製</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>貼到 GAS 編輯器 → 啟用</strong><p>打開試算表 → 延伸功能 → Apps Script → 貼上 → 執行</p></div>
+    </div>
+  </div>
+  <p style="margin-top:.8rem;font-weight:700;color:var(--green);font-size:1.1rem;">就這樣！你不需要「學程式」，只需要會「說需求」</p>
+</div>
+
+<!-- ===== 15: Demo — 開啟 GAS 編輯器 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <span class="demo-banner">Demo 示範</span>
+  <h2>開啟 GAS 編輯器</h2>
+  <div class="mockup" style="margin-top:.8rem;">
+    <div class="mockup-bar">Google 試算表</div>
+    <div class="mockup-content">
+      <p style="font-size:.9rem;color:var(--g600);margin-bottom:.6rem;">選單列：</p>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+        <span style="padding:.3rem .8rem;background:var(--g50);border-radius:6px;font-size:.85rem;">檔案</span>
+        <span style="padding:.3rem .8rem;background:var(--g50);border-radius:6px;font-size:.85rem;">編輯</span>
+        <span style="padding:.3rem .8rem;background:var(--g50);border-radius:6px;font-size:.85rem;">檢視</span>
+        <span style="padding:.3rem .8rem;background:var(--g50);border-radius:6px;font-size:.85rem;">插入</span>
+        <span style="padding:.3rem .8rem;background:var(--g50);border-radius:6px;font-size:.85rem;">格式</span>
+        <span style="padding:.3rem .8rem;background:var(--blue-lt);border:2px solid var(--blue);border-radius:6px;font-size:.85rem;font-weight:700;color:var(--blue);">延伸功能 ▾</span>
+      </div>
+      <div style="margin-top:.5rem;margin-left:2rem;background:var(--white);border:2px solid var(--g200);border-radius:8px;padding:.5rem;width:200px;">
+        <p style="padding:.3rem .5rem;font-size:.85rem;cursor:pointer;border-radius:4px;background:var(--blue-lt);color:var(--blue);font-weight:700;">📜 Apps Script</p>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top:.5rem;font-size:.95rem;color:var(--g600);">任何 Google 試算表 → 延伸功能 → Apps Script → 就會開啟程式編輯器</p>
+</div>
+
+<!-- ===== 16: Demo — AI 產生程式碼 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <span class="demo-banner">Demo 示範</span>
+  <h2>Step 1: 對 AI 描述需求</h2>
+  <div class="mockup" style="margin-top:.6rem;">
+    <div class="mockup-bar">ChatGPT / Gemini / Claude</div>
+    <div class="mockup-content">
+      <div class="chat-bubble user">幫我寫一段 Google Apps Script，功能是：讀取試算表 A 欄的 Email 和 B 欄的姓名，然後逐筆寄出客製化的感謝信。信件主旨是「感謝您的支持」，內文要包含對方的名字。</div>
+      <div class="chat-bubble ai">好的！以下是完整的 GAS 程式碼：<br><br>function sendThankYouEmails() {<br>&nbsp;&nbsp;var sheet = SpreadsheetApp...<br>...</div>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:.5rem;">
+    <div class="label">提示詞技巧</div>
+    <p>講清楚三件事：① 資料在哪 ② 要做什麼動作 ③ 結果長什麼樣</p>
+  </div>
+</div>
+
+<!-- ===== 17: Demo — 貼上執行 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <span class="demo-banner">Demo 示範</span>
+  <h2>Step 2-3: 貼上 → 執行</h2>
+  <div class="mockup" style="margin-top:.6rem;">
+    <div class="mockup-bar">Apps Script 編輯器</div>
+    <div class="mockup-content" style="font-family:'Fira Code',monospace;font-size:.8rem;line-height:1.8;color:var(--g800);">
+      <span style="color:var(--blue);">function</span> <span style="color:var(--purple);">sendThankYouEmails</span>() {<br>
+      &nbsp;&nbsp;<span style="color:var(--blue);">var</span> sheet = SpreadsheetApp.getActiveSheet();<br>
+      &nbsp;&nbsp;<span style="color:var(--blue);">var</span> data = sheet.getDataRange().getValues();<br>
+      &nbsp;&nbsp;<span style="color:var(--blue);">for</span> (<span style="color:var(--blue);">var</span> i = 1; i &lt; data.length; i++) {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--blue);">var</span> email = data[i][0];<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--blue);">var</span> name = data[i][1];<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;GmailApp.sendEmail(email, <span style="color:var(--green);">"感謝您的支持"</span>,<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name + <span style="color:var(--green);">" 您好，感謝..."</span>);<br>
+      &nbsp;&nbsp;}<br>
+      }
+    </div>
+  </div>
+  <div class="flow" style="margin-top:.6rem;">
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);">複製 AI 程式碼</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);">貼到編輯器</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">按 ▶ 執行</div>
+  </div>
+</div>
+
+<!-- ===== 18: 授權說明 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <h2>⚠️ 第一次執行會要求授權</h2>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>點「審查權限」</strong><p>Google 會問你要不要讓這個腳本存取你的資料</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>選擇你的 Google 帳號</strong></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>點「進階」→「前往（不安全）」</strong><p>因為是自己寫的腳本，Google 還沒驗證過，所以會有警告 — 放心，這是正常的</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content"><strong>點「允許」</strong><p>授權完成，以後就不會再問了</p></div>
+    </div>
+  </div>
+  <div class="info-box warning">
+    <p style="font-size:.9rem;">注意：只授權<strong>自己寫的</strong>或<strong>信任的</strong>腳本。不要隨便授權來路不明的程式碼！</p>
+  </div>
+</div>
+
+<!-- ===== 19: GAS 編輯器介面導覽 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <span class="demo-banner">Demo 示範</span>
+  <h2>GAS 編輯器介面導覽</h2>
+  <div class="mockup" style="margin-top:.6rem;">
+    <div class="mockup-bar">Apps Script 編輯器</div>
+    <div class="mockup-content" style="font-size:.85rem;">
+      <div style="display:flex;gap:1rem;">
+        <div style="width:140px;border-right:1px solid var(--g200);padding-right:.8rem;">
+          <p style="font-weight:700;margin-bottom:.3rem;">左側面板</p>
+          <p style="color:var(--blue);font-weight:600;">📝 編輯器</p>
+          <p>⏰ 觸發條件</p>
+          <p>📋 執行紀錄</p>
+          <p>⚙️ 專案設定</p>
+        </div>
+        <div style="flex:1;">
+          <p style="font-weight:700;margin-bottom:.3rem;">主要區域</p>
+          <p style="color:var(--g600);">上方：▶ 執行 / 🐛 偵錯 / 函式選擇</p>
+          <p style="color:var(--g600);">中間：程式碼編輯區</p>
+          <p style="color:var(--g600);">下方：執行日誌輸出</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:.5rem;">
+    <p>最常用：① 貼程式碼到編輯區 ② 按 ▶ 執行 ③ 左側看「觸發條件」和「執行紀錄」</p>
+  </div>
+</div>
+
+<!-- ===== 20: AI 產生程式碼的完整流程 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <h2>完整流程：從需求到執行</h2>
+  <div class="flow" style="margin-top:1rem;">
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);min-width:100px;">
+      <div style="font-size:1.2rem;">💬</div>
+      <div style="font-size:.85rem;">用中文<br>描述需求</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="min-width:100px;">
+      <div style="font-size:1.2rem;">🤖</div>
+      <div style="font-size:.85rem;">AI 產生<br>GAS 程式碼</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="min-width:100px;">
+      <div style="font-size:1.2rem;">📋</div>
+      <div style="font-size:.85rem;">複製貼上<br>到編輯器</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="min-width:100px;">
+      <div style="font-size:1.2rem;">▶️</div>
+      <div style="font-size:.85rem;">按執行<br>授權</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);min-width:100px;">
+      <div style="font-size:1.2rem;">✅</div>
+      <div style="font-size:.85rem;">驗證結果<br>設觸發器</div>
+    </div>
+  </div>
+  <div class="info-box success" style="margin-top:.8rem;">
+    <p>全程不需要「學程式」— 你只負責<strong>說清楚需求</strong>和<strong>按按鈕</strong></p>
+  </div>
+</div>
+
+<!-- ===== 21: 閃卡 — ROI/TCO ===== -->
+<div class="slide" data-act="GAS 入門">
+  <div style="background:var(--blue-lt);padding:.3rem 1rem;border-radius:100px;font-size:.85rem;font-weight:700;color:var(--blue);display:inline-block;margin-bottom:.6rem;">📘 iPAS 術語閃卡</div>
+  <h2 style="color:var(--blue);font-size:2rem;">ROI & TCO — 先算值不值得</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <div class="info-box" style="background:var(--green-lt);border-left:4px solid var(--green);">
+        <h3 style="color:var(--green);">ROI 投資報酬率</h3>
+        <p style="font-size:.95rem;">Return on Investment<br>
+        花 1 小時建自動化<br>每年省 40 小時 → ROI = 3900%</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="info-box" style="background:var(--gold-lt);border-left:4px solid var(--gold);">
+        <h3 style="color:var(--gold);">TCO 總擁有成本</h3>
+        <p style="font-size:.95rem;">Total Cost of Ownership<br>
+        不只是建置成本<br>還有維護、除錯、人員訓練成本</p>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top:.8rem;font-weight:700;color:var(--navy);font-size:1rem;">做自動化前先問：<span class="blue">省下的時間</span> 大於 <span class="red">投入的時間</span> 嗎？</p>
+  <p style="font-size:.9rem;color:var(--g600);">📖 深入學習 → <a href="https://ai100.cooperation.tw/classroom/learn" target="_blank" style="color:var(--blue);">AI100 M09 AI 導入與評估</a></p>
+</div>
+
+<!-- ============================================================ -->
+<!-- Phase 1: 建表單 + 收數據 (個人任務) -->
+<!-- ============================================================ -->
+
+<!-- ===== Phase 1 封面 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem;">
+    <span style="background:var(--blue);color:#fff;padding:.4rem 1rem;border-radius:100px;font-weight:900;font-size:1.2rem;">Phase 1</span>
+    <span style="font-size:1rem;color:var(--g600);">個人任務</span>
+  </div>
+  <h2>建表單 + 收數據</h2>
+  <p style="color:var(--g600);margin-top:.4rem;">每個人建一份自己的「課程滿意度問卷」，3 題就好</p>
+  <div class="flow" style="margin-top:1rem;">
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);">建 Google 表單</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);">自動收到 Sheet</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">你的數據基地</div>
+  </div>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <div class="label">為什麼從表單開始？</div>
+    <p>表單是 Google 自動化最常見的入口 — 收到數據才能觸發後續所有流程</p>
+  </div>
+</div>
+
+<!-- ===== Phase 1: Demo — 建表單 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <span class="demo-banner">Demo 示範</span>
+  <h2>30 秒建好一份問卷</h2>
+  <div class="mockup" style="margin-top:.6rem;">
+    <div class="mockup-bar">Google 表單 — 課程滿意度問卷</div>
+    <div class="mockup-content" style="font-size:.85rem;">
+      <div style="margin-bottom:.5rem;">
+        <p style="font-weight:700;">Q1. 你的姓名</p>
+        <div style="border-bottom:1px solid var(--g200);padding:.2rem 0;color:var(--g400);">簡答</div>
+      </div>
+      <div style="margin-bottom:.5rem;">
+        <p style="font-weight:700;">Q2. 你的 Email</p>
+        <div style="border-bottom:1px solid var(--g200);padding:.2rem 0;color:var(--g400);">簡答</div>
+      </div>
+      <div style="margin-bottom:.5rem;">
+        <p style="font-weight:700;">Q3. 整體滿意度（1-5 分）</p>
+        <div style="display:flex;gap:.5rem;margin-top:.2rem;">
+          <span style="padding:.2rem .6rem;border:1px solid var(--g200);border-radius:4px;">1</span>
+          <span style="padding:.2rem .6rem;border:1px solid var(--g200);border-radius:4px;">2</span>
+          <span style="padding:.2rem .6rem;border:1px solid var(--g200);border-radius:4px;">3</span>
+          <span style="padding:.2rem .6rem;border:1px solid var(--blue);background:var(--blue-lt);border-radius:4px;font-weight:700;">4</span>
+          <span style="padding:.2rem .6rem;border:1px solid var(--g200);border-radius:4px;">5</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top:.5rem;font-size:.95rem;color:var(--g600);">表單 → 回覆 → 「建立試算表」→ 所有回覆自動進入 Sheet</p>
+</div>
+
+<!-- ===== Phase 1: 案例 ⭐ — 建你自己的問卷 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <span class="exercise-banner">案例 ⭐ 個人任務</span>
+  <h2>建一份你自己的問卷</h2>
+  <div class="step-list" style="margin-top:.6rem;">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>到 Google 表單建一份新問卷</strong><p>主題自訂（課程回饋、活動報名、團隊調查...隨你）</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>至少 3 題</strong><p>必須包含：姓名、Email、至少一題評分或選擇題</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>連結到試算表</strong><p>表單 → 回覆 → 建立試算表 → 確認數據會自動進入</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content"><strong>自己填一次測試</strong><p>確認 Sheet 有收到你的回覆</p></div>
+    </div>
+  </div>
+  <div class="timer" data-minutes="8">8:00</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Phase 2: GAS 串接自動發信 -->
+<!-- ============================================================ -->
+
+<!-- ===== Phase 2 封面 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem;">
+    <span style="background:var(--green);color:#fff;padding:.4rem 1rem;border-radius:100px;font-weight:900;font-size:1.2rem;">Phase 2</span>
+    <span style="font-size:1rem;color:var(--g600);">GAS 串接</span>
+  </div>
+  <h2>用 GAS 自動發送問卷邀請信</h2>
+  <p style="color:var(--g600);margin-top:.4rem;">從 Sheet 讀 Email 名單 → 自動寄出帶問卷連結的邀請信</p>
+  <div class="flow" style="margin-top:1rem;">
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);">📊 Sheet<br><span style="font-size:.75rem;font-weight:400;">Email 名單</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);">⚡ GAS<br><span style="font-size:.75rem;font-weight:400;">逐筆寄信</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">📧 邀請信<br><span style="font-size:.75rem;font-weight:400;">含問卷連結</span></div>
+  </div>
+  <div class="info-box success" style="margin-top:.8rem;">
+    <p style="font-size:1.1rem;font-weight:700;">重點體驗：<span class="green">你真的會用 AI 自動發信給全班！</span></p>
+  </div>
+</div>
+
+<!-- ===== Phase 2: 程式碼 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <span class="demo-banner">Demo 示範</span>
+  <h2>自動發送問卷邀請 — 程式碼</h2>
+  <div class="code-block" style="font-size:.8rem;margin-top:.6rem;">function sendSurveyInvites() {
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var data = sheet.getDataRange().getValues();
+  var formUrl = '你的問卷連結';
+
+  for (var i = 1; i &lt; data.length; i++) {
+    var email = data[i][0];  // A 欄: Email
+    var name  = data[i][1];  // B 欄: 姓名
+
+    if (data[i][2] !== '✓') {  // C 欄: 尚未寄送
+      var subject = name + '，邀請你填寫課程問卷！';
+      var body = name + ' 你好！\n\n'
+        + '請花 1 分鐘填寫問卷：\n'
+        + formUrl + '\n\n'
+        + '感謝你的寶貴意見！';
+
+      GmailApp.sendEmail(email, subject, body);
+      sheet.getRange(i + 1, 3).setValue('✓');
+    }
+  }
+}</div>
+  <p class="callout">把 <code>'你的問卷連結'</code> 換成你 Phase 1 建的問卷網址</p>
+</div>
+
+<!-- ===== Phase 2: 效果展示 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <span class="demo-banner">Demo 示範</span>
+  <h2>執行結果：信箱收到邀請了！</h2>
+  <div class="two-col" style="margin-top:.8rem;">
+    <div class="col">
+      <div class="mockup">
+        <div class="mockup-bar">同學收件匣</div>
+        <div class="mockup-content" style="font-size:.85rem;">
+          <p style="font-weight:700;">王小明，邀請你填寫課程問卷！</p>
+          <p style="color:var(--g600);margin-top:.3rem;">王小明 你好！<br>請花 1 分鐘填寫問卷：<br><span style="color:var(--blue);text-decoration:underline;">https://forms.gle/xxx</span></p>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="mockup">
+        <div class="mockup-bar">你的試算表 — 自動標記</div>
+        <div class="mockup-content" style="font-size:.85rem;">
+          <table style="width:100%;border-collapse:collapse;">
+            <tr style="background:var(--g50);font-weight:700;"><td style="padding:.2rem .4rem;border:1px solid var(--g200);">Email</td><td style="padding:.2rem .4rem;border:1px solid var(--g200);">姓名</td><td style="padding:.2rem .4rem;border:1px solid var(--g200);">已寄</td></tr>
+            <tr><td style="padding:.2rem .4rem;border:1px solid var(--g200);">wang@</td><td style="padding:.2rem .4rem;border:1px solid var(--g200);">王小明</td><td style="padding:.2rem .4rem;border:1px solid var(--g200);color:var(--green);font-weight:700;">✓</td></tr>
+            <tr><td style="padding:.2rem .4rem;border:1px solid var(--g200);">chen@</td><td style="padding:.2rem .4rem;border:1px solid var(--g200);">陳美玲</td><td style="padding:.2rem .4rem;border:1px solid var(--g200);color:var(--green);font-weight:700;">✓</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top:.6rem;font-size:1.05rem;color:var(--green);font-weight:700;">全班同學的信箱，不到 10 秒全部收到你的問卷邀請！</p>
+</div>
+
+<!-- ===== Phase 2: 案例 ⭐⭐ — 分享 Email ===== -->
+<div class="slide" data-act="GAS 入門" data-push>
+  <span class="exercise-banner">案例 ⭐⭐ 串接發信</span>
+  <h2>學員互相分享 Email → 群發邀請</h2>
+  <div class="step-list" style="margin-top:.6rem;">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>把你的 Email 發到訊息牆</strong><p>讓同組/全班的人可以收集</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>建一張「名單」試算表</strong><p>A 欄：Email，B 欄：姓名，C 欄：已寄送</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>請 AI 幫你改信件內容</strong>
+        <div class="code-block" style="font-size:.85rem;margin-top:.3rem;">幫我修改這段 GAS，把信件改成：
+邀請對方填寫我的課程問卷。
+問卷連結是：[你的連結]
+語氣要親切有趣。</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content"><strong>貼到 GAS → 執行 → 看同學信箱！</strong></div>
+    </div>
+  </div>
+  <div class="timer" data-minutes="10">10:00</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Phase 3: 互寄問卷 + 體驗 -->
+<!-- ============================================================ -->
+
+<!-- ===== Phase 3 封面 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem;">
+    <span style="background:var(--purple);color:#fff;padding:.4rem 1rem;border-radius:100px;font-weight:900;font-size:1.2rem;">Phase 3</span>
+    <span style="font-size:1rem;color:var(--g600);">互動體驗</span>
+  </div>
+  <h2>互寄問卷 + 全班體驗</h2>
+  <p style="color:var(--g600);margin-top:.4rem;">用 GAS 一鍵群發你的問卷 → 全班同時填彼此的問卷</p>
+  <div class="flow" style="margin-top:1rem;">
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);">各組收集<br>Email 名單</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--purple-lt);border-color:var(--purple);">GAS 一鍵<br>群發問卷</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">全班同時<br>填問卷！</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);">投票：<br>最佳問卷</div>
+  </div>
+</div>
+
+<!-- ===== Phase 3: 執行時刻 ===== -->
+<div class="slide cinematic" data-act="GAS 入門">
+  <h2 style="font-size:2.2rem;">3... 2... 1... <span style="color:var(--gold);">發射！</span></h2>
+  <p style="color:rgba(255,255,255,.7);font-size:1.1rem;margin-top:1rem;">全班同時按下 ▶ 執行</p>
+  <div style="margin-top:1.5rem;display:flex;gap:2rem;justify-content:center;flex-wrap:wrap;">
+    <div style="text-align:center;">
+      <div class="big-num" style="color:var(--gold);">📧</div>
+      <p style="color:var(--g400);margin-top:.3rem;">信件正在飛...</p>
+    </div>
+    <div style="text-align:center;">
+      <div class="big-num" style="color:var(--green);">✅</div>
+      <p style="color:var(--g400);margin-top:.3rem;">打開信箱看看！</p>
+    </div>
+  </div>
+  <p style="margin-top:1.5rem;font-size:1.3rem;font-weight:900;color:#fff;">「我真的用 AI 自動發信給全班了！」</p>
+</div>
+
+<!-- ===== Phase 3: 填問卷 + 投票 ===== -->
+<div class="slide vote-slide" data-act="GAS 入門" data-push>
+  <span class="exercise-banner">全班互動</span>
+  <h2>體驗 + 投票時間</h2>
+  <div class="step-list" style="margin-top:.6rem;">
+    <div class="step">
+      <div class="step-num" style="background:var(--blue);">1</div>
+      <div class="step-content"><strong>打開信箱</strong><p>找到同學寄給你的問卷邀請 → 點連結填寫</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--green);">2</div>
+      <div class="step-content"><strong>填 3-5 份同學的問卷</strong><p>體驗不同的問卷設計 — 哪個最好填？哪個最有趣？</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--gold);">3</div>
+      <div class="step-content"><strong>投票：哪個問卷設計最好？</strong><p>到訊息牆投票 — 問卷設計也是一門學問！</p></div>
+    </div>
+  </div>
+  <div class="timer" data-minutes="10">10:00</div>
+</div>
+
+<!-- ===== 33: GAS 除錯技巧 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <h2>🔧 GAS 除錯技巧</h2>
+  <p style="color:var(--g600);">腳本跑不動？別慌，按這三步排查</p>
+  <div class="step-list" style="margin-top:.8rem;">
+    <div class="step">
+      <div class="step-num" style="background:var(--red);">1</div>
+      <div class="step-content"><strong>看「執行紀錄」</strong><p>GAS 編輯器 → 左側「執行」→ 會顯示錯誤訊息</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--gold);">2</div>
+      <div class="step-content"><strong>把錯誤訊息貼給 AI</strong>
+        <div class="code-block" style="margin-top:.3rem;font-size:.85rem;">我的 GAS 出現以下錯誤：
+TypeError: Cannot read properties of null
+第 8 行。請幫我修復。</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--green);">3</div>
+      <div class="step-content"><strong>用 Logger.log() 偵錯</strong><p>在程式碼中加 <code>Logger.log(變數名)</code> 查看中間值</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 32: 常見錯誤排行 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <h2>GAS 常見錯誤 Top 5</h2>
+  <table class="compare-table" style="margin-top:.8rem;">
+    <thead>
+      <tr><th>#</th><th>錯誤</th><th>原因 & 解法</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td style="font-family:'Fira Code',monospace;font-size:.85rem;color:var(--red);">Authorization required</td>
+        <td>沒授權 → 重新執行，按「審查權限」</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td style="font-family:'Fira Code',monospace;font-size:.85rem;color:var(--red);">Cannot read property of null</td>
+        <td>試算表名稱或欄位對不上 → 檢查資料範圍</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td style="font-family:'Fira Code',monospace;font-size:.85rem;color:var(--red);">Service invocations exceeded</td>
+        <td>超過每日免費額度 → 明天再跑或分批</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td style="font-family:'Fira Code',monospace;font-size:.85rem;color:var(--red);">Exceeded max execution time</td>
+        <td>腳本跑太久（>6分鐘）→ 縮小資料範圍</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td style="font-family:'Fira Code',monospace;font-size:.85rem;color:var(--red);">Invalid email address</td>
+        <td>Email 格式錯 → 檢查試算表資料</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 33: GAS 限制 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <h2>GAS 免費版限制</h2>
+  <table class="compare-table" style="margin-top:.8rem;">
+    <thead>
+      <tr><th>項目</th><th>免費帳號</th><th>Workspace 帳號</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>每日 Email 數量</td>
+        <td>100 封</td>
+        <td>1,500 封</td>
+      </tr>
+      <tr>
+        <td>腳本執行時間</td>
+        <td>6 分鐘/次</td>
+        <td>6 分鐘/次</td>
+      </tr>
+      <tr>
+        <td>每日總執行時間</td>
+        <td>90 分鐘</td>
+        <td>6 小時</td>
+      </tr>
+      <tr>
+        <td>觸發器數量</td>
+        <td>20 個</td>
+        <td>20 個</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="info-box tip" style="margin-top:.6rem;">
+    <div class="label">夠用嗎？</div>
+    <p>對個人和中小企業來說，<strong>完全夠用</strong>。一般自動化腳本幾秒就跑完。</p>
+  </div>
+</div>
+
+<!-- ===== 模組十 小結 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <h2>單元十 成果回顧</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>建了自己的問卷</h3>
+      <p>Google 表單<br>自動收到 Sheet</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>用 GAS 群發邀請</h3>
+      <p>AI 寫碼 → 一鍵發信<br>全班都收到了</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>互填問卷體驗</h3>
+      <p>體驗完整的<br>表單→發信→填答 流程</p>
+    </div>
+  </div>
+  <p style="margin-top:1rem;font-size:1.05rem;color:var(--navy);font-weight:700;">接下來：把收回的數據<span class="blue">分析出價值</span></p>
+</div>
+
+<!-- ============================================================ -->
+<!-- C. 單元十一：跨服務串接 (slides 35-59) -->
+<!-- ============================================================ -->
+
+<!-- ===== extra: GAS 小技巧 ===== -->
+<div class="slide" data-act="GAS 入門">
+  <h2>💡 GAS 實用小技巧</h2>
+  <div class="card-grid" style="margin-top:.8rem;">
+    <div class="card" style="border-top:3px solid var(--blue);">
+      <div class="icon">📌</div>
+      <h3>加入自訂選單</h3>
+      <div class="code-block" style="font-size:.75rem;margin-top:.3rem;padding:.6rem;">function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('自動化')
+    .addItem('執行報表', 'myFunc')
+    .addToUi();
+}</div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--green);">
+      <div class="icon">📧</div>
+      <h3>HTML 格式信件</h3>
+      <div class="code-block" style="font-size:.75rem;margin-top:.3rem;padding:.6rem;">GmailApp.sendEmail(
+  to, subject, '',
+  {htmlBody: '&lt;h2&gt;標題&lt;/h2&gt;'}
+);</div>
+    </div>
+  </div>
+  <p style="margin-top:.6rem;font-size:.95rem;color:var(--g600);">這些都可以直接請 AI 幫你加到現有程式碼中</p>
+</div>
+
+<!-- ===== extra: 休息提示 ===== -->
+<div class="slide break-slide" data-act="GAS 入門">
+  <div style="font-size:4rem;margin-bottom:1rem;">☕</div>
+  <h2>休息 10 分鐘</h2>
+  <p style="font-size:1.1rem;color:var(--g600);margin-top:1rem;">10:30 回來，進入單元十一：跨服務串接</p>
+  <p style="margin-top:.8rem;color:var(--g400);">休息時間可以試著幫上午的腳本加入觸發器</p>
+</div>
+
+<!-- ===== 35: 單元十一封面 ===== -->
+<div class="slide section-title" data-act="跨服務串接">
+  <p style="font-size:1rem;color:rgba(255,255,255,.6);">單元十一</p>
+  <h1 style="color:#fff;">跨服務串接</h1>
+  <p style="margin-top:1rem;font-size:1.2rem;color:rgba(255,255,255,.8);">Gmail + 日曆 + 試算表 — 全部連起來</p>
+</div>
+
+<!-- ===== 36: Google 全串接圖 ===== -->
+<div class="slide" data-act="跨服務串接">
+  <h2>Google Workspace 全串接圖</h2>
+  <div style="text-align:center;margin-top:1rem;">
+    <div style="display:inline-grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:600px;">
+      <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+        <div style="font-size:1.8rem;">📧</div>
+        <h3>Gmail</h3>
+      </div>
+      <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+        <div style="font-size:1.8rem;">📅</div>
+        <h3>日曆</h3>
+      </div>
+      <div class="card" style="text-align:center;border-top:3px solid var(--gold);">
+        <div style="font-size:1.8rem;">📊</div>
+        <h3>試算表</h3>
+      </div>
+      <div class="card" style="text-align:center;border-top:3px solid var(--purple);">
+        <div style="font-size:1.8rem;">📝</div>
+        <h3>表單</h3>
+      </div>
+      <div class="card" style="text-align:center;border-top:3px solid var(--red);">
+        <div style="font-size:1.8rem;">📄</div>
+        <h3>文件</h3>
+      </div>
+      <div class="card" style="text-align:center;border-top:3px solid var(--orange);">
+        <div style="font-size:1.8rem;">📁</div>
+        <h3>雲端硬碟</h3>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top:1rem;font-size:1.1rem;font-weight:700;color:var(--navy);">GAS 是中間的<span class="blue">黏著劑</span> — 把所有 Google 服務串成自動化流程</p>
+</div>
+
+<!-- ===== 37: Demo — 跨服務串接概念 ===== -->
+<div class="slide" data-act="跨服務串接">
+  <span class="demo-banner">Demo 示範</span>
+  <h2>試算表 + Gmail + 日曆 三合一</h2>
+  <p style="color:var(--g600);">情境：專案管理者追蹤任務到期日，自動發提醒 + 建日曆事件</p>
+  <div class="flow" style="margin-top:1rem;">
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);">📊 試算表<br><span style="font-size:.75rem;font-weight:400;">任務 + 到期日</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);">⚡ GAS<br><span style="font-size:.75rem;font-weight:400;">比對日期</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">📧 寄提醒<br>📅 建事件</div>
+  </div>
+  <div class="info-box analogy" style="margin-top:.8rem;">
+    <p>就像請一個助理每天早上幫你看任務清單：<br>
+    「這個快到期了 → 寄信提醒負責人 → 順便加到他的日曆」</p>
+  </div>
+</div>
+
+<!-- ===== 38: 跨服務程式碼 ===== -->
+<div class="slide" data-act="跨服務串接">
+  <span class="demo-banner">Demo 示範</span>
+  <h2>跨服務串接 — 程式碼</h2>
+  <div class="code-block" style="font-size:.75rem;margin-top:.5rem;">function checkDeadlines() {
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var data = sheet.getDataRange().getValues();
+  var today = new Date();
+  var threeDays = new Date(today.getTime() + 3*24*60*60*1000);
+
+  for (var i = 1; i &lt; data.length; i++) {
+    var task = data[i][0];      // A: 任務名稱
+    var owner = data[i][1];     // B: 負責人 Email
+    var deadline = new Date(data[i][2]); // C: 到期日
+
+    if (deadline &lt;= threeDays &amp;&amp; deadline >= today) {
+      // 寄 Email 提醒
+      GmailApp.sendEmail(owner,
+        '⏰ 任務即將到期：' + task,
+        task + ' 將在 ' + deadline.toLocaleDateString()
+          + ' 到期，請盡速處理！'
+      );
+
+      // 建立日曆事件
+      CalendarApp.getDefaultCalendar().createEvent(
+        '📌 ' + task + ' 到期',
+        deadline, deadline
+      );
+    }
+  }
+}</div>
+</div>
+
+<!-- ===== 39: 看 GAS 怎麼呼叫不同服務 ===== -->
+<div class="slide" data-act="跨服務串接">
+  <h2>一個腳本，多個 API</h2>
+  <table class="compare-table" style="margin-top:.8rem;">
+    <thead>
+      <tr><th>要做的事</th><th>GAS API</th><th>一行程式碼</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>讀試算表</td>
+        <td>SpreadsheetApp</td>
+        <td style="font-family:'Fira Code',monospace;font-size:.8rem;">.getActiveSheet()</td>
+      </tr>
+      <tr>
+        <td>寄信</td>
+        <td>GmailApp</td>
+        <td style="font-family:'Fira Code',monospace;font-size:.8rem;">.sendEmail(to, subject, body)</td>
+      </tr>
+      <tr>
+        <td>建日曆事件</td>
+        <td>CalendarApp</td>
+        <td style="font-family:'Fira Code',monospace;font-size:.8rem;">.createEvent(title, start, end)</td>
+      </tr>
+      <tr>
+        <td>建文件</td>
+        <td>DocumentApp</td>
+        <td style="font-family:'Fira Code',monospace;font-size:.8rem;">.create(name)</td>
+      </tr>
+      <tr>
+        <td>操作檔案</td>
+        <td>DriveApp</td>
+        <td style="font-family:'Fira Code',monospace;font-size:.8rem;">.getFileById(id)</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="margin-top:.6rem;font-size:.95rem;color:var(--g600);">你不用記這些 — 對 AI 說「幫我用 GAS 寄信 + 建日曆事件」，它就會用</p>
+</div>
+
+<!-- ===== 40: Demo — 自動執行設定 ===== -->
+<div class="slide" data-act="跨服務串接">
+  <span class="demo-banner">Demo 示範</span>
+  <h2>自動執行設定：定時 vs 事件觸發</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <div class="info-box" style="background:var(--blue-lt);border-left:4px solid var(--blue);">
+        <h3 style="color:var(--blue);">⏰ 定時觸發</h3>
+        <p style="font-size:.9rem;">每天早上 8 點檢查到期任務<br>每週一產生週報<br>每月 1 號備份資料</p>
+        <p style="font-size:.85rem;margin-top:.4rem;color:var(--g600);">適合：例行性工作</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="info-box" style="background:var(--green-lt);border-left:4px solid var(--green);">
+        <h3 style="color:var(--green);">📝 事件觸發</h3>
+        <p style="font-size:.9rem;">有人填表 → 自動通知<br>試算表被編輯 → 自動檢查<br>日曆事件更新 → 同步通知</p>
+        <p style="font-size:.85rem;margin-top:.4rem;color:var(--g600);">適合：即時回應</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Phase 4: 數據分析 -->
+<!-- ============================================================ -->
+
+<!-- ===== Phase 4 封面 ===== -->
+<div class="slide" data-act="跨服務串接">
+  <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem;">
+    <span style="background:var(--orange);color:#fff;padding:.4rem 1rem;border-radius:100px;font-weight:900;font-size:1.2rem;">Phase 4</span>
+    <span style="font-size:1rem;color:var(--g600);">數據分析</span>
+  </div>
+  <h2>用 GAS 分析問卷數據</h2>
+  <p style="color:var(--g600);margin-top:.4rem;">問卷數據收回來了 — 現在用 GAS 跑統計 + AI 做情緒分析</p>
+  <div class="flow" style="margin-top:1rem;">
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);">📊 Sheet<br><span style="font-size:.75rem;font-weight:400;">問卷回覆</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);">⚡ GAS<br><span style="font-size:.75rem;font-weight:400;">基本統計</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--purple-lt);border-color:var(--purple);">🤖 AI<br><span style="font-size:.75rem;font-weight:400;">情緒分析</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">📧 報告<br><span style="font-size:.75rem;font-weight:400;">寄到信箱</span></div>
+  </div>
+</div>
+
+<!-- ===== Phase 4: Demo — 基本統計 ===== -->
+<div class="slide" data-act="跨服務串接">
+  <span class="demo-banner">Demo 示範</span>
+  <h2>GAS 跑基本統計</h2>
+  <div class="code-block" style="font-size:.78rem;margin-top:.5rem;">function analyzeSurvey() {
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var data = sheet.getDataRange().getValues();
+  var scores = [];
+
+  for (var i = 1; i &lt; data.length; i++) {
+    scores.push(Number(data[i][2])); // C 欄: 評分
+  }
+
+  var total = scores.length;
+  var sum = scores.reduce(function(a,b){return a+b;}, 0);
+  var avg = (sum / total).toFixed(1);
+  var max = Math.max.apply(null, scores);
+  var min = Math.min.apply(null, scores);
+
+  var report = '問卷統計報告\n'
+    + '回覆數：' + total + ' 人\n'
+    + '平均分：' + avg + ' 分\n'
+    + '最高分：' + max + ' / 最低分：' + min;
+
+  // 寄報告到自己信箱
+  GmailApp.sendEmail(
+    Session.getActiveUser().getEmail(),
+    '問卷分析報告', report
+  );
+}</div>
+</div>
+
+<!-- ===== Phase 4: 效果展示 — 統計報告 ===== -->
+<div class="slide" data-act="跨服務串接">
+  <span class="demo-banner">Demo 示範</span>
+  <h2>收到你的統計報告</h2>
+  <div class="two-col" style="margin-top:.8rem;">
+    <div class="col">
+      <div class="mockup">
+        <div class="mockup-bar">你的收件匣</div>
+        <div class="mockup-content" style="font-size:.85rem;">
+          <p style="font-weight:700;">問卷分析報告</p>
+          <p style="color:var(--g600);margin-top:.3rem;white-space:pre-line;">回覆數：18 人
+平均分：4.2 分
+最高分：5 / 最低分：2</p>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div style="text-align:center;padding:1rem;">
+        <div class="big-num" style="color:var(--green);font-size:3.5rem;">4.2</div>
+        <p style="font-weight:700;color:var(--navy);">平均滿意度</p>
+        <p style="font-size:.9rem;color:var(--g600);margin-top:.3rem;">18 人回覆</p>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top:.6rem;font-size:.95rem;font-weight:700;color:var(--navy);">從收集 → 發送 → 回收 → 分析 → 報告，一條龍全自動！</p>
+</div>
+
+<!-- ===== Phase 4: 進階 — AI 情緒分析概念 ===== -->
+<div class="slide" data-act="跨服務串接">
+  <span class="demo-banner">進階 Demo</span>
+  <h2>串 AI API 做回覆文字情緒分析</h2>
+  <div class="info-box analogy" style="margin-top:.6rem;">
+    <div class="label">概念</div>
+    <p>問卷除了評分，還有開放式文字回覆<br>
+    用 GAS 呼叫 AI API → 分析每則回覆的情緒（正面/中性/負面）</p>
+  </div>
+  <div class="code-block" style="font-size:.78rem;margin-top:.6rem;">// 概念：用 UrlFetchApp 呼叫外部 AI API
+function analyzeComment(text) {
+  var response = UrlFetchApp.fetch(
+    'https://api.example.com/analyze',
+    { method: 'post',
+      payload: JSON.stringify({text: text}),
+      contentType: 'application/json' }
+  );
+  return JSON.parse(response).sentiment;
+  // 回傳: "positive" / "neutral" / "negative"
+}</div>
+  <p style="margin-top:.5rem;font-size:.95rem;color:var(--g600);">這就是<strong>跨服務串接</strong>的威力 — GAS + 外部 AI = 智慧自動化</p>
+</div>
+
+<!-- ===== Phase 4: 案例 ⭐⭐ — 分析你的問卷 ===== -->
+<div class="slide" data-act="跨服務串接">
+  <span class="exercise-banner">案例 ⭐⭐ 數據分析</span>
+  <h2>分析你收回的問卷數據</h2>
+  <div class="step-list" style="margin-top:.6rem;">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>打開你的問卷回覆試算表</strong><p>看看收到多少回覆？數據長什麼樣？</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>請 AI 幫你寫分析腳本</strong>
+        <div class="code-block" style="font-size:.85rem;margin-top:.3rem;">幫我寫 GAS 分析我的問卷回覆：
+1. 計算評分的平均、最高、最低
+2. 把統計結果寫到新的「分析」工作表
+3. 寄一封摘要報告到我的信箱</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>執行 → 檢查信箱收到報告！</strong></div>
+    </div>
+  </div>
+  <div class="timer" data-minutes="10">10:00</div>
+</div>
+
+<!-- ===== Phase 4: 各組比較 + 投票 ===== -->
+<div class="slide vote-slide" data-act="跨服務串接" data-push>
+  <span class="exercise-banner">全班互動</span>
+  <h2>各組比較分析結果</h2>
+  <div class="step-list" style="margin-top:.6rem;">
+    <div class="step">
+      <div class="step-num" style="background:var(--blue);">1</div>
+      <div class="step-content"><strong>各組分享分析結果</strong><p>平均分多少？回覆率多少？有什麼有趣發現？</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--green);">2</div>
+      <div class="step-content"><strong>比較：誰的問卷回收率最高？</strong><p>問卷設計好 + 邀請信寫得好 = 高回收率</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--gold);">3</div>
+      <div class="step-content"><strong>投票：最佳數據分析！</strong><p>誰的分析報告最清楚、最有洞察？</p></div>
+    </div>
+  </div>
+  <div class="timer" data-minutes="5">5:00</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Phase 5: 個人排名 → 銜接分組專題 -->
+<!-- ============================================================ -->
+
+<!-- ===== Phase 5 封面 ===== -->
+<div class="slide" data-act="跨服務串接">
+  <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem;">
+    <span style="background:var(--navy);color:#fff;padding:.4rem 1rem;border-radius:100px;font-weight:900;font-size:1.2rem;">Phase 5</span>
+    <span style="font-size:1rem;color:var(--g600);">升級挑戰</span>
+  </div>
+  <h2>個人成績 → 分組專題</h2>
+  <p style="color:var(--g600);margin-top:.4rem;">從個人小任務升級到團隊大專題</p>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--gold);">
+      <div class="icon">🏆</div>
+      <h3>個人排名</h3>
+      <p>問卷回收率<br>設計評分<br>分析品質</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--purple);">
+      <div class="icon">🚀</div>
+      <h3>升級挑戰</h3>
+      <p>個人能做的<br>→ 團隊做更大的<br>→ 複雜度提升</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">👥</div>
+      <h3>分組專題</h3>
+      <p>把上午學的<br>自動化技能<br>整合進專題</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Phase 5: 一條龍回顧 ===== -->
+<div class="slide cinematic" data-act="跨服務串接">
+  <h2 style="font-size:1.8rem;">回顧：你今天完成了一條龍</h2>
+  <div class="flow" style="margin-top:1.2rem;">
+    <div class="flow-box" style="background:rgba(26,115,232,.2);border-color:var(--blue);color:#fff;font-size:.85rem;">建表單</div>
+    <div class="flow-arrow" style="color:var(--g400);">→</div>
+    <div class="flow-box" style="background:rgba(15,157,138,.2);border-color:var(--green);color:#fff;font-size:.85rem;">GAS 發信</div>
+    <div class="flow-arrow" style="color:var(--g400);">→</div>
+    <div class="flow-box" style="background:rgba(124,58,237,.2);border-color:var(--purple);color:#fff;font-size:.85rem;">互填問卷</div>
+    <div class="flow-arrow" style="color:var(--g400);">→</div>
+    <div class="flow-box" style="background:rgba(234,88,12,.2);border-color:var(--orange);color:#fff;font-size:.85rem;">數據分析</div>
+    <div class="flow-arrow" style="color:var(--g400);">→</div>
+    <div class="flow-box" style="background:rgba(249,171,0,.2);border-color:var(--gold);color:#fff;font-size:.85rem;">報告寄出</div>
+  </div>
+  <p style="margin-top:1.5rem;font-size:1.3rem;font-weight:900;color:#fff;">這不只是「學 GAS」<br>而是<span style="color:var(--gold);">用 AI 打造完整的自動化工作流</span></p>
+</div>
+
+<!-- ===== Phase 5: 試算表當作資料庫 ===== -->
+<div class="slide" data-act="跨服務串接">
+  <h2>核心觀念：試算表 = 你的資料庫</h2>
+  <div class="info-box analogy" style="margin-top:.8rem;">
+    <div class="label">你今天體驗了什麼？</div>
+    <p style="font-size:1rem;">表單收到 Sheet → GAS 從 Sheet 讀名單發信 → 回覆存回 Sheet → GAS 從 Sheet 跑統計<br>
+    <strong>試算表就是你的數據中心</strong>，GAS 是幫你處理數據的引擎</p>
+  </div>
+  <table class="compare-table" style="margin-top:.8rem;">
+    <thead>
+      <tr><th>資料庫概念</th><th>試算表對應</th><th>GAS 指令</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>一張表</td>
+        <td>一個工作表</td>
+        <td style="font-family:'Fira Code',monospace;font-size:.8rem;">getActiveSheet()</td>
+      </tr>
+      <tr>
+        <td>查詢資料</td>
+        <td>讀取範圍</td>
+        <td style="font-family:'Fira Code',monospace;font-size:.8rem;">getDataRange().getValues()</td>
+      </tr>
+      <tr>
+        <td>寫入資料</td>
+        <td>填入儲存格</td>
+        <td style="font-family:'Fira Code',monospace;font-size:.8rem;">getRange(r,c).setValue(v)</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== extra: 更多跨服務組合 ===== -->
+<div class="slide" data-act="跨服務串接">
+  <h2>更多跨服務組合靈感</h2>
+  <table class="compare-table" style="margin-top:.8rem;">
+    <thead>
+      <tr><th>串接組合</th><th>應用場景</th><th>觸發方式</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>表單 + 試算表 + Gmail</strong></td>
+        <td>報名即回覆 + 資料建檔</td>
+        <td>表單提交</td>
+      </tr>
+      <tr>
+        <td><strong>試算表 + 日曆 + Gmail</strong></td>
+        <td>任務追蹤 + 到期提醒</td>
+        <td>每日定時</td>
+      </tr>
+      <tr>
+        <td><strong>試算表 + 文件 + 雲端硬碟</strong></td>
+        <td>自動產生合約 + 歸檔</td>
+        <td>手動觸發</td>
+      </tr>
+      <tr>
+        <td><strong>日曆 + Gmail</strong></td>
+        <td>會議前自動寄議程</td>
+        <td>日曆事件前 1 天</td>
+      </tr>
+      <tr>
+        <td><strong>Gmail + 試算表</strong></td>
+        <td>特定主旨信件自動記錄</td>
+        <td>每小時掃描</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== extra: 實際企業案例 ===== -->
+<div class="slide" data-act="跨服務串接">
+  <h2>真實案例：某中小企業的自動化改造</h2>
+  <div class="info-box" style="background:var(--blue-lt);border-left:4px solid var(--blue);margin-top:.6rem;">
+    <div class="label">背景</div>
+    <p style="font-size:.95rem;">20 人貿易公司，3 位行政每天花 2 小時處理訂單通知與追蹤</p>
+  </div>
+  <div class="step-list" style="margin-top:.6rem;">
+    <div class="step">
+      <div class="step-num" style="background:var(--red);">前</div>
+      <div class="step-content"><strong>Before</strong><p>手動看試算表 → 手動寄信 → 手動更新狀態 → 2 小時/天</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--green);">後</div>
+      <div class="step-content"><strong>After</strong><p>GAS 自動比對 → 自動寄通知 → 自動更新狀態 → 0 分鐘/天</p></div>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:.6rem;">
+    <div class="big-num" style="color:var(--green);font-size:3rem;">520</div>
+    <p style="font-size:1rem;font-weight:700;color:var(--navy);">小時/年 — 相當於一個人 3 個月的工時</p>
+  </div>
+</div>
+
+<!-- ===== 閃卡 — Data Drift ===== -->
+<div class="slide" data-act="跨服務串接">
+  <div style="background:var(--blue-lt);padding:.3rem 1rem;border-radius:100px;font-size:.85rem;font-weight:700;color:var(--blue);display:inline-block;margin-bottom:.6rem;">📘 iPAS 術語閃卡</div>
+  <h2 style="color:var(--blue);font-size:2rem;">Data Drift — AI 會過時</h2>
+  <div style="text-align:center;margin:.6rem 0;">
+    <span style="font-size:3rem;">📉</span>
+  </div>
+  <div class="info-box analogy">
+    <div class="label">白話解釋</div>
+    <p style="font-size:1rem;">AI 模型是用「過去的資料」訓練的<br>
+    當真實世界的資料分布改變（例如消費習慣變了），<br>
+    AI 的預測就會越來越不準 — 這就是 <strong>Data Drift</strong></p>
+  </div>
+  <div style="margin-top:.6rem;">
+    <p style="font-weight:700;color:var(--navy);font-size:1rem;">跟自動化的關係？</p>
+    <p style="font-size:.95rem;color:var(--g600);">自動化流程中如果用了 AI 判斷，需要<strong>定期檢查</strong>準確度是否下降</p>
+  </div>
+  <p style="font-size:.9rem;color:var(--g600);">📖 深入學習 → <a href="https://ai100.cooperation.tw/classroom/learn" target="_blank" style="color:var(--blue);">AI100 M09 AI 導入與評估</a></p>
+</div>
+
+<!-- ===== 48: 權限管理注意事項 ===== -->
+<div class="slide" data-act="跨服務串接">
+  <h2>🔒 權限管理與安全注意事項</h2>
+  <div class="card-grid grid-2x2" style="margin-top:.8rem;">
+    <div class="card" style="border-top:3px solid var(--red);">
+      <div class="icon">⚠️</div>
+      <h3>不要共享編輯權</h3>
+      <p>GAS 腳本有你的帳號權限<br>共享 = 對方能以你的名義寄信</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--gold);">
+      <div class="icon">🔑</div>
+      <h3>最小權限原則</h3>
+      <p>腳本只要求「需要的」權限<br>不要給太多存取範圍</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--blue);">
+      <div class="icon">📋</div>
+      <h3>定期檢查觸發器</h3>
+      <p>GAS 左側「觸發條件」→<br>刪除不再使用的觸發器</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--green);">
+      <div class="icon">🧪</div>
+      <h3>先測試再上線</h3>
+      <p>用自己的信箱測試<br>確認沒問題才換成正式的</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 模組十一 小結 ===== -->
+<div class="slide" data-act="跨服務串接">
+  <h2>單元十一 成果回顧</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>數據分析自動化</h3>
+      <p>GAS 跑統計<br>自動寄報告</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>跨服務串接</h3>
+      <p>表單 + Sheet + Gmail<br>全串聯</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>完整一條龍</h3>
+      <p>建表單→發信→回收<br>→分析→報告</p>
+    </div>
+  </div>
+  <p style="margin-top:1rem;font-size:1.05rem;color:var(--navy);font-weight:700;">接下來：午休！下午學<span class="blue">自動化設計思維</span></p>
+</div>
+
+<!-- ===== 50: 午休 ===== -->
+<div class="slide break-slide" data-act="跨服務串接">
+  <div style="font-size:4rem;margin-bottom:1rem;">🍱</div>
+  <h1 style="color:var(--navy);">午休時間</h1>
+  <p style="font-size:1.2rem;color:var(--g600);margin-top:1rem;">12:00 - 13:00</p>
+  <p style="margin-top:1rem;color:var(--g400);font-size:1rem;">下午 1 點回來，我們聊聊怎麼設計自動化</p>
+  <p style="color:var(--g400);font-size:.9rem;margin-top:.5rem;">午休時間可以試著跑看看上午的腳本</p>
+</div>
+
+<!-- ============================================================ -->
+<!-- D. 單元十二：自動化設計思維 (slides 51-74) -->
+<!-- ============================================================ -->
+
+<!-- ===== 51: 單元十二封面 ===== -->
+<div class="slide section-title" data-act="設計思維">
+  <p style="font-size:1rem;color:rgba(255,255,255,.6);">單元十二</p>
+  <h1 style="color:#fff;">自動化設計思維</h1>
+  <p style="margin-top:1rem;font-size:1.2rem;color:rgba(255,255,255,.8);">從「痛點」到「自動化」的完整方法</p>
+</div>
+
+<!-- ===== 52: 自動化不是目的 ===== -->
+<div class="slide cinematic" data-act="設計思維">
+  <h2 style="font-size:2rem;">自動化不是目的，<span style="color:var(--gold);">解決痛點</span>才是</h2>
+  <div class="quote-box" style="margin-top:1.5rem;background:rgba(255,255,255,.05);border-left-color:var(--gold);">
+    <div class="quote-text" style="color:var(--gold);">「把一個爛流程自動化，你只會得到一個更快的爛流程。」</div>
+  </div>
+  <p style="margin-top:1.2rem;color:rgba(255,255,255,.7);font-size:1.05rem;">先問：這個流程<strong>值得</strong>自動化嗎？<br>還是應該先<strong>簡化</strong>再自動化？</p>
+</div>
+
+<!-- ===== 53: 五步驟框架 ===== -->
+<div class="slide" data-act="設計思維">
+  <h2>自動化設計五步驟</h2>
+  <div class="step-list" style="margin-top:.8rem;">
+    <div class="step">
+      <div class="step-num" style="background:var(--red);">1</div>
+      <div class="step-content"><strong>辨識重複</strong><p>找出每天/每週重複做的事情，列清單</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--gold);">2</div>
+      <div class="step-content"><strong>拆解步驟</strong><p>把重複工作拆成一步一步的 SOP</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--blue);">3</div>
+      <div class="step-content"><strong>找觸發點</strong><p>什麼事件啟動這個流程？定時？有人操作？</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--purple);">4</div>
+      <div class="step-content"><strong>AI 產生腳本</strong><p>把 SOP 描述給 AI，讓它幫你寫程式碼</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--green);">5</div>
+      <div class="step-content"><strong>測試 + 上線</strong><p>先小範圍測試，確認沒問題再擴大</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 54: Step 1 — 辨識重複 ===== -->
+<div class="slide" data-act="設計思維">
+  <h2>Step 1：辨識重複</h2>
+  <p style="color:var(--g600);">問自己三個問題</p>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--red);">
+      <div style="font-size:2rem;">😩</div>
+      <h3>什麼事讓我煩？</h3>
+      <p>每次做都覺得：<br>「又要做這個...」</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--gold);">
+      <div style="font-size:2rem;">🔄</div>
+      <h3>什麼事一直重複？</h3>
+      <p>每天/每週/每月<br>固定做同樣的事</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div style="font-size:2rem;">⏱️</div>
+      <h3>什麼事花最多時間？</h3>
+      <p>明明不複雜<br>但就是很花時間</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 55: Step 2 — 拆解步驟 ===== -->
+<div class="slide" data-act="設計思維">
+  <h2>Step 2：拆解步驟</h2>
+  <p style="color:var(--g600);">把工作拆成「電腦能理解」的步驟</p>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <div class="info-box" style="background:var(--red-lt);border-left:4px solid var(--red);">
+        <h3 style="color:var(--red);">模糊版</h3>
+        <p style="font-size:.95rem;">「每天整理客戶資料」</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="info-box" style="background:var(--green-lt);border-left:4px solid var(--green);">
+        <h3 style="color:var(--green);">拆解版</h3>
+        <p style="font-size:.9rem;">1. 打開試算表<br>2. 找到「狀態」欄是空的列<br>3. 檢查 Email 格式是否正確<br>4. 標記「已檢查」<br>5. 寄通知給業務</p>
+      </div>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:.6rem;">
+    <div class="label">訣竅</div>
+    <p>拆到「連新人都能照做」的程度，就是電腦能理解的程度</p>
+  </div>
+</div>
+
+<!-- ===== 56: Step 3 — 找觸發點 ===== -->
+<div class="slide" data-act="設計思維">
+  <h2>Step 3：找觸發點</h2>
+  <table class="compare-table" style="margin-top:.8rem;">
+    <thead>
+      <tr><th>觸發類型</th><th>適用場景</th><th>GAS 設定</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>⏰ 定時</strong></td>
+        <td>日報、週報、月備份</td>
+        <td>時間驅動 → 日計時器</td>
+      </tr>
+      <tr>
+        <td><strong>📝 表單提交</strong></td>
+        <td>客服回報、面試報名</td>
+        <td>從試算表 → 提交表單</td>
+      </tr>
+      <tr>
+        <td><strong>✏️ 試算表編輯</strong></td>
+        <td>庫存低於安全量、狀態變更</td>
+        <td>從試算表 → 編輯時</td>
+      </tr>
+      <tr>
+        <td><strong>👆 手動按鈕</strong></td>
+        <td>月結、一鍵出報告</td>
+        <td>選單 → 自訂選項</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 57: 閃卡 — CRISP-DM ===== -->
+<div class="slide" data-act="設計思維">
+  <div style="background:var(--blue-lt);padding:.3rem 1rem;border-radius:100px;font-size:.85rem;font-weight:700;color:var(--blue);display:inline-block;margin-bottom:.6rem;">📘 iPAS 術語閃卡</div>
+  <h2 style="color:var(--blue);font-size:1.8rem;">CRISP-DM — AI 專案標準六步驟</h2>
+  <div class="flow" style="margin-top:.8rem;">
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);font-size:.85rem;min-width:90px;">1. 理解業務</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="font-size:.85rem;min-width:90px;">2. 理解資料</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="font-size:.85rem;min-width:90px;">3. 準備資料</div>
+  </div>
+  <div class="flow" style="margin-top:.3rem;">
+    <div class="flow-box" style="font-size:.85rem;min-width:90px;">4. 建立模型</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="font-size:.85rem;min-width:90px;">5. 評估</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);font-size:.85rem;min-width:90px;">6. 部署</div>
+  </div>
+  <div class="info-box analogy" style="margin-top:.8rem;">
+    <p style="font-size:.95rem;">跟今天學的「自動化五步驟」其實很像！<br>
+    <strong>業界標準</strong>：先了解問題 → 準備資料 → 建方案 → 測試 → 上線</p>
+  </div>
+  <p style="font-size:.9rem;color:var(--g600);">📖 深入學習 → <a href="https://ai100.cooperation.tw/classroom/learn" target="_blank" style="color:var(--blue);">AI100 M08 AI 專案管理</a></p>
+</div>
+
+<!-- ===== 58: ROI 計算 ===== -->
+<div class="slide" data-act="設計思維">
+  <h2>自動化 ROI 計算</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <div class="info-box" style="background:var(--red-lt);border-left:4px solid var(--red);">
+        <h3 style="color:var(--red);">投入成本</h3>
+        <p style="font-size:.95rem;">
+          建置：<strong>1 小時</strong>（AI 幫忙寫）<br>
+          測試：<strong>0.5 小時</strong><br>
+          學習：<strong>今天這堂課</strong><br>
+          <span style="color:var(--red);font-weight:700;">合計 ≈ 1.5 小時</span>
+        </p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="info-box" style="background:var(--green-lt);border-left:4px solid var(--green);">
+        <h3 style="color:var(--green);">省下的時間</h3>
+        <p style="font-size:.95rem;">
+          每週省：<strong>45 分鐘</strong><br>
+          每月省：<strong>3 小時</strong><br>
+          每年省：<strong>36 小時</strong><br>
+          <span style="color:var(--green);font-weight:700;">三年省 108 小時</span>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:1rem;">
+    <div class="big-num" style="color:var(--green);">2,400%</div>
+    <p style="font-size:1.1rem;font-weight:700;color:var(--navy);">三年 ROI — 投 1.5 小時，省 108 小時</p>
+  </div>
+</div>
+
+<!-- ===== 59: ROI 決策矩陣 ===== -->
+<div class="slide" data-act="設計思維">
+  <h2>自動化決策矩陣</h2>
+  <p style="color:var(--g600);">不是每件事都值得自動化</p>
+  <table class="compare-table" style="margin-top:.8rem;">
+    <thead>
+      <tr><th></th><th style="text-align:center;">頻率低</th><th style="text-align:center;">頻率高</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="font-weight:700;background:var(--g50);">耗時短</td>
+        <td style="text-align:center;background:var(--g50);">❌ 不自動化</td>
+        <td style="text-align:center;background:var(--gold-lt);">⚡ 可考慮</td>
+      </tr>
+      <tr>
+        <td style="font-weight:700;background:var(--g50);">耗時長</td>
+        <td style="text-align:center;background:var(--gold-lt);">⚡ 可考慮</td>
+        <td style="text-align:center;background:var(--green-lt);font-weight:700;color:var(--green);">✅ 優先自動化！</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <div class="label">判斷原則</div>
+    <p>「<strong>高頻 × 耗時</strong>」的工作優先自動化 — ROI 最高</p>
+  </div>
+</div>
+
+<!-- ===== 60: Demo — 真實痛點轉自動化 ===== -->
+<div class="slide" data-act="設計思維">
+  <span class="demo-banner">Demo 示範</span>
+  <h2>把一個真實痛點轉成自動化</h2>
+  <p style="color:var(--g600);">痛點：業務每週要手動整理本週成交清單，寄給主管</p>
+  <div class="step-list" style="margin-top:.6rem;">
+    <div class="step">
+      <div class="step-num" style="background:var(--red);">1</div>
+      <div class="step-content"><strong>辨識</strong><p>每週五下午手動整理 → 重複 + 耗時 30 分鐘</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--gold);">2</div>
+      <div class="step-content"><strong>拆解</strong><p>篩選本週資料 → 算小計 → 格式化 → 寄信</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--blue);">3</div>
+      <div class="step-content"><strong>觸發</strong><p>每週五 16:00 定時執行</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--purple);">4</div>
+      <div class="step-content"><strong>AI 寫碼</strong><p>跟 AI 說：「幫我寫 GAS，每週五從試算表篩選本週資料，彙整成表格，Email 給主管」</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--green);">5</div>
+      <div class="step-content"><strong>測試上線</strong><p>先跑一次確認格式 → 設定定時觸發</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 61: Demo — 週報自動化程式碼 ===== -->
+<div class="slide" data-act="設計思維">
+  <span class="demo-banner">Demo 示範</span>
+  <h2>週報自動化 — AI 產生的程式碼</h2>
+  <div class="code-block" style="font-size:.75rem;margin-top:.5rem;">function sendWeeklyReport() {
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var data = sheet.getDataRange().getValues();
+  var today = new Date();
+  var weekAgo = new Date(today.getTime() - 7*24*60*60*1000);
+
+  var report = '本週成交清單\n' + '='.repeat(30) + '\n';
+  var totalAmount = 0;
+  var count = 0;
+
+  for (var i = 1; i &lt; data.length; i++) {
+    var date = new Date(data[i][0]); // A: 日期
+    var client = data[i][1];         // B: 客戶
+    var amount = data[i][2];         // C: 金額
+
+    if (date >= weekAgo &amp;&amp; date &lt;= today) {
+      report += client + ' — $'
+        + amount.toLocaleString() + '\n';
+      totalAmount += amount;
+      count++;
+    }
+  }
+
+  report += '='.repeat(30) + '\n'
+    + '本週成交 ' + count + ' 筆，'
+    + '合計 $' + totalAmount.toLocaleString();
+
+  GmailApp.sendEmail('boss@company.com',
+    '【週報】本週成交摘要', report);
+}</div>
+</div>
+
+<!-- ===== 62: Demo — 給 AI 的提示詞範本 ===== -->
+<div class="slide" data-act="設計思維">
+  <h2>「痛點轉自動化」提示詞範本</h2>
+  <div class="code-block" style="font-size:.85rem;margin-top:.8rem;">我有一個工作痛點需要自動化，請幫我用 Google Apps Script 實作：
+
+【痛點描述】
+我每 [頻率] 需要 [做什麼事]，目前都是手動做，每次花 [時間]。
+
+【資料來源】
+我的資料在 Google 試算表，欄位如下：
+A: [欄位名], B: [欄位名], C: [欄位名]
+
+【期望結果】
+自動化完成後，我希望：
+1. [結果 1]
+2. [結果 2]
+
+【觸發方式】
+[定時/事件/手動] 觸發
+
+請提供完整可直接貼上執行的程式碼。</div>
+</div>
+
+<!-- ===== 63: 案例 — 設計思維 ⭐⭐⭐ ===== -->
+<div class="slide" data-act="設計思維">
+  <span class="exercise-banner">實作練習</span>
+  <span class="case-banner">⭐⭐⭐ 案例</span>
+  <h2>設計你自己的自動化方案</h2>
+  <div class="step-list" style="margin-top:.6rem;">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>找出一個工作痛點</strong><p>每天/每週重複做的事，用一句話描述</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>用五步驟框架拆解</strong><p>辨識 → 拆解 → 觸發 → AI 寫碼 → 測試</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>用提示詞範本請 AI 寫程式碼</strong></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content"><strong>貼到 GAS 執行 → 分享結果！</strong></div>
+    </div>
+  </div>
+  <div class="timer" data-minutes="15">15:00</div>
+</div>
+
+<!-- ===== extra: 各組分享時間 ===== -->
+<div class="slide" data-act="設計思維">
+  <span class="exercise-banner">分享時間</span>
+  <h2>各組分享你的自動化方案</h2>
+  <div class="info-box" style="background:var(--purple-lt);border-left:4px solid var(--purple);margin-top:.8rem;">
+    <div class="label" style="color:var(--purple);">每組 2 分鐘</div>
+    <p style="font-size:1rem;line-height:2;">
+      1. 你的<strong>痛點</strong>是什麼？<br>
+      2. 你用了哪個<strong>觸發方式</strong>？<br>
+      3. 跑起來了嗎？<strong>Demo 一下！</strong><br>
+      4. 預估能<strong>省多少時間</strong>？
+    </p>
+  </div>
+</div>
+
+<!-- ===== extra: 自動化 vs 手動 心智模型 ===== -->
+<div class="slide" data-act="設計思維">
+  <h2>心智模型：何時手動、何時自動？</h2>
+  <div class="card-grid" style="margin-top:.8rem;">
+    <div class="card" style="border-top:3px solid var(--green);text-align:center;">
+      <div class="icon">🤖</div>
+      <h3>適合自動化</h3>
+      <p style="font-size:.85rem;">規則明確<br>重複性高<br>不需判斷<br>資料結構化</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--gold);text-align:center;">
+      <div class="icon">🤝</div>
+      <h3>半自動化</h3>
+      <p style="font-size:.85rem;">AI 準備草稿<br>人來審核決定<br>一鍵送出</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--red);text-align:center;">
+      <div class="icon">👤</div>
+      <h3>保持手動</h3>
+      <p style="font-size:.85rem;">需要人情溫度<br>需要創意判斷<br>影響大且不可逆</p>
+    </div>
+  </div>
+  <p style="margin-top:.6rem;font-size:.95rem;font-weight:700;color:var(--navy);">最佳實踐：讓機器做<span class="blue">枯燥的</span>，人做<span class="green">有價值的</span></p>
+</div>
+
+<!-- ===== extra: GAS 以外的自動化工具 ===== -->
+<div class="slide" data-act="設計思維">
+  <h2>延伸：GAS 以外的自動化工具</h2>
+  <table class="compare-table" style="margin-top:.8rem;">
+    <thead>
+      <tr><th>工具</th><th>特色</th><th>適合誰</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="font-weight:700;color:var(--blue);">Google Apps Script</td>
+        <td>免費、Google 全家桶</td>
+        <td>Google 重度使用者（今天學的）</td>
+      </tr>
+      <tr>
+        <td style="font-weight:700;">Zapier</td>
+        <td>拖拉式、5000+ 串接</td>
+        <td>不想碰程式碼的人</td>
+      </tr>
+      <tr>
+        <td style="font-weight:700;">Make (Integromat)</td>
+        <td>視覺化流程、彈性高</td>
+        <td>複雜多步驟串接</td>
+      </tr>
+      <tr>
+        <td style="font-weight:700;">Power Automate</td>
+        <td>Microsoft 全家桶</td>
+        <td>Office 365 使用者</td>
+      </tr>
+      <tr>
+        <td style="font-weight:700;">n8n</td>
+        <td>開源、可自架</td>
+        <td>有技術背景的人</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="margin-top:.5rem;font-size:.9rem;color:var(--g600);">今天學的「設計思維」適用於所有工具 — 工具只是手段，思維才是核心</p>
+</div>
+
+<!-- ===== 64: 進階：自動化組合技 ===== -->
+<div class="slide" data-act="設計思維">
+  <h2>進階：自動化組合技</h2>
+  <p style="color:var(--g600);">一個腳本串多個服務 = 威力加倍</p>
+  <div class="card-grid grid-2x2" style="margin-top:.8rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div class="icon">📊📧</div>
+      <h3>庫存預警</h3>
+      <p>庫存低於安全量<br>→ 自動寄採購信</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">📝📅📧</div>
+      <h3>面試全自動</h3>
+      <p>填表 → 建日曆<br>→ 通知面試官</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--gold);">
+      <div class="icon">⏰📊📄</div>
+      <h3>月報產生器</h3>
+      <p>月初自動彙整<br>→ 產生 Doc 報告</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--purple);">
+      <div class="icon">📧📊🔔</div>
+      <h3>合約到期提醒</h3>
+      <p>到期前 30 天<br>→ 通知 + 建追蹤</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 65: 自動化層次 ===== -->
+<div class="slide" data-act="設計思維">
+  <h2>自動化的四個層次</h2>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step">
+      <div class="step-num" style="background:var(--g400);">L1</div>
+      <div class="step-content"><strong>手動執行</strong><p>按一個按鈕跑腳本 — 已經比手動快很多</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--blue);">L2</div>
+      <div class="step-content"><strong>定時自動</strong><p>每天/每週自動執行 — 完全不用管</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--green);">L3</div>
+      <div class="step-content"><strong>事件驅動</strong><p>有人操作就觸發 — 即時回應</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--purple);">L4</div>
+      <div class="step-content"><strong>AI 判斷 + 自動執行</strong><p>AI 分析內容 → 自動決定下一步 — 智慧自動化</p></div>
+    </div>
+  </div>
+  <p style="margin-top:.6rem;font-size:.95rem;color:var(--g600);">今天已經學到 L1-L3！L4 是下一步進階目標</p>
+</div>
+
+<!-- ===== 66: 常見自動化場景清單 ===== -->
+<div class="slide" data-act="設計思維">
+  <h2>各部門常見自動化場景</h2>
+  <table class="compare-table" style="margin-top:.6rem;font-size:.85rem;">
+    <thead>
+      <tr><th>部門</th><th>自動化場景</th><th>省時/週</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>業務</strong></td>
+        <td>客戶跟進提醒、報價單自動產生</td>
+        <td>2-3 小時</td>
+      </tr>
+      <tr>
+        <td><strong>HR</strong></td>
+        <td>面試排程、新人入職通知串</td>
+        <td>1-2 小時</td>
+      </tr>
+      <tr>
+        <td><strong>財務</strong></td>
+        <td>請款進度追蹤、月結報表</td>
+        <td>2-4 小時</td>
+      </tr>
+      <tr>
+        <td><strong>行政</strong></td>
+        <td>會議室預約、設備借用通知</td>
+        <td>1-2 小時</td>
+      </tr>
+      <tr>
+        <td><strong>客服</strong></td>
+        <td>客訴分類、FAQ 自動回覆</td>
+        <td>3-5 小時</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 67: 自動化失敗案例 ===== -->
+<div class="slide" data-act="設計思維">
+  <h2>自動化也會失敗的 3 種情況</h2>
+  <div class="card-grid" style="margin-top:.8rem;">
+    <div class="card" style="border-top:3px solid var(--red);">
+      <div class="icon">💥</div>
+      <h3>自動化爛流程</h3>
+      <p>流程本身有問題<br>自動化只會錯得更快<br><span class="green bold">→ 先簡化再自動化</span></p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--red);">
+      <div class="icon">🙈</div>
+      <h3>沒人維護</h3>
+      <p>腳本設好就忘了<br>資料格式變了就壞掉<br><span class="green bold">→ 定期檢查</span></p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--red);">
+      <div class="icon">🎯</div>
+      <h3>過度自動化</h3>
+      <p>花 10 小時自動化<br>一個 5 分鐘/月的工作<br><span class="green bold">→ 先算 ROI</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 68: 維護清單 ===== -->
+<div class="slide" data-act="設計思維">
+  <h2>自動化維護清單</h2>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <div class="label">每月花 10 分鐘做一次</div>
+    <p style="font-size:.95rem;line-height:2;">
+      ☐ 觸發器還正常運作嗎？（GAS → 觸發條件 → 看最近執行記錄）<br>
+      ☐ 試算表格式有沒有被改過？（欄位順序、資料格式）<br>
+      ☐ Email 有沒有正確寄出？（抽查 1-2 封）<br>
+      ☐ 有沒有超過每日限額的警告？<br>
+      ☐ 是否有新需求可以加進去？
+    </p>
+  </div>
+  <p style="margin-top:.8rem;font-size:1rem;font-weight:700;color:var(--navy);">好的自動化 = 建好 + <span class="blue">持續照顧</span></p>
+</div>
+
+<!-- ===== 69: 模組十二 小結 ===== -->
+<div class="slide" data-act="設計思維">
+  <h2>單元十二 成果回顧</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>五步驟框架</h3>
+      <p>辨識 → 拆解 →<br>觸發 → AI 寫碼 → 測試</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>ROI 思維</h3>
+      <p>先算值不值得<br>再決定自動化</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>CRISP-DM</h3>
+      <p>AI 專案的<br>標準六步驟</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- E. 專題工作時間 + 收尾 (slides 70-84) -->
+<!-- ============================================================ -->
+
+<!-- ===== 70: 專題封面 ===== -->
+<div class="slide section-title" data-act="收尾">
+  <p style="font-size:1rem;color:rgba(255,255,255,.6);">專題工作時間</p>
+  <h1 style="color:#fff;">把自動化加進專題</h1>
+  <p style="margin-top:1rem;font-size:1.2rem;color:rgba(255,255,255,.8);">各組整合今天所學，升級你的專題</p>
+</div>
+
+<!-- ===== 71: 專題任務說明 ===== -->
+<div class="slide" data-act="收尾">
+  <span class="exercise-banner">專題時間</span>
+  <h2>今日專題任務</h2>
+  <div class="step-list" style="margin-top:.8rem;">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>在你們的專題中找一個可以自動化的環節</strong><p>用今天學的「辨識重複」方法找出來</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>設計自動化方案</strong><p>用五步驟框架：觸發 → 腳本 → 目標</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>實作至少一個 GAS 腳本</strong><p>讓它真的能跑！即使是簡單版也好</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content"><strong>準備 2 分鐘分享</strong><p>說明你們自動化了什麼、省了多少時間</p></div>
+    </div>
+  </div>
+  <div class="timer" data-minutes="30">30:00</div>
+</div>
+
+<!-- ===== 72: 專題建議 ===== -->
+<div class="slide" data-act="收尾">
+  <h2>各組專題自動化建議</h2>
+  <div class="card-grid grid-2x2" style="margin-top:.8rem;">
+    <div class="card" style="border-top:3px solid var(--blue);">
+      <h3>如果你們做客服</h3>
+      <p style="font-size:.85rem;">表單 → 分類 → 自動通知<br>用範例 5 的分類通知</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--green);">
+      <h3>如果你們做行銷</h3>
+      <p style="font-size:.85rem;">客戶名單 → 客製化信<br>用範例 1 的群發信</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--gold);">
+      <h3>如果你們做管理</h3>
+      <p style="font-size:.85rem;">任務追蹤 → 到期提醒<br>用範例 4 的排程系統</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--purple);">
+      <h3>如果你們做資料</h3>
+      <p style="font-size:.85rem;">自動備份 + 日報彙整<br>用範例 3 + 週報腳本</p>
+    </div>
+  </div>
+  <p style="margin-top:.6rem;font-size:.95rem;color:var(--g600);">不確定怎麼做？舉手問老師，或直接問 AI！</p>
+</div>
+
+<!-- ===== 73: 各組協作 ===== -->
+<div class="slide" data-act="收尾">
+  <span class="exercise-banner">各組協作實作</span>
+  <h2>分工建議</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <div class="info-box" style="background:var(--blue-lt);border-left:4px solid var(--blue);">
+        <h3>角色 A — 資料設計</h3>
+        <p style="font-size:.9rem;">建立試算表結構<br>填入測試資料<br>確認欄位名稱正確</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="info-box" style="background:var(--green-lt);border-left:4px solid var(--green);">
+        <h3>角色 B — 腳本實作</h3>
+        <p style="font-size:.9rem;">對 AI 描述需求<br>複製程式碼到 GAS<br>設定觸發器 + 測試</p>
+      </div>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <div class="label">小提醒</div>
+    <p>人多的組可以再分：一人負責簡報說明、一人負責 Demo 展示</p>
+  </div>
+</div>
+
+<!-- ===== 74: 休息提示 ===== -->
+<div class="slide break-slide" data-act="收尾">
+  <div style="font-size:4rem;margin-bottom:1rem;">☕</div>
+  <h2>各組實作中 — 有問題隨時舉手</h2>
+  <p style="font-size:1.1rem;color:var(--g600);margin-top:1rem;">老師會到各組巡場指導</p>
+  <p style="margin-top:.8rem;color:var(--g400);">完成的組可以繼續優化，或幫旁邊的組</p>
+</div>
+
+<!-- ===== extra: 各組專題進度分享 ===== -->
+<div class="slide" data-act="收尾">
+  <span class="exercise-banner">分享時間</span>
+  <h2>各組專題進度分享</h2>
+  <div class="info-box" style="background:var(--purple-lt);border-left:4px solid var(--purple);margin-top:.8rem;">
+    <div class="label" style="color:var(--purple);">每組 3 分鐘</div>
+    <p style="font-size:1rem;line-height:2;">
+      1. <strong>展示</strong>你們實作的 GAS 腳本<br>
+      2. <strong>Demo</strong>實際執行效果<br>
+      3. <strong>說明</strong>整合到專題的計畫<br>
+      4. 其他組<strong>提問 + 給建議</strong>
+    </p>
+  </div>
+  <div class="timer" data-minutes="20">20:00</div>
+</div>
+
+<!-- ===== extra: 回顧四天學習路徑 ===== -->
+<div class="slide" data-act="收尾">
+  <h2>四天學習路徑回顧</h2>
+  <div class="flow" style="margin-top:1rem;">
+    <div class="flow-box" style="background:var(--g50);border-color:var(--g200);min-width:120px;">
+      <div style="font-size:.85rem;color:var(--g400);">Day 1</div>
+      <div style="font-size:.95rem;">認識 AI</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--g50);border-color:var(--g200);min-width:120px;">
+      <div style="font-size:.85rem;color:var(--g400);">Day 2</div>
+      <div style="font-size:.95rem;">提示詞</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--g50);border-color:var(--g200);min-width:120px;">
+      <div style="font-size:.85rem;color:var(--g400);">Day 3</div>
+      <div style="font-size:.95rem;">進階應用</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);min-width:120px;">
+      <div style="font-size:.85rem;color:var(--green);font-weight:700;">Day 4</div>
+      <div style="font-size:.95rem;font-weight:700;">自動化</div>
+    </div>
+    <div class="flow-arrow" style="color:var(--g400);">→</div>
+    <div class="flow-box" style="border-style:dashed;min-width:120px;">
+      <div style="font-size:.85rem;color:var(--g400);">Day 5</div>
+      <div style="font-size:.95rem;">發表</div>
+    </div>
+  </div>
+  <div class="info-box success" style="margin-top:1rem;">
+    <p style="font-size:1.05rem;">你已經從「手動用 AI」進化到「讓 AI 自動幫你工作」— 這是巨大的一步！</p>
+  </div>
+</div>
+
+<!-- ===== extra: 今天學到的關鍵數字 ===== -->
+<div class="slide" data-act="收尾">
+  <h2>今天學到的關鍵數字</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card" style="text-align:center;">
+      <div class="big-num" style="font-size:2.5rem;color:var(--blue);">5</div>
+      <p style="font-weight:700;">個 GAS 範例</p>
+      <p style="font-size:.85rem;color:var(--g600);">群發信、通知、備份<br>排程、分類</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="big-num" style="font-size:2.5rem;color:var(--green);">3</div>
+      <p style="font-weight:700;">個 iPAS 術語</p>
+      <p style="font-size:.85rem;color:var(--g600);">ROI/TCO、Data Drift<br>CRISP-DM</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="big-num" style="font-size:2.5rem;color:var(--gold);">5</div>
+      <p style="font-weight:700;">步驟框架</p>
+      <p style="font-size:.85rem;color:var(--g600);">辨識→拆解→觸發<br>→AI 寫碼→測試</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Day4 回顧 ===== -->
+<div class="slide" data-act="收尾">
+  <h2>📝 Day 4 回顧</h2>
+  <div class="card-grid grid-2x2" style="margin-top:.8rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div class="icon">⚡</div>
+      <h3>一條龍體驗</h3>
+      <p>建表單 → GAS 發信<br>→ 互填 → 分析 → 報告</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">🔗</div>
+      <h3>跨服務串接</h3>
+      <p>表單 + Sheet + Gmail<br>全串聯自動化</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--purple);">
+      <div class="icon">🧠</div>
+      <h3>設計思維</h3>
+      <p>五步驟框架<br>+ ROI 決策</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--gold);">
+      <div class="icon">🎯</div>
+      <h3>專題升級</h3>
+      <p>個人任務 → 分組專題<br>複雜度提升</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 76: 測驗題 1 ===== -->
+<div class="slide vote-slide" data-act="收尾">
+  <h2>測驗 1/5</h2>
+  <div class="info-box" style="background:var(--blue-lt);border-left:4px solid var(--blue);margin-top:.8rem;">
+    <p style="font-size:1.1rem;font-weight:700;">GAS 腳本是在哪裡執行的？</p>
+  </div>
+  <div class="step-list" style="margin-top:.6rem;">
+    <div class="step"><div class="step-num">A</div><div class="step-content"><strong>你自己的電腦上</strong></div></div>
+    <div class="step"><div class="step-num" style="background:var(--green);">B</div><div class="step-content"><strong>Google 的雲端伺服器上 ✅</strong></div></div>
+    <div class="step"><div class="step-num">C</div><div class="step-content"><strong>手機的 App 裡</strong></div></div>
+    <div class="step"><div class="step-num">D</div><div class="step-content"><strong>需要另外安裝軟體</strong></div></div>
+  </div>
+</div>
+
+<!-- ===== 77: 測驗題 2 ===== -->
+<div class="slide vote-slide" data-act="收尾">
+  <h2>測驗 2/5</h2>
+  <div class="info-box" style="background:var(--blue-lt);border-left:4px solid var(--blue);margin-top:.8rem;">
+    <p style="font-size:1.1rem;font-weight:700;">「觸發器」的功能是什麼？</p>
+  </div>
+  <div class="step-list" style="margin-top:.6rem;">
+    <div class="step"><div class="step-num">A</div><div class="step-content"><strong>讓程式碼跑得更快</strong></div></div>
+    <div class="step"><div class="step-num">B</div><div class="step-content"><strong>把程式碼翻譯成中文</strong></div></div>
+    <div class="step"><div class="step-num" style="background:var(--green);">C</div><div class="step-content"><strong>決定腳本「何時」自動執行 ✅</strong></div></div>
+    <div class="step"><div class="step-num">D</div><div class="step-content"><strong>檢查程式碼有沒有錯誤</strong></div></div>
+  </div>
+</div>
+
+<!-- ===== 78: 測驗題 3 ===== -->
+<div class="slide vote-slide" data-act="收尾">
+  <h2>測驗 3/5</h2>
+  <div class="info-box" style="background:var(--blue-lt);border-left:4px solid var(--blue);margin-top:.8rem;">
+    <p style="font-size:1.1rem;font-weight:700;">以下哪個工作最適合優先自動化？</p>
+  </div>
+  <div class="step-list" style="margin-top:.6rem;">
+    <div class="step"><div class="step-num">A</div><div class="step-content"><strong>每年做一次的策略規劃</strong></div></div>
+    <div class="step"><div class="step-num" style="background:var(--green);">B</div><div class="step-content"><strong>每天重複 30 分鐘的報表彙整 ✅</strong></div></div>
+    <div class="step"><div class="step-num">C</div><div class="step-content"><strong>每月一次的 5 分鐘簽核</strong></div></div>
+    <div class="step"><div class="step-num">D</div><div class="step-content"><strong>需要創意判斷的文案撰寫</strong></div></div>
+  </div>
+</div>
+
+<!-- ===== 79: 測驗題 4 ===== -->
+<div class="slide vote-slide" data-act="收尾">
+  <h2>測驗 4/5</h2>
+  <div class="info-box" style="background:var(--blue-lt);border-left:4px solid var(--blue);margin-top:.8rem;">
+    <p style="font-size:1.1rem;font-weight:700;">CRISP-DM 的第一步是什麼？</p>
+  </div>
+  <div class="step-list" style="margin-top:.6rem;">
+    <div class="step"><div class="step-num" style="background:var(--green);">A</div><div class="step-content"><strong>理解業務需求 ✅</strong></div></div>
+    <div class="step"><div class="step-num">B</div><div class="step-content"><strong>收集資料</strong></div></div>
+    <div class="step"><div class="step-num">C</div><div class="step-content"><strong>建立模型</strong></div></div>
+    <div class="step"><div class="step-num">D</div><div class="step-content"><strong>部署上線</strong></div></div>
+  </div>
+</div>
+
+<!-- ===== 80: 測驗題 5 ===== -->
+<div class="slide vote-slide" data-act="收尾">
+  <h2>測驗 5/5</h2>
+  <div class="info-box" style="background:var(--blue-lt);border-left:4px solid var(--blue);margin-top:.8rem;">
+    <p style="font-size:1.1rem;font-weight:700;">Data Drift 是什麼意思？</p>
+  </div>
+  <div class="step-list" style="margin-top:.6rem;">
+    <div class="step"><div class="step-num">A</div><div class="step-content"><strong>資料被駭客偷走</strong></div></div>
+    <div class="step"><div class="step-num">B</div><div class="step-content"><strong>資料存放的位置改變</strong></div></div>
+    <div class="step"><div class="step-num" style="background:var(--green);">C</div><div class="step-content"><strong>真實資料分布改變導致 AI 預測變差 ✅</strong></div></div>
+    <div class="step"><div class="step-num">D</div><div class="step-content"><strong>資料量太大超出硬碟</strong></div></div>
+  </div>
+</div>
+
+<!-- ===== 81: Day5 預告 ===== -->
+<div class="slide" data-act="收尾">
+  <h2>Day 5 預告 — 最終日！</h2>
+  <div class="card-grid grid-2x2" style="margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div class="icon">🔗</div>
+      <h3>全流程整合</h3>
+      <p>AI + 自動化<br>完整串起來</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">🎤</div>
+      <h3>專題發表</h3>
+      <p>各組上台<br>Demo + 簡報</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--gold);">
+      <div class="icon">🏆</div>
+      <h3>評分 + 頒獎</h3>
+      <p>最佳專題<br>最佳自動化</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--purple);">
+      <div class="icon">🚀</div>
+      <h3>職涯規劃</h3>
+      <p>AI 時代<br>持續學習路徑</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 82: Day5 準備事項 ===== -->
+<div class="slide" data-act="收尾">
+  <h2>回家作業 — Day5 準備</h2>
+  <div class="info-box" style="background:var(--purple-lt);border-left:4px solid var(--purple);margin-top:1rem;">
+    <div class="label" style="color:var(--purple);">各組請準備</div>
+    <p style="font-size:1rem;line-height:2;">
+      1. <strong>5 分鐘簡報</strong>：專題完整流程 Demo<br>
+      2. <strong>包含自動化</strong>：至少展示一個自動化功能<br>
+      3. <strong>ROI 說明</strong>：你們的方案能省多少時間？<br>
+      4. <strong>全組參與</strong>：每個人至少說一段
+    </p>
+  </div>
+  <p style="margin-top:1rem;font-size:.95rem;color:var(--g600);">提示：可以把簡報也用 AI 幫你產生！</p>
+</div>
+
+<!-- ===== 83: 今日金句 ===== -->
+<div class="slide cinematic" data-act="收尾">
+  <div class="quote-box" style="background:rgba(255,255,255,.05);border-left-color:var(--green);">
+    <div class="quote-text" style="color:#fff;font-size:1.4rem;">「能重複的事交給機器，<br>你的時間留給只有人能做的事。」</div>
+  </div>
+  <p style="margin-top:2rem;color:rgba(255,255,255,.6);font-size:1.1rem;">今天你已經學會讓 Google 幫你工作了 🎉</p>
+</div>
+
+<!-- ===== 84: Closing ===== -->
+<div class="slide cover" data-act="收尾">
+  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:.8rem;">Day 4 完成！</p>
+  <h1>明天見！</h1>
+  <p style="margin-top:1.5rem;font-size:1.3rem;color:rgba(255,255,255,.85);">Day 5 — 全流程整合 × 專題發表</p>
+  <p style="color:rgba(255,255,255,.9);font-size:1.3rem;font-weight:700;margin-top:1rem;">09:00 準時開始</p>
+</div>
+
+</div>
+
+<div class="section-nav">
+  <button class="section-nav-btn" id="navBtn" onclick="toggleNav()">
+    <span id="navSection">封面</span>
+    <span class="nav-counter"><span id="current">1</span>/<span id="total"></span></span>
+  </button>
+  <div class="section-nav-menu" id="navMenu"></div>
+</div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>←</button><button id="next">→</button></div>
+
+<!-- G key nav overlay -->
+<div id="navOverlay">
+  <div style="max-width:960px;margin:0 auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <h2 style="color:#fff;font-size:1.3rem;font-weight:700;">快速導覽 <span style="color:rgba(255,255,255,.3);font-size:.85rem;">(點擊跳頁 / ESC 關閉)</span></h2>
+      <button id="navClose" style="background:none;border:2px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;font-size:1rem;padding:.3rem .8rem;cursor:pointer;">✕</button>
+    </div>
+    <div id="navGrid"></div>
+  </div>
+</div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),tot=slides.length;
+
+let idx=0,fi=-1;
+document.getElementById('total').textContent=tot;
+const gf=el=>[...el.querySelectorAll('.fragment')].sort((a,b)=>(+(a.dataset.order||0))-(+(b.dataset.order||0)));
+
+function go(n){
+  if(n<0)n=0;if(n>=tot)n=tot-1;
+  slides.forEach((s)=>{s.classList.remove('active');s.querySelectorAll('.fragment').forEach(f=>f.classList.remove('visible'));});
+  idx=n;fi=-1;slides[idx].classList.add('active');ui();
+}
+function ui(){
+  document.getElementById('current').textContent=idx+1;
+  document.getElementById('prev').disabled=idx===0&&fi<=0;
+  const f=gf(slides[idx]);
+  document.getElementById('next').disabled=idx===tot-1&&fi>=f.length-1;
+  document.getElementById('progress').style.width=((idx+1)/tot*100)+'%';
+}
+function adv(){
+  const f=gf(slides[idx]);
+  if(fi<f.length-1){
+    fi++;const ord=f[fi].dataset.order;
+    f[fi].classList.add('visible');
+    while(fi<f.length-1&&f[fi+1].dataset.order===ord){fi++;f[fi].classList.add('visible');}
+    ui();
+  }else if(idx<tot-1)go(idx+1);
+}
+function ret(){
+  const f=gf(slides[idx]);
+  if(fi>=0){
+    const ord=f[fi].dataset.order;
+    f[fi].classList.remove('visible');fi--;
+    while(fi>=0&&f[fi].dataset.order===ord){f[fi].classList.remove('visible');fi--;}
+    ui();
+  }else if(idx>0){go(idx-1);const p=gf(slides[idx]);p.forEach(x=>x.classList.add('visible'));fi=p.length-1;ui();}
+}
+
+document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
+document.addEventListener('keydown',e=>{
+  if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}
+  if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}
+  if(e.key==='Home'){e.preventDefault();go(0);
+}
+  if(e.key==='End'){e.preventDefault();go(tot-1);}
+  if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
+  if(e.key==='1')go(0);
+
+  if(e.key==='2')go(10);
+  if(e.key==='3')go(41);
+  if(e.key==='4')go(62);
+  if(e.key==='5')go(84);
+});
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});
+document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
+
+// Copy-to-clipboard for code blocks
+document.querySelectorAll('.code-block').forEach(function(block) {
+  if (block.textContent.trim().length > 20) {
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = '複製';
+    btn.onclick = function(e) {
+      e.stopPropagation();
+      navigator.clipboard.writeText(block.textContent.trim()).then(function() {
+        btn.textContent = '已複製 ✓';
+        btn.classList.add('copied');
+        setTimeout(function() { btn.textContent = '複製'; btn.classList.remove('copied'); }, 2000);
+      });
+    };
+    block.appendChild(btn);
+  }
+});
+
+// Countdown timer for exercise slides
+document.querySelectorAll('.timer[data-minutes]').forEach(function(el) {
+  var mins = parseInt(el.dataset.minutes);
+  el.innerHTML = mins + ':00';
+  el.style.cursor = 'pointer';
+  el.title = '點擊開始計時';
+  el.onclick = function() {
+    var total = mins * 60;
+    el.style.background = 'var(--purple)';
+    el.style.color = '#fff';
+    var iv = setInterval(function() {
+      total--;
+      if (total <= 0) { clearInterval(iv); el.innerHTML = '時間到！'; el.style.background = 'var(--red)'; return; }
+      var m = Math.floor(total / 60), s = total % 60;
+      el.innerHTML = m + ':' + (s < 10 ? '0' : '') + s;
+    }, 1000);
+  };
+});
+
+// Auto-push notification when entering a push slide
+var _origGo2 = go;
+go = function(n) {
+  _origGo2(n);
+  var slide = slides[idx];
+  if (slide.dataset.push) {
+    console.log('[PUSH]', slide.dataset.push);
+  }
+};
+
+// ── Section navigation ──
+var sections = [
+  { title: '封面', idx: 0 },
+  { title: 'A. 暖身 + 基礎觀念', idx: 1 },
+  { title: '　 自動化三要素', idx: 7 },
+  { title: 'B. 單元十：GAS 入門', idx: 10 },
+  { title: '　 Demo：三步驟啟動', idx: 14 },
+  { title: '　 閃卡：ROI / TCO', idx: 21 },
+  { title: '　 Phase 1：建表單', idx: 22 },
+  { title: '　 Phase 2：GAS 發信', idx: 25 },
+  { title: '　 Phase 3：互寄問卷', idx: 29 },
+  { title: '　 GAS 除錯 & 限制', idx: 32 },
+  { title: 'C. 單元十一：跨服務串接', idx: 38 },
+  { title: '　 Demo：三合一串接', idx: 40 },
+  { title: '　 Phase 4：數據分析', idx: 44 },
+  { title: '　 Phase 5：排名→專題', idx: 50 },
+  { title: '　 閃卡：Data Drift', idx: 55 },
+  { title: '午休', idx: 58 },
+  { title: 'D. 單元十二：設計思維', idx: 59 },
+  { title: '　 五步驟框架', idx: 61 },
+  { title: '　 閃卡：CRISP-DM', idx: 65 },
+  { title: '　 ROI 計算', idx: 66 },
+  { title: '　 案例 ⭐⭐⭐', idx: 71 },
+  { title: '　 自動化組合技', idx: 75 },
+  { title: 'E. 專題 + 收尾', idx: 81 },
+  { title: '　 Day4 回顧', idx: 89 },
+  { title: '　 測驗 5 題', idx: 90 },
+  { title: '　 Day5 預告', idx: 95 },
+];
+
+var navMenu = document.getElementById('navMenu');
+var navBtn = document.getElementById('navBtn');
+var navSection = document.getElementById('navSection');
+
+// Build menu
+sections.forEach(function(s, i) {
+  var item = document.createElement('div');
+  item.className = 'section-nav-item';
+  item.dataset.secIdx = i;
+  item.innerHTML = '<div class="nav-idx">' + (s.idx + 1) + '</div><div class="nav-title">' + s.title + '</div>';
+  item.onclick = function() { go(s.idx); navMenu.classList.remove('open'); };
+  navMenu.appendChild(item);
+});
+
+function toggleNav() {
+  navMenu.classList.toggle('open');
+}
+
+// Close menu on click outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.section-nav')) navMenu.classList.remove('open');
+});
+
+// Update current section label
+function updateSectionLabel() {
+  var current = '';
+  for (var i = sections.length - 1; i >= 0; i--) {
+    if (idx >= sections[i].idx) { current = sections[i].title.replace(/^　 /, ''); break; }
+  }
+  navSection.textContent = current || '封面';
+  navMenu.querySelectorAll('.section-nav-item').forEach(function(item, i) {
+    var isActive = idx >= sections[i].idx && (i === sections.length - 1 || idx < sections[i + 1].idx);
+    item.classList.toggle('active', isActive);
+  });
+}
+
+// Patch ui() to also update section label
+var _origUi = ui;
+ui = function() { _origUi(); updateSectionLabel(); };
+
+// ── G key Quick Nav Overlay ──
+var navOverlay = document.getElementById('navOverlay');
+var navGrid = document.getElementById('navGrid');
+function buildNavGrid() {
+  navGrid.innerHTML = '';
+  slides.forEach(function(s, i) {
+    var act = s.dataset.act || '';
+    var isDark = s.classList.contains('cover') || s.classList.contains('section-title') || s.classList.contains('cinematic');
+    var t = s.querySelector('h1,h2');
+    var label = t ? t.textContent.replace(/\n/g, ' ').substring(0, 18) : 'Slide ' + (i + 1);
+    var card = document.createElement('div');
+    card.className = 'nav-card' + (i === idx ? ' current' : '');
+    card.innerHTML = '<div class="nav-card-top' + (isDark ? ' dark' : '') + '">' + (i + 1) + '</div>' +
+      '<div class="nav-card-bottom"><div class="nav-card-act">' + act + '</div><div class="nav-card-title">' + label + '</div></div>';
+    card.onclick = function() { go(i); closeNavOverlay(); };
+    navGrid.appendChild(card);
+  });
+}
+function openNavOverlay() { buildNavGrid(); navOverlay.style.display = 'block'; }
+function closeNavOverlay() { navOverlay.style.display = 'none'; }
+document.getElementById('navClose').onclick = closeNavOverlay;
+navOverlay.onclick = function(e) { if (e.target === navOverlay) closeNavOverlay(); };
+
+// Patch keyboard to add G key
+document.addEventListener('keydown', function(e) {
+  if (navOverlay.style.display === 'block') {
+    if (e.key === 'Escape' || e.key === 'g' || e.key === 'G') { e.preventDefault(); closeNavOverlay(); }
+    return;
+  }
+  if (e.key === 'g' || e.key === 'G') { e.preventDefault(); openNavOverlay(); return; }
+}, true);
+
+go(0);
+
+
+// postMessage bridge for iframe embedding (classroom integration)
+window.addEventListener('message', function(e) {
+  if (!e.data || e.data.type !== 'slideControl') return;
+  var d = e.data;
+  if (d.action === 'next') adv();
+  else if (d.action === 'prev') ret();
+  else if (d.action === 'goto' && typeof d.index === 'number') go(d.index);
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'slideState', current: idx, total: tot }, '*');
+  }
+});
+var _origGo = go;
+go = function(n) {
+  _origGo(n);
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'slideState', current: idx, total: tot }, '*');
+  }
+};
+</script>
+</body>
+</html>

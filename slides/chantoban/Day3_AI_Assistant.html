@@ -1,0 +1,1943 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 3 — AI 個人助手設計</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════
+   Reading Glasses + Safe Zone + grow.google 風格
+   產投班 Day3 — 投影教學用 (3-10m 觀看距離)
+
+   Safe Zone 規則：
+   - padding-top: 3.5rem（清除 module-badge top:1rem）
+   - padding-bottom: 4.5rem（清除 controls bottom:1.2rem + progress）
+   - justify-content: flex-start + ::before/::after 偽元素置中
+   - 安全內容高度 ≤ 30rem (660px)
+
+   Reading Glasses 規格：
+   - 正文 22px, 最小 16px, CJK 行高 ≥ 1.7
+   - 字重 ≥ 400, 按鈕 ≥ 48px
+   - 內容最大寬度 720px
+   ═══════════════════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+  --orange:#EA580C; --orange-lt:#FFF7ED;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--white);}
+
+/* ── Slide Layout (Safe Zone) ── */
+.slides{width:100%;height:100%;position:relative;}
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-start;
+  padding:3.5rem 4rem 6rem;
+  display:none;
+  background:var(--white);
+  overflow-y:auto;
+}
+/* Removed ::before/::after centering — was pushing short content off screen */
+
+.slide.active{display:flex;}
+/* .slide.prev removed — using display:none/flex */
+.slide.cover{background:var(--navy);color:#fff;text-align:center;}
+.slide.cover h2{color:#fff;}
+.slide.section-title{background:var(--green);color:#fff;text-align:center;}
+.slide.section-title h2{color:#fff;}
+.slide.break-slide{background:var(--offwhite);text-align:center;}
+
+/* ── Typography (Reading Glasses) ── */
+h1{font-size:2.8rem;font-weight:900;line-height:1.3;}
+h2{font-size:1.8rem;font-weight:700;color:var(--g900);margin-bottom:.8rem;line-height:1.4;}
+h3{font-size:1.2rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.05rem;line-height:1.8;}
+.subtitle{font-size:1.05rem;color:var(--g600);font-weight:500;}
+small,.caption{font-size:max(16px,0.75rem);}
+.blue{color:var(--blue);}.green{color:var(--green);}.gold{color:var(--gold);}
+.red{color:var(--red);}.purple{color:var(--purple);}.dim{color:var(--g600);}.bold{font-weight:700;}
+
+/* ── Fragment animation ── */
+.fragment{opacity:0;transform:translateY(8px);transition:opacity .25s,transform .25s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* ── Cards ── */
+.card-grid{display:flex;gap:1.2rem;flex-wrap:wrap;justify-content:center;margin-top:1rem;max-width:960px;}
+.card{background:var(--white);border:2px solid var(--g100);border-radius:16px;padding:1.4rem;min-width:140px;max-width:260px;flex:1;}
+.card:hover{border-color:var(--blue);}
+.card .icon{font-size:2rem;margin-bottom:.4rem;}
+.card h3{font-size:1.1rem;}
+.card p{font-size:.95rem;color:var(--g600);line-height:1.7;}
+
+/* ── Steps ── */
+.step-list{text-align:left;max-width:960px;width:100%;}
+.step{display:flex;gap:1rem;align-items:flex-start;padding:.6rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.05rem;}.step-content p{font-size:.95rem;color:var(--g600);margin-top:.1rem;}
+
+/* ── Code ── */
+.code-block{background:var(--g50);border:2px solid var(--g200);border-radius:12px;padding:1.2rem 1.5rem;text-align:left;max-width:960px;width:100%;font-family:'Fira Code',monospace;font-size:.9rem;line-height:1.8;margin:.6rem 0;color:var(--g900);white-space:pre-wrap;position:relative;}
+
+/* ── Table ── */
+.compare-table{border-collapse:collapse;font-size:.95rem;margin-top:.6rem;width:100%;max-width:960px;}
+.compare-table th{background:var(--navy);color:#fff;padding:.5rem .8rem;text-align:left;font-size:.95rem;}
+.compare-table td{padding:.5rem .8rem;border-bottom:1px solid var(--g100);font-size:.95rem;}
+.compare-table tr:hover td{background:var(--g50);}
+
+/* ── Info boxes ── */
+.info-box{border-radius:12px;padding:1rem 1.5rem;max-width:960px;width:100%;text-align:left;margin-top:.6rem;}
+.info-box.analogy{background:var(--blue-lt);border-left:4px solid var(--blue);}
+.info-box.warning{background:var(--red-lt);border-left:4px solid var(--red);}
+.info-box.success{background:var(--green-lt);border-left:4px solid var(--green);}
+.info-box.tip{background:var(--gold-lt);border-left:4px solid var(--gold);}
+.info-box .label{font-weight:700;font-size:.95rem;margin-bottom:.3rem;}
+.info-box p{font-size:1rem;}
+
+/* ── Flow ── */
+.flow{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:center;margin:1rem 0;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.5rem .8rem;font-size:.95rem;font-weight:700;text-align:center;min-width:80px;}
+.flow-arrow{color:var(--blue);font-size:1.3rem;font-weight:900;}
+
+/* ── Two col ── */
+.two-col{display:flex;gap:1.5rem;width:100%;max-width:960px;text-align:left;}
+.two-col .col{flex:1;}
+
+/* ── Big number ── */
+.big-num{font-size:4rem;font-weight:900;color:var(--blue);line-height:1;}
+
+/* ── Banners ── */
+.exercise-banner{display:inline-block;background:var(--purple);color:#fff;padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:.95rem;margin-bottom:.6rem;}
+.demo-banner{display:inline-block;background:var(--blue);color:#fff;padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:.95rem;margin-bottom:.6rem;}
+.case-banner{display:inline-block;background:var(--orange);color:#fff;padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:.95rem;margin-bottom:.6rem;}
+
+/* ── Quote ── */
+.quote-box{max-width:960px;width:100%;background:var(--g50);border-left:5px solid var(--navy);border-radius:0 12px 12px 0;padding:1.2rem 1.5rem;margin:.6rem 0;text-align:left;}
+.quote-box .quote-text{font-size:1.2rem;font-weight:700;line-height:1.6;color:var(--navy);}
+.quote-box .quote-src{font-size:.9rem;color:var(--g600);margin-top:.4rem;}
+
+/* ── Mockup ── */
+.mockup{max-width:960px;width:100%;border:2px solid var(--g200);border-radius:12px;overflow:hidden;margin:.6rem 0;text-align:left;background:var(--white);}
+.mockup-bar{background:var(--g100);padding:.4rem 1rem;font-size:.8rem;font-weight:700;color:var(--g600);border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:.4rem;}
+.mockup-bar::before{content:'● ● ●';font-size:.5rem;color:var(--g400);letter-spacing:3px;}
+.mockup-content{padding:1rem 1.2rem;}
+.chat-bubble{padding:.6rem 1rem;border-radius:12px;margin:.4rem 0;max-width:85%;font-size:.95rem;line-height:1.7;}
+.chat-bubble.user{background:var(--blue);color:#fff;margin-left:auto;border-bottom-right-radius:4px;}
+.chat-bubble.ai{background:var(--g50);color:var(--g900);margin-right:auto;border-bottom-left-radius:4px;}
+
+/* ── Copy button ── */
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:.3rem .8rem;font-size:.8rem;font-weight:700;cursor:pointer;opacity:.7;transition:opacity .2s;}
+.copy-btn:hover{opacity:1;}
+.copy-btn.copied{background:var(--green);}
+
+/* ── Timer ── */
+.timer{display:inline-flex;align-items:center;gap:.5rem;background:var(--purple-lt);color:var(--purple);padding:.3rem 1rem;border-radius:100px;font-weight:700;font-size:1rem;margin-top:.5rem;}
+.timer::before{content:'⏱';}
+
+/* ── Push marker ── */
+[data-push]::before{content:'📲 推送';position:absolute;top:3.5rem;left:1rem;background:var(--green-lt);color:var(--green);padding:.2rem .6rem;border-radius:100px;font-size:.75rem;font-weight:700;z-index:10;}
+[data-push]{position:relative;}
+
+/* ── Typing animation ── */
+.typing .chat-bubble.ai{overflow:hidden;white-space:nowrap;border-right:3px solid var(--g400);animation:typing 2s steps(40) 0.5s forwards,blink .5s step-end infinite alternate;}
+@keyframes typing{from{max-width:0;opacity:1;}to{max-width:100%;opacity:1;}}
+@keyframes blink{50%{border-color:transparent;}}
+
+/* ── Cinematic dark slides ── */
+.slide.cinematic{background:var(--g900);color:#fff;}
+.slide.cinematic h2{color:#fff;}
+.slide.cinematic .subtitle{color:var(--g400);}
+
+/* ── Callout arrow ── */
+.callout{color:var(--red);font-weight:700;font-size:.95rem;margin-top:.4rem;}
+.callout::before{content:'👆 ';}
+
+/* ── Vote marker ── */
+.vote-slide{position:relative;}
+.vote-slide::after{content:'🗳️ 投票題';position:absolute;top:3.5rem;right:1rem;background:var(--gold-lt);color:#B45309;padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;z-index:10;}
+
+/* ── Section nav ── */
+.section-nav{position:fixed;bottom:1.2rem;left:1.2rem;z-index:200;}
+.section-nav-btn{background:var(--white);border:2px solid var(--g200);border-radius:12px;padding:.4rem .8rem;font-size:.85rem;font-weight:600;color:var(--g600);cursor:pointer;display:flex;align-items:center;gap:.4rem;transition:all .15s;min-height:48px;}
+.section-nav-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-lt);}
+.section-nav-btn .nav-counter{font-weight:400;color:var(--g400);}
+.section-nav-menu{position:absolute;bottom:calc(100% + .5rem);left:0;background:var(--white);border:2px solid var(--g200);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:60vh;overflow-y:auto;min-width:280px;display:none;padding:.4rem;}
+.section-nav-menu.open{display:block;}
+.section-nav-item{display:flex;align-items:center;gap:.6rem;padding:.5rem .8rem;border-radius:8px;cursor:pointer;font-size:.85rem;color:var(--g600);transition:background .1s;}
+.section-nav-item:hover{background:var(--g50);}
+.section-nav-item.active{background:var(--blue-lt);color:var(--blue);font-weight:700;}
+.section-nav-item .nav-idx{width:24px;height:24px;border-radius:50%;background:var(--g100);color:var(--g600);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0;}
+.section-nav-item.active .nav-idx{background:var(--blue);color:#fff;}
+.section-nav-item .nav-title{flex:1;}
+
+/* ── Fixed overlays ── */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.8rem;}
+.controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:var(--white);color:var(--g800);font-size:1.2rem;cursor:pointer;transition:all .15s;}
+.controls button:hover{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
+.controls button:disabled{opacity:.25;cursor:default;}
+/* ── G key nav overlay ── */
+#navOverlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);overflow-y:auto;padding:2rem;}
+#navGrid{display:grid;grid-template-columns:repeat(6,1fr);gap:.8rem;max-width:960px;margin:0 auto;}
+.nav-card{cursor:pointer;border-radius:10px;overflow:hidden;border:2px solid var(--g200);transition:border-color .15s;background:var(--white);}
+.nav-card:hover{border-color:var(--gold);}
+.nav-card.current{border-color:var(--blue);}
+.nav-card-top{height:50px;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--g400);background:var(--offwhite);}
+.nav-card-top.dark{background:var(--navy);color:rgba(255,255,255,.4);}
+.nav-card-bottom{padding:.4rem;font-size:.65rem;}
+.nav-card-act{color:var(--blue);font-weight:700;margin-bottom:.1rem;}
+.nav-card-title{color:var(--g600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.module-badge{position:fixed;top:.8rem;right:1rem;z-index:100;background:var(--blue-lt);color:var(--blue);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;}
+.module-title{position:fixed;top:.8rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
+
+/* ── RWD ── */
+@media(max-width:768px){
+  html{font-size:16px;}
+  .slide{padding:3rem 1.2rem 5.5rem;}
+  h1{font-size:1.8rem;}h2{font-size:1.4rem;}p,li{font-size:.95rem;}
+  .card-grid{flex-direction:column;align-items:center;}
+  .card{max-width:100%;min-width:auto;}
+  .two-col{flex-direction:column;}
+  .mockup{max-width:100%;}
+  .controls button{width:40px;height:40px;}
+  .flow{gap:.3rem;}.flow-box{font-size:.85rem;padding:.4rem .6rem;min-width:65px;}
+}
+@media(max-width:480px){
+  h1{font-size:1.5rem;}
+  .big-num{font-size:2.8rem;}
+  .flow-box{min-width:55px;font-size:.8rem;}
+}
+/* 2x2 grid standard */
+.grid-2x2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;max-width:800px;width:100%;margin:1rem auto;}
+.grid-2x2 .card{min-height:0;}
+</style>
+</head>
+<body>
+
+<div class="module-title">Day 3 — AI 個人助手設計</div>
+<div class="module-badge">產投班</div>
+<div class="slides">
+
+<!-- ═══════════════════════════════════════════════════════════
+     A. 暖身 (5 pages: 0-4)
+     ═══════════════════════════════════════════════════════════ -->
+
+<!-- 0: Cover -->
+<div class="slide cover" data-act="暖身">
+  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:.5rem;">AI 工具應用與自動化流程實戰班</p>
+  <h1 style="font-size:3rem;">Day 3<br>AI 個人助手設計</h1>
+  <p style="margin-top:1.5rem;font-size:1.2rem;color:rgba(255,255,255,.7);">GPTs × Gems × 多助手策略</p>
+  <p style="margin-top:2rem;font-size:1rem;color:rgba(255,255,255,.4);">09:00 – 17:00</p>
+</div>
+
+<!-- 1: Day2 回顧 -->
+<div class="slide" data-act="暖身">
+  <h2>Day 2 回顧 — 你的 Prompt 升級了嗎？</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card fragment" style="border-top:3px solid var(--blue);text-align:center;">
+      <div class="icon">🎯</div>
+      <h3>RTFC 四要素</h3>
+      <p>角色 + 任務 + 格式 + 脈絡</p>
+    </div>
+    <div class="card fragment" style="border-top:3px solid var(--green);text-align:center;">
+      <div class="icon">🔗</div>
+      <h3>多輪對話策略</h3>
+      <p>追問、修正、疊加</p>
+    </div>
+    <div class="card fragment" style="border-top:3px solid var(--purple);text-align:center;">
+      <div class="icon">📋</div>
+      <h3>Prompt 範本庫</h3>
+      <p>建立可複用的提示詞</p>
+    </div>
+  </div>
+  <p class="fragment" style="margin-top:1rem;font-size:1rem;color:var(--green);font-weight:700;">今天，我們把 Prompt 「裝進」一個永久助手裡 →</p>
+</div>
+
+<!-- 2: 今日行程 -->
+<div class="slide" data-act="暖身">
+  <h2>今日行程</h2>
+  <div class="step-list" style="margin-top:.8rem;">
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--blue);">上</div>
+      <div class="step-content"><strong>09:00 – 10:30　單元七：GPTs 實作</strong><p>在 ChatGPT 建立你的第一個客製化 AI 助手</p></div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--green);">上</div>
+      <div class="step-content"><strong>10:50 – 12:00　單元八：Gems + Google 整合</strong><p>在 Gemini 建立 Gem，串接 Gmail/Docs/Sheets</p></div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--gold);">🍱</div>
+      <div class="step-content"><strong>12:00 – 13:00　午休</strong></div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--purple);">下</div>
+      <div class="step-content"><strong>13:00 – 14:30　單元九：多助手策略</strong><p>用 AI 設計 AI，規劃你的 AI 員工團隊</p></div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--orange);">下</div>
+      <div class="step-content"><strong>14:50 – 16:00　成果分享 + 專題</strong><p>Demo 你的助手，為期末專題建專屬 AI 助手</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- 3: Day3 定位 -->
+<div class="slide cinematic" data-act="暖身">
+  <p class="subtitle" style="color:var(--g400);">五天課程定位</p>
+  <h2 style="font-size:1.6rem;margin-top:.5rem;">Day 1 用工具 → Day 2 用好工具 → <span style="color:var(--gold);">Day 3 養工具</span> → Day 4 串工具 → Day 5 改造工作</h2>
+  <div class="info-box analogy " style="margin-top:1.5rem;background:rgba(255,255,255,.08);border-left-color:var(--gold);">
+    <p style="color:rgba(255,255,255,.85);font-size:1.1rem;">
+      Day 1-2：你每次都要「重新教」AI 你是誰、要什麼<br>
+      Day 3：把這些「教法」存起來，變成<strong style="color:var(--gold);">專屬 AI 員工</strong>，隨時聽命</p>
+  </div>
+</div>
+
+<!-- 4: 暖身投票 -->
+<div class="slide vote-slide" data-vote="true" data-act="暖身">
+  <h2>暖身投票 🗳️</h2>
+  <p style="font-size:1.2rem;margin-bottom:1.5rem;">你有沒有用過 GPTs 或 Gems？</p>
+  <div class="card-grid">
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">🙋</div>
+      <h3>A. 有，常用</h3>
+      <p>已經在用客製化 AI 助手</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div class="icon">🤔</div>
+      <h3>B. 聽過，沒試</h3>
+      <p>知道有這功能，還沒動手</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--purple);">
+      <div class="icon">❓</div>
+      <h3>C. 完全沒聽過</h3>
+      <p>GPTs？Gems？那是什麼？</p>
+    </div>
+  </div>
+  <p  style="margin-top:1rem;font-size:.95rem;color:var(--g600);">不管選哪個，今天結束你都會有自己的 AI 助手 ✌️</p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     B. 單元七：GPTs 實作 (30 pages: 5-34)
+     ═══════════════════════════════════════════════════════════ -->
+
+<!-- 5: Section title -->
+<div class="slide section-title" data-act="GPTs">
+  <p style="font-size:1rem;color:rgba(255,255,255,.6);">單元七</p>
+  <h1 style="font-size:2.8rem;color:#fff;">GPTs 實作</h1>
+  <p style="font-size:1.2rem;color:rgba(255,255,255,.8);margin-top:.5rem;">在 ChatGPT 建立你的專屬 AI 員工</p>
+</div>
+
+<!-- 6: 什麼是客製化 AI 助手 -->
+<div class="slide" data-act="GPTs">
+  <h2>什麼是客製化 AI 助手？</h2>
+  <div class="info-box analogy">
+    <div class="label">💡 比喻</div>
+    <p>ChatGPT = 一個什麼都會一點的<strong>通才實習生</strong><br>
+    GPT = 你親自訓練的<strong>專屬部門員工</strong>，懂你的規則、SOP、公司文件</p>
+  </div>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <h3 style="color:var(--g600);">沒有 GPTs 之前</h3>
+      <p style="font-size:.95rem;">每次對話都要重新說：<br>「你是一個...，請用...格式，根據...規則」</p>
+    </div>
+    <div class="col">
+      <h3 style="color:var(--green);">有 GPTs 之後</h3>
+      <p style="font-size:.95rem;">設定一次，永久記住：<br>打開就用，不用每次重教</p>
+    </div>
+  </div>
+</div>
+
+<!-- 7: GPTs 能幹嘛 -->
+<div class="slide" data-act="GPTs">
+  <h2>GPTs 能幫你做什麼？</h2>
+  <div class="card-grid grid-2x2" style="margin-top:.8rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div class="icon">📝</div>
+      <h3>固定格式寫作</h3>
+      <p>週報、Email、公告</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">📚</div>
+      <h3>知識庫問答</h3>
+      <p>根據你的文件回答</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--purple);">
+      <div class="icon">🔍</div>
+      <h3>合約/文件審閱</h3>
+      <p>照你的檢查清單審查</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--gold);">
+      <div class="icon">💬</div>
+      <h3>客服 FAQ</h3>
+      <p>自動回答常見問題</p>
+    </div>
+  </div>
+</div>
+
+<!-- 8: GPTs 四大組件 -->
+<div class="slide" data-act="GPTs">
+  <h2>GPTs 的四大組件</h2>
+  <div class="flow" style="margin:1.5rem 0;">
+    <div class="flow-box" style="border-color:var(--blue);">📛 名稱描述</div>
+    <div class="flow-arrow">+</div>
+    <div class="flow-box" style="border-color:var(--green);">📜 Instructions</div>
+    <div class="flow-arrow">+</div>
+    <div class="flow-box" style="border-color:var(--purple);">📁 知識庫</div>
+    <div class="flow-arrow">+</div>
+    <div class="flow-box" style="border-color:var(--gold);">⚙️ 設定</div>
+  </div>
+  <div class="info-box tip">
+    <div class="label">🔑 核心觀念</div>
+    <p>Instructions 就是你 Day 2 學的 Prompt，但<strong>永久存起來</strong>，每次對話自動套用</p>
+  </div>
+</div>
+
+<!-- 9: Demo 開始 -->
+<div class="slide" data-act="GPTs">
+  <div class="demo-banner">Demo 時間</div>
+  <h2>完整建立一個 GPT — Step by Step</h2>
+  <p style="font-size:1.1rem;margin-top:.5rem;">跟著螢幕操作，等一下換你做！</p>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>進入 GPT Builder</strong></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>設定名稱 + 描述</strong></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>寫 Instructions</strong></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-content"><strong>上傳知識庫</strong></div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-content"><strong>測試與調整</strong></div></div>
+  </div>
+</div>
+
+<!-- 10: Step 1 進入 GPT Builder -->
+<div class="slide" data-act="GPTs">
+  <div class="demo-banner">Step 1</div>
+  <h2>進入 GPT Builder</h2>
+  <div class="mockup" style="margin-top:.8rem;">
+    <div class="mockup-bar">chatgpt.com</div>
+    <div class="mockup-content" style="text-align:center;padding:1.5rem;">
+      <p style="font-size:1.1rem;font-weight:700;margin-bottom:.8rem;">從左上角選單進入</p>
+      <div class="step-list" style="max-width:500px;margin:0 auto;">
+        <div class="step"><div class="step-num">1</div><div class="step-content"><strong>點左上角「探索 GPTs」</strong></div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-content"><strong>右上角「+ 建立」</strong></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-content"><strong>進入 GPT Builder 畫面</strong></div></div>
+      </div>
+    </div>
+  </div>
+  <p class="fragment callout">需要 ChatGPT Plus 或 Team 方案才能建立 GPTs</p>
+</div>
+
+<!-- 11: Step 2 設定名稱 -->
+<div class="slide" data-act="GPTs">
+  <div class="demo-banner">Step 2</div>
+  <h2>設定名稱 + 描述</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <h3>名稱</h3>
+      <p style="font-size:.95rem;">簡短好記，說明用途</p>
+      <div class="code-block" style="margin-top:.4rem;font-size:.85rem;">產品 FAQ 小助手</div>
+    </div>
+    <div class="col">
+      <h3>描述</h3>
+      <p style="font-size:.95rem;">一句話說清楚能幫什麼忙</p>
+      <div class="code-block" style="margin-top:.4rem;font-size:.85rem;">根據產品規格表回答客戶常見問題，語氣親切專業</div>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:1rem;">
+    <div class="label">💡 好名字的特徵</div>
+    <p>「XX 助手」「XX 小幫手」— 讓人一看就知道做什麼</p>
+  </div>
+</div>
+
+<!-- 12: Step 3a Instructions 角色定義 -->
+<div class="slide" data-act="GPTs">
+  <div class="demo-banner">Step 3a</div>
+  <h2>寫 Instructions — 角色定義</h2>
+  <div class="code-block" style="margin-top:.8rem;font-size:.85rem;">你是一位專業的產品客服人員。
+
+你的職責：
+- 根據知識庫中的產品規格表回答問題
+- 語氣親切、專業、有耐心
+- 如果知識庫裡找不到答案，誠實說「我需要確認後回覆您」</div>
+  <div class="info-box analogy" style="margin-top:.8rem;">
+    <p>這就是 Day 2 學的 <strong>R（角色）</strong>— 但現在寫一次，永遠生效</p>
+  </div>
+</div>
+
+<!-- 13: Step 3b Instructions 回答規則 -->
+<div class="slide" data-act="GPTs">
+  <div class="demo-banner">Step 3b</div>
+  <h2>寫 Instructions — 回答規則</h2>
+  <div class="code-block" style="margin-top:.8rem;font-size:.85rem;">回答規則：
+1. 先確認客戶問的是哪個產品型號
+2. 從知識庫中找到對應規格
+3. 用簡單易懂的語言回答（避免太多術語）
+4. 回答結尾加上「還有其他問題嗎？」
+5. 如果客戶抱怨，先表達理解再解決問題</div>
+  <p  style="margin-top:.6rem;font-size:.95rem;color:var(--g600);">規則越具體，助手越「聽話」— 跟帶新人一樣</p>
+</div>
+
+<!-- 14: Step 3c Instructions 輸出格式 -->
+<div class="slide" data-act="GPTs">
+  <div class="demo-banner">Step 3c</div>
+  <h2>寫 Instructions — 輸出格式</h2>
+  <div class="code-block" style="margin-top:.8rem;font-size:.85rem;">輸出格式：
+- 回答長度不超過 200 字
+- 如果涉及規格數字，用表格呈現
+- 推薦產品時列出 2-3 個選項
+- 每次回答只處理一個問題</div>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <div class="label">💡 Day 2 的 RTFC 直接套用</div>
+    <p><strong>R</strong> 角色 → 步驟 3a<br>
+    <strong>T</strong> 任務 + <strong>C</strong> 脈絡 → 步驟 3b<br>
+    <strong>F</strong> 格式 → 步驟 3c</p>
+  </div>
+</div>
+
+<!-- 15: Step 4 上傳知識庫 -->
+<div class="slide" data-act="GPTs">
+  <div class="demo-banner">Step 4</div>
+  <h2>上傳知識庫</h2>
+  <p style="font-size:1rem;margin-bottom:.8rem;">讓 AI 擁有「公司內部知識」</p>
+  <div class="card-grid">
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div class="icon">📄</div>
+      <h3>PDF / Word</h3>
+      <p>產品手冊<br>公司 SOP</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">📊</div>
+      <h3>Excel / CSV</h3>
+      <p>價目表<br>客戶 FAQ 清單</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--purple);">
+      <div class="icon">📝</div>
+      <h3>TXT / Markdown</h3>
+      <p>政策文件<br>作業流程</p>
+    </div>
+  </div>
+  <div class="info-box warning" style="margin-top:.8rem;">
+    <div class="label">⚠️ 注意</div>
+    <p>上傳的文件 AI 都看得到 — <strong>不要上傳機密資料</strong>（薪資、個資、營業秘密）</p>
+  </div>
+</div>
+
+<!-- 16: Step 5 測試與調整 -->
+<div class="slide" data-act="GPTs">
+  <div class="demo-banner">Step 5</div>
+  <h2>測試與調整</h2>
+  <div class="mockup" style="margin-top:.8rem;">
+    <div class="mockup-bar">GPT Builder — 預覽</div>
+    <div class="mockup-content">
+      <div class="chat-bubble user">你們的 A100 型號有什麼特點？</div>
+      <div class="chat-bubble ai">A100 是我們的旗艦型號，主要特點包括：<br>1. 續航力：8 小時<br>2. 防水等級：IP67<br>3. 重量：僅 180g<br><br>還有其他問題嗎？ 😊</div>
+    </div>
+  </div>
+  <div class="info-box success" style="margin-top:.6rem;">
+    <div class="label">✅ 檢查清單</div>
+    <p>回答是否根據知識庫？語氣對嗎？格式符合要求？</p>
+  </div>
+</div>
+
+<!-- 17: 閃卡 Embedding -->
+<div class="slide" data-act="GPTs">
+  <div style="background:var(--blue-lt);padding:.3rem 1rem;border-radius:100px;font-size:.85rem;font-weight:700;color:var(--blue);display:inline-block;margin-bottom:.6rem;">📘 iPAS 術語閃卡</div>
+  <h2 style="color:var(--blue);">Embedding — 文字變數字算距離</h2>
+  <div style="text-align:center;margin:.8rem 0;">
+    <span style="font-size:3rem;">🔢</span>
+  </div>
+  <div class="info-box analogy">
+    <p style="font-size:1.1rem;line-height:1.8;">
+    GPTs 的知識庫是怎麼「搜尋」的？<br>
+    <strong>Embedding</strong> = 把文字轉成一串數字（向量）<br>
+    「貓」→ [0.2, 0.8, 0.1...]　「狗」→ [0.3, 0.7, 0.2...]<br>
+    意思越接近 → 數字距離越近 → AI 就找到相關段落</p>
+  </div>
+  <p  style="margin-top:.6rem;font-size:.95rem;color:var(--navy);font-weight:700;">你上傳的文件，AI 背後就是用 Embedding 來找答案的 📐</p>
+  <p  style="margin-top:.3rem;font-size:.9rem;color:var(--g600);">📖 深入學習 → <a href="https://ai100.cooperation.tw/classroom/learn" target="_blank" style="color:var(--blue);">AI100 M05 生成式 AI</a></p>
+</div>
+
+<!-- 18: 閃卡 Fine-tuning -->
+<div class="slide" data-act="GPTs">
+  <div style="background:var(--blue-lt);padding:.3rem 1rem;border-radius:100px;font-size:.85rem;font-weight:700;color:var(--blue);display:inline-block;margin-bottom:.6rem;">📘 iPAS 術語閃卡</div>
+  <h2 style="color:var(--blue);">Fine-tuning — 更深層的客製化</h2>
+  <div style="text-align:center;margin:.8rem 0;">
+    <span style="font-size:3rem;">🎛️</span>
+  </div>
+  <div class="two-col" style="margin-top:.8rem;">
+    <div class="col">
+      <div class="info-box" style="background:var(--green-lt);border-left:4px solid var(--green);">
+        <h3>GPTs（今天學的）</h3>
+        <p style="font-size:.95rem;">= 給 AI 一份工作手冊<br>不改變 AI 本身</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="info-box" style="background:var(--purple-lt);border-left:4px solid var(--purple);">
+        <h3>Fine-tuning（微調）</h3>
+        <p style="font-size:.95rem;">= 重新訓練 AI 的大腦<br>改變 AI 本身的能力</p>
+      </div>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <p>Fine-tuning 需要大量數據 + 技術能力，一般工作用 GPTs 就夠了！</p>
+  </div>
+  <p  style="margin-top:.3rem;font-size:.9rem;color:var(--g600);">📖 深入學習 → <a href="https://ai100.cooperation.tw/classroom/learn" target="_blank" style="color:var(--blue);">AI100 M05 生成式 AI</a></p>
+</div>
+
+<!-- 19: 案例 ⭐ 標題 -->
+<div class="slide" data-act="GPTs">
+  <div class="exercise-banner">實作練習</div>
+  <div class="case-banner" style="background:var(--gold-lt);color:var(--gold);margin-left:.5rem;">案例 ⭐ 全班跟著做</div>
+  <h2>建一個「產品 FAQ 助手」</h2>
+  <p style="font-size:1.05rem;margin-top:.5rem;">目標：打開 GPT 後，直接問產品問題就能回答</p>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>名稱</strong>：「[你的產品] FAQ 助手」</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>Instructions</strong>：用 RTFC 架構寫角色+規則+格式</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>知識庫</strong>：上傳一份產品介紹文件（或用範例檔）</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-content"><strong>測試</strong>：問 3 個問題，看回答品質</div></div>
+  </div>
+  <div class="timer" data-minutes="15">15:00</div>
+</div>
+
+<!-- 20: 案例 ⭐ 提供 Instructions 範例 -->
+<div class="slide" data-act="GPTs">
+  <span class="exercise-banner">實作練習</span>
+  <span class="case-banner" style="background:var(--gold-lt);color:var(--gold);">⭐ 跟著做</span>
+  <h2>範例 Instructions（可直接複製）</h2>
+  <div class="code-block" style="margin-top:.6rem;font-size:.82rem;">你是 [公司名] 的產品 FAQ 客服人員。
+
+角色：親切專業的產品諮詢顧問
+任務：根據知識庫中的產品資料回答客戶問題
+格式：
+- 回答簡潔（150 字以內）
+- 涉及規格用表格
+- 結尾問「還有其他問題嗎？」
+規則：
+- 只回答知識庫中有的內容
+- 不確定的說「我需要確認後回覆您」
+- 不要編造數據</div>
+  <p  style="margin-top:.6rem;font-size:.95rem;color:var(--green);font-weight:700;">把 [公司名] 換成你的，就可以直接用！</p>
+</div>
+
+<!-- 21a: 案例 ⭐⭐ 週報助手 — 設定 -->
+<div class="slide" data-act="GPTs">
+  <span class="exercise-banner">實作練習</span>
+  <span class="case-banner">⭐⭐ 自己試</span>
+  <h2>建一個「週報撰寫助手」(1/2)</h2>
+  <p style="font-size:1rem;margin-top:.5rem;">告訴 AI 這週做了什麼，自動產出格式化週報</p>
+  <div class="code-block" style="margin-top:.6rem;font-size:.82rem;">你是一位週報撰寫助手。
+
+任務：將使用者口述的工作內容，整理成結構化週報
+格式：
+## 本週工作摘要
+- [重點 1]
+- [重點 2]
+
+## 完成事項
+| 項目 | 進度 | 說明 |
+
+## 下週計劃
+- [計劃 1]</div>
+</div>
+
+<!-- 21b: 案例 ⭐⭐ 週報助手 — 知識庫 + 測試 -->
+<div class="slide" data-act="GPTs">
+  <span class="case-banner">⭐⭐ 週報助手</span>
+  <h2>建一個「週報撰寫助手」(2/2)</h2>
+  <div class="code-block" style="margin-top:.6rem;font-size:.82rem;">規則：
+- 語氣正式但不生硬
+- 自動分類（開發/行政/溝通）
+- 如果使用者只說一句話，追問細節</div>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <div class="label">💡 進階：上傳知識庫</div>
+    <p>上傳你過去的週報範本，讓 AI 學你的格式和用詞風格</p>
+  </div>
+  <div class="timer" data-minutes="10">10:00</div>
+</div>
+
+<!-- 22: 案例 ⭐⭐ 測試畫面 -->
+<div class="slide" data-act="GPTs">
+  <span class="exercise-banner">⭐⭐ 週報助手</span>
+  <h2>測試你的週報助手</h2>
+  <div class="mockup" style="margin-top:.8rem;">
+    <div class="mockup-bar">我的 GPT — 週報撰寫助手</div>
+    <div class="mockup-content">
+      <div class="chat-bubble user">這週開了三個會，修了一個bug，還處理了客戶投訴</div>
+      <div class="chat-bubble ai"><strong>## 本週工作摘要</strong><br>本週主要處理跨部門溝通、技術修復及客戶服務。<br><br><strong>## 完成事項</strong><br>| 項目 | 分類 | 說明 |<br>|------|------|------|<br>| 部門會議 ×3 | 溝通 | 跨部門協作... |<br>| Bug 修復 | 開發 | 已修復並測試 |<br>| 客訴處理 | 服務 | 已解決 |</div>
+    </div>
+  </div>
+  <p  style="margin-top:.6rem;font-size:.95rem;color:var(--g600);">口述 30 秒 → 格式化週報，每週省 20 分鐘</p>
+</div>
+
+<!-- 23: 案例 ⭐⭐⭐ 合約審閱助手 標題 -->
+<div class="slide" data-act="GPTs">
+  <span class="exercise-banner">實作練習</span>
+  <span class="case-banner">⭐⭐⭐ 挑戰</span>
+  <h2>建一個「合約審閱助手」+ 上傳知識庫</h2>
+  <p style="font-size:1rem;margin-top:.5rem;">上傳公司合約範本 → AI 幫你檢查新合約的風險</p>
+  <div class="step-list" style="margin-top:.8rem;">
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>名稱</strong>：合約審閱助手</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>Instructions</strong>：寫審閱規則（重點條款、風險條款清單）</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>知識庫</strong>：上傳合約範本 + 審閱 checklist</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-content"><strong>測試</strong>：貼入一份合約文字，看審閱結果</div></div>
+  </div>
+  <div class="timer" data-minutes="15">15:00</div>
+</div>
+
+<!-- 24: 案例 ⭐⭐⭐ 合約 Instructions -->
+<div class="slide" data-act="GPTs">
+  <span class="case-banner">⭐⭐⭐ 合約審閱助手</span>
+  <h2>合約審閱 Instructions 參考</h2>
+  <div class="code-block" style="margin-top:.6rem;font-size:.8rem;">你是一位合約審閱助手，協助非法律專業人員初步檢查合約。
+
+任務：
+1. 逐段閱讀使用者提供的合約
+2. 標記風險條款（紅色警告）
+3. 對比知識庫中的公司範本，找出差異
+
+必須檢查的重點：
+- 付款條件（是否有不合理的預付比例）
+- 違約金（是否超過合約金額 30%）
+- 智慧財產權歸屬
+- 保密義務期限
+- 自動續約條款
+
+輸出格式：
+## 🟢 安全條款
+## 🟡 需注意
+## 🔴 高風險
+
+結尾加上：「此為 AI 初步篩檢，正式簽約前請諮詢法務。」</div>
+</div>
+
+<!-- 25: GPT 不聽話怎麼辦 -->
+<div class="slide" data-act="GPTs">
+  <h2>常見問題：GPT 不聽話怎麼辦？</h2>
+  <table class="compare-table" style="margin-top:.8rem;">
+    <tr><th style="width:40%;">症狀</th><th>解法</th></tr>
+    <tr ><td>回答太長 / 太短</td><td>在 Instructions 加字數限制<br>「回答控制在 100-150 字」</td></tr>
+    <tr ><td>沒用知識庫內容</td><td>加規則「優先從上傳文件中找答案」</td></tr>
+    <tr ><td>語氣不對</td><td>給範例：「以下是好的回答語氣：...」</td></tr>
+    <tr ><td>跳出角色</td><td>加防護：「不要回答與 [主題] 無關的問題」</td></tr>
+    <tr ><td>編造資料</td><td>加規則「找不到就說不知道，不要編」</td></tr>
+  </table>
+</div>
+
+<!-- 26: Instructions 優化技巧 -->
+<div class="slide" data-act="GPTs">
+  <h2>讓 Instructions 更強的 3 招</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div class="icon">📝</div>
+      <h3>給範例</h3>
+      <p>「好的回答像這樣：...」<br>「不好的回答像這樣：...」</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">🚧</div>
+      <h3>設邊界</h3>
+      <p>「只回答 [範圍] 的問題」<br>「超出範圍回覆：抱歉...」</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--purple);">
+      <div class="icon">🔄</div>
+      <h3>定流程</h3>
+      <p>「第一步確認...第二步...」<br>讓 AI 按 SOP 走</p>
+    </div>
+  </div>
+</div>
+
+<!-- 27: GPTs 分享與權限 -->
+<div class="slide" data-act="GPTs">
+  <h2>GPTs 的分享與權限</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--g400);">
+      <div class="icon">🔒</div>
+      <h3>僅自己</h3>
+      <p>只有你能用<br>（預設）</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div class="icon">🔗</div>
+      <h3>有連結的人</h3>
+      <p>分享連結<br>同事可以用</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">🌍</div>
+      <h3>公開到 GPT Store</h3>
+      <p>所有人都能找到</p>
+    </div>
+  </div>
+  <div class="info-box warning" style="margin-top:.8rem;">
+    <div class="label">⚠️ 安全提醒</div>
+    <p>公開分享時，知識庫裡的<strong>文件可能被下載</strong>。機密資料不要放進公開 GPT！</p>
+  </div>
+</div>
+
+<!-- 28: GPT Store 生態 -->
+<div class="slide" data-act="GPTs">
+  <h2>GPT Store — 別人做好的 AI 助手</h2>
+  <p style="font-size:1rem;margin-top:.5rem;">不一定要自己建，先看看別人做了什麼</p>
+  <div class="card-grid grid-2x2" style="margin-top:.8rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div class="icon">✍️</div>
+      <h3>寫作類</h3>
+      <p>文案、翻譯、校對</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">📊</div>
+      <h3>分析類</h3>
+      <p>數據、報表、摘要</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--purple);">
+      <div class="icon">🎨</div>
+      <h3>創意類</h3>
+      <p>圖片、設計、簡報</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--gold);">
+      <div class="icon">💼</div>
+      <h3>工作流類</h3>
+      <p>排程、CRM、HR</p>
+    </div>
+  </div>
+  <p  style="margin-top:.8rem;font-size:.95rem;color:var(--g600);">找到好的 GPT → 研究它的 Instructions → 學習寫法 📚</p>
+</div>
+
+<!-- 29: 小技巧 用 AI 寫 Instructions -->
+<div class="slide" data-act="GPTs">
+  <h2>秘密武器：用 AI 幫你寫 Instructions</h2>
+  <div class="mockup" style="margin-top:.8rem;">
+    <div class="mockup-bar">ChatGPT</div>
+    <div class="mockup-content">
+      <div class="chat-bubble user">我想建一個 GPT，專門幫我把客戶的 Email 重點整理成表格。請幫我寫 Instructions。</div>
+      <div class="chat-bubble ai">以下是你可以使用的 Instructions：<br><br>你是一位 Email 摘要助手...<br>任務：讀取客戶 Email → 提取重點 → 輸出表格<br>格式：| 寄件者 | 主旨 | 待辦事項 | 截止日 |<br>...</div>
+    </div>
+  </div>
+  <div class="info-box success" style="margin-top:.6rem;">
+    <p style="font-weight:700;">用 AI 設計 AI — 這就是 Day 3 的核心技能 🎯</p>
+  </div>
+</div>
+
+<!-- 30: 模組七成果 -->
+<div class="slide" data-act="GPTs">
+  <h2>單元七成果回顧</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>學會建 GPTs</h3>
+      <p>5 步驟完整流程</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>寫 Instructions</h3>
+      <p>RTFC → 永久設定</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>知識庫應用</h3>
+      <p>上傳文件讓 AI 回答</p>
+    </div>
+  </div>
+  <div class="quote-box" style="margin-top:1rem;">
+    <div class="quote-text">「一個好的 GPT = 一份好的 Instructions + 對的知識庫」</div>
+  </div>
+</div>
+
+<!-- 31: 休息提示 -->
+<div class="slide break-slide" data-act="GPTs">
+  <p style="font-size:3rem;margin-bottom:1rem;">☕</p>
+  <h2>休息 10 分鐘</h2>
+  <p style="font-size:1.1rem;color:var(--g600);margin-top:.5rem;">10:20 回來繼續 — 接下來是 Gemini 的世界</p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     C. 單元八：Gems + Google 整合 (25 pages: 32-56)
+     ═══════════════════════════════════════════════════════════ -->
+
+<!-- 32: Section title -->
+<div class="slide section-title" data-act="Gems">
+  <p style="font-size:1rem;color:rgba(255,255,255,.6);">單元八</p>
+  <h1 style="font-size:2.8rem;color:#fff;">Gems + Google 整合</h1>
+  <p style="font-size:1.2rem;color:rgba(255,255,255,.8);margin-top:.5rem;">Gemini 的客製化助手 + Google 生態系原生 AI</p>
+</div>
+
+<!-- 33: Gems vs GPTs 比較 -->
+<div class="slide" data-act="Gems">
+  <h2>Gemini Gems vs ChatGPT GPTs</h2>
+  <table class="compare-table" style="margin-top:.8rem;">
+    <tr><th>比較項目</th><th>GPTs (ChatGPT)</th><th>Gems (Gemini)</th></tr>
+    <tr ><td><strong>建立方式</strong></td><td>GPT Builder（圖形介面）</td><td>直接在 Gemini 對話中建立</td></tr>
+    <tr ><td><strong>知識庫</strong></td><td>上傳 PDF / Excel / Word</td><td>上傳文件 + 連結 Google Drive</td></tr>
+    <tr ><td><strong>核心差異</strong></td><td>獨立生態系，功能豐富</td><td>深度整合 Google 服務</td></tr>
+    <tr ><td><strong>費用</strong></td><td>Plus / Team 方案</td><td>免費版可建，Advanced 更多功能</td></tr>
+    <tr ><td><strong>最大優勢</strong></td><td>GPT Store + 豐富第三方</td><td>Gmail/Docs/Sheets 原生整合</td></tr>
+  </table>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <p>不是選一個 — 而是<strong>看場景選工具</strong>。Google 重度用戶 → Gems 優先</p>
+  </div>
+</div>
+
+<!-- 34: Demo 建立 Gem -->
+<div class="slide" data-act="Gems">
+  <div class="demo-banner">Demo 時間</div>
+  <h2>完整建立一個 Gem</h2>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>開啟 Gemini</strong> → gemini.google.com<p>登入你的 Google 帳號</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>左側選單 → Gem 管理員 → 新增 Gem</strong></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>設定名稱 + 自訂指示</strong><p>跟 GPTs 的 Instructions 概念一樣</p></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-content"><strong>（選擇性）上傳知識文件</strong></div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-content"><strong>儲存 → 立即使用</strong></div></div>
+  </div>
+</div>
+
+<!-- 35: Gem 的自訂指示範例 -->
+<div class="slide" data-act="Gems">
+  <div class="demo-banner">Gem 範例</div>
+  <h2>Gem 的自訂指示（Instructions）</h2>
+  <div class="code-block" style="margin-top:.8rem;font-size:.82rem;">你是一位會議記錄助手。
+
+任務：
+- 將使用者提供的會議錄音逐字稿整理成結構化會議記錄
+- 自動提取：出席者、討論事項、決議、待辦事項
+
+格式：
+# 會議記錄
+- 日期：
+- 出席者：
+## 討論事項
+1. [議題] — [結論]
+## 待辦事項
+| 負責人 | 事項 | 截止日 |
+
+規則：
+- 去除贅字口語（嗯、那個、對啊）
+- 如果沒有提到截止日，標註「待確認」</div>
+</div>
+
+<!-- 36: Gemini 在 Google 服務中 -->
+<div class="slide" data-act="Gems">
+  <h2>Gemini 的真正殺手鐧：Google 原生 AI</h2>
+  <p style="font-size:1rem;margin-top:.5rem;">不用切換工具 — AI 就在你原本的工作環境裡</p>
+  <div class="card-grid grid-2x2" style="margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--red);">
+      <div class="icon">📧</div>
+      <h3>Gmail</h3>
+      <p>「幫我回覆這封信」<br>AI 自動草擬回信</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div class="icon">📄</div>
+      <h3>Google Docs</h3>
+      <p>「幫我摘要這篇文章」<br>「幫我改寫這段」</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">📊</div>
+      <h3>Google Sheets</h3>
+      <p>「幫我寫公式」<br>「分析這些數據」</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--gold);">
+      <div class="icon">📽️</div>
+      <h3>Google Slides</h3>
+      <p>「生成投影片」<br>「幫我排版」</p>
+    </div>
+  </div>
+</div>
+
+<!-- 37: Gmail + AI Demo -->
+<div class="slide" data-act="Gems">
+  <div class="demo-banner">Demo</div>
+  <h2>Gmail 中的 AI — 自動撰寫回信</h2>
+  <div class="mockup" style="margin-top:.8rem;">
+    <div class="mockup-bar">Gmail — 回覆</div>
+    <div class="mockup-content">
+      <p style="font-size:.85rem;color:var(--g600);margin-bottom:.5rem;"><strong>原信：</strong>Hi, 請問你們的專案進度如何？下週能交初稿嗎？</p>
+      <div style="background:var(--blue-lt);padding:.6rem 1rem;border-radius:8px;margin:.5rem 0;">
+        <p style="font-size:.85rem;color:var(--blue);font-weight:700;">✨ 幫我撰寫 → 「專業語氣回覆，進度正常，初稿下週三可交」</p>
+      </div>
+      <p style="font-size:.9rem;margin-top:.5rem;line-height:1.6;">Dear [Name],<br>感謝您的詢問。專案進度一切正常，預計下週三可提交初稿供您審閱。如有任何需要提前討論的項目，歡迎隨時聯繫。</p>
+    </div>
+  </div>
+  <p  style="margin-top:.6rem;font-size:.95rem;color:var(--green);font-weight:700;">原本寫 5 分鐘的回信 → 10 秒搞定，還更專業</p>
+</div>
+
+<!-- 38: Google Sheets + AI Demo -->
+<div class="slide" data-act="Gems">
+  <div class="demo-banner">Demo</div>
+  <h2>Google Sheets — AI 幫你寫公式</h2>
+  <div class="mockup" style="margin-top:.8rem;">
+    <div class="mockup-bar">Google Sheets</div>
+    <div class="mockup-content">
+      <p style="font-size:.9rem;margin-bottom:.5rem;">你有一張銷售報表，想算出「各部門第三季業績總和」</p>
+      <div style="background:var(--blue-lt);padding:.6rem 1rem;border-radius:8px;margin:.5rem 0;">
+        <p style="font-size:.85rem;color:var(--blue);font-weight:700;">✨ 問 Gemini：「幫我寫公式，加總 B 欄中部門是『業務部』且日期在第三季的金額」</p>
+      </div>
+      <div class="code-block" style="font-size:.82rem;margin-top:.5rem;">=SUMPRODUCT((A2:A100="業務部")*(MONTH(C2:C100)>=7)*(MONTH(C2:C100)<=9)*D2:D100)</div>
+    </div>
+  </div>
+  <p  style="margin-top:.6rem;font-size:.95rem;color:var(--g600);">不用記公式語法，用自然語言描述需求就好</p>
+</div>
+
+<!-- 39: Google Docs + AI Demo -->
+<div class="slide" data-act="Gems">
+  <div class="demo-banner">Demo</div>
+  <h2>Google Docs — AI 幫你寫、改、摘</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <div class="info-box" style="background:var(--blue-lt);border-left:4px solid var(--blue);">
+        <h3>「幫我寫」</h3>
+        <p style="font-size:.9rem;">輸入主題，AI 自動生成草稿<br>例：「寫一封年終感謝信」</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="info-box" style="background:var(--green-lt);border-left:4px solid var(--green);">
+        <h3>「幫我改」</h3>
+        <p style="font-size:.9rem;">選取文字，AI 幫你改寫<br>例：「更正式」「更簡潔」「更友善」</p>
+      </div>
+    </div>
+  </div>
+  <div class="info-box" style="background:var(--purple-lt);border-left:4px solid var(--purple);margin-top:.8rem;" >
+    <h3>「幫我摘」</h3>
+    <p style="font-size:.9rem;">一份 20 頁的報告 → 3 句話重點摘要</p>
+  </div>
+</div>
+
+<!-- 40: 閃卡 NLP/CV/多模態 -->
+<div class="slide" data-act="Gems">
+  <div style="background:var(--blue-lt);padding:.3rem 1rem;border-radius:100px;font-size:.85rem;font-weight:700;color:var(--blue);display:inline-block;margin-bottom:.6rem;">📘 iPAS 術語閃卡</div>
+  <h2 style="color:var(--blue);">NLP / CV / 多模態</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div class="icon">📝</div>
+      <h3>NLP</h3>
+      <p>Natural Language Processing<br>AI 處理「文字」<br>例：翻譯、摘要、回信</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">👁️</div>
+      <h3>CV</h3>
+      <p>Computer Vision<br>AI 處理「圖片」<br>例：人臉辨識、OCR</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--purple);">
+      <div class="icon">🔀</div>
+      <h3>多模態</h3>
+      <p>Multimodal<br>同時處理文字+圖片+聲音<br>例：看圖說話、語音對話</p>
+    </div>
+  </div>
+  <p  style="margin-top:.6rem;font-size:.9rem;color:var(--g600);">📖 深入學習 → <a href="https://ai100.cooperation.tw/classroom/learn" target="_blank" style="color:var(--blue);">AI100 M07 產業應用</a></p>
+</div>
+
+<!-- 41: 案例 ⭐ 建一個工作用 Gem -->
+<div class="slide" data-act="Gems">
+  <div class="exercise-banner">實作練習</div>
+  <div class="case-banner" style="background:var(--gold-lt);color:var(--gold);margin-left:.5rem;">案例 ⭐ 全班跟著做</div>
+  <h2>建一個「Email 回覆助手」Gem</h2>
+  <div class="code-block" style="margin-top:.8rem;font-size:.82rem;">你是一位專業的商務 Email 回覆助手。
+
+任務：
+- 使用者貼上收到的 Email，你幫忙草擬回覆
+- 自動判斷語氣（正式 / 半正式 / 友善）
+
+格式：
+- 開頭稱謂
+- 回覆內容（3-5 句）
+- 結尾祝福語
+- 署名位置
+
+規則：
+- 繁體中文為主，除非原信是英文
+- 不要用太多驚嘆號
+- 保持禮貌但不諂媚</div>
+  <div class="timer" data-minutes="10">10:00</div>
+</div>
+
+<!-- 42: 案例 ⭐⭐ Gemini + Gmail -->
+<div class="slide" data-act="Gems">
+  <span class="exercise-banner">實作練習</span>
+  <span class="case-banner">⭐⭐ 自己試</span>
+  <h2>用 Gemini 整合 Gmail 自動回覆</h2>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>開啟 Gmail</strong>，找一封需要回覆的信</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>點「幫我撰寫」</strong>或側邊欄 Gemini</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>用自然語言描述</strong>你想回覆的重點</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-content"><strong>AI 自動生成回信</strong> → 修改 → 寄出</div></div>
+  </div>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <div class="label">💡 進階</div>
+    <p>如果你建了 Email 回覆 Gem → 可以用 Gem 來批次處理多封信</p>
+  </div>
+  <div class="timer" data-minutes="10">10:00</div>
+</div>
+
+<!-- 43: 案例 ⭐⭐⭐ 跨 Google 服務 -->
+<div class="slide" data-act="Gems">
+  <span class="exercise-banner">實作練習</span>
+  <span class="case-banner">⭐⭐⭐ 挑戰</span>
+  <h2>跨 Google 服務的 AI 助手工作流</h2>
+  <p style="font-size:1rem;margin-top:.5rem;">把 Gemini 串在你的 Google 工作流裡</p>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>Gmail</strong>：用 Gemini 摘要今日 5 封重要信件重點</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>Docs</strong>：把摘要貼進 Docs，用 AI 整理成會議準備文件</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>Sheets</strong>：把待辦事項放進 Sheets，讓 AI 幫你加優先序</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-content"><strong>Gem</strong>：用你建的 Gem 草擬各封信的回覆</div></div>
+  </div>
+  <div class="timer" data-minutes="15">15:00</div>
+</div>
+
+<!-- 44: Gems 的限制 -->
+<div class="slide" data-act="Gems">
+  <h2>Gems 目前的限制（誠實告訴你）</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <div class="info-box success">
+        <div class="label">✅ 優點</div>
+        <p style="font-size:.95rem;">
+          免費版可建 Gem<br>
+          深度整合 Google<br>
+          操作直覺簡單<br>
+          不用切換工具</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="info-box warning">
+        <div class="label">⚠️ 限制</div>
+        <p style="font-size:.95rem;">
+          沒有 GPT Store 生態<br>
+          知識庫容量較小<br>
+          第三方擴展較少<br>
+          進階功能需付費</p>
+      </div>
+    </div>
+  </div>
+  <div class="info-box analogy" style="margin-top:.8rem;">
+    <p>GPTs = App Store 裡的 App（豐富但獨立）<br>
+    Gems = 作業系統內建功能（少但整合好）</p>
+  </div>
+</div>
+
+<!-- 45: 模組八成果 -->
+<div class="slide" data-act="Gems">
+  <h2>單元八成果回顧</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>建立 Gem</h3>
+      <p>Gemini 的客製化助手</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>Google 原生 AI</h3>
+      <p>Gmail / Docs / Sheets</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>跨服務串接</h3>
+      <p>AI 融入 Google 工作流</p>
+    </div>
+  </div>
+  <div class="quote-box" style="margin-top:1rem;">
+    <div class="quote-text">「最強的 AI 不是最聰明的那個 — 是你已經在用的那個」</div>
+  </div>
+</div>
+
+<!-- 46: 午休 -->
+<div class="slide break-slide" data-act="Gems">
+  <p style="font-size:3rem;margin-bottom:1rem;">🍱</p>
+  <h2>午休時間</h2>
+  <p style="font-size:1.2rem;color:var(--g600);margin-top:.5rem;">12:00 – 13:00</p>
+  <p style="font-size:1rem;color:var(--g400);margin-top:1rem;">下午：用 AI 設計 AI — 多助手策略</p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     D. 單元九：多助手策略 (20 pages: 47-66)
+     ═══════════════════════════════════════════════════════════ -->
+
+<!-- 47: Section title -->
+<div class="slide section-title" data-act="多助手">
+  <p style="font-size:1rem;color:rgba(255,255,255,.6);">單元九</p>
+  <h1 style="font-size:2.8rem;color:#fff;">多助手策略</h1>
+  <p style="font-size:1.2rem;color:rgba(255,255,255,.8);margin-top:.5rem;">用 AI 設計 AI — 打造你的 AI 員工團隊</p>
+</div>
+
+<!-- 48: 為什麼需要多個助手 -->
+<div class="slide" data-act="多助手">
+  <h2>為什麼不是一個 AI 搞定所有事？</h2>
+  <div class="info-box analogy" style="margin-top:1rem;">
+    <div class="label">💡 比喻</div>
+    <p style="font-size:1.1rem;">你不會請「一個員工」做所有事情 —<br>
+    行政找行政、業務找業務、技術找技術<br><br>
+    AI 也一樣：<strong>專一的助手 > 萬能的通才</strong></p>
+  </div>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--red);">
+      <div class="icon">❌</div>
+      <h3>一個 GPT 做所有事</h3>
+      <p>Instructions 太長<br>角色混亂、品質不穩</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>多個 GPT 各司其職</h3>
+      <p>各自專精<br>品質穩定、好維護</p>
+    </div>
+  </div>
+</div>
+
+<!-- 49: AI 助手設計三原則 -->
+<div class="slide" data-act="多助手">
+  <h2>AI 助手設計三原則</h2>
+  <div class="card-grid" style="margin-top:1.2rem;">
+    <div class="card" style="text-align:center;border-top:4px solid var(--blue);min-width:180px;">
+      <div style="font-size:2.5rem;margin-bottom:.3rem;">🎯</div>
+      <h3 style="font-size:1.2rem;">專一</h3>
+      <p style="font-size:1rem;">一個助手<br>只做一件事</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:4px solid var(--green);min-width:180px;">
+      <div style="font-size:2.5rem;margin-bottom:.3rem;">📋</div>
+      <h3 style="font-size:1.2rem;">明確</h3>
+      <p style="font-size:1rem;">Instructions<br>越具體越好</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:4px solid var(--purple);min-width:180px;">
+      <div style="font-size:2.5rem;margin-bottom:.3rem;">🧪</div>
+      <h3 style="font-size:1.2rem;">可測</h3>
+      <p style="font-size:1rem;">要能驗證<br>回答品質</p>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:1rem;">
+    <p>如果一個助手的 Instructions 超過 500 字 → 考慮拆成兩個</p>
+  </div>
+</div>
+
+<!-- 50: Demo AI 員工團隊規劃 -->
+<div class="slide" data-act="多助手">
+  <div class="demo-banner">Demo</div>
+  <h2>規劃 AI 員工團隊</h2>
+  <p style="font-size:1rem;margin-top:.5rem;">假設你是一位部門主管，可以有 4 位 AI 員工：</p>
+  <div class="card-grid grid-2x2" style="margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div class="icon">✍️</div>
+      <h3>寫作助手</h3>
+      <p>Email、公告<br>報告、企劃</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">📊</div>
+      <h3>數據助手</h3>
+      <p>報表分析<br>圖表製作</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--purple);">
+      <div class="icon">🌐</div>
+      <h3>翻譯助手</h3>
+      <p>中英翻譯<br>在地化調整</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--gold);">
+      <div class="icon">💬</div>
+      <h3>客服助手</h3>
+      <p>FAQ 回覆<br>投訴處理</p>
+    </div>
+  </div>
+</div>
+
+<!-- 51: AI 員工團隊分工圖 -->
+<div class="slide" data-act="多助手">
+  <h2>AI 員工團隊 — 分工架構</h2>
+  <div style="text-align:center;margin-top:1rem;">
+    <div class="flow">
+      <div class="flow-box" style="background:var(--navy);color:#fff;border-color:var(--navy);min-width:100px;">👤 你</div>
+    </div>
+    <div style="color:var(--g400);font-size:1.5rem;margin:.3rem 0;">↙　↓　↓　↘</div>
+    <div class="flow" style="margin-top:.3rem;">
+      <div class="flow-box" style="border-color:var(--blue);min-width:90px;">✍️ 寫作</div>
+      <div class="flow-box" style="border-color:var(--green);min-width:90px;">📊 數據</div>
+      <div class="flow-box" style="border-color:var(--purple);min-width:90px;">🌐 翻譯</div>
+      <div class="flow-box" style="border-color:var(--gold);min-width:90px;">💬 客服</div>
+    </div>
+  </div>
+  <div class="info-box analogy" style="margin-top:1.2rem;">
+    <p style="font-size:1.1rem;">每個助手 = 一位<strong>專職員工</strong><br>你 = <strong>主管</strong>，分派工作、驗收品質</p>
+  </div>
+</div>
+
+<!-- 52: 用 AI 幫你寫 Instructions -->
+<div class="slide" data-act="多助手">
+  <h2>用 AI 幫你寫 Instructions 的 Prompt</h2>
+  <div class="code-block" style="margin-top:.8rem;font-size:.82rem;">我是一位 [你的職位]。
+我想建立一個 AI 助手來幫我處理 [具體工作]。
+
+請幫我寫一份 GPT 的 Instructions，包含：
+1. 角色定義
+2. 具體任務描述
+3. 輸出格式要求
+4. 回答規則和邊界
+5. 2-3 個範例對話
+
+注意：
+- 語氣 [正式/友善/專業]
+- 使用 [繁體中文]
+- 回答長度 [XX 字以內]</div>
+  <div class="info-box success" style="margin-top:.6rem;">
+    <p style="font-weight:700;">用 AI 設計 AI = 用 Day 2 的 Prompt 技巧打造 Day 3 的助手 🔄</p>
+  </div>
+</div>
+
+<!-- 53: 範例 人資主管 -->
+<div class="slide" data-act="多助手">
+  <h2>範例：人資主管的 AI 助手團隊</h2>
+  <table class="compare-table" style="margin-top:.8rem;">
+    <tr><th>助手名稱</th><th>負責什麼</th><th>建在哪裡</th></tr>
+    <tr ><td>📋 招募助理</td><td>篩選履歷、草擬面試問題、安排面試</td><td>GPT（需上傳 JD）</td></tr>
+    <tr ><td>📝 公告撰手</td><td>公司公告、政策通知、節日祝賀</td><td>Gem（串 Gmail）</td></tr>
+    <tr ><td>📊 考勤分析</td><td>出缺勤統計、異常提醒、趨勢分析</td><td>Gem（串 Sheets）</td></tr>
+    <tr ><td>💬 員工問答</td><td>福利制度、請假規則、報帳流程</td><td>GPT（上傳員工手冊）</td></tr>
+  </table>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <p>知識庫重的用 GPTs，要串 Google 的用 Gems — <strong>不必只選一個平台</strong></p>
+  </div>
+</div>
+
+<!-- 54: 範例 行銷經理 -->
+<div class="slide" data-act="多助手">
+  <h2>範例：行銷經理的 AI 助手團隊</h2>
+  <table class="compare-table" style="margin-top:.8rem;">
+    <tr><th>助手名稱</th><th>負責什麼</th><th>建在哪裡</th></tr>
+    <tr ><td>✍️ 文案手</td><td>社群貼文、EDM、廣告文案</td><td>GPT（上傳品牌指南）</td></tr>
+    <tr ><td>📊 數據分析</td><td>GA 報表摘要、投放效益分析</td><td>Gem（串 Sheets）</td></tr>
+    <tr ><td>🎨 創意發想</td><td>活動企劃、campaign 點子</td><td>GPT</td></tr>
+    <tr ><td>🌐 翻譯官</td><td>中英日翻譯、在地化調整</td><td>Gem / GPT 皆可</td></tr>
+  </table>
+</div>
+
+<!-- 55: 範例 業務主管 -->
+<div class="slide" data-act="多助手">
+  <h2>範例：業務主管的 AI 助手團隊</h2>
+  <table class="compare-table" style="margin-top:.8rem;">
+    <tr><th>助手名稱</th><th>負責什麼</th><th>建在哪裡</th></tr>
+    <tr ><td>📧 信件管家</td><td>客戶 Email 分類、優先排序、草擬回覆</td><td>Gem（串 Gmail）</td></tr>
+    <tr ><td>📋 提案助手</td><td>根據客戶需求生成提案大綱</td><td>GPT（上傳案例庫）</td></tr>
+    <tr ><td>📊 業績追蹤</td><td>CRM 數據整理、業績趨勢分析</td><td>Gem（串 Sheets）</td></tr>
+    <tr ><td>📝 會議秘書</td><td>會議記錄、待辦提醒</td><td>Gem（串 Docs）</td></tr>
+  </table>
+</div>
+
+<!-- 56: 案例 ⭐ 規劃自己的團隊 -->
+<div class="slide" data-act="多助手">
+  <div class="exercise-banner">實作練習</div>
+  <div class="case-banner" style="background:var(--gold-lt);color:var(--gold);margin-left:.5rem;">案例 ⭐ 全班跟著做</div>
+  <h2>規劃你的 AI 員工團隊</h2>
+  <p style="font-size:1rem;margin-top:.5rem;">用紙或電腦填寫以下表格：</p>
+  <table class="compare-table" style="margin-top:.8rem;">
+    <tr><th>助手名稱</th><th>負責什麼</th><th>GPT or Gem</th></tr>
+    <tr><td>助手 1：</td><td>　</td><td>　</td></tr>
+    <tr><td>助手 2：</td><td>　</td><td>　</td></tr>
+    <tr><td>助手 3：</td><td>　</td><td>　</td></tr>
+    <tr><td>助手 4：</td><td>　</td><td>　</td></tr>
+  </table>
+  <div class="timer" data-minutes="8">8:00</div>
+</div>
+
+<!-- 57: 案例 ⭐⭐ 實際建立其中一個 -->
+<div class="slide" data-act="多助手">
+  <span class="exercise-banner">實作練習</span>
+  <span class="case-banner">⭐⭐ 自己試</span>
+  <h2>從你的團隊中，建一個最需要的助手</h2>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>選一個</strong>你表格裡最急需的助手</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>用 AI 幫你寫 Instructions</strong>（用前面學的 Prompt）</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>在 ChatGPT 或 Gemini 建立</strong></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-content"><strong>測試 3 個真實問題</strong></div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-content"><strong>調整 Instructions 直到滿意</strong></div></div>
+  </div>
+  <div class="timer" data-minutes="15">15:00</div>
+</div>
+
+<!-- 58: 案例 ⭐⭐⭐ 完整建立+分享 -->
+<div class="slide" data-act="多助手">
+  <span class="exercise-banner">實作練習</span>
+  <span class="case-banner">⭐⭐⭐ 挑戰</span>
+  <h2>挑戰：建 2 個助手 + 設計協作流程</h2>
+  <p style="font-size:1rem;margin-top:.5rem;">讓兩個助手「接力」處理一個完整工作流</p>
+  <div class="info-box analogy" style="margin-top:.8rem;">
+    <div class="label">範例流程</div>
+    <p style="font-size:.95rem;">
+      <strong>助手 A（數據分析）</strong>：分析本月銷售數據 → 輸出重點<br>
+      <strong>助手 B（報告撰寫）</strong>：把重點寫成月報 → 格式化輸出<br><br>
+      你只要做：A 的結果 → 複製 → 貼到 B → 完成 ✅</p>
+  </div>
+  <div class="timer" data-minutes="20">20:00</div>
+</div>
+
+<!-- 59: GPTs vs Gems 適用場景 -->
+<div class="slide" data-act="多助手">
+  <h2>GPTs vs Gems — 什麼時候用哪個？</h2>
+  <table class="compare-table" style="margin-top:.8rem;">
+    <tr><th>場景</th><th>推薦</th><th>原因</th></tr>
+    <tr ><td>需要上傳大量文件</td><td style="color:var(--green);font-weight:700;">GPTs</td><td>知識庫功能更強</td></tr>
+    <tr ><td>要串 Gmail/Sheets</td><td style="color:var(--blue);font-weight:700;">Gems</td><td>原生整合，不用切換</td></tr>
+    <tr ><td>要分享給別人用</td><td style="color:var(--green);font-weight:700;">GPTs</td><td>GPT Store 生態完整</td></tr>
+    <tr ><td>想免費試試看</td><td style="color:var(--blue);font-weight:700;">Gems</td><td>免費版可建</td></tr>
+    <tr ><td>需要第三方工具</td><td style="color:var(--green);font-weight:700;">GPTs</td><td>Actions 生態豐富</td></tr>
+    <tr ><td>整合現有 Google 工作流</td><td style="color:var(--blue);font-weight:700;">Gems</td><td>無縫融入</td></tr>
+  </table>
+  <div class="info-box success" style="margin-top:.8rem;">
+    <p><strong>結論：兩個都學、看場景選</strong> — 這就是「選工具」的能力 🎯</p>
+  </div>
+</div>
+
+<!-- 60: 助手維護與迭代 -->
+<div class="slide" data-act="多助手">
+  <h2>助手不是做完就好 — 要維護</h2>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step"><div class="step-num" style="background:var(--blue);">1</div><div class="step-content"><strong>定期測試</strong><p>每月用新問題測一次，看回答品質</p></div></div>
+    <div class="step"><div class="step-num" style="background:var(--green);">2</div><div class="step-content"><strong>更新知識庫</strong><p>產品更新？政策改了？替換文件</p></div></div>
+    <div class="step"><div class="step-num" style="background:var(--purple);">3</div><div class="step-content"><strong>優化 Instructions</strong><p>發現不好的回答，加規則修正</p></div></div>
+    <div class="step"><div class="step-num" style="background:var(--gold);">4</div><div class="step-content"><strong>收集回饋</strong><p>如果分享給同事，問他們用得如何</p></div></div>
+  </div>
+</div>
+
+<!-- 61: 模組九成果 -->
+<div class="slide" data-act="多助手">
+  <h2>單元九成果回顧</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>多助手策略</h3>
+      <p>專一 + 明確 + 可測</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>AI 員工團隊</h3>
+      <p>規劃 + 實際建立</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>平台選擇</h3>
+      <p>GPTs vs Gems 場景判斷</p>
+    </div>
+  </div>
+  <div class="quote-box" style="margin-top:1rem;">
+    <div class="quote-text">「用 AI 設計 AI — 這是從『使用者』變『設計者』的轉捩點」</div>
+  </div>
+</div>
+
+<!-- 62: 休息 -->
+<div class="slide break-slide" data-act="多助手">
+  <p style="font-size:3rem;margin-bottom:1rem;">☕</p>
+  <h2>休息 10 分鐘</h2>
+  <p style="font-size:1.1rem;color:var(--g600);margin-top:.5rem;">14:40 回來 — 成果分享 + 專題 check-in</p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     E. 成果分享 + 收尾 (15 pages: 63-77)
+     ═══════════════════════════════════════════════════════════ -->
+
+<!-- 63: Section title -->
+<div class="slide section-title" data-act="收尾">
+  <p style="font-size:1rem;color:rgba(255,255,255,.6);">成果分享 + 收尾</p>
+  <h1 style="font-size:2.8rem;color:#fff;">你的 AI 助手 Show Time</h1>
+  <p style="font-size:1.2rem;color:rgba(255,255,255,.8);margin-top:.5rem;">組內分享 + 專題進度</p>
+</div>
+
+<!-- 64: 組內成果分享 -->
+<div class="slide" data-act="收尾">
+  <h2>組內成果分享</h2>
+  <p style="font-size:1.1rem;margin-top:.5rem;">每人 3 分鐘，Demo 你今天最得意的 AI 助手</p>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>你的助手叫什麼？做什麼用？</strong></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>現場 Demo 一個問答</strong></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>你覺得最有用的地方？</strong></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-content"><strong>遇到什麼問題？怎麼解決的？</strong></div></div>
+  </div>
+  <div class="timer" data-minutes="20">20:00</div>
+</div>
+
+<!-- 65: 分享重點提醒 -->
+<div class="slide" data-act="收尾">
+  <h2>分享時注意聽 👂</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div class="icon">💡</div>
+      <h3>他的 Instructions 怎麼寫的？</h3>
+      <p>有沒有你可以學的寫法</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">🎯</div>
+      <h3>他解決了什麼問題？</h3>
+      <p>跟你的工作有沒有類似的</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--purple);">
+      <div class="icon">🔧</div>
+      <h3>他怎麼調教 AI 的？</h3>
+      <p>不聽話→怎麼修正的</p>
+    </div>
+  </div>
+</div>
+
+<!-- 66: 專題 check-in -->
+<div class="slide" data-act="收尾">
+  <h2>專題 Check-in — Day 3 任務</h2>
+  <div class="info-box tip" style="margin-top:1rem;">
+    <div class="label">🎯 今天的專題進度</div>
+    <p style="font-size:1.05rem;">為你的期末專題，建立一個<strong>專屬 AI 助手</strong></p>
+  </div>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step"><div class="step-num" style="background:var(--g400);">D1</div><div class="step-content" style="opacity:.5;"><strong>選題</strong>：確定專題方向</div></div>
+    <div class="step"><div class="step-num" style="background:var(--g400);">D2</div><div class="step-content" style="opacity:.5;"><strong>拆解</strong>：用提示詞拆解問題</div></div>
+    <div class="step"><div class="step-num" style="background:var(--green);">D3</div><div class="step-content"><strong style="color:var(--green);">助手</strong>：為專題建一個 GPT 或 Gem</div></div>
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g400);">D4</div><div class="step-content" style="opacity:.3;"><strong>自動化</strong>：串接工具、自動執行</div></div>
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g400);">D5</div><div class="step-content" style="opacity:.3;"><strong>整合發表</strong>：成果展示</div></div>
+  </div>
+</div>
+
+<!-- 67: 專題 AI 助手建議 -->
+<div class="slide" data-act="收尾">
+  <h2>你的專題需要什麼 AI 助手？</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <div class="info-box" style="background:var(--blue-lt);border-left:4px solid var(--blue);">
+        <h3>如果專題是「客服優化」</h3>
+        <p style="font-size:.9rem;">→ 建一個「FAQ 客服 GPT」<br>上傳產品文件+FAQ 清單</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="info-box" style="background:var(--green-lt);border-left:4px solid var(--green);">
+        <h3>如果專題是「報告自動化」</h3>
+        <p style="font-size:.9rem;">→ 建一個「報告撰寫 Gem」<br>串 Google Sheets 數據源</p>
+      </div>
+    </div>
+  </div>
+  <div class="two-col" style="margin-top:.8rem;">
+    <div class="col">
+      <div class="info-box" style="background:var(--purple-lt);border-left:4px solid var(--purple);">
+        <h3>如果專題是「內部知識庫」</h3>
+        <p style="font-size:.9rem;">→ 建一個「SOP 問答 GPT」<br>上傳所有部門 SOP 文件</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="info-box" style="background:var(--gold-lt);border-left:4px solid var(--gold);">
+        <h3>如果專題是「行銷內容」</h3>
+        <p style="font-size:.9rem;">→ 建一個「品牌文案 GPT」<br>上傳品牌指南+過往文案</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 68: 專題動手時間 -->
+<div class="slide" data-act="收尾">
+  <div class="exercise-banner">專題時間</div>
+  <h2>動手：為你的專題建一個 AI 助手</h2>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>確認你的專題方向</strong>（Day 1 選的題目）</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><strong>決定需要什麼助手</strong>（參考前頁建議）</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>用 AI 生成 Instructions</strong></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-content"><strong>建立 + 測試</strong></div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-content"><strong>記錄下來</strong>（截圖/文字 → 組內共享）</div></div>
+  </div>
+  <div class="timer" data-minutes="20">20:00</div>
+</div>
+
+<!-- 69: Day3 回顧 -->
+<div class="slide cinematic" data-act="收尾">
+  <h2 style="font-size:2rem;">Day 3 回顧</h2>
+  <div class="card-grid" style="margin-top:1.2rem;">
+    <div class="card" style="background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);text-align:center;">
+      <div class="icon">🤖</div>
+      <h3 style="color:var(--blue);">GPTs 實作</h3>
+      <p style="color:rgba(255,255,255,.6);">5 步建立助手<br>Instructions + 知識庫</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);text-align:center;">
+      <div class="icon">💎</div>
+      <h3 style="color:var(--green);">Gems + Google</h3>
+      <p style="color:rgba(255,255,255,.6);">Google 原生 AI<br>Gmail/Docs/Sheets</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);text-align:center;">
+      <div class="icon">👥</div>
+      <h3 style="color:var(--gold);">多助手策略</h3>
+      <p style="color:rgba(255,255,255,.6);">AI 員工團隊<br>用 AI 設計 AI</p>
+    </div>
+  </div>
+</div>
+
+<!-- 70: 測驗題 1 -->
+<div class="slide vote-slide" data-vote="true" data-act="收尾">
+  <h2>Day 3 小測驗 (1/5)</h2>
+  <p style="font-size:1.1rem;margin-bottom:1rem;">GPTs 的「Instructions」本質上是什麼？</p>
+  <div class="step-list">
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">A</div><div class="step-content">一段程式碼</div></div>
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">B</div><div class="step-content">一份永久存起來的 Prompt（提示詞）</div></div>
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">C</div><div class="step-content">AI 的訓練資料</div></div>
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">D</div><div class="step-content">一種資料庫設定</div></div>
+  </div>
+  <div class="info-box success" style="margin-top:.8rem;">
+    <p><strong>答案：B</strong> — Instructions = 永久版 Prompt，每次對話自動套用</p>
+  </div>
+</div>
+
+<!-- 71: 測驗題 2 -->
+<div class="slide vote-slide" data-vote="true" data-act="收尾">
+  <h2>Day 3 小測驗 (2/5)</h2>
+  <p style="font-size:1.1rem;margin-bottom:1rem;">Embedding 的功能是什麼？</p>
+  <div class="step-list">
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">A</div><div class="step-content">把圖片壓縮成小檔案</div></div>
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">B</div><div class="step-content">把文字轉成數字（向量），讓 AI 能計算意義的距離</div></div>
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">C</div><div class="step-content">把 AI 嵌入到網頁中</div></div>
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">D</div><div class="step-content">一種加密技術</div></div>
+  </div>
+  <div class="info-box success" style="margin-top:.8rem;">
+    <p><strong>答案：B</strong> — Embedding 讓 AI 把文字變數字，意思接近的向量距離越近</p>
+  </div>
+</div>
+
+<!-- 72: 測驗題 3 -->
+<div class="slide vote-slide" data-vote="true" data-act="收尾">
+  <h2>Day 3 小測驗 (3/5)</h2>
+  <p style="font-size:1.1rem;margin-bottom:1rem;">Gems 相比 GPTs 的最大優勢是什麼？</p>
+  <div class="step-list">
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">A</div><div class="step-content">比較聰明</div></div>
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">B</div><div class="step-content">深度整合 Google 服務（Gmail/Docs/Sheets）</div></div>
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">C</div><div class="step-content">可以寫程式碼</div></div>
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">D</div><div class="step-content">支援更多語言</div></div>
+  </div>
+  <div class="info-box success" style="margin-top:.8rem;">
+    <p><strong>答案：B</strong> — Gems 的殺手鐧是 Google 生態系原生整合</p>
+  </div>
+</div>
+
+<!-- 73: 測驗題 4 -->
+<div class="slide vote-slide" data-vote="true" data-act="收尾">
+  <h2>Day 3 小測驗 (4/5)</h2>
+  <p style="font-size:1.1rem;margin-bottom:1rem;">AI 助手設計的三原則是什麼？</p>
+  <div class="step-list">
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">A</div><div class="step-content">快速、便宜、好用</div></div>
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">B</div><div class="step-content">專一、明確、可測</div></div>
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">C</div><div class="step-content">美觀、智能、自動</div></div>
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">D</div><div class="step-content">免費、開源、安全</div></div>
+  </div>
+  <div class="info-box success" style="margin-top:.8rem;">
+    <p><strong>答案：B</strong> — 專一（只做一件事）、明確（Instructions 夠具體）、可測（能驗證品質）</p>
+  </div>
+</div>
+
+<!-- 74: 測驗題 5 -->
+<div class="slide vote-slide" data-vote="true" data-act="收尾">
+  <h2>Day 3 小測驗 (5/5)</h2>
+  <p style="font-size:1.1rem;margin-bottom:1rem;">Fine-tuning 跟 GPTs 的差別是什麼？</p>
+  <div class="step-list">
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">A</div><div class="step-content">Fine-tuning 比較便宜</div></div>
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">B</div><div class="step-content">GPTs 是給 AI 工作手冊；Fine-tuning 是重新訓練 AI 的大腦</div></div>
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">C</div><div class="step-content">兩個是一樣的東西</div></div>
+    <div class="step"><div class="step-num" style="background:var(--g200);color:var(--g800);">D</div><div class="step-content">Fine-tuning 不需要資料</div></div>
+  </div>
+  <div class="info-box success" style="margin-top:.8rem;">
+    <p><strong>答案：B</strong> — GPTs = 工作手冊（不改 AI）；Fine-tuning = 微調（改 AI 本身）</p>
+  </div>
+</div>
+
+<!-- 75: Day4 預告 -->
+<div class="slide" data-act="收尾">
+  <h2>Day 4 預告 — AI 自動化流程實作</h2>
+  <div class="card-grid" style="margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div class="icon">⚡</div>
+      <h3>自動化概念</h3>
+      <p>從手動到自動<br>什麼值得自動化？</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div class="icon">🔗</div>
+      <h3>Google 自動化</h3>
+      <p>用對話讓 AI<br>建立自動流程</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--purple);">
+      <div class="icon">🤖</div>
+      <h3>AI 工作流串接</h3>
+      <p>把今天的助手<br>串進自動化流程</p>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:1rem;">
+    <div class="label">💡 Day 4 預習</div>
+    <p>想一想：你的工作中有哪些事是「每天重複做一樣的步驟」？</p>
+  </div>
+</div>
+
+<!-- 76: 今日關鍵一句話 -->
+<div class="slide cinematic" data-act="收尾">
+  <div class="quote-box" style="background:rgba(255,255,255,.06);border-left-color:var(--gold);">
+    <div class="quote-text" style="font-size:1.5rem;color:#fff;">「Day 1-2 你在跟 AI 聊天<br>Day 3 你開始養 AI 員工<br>Day 4 你會讓他們自動上班」</div>
+  </div>
+  <p  style="margin-top:1.5rem;font-size:1.1rem;color:rgba(255,255,255,.7);">從 <strong style="color:var(--gold);">用工具</strong> 到 <strong style="color:var(--gold);">選工具</strong> → 你正在升級 🚀</p>
+</div>
+
+<!-- 77: Closing -->
+<div class="slide cover" data-act="收尾">
+  <p style="font-size:1.1rem;color:rgba(255,255,255,.6);margin-bottom:1rem;">AI 工具應用與自動化流程實戰班</p>
+  <h1 style="font-size:3.2rem;">明天見！</h1>
+  <p class="subtitle" style="margin-top:1.5rem;font-size:1.4rem;color:rgba(255,255,255,.8);">Day 4 — AI 自動化流程實作</p>
+  <div style="margin-top:2.5rem;text-align:center;">
+    <p style="color:rgba(255,255,255,.7);font-size:1.1rem;">帶著你的 AI 助手和自動化靈感來！</p>
+    <p style="color:rgba(255,255,255,.9);font-size:1.3rem;font-weight:700;margin-top:1rem;">09:00 準時開始</p>
+  </div>
+</div>
+
+</div>
+
+<div class="section-nav">
+  <button class="section-nav-btn" id="navBtn" onclick="toggleNav()">
+    <span id="navSection">暖身</span>
+    <span class="nav-counter"><span id="current">1</span>/<span id="total"></span></span>
+  </button>
+  <div class="section-nav-menu" id="navMenu"></div>
+</div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>←</button><button id="next">→</button></div>
+
+<!-- G key nav overlay -->
+<div id="navOverlay">
+  <div style="max-width:960px;margin:0 auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <h2 style="color:#fff;font-size:1.3rem;font-weight:700;">快速導覽 <span style="color:rgba(255,255,255,.3);font-size:.85rem;">(點擊跳頁 / ESC 關閉)</span></h2>
+      <button id="navClose" style="background:none;border:2px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;font-size:1rem;padding:.3rem .8rem;cursor:pointer;">✕</button>
+    </div>
+    <div id="navGrid"></div>
+  </div>
+</div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),tot=slides.length;
+let idx=0,fi=-1;
+document.getElementById('total').textContent=tot;
+const gf=el=>[...el.querySelectorAll('.fragment')].sort((a,b)=>(+(a.dataset.order||0))-(+(b.dataset.order||0)));
+
+function go(n){
+  if(n<0)n=0;if(n>=tot)n=tot-1;
+  slides.forEach((s)=>{s.classList.remove('active');s.querySelectorAll('.fragment').forEach(f=>f.classList.remove('visible'));});
+  idx=n;fi=-1;slides[idx].classList.add('active');ui();
+}
+function ui(){
+  document.getElementById('current').textContent=idx+1;
+  document.getElementById('prev').disabled=idx===0&&fi<=0;
+  const f=gf(slides[idx]);
+  document.getElementById('next').disabled=idx===tot-1&&fi>=f.length-1;
+  document.getElementById('progress').style.width=((idx+1)/tot*100)+'%';
+}
+function adv(){
+  const f=gf(slides[idx]);
+  if(fi<f.length-1){
+    fi++;const ord=f[fi].dataset.order;
+    f[fi].classList.add('visible');
+    while(fi<f.length-1&&f[fi+1].dataset.order===ord){fi++;f[fi].classList.add('visible');}
+    ui();
+  }else if(idx<tot-1)go(idx+1);
+}
+function ret(){
+  const f=gf(slides[idx]);
+  if(fi>=0){
+    const ord=f[fi].dataset.order;
+    f[fi].classList.remove('visible');fi--;
+    while(fi>=0&&f[fi].dataset.order===ord){f[fi].classList.remove('visible');fi--;}
+    ui();
+  }else if(idx>0){go(idx-1);const p=gf(slides[idx]);p.forEach(x=>x.classList.add('visible'));fi=p.length-1;ui();}
+}
+
+document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
+document.addEventListener('keydown',e=>{
+  if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}
+  if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}
+  if(e.key==='Home'){e.preventDefault();go(0);}
+  if(e.key==='End'){e.preventDefault();go(tot-1);}
+  if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
+  if(e.key==='1')go(0);   // 暖身
+  if(e.key==='2')go(5);   // GPTs
+  if(e.key==='3')go(33);  // Gems
+  if(e.key==='4')go(48);  // 多助手
+  if(e.key==='5')go(64);  // 收尾
+});
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});
+document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
+
+// Copy-to-clipboard for code blocks
+document.querySelectorAll('.code-block').forEach(function(block) {
+  if (block.textContent.trim().length > 20) {
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = '複製';
+    btn.onclick = function(e) {
+      e.stopPropagation();
+      navigator.clipboard.writeText(block.textContent.trim()).then(function() {
+        btn.textContent = '已複製 ✓';
+        btn.classList.add('copied');
+        setTimeout(function() { btn.textContent = '複製'; btn.classList.remove('copied'); }, 2000);
+      });
+    };
+    block.appendChild(btn);
+  }
+});
+
+// Countdown timer for exercise slides
+document.querySelectorAll('.timer[data-minutes]').forEach(function(el) {
+  var mins = parseInt(el.dataset.minutes);
+  el.innerHTML = mins + ':00';
+  el.style.cursor = 'pointer';
+  el.title = '點擊開始計時';
+  el.onclick = function() {
+    var total = mins * 60;
+    el.style.background = 'var(--purple)';
+    el.style.color = '#fff';
+    var iv = setInterval(function() {
+      total--;
+      if (total <= 0) { clearInterval(iv); el.innerHTML = '時間到！'; el.style.background = 'var(--red)'; return; }
+      var m = Math.floor(total / 60), s = total % 60;
+      el.innerHTML = m + ':' + (s < 10 ? '0' : '') + s;
+    }, 1000);
+  };
+});
+
+// Auto-push notification when entering a push slide
+var _origGo2 = go;
+go = function(n) {
+  _origGo2(n);
+  var slide = slides[idx];
+  if (slide.dataset.push) {
+    console.log('[PUSH]', slide.dataset.push);
+  }
+};
+
+// ── Section navigation ──
+var sections = [
+  { title: '封面', idx: 0 },
+  { title: 'A. 暖身', idx: 1 },
+  { title: '　 今日行程', idx: 2 },
+  { title: '　 暖身投票', idx: 4 },
+  { title: 'B. 單元七：GPTs 實作', idx: 5 },
+  { title: '　 什麼是客製化 AI 助手', idx: 6 },
+  { title: '　 Demo：建立 GPT (Step 1-5)', idx: 9 },
+  { title: '　 閃卡：Embedding', idx: 17 },
+  { title: '　 閃卡：Fine-tuning', idx: 18 },
+  { title: '　 案例 ⭐ 產品 FAQ 助手', idx: 19 },
+  { title: '　 案例 ⭐⭐ 週報助手', idx: 21 },
+  { title: '　 案例 ⭐⭐⭐ 合約審閱', idx: 24 },
+  { title: '　 GPT 不聽話排解', idx: 26 },
+  { title: '　 模組成果', idx: 31 },
+  { title: '休息', idx: 32 },
+  { title: 'C. 單元八：Gems + Google', idx: 33 },
+  { title: '　 Gems vs GPTs 比較', idx: 34 },
+  { title: '　 Demo：建立 Gem', idx: 35 },
+  { title: '　 Google 原生 AI', idx: 37 },
+  { title: '　 閃卡：NLP/CV/多模態', idx: 41 },
+  { title: '　 案例 ⭐ Email Gem', idx: 42 },
+  { title: '　 案例 ⭐⭐ Gmail 整合', idx: 43 },
+  { title: '　 案例 ⭐⭐⭐ 跨服務', idx: 44 },
+  { title: '　 模組成果', idx: 46 },
+  { title: '午休', idx: 47 },
+  { title: 'D. 單元九：多助手策略', idx: 48 },
+  { title: '　 設計三原則', idx: 50 },
+  { title: '　 Demo：AI 員工團隊', idx: 51 },
+  { title: '　 用 AI 寫 Instructions', idx: 53 },
+  { title: '　 範例：人資/行銷/業務', idx: 54 },
+  { title: '　 案例 ⭐⭐⭐', idx: 57 },
+  { title: '　 GPTs vs Gems 場景選擇', idx: 60 },
+  { title: '　 模組成果', idx: 62 },
+  { title: '休息', idx: 63 },
+  { title: 'E. 成果分享 + 收尾', idx: 64 },
+  { title: '　 組內分享', idx: 65 },
+  { title: '　 專題 Check-in', idx: 67 },
+  { title: '　 Day3 回顧 + 測驗', idx: 70 },
+  { title: '　 Day4 預告', idx: 76 },
+  { title: '　 Closing', idx: 78 },
+];
+
+var navMenu = document.getElementById('navMenu');
+var navBtn = document.getElementById('navBtn');
+var navSection = document.getElementById('navSection');
+
+// Build menu
+sections.forEach(function(s, i) {
+  var item = document.createElement('div');
+  item.className = 'section-nav-item';
+  item.dataset.secIdx = i;
+  item.innerHTML = '<div class="nav-idx">' + (s.idx + 1) + '</div><div class="nav-title">' + s.title + '</div>';
+  item.onclick = function() { go(s.idx); navMenu.classList.remove('open'); };
+  navMenu.appendChild(item);
+});
+
+function toggleNav() {
+  navMenu.classList.toggle('open');
+}
+
+// Close menu on click outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.section-nav')) navMenu.classList.remove('open');
+});
+
+// Update current section label
+function updateSectionLabel() {
+  var current = '';
+  for (var i = sections.length - 1; i >= 0; i--) {
+    if (idx >= sections[i].idx) { current = sections[i].title.replace(/^　 /, ''); break; }
+  }
+  navSection.textContent = current || '封面';
+  navMenu.querySelectorAll('.section-nav-item').forEach(function(item, i) {
+    var isActive = idx >= sections[i].idx && (i === sections.length - 1 || idx < sections[i + 1].idx);
+    item.classList.toggle('active', isActive);
+  });
+}
+
+// Patch ui() to also update section label
+var _origUi = ui;
+ui = function() { _origUi(); updateSectionLabel(); };
+
+// ── G key Quick Nav Overlay ──
+var navOverlay = document.getElementById('navOverlay');
+var navGrid = document.getElementById('navGrid');
+function buildNavGrid() {
+  navGrid.innerHTML = '';
+  slides.forEach(function(s, i) {
+    var act = s.dataset.act || '';
+    var isDark = s.classList.contains('cover') || s.classList.contains('section-title') || s.classList.contains('cinematic');
+    var t = s.querySelector('h1,h2');
+    var label = t ? t.textContent.replace(/\n/g, ' ').substring(0, 18) : 'Slide ' + (i + 1);
+    var card = document.createElement('div');
+    card.className = 'nav-card' + (i === idx ? ' current' : '');
+    card.innerHTML = '<div class="nav-card-top' + (isDark ? ' dark' : '') + '">' + (i + 1) + '</div>' +
+      '<div class="nav-card-bottom"><div class="nav-card-act">' + act + '</div><div class="nav-card-title">' + label + '</div></div>';
+    card.onclick = function() { go(i); closeNavOverlay(); };
+    navGrid.appendChild(card);
+  });
+}
+function openNavOverlay() { buildNavGrid(); navOverlay.style.display = 'block'; }
+function closeNavOverlay() { navOverlay.style.display = 'none'; }
+document.getElementById('navClose').onclick = closeNavOverlay;
+navOverlay.onclick = function(e) { if (e.target === navOverlay) closeNavOverlay(); };
+
+// Patch keyboard to add G key
+document.addEventListener('keydown', function(e) {
+  if (navOverlay.style.display === 'block') {
+    if (e.key === 'Escape' || e.key === 'g' || e.key === 'G') { e.preventDefault(); closeNavOverlay(); }
+    return;
+  }
+  if (e.key === 'g' || e.key === 'G') { e.preventDefault(); openNavOverlay(); return; }
+}, true);
+
+go(0);
+
+// postMessage bridge for iframe embedding (classroom integration)
+window.addEventListener('message', function(e) {
+  if (!e.data || e.data.type !== 'slideControl') return;
+  var d = e.data;
+  if (d.action === 'next') adv();
+  else if (d.action === 'prev') ret();
+  else if (d.action === 'goto' && typeof d.index === 'number') go(d.index);
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'slideState', current: idx, total: tot }, '*');
+  }
+});
+var _origGo = go;
+go = function(n) {
+  _origGo(n);
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'slideState', current: idx, total: tot }, '*');
+  }
+};
+</script>
+</body>
+</html>
