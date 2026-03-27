@@ -6,6 +6,24 @@ permalink: /ipas/
 
 <div class="ipas-index">
 
+<!-- 學習系統入口 -->
+<a href="{{ '/classroom/learn' | relative_url }}" style="display:block;text-decoration:none;margin-bottom:2rem;">
+<div style="background:linear-gradient(135deg,#0B3C5D,#1A73E8);border-radius:16px;padding:2rem;color:#fff;text-align:center;border:3px solid #FFC857;position:relative;overflow:hidden;">
+  <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:rgba(255,200,87,.15);border-radius:50%;"></div>
+  <div style="position:absolute;bottom:-30px;left:-30px;width:120px;height:120px;background:rgba(255,255,255,.05);border-radius:50%;"></div>
+  <p style="font-size:.85rem;color:rgba(255,255,255,.7);margin-bottom:.5rem;">iPAS AI 應用規劃師</p>
+  <h2 style="font-size:1.6rem;font-weight:900;margin:0;line-height:1.4;">
+    2026 新型態情境學習系統
+  </h2>
+  <p style="margin:.8rem 0 0;font-size:.95rem;color:rgba(255,255,255,.85);">
+    三問法 × AI 動態出題 × 盲區追蹤 — 不是刷題，是建立判斷框架
+  </p>
+  <span style="display:inline-block;margin-top:1rem;padding:.5rem 1.5rem;background:#FFC857;color:#0B3C5D;border-radius:100px;font-weight:700;font-size:.9rem;">
+    點擊進入系統 →
+  </span>
+</div>
+</a>
+
 <h1>iPAS AI 應用規劃師 — 2026 考點補充</h1>
 
 <p class="hero-subtitle">

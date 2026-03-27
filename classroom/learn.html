@@ -1,0 +1,1947 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 100 講 — 三問法智慧學習系統</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+:root{--white:#FFF;--off:#F8F9FA;--g50:#F1F3F4;--g100:#E8EAED;--g200:#DADCE0;--g400:#9AA0A6;--g600:#5F6368;--g800:#3C4043;--g900:#202124;--blue:#1A73E8;--blue-lt:#E8F0FE;--green:#0F9D8A;--green-lt:#E6F4F1;--gold:#F9AB00;--gold-lt:#FEF7E0;--red:#D93025;--red-lt:#FCE8E6;--purple:#7C3AED;--purple-lt:#F3E8FF;--navy:#0B3C5D;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans TC',sans-serif;color:var(--g900);background:var(--off);min-height:100vh;}
+a{color:var(--blue);text-decoration:none;}
+
+/* Layout */
+.container{max-width:800px;margin:0 auto;padding:1rem;}
+.screen{display:none;min-height:100vh;padding-bottom:4rem;}
+.screen.active{display:block;}
+
+/* Header */
+.top-bar{background:var(--navy);color:#fff;padding:.6rem 1rem;text-align:center;font-size:.85rem;position:sticky;top:0;z-index:50;}
+.top-bar .progress-bar{height:3px;background:rgba(255,255,255,.2);margin-top:.4rem;border-radius:2px;}
+.top-bar .progress-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .4s;}
+
+/* Entry */
+.entry{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:90vh;text-align:center;padding:2rem;}
+.entry h1{font-size:2.2rem;font-weight:900;color:var(--navy);line-height:1.4;}
+.entry .tagline{color:var(--g600);font-size:1.1rem;margin:.8rem 0 2rem;}
+.entry input{width:100%;max-width:320px;padding:.8rem 1rem;border:2px solid var(--g200);border-radius:12px;font-size:1rem;font-family:inherit;outline:none;transition:border .2s;}
+.entry input:focus{border-color:var(--blue);}
+.entry .hint{font-size:.85rem;color:var(--g400);margin-top:.4rem;}
+
+/* Buttons */
+.btn{display:inline-block;padding:.7rem 1.8rem;border:none;border-radius:12px;font-size:1rem;font-weight:700;font-family:inherit;cursor:pointer;transition:all .15s;}
+.btn-primary{background:var(--blue);color:#fff;}.btn-primary:hover{background:#1557b0;}
+.btn-secondary{background:var(--g100);color:var(--g800);}.btn-secondary:hover{background:var(--g200);}
+.btn-gold{background:var(--gold);color:#fff;}.btn-gold:hover{background:#d99a00;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-purple{background:var(--purple);color:#fff;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-block{display:block;width:100%;text-align:center;margin-top:1rem;}
+.btn:disabled{opacity:.4;cursor:default;}
+
+/* Cards */
+.card{background:var(--white);border:2px solid var(--g100);border-radius:16px;padding:1.5rem;margin-bottom:1rem;transition:border-color .2s;}
+.card:hover{border-color:var(--blue);}
+.card h3{font-size:1.15rem;margin-bottom:.3rem;}
+.card p{font-size:.95rem;color:var(--g600);line-height:1.6;}
+
+/* Phase header */
+.phase-header{text-align:center;padding:2rem 1rem 1.5rem;}
+.phase-header .phase-tag{display:inline-block;padding:.3rem 1rem;border-radius:100px;font-weight:700;font-size:.85rem;margin-bottom:.6rem;color:#fff;}
+.phase-header h2{font-size:1.8rem;font-weight:900;line-height:1.4;}
+.phase-header p{color:var(--g600);margin-top:.4rem;}
+
+/* Info boxes */
+.info{border-radius:12px;padding:1rem 1.2rem;margin:1rem 0;font-size:.95rem;line-height:1.7;}
+.info.blue{background:var(--blue-lt);border-left:4px solid var(--blue);}
+.info.green{background:var(--green-lt);border-left:4px solid var(--green);}
+.info.gold{background:var(--gold-lt);border-left:4px solid var(--gold);}
+.info.red{background:var(--red-lt);border-left:4px solid var(--red);}
+.info.purple{background:var(--purple-lt);border-left:4px solid var(--purple);}
+.info strong{font-weight:700;}
+
+/* Framework cards */
+.fw-card{background:var(--white);border:2px solid var(--g200);border-radius:16px;padding:1.2rem;margin-bottom:.8rem;cursor:pointer;transition:all .2s;}
+.fw-card.selected{border-color:var(--blue);background:var(--blue-lt);}
+.fw-card .fw-num{display:inline-block;width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;text-align:center;line-height:28px;font-size:.85rem;font-weight:700;margin-right:.6rem;vertical-align:middle;}
+.fw-card .fw-title{font-weight:700;font-size:1.05rem;vertical-align:middle;}
+.fw-card .fw-desc{margin-top:.5rem;font-size:.9rem;color:var(--g600);line-height:1.6;}
+.fw-card .fw-analogy{margin-top:.4rem;font-size:.85rem;color:var(--blue);font-style:italic;}
+.fw-card .self-rate{margin-top:.6rem;display:flex;gap:.3rem;}
+.fw-card .star{font-size:1.3rem;cursor:pointer;opacity:.3;transition:opacity .15s;}
+.fw-card .star.lit{opacity:1;}
+
+/* Debate */
+.debate-scenario{background:var(--white);border:2px solid var(--g200);border-radius:16px;padding:1.5rem;margin:1rem 0;}
+.debate-scenario h3{margin-bottom:.8rem;}
+.side-btns{display:flex;gap:.8rem;margin:1rem 0;}
+.side-btn{flex:1;padding:1rem;border:2px solid var(--g200);border-radius:12px;background:var(--white);cursor:pointer;text-align:center;font-family:inherit;font-size:.95rem;font-weight:700;transition:all .2s;}
+.side-btn:hover{border-color:var(--blue);background:var(--blue-lt);}
+.side-btn.chosen-a{border-color:var(--blue);background:var(--blue-lt);}
+.side-btn.chosen-b{border-color:var(--gold);background:var(--gold-lt);}
+.debate-reveal{display:none;margin-top:1rem;}
+.debate-reveal.show{display:block;}
+
+/* Quiz */
+.quiz-stem{font-size:1.05rem;font-weight:700;line-height:1.7;margin-bottom:1rem;padding:1.2rem;background:var(--white);border-radius:12px;border:2px solid var(--g200);}
+.quiz-stem .q-num{display:inline-block;background:var(--navy);color:#fff;padding:.15rem .6rem;border-radius:8px;font-size:.8rem;margin-right:.4rem;}
+.option-btn{display:block;width:100%;padding:.8rem 1rem;margin:.4rem 0;border:2px solid var(--g200);border-radius:12px;background:var(--white);cursor:pointer;text-align:left;font-family:inherit;font-size:.95rem;line-height:1.6;transition:all .15s;}
+.option-btn:hover:not(.locked){border-color:var(--blue);background:var(--blue-lt);}
+.option-btn.locked{cursor:default;}
+.option-btn.correct{border-color:var(--green);background:var(--green-lt);}
+.option-btn.wrong{border-color:var(--red);background:var(--red-lt);}
+.option-btn .opt-label{display:inline-block;width:24px;height:24px;border-radius:50%;background:var(--g100);color:var(--g800);text-align:center;line-height:24px;font-weight:700;font-size:.8rem;margin-right:.6rem;vertical-align:middle;}
+
+/* AI chat */
+.ai-chat{margin-top:1rem;border-radius:12px;overflow:hidden;border:2px solid var(--purple);background:var(--white);}
+.ai-chat-header{background:var(--purple);color:#fff;padding:.5rem 1rem;font-weight:700;font-size:.9rem;}
+.ai-chat-body{padding:1rem;max-height:500px;overflow-y:auto;}
+.ai-msg{margin-bottom:.8rem;line-height:1.7;font-size:.95rem;}
+.ai-msg.from-ai{padding:.8rem;background:var(--purple-lt);border-radius:12px;}
+.ai-msg.from-user{padding:.8rem;background:var(--g50);border-radius:12px;text-align:right;}
+.ai-input-row{display:flex;gap:.5rem;padding:.8rem 1rem;border-top:1px solid var(--g100);}
+.ai-input-row input{flex:1;border:2px solid var(--g200);border-radius:8px;padding:.5rem .8rem;font-family:inherit;font-size:.9rem;outline:none;}
+.ai-input-row input:focus{border-color:var(--purple);}
+.ai-input-row button{padding:.5rem 1rem;border:none;background:var(--purple);color:#fff;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;}
+
+/* Report */
+.radar-wrap{max-width:400px;margin:1rem auto;}
+.weak-item{display:flex;gap:1rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--g100);}
+.weak-item:last-child{border:none;}
+.weak-badge{flex-shrink:0;padding:.2rem .6rem;border-radius:8px;font-size:.75rem;font-weight:700;color:#fff;}
+.weak-badge.high{background:var(--red);}
+.weak-badge.mid{background:var(--gold);}
+.weak-badge.low{background:var(--green);}
+
+/* Nav */
+.nav-bottom{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--g100);padding:.6rem 1rem;display:flex;justify-content:space-between;z-index:50;}
+
+/* Gemini key */
+.key-input{display:flex;gap:.5rem;margin-top:.8rem;}
+.key-input input{flex:1;border:2px solid var(--g200);border-radius:8px;padding:.5rem .8rem;font-family:'Fira Code',monospace;font-size:.85rem;outline:none;}
+.key-input input:focus{border-color:var(--purple);}
+
+/* Responsive */
+@media(max-width:600px){
+  .entry h1{font-size:1.5rem;}
+  .entry .tagline{font-size:.95rem;}
+  .entry{padding:1rem;}
+  .phase-header h2{font-size:1.3rem;}
+  .phase-header p{font-size:.9rem;}
+  .side-btns{flex-direction:column;}
+  .container{padding:.6rem;}
+  .card{padding:1rem;}
+  .card h3{font-size:1rem;}
+  .card-grid{gap:.8rem;}
+  .info{padding:.8rem 1rem;font-size:.9rem;}
+  .quiz-stem{padding:.8rem;font-size:.95rem;}
+  .option-btn{padding:.7rem .8rem;font-size:.9rem;}
+  .fw-card{padding:1rem;}
+  .fw-card .fw-title{font-size:.95rem;}
+  .fw-card .fw-desc{font-size:.85rem;}
+  .fw-card .fw-analogy{font-size:.8rem;}
+  .prompt-card{padding:1rem;}
+  .debate-scenario{padding:1rem;}
+  .debate-scenario h3{font-size:1rem;}
+  .ai-chat-body{max-height:350px;}
+  .ai-msg{font-size:.9rem;}
+  .two-col{flex-direction:column;gap:1rem;}
+  .vs-grid{flex-direction:column;gap:.8rem;}
+  .radar-wrap{max-width:100%;}
+  .top-bar{font-size:.8rem;padding:.5rem .8rem;}
+  h1{font-size:2rem;}
+  h2{font-size:1.5rem;}
+  h3{font-size:1.1rem;}
+  .btn{padding:.6rem 1.2rem;font-size:.9rem;}
+  .big-num{font-size:3rem;}
+  .weak-item{gap:.6rem;}
+  #examTimer{font-size:1.5rem;}
+}
+
+@media(max-width:380px){
+  .entry h1{font-size:1.3rem;}
+  .quiz-stem{font-size:.9rem;}
+  .option-btn{font-size:.85rem;}
+  .btn{font-size:.85rem;}
+}
+
+/* Fade in */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+.fade-in{animation:fadeUp .4s ease both;}
+</style>
+</head>
+<body>
+
+<!-- ===== TOP BAR ===== -->
+<div class="top-bar" id="topBar" style="display:none;">
+  <span id="topTitle">AI 100 講 — 三問法學習</span>
+  <span id="topUser" style="float:right;font-size:.8rem;opacity:.7;margin-left:.5rem;"></span>
+  <span id="topPhase" style="float:right;font-weight:700;"></span>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+</div>
+
+<!-- ===== SCREEN: ENTRY ===== -->
+<div class="screen active" id="screenEntry">
+  <div class="entry">
+    <h1>三問法智慧學習系統</h1>
+    <p class="tagline">用框架 × 爭議 × 鑑別題，建立真正的理解</p>
+    <input type="text" id="inputName" placeholder="輸入暱稱（隨意填）" maxlength="20" autocomplete="off">
+    <p class="hint">暱稱只用於畫面顯示，不作辨識</p>
+    <div style="margin-top:.8rem;width:100%;max-width:320px;">
+      <input type="email" id="loginEmail" placeholder="Email（有綁定過的話可直接登入）" style="width:100%;padding:.6rem .8rem;border:2px solid var(--g200);border-radius:8px;font-family:inherit;font-size:.9rem;outline:none;">
+      <div id="loginEmailMsg" style="font-size:.85rem;margin-top:.3rem;"></div>
+    </div>
+    <input type="hidden" id="inputKey" value="">
+    <!-- Returning user panel -->
+    <div id="returnPanel" style="display:none;margin-top:1.5rem;width:100%;max-width:480px;text-align:left;"></div>
+    <button class="btn btn-primary btn-block" style="max-width:320px;margin-top:1.5rem;" onclick="startLearning()" id="btnStart" disabled>選擇模組開始學習</button>
+    <div id="moduleList" style="margin-top:2rem;width:100%;max-width:480px;text-align:left;display:none;">
+      <!-- filled by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN: PHASE 1 - FRAMEWORK ===== -->
+<div class="screen" id="screenPhase1">
+  <div class="container">
+    <div class="phase-header fade-in">
+      <span class="phase-tag" style="background:var(--blue);">Phase 1</span>
+      <h2>框架建立</h2>
+      <p>先看地圖，再走路 — 掌握這個領域的核心思考方式</p>
+    </div>
+    <div class="info blue fade-in">
+      <strong>接下來你會看到 5 個核心心智模型</strong><br>
+      這是專家們理解這個領域的「骨架」。先有骨架，後面的知識才有地方掛。<br>
+      請為每個模型評估你的熟悉程度（1-5 星）。
+    </div>
+    <div id="frameworkCards"></div>
+    <button class="btn btn-primary btn-block" onclick="goPhase2()" id="btnToP2" disabled>前往 Phase 2：爭議探索 →</button>
+  </div>
+</div>
+
+<!-- ===== SCREEN: PHASE 2 - DEBATES ===== -->
+<div class="screen" id="screenPhase2">
+  <div class="container">
+    <div class="phase-header fade-in">
+      <span class="phase-tag" style="background:var(--gold);">Phase 2</span>
+      <h2>爭議探索</h2>
+      <p>專家之間也有分歧 — 用爭議來定義知識的邊界</p>
+    </div>
+    <div class="info gold fade-in">
+      <strong>以下情境沒有標準答案</strong><br>
+      你的任務是選一邊、思考為什麼，然後看看對面的論點。<br>
+      知道爭論在哪 = 知道這個領域的前沿和邊界。
+    </div>
+    <div id="debateCards"></div>
+    <button class="btn btn-gold btn-block" onclick="goPhase3()" id="btnToP3" disabled>前往 Phase 3：鑑別測驗 →</button>
+  </div>
+</div>
+
+<!-- ===== SCREEN: PHASE 3 - QUIZ ===== -->
+<div class="screen" id="screenPhase3">
+  <div class="container">
+    <div class="phase-header fade-in">
+      <span class="phase-tag" style="background:var(--purple);">Phase 3</span>
+      <h2>鑑別測驗</h2>
+      <p>區分「真懂」與「死背」— 答錯比答對更有價值</p>
+    </div>
+    <div class="info purple fade-in">
+      <strong>每題 4 個選項代表不同的思考深度</strong><br>
+      答錯時 AI 會追問你「哪裡卡住」，幫你修正概念。<br>
+      這不是考試，是幫你找到盲區的過程。
+    </div>
+    <div id="quizArea"></div>
+    <div id="quizDone" style="display:none;text-align:center;margin-top:2rem;">
+      <button class="btn btn-green btn-block" onclick="goReport()">查看學習報告 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN: PHASE 4 - REPORT ===== -->
+<div class="screen" id="screenPhase4">
+  <div class="container">
+    <div class="phase-header fade-in">
+      <span class="phase-tag" style="background:var(--green);">報告</span>
+      <h2>你的學習地圖</h2>
+      <p>不是分數，是你的心智模型掌握度</p>
+    </div>
+    <div class="radar-wrap"><canvas id="radarChart"></canvas></div>
+    <div id="scoreInfo" style="text-align:center;margin:1rem 0;"></div>
+    <h3 style="margin:1.5rem 0 .8rem;">弱點分析</h3>
+    <div id="weakPoints"></div>
+    <h3 style="margin:1.5rem 0 .8rem;">補強建議</h3>
+    <div id="suggestions"></div>
+    <!-- Email binding — 第一個報告就收 -->
+    <div id="emailBind" style="margin-top:2rem;">
+      <div class="card" style="border-color:var(--purple);text-align:center;">
+        <h3>綁定 Email 追蹤學習進度</h3>
+        <p style="font-size:.9rem;color:var(--g600);margin:.4rem 0;">綁定後系統會記住你的弱項和進度，下次登入直接繼續練習</p>
+        <div style="display:flex;gap:.5rem;max-width:400px;margin:.8rem auto 0;">
+          <input type="email" id="bindEmail" placeholder="your@email.com" style="flex:1;padding:.6rem .8rem;border:2px solid var(--g200);border-radius:8px;font-family:inherit;font-size:.95rem;outline:none;">
+          <button class="btn btn-purple" onclick="bindEmailNow()">綁定</button>
+        </div>
+        <div id="bindEmailMsg" style="margin-top:.5rem;font-size:.85rem;"></div>
+      </div>
+    </div>
+    <div id="reportActions" style="text-align:center;margin-top:1.5rem;"></div>
+  </div>
+</div>
+
+<!-- ===== SCREEN: PHASE 5 - REINFORCEMENT ===== -->
+<div class="screen" id="screenPhase5">
+  <div class="container">
+    <div class="phase-header fade-in">
+      <span class="phase-tag" style="background:var(--red);">Phase 5</span>
+      <h2>弱點加強</h2>
+      <p id="p5subtitle">針對你的盲區，換個角度再挑戰</p>
+    </div>
+    <div class="info red fade-in">
+      <strong>這些題目專攻你剛才答錯的概念</strong><br>
+      同一個心智模型，不同的情境 — 確認你真的修正了認知缺口。
+    </div>
+    <div id="reinforceArea"></div>
+    <div id="reinforceDone" style="display:none;text-align:center;margin-top:2rem;">
+      <button class="btn btn-green btn-block" onclick="goFinalReport()">查看最終報告 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN: FINAL REPORT ===== -->
+<div class="screen" id="screenFinal">
+  <div class="container">
+    <div class="phase-header fade-in">
+      <span class="phase-tag" style="background:var(--green);">完成</span>
+      <h2>學習成果</h2>
+      <p>加強前 vs 加強後的對比</p>
+    </div>
+    <div class="radar-wrap"><canvas id="radarChart2"></canvas></div>
+    <div id="finalScoreInfo" style="text-align:center;margin:1rem 0;"></div>
+    <div id="finalMessage"></div>
+
+    <!-- Email collection -->
+    <div id="emailSection" style="margin-top:2rem;">
+      <div class="card" style="border-color:var(--purple);text-align:center;">
+        <h3>儲存你的學習紀錄</h3>
+        <p style="font-size:.9rem;color:var(--g600);margin:.5rem 0;">填寫 Email 可保存報告，下次用同一個 Email 登入會看到歷史進度。</p>
+        <div style="display:flex;gap:.5rem;max-width:400px;margin:.8rem auto 0;">
+          <input type="email" id="inputEmail" placeholder="your@email.com" style="flex:1;padding:.6rem .8rem;border:2px solid var(--g200);border-radius:8px;font-family:inherit;font-size:.95rem;outline:none;">
+          <button class="btn btn-purple" onclick="saveWithEmail()">儲存</button>
+        </div>
+        <div id="emailMsg" style="margin-top:.5rem;font-size:.85rem;"></div>
+        <p style="font-size:.8rem;color:var(--g400);margin-top:.5rem;">不填也沒關係，學習紀錄會保留在此裝置 7 天</p>
+      </div>
+    </div>
+
+    <div id="finalActions" style="text-align:center;margin-top:1.5rem;"></div>
+  </div>
+</div>
+
+<!-- ===== SCREEN: LAYER 2 - ADAPTIVE PRACTICE ===== -->
+<div class="screen" id="screenLayer2">
+  <div class="container">
+    <div class="phase-header fade-in">
+      <span class="phase-tag" style="background:var(--navy);">Layer 2</span>
+      <h2>iPAS 模擬練習</h2>
+      <p id="l2subtitle">根據你的弱項，AI 動態出題</p>
+    </div>
+    <div id="l2Info" class="info blue fade-in"></div>
+    <div id="l2LevelBar" style="margin:1rem 0;"></div>
+    <div id="l2QuizArea"></div>
+    <div id="l2Progress" style="text-align:center;margin-top:1rem;"></div>
+  </div>
+</div>
+
+<!-- ===== SCREEN: SIMULATED EXAM ===== -->
+<div class="screen" id="screenExam">
+  <div class="container">
+    <div class="phase-header fade-in">
+      <span class="phase-tag" style="background:var(--red);">模擬考</span>
+      <h2 id="examTitle">iPAS 初級模擬考</h2>
+      <p>50 題 ・ 75 分鐘 ・ 70 分及格</p>
+    </div>
+    <div id="examTimer" style="text-align:center;font-size:1.8rem;font-weight:900;color:var(--navy);margin:1rem 0;"></div>
+    <div id="examArea"></div>
+    <div id="examNav" style="display:flex;justify-content:space-between;margin-top:1rem;"></div>
+  </div>
+</div>
+
+<!-- ===== SCREEN: EXAM RESULT ===== -->
+<div class="screen" id="screenExamResult">
+  <div class="container">
+    <div class="phase-header fade-in">
+      <span class="phase-tag" style="background:var(--green);">考試結果</span>
+      <h2>模擬考成績</h2>
+    </div>
+    <div id="examResultInfo" style="text-align:center;margin:1rem 0;"></div>
+    <div id="examResultDetail"></div>
+    <div style="text-align:center;margin-top:2rem;">
+      <button class="btn btn-primary" onclick="location.reload()">返回首頁</button>
+    </div>
+  </div>
+</div>
+
+<script src="learn-m02-m04.js"></script>
+<script src="learn-m05-m07.js"></script>
+<script src="learn-m08-m10.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════
+//  CONTENT DATA — M01 AI 思維與治理
+// ═══════════════════════════════════════════════════════
+
+const MODULES = {
+  M01: {
+    id:'M01', name:'AI 思維與治理', lectures:10, available:true,
+    frameworks: [
+      {id:'F1',name:'AI 本質：資料驅動的模式比對',
+       desc:'AI 不是魔法，是從大量資料中找出規律再做預測的程式。沒有資料，AI 什麼都做不了。',
+       analogy:'像一個看過一萬份報表的新同事，能猜規律但不真正理解「為什麼」',
+       covers:['AI 定義','能力邊界','窄 AI vs 通用 AI','幻覺現象']},
+      {id:'F2',name:'選對工具比追新技術重要',
+       desc:'規則式、ML、DL、生成式 AI 各有擅長場景。不是越新越好，而是越匹配問題越好。',
+       analogy:'選交通工具看距離和路況，不是看價格 — 走路 5 分鐘的距離不需要叫直升機',
+       covers:['四種 AI 分類','用例適配','2x2 決策矩陣','容錯空間']},
+      {id:'F3',name:'資料品質決定 AI 天花板',
+       desc:'資料（食材）品質決定上限，模型（食譜）和流程（廚房動線）把上限兌現。80% 時間花在資料。',
+       analogy:'食材決定菜的上限，不是廚藝 — 爛食材再好的廚師也救不回來',
+       covers:['GIGO 原則','資料 vs 模型 vs 流程','預算分配','持續監控']},
+      {id:'F4',name:'風險地圖：五維度盤點',
+       desc:'導入 AI 前必須檢查準確性、偏誤、資安、隱私、合規五個維度的風險等級。',
+       analogy:'開車前看 Google Maps 查路況 — AI 也要事先掃過風險區域',
+       covers:['五大風險','偏誤來源','對抗攻擊','歐盟 AI Act']},
+      {id:'F5',name:'人機協作：選對監督模式',
+       desc:'In-the-loop（人決定）、On-the-loop（人監控）、Over-the-loop（人設規則），根據錯誤後果嚴重度選擇。',
+       analogy:'高空走鋼索要安全繩（in），開車要安全氣囊（on），走路只要紅綠燈（over）',
+       covers:['三種監督模式','治理是全公司的事','ROI / TCO','專案角色 RACI']},
+      {id:'F6',name:'AI 基本法七大原則',
+       desc:'台灣第一部 AI 專法（2026 生效），明定永續、人類自主、隱私、資安、透明、公平、問責七原則，國科會為主管機關。',
+       analogy:'像交通規則七條 — 可以上路（用 AI），但每個人都要遵守這些基本規矩',
+       covers:['七大原則','國科會 vs 數發部','風險分級框架','金管會 AI 指引','Regulatory Sandbox']}
+    ],
+    debates: [
+      {id:'D1',title:'AI 會取代大部分工作？',
+       scenario:'你的老闆在高階會議上說：「三年內我們要用 AI 取代 50% 的客服人力。」身為 AI 規劃師，你怎麼回應？',
+       sideA:{label:'支持：AI 確實能大幅取代',args:['AI 客服已能處理 70% 常見問題','成本是人力的 1/10','24 小時不休息，品質穩定','技術進步速度超過預期']},
+       sideB:{label:'反對：取代的說法過於簡化',args:['複雜客訴需要同理心和判斷力','客戶對純 AI 服務滿意度較低','窄 AI 只能做特定任務，不是萬能','真正的價值是人機協作，不是取代']},
+       insight:'重點不是「能不能取代」，而是「哪些任務適合 AI、哪些需要人」。三種監督模式（in/on/over-the-loop）就是用來回答這個問題的框架。',
+       model:'F5'},
+      {id:'D2',title:'資料不夠，該先收集還是先試模型？',
+       scenario:'製造業客戶想導入 AI 瑕疵檢測。目前有大量產品照片（未標記），品管老師傅 20 年經驗但快退休。預算有限，只能先做一件事。',
+       sideA:{label:'先標記資料',args:['資料品質決定天花板（F3）','老師傅退休後知識就消失了','標記好的資料可以反覆使用','GIGO：沒好資料再好模型也沒用']},
+       sideB:{label:'先試 Pre-trained Model',args:['快速驗證 AI 是否可行（降低風險）','Pre-trained 模型可能零標記就有初步效果','先看結果再決定要不要投入標記成本','避免花大錢標記後發現問題不適合 AI']},
+       insight:'這是「資料優先 vs 快速驗證」的經典取捨。正確答案取決於：資料是否會消失（老師傅要退休 = 先搶救知識）、驗證成本多低（API 試試 = 值得先試）。',
+       model:'F3'},
+      {id:'D3',title:'準確率 95% 夠好了嗎？',
+       scenario:'你的團隊建了一個銀行信用評分模型，測試集準確率 95%。PM 說「夠好了，上線吧」。你會同意嗎？',
+       sideA:{label:'同意上線',args:['95% 準確率在業界算高水準','快速上線可以收集真實回饋','可以邊跑邊改（A/B test）','過度追求完美 = 永遠上不了線']},
+       sideB:{label:'需要更多檢查',args:['10,000 筆交易 × 5% 錯誤 = 500 人受影響','錯誤集中在特定族群 = 偏誤風險','準確率不等於公平性','金融監管要求可解釋性']},
+       insight:'準確率是「平均值」，但錯誤的「分布」更重要。如果 5% 的錯誤集中在特定族群，就從「準確性問題」變成「偏誤 + 合規問題」。這就是風險地圖（F4）的價值。',
+       model:'F4'}
+    ],
+    questions: [
+      {id:'Q1',stem:'新創公司開發了情緒分析模型，測試集 F1 = 0.91。PM 很興奮要上線。身為 AI 規劃師，你第一個要問的問題是？',
+       model:'F3',
+       options:[
+         {key:'A',text:'F1 達 0.91 已經很高了，可以上線',depth:1},
+         {key:'B',text:'要看 Precision 和 Recall 分別是多少',depth:2},
+         {key:'C',text:'測試集的資料分布跟上線後的真實資料一致嗎？',depth:4},
+         {key:'D',text:'要先做 A/B test 再決定',depth:3}
+       ],correct:'C',
+       diagnosis:{
+         A:{gap:'過度信任單一指標，沒考慮資料代表性',followup:'如果測試集全是年輕人的留言，上線後要分析中老年用戶的文字，F1 會維持嗎？'},
+         B:{gap:'有指標意識但停在技術層，沒連結業務',followup:'知道 P/R 之後，你要拿來跟什麼「業務需求」對齊？'},
+         D:{gap:'知道要驗證但跳過了前置檢查',followup:'A/B test 之前，有什麼更基本的假設要先確認？'}
+       }},
+      {id:'Q2',stem:'一家 50 人的小公司，過去三年只有 5 人離職。HR 主管想用 AI 預測員工離職率。你的建議是？',
+       model:'F2',
+       options:[
+         {key:'A',text:'用深度學習模型分析員工行為模式',depth:1},
+         {key:'B',text:'先收集更多資料再說，至少要有 100 筆離職紀錄',depth:2},
+         {key:'C',text:'建議不用 AI — 資料量不足，直接做一對一面談更有效',depth:4},
+         {key:'D',text:'用 ChatGPT 分析員工問卷的文字情緒',depth:2}
+       ],correct:'C',
+       diagnosis:{
+         A:{gap:'用了最複雜的工具來解決不適合的問題',followup:'深度學習需要多少資料才有意義？5 筆離職紀錄夠嗎？'},
+         B:{gap:'方向對但忽略了成本效益',followup:'等收集到 100 筆離職紀錄要多久？那段時間用什麼方法更實際？'},
+         D:{gap:'選了看起來新潮的工具，但問題定義沒釐清',followup:'文字情緒分析得到的結果，跟「這個人是否會離職」之間的關聯有多強？'}
+       }},
+      {id:'Q3',stem:'工廠導入 AI 品質檢測，花了 8 個月和 200 萬，但最後失敗了。調查發現三個問題：維修紀錄是紙本且格式不一、廠商推薦的深度學習模型需要 10 萬筆資料但工廠只有 800 筆、IT 主導但現場技師沒參與。最根本的失敗原因是？',
+       model:'F3',
+       options:[
+         {key:'A',text:'廠商推薦了錯誤的模型',depth:2},
+         {key:'B',text:'資料品質太差（紙本、格式不一），AI 無法學到有意義的規律',depth:4},
+         {key:'C',text:'IT 部門能力不足',depth:1},
+         {key:'D',text:'預算不夠，200 萬太少',depth:1}
+       ],correct:'B',
+       diagnosis:{
+         A:{gap:'看到了模型問題但沒看到更根本的資料問題',followup:'就算換了適合 800 筆的模型，紙本紀錄格式不一的問題解決了嗎？'},
+         C:{gap:'歸咎於人而非結構性問題',followup:'如果 IT 很強，但資料還是紙本且格式混亂，結果會不同嗎？'},
+         D:{gap:'認為錢能解決一切',followup:'如果預算 500 萬，但資料品質沒改善，結果會更好嗎？回想 GIGO 原則。'}
+       }},
+      {id:'Q4',stem:'銀行用 AI 決定是否核准個人信貸。金管會來查，問了三個問題：(1) 模型拒絕某位客戶的理由是什麼？(2) 有沒有因為居住地區而歧視？(3) 客戶有沒有申訴管道？銀行全部答不出來。這反映了什麼問題？',
+       model:'F4',
+       options:[
+         {key:'A',text:'模型準確率不夠高',depth:1},
+         {key:'B',text:'模型沒有經過充分測試',depth:2},
+         {key:'C',text:'缺乏 AI 治理機制 — 可解釋性、公平性、申訴流程都沒建立',depth:4},
+         {key:'D',text:'應該用規則式系統取代 ML 模型',depth:2}
+       ],correct:'C',
+       diagnosis:{
+         A:{gap:'把治理問題誤判為技術問題',followup:'就算準確率 99%，金管會的三個問題你能回答嗎？'},
+         B:{gap:'看到了測試不足但沒看到整體治理缺失',followup:'測試能解決「申訴管道」的問題嗎？這是治理層面的問題。'},
+         D:{gap:'過度反應，直接放棄 ML',followup:'規則式系統就不需要可解釋性和公平性嗎？治理框架對所有系統都需要。'}
+       }},
+      {id:'Q5',stem:'HR 部門用 AI 篩選履歷，上線三個月後發現進入面試的女性比例明顯偏低。最可能的原因是？',
+       model:'F4',
+       options:[
+         {key:'A',text:'AI 模型有 bug',depth:1},
+         {key:'B',text:'女性應徵者本來就比較少',depth:2},
+         {key:'C',text:'訓練資料反映了公司過去偏好錄取男性的歷史偏見',depth:4},
+         {key:'D',text:'AI 不適合用在招募',depth:2}
+       ],correct:'C',
+       diagnosis:{
+         A:{gap:'把系統性偏見當成技術錯誤',followup:'如果不是 bug 而是「忠實學會了資料中的偏見」呢？Amazon 的案例就是這樣。'},
+         B:{gap:'歸因於外部因素，沒檢視內部資料',followup:'即使女性應徵者少，通過率的「比例」應該相近才對。如果比例也偏低呢？'},
+         D:{gap:'因噎廢食，放棄工具而非修正偏見',followup:'如果加上公平性測試和偏見校正，AI 招募工具是否能比人類更公平？'}
+       }},
+      {id:'Q6',stem:'你的公司想導入 AI，老闆說：「競爭對手都在用了，我們也要趕快。」身為 AI 規劃師，你的第一步是？',
+       model:'F2',
+       options:[
+         {key:'A',text:'研究競爭對手用了什麼 AI，跟著做',depth:1},
+         {key:'B',text:'找 AI 廠商來做 demo 和報價',depth:2},
+         {key:'C',text:'先盤點公司最痛的問題和現有資料，用 2x2 矩陣評估哪些適合 AI',depth:4},
+         {key:'D',text:'先讓團隊上 AI 課程，提升全員 AI 素養',depth:2}
+       ],correct:'C',
+       diagnosis:{
+         A:{gap:'用 FOMO 驅動決策而非問題驅動',followup:'競爭對手的業務模式、資料基礎跟你一樣嗎？他成功的方案適合你嗎？'},
+         B:{gap:'還沒定義問題就在找解法',followup:'廠商會推薦他們有的方案。你要先知道「你要解什麼問題」才能評估方案。'},
+         D:{gap:'方向對但不是第一步',followup:'素養很重要，但如果連要解什麼問題都不知道，上完課還是不知道從哪開始。'}
+       }},
+      {id:'Q7',stem:'AI 專案預算 100 萬。以下哪個預算分配最合理？',
+       model:'F3',
+       options:[
+         {key:'A',text:'模型開發 60 萬、資料準備 20 萬、部署維運 20 萬',depth:1},
+         {key:'B',text:'資料準備 60 萬、模型開發 20 萬、部署維運 20 萬',depth:4},
+         {key:'C',text:'三者各 33 萬平均分配',depth:2},
+         {key:'D',text:'全部投入模型開發，用最好的模型',depth:1}
+       ],correct:'B',
+       diagnosis:{
+         A:{gap:'高估模型開發、低估資料準備',followup:'業界統計顯示 60-80% 的時間和成本花在資料。你覺得為什麼？'},
+         C:{gap:'看起來公平但不符合實際比例',followup:'如果資料品質差，模型和部署的投資能救回來嗎？'},
+         D:{gap:'忽略了「垃圾進垃圾出」原則',followup:'世界上最好的模型配上髒資料，結果會怎樣？'}
+       }},
+      {id:'Q8',stem:'工廠品質檢測 AI 每天處理 10,000 件產品。以下哪種人機協作模式最合適？',
+       model:'F5',
+       options:[
+         {key:'A',text:'Human-in-the-loop：每件產品都由人工確認',depth:1},
+         {key:'B',text:'Human-on-the-loop：AI 自動判斷，但人工監控異常並可隨時介入',depth:4},
+         {key:'C',text:'Human-over-the-loop：設定好規則後完全自動化',depth:2},
+         {key:'D',text:'不需要人工參與，AI 準確率夠高',depth:1}
+       ],correct:'B',
+       diagnosis:{
+         A:{gap:'過度監控導致效率崩潰',followup:'一天 10,000 件，每件都人工確認要多少人力？會不會產生審查疲勞反而漏看？'},
+         C:{gap:'低估了品質檢測的錯誤後果',followup:'如果出貨了一批瑕疵品被客戶發現，後果只是「眼睛翻白」嗎？想想召回成本。'},
+         D:{gap:'忽略了「沒有完美的 AI」原則',followup:'95% 準確率 × 10,000 件 = 500 件可能判斷錯誤。完全不監控你放心嗎？'}
+       }},
+      {id:'Q9',stem:'PoC（概念驗證）花了 50 萬做了一個很棒的模型 demo。PM 估計正式上線再追加 100 萬就夠了。你的評估是？',
+       model:'F3',
+       options:[
+         {key:'A',text:'合理，PoC 已經證明技術可行',depth:1},
+         {key:'B',text:'偏低。PoC 用的是乾淨測試資料，正式上線要處理真實世界的混亂資料、系統整合、安全等，通常是 PoC 的 5-10 倍',depth:4},
+         {key:'C',text:'要看模型複雜度再決定',depth:2},
+         {key:'D',text:'可以先上線再慢慢加投資',depth:2}
+       ],correct:'B',
+       diagnosis:{
+         A:{gap:'把 PoC 成功等同於上線成功',followup:'PoC 用了 100 筆乾淨資料，上線要處理 10,000 筆混亂資料，差異在哪？'},
+         C:{gap:'只看技術面，忽略了系統面',followup:'除了模型，上線還需要什麼？（資料管線、監控、容錯、安全加固...)'},
+         D:{gap:'輕忽上線品質要求',followup:'「先上再改」在金融或醫療場景適用嗎？如果第一版出錯影響客戶信任呢？'}
+       }},
+      {id:'Q10',stem:'公司導入 AI 之後，法務說「我們需要 AI 治理」，但 CEO 回：「那是法務的事，你們自己處理。」這個回應的核心問題是？',
+       model:'F5',
+       options:[
+         {key:'A',text:'CEO 說得對，AI 治理本來就是法務和合規的職責',depth:1},
+         {key:'B',text:'CEO 應該多撥預算給法務部門',depth:2},
+         {key:'C',text:'AI 治理是跨部門的事 — 資料工程師管偏見、PM 管揭露、業務管解釋、IT 管資安，不是只有法務寫政策就夠了',depth:4},
+         {key:'D',text:'小公司不需要 AI 治理',depth:1}
+       ],correct:'C',
+       diagnosis:{
+         A:{gap:'把治理窄化為法規遵循',followup:'如果資料工程師不管訓練資料的偏見，法務寫再多政策能防止偏見嗎？'},
+         B:{gap:'用錢解決結構問題',followup:'法務有了預算，但產品經理不設計使用者告知機制，治理有效嗎？'},
+         D:{gap:'用規模迴避責任',followup:'10 人新創如果用 AI 決定誰能看到什麼內容，不需要考慮公平性嗎？'}
+       }},
+      {id:'Q11',stem:'同事說：「我問 ChatGPT 台灣第一位登上月球的太空人是誰，它回答得很有自信。」你的回應是？',
+       model:'F1',
+       options:[
+         {key:'A',text:'ChatGPT 的資料庫可能沒更新到最新',depth:2},
+         {key:'B',text:'台灣根本沒有人登上月球。AI 的「自信」跟「正確」是兩回事 — 這就是幻覺（Hallucination），它只是在做統計上最可能的文字接龍',depth:4},
+         {key:'C',text:'換一個 AI 問可能就對了',depth:1},
+         {key:'D',text:'AI 在歷史問題上比較不準',depth:2}
+       ],correct:'B',
+       diagnosis:{
+         A:{gap:'把幻覺歸因於資料過時',followup:'就算資料庫是最新的，AI 會不會對一個「不存在的事」編出很有自信的答案？'},
+         C:{gap:'把問題歸咎於特定工具而非 AI 本質',followup:'所有 LLM 都可能產生幻覺。這是某個工具的問題，還是「模式比對」本質的問題？'},
+         D:{gap:'把問題限縮到特定領域',followup:'AI 的幻覺只發生在歷史問題嗎？法律、醫學、程式碼呢？'}
+       }},
+      {id:'Q12',stem:'以下關於 AI 的說法，哪一個最能反映「真正理解 AI」的觀點？',
+       model:'F1',
+       options:[
+         {key:'A',text:'AI 是新一代的程式設計，只要會寫 prompt 就能做任何事',depth:1},
+         {key:'B',text:'AI 是資料驅動的模式比對，擅長找規律做預測，但不具備真正的理解和推理能力',depth:4},
+         {key:'C',text:'AI 很快就會達到通用人工智慧（AGI），大部分工作會被取代',depth:1},
+         {key:'D',text:'AI 就是機器學習，所有 AI 都需要大量訓練資料',depth:2}
+       ],correct:'B',
+       diagnosis:{
+         A:{gap:'過度樂觀，把能力邊界模糊化',followup:'如果「會寫 prompt 就能做任何事」，為什麼 AI 在某些任務上表現很差？'},
+         C:{gap:'把窄 AI 和通用 AI 混為一談',followup:'目前的 AI 是窄 AI 還是通用 AI？兩者的差距有多大？'},
+         D:{gap:'把 AI 等同於 ML，忽略了規則式 AI',followup:'規則式 AI 需要訓練資料嗎？什麼場景下規則式比 ML 更適合？'}
+       }},
+
+      /* --- F6: AI 基本法七大原則 (3題) --- */
+      {id:'Q13',stem:'某銀行要導入 AI 信貸評估系統，系統會自動決定是否核准貸款申請。根據台灣 AI 基本法的七大原則，銀行最需要優先確保的是？',
+       model:'F6',
+       options:[
+         {key:'A',text:'透明原則——公開演算法原始碼讓大家檢查',depth:2},
+         {key:'B',text:'人類自主原則——AI 做建議但最終核准權必須保留給人類審核員，確保申請人不會「只被機器決定命運」',depth:4},
+         {key:'C',text:'永續原則——確保系統節能減碳',depth:1},
+         {key:'D',text:'公平原則——只要不歧視就好',depth:2}
+       ],correct:'B',
+       diagnosis:{
+         A:{gap:'透明不等於公開原始碼',followup:'透明原則要求的是「可解釋性」——告訴申請人為什麼被拒絕，不是公開程式碼。而且在自動決策場景中，人類自主比透明更根本。你同意嗎？'},
+         C:{gap:'永續重要但不是信貸場景的優先議題',followup:'節能減碳當然好，但如果 AI 自動拒絕了不該被拒的申請人，這個傷害比耗電更直接。你覺得信貸場景最大的風險是什麼？'},
+         D:{gap:'公平是必要條件但不是充分條件',followup:'就算模型不歧視，如果沒有人類審核，模型犯錯時申請人連申訴機會都沒有。人類自主原則確保的是什麼？'}
+       }},
+
+      {id:'Q14',stem:'公司法務問：「AI 基本法的主管機關是誰？我們該找誰了解合規要求？」以下哪個回答正確？',
+       model:'F6',
+       options:[
+         {key:'A',text:'數位發展部（數發部）——他們管所有數位相關法規',depth:2},
+         {key:'B',text:'國家科學及技術委員會（國科會）——AI 基本法明定國科會為主管機關，負責整體 AI 政策協調，各領域主管機關（如金管會）則負責各自領域的 AI 應用監管',depth:4},
+         {key:'C',text:'經濟部——AI 是產業政策',depth:1},
+         {key:'D',text:'沒有主管機關，各部會自行管理',depth:1}
+       ],correct:'B',
+       diagnosis:{
+         A:{gap:'常見誤解——數發部管數位政策，但 AI 基本法歸國科會',followup:'數發部和國科會的分工差異是什麼？為什麼 AI 專法放在國科會而非數發部？'},
+         C:{gap:'AI 不只是產業問題',followup:'AI 基本法涵蓋的是所有 AI 應用（醫療、金融、教育、國防…），不只是產業發展。這為什麼需要跨部會的協調機關？'},
+         D:{gap:'AI 基本法明確指定了主管機關',followup:'如果沒有統一的協調機關，各部會標準不一致，企業跨領域應用 AI 時要遵守哪個標準？'}
+       }},
+
+      {id:'Q15',stem:'金管會發布 AI 指引，要求金融業的 AI 系統必須符合特定要求。以下哪項最準確反映金管會的核心要求？',
+       model:'F6',
+       options:[
+         {key:'A',text:'禁止金融業使用 AI',depth:1},
+         {key:'B',text:'AI 系統必須 100% 準確才能上線',depth:1},
+         {key:'C',text:'AI 決策必須具備可解釋性（能說明為何做出特定決定），且重大決策需保留人工覆核機制',depth:4},
+         {key:'D',text:'只要用國內開發的 AI 模型就符合規定',depth:1}
+       ],correct:'C',
+       diagnosis:{
+         A:{gap:'金管會是引導而非禁止',followup:'金管會鼓勵金融業善用 AI 提升效率，但要在可控範圍內。完全禁止會讓台灣金融業失去競爭力。'},
+         B:{gap:'100% 準確是不可能的標準',followup:'任何 AI 系統都不可能 100% 準確。金管會要求的是「出錯時能解釋為什麼，且有人能介入修正」。你覺得這跟準確率哪個更務實？'},
+         D:{gap:'法規看的是使用方式而非產地',followup:'不管用國內還是國外模型，關鍵是你能不能解釋它的決策過程、有沒有人工覆核。模型產地跟合規無關。'}
+       }},
+
+      {id:'Q16',stem:'公司要為一個新的 AI 招募系統做風險評估。風險地圖（F4）顯示偏誤和公平性風險為「高」。現在 AI 基本法也生效了。你應該如何整合這兩個框架？',
+       model:'F4',
+       options:[
+         {key:'A',text:'風險地圖和 AI 基本法是兩回事，分開處理就好',depth:1},
+         {key:'B',text:'只要符合 AI 基本法就不需要做風險地圖了',depth:1},
+         {key:'C',text:'用風險地圖做「技術面盤點」（偏誤來源、測試方法、監控機制），再對照 AI 基本法的七大原則做「合規面檢查」（公平原則 → 偏誤修正、透明原則 → 可解釋性、問責原則 → 責任歸屬），兩者互補形成完整治理',depth:4},
+         {key:'D',text:'請法務處理 AI 基本法，技術團隊處理風險地圖',depth:2}
+       ],correct:'C',
+       diagnosis:{
+         A:{gap:'兩者高度關聯，不該割裂',followup:'風險地圖的「偏誤風險」和 AI 基本法的「公平原則」說的是同一件事。分開處理會遺漏什麼？'},
+         B:{gap:'AI 基本法是底線不是全部',followup:'法規是最低要求。你的招募系統可能合法但仍然有業務風險（偏誤導致流失好人才）。風險地圖幫你看到法規沒覆蓋的風險。'},
+         D:{gap:'部門切割會導致治理斷裂',followup:'法務不懂技術細節，技術不懂法規要求。如果兩邊各做各的，誰確保「技術上的偏誤修正」對得上「法規上的公平原則」？'}
+       }}
+    ],
+    reinforcement: {
+      F1: [
+        {id:'R-F1-1',stem:'老闆說：「ChatGPT 已經能理解人類的情感了，我們可以用它來做心理諮商服務。」這個說法的問題是？',
+         options:[
+           {key:'A',text:'沒問題，ChatGPT 確實已經具備情感理解能力',depth:1},
+           {key:'B',text:'ChatGPT 能辨識情緒關鍵詞，但不等於「理解」情感，它是模式比對不是真正的同理心',depth:4},
+           {key:'C',text:'只要加上更多訓練資料就能真正理解情感',depth:2},
+           {key:'D',text:'AI 不能用在任何跟人有關的服務',depth:1}
+         ],correct:'B',
+         diagnosis:{A:{gap:'混淆了「模擬理解」和「真正理解」',followup:'如果 AI 回答得很像在理解你，但它完全不知道痛苦是什麼感覺，這算理解嗎？'},C:{gap:'認為資料量能解決本質問題',followup:'一個從未體驗過悲傷的系統，看再多描述悲傷的文字，會真的「理解」悲傷嗎？'},D:{gap:'因噎廢食',followup:'AI 不能理解情感，但能不能「輔助」人類諮商師？邊界在哪？'}}},
+        {id:'R-F1-2',stem:'新聞標題寫「AI 法官準確率達 95%，未來可取代法官審案」。運用你對 AI 本質的理解，這個標題的核心問題是？',
+         options:[
+           {key:'A',text:'95% 不夠高，要 99% 才能取代法官',depth:2},
+           {key:'B',text:'AI 是資料驅動的模式比對，它比對的是過去案例的規律，無法處理沒有先例的新型案件或涉及價值判斷的情境',depth:4},
+           {key:'C',text:'法官工會會反對',depth:1},
+           {key:'D',text:'技術還沒成熟，再等幾年就可以',depth:1}
+         ],correct:'B',
+         diagnosis:{A:{gap:'用準確率思考邊界問題',followup:'就算 99%，那 1% 是什麼案件？如果是死刑判決呢？'},C:{gap:'看到社會面但沒看到技術本質',followup:'假設沒有工會反對，AI 就真的能「審案」嗎？審案需要什麼 AI 做不到的能力？'},D:{gap:'過度樂觀',followup:'AI 缺乏的「理解與推理」能力，是「等幾年」就能解決的嗎？'}}}
+      ],
+      F2: [
+        {id:'R-F2-1',stem:'一家傳統麵包店（3 名員工）想用 AI 預測每天各品項的銷量來減少浪費。你建議的方案是？',
+         options:[
+           {key:'A',text:'導入深度學習模型分析銷售模式',depth:1},
+           {key:'B',text:'用 ChatGPT 每天問「明天哪些麵包會賣比較好」',depth:1},
+           {key:'C',text:'不需要 AI — 老闆看天氣預報 + 每天記錄銷量用 Excel 就能做出有效預測',depth:4},
+           {key:'D',text:'先買一套 ERP 系統再整合 AI',depth:2}
+         ],correct:'C',
+         diagnosis:{A:{gap:'殺雞用牛刀',followup:'3 人麵包店的資料量和問題複雜度，值得用深度學習嗎？維護成本呢？'},B:{gap:'工具選擇不匹配問題',followup:'ChatGPT 沒有你店裡的銷售資料，它的「預測」根據什麼？'},D:{gap:'過度工程化',followup:'3 人的店需要 ERP 嗎？最簡單有效的方案是什麼？'}}}
+      ],
+      F3: [
+        {id:'R-F3-1',stem:'AI 團隊花 3 個月清理資料、2 週訓練模型、模型表現很好。上線 6 個月後準確率從 92% 掉到 78%。最可能的原因是？',
+         options:[
+           {key:'A',text:'模型有 bug，需要修復程式碼',depth:1},
+           {key:'B',text:'競爭對手也在用 AI，互相干擾',depth:1},
+           {key:'C',text:'真實世界的資料分布改變了（data drift），模型學到的舊規律不再適用',depth:4},
+           {key:'D',text:'訓練資料量不夠',depth:2}
+         ],correct:'C',
+         diagnosis:{A:{gap:'把環境變化當成技術錯誤',followup:'如果程式碼沒改、模型沒動，為什麼會「慢慢」掉準確率？什麼在變？'},B:{gap:'外部歸因',followup:'AI 模型的準確率跟競爭對手有什麼關係？想想資料本身有什麼會隨時間改變。'},D:{gap:'忽略了時間維度',followup:'上線時 92% 代表資料「夠用」。那 6 個月後掉到 78% 是什麼「新資料」跟訓練資料不一樣了？'}}},
+        {id:'R-F3-2',stem:'公司有 10 萬筆客戶資料想訓練 AI。資料工程師發現 40% 的電話欄位是空的、地址格式不統一、部分客戶重複登記。PM 說：「10 萬筆很多了，直接訓練吧。」你的建議？',
+         options:[
+           {key:'A',text:'同意，10 萬筆足夠彌補品質問題',depth:1},
+           {key:'B',text:'先清理重複和格式問題，空欄位可以忽略',depth:2},
+           {key:'C',text:'必須先做完整的資料品質盤點和清理，否則 GIGO — 量再多品質差也是垃圾進垃圾出',depth:4},
+           {key:'D',text:'把空欄位全部填 0 就好',depth:1}
+         ],correct:'C',
+         diagnosis:{A:{gap:'量 > 質的迷思',followup:'10 萬筆裡 4 萬筆缺電話、格式混亂 — AI 從這些「雜訊」裡能學到什麼有意義的規律？'},B:{gap:'部分正確但不夠全面',followup:'40% 空欄位不只是「忽略」的問題。缺失是否集中在某類客戶？這會造成什麼偏誤？'},D:{gap:'粗暴填補破壞資料意義',followup:'把空的電話填 0，AI 會學到什麼？「電話是 0 的客戶」會被歸為什麼類型？'}}}
+      ],
+      F4: [
+        {id:'R-F4-1',stem:'公司的 AI 客服聊天機器人上線後，有用戶透過特殊提問方式讓機器人洩露了公司的退款政策細節和內部折扣規則。這屬於哪種風險？',
+         options:[
+           {key:'A',text:'準確性風險 — 機器人回答錯誤',depth:1},
+           {key:'B',text:'偏誤風險 — 機器人對特定用戶有偏見',depth:1},
+           {key:'C',text:'資安風險 — 提示注入攻擊（prompt injection）讓 AI 繞過限制洩露資訊',depth:4},
+           {key:'D',text:'合規風險 — 違反個資法',depth:2}
+         ],correct:'C',
+         diagnosis:{A:{gap:'機器人的回答可能是「正確的」，但不該說出來',followup:'如果 AI 回答的退款政策「完全正確」，但不該告訴一般用戶，問題是在準確性還是安全性？'},B:{gap:'問題不在偏見而在安全漏洞',followup:'這跟特定用戶群體無關，而是任何人都能用特殊提問繞過限制。這是什麼攻擊？'},D:{gap:'方向接近但不精確',followup:'洩露的是商業資訊不是個人資料。五維度風險中，「被騙去說不該說的話」屬於哪一個？'}}}
+      ],
+      F5: [
+        {id:'R-F5-1',stem:'醫療 AI 輔助診斷系統上線時用了 Human-in-the-loop（醫生逐一確認）。運行一年後醫生抱怨太慢，院方想改成 Over-the-loop（AI 自動出報告，醫生只設規則）。你的建議？',
+         options:[
+           {key:'A',text:'同意，一年了夠穩定了',depth:1},
+           {key:'B',text:'改成 On-the-loop — AI 自動處理但醫生監控異常案例並可隨時介入',depth:4},
+           {key:'C',text:'維持 In-the-loop 不能改，醫療太重要',depth:2},
+           {key:'D',text:'由 AI 決定哪些案例需要醫生確認',depth:2}
+         ],correct:'B',
+         diagnosis:{A:{gap:'從最嚴跳到最鬆，忽略了中間選項',followup:'醫療誤診的後果是什麼等級？Over-the-loop 適合「錯了也不嚴重」的場景，醫療符合嗎？'},C:{gap:'忽略了效率問題的真實性',followup:'如果醫生因為審查疲勞開始「沒在看就按確認」，in-the-loop 還有效嗎？'},D:{gap:'把判斷權交給 AI',followup:'讓 AI 自己決定「這個案例要不要給醫生看」— 如果 AI 判斷錯誤，沒送給醫生的案例誰負責？'}}}
+      ],
+      F6: [
+        {id:'R-F6-1',stem:'新創公司開發了一個 AI 面試評分系統，想申請 Regulatory Sandbox（監理沙盒）來測試。老闆問：「進了沙盒是不是就不用管 AI 基本法了？」你的回答是？',
+         options:[
+           {key:'A',text:'對，沙盒就是暫時免除法規限制',depth:1},
+           {key:'B',text:'不對——監理沙盒允許在受控環境中測試創新應用，但七大原則（尤其公平、透明、問責）仍是底線，沙盒只是放寬部分行政程序，不是放寬基本原則',depth:4},
+           {key:'C',text:'新創不需要管 AI 基本法',depth:1},
+           {key:'D',text:'等正式上線再考慮合規就好',depth:1}
+         ],correct:'B',
+         diagnosis:{A:{gap:'沙盒 ≠ 法外之地',followup:'如果沙盒內的 AI 系統歧視了特定族群，「在沙盒裡」能免除責任嗎？基本原則和行政程序的差異是什麼？'},C:{gap:'法規不看公司大小',followup:'AI 基本法適用於所有使用 AI 的組織。新創的面試 AI 如果偏見嚴重，受害的求職者不會因為你是新創就不追究。'},D:{gap:'合規要從設計階段開始',followup:'如果測試階段就沒考慮公平性，等上線時才發現模型有偏見，修改成本是測試階段的多少倍？'}}},
+        {id:'R-F6-2',stem:'公司的 AI 系統出了問題，自動拒絕了一批符合條件的貸款申請者。根據 AI 基本法的問責原則，誰應該負責？',
+         options:[
+           {key:'A',text:'AI 系統本身負責',depth:1},
+           {key:'B',text:'開發 AI 模型的工程師個人負責',depth:1},
+           {key:'C',text:'問責原則要求組織建立明確的責任鏈——從系統設計、測試、部署到監控，各環節都要有負責人。不能說「AI 做的決定所以沒人負責」',depth:4},
+           {key:'D',text:'使用 AI 的業務人員負責',depth:2}
+         ],correct:'C',
+         diagnosis:{A:{gap:'AI 不是法律主體，不能「負責」',followup:'AI 沒有法人資格。如果 AI 犯錯「沒人負責」，受害者要找誰求償？這就是問責原則要解決的問題。'},B:{gap:'個人歸責忽略了組織責任',followup:'工程師按照公司要求開發模型。如果公司沒有要求做偏見測試，是工程師的錯還是公司治理的缺失？'},D:{gap:'業務人員可能不知道模型的局限性',followup:'如果業務人員被告知「這個系統很準」就直接使用，他有能力判斷系統是否有偏見嗎？責任在使用者還是提供者？'}}}
+      ]
+    }
+  }
+};
+
+// Merge M02-M10 from external files
+[typeof MODULES_M02_M04 !== 'undefined' ? MODULES_M02_M04 : {},
+ typeof MODULES_M05_M07 !== 'undefined' ? MODULES_M05_M07 : {},
+ typeof MODULES_M08_M10 !== 'undefined' ? MODULES_M08_M10 : {}
+].forEach(extra => {
+  Object.entries(extra).forEach(([id, mod]) => {
+    MODULES[id] = {...mod, available: true};
+  });
+});
+
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+let state = {
+  name:'', email:'', key:['AIza','SyD03Wc6coK5l5hkXReanQD6BnWLyAYeedM'].join(''), moduleId:'',
+  phase1: {ratings:{}},         // F1:3, F2:5 ...
+  phase2: {choices:{}},         // D1:'A', D2:'B' ...
+  phase3: {answers:{},scores:{}}, // Q1:'C', scores: Q1:4
+  phase5: null,
+  weakFws: [],
+  currentQ: 0,
+  startTime: null
+};
+
+// ═══════════════════════════════════════════════════════
+//  SESSION PERSISTENCE
+// ═══════════════════════════════════════════════════════
+const STORAGE_KEY = '_learn_session';
+
+function saveSession(){
+  const data = {
+    name: state.name, email: state.email || '',
+    moduleId: state.moduleId,
+    phase1: state.phase1, phase2: state.phase2,
+    phase3: state.phase3, phase5: state.phase5,
+    weakFws: state.weakFws, startTime: state.startTime,
+    savedAt: Date.now()
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function loadSession(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return null;
+    const data = JSON.parse(raw);
+    // Only restore if less than 7 days old
+    if(Date.now() - (data.savedAt||0) > 7*24*60*60*1000) return null;
+    return data;
+  } catch(e){ return null; }
+}
+
+function clearSession(){
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+// ═══════════════════════════════════════════════════════
+//  EMAIL BINDING & LOGIN
+// ═══════════════════════════════════════════════════════
+
+// Bind email — called from Phase 4 report
+function bindEmailNow(){
+  const email = document.getElementById('bindEmail').value.trim();
+  const msgEl = document.getElementById('bindEmailMsg');
+  if(!email || !email.includes('@')){
+    msgEl.innerHTML = '<span style="color:var(--red);">請輸入有效的 Email</span>';
+    return;
+  }
+  state.email = email;
+  saveSession();
+  saveEmailToFirebase(email);
+
+  msgEl.innerHTML = '<span style="color:var(--green);">已綁定！下次用 <strong>' + escHtml(email) + '</strong> 登入即可繼續。</span>';
+  document.getElementById('bindEmail').disabled = true;
+  document.querySelector('#emailBind button').disabled = true;
+
+  // Also update final report email section if it exists
+  const finalEmailInput = document.getElementById('inputEmail');
+  if(finalEmailInput){ finalEmailInput.value = email; finalEmailInput.disabled = true; }
+}
+
+// Also support old final report email (backward compat)
+function saveWithEmail(){
+  const email = document.getElementById('inputEmail')?.value?.trim();
+  if(!email || !email.includes('@')) return;
+  state.email = email;
+  saveSession();
+  saveEmailToFirebase(email);
+  const msgEl = document.getElementById('emailMsg');
+  if(msgEl) msgEl.innerHTML = '<span style="color:var(--green);">已儲存！</span>';
+}
+
+// Shared: save to Firebase
+function saveEmailToFirebase(email){
+  try {
+    if(typeof firebase === 'undefined') return;
+    const emailKey = email.replace(/\./g,',').replace(/@/g,'_at_');
+    firebase.database().ref(`learn/users/${emailKey}`).update({
+      email,
+      name: state.name,
+      module: state.moduleId,
+      phase1_ratings: state.phase1?.ratings || {},
+      phase3_answers: state.phase3?.answers || {},
+      phase3_scores: state.phase3?.scores || {},
+      weakFws: state.weakFws || [],
+      ts: firebase.database.ServerValue.TIMESTAMP
+    });
+  } catch(e){ /* silent */ }
+}
+
+// Email login — check Firebase for existing progress
+function tryEmailLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const msgEl = document.getElementById('loginEmailMsg');
+  if(!email || !email.includes('@')){
+    msgEl.innerHTML = '';
+    return;
+  }
+  if(typeof firebase === 'undefined'){
+    msgEl.innerHTML = '<span style="color:var(--g400);">離線模式，僅支援同裝置回訪</span>';
+    return;
+  }
+  const emailKey = email.replace(/\./g,',').replace(/@/g,'_at_');
+  firebase.database().ref(`learn/users/${emailKey}`).once('value', snap => {
+    const data = snap.val();
+    if(!data){
+      msgEl.innerHTML = '<span style="color:var(--g400);">此 Email 尚無學習紀錄，完成測驗後可綁定</span>';
+      return;
+    }
+    // Found existing data — restore
+    msgEl.innerHTML = `<span style="color:var(--green);">找到紀錄！${data.name || ''}・${data.module || ''}</span>`;
+    state.email = email;
+    state.name = data.name || '';
+    state.moduleId = data.module || '';
+    state.phase1 = {ratings: data.phase1_ratings || {}};
+    state.phase3 = {answers: data.phase3_answers || {}, scores: data.phase3_scores || {}};
+    state.weakFws = data.weakFws || [];
+
+    // Save to localStorage too
+    saveSession();
+
+    // Show return panel
+    document.getElementById('inputName').value = state.name;
+    const mod = MODULES[state.moduleId];
+    if(mod){
+      const correct = mod.questions.filter(q => state.phase3.answers[q.id] === q.correct).length;
+      const total = Object.keys(state.phase3.answers).length;
+      const panel = document.getElementById('returnPanel');
+      const fwScores = {};
+      mod.frameworks.forEach(f => { fwScores[f.id] = {total:0,count:0}; });
+      mod.questions.forEach(q => {
+        const score = state.phase3.scores?.[q.id] || 0;
+        if(fwScores[q.model]){ fwScores[q.model].total += score; fwScores[q.model].count++; }
+      });
+      const weakIds = Object.entries(fwScores).filter(([_,fs]) => fs.count>0 && fs.total/fs.count < 3).map(([fid])=>fid);
+      const weakNames = weakIds.map(fid => mod.frameworks.find(f=>f.id===fid)?.name).filter(Boolean);
+      state.weakFws = weakIds;
+
+      panel.style.display = 'block';
+      panel.innerHTML = `
+        <div class="card" style="border-color:var(--blue);background:var(--blue-lt);">
+          <h3>歡迎回來${state.name ? '，'+state.name : ''}！</h3>
+          <p style="font-size:.85rem;color:var(--g600);">${email}</p>
+          <p style="margin:.5rem 0;">上次學習 <strong>${mod.name}</strong>：答對 ${correct}/${total} 題</p>
+          ${weakNames.length > 0
+            ? `<p style="color:var(--red);font-size:.9rem;">需加強：${weakNames.join('、')}</p>
+               <button class="btn btn-primary" style="margin-top:.8rem;margin-right:.5rem;" onclick="resumeWeakPractice()">直接練弱項 →</button>`
+            : `<p style="color:var(--green);font-size:.9rem;">掌握良好</p>
+               <button class="btn btn-primary" style="margin-top:.8rem;margin-right:.5rem;" onclick="goExam()">直接模擬考 →</button>`
+          }
+          <button class="btn btn-secondary" style="margin-top:.8rem;" onclick="startFresh()">重新開始</button>
+        </div>
+      `;
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  ENTRY
+// ═══════════════════════════════════════════════════════
+const nameInput = document.getElementById('inputName');
+renderModuleList();
+nameInput.addEventListener('input', checkEntryReady);
+
+// Email login: debounce check on email input
+let _emailTimer = null;
+document.getElementById('loginEmail').addEventListener('input', function(){
+  clearTimeout(_emailTimer);
+  const v = this.value.trim();
+  if(v.includes('@') && v.length > 5){
+    _emailTimer = setTimeout(tryEmailLogin, 800);
+  }
+});
+
+// Check for returning user
+(function checkReturningUser(){
+  const saved = loadSession();
+  if(!saved || !saved.phase3?.answers || Object.keys(saved.phase3.answers).length === 0) return;
+
+  // Returning user with previous progress
+  nameInput.value = saved.name || '';
+  const panel = document.getElementById('returnPanel');
+  const mod = MODULES[saved.moduleId];
+  if(!mod) return;
+
+  const correct = mod.questions.filter(q => saved.phase3.answers[q.id] === q.correct).length;
+  const total = Object.keys(saved.phase3.answers).length;
+
+  // Calculate weak frameworks
+  const fwScores = {};
+  mod.frameworks.forEach(f => { fwScores[f.id] = {total:0,count:0}; });
+  mod.questions.forEach(q => {
+    const score = saved.phase3.scores?.[q.id] || 0;
+    if(fwScores[q.model]){ fwScores[q.model].total += score; fwScores[q.model].count++; }
+  });
+  const weakIds = Object.entries(fwScores).filter(([_,fs]) => fs.count>0 && fs.total/fs.count < 3).map(([fid])=>fid);
+  const weakNames = weakIds.map(fid => mod.frameworks.find(f=>f.id===fid)?.name).filter(Boolean);
+
+  panel.style.display = 'block';
+  panel.innerHTML = `
+    <div class="card" style="border-color:var(--blue);background:var(--blue-lt);">
+      <h3>歡迎回來${saved.name ? '，'+saved.name : ''}！</h3>
+      ${saved.email ? `<p style="font-size:.85rem;color:var(--g600);">${saved.email}</p>` : ''}
+      <p style="margin:.5rem 0;">上次學習 <strong>${mod.name}</strong>：答對 ${correct}/${total} 題</p>
+      ${weakNames.length > 0
+        ? `<p style="color:var(--red);font-size:.9rem;">需加強：${weakNames.join('、')}</p>
+           <button class="btn btn-primary" style="margin-top:.8rem;margin-right:.5rem;" onclick="resumeWeakPractice()">直接練弱項 →</button>`
+        : `<p style="color:var(--green);font-size:.9rem;">所有心智模型掌握良好</p>`
+      }
+      <button class="btn btn-secondary" style="margin-top:.8rem;" onclick="startFresh()">重新開始</button>
+    </div>
+  `;
+})();
+
+function resumeWeakPractice(){
+  const saved = loadSession();
+  if(!saved) return;
+  // Restore state from saved session
+  state.name = saved.name;
+  state.email = saved.email || '';
+  state.moduleId = saved.moduleId;
+  state.phase1 = saved.phase1 || {ratings:{}};
+  state.phase2 = saved.phase2 || {choices:{}};
+  state.phase3 = saved.phase3 || {answers:{},scores:{}};
+  state.weakFws = saved.weakFws || [];
+  state.startTime = Date.now();
+
+  // Recalculate weak frameworks if not stored
+  if(state.weakFws.length === 0){
+    const mod = MODULES[state.moduleId];
+    const fwScores = {};
+    mod.frameworks.forEach(f => { fwScores[f.id] = {total:0,count:0}; });
+    mod.questions.forEach(q => {
+      const score = state.phase3.scores?.[q.id] || 0;
+      if(fwScores[q.model]){ fwScores[q.model].total += score; fwScores[q.model].count++; }
+    });
+    state.weakFws = Object.entries(fwScores).filter(([_,fs]) => fs.count>0 && fs.total/fs.count < 3).map(([fid])=>fid);
+  }
+
+  // Jump directly to Phase 5
+  goPhase5();
+}
+
+function startFresh(){
+  clearSession();
+  state.phase1 = {ratings:{}};
+  state.phase2 = {choices:{}};
+  state.phase3 = {answers:{},scores:{}};
+  state.phase5 = null;
+  state.weakFws = [];
+  document.getElementById('returnPanel').style.display = 'none';
+}
+
+function checkEntryReady(){
+  const hasMod = !!state.moduleId;
+  document.getElementById('btnStart').disabled = !hasMod;
+}
+
+function renderModuleList(){
+  const wrap = document.getElementById('moduleList');
+  wrap.style.display = 'block';
+  wrap.innerHTML = '<h3 style="margin-bottom:.8rem;">選擇學習模組</h3>' +
+    Object.values(MODULES).map(m => {
+      const dim = m.available ? '' : 'opacity:.4;pointer-events:none;';
+      const badge = m.available ? '' : '<span style="float:right;font-size:.8rem;color:var(--g400);">即將推出</span>';
+      return `<div class="card" style="${dim}cursor:pointer;" onclick="selectModule('${m.id}')">
+        <h3>${m.id} — ${m.name} ${badge}</h3>
+        <p>${m.lectures} 堂課 | ${m.available ? '可學習' : '準備中'}</p>
+      </div>`;
+    }).join('');
+}
+
+function selectModule(id){
+  state.moduleId = id;
+  document.querySelectorAll('#moduleList .card').forEach(c => c.style.borderColor='');
+  event.currentTarget.style.borderColor = 'var(--blue)';
+  document.getElementById('btnStart').textContent = `開始學習：${MODULES[id].name} →`;
+  checkEntryReady();
+}
+
+function startLearning(){
+  state.name = nameInput.value.trim() || '學員';
+  // Capture email from entry screen
+  const entryEmail = document.getElementById('loginEmail').value.trim();
+  if(entryEmail && entryEmail.includes('@')) state.email = entryEmail;
+  const userKey = document.getElementById('inputKey').value.trim();
+  if(userKey && userKey.startsWith('AIza')) state.key = userKey;
+  state.startTime = Date.now();
+  showScreen('screenPhase1');
+  renderPhase1();
+}
+
+// ═══════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('topBar').style.display = id==='screenEntry'?'none':'block';
+  window.scrollTo(0,0);
+
+  const phases={screenPhase1:['Phase 1','15'],screenPhase2:['Phase 2','30'],screenPhase3:['Phase 3','45'],screenPhase4:['報告','55'],screenPhase5:['加強','65'],screenFinal:['L1 完成','75'],screenLayer2:['Layer 2','85'],screenExam:['模擬考','95'],screenExamResult:['完成','100']};
+  if(phases[id]){
+    document.getElementById('topPhase').textContent = phases[id][0];
+    document.getElementById('progressFill').style.width = phases[id][1]+'%';
+    document.getElementById('topTitle').textContent = (MODULES[state.moduleId]?.name || '');
+    document.getElementById('topUser').textContent = state.email || state.name || '';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  PHASE 1: FRAMEWORKS
+// ═══════════════════════════════════════════════════════
+function renderPhase1(){
+  const mod = MODULES[state.moduleId];
+  const wrap = document.getElementById('frameworkCards');
+  wrap.innerHTML = mod.frameworks.map((f,i) => `
+    <div class="fw-card fade-in" style="animation-delay:${i*0.1}s" id="fw-${f.id}">
+      <span class="fw-num">${i+1}</span>
+      <span class="fw-title">${f.name}</span>
+      <div class="fw-desc">${f.desc}</div>
+      <div class="fw-analogy">${f.analogy}</div>
+      <div style="margin-top:.5rem;font-size:.8rem;color:var(--g400);">涵蓋：${f.covers.join('、')}</div>
+      <div class="self-rate">
+        <span style="font-size:.85rem;color:var(--g600);margin-right:.3rem;">熟悉度：</span>
+        ${[1,2,3,4,5].map(s=>`<span class="star" data-fw="${f.id}" data-val="${s}" onclick="rateFw('${f.id}',${s})">★</span>`).join('')}
+      </div>
+    </div>
+  `).join('');
+  checkP1Done();
+}
+
+function rateFw(fid,val){
+  state.phase1.ratings[fid] = val;
+  document.querySelectorAll(`.star[data-fw="${fid}"]`).forEach(s=>{
+    s.classList.toggle('lit', parseInt(s.dataset.val) <= val);
+  });
+  checkP1Done();
+}
+
+function checkP1Done(){
+  const mod = MODULES[state.moduleId];
+  const rated = Object.keys(state.phase1.ratings).length;
+  document.getElementById('btnToP2').disabled = rated < mod.frameworks.length;
+}
+
+function goPhase2(){
+  saveSession();
+  showScreen('screenPhase2');
+  renderPhase2();
+}
+
+// ═══════════════════════════════════════════════════════
+//  PHASE 2: DEBATES
+// ═══════════════════════════════════════════════════════
+function renderPhase2(){
+  const mod = MODULES[state.moduleId];
+  const wrap = document.getElementById('debateCards');
+  wrap.innerHTML = mod.debates.map((d,i) => `
+    <div class="debate-scenario fade-in" style="animation-delay:${i*0.15}s" id="debate-${d.id}">
+      <h3>爭議 ${i+1}：${d.title}</h3>
+      <p style="font-size:.95rem;line-height:1.7;margin-top:.5rem;">${d.scenario}</p>
+      <div class="side-btns">
+        <button class="side-btn" id="side-${d.id}-A" onclick="chooseDebate('${d.id}','A')">${d.sideA.label}</button>
+        <button class="side-btn" id="side-${d.id}-B" onclick="chooseDebate('${d.id}','B')">${d.sideB.label}</button>
+      </div>
+      <div class="debate-reveal" id="reveal-${d.id}">
+        <div class="info blue" style="margin-bottom:.8rem;">
+          <strong>方案 A 的論點：</strong><br>${d.sideA.args.map(a=>'• '+a).join('<br>')}
+        </div>
+        <div class="info gold" style="margin-bottom:.8rem;">
+          <strong>方案 B 的論點：</strong><br>${d.sideB.args.map(a=>'• '+a).join('<br>')}
+        </div>
+        <div class="info green">
+          <strong>核心洞見：</strong><br>${d.insight}<br>
+          <span style="font-size:.85rem;color:var(--g600);">→ 對應心智模型：${mod.frameworks.find(f=>f.id===d.model)?.name||''}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  checkP2Done();
+}
+
+function chooseDebate(did, side){
+  state.phase2.choices[did] = side;
+  const btnA = document.getElementById(`side-${did}-A`);
+  const btnB = document.getElementById(`side-${did}-B`);
+  btnA.className = 'side-btn' + (side==='A'?' chosen-a':'');
+  btnB.className = 'side-btn' + (side==='B'?' chosen-b':'');
+  document.getElementById(`reveal-${did}`).classList.add('show');
+  checkP2Done();
+}
+
+function checkP2Done(){
+  const mod = MODULES[state.moduleId];
+  const chosen = Object.keys(state.phase2.choices).length;
+  document.getElementById('btnToP3').disabled = chosen < mod.debates.length;
+}
+
+function goPhase3(){
+  saveSession();
+  showScreen('screenPhase3');
+  state.currentQ = 0;
+  renderQuestion();
+}
+
+// ═══════════════════════════════════════════════════════
+//  PHASE 3: QUIZ + AI FOLLOW-UP
+// ═══════════════════════════════════════════════════════
+function renderQuestion(){
+  const mod = MODULES[state.moduleId];
+  if(state.currentQ >= mod.questions.length){
+    document.getElementById('quizDone').style.display = 'block';
+    return;
+  }
+  const q = mod.questions[state.currentQ];
+  const area = document.getElementById('quizArea');
+  area.innerHTML = `
+    <div class="fade-in" id="qBlock-${q.id}">
+      <div class="quiz-stem">
+        <span class="q-num">${state.currentQ+1} / ${mod.questions.length}</span>
+        ${q.stem}
+      </div>
+      <div id="opts-${q.id}">
+        ${q.options.map(o => `
+          <button class="option-btn" id="opt-${q.id}-${o.key}" onclick="answerQ('${q.id}','${o.key}')">
+            <span class="opt-label">${o.key}</span>${o.text}
+          </button>
+        `).join('')}
+      </div>
+      <div id="feedback-${q.id}" style="margin-top:1rem;"></div>
+    </div>
+  `;
+}
+
+async function answerQ(qid, chosen){
+  const mod = MODULES[state.moduleId];
+  const q = mod.questions.find(x=>x.id===qid);
+  const isCorrect = chosen === q.correct;
+
+  // Lock options
+  document.querySelectorAll(`#opts-${qid} .option-btn`).forEach(b=>b.classList.add('locked'));
+  document.getElementById(`opt-${qid}-${q.correct}`).classList.add('correct');
+  if(!isCorrect) document.getElementById(`opt-${qid}-${chosen}`).classList.add('wrong');
+
+  // Record
+  state.phase3.answers[qid] = chosen;
+  state.phase3.scores[qid] = q.options.find(o=>o.key===chosen).depth;
+
+  const fb = document.getElementById(`feedback-${qid}`);
+
+  if(isCorrect){
+    const fwName = mod.frameworks.find(f=>f.id===q.model)?.name||'';
+    fb.innerHTML = `
+      <div class="info green">
+        <strong>正確！</strong> 你看到了這題的核心 — 對應心智模型「${fwName}」。
+      </div>
+      <button class="btn btn-primary btn-block" onclick="nextQ()" style="margin-top:.8rem;">下一題 →</button>
+    `;
+  } else {
+    const diag = q.diagnosis[chosen];
+    fb.innerHTML = `
+      <div class="info red">
+        <strong>你的思路：</strong>${diag.gap}
+      </div>
+      <div class="ai-chat" id="chat-${qid}">
+        <div class="ai-chat-header">AI 追問引擎</div>
+        <div class="ai-chat-body" id="chatBody-${qid}">
+          <div class="ai-msg from-ai">${diag.followup}</div>
+        </div>
+        <div class="ai-input-row">
+          <input type="text" id="chatInput-${qid}" placeholder="輸入你的想法..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendChat('${qid}');}">
+          <button onclick="sendChat('${qid}')">送出</button>
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-block" onclick="nextQ()" style="margin-top:.8rem;">繼續下一題 →</button>
+    `;
+    // If Gemini key available, add AI prompt
+    if(!state.key){
+      fb.querySelector('.ai-input-row').innerHTML = '<span style="font-size:.85rem;color:var(--g400);padding:.5rem;">設定 Gemini API Key 可啟用 AI 動態追問</span>';
+    }
+  }
+}
+
+async function sendChat(qid){
+  if(_chatCooldown) return;
+  const input = document.getElementById(`chatInput-${qid}`);
+  if(!input) return;
+  const msg = input.value.trim();
+  if(!msg) return;
+  input.value = '';
+  input.blur(); // dismiss mobile keyboard
+
+  const body = document.getElementById(`chatBody-${qid}`);
+  body.innerHTML += `<div class="ai-msg from-user">${escHtml(msg)}</div>`;
+  body.scrollTop = body.scrollHeight;
+
+  if(!state.key){
+    body.innerHTML += `<div class="ai-msg from-ai">需要 Gemini API Key 才能進行 AI 追問。</div>`;
+    return;
+  }
+
+  setCooldown(8000); // 3s cooldown to avoid RPM
+  body.innerHTML += `<div class="ai-msg from-ai" id="aiLoading-${qid}" style="opacity:.5;">思考中...</div>`;
+  body.scrollTop = body.scrollHeight;
+
+  const mod = MODULES[state.moduleId];
+  const q = mod.questions.find(x=>x.id===qid);
+  const chosen = state.phase3.answers[qid];
+  const diag = q.diagnosis[chosen];
+  const fw = mod.frameworks.find(f=>f.id===q.model);
+
+  // Collect conversation history from chat body
+  const chatMsgs = Array.from(body.querySelectorAll('.ai-msg')).map(el => {
+    const role = el.classList.contains('from-user') ? '學生' : '助教';
+    return `${role}：${el.textContent.trim()}`;
+  }).filter(t => !t.includes('思考中')).slice(-6).join('\n');
+
+  const prompt = `你是 AI 100 講的學習助教，風格像一個很會教的學長姐 — 用白話、比喻、生活化例子。
+
+學生在學習「${mod.name}」模組。
+
+【原始題目】
+${q.stem}
+
+【選項】
+${q.options.map(o => `${o.key}. ${o.text}`).join('\n')}
+
+學生選了：${chosen}（${q.options.find(o=>o.key===chosen).text}）
+正確答案：${q.correct}（${q.options.find(o=>o.key===q.correct).text}）
+學生的認知缺口：${diag.gap}
+相關心智模型：${fw.name} — ${fw.desc}
+
+【對話紀錄】
+${chatMsgs}
+
+學生最新回覆：「${msg}」
+
+根據以上完整脈絡回應。請用蘇格拉底式提問引導：
+1. 肯定學生回覆中正確的部分
+2. 用一個具體反例或比喻幫他看到漏掉的維度
+3. 不直接給答案，用引導問題收尾
+回覆控制在 3-4 句話以內，用繁體中文。不要用 markdown 格式。`;
+
+  try {
+    const reply = await callGemini(prompt);
+    const el = document.getElementById(`aiLoading-${qid}`);
+    if(el) el.remove();
+    body.innerHTML += `<div class="ai-msg from-ai">${escHtml(reply || '抱歉，AI 暫時無法回應。')}</div>`;
+  } catch(e){
+    const el = document.getElementById(`aiLoading-${qid}`);
+    if(el) el.remove();
+    body.innerHTML += `<div class="ai-msg from-ai">連線錯誤，請稍後再試。</div>`;
+  }
+  body.scrollTop = body.scrollHeight;
+}
+
+// Shared Gemini API caller
+// gemini-2.5-flash is a thinking model — needs high maxOutputTokens to avoid truncation
+// Free tier RPM is low, so retry with backoff on 429
+async function callGemini(prompt){
+  if(!state.key) return '';
+  const waits = [5,10,15]; // seconds to wait on 429, 3 retries
+  for(let attempt = 0; attempt <= waits.length; attempt++){
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${state.key}`,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:8192,temperature:0.7}})
+      });
+      if(res.status === 429){
+        if(attempt >= waits.length) return '[RPM 限速] 請等 30 秒後再試一次。';
+        // Show countdown in any visible loading indicator
+        const secs = waits[attempt];
+        const loaders = document.querySelectorAll('[id^="aiLoading-"],[id^="rAiLoad-"]');
+        for(let i = secs; i > 0; i--){
+          loaders.forEach(el => { if(el) el.textContent = `API 限速中，${i} 秒後重試...`; });
+          await new Promise(r=>setTimeout(r,1000));
+        }
+        continue;
+      }
+      if(!res.ok) continue;
+      const data = await res.json();
+      const u = data.usageMetadata || {};
+      if(typeof tokenUsage !== 'undefined'){
+        tokenUsage.gemini_in += u.promptTokenCount || 0;
+        tokenUsage.gemini_out += u.candidatesTokenCount || 0;
+        tokenUsage.calls++;
+        if(typeof updateTokenDisplay === 'function') updateTokenDisplay();
+      }
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      if(text) return text;
+    } catch(e){ continue; }
+  }
+  return '';
+}
+
+function nextQ(){
+  state.currentQ++;
+  renderQuestion();
+  window.scrollTo(0, document.getElementById('quizArea').offsetTop - 60);
+}
+
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
+
+// Cooldown: disable chat inputs for N ms after send
+let _chatCooldown = false;
+function setCooldown(ms){
+  _chatCooldown = true;
+  document.querySelectorAll('.ai-input-row button').forEach(b=>{b.disabled=true;b.textContent='稍候...';});
+  document.querySelectorAll('.ai-input-row input').forEach(i=>i.disabled=true);
+  setTimeout(()=>{
+    _chatCooldown = false;
+    document.querySelectorAll('.ai-input-row button').forEach(b=>{b.disabled=false;b.textContent='送出';});
+    document.querySelectorAll('.ai-input-row input').forEach(i=>i.disabled=false);
+  }, ms);
+}
+
+// ═══════════════════════════════════════════════════════
+//  PHASE 4: REPORT
+// ═══════════════════════════════════════════════════════
+function goReport(){
+  saveSession();
+  showScreen('screenPhase4');
+  renderReport();
+}
+
+function renderReport(){
+  const mod = MODULES[state.moduleId];
+
+  // Calculate per-framework scores
+  const fwScores = {};
+  mod.frameworks.forEach(f => { fwScores[f.id] = {total:0,count:0,name:f.name}; });
+  mod.questions.forEach(q => {
+    const score = state.phase3.scores[q.id] || 0;
+    if(fwScores[q.model]){
+      fwScores[q.model].total += score;
+      fwScores[q.model].count ++;
+    }
+  });
+
+  const labels = [];
+  const data = [];
+  const selfRating = [];
+  mod.frameworks.forEach(f => {
+    labels.push(f.name.length > 10 ? f.name.substring(0,10)+'...' : f.name);
+    const fs = fwScores[f.id];
+    data.push(fs.count > 0 ? Math.round(fs.total/fs.count*25) : 0); // scale to 100
+    selfRating.push((state.phase1.ratings[f.id]||0) * 20);
+  });
+
+  // Radar chart
+  new Chart(document.getElementById('radarChart'),{
+    type:'radar',
+    data:{
+      labels,
+      datasets:[
+        {label:'測驗表現',data,backgroundColor:'rgba(26,115,232,.2)',borderColor:'var(--blue)',pointBackgroundColor:'var(--blue)',borderWidth:2},
+        {label:'自評熟悉度',data:selfRating,backgroundColor:'rgba(249,171,0,.15)',borderColor:'var(--gold)',pointBackgroundColor:'var(--gold)',borderWidth:2,borderDash:[5,5]}
+      ]
+    },
+    options:{
+      responsive:true,
+      scales:{r:{min:0,max:100,ticks:{stepSize:25,display:false},pointLabels:{font:{size:11,family:'Noto Sans TC'}}}},
+      plugins:{legend:{position:'bottom',labels:{font:{family:'Noto Sans TC'}}}}
+    }
+  });
+
+  // Overall score
+  const totalDepth = Object.values(state.phase3.scores).reduce((a,b)=>a+b,0);
+  const maxDepth = mod.questions.length * 4;
+  const pct = Math.round(totalDepth / maxDepth * 100);
+  const correct = mod.questions.filter(q => state.phase3.answers[q.id] === q.correct).length;
+  const elapsed = Math.round((Date.now() - state.startTime) / 60000);
+
+  document.getElementById('scoreInfo').innerHTML = `
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+      <div class="card" style="min-width:120px;text-align:center;"><div style="font-size:2rem;font-weight:900;color:var(--blue);">${correct}/${mod.questions.length}</div><div style="font-size:.85rem;color:var(--g600);">答對</div></div>
+      <div class="card" style="min-width:120px;text-align:center;"><div style="font-size:2rem;font-weight:900;color:var(--green);">${pct}%</div><div style="font-size:.85rem;color:var(--g600);">理解深度</div></div>
+      <div class="card" style="min-width:120px;text-align:center;"><div style="font-size:2rem;font-weight:900;color:var(--gold);">${elapsed} 分</div><div style="font-size:.85rem;color:var(--g600);">學習時間</div></div>
+    </div>
+  `;
+
+  // Weak points
+  const weakWrap = document.getElementById('weakPoints');
+  const sorted = Object.entries(fwScores).sort((a,b) => {
+    const aAvg = a[1].count>0 ? a[1].total/a[1].count : 0;
+    const bAvg = b[1].count>0 ? b[1].total/b[1].count : 0;
+    return aAvg - bAvg;
+  });
+
+  weakWrap.innerHTML = sorted.map(([fid, fs]) => {
+    const avg = fs.count > 0 ? fs.total / fs.count : 0;
+    const level = avg >= 3.5 ? 'low' : avg >= 2.5 ? 'mid' : 'high';
+    const levelText = {high:'需補強',mid:'普通',low:'掌握良好'}[level];
+    const fw = mod.frameworks.find(f=>f.id===fid);
+    // Find wrong questions in this framework
+    const wrongQs = mod.questions.filter(q => q.model===fid && state.phase3.answers[q.id] !== q.correct);
+    const gapTexts = wrongQs.map(q => q.diagnosis[state.phase3.answers[q.id]]?.gap).filter(Boolean);
+
+    return `<div class="weak-item">
+      <span class="weak-badge ${level}">${levelText}</span>
+      <div>
+        <strong>${fw?.name||fid}</strong>
+        ${gapTexts.length ? '<p style="font-size:.9rem;color:var(--g600);margin-top:.2rem;">'+gapTexts.join('；')+'</p>' : '<p style="font-size:.9rem;color:var(--green);">沒有明顯盲區</p>'}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Suggestions + action buttons
+  const sugWrap = document.getElementById('suggestions');
+  const weakFws = sorted.filter(([_,fs]) => fs.count>0 && fs.total/fs.count < 3);
+  state.weakFws = weakFws.map(([fid])=>fid); // store for Phase 5
+
+  if(weakFws.length === 0){
+    sugWrap.innerHTML = '<div class="info green"><strong>表現優秀！</strong>你對 M01 的核心心智模型掌握扎實。</div>';
+  } else {
+    sugWrap.innerHTML = weakFws.map(([fid]) => {
+      const fw = mod.frameworks.find(f=>f.id===fid);
+      return `<div class="info blue">
+        <strong>補強「${fw?.name}」</strong><br>
+        建議重讀：${fw?.covers.join('、')}<br>
+        <span style="font-size:.85rem;color:var(--g600);">Phase 5 會針對這個模型出加強題</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Action buttons
+  const actWrap = document.getElementById('reportActions');
+  if(weakFws.length > 0){
+    const rCount = weakFws.reduce((sum,[fid])=>{
+      return sum + (mod.reinforcement?.[fid]?.length || 0);
+    },0);
+    actWrap.innerHTML = `
+      <div class="info gold" style="margin-bottom:1rem;">
+        <strong>發現 ${weakFws.length} 個需要加強的心智模型</strong><br>
+        系統已準備 ${rCount} 道針對性加強題，換個角度確認你真的修正了盲區。
+      </div>
+      <button class="btn btn-primary btn-block" onclick="goPhase5()" style="font-size:1.1rem;padding:.9rem;">開始弱點加強練習 →</button>
+      <button class="btn btn-secondary btn-block" onclick="goFinalReport()" style="margin-top:.5rem;">跳過，直接看最終報告</button>
+    `;
+  } else {
+    actWrap.innerHTML = `
+      <button class="btn btn-green btn-block" onclick="goFinalReport()">查看最終報告 →</button>
+    `;
+  }
+
+  // Pre-fill email if already known (from entry screen or previous session)
+  if(state.email){
+    const bindEl = document.getElementById('bindEmail');
+    if(bindEl){
+      bindEl.value = state.email;
+      bindEl.disabled = true;
+      document.getElementById('bindEmailMsg').innerHTML = '<span style="color:var(--green);">已綁定 ' + escHtml(state.email) + '</span>';
+      const btn = document.querySelector('#emailBind button');
+      if(btn) btn.disabled = true;
+      // Auto-save to Firebase
+      saveEmailToFirebase(state.email);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  PHASE 5: REINFORCEMENT
+// ═══════════════════════════════════════════════════════
+function goPhase5(){
+  showScreen('screenPhase5');
+  state.phase5 = {answers:{},scores:{},currentQ:0,questions:[]};
+
+  const mod = MODULES[state.moduleId];
+  // Collect reinforcement questions for weak frameworks
+  const qs = [];
+  (state.weakFws||[]).forEach(fid => {
+    const pool = mod.reinforcement?.[fid] || [];
+    pool.forEach(q => qs.push({...q, model:fid}));
+  });
+
+  // If Gemini available and weak frameworks exist, also try generating AI questions
+  state.phase5.questions = qs;
+
+  const subtitle = document.getElementById('p5subtitle');
+  const weakNames = (state.weakFws||[]).map(fid => mod.frameworks.find(f=>f.id===fid)?.name).filter(Boolean);
+  subtitle.textContent = `聚焦：${weakNames.join('、')}`;
+
+  if(qs.length > 0){
+    renderReinforceQ();
+  } else {
+    // No pre-built questions, try AI generation
+    if(state.key){
+      generateAIReinforcement();
+    } else {
+      document.getElementById('reinforceArea').innerHTML = '<div class="info green">沒有額外加強題。你的弱點已在 Phase 3 追問中處理過。</div>';
+      document.getElementById('reinforceDone').style.display = 'block';
+    }
+  }
+}
+
+function renderReinforceQ(){
+  const qs = state.phase5.questions;
+  if(state.phase5.currentQ >= qs.length){
+    document.getElementById('reinforceDone').style.display = 'block';
+    return;
+  }
+  const q = qs[state.phase5.currentQ];
+  const mod = MODULES[state.moduleId];
+  const fw = mod.frameworks.find(f=>f.id===q.model);
+  const area = document.getElementById('reinforceArea');
+  area.innerHTML = `
+    <div class="fade-in" id="rBlock-${q.id}">
+      <div style="margin-bottom:.5rem;">
+        <span style="display:inline-block;padding:.2rem .6rem;border-radius:8px;font-size:.8rem;font-weight:700;background:var(--red-lt);color:var(--red);">加強：${fw?.name||q.model}</span>
+        <span style="float:right;font-size:.85rem;color:var(--g400);">${state.phase5.currentQ+1} / ${qs.length}</span>
+      </div>
+      <div class="quiz-stem">${q.stem}</div>
+      <div id="rOpts-${q.id}">
+        ${q.options.map(o => `
+          <button class="option-btn" id="rOpt-${q.id}-${o.key}" onclick="answerR('${q.id}','${o.key}')">
+            <span class="opt-label">${o.key}</span>${o.text}
+          </button>
+        `).join('')}
+      </div>
+      <div id="rFeedback-${q.id}" style="margin-top:1rem;"></div>
+    </div>
+  `;
+}
+
+async function answerR(qid, chosen){
+  const q = state.phase5.questions.find(x=>x.id===qid);
+  const isCorrect = chosen === q.correct;
+
+  document.querySelectorAll(`#rOpts-${qid} .option-btn`).forEach(b=>b.classList.add('locked'));
+  document.getElementById(`rOpt-${qid}-${q.correct}`).classList.add('correct');
+  if(!isCorrect) document.getElementById(`rOpt-${qid}-${chosen}`).classList.add('wrong');
+
+  state.phase5.answers[qid] = chosen;
+  state.phase5.scores[qid] = q.options.find(o=>o.key===chosen).depth;
+
+  const fb = document.getElementById(`rFeedback-${qid}`);
+  const mod = MODULES[state.moduleId];
+  const fw = mod.frameworks.find(f=>f.id===q.model);
+
+  if(isCorrect){
+    fb.innerHTML = `
+      <div class="info green">
+        <strong>答對了！</strong> 看起來你已經修正了「${fw?.name}」的認知缺口。
+      </div>
+      <button class="btn btn-primary btn-block" onclick="nextR()" style="margin-top:.8rem;">繼續 →</button>
+    `;
+  } else {
+    const diag = q.diagnosis?.[chosen];
+    fb.innerHTML = `
+      <div class="info red">
+        <strong>還有盲區：</strong>${diag?.gap || '這個概念需要更深入理解'}
+      </div>
+      <div class="ai-chat" id="rChat-${qid}">
+        <div class="ai-chat-header">AI 追問引擎</div>
+        <div class="ai-chat-body" id="rChatBody-${qid}">
+          <div class="ai-msg from-ai">${diag?.followup || '想想看，這個情境跟你之前答錯的題目有什麼共通點？'}</div>
+        </div>
+        <div class="ai-input-row">
+          ${state.key
+            ? `<input type="text" id="rChatInput-${qid}" placeholder="輸入你的想法..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendRChat('${qid}');}"><button onclick="sendRChat('${qid}')">送出</button>`
+            : '<span style="font-size:.85rem;color:var(--g400);padding:.5rem;">設定 Gemini API Key 可啟用 AI 動態追問</span>'
+          }
+        </div>
+      </div>
+      <div class="info blue" style="margin-top:.8rem;">
+        <strong>回顧心智模型：${fw?.name}</strong><br>${fw?.desc}
+      </div>
+      <button class="btn btn-secondary btn-block" onclick="nextR()" style="margin-top:.8rem;">繼續 →</button>
+    `;
+  }
+}
+
+async function sendRChat(qid){
+  if(_chatCooldown) return;
+  const input = document.getElementById(`rChatInput-${qid}`);
+  if(!input) return;
+  const msg = input.value.trim();
+  if(!msg || !state.key) return;
+  input.value = '';
+  input.blur();
+
+  const body = document.getElementById(`rChatBody-${qid}`);
+  body.innerHTML += `<div class="ai-msg from-user">${escHtml(msg)}</div>`;
+  setCooldown(8000);
+  body.innerHTML += `<div class="ai-msg from-ai" id="rAiLoad-${qid}" style="opacity:.5;">思考中...</div>`;
+  body.scrollTop = body.scrollHeight;
+
+  const q = state.phase5.questions.find(x=>x.id===qid);
+  const mod = MODULES[state.moduleId];
+  const fw = mod.frameworks.find(f=>f.id===q.model);
+  const chosen = state.phase5.answers[qid];
+  const diag = q.diagnosis?.[chosen];
+
+  const origWrongQs = mod.questions.filter(oq => oq.model===q.model && state.phase3.answers[oq.id]!==oq.correct);
+  const origContext = origWrongQs.map(oq => `之前錯的題：${oq.stem}（選了${state.phase3.answers[oq.id]}，正確是${oq.correct}）`).join('\n');
+
+  const prompt = `你是 AI 100 講的學習助教。學生正在做弱點加強練習。
+
+這是第二輪測驗，學生在同一個心智模型「${fw?.name}」上又答錯了。
+心智模型定義：${fw?.desc}
+
+加強題：${q.stem}
+學生選了：${chosen}（${q.options.find(o=>o.key===chosen)?.text}）
+正確答案：${q.correct}
+認知缺口：${diag?.gap || '概念理解不足'}
+
+${origContext ? '第一輪的錯誤紀錄：\n'+origContext : ''}
+
+學生回覆：「${msg}」
+
+這是第二次在同一概念上犯錯，請：
+1. 更直接地解釋核心概念（不再只用引導問題）
+2. 用一個非常生活化的比喻讓概念「黏住」
+3. 最後用一句話總結這個心智模型的判斷標準
+回覆控制在 4-5 句，用繁體中文。不要用 markdown 格式。`;
+
+  try {
+    const reply = await callGemini(prompt);
+    const el = document.getElementById(`rAiLoad-${qid}`);
+    if(el) el.remove();
+    body.innerHTML += `<div class="ai-msg from-ai">${escHtml(reply || '抱歉，AI 暫時無法回應。')}</div>`;
+  } catch(e){
+    const el = document.getElementById(`rAiLoad-${qid}`);
+    if(el) el.remove();
+    body.innerHTML += `<div class="ai-msg from-ai">連線錯誤。</div>`;
+  }
+  body.scrollTop = body.scrollHeight;
+}
+
+function nextR(){
+  state.phase5.currentQ++;
+  renderReinforceQ();
+  const area = document.getElementById('reinforceArea');
+  window.scrollTo(0, area.offsetTop - 60);
+}
+
+// AI-generated reinforcement (when no pre-built questions available)
+async function generateAIReinforcement(){
+  const area = document.getElementById('reinforceArea');
+  area.innerHTML = '<div class="info purple" style="text-align:center;"><strong>AI 正在根據你的弱點生成加強題...</strong></div>';
+
+  const mod = MODULES[state.moduleId];
+  const weakInfo = (state.weakFws||[]).map(fid => {
+    const fw = mod.frameworks.find(f=>f.id===fid);
+    const wrongQs = mod.questions.filter(q => q.model===fid && state.phase3.answers[q.id]!==q.correct);
+    const gaps = wrongQs.map(q=>q.diagnosis[state.phase3.answers[q.id]]?.gap).filter(Boolean);
+    return `心智模型「${fw?.name}」：${fw?.desc}\n學生的盲區：${gaps.join('；')}`;
+  }).join('\n\n');
+
+  const prompt = `你是 AI 教學系統的出題引擎。根據以下學生弱點，生成 2 道鑑別題。
+
+${weakInfo}
+
+每題必須：
+1. 是情境題（給一個具體的企業/工作場景）
+2. 4 個選項代表不同思考深度（depth 1-4，4 最深）
+3. 針對學生「已知的盲區」設計
+
+回覆 JSON 格式（不要 markdown code block）：
+[{"stem":"題目","options":[{"key":"A","text":"選項","depth":1},{"key":"B","text":"選項","depth":2},{"key":"C","text":"選項","depth":4},{"key":"D","text":"選項","depth":3}],"correct":"C","explanation":"為什麼 C 是最深的理解"}]`;
+
+  try {
+    let text = await callGemini(prompt);
+    // Try to parse JSON from response
+    text = text.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+    const aiQs = JSON.parse(text);
+    state.phase5.questions = aiQs.map((q,i) => ({
+      ...q,
+      id: `AI-R-${i}`,
+      model: state.weakFws?.[0] || 'F1',
+      diagnosis: Object.fromEntries(q.options.filter(o=>o.key!==q.correct).map(o=>[o.key,{gap:'AI 生成題 — 思考這個選項的局限性',followup:q.explanation||'想想看，正確答案考慮了什麼額外的維度？'}]))
+    }));
+    renderReinforceQ();
+  } catch(e){
+    area.innerHTML = '<div class="info gold">AI 題目生成失敗，請直接查看最終報告。</div>';
+    document.getElementById('reinforceDone').style.display = 'block';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  FINAL REPORT
+// ═══════════════════════════════════════════════════════
+function goFinalReport(){
+  saveSession();
+  showScreen('screenFinal');
+  renderFinalReport();
+}
+
+function renderFinalReport(){
+  const mod = MODULES[state.moduleId];
+
+  // Original scores (Phase 3)
+  const fwOrig = {};
+  mod.frameworks.forEach(f => { fwOrig[f.id] = {total:0,count:0}; });
+  mod.questions.forEach(q => {
+    const score = state.phase3.scores[q.id] || 0;
+    if(fwOrig[q.model]){ fwOrig[q.model].total += score; fwOrig[q.model].count++; }
+  });
+
+  // Combined scores (Phase 3 + Phase 5)
+  const fwCombined = {};
+  mod.frameworks.forEach(f => {
+    fwCombined[f.id] = {total: fwOrig[f.id].total, count: fwOrig[f.id].count};
+  });
+  if(state.phase5){
+    (state.phase5.questions||[]).forEach(q => {
+      const score = state.phase5.scores?.[q.id] || 0;
+      const fid = q.model;
+      if(fwCombined[fid]){ fwCombined[fid].total += score; fwCombined[fid].count++; }
+    });
+  }
+
+  const labels = [];
+  const origData = [];
+  const combinedData = [];
+  mod.frameworks.forEach(f => {
+    labels.push(f.name.length > 10 ? f.name.substring(0,10)+'...' : f.name);
+    const o = fwOrig[f.id];
+    origData.push(o.count > 0 ? Math.round(o.total/o.count*25) : 0);
+    const c = fwCombined[f.id];
+    combinedData.push(c.count > 0 ? Math.round(c.total/c.count*25) : 0);
+  });
+
+  new Chart(document.getElementById('radarChart2'),{
+    type:'radar',
+    data:{
+      labels,
+      datasets:[
+        {label:'Phase 3（加強前）',data:origData,backgroundColor:'rgba(217,48,37,.15)',borderColor:'var(--red)',pointBackgroundColor:'var(--red)',borderWidth:2,borderDash:[5,5]},
+        {label:'加強後',data:combinedData,backgroundColor:'rgba(15,157,138,.2)',borderColor:'var(--green)',pointBackgroundColor:'var(--green)',borderWidth:2}
+      ]
+    },
+    options:{
+      responsive:true,
+      scales:{r:{min:0,max:100,ticks:{stepSize:25,display:false},pointLabels:{font:{size:11,family:'Noto Sans TC'}}}},
+      plugins:{legend:{position:'bottom',labels:{font:{family:'Noto Sans TC'}}}}
+    }
+  });
+
+  // Score summary
+  const origTotal = Object.values(state.phase3.scores).reduce((a,b)=>a+b,0);
+  const origMax = mod.questions.length * 4;
+  const origPct = Math.round(origTotal/origMax*100);
+
+  let combinedTotal = origTotal;
+  let combinedMax = origMax;
+  if(state.phase5?.scores){
+    combinedTotal += Object.values(state.phase5.scores).reduce((a,b)=>a+b,0);
+    combinedMax += (state.phase5.questions?.length||0) * 4;
+  }
+  const combinedPct = combinedMax > 0 ? Math.round(combinedTotal/combinedMax*100) : origPct;
+  const improved = combinedPct - origPct;
+
+  document.getElementById('finalScoreInfo').innerHTML = `
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+      <div class="card" style="min-width:140px;text-align:center;">
+        <div style="font-size:.85rem;color:var(--g400);">加強前</div>
+        <div style="font-size:2rem;font-weight:900;color:var(--red);">${origPct}%</div>
+      </div>
+      <div class="card" style="min-width:140px;text-align:center;">
+        <div style="font-size:.85rem;color:var(--g400);">加強後</div>
+        <div style="font-size:2rem;font-weight:900;color:var(--green);">${combinedPct}%</div>
+      </div>
+      <div class="card" style="min-width:140px;text-align:center;">
+        <div style="font-size:.85rem;color:var(--g400);">提升</div>
+        <div style="font-size:2rem;font-weight:900;color:var(--blue);">${improved >= 0 ? '+' : ''}${improved}%</div>
+      </div>
+    </div>
+  `;
+
+  // Final message
+  const elapsed = Math.round((Date.now() - state.startTime) / 60000);
+  const msgWrap = document.getElementById('finalMessage');
+
+  if(combinedPct >= 80){
+    msgWrap.innerHTML = `
+      <div class="info green" style="text-align:center;margin-top:1.5rem;">
+        <strong style="font-size:1.2rem;">恭喜！你已建立了紮實的心智模型框架</strong><br><br>
+        總學習時間：${elapsed} 分鐘<br>
+        你現在對「${mod.name}」有了專家級的思考骨架。<br>
+        後續複習不是從零開始，而是在框架上填細節。
+      </div>
+    `;
+  } else if(combinedPct >= 50){
+    msgWrap.innerHTML = `
+      <div class="info gold" style="text-align:center;margin-top:1.5rem;">
+        <strong style="font-size:1.2rem;">有進步！部分概念已修正</strong><br><br>
+        總學習時間：${elapsed} 分鐘<br>
+        建議回去重讀弱項對應的講座章節，然後再跑一次系統。<br>
+        每次跑都會加深理解 — 這不是刷題，是建構思考框架的過程。
+      </div>
+    `;
+  } else {
+    msgWrap.innerHTML = `
+      <div class="info blue" style="text-align:center;margin-top:1.5rem;">
+        <strong style="font-size:1.2rem;">學習旅程才剛開始</strong><br><br>
+        總學習時間：${elapsed} 分鐘<br>
+        建議先完整閱讀 M01 的講座內容，建立基礎知識後再回來挑戰。<br>
+        記住：三問法的價值不在分數，而在幫你「看到自己看不到的盲區」。
+      </div>
+    `;
+  }
+
+  saveProgress('completed');
+}
+
+// ═══════════════════════════════════════════════════════
+//  FIREBASE INTEGRATION (optional)
+// ═══════════════════════════════════════════════════════
+// Firebase is loaded async — if available, saves progress
+(function(){
+  const s = document.createElement('script');
+  s.src = 'https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js';
+  s.onload = () => {
+    const s2 = document.createElement('script');
+    s2.src = 'https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js';
+    s2.onload = initFirebase;
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s);
+})();
+
+function initFirebase(){
+  try {
+    firebase.initializeApp({
+      apiKey: ['AIza','SyC5X5C0Uje6bCMzrvuUuq5Bz33ly0PR-vc'].join(''),
+      databaseURL: 'https://ai-classroom-70a97-default-rtdb.firebaseio.com',
+      projectId: 'ai-classroom-70a97'
+    });
+    console.log('Firebase connected for learn system');
+
+    // Save progress on phase transitions
+    const origGoP2 = window.goPhase2;
+    window.goPhase2 = function(){
+      saveProgress('phase1_complete');
+      origGoP2();
+    };
+    const origGoP3 = window.goPhase3;
+    window.goPhase3 = function(){
+      saveProgress('phase2_complete');
+      origGoP3();
+    };
+    const origGoReport = window.goReport;
+    window.goReport = function(){
+      saveProgress('phase3_complete');
+      origGoReport();
+    };
+  } catch(e){
+    console.log('Firebase optional, continuing without it');
+  }
+}
+
+function saveProgress(milestone){
+  try {
+    if(typeof firebase === 'undefined') return;
+    const odID = localStorage.getItem('_learn_odid') || crypto.randomUUID();
+    localStorage.setItem('_learn_odid', odID);
+    const ref = firebase.database().ref(`learn/${odID}`);
+    const payload = {
+      name: state.name,
+      module: state.moduleId,
+      milestone,
+      phase1_ratings: state.phase1.ratings,
+      phase2_choices: state.phase2.choices,
+      phase3_answers: state.phase3.answers,
+      phase3_scores: state.phase3.scores,
+      ts: firebase.database.ServerValue.TIMESTAMP
+    };
+    if(state.phase5){
+      payload.phase5_answers = state.phase5.answers || {};
+      payload.phase5_scores = state.phase5.scores || {};
+      payload.weakFws = state.weakFws || [];
+    }
+    ref.update(payload);
+  } catch(e){ /* silent */ }
+}
+</script>
+<script src="learn-layer2.js"></script>
+</body>
+</html>
