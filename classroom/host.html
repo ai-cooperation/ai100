@@ -1184,12 +1184,26 @@ function closeSurveyEditor() {
   } else if (currentPhase === 'post-class') {
     renderPostClassPhase();
   } else if (document.getElementById('courseView').classList.contains('active')) {
-    // Back to course session list or prepare view
-    if (cvSelectedSessionIdx !== null && cvSelectedPhase === 'prepare') {
-      renderCVPrepare(cvSessions[cvSelectedSessionIdx]);
-    } else if (cvSelectedSessionIdx !== null && cvSelectedPhase === 'post') {
-      renderCVPost(cvSessions[cvSelectedSessionIdx]);
-    } else {
+    // Back to course session list or prepare/post view
+    try {
+      if (cvSelectedSessionIdx !== null && cvSessions[cvSelectedSessionIdx]) {
+        if (cvSelectedPhase === 'prepare') {
+          renderCVPrepare(cvSessions[cvSelectedSessionIdx]);
+        } else if (cvSelectedPhase === 'post') {
+          renderCVPost(cvSessions[cvSelectedSessionIdx]);
+        } else {
+          renderSessionList();
+        }
+      } else {
+        renderSessionList();
+      }
+    } catch(e) {
+      console.warn('closeSurveyEditor fallback:', e);
+      renderSessionList();
+    }
+  } else {
+    // Fallback: if no phase matched, try session list or lobby
+    if (document.getElementById('courseView').classList.contains('active')) {
       renderSessionList();
     }
   }
@@ -1627,7 +1641,7 @@ function loadCourseList(){
         sessions:sessionArr,
         nearestSession:nearestSession,
         sortKey:sortKey,
-        nearestMonth:nearestSession?nearestSession.date.substring(0,6):''
+        nearestMonth:nearestSession?(function(d){d=d.replace(/-/g,'');return d.substring(0,4)+d.substring(4,6)})(nearestSession.date):''
       });
     });
 
@@ -1742,6 +1756,15 @@ function enterCourseView(courseId,title){
   cvSelectedSessionIdx=null;
   cvSelectedPhase=null;
 
+  // Reset email state to avoid stale data from previous room
+  _feedbackRecipients = { wantPdf: [], all: [] };
+  var elLink = document.getElementById('emailLink');
+  var elBody = document.getElementById('emailBody');
+  var elDeck = document.getElementById('emailDeckSelect');
+  if (elLink) elLink.value = '';
+  if (elBody) elBody.value = '';
+  if (elDeck) { elDeck.innerHTML = '<option value="">— 選擇教材 —</option>'; }
+
   document.getElementById('lobby').classList.remove('active');
   document.getElementById('courseView').classList.add('active');
   document.getElementById('cvCourseName').textContent=title;
@@ -1758,6 +1781,16 @@ function backToCourseList(){
   cvListeners.forEach(function(l){l.ref.off(l.event)});
   cvListeners=[];
   cvCourseId=null;cvCourseName='';cvSessions=[];cvSelectedSessionIdx=null;cvSelectedPhase=null;
+
+  // Reset email state to avoid stale data across rooms
+  _feedbackRecipients = { wantPdf: [], all: [] };
+  var elLink = document.getElementById('emailLink');
+  var elBody = document.getElementById('emailBody');
+  var elDeck = document.getElementById('emailDeckSelect');
+  if (elLink) elLink.value = '';
+  if (elBody) elBody.value = '';
+  if (elDeck) { elDeck.innerHTML = '<option value="">— 選擇教材 —</option>'; }
+
   document.getElementById('courseView').classList.remove('active');
   document.getElementById('lobby').classList.add('active');
 }
@@ -1985,12 +2018,34 @@ function renderCVPost(sess){
     h+='<div class="kpi-card"><div class="kpi-val" style="color:#1A73E8">'+recAvg+'</div><div class="kpi-label">推薦度 /5</div></div>';
     h+='</div>';
 
+    // ── 課後問卷管理 ──
     h+='<div class="post-section" style="margin-top:1rem">';
     h+='<h3>📝 課後問卷管理</h3>';
     h+='<div class="survey-status"><span class="ss-label ss-no" id="cvPostMgmtLabel">載入中...</span>';
     h+='<button onclick="openSurveyEditor(\'post\',\''+esc(sess.roomId)+'\')">編輯</button>';
     h+='<button onclick="previewSurveyConfig(\'post\',\''+esc(sess.roomId)+'\')">預覽</button></div>';
     h+='<div id="cvPostMgmtCount" style="font-size:0.8rem;color:var(--dim);margin-top:0.4rem">已收到 '+total+' 份回饋</div>';
+    h+='</div>';
+
+    // ── 寄送教材 ──
+    h+='<div class="post-section" style="margin-top:1rem">';
+    h+='<h3>📧 寄送教材</h3>';
+    h+='<div style="margin-bottom:0.6rem">';
+    h+='<label style="font-size:0.8rem;color:var(--dim);display:block;margin-bottom:4px;">教材連結</label>';
+    h+='<input id="cvPostShareLink" placeholder="Google Drive / PDF 連結" style="width:100%;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;" value="'+esc(sess.shareLink||'')+'">';
+    h+='</div>';
+    h+='<div style="margin-bottom:0.6rem">';
+    h+='<label style="font-size:0.8rem;color:var(--dim);display:block;margin-bottom:4px;">分享訊息</label>';
+    h+='<textarea id="cvPostEmailMsg" rows="3" style="width:100%;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;resize:vertical;font-family:inherit;line-height:1.5;">感謝參加課程！以下是課程教材連結，歡迎複習回顧。</textarea>';
+    h+='</div>';
+    h+='<div style="margin-bottom:0.6rem">';
+    h+='<label style="font-size:0.8rem;color:var(--dim);display:block;margin-bottom:4px;">寄送模式</label>';
+    h+='<div style="display:flex;gap:1rem;align-items:center;">';
+    h+='<label style="font-size:0.85rem;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:4px;"><input type="radio" name="cvPostEmailMode" value="auto" style="accent-color:var(--pri);"> 自動（填完問卷即寄）</label>';
+    h+='<label style="font-size:0.85rem;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:4px;"><input type="radio" name="cvPostEmailMode" value="manual" checked style="accent-color:var(--pri);"> 手動（講師確認後寄）</label>';
+    h+='</div>';
+    h+='</div>';
+    h+='<button onclick="saveCVPostEmailConfig(\''+esc(sess.roomId)+'\')" style="width:100%;padding:0.6rem;background:var(--pri);color:#fff;border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer">💾 儲存設定</button>';
     h+='</div>';
 
     h+='<div class="post-actions">';
@@ -2013,6 +2068,42 @@ function renderCVPost(sess){
         label.className = 'ss-label ss-no';
       }
     });
+
+    // Load existing emailConfig
+    db.ref('rooms/'+sess.roomId+'/emailConfig').once('value', function(ecSnap) {
+      var ec = ecSnap.val();
+      if (ec) {
+        var linkEl = document.getElementById('cvPostShareLink');
+        var msgEl = document.getElementById('cvPostEmailMsg');
+        if (ec.shareLink && linkEl) linkEl.value = ec.shareLink;
+        if (ec.message && msgEl) msgEl.value = ec.message;
+        if (ec.mode) {
+          var radios = document.querySelectorAll('input[name="cvPostEmailMode"]');
+          radios.forEach(function(r) { r.checked = (r.value === ec.mode); });
+        }
+      }
+    });
+  });
+}
+
+function saveCVPostEmailConfig(rid) {
+  var shareLink = (document.getElementById('cvPostShareLink') || {}).value || '';
+  var message = (document.getElementById('cvPostEmailMsg') || {}).value || '';
+  var modeRadio = document.querySelector('input[name="cvPostEmailMode"]:checked');
+  var mode = modeRadio ? modeRadio.value : 'manual';
+
+  var config = {
+    mode: mode,
+    shareLink: shareLink.trim(),
+    message: message.trim(),
+    subject: 'AI 100 講 — 課程教材',
+    updatedAt: firebase.database.ServerValue.TIMESTAMP
+  };
+
+  db.ref('rooms/' + rid + '/emailConfig').set(config).then(function() {
+    showActionToast('寄送設定已儲存');
+  }).catch(function(e) {
+    alert('儲存失敗：' + e.message);
   });
 }
 
@@ -2101,6 +2192,12 @@ function showNewSessionForm(){
 
   html+='<div class="nsf-field"><label>課後分享連結（選填）</label><input type="url" id="nsShareLink" placeholder="Google Drive 連結"></div>';
 
+  html+='<div class="nsf-field"><label>寄送模式</label>';
+  html+='<div style="display:flex;gap:1rem;align-items:center;margin-top:0.3rem">';
+  html+='<label style="font-size:0.85rem;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:4px;"><input type="radio" name="nsEmailMode" value="auto" style="accent-color:var(--pri);"> 自動（填完問卷即寄）</label>';
+  html+='<label style="font-size:0.85rem;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:4px;"><input type="radio" name="nsEmailMode" value="manual" checked style="accent-color:var(--pri);"> 手動（講師確認後寄）</label>';
+  html+='</div></div>';
+
   html+='<button class="nsf-submit" onclick="submitNewSession()">建立堂次</button>';
   html+='<button class="nsf-cancel" onclick="renderSessionList()">取消</button>';
   html+='</div>';
@@ -2122,6 +2219,8 @@ function submitNewSession(){
   var title=document.getElementById('nsTitle').value.trim();
   var duration=parseInt(document.getElementById('nsDuration').value)||3;
   var shareLink=document.getElementById('nsShareLink').value.trim();
+  var emailModeRadio=document.querySelector('input[name="nsEmailMode"]:checked');
+  var emailMode=emailModeRadio?emailModeRadio.value:'manual';
 
   if(!title){alert('請填寫主題');return}
   if(!date){alert('請選擇日期');return}
@@ -2177,6 +2276,15 @@ function submitNewSession(){
       deck:deckId||null,
       deckType:deckType||null
     };
+    // Email config
+    if (shareLink || emailMode !== 'manual') {
+      updates['rooms/'+roomIdNew+'/emailConfig']={
+        mode:emailMode,
+        shareLink:shareLink,
+        message:'感謝參加課程！以下是課程教材連結，歡迎複習回顧。',
+        subject:'AI 100 講 — 課程教材'
+      };
+    }
     // User rooms
     updates['users/'+currentUser.uid+'/rooms/'+roomIdNew]={
       title:title,
