@@ -464,12 +464,15 @@
     <h1>📚 講師後台</h1>
     <div class="user"><img id="lobbyAvatar" src=""><span id="lobbyName"></span><span class="logout" onclick="googleLogout()">登出</span></div>
   </div>
+  <!-- 課程規劃看板（暫時隱藏，等整合完再顯示） -->
+  <!--
   <div style="display:flex;gap:0.6rem;margin-bottom:1.5rem;flex-wrap:wrap">
     <a href="/classroom/planner" style="flex:1;min-width:200px;display:flex;align-items:center;gap:0.8rem;padding:1rem 1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text);transition:border-color 0.2s">
       <span style="font-size:1.5rem">📋</span>
       <div><div style="font-weight:700;color:var(--gold);font-size:0.9rem">課程規劃看板</div><div style="font-size:0.7rem;color:var(--dim)">Trello 式課程管理 · 教案 · 問卷</div></div>
     </a>
   </div>
+  -->
   <div id="todayClassSection" style="display:none;margin-bottom:1.5rem;">
     <h2 style="font-size:1rem;color:var(--gold);margin-bottom:0.8rem">📅 今日課程</h2>
     <div id="todayClassList"></div>
@@ -495,12 +498,12 @@
     </div>
   </div>
 
-  <!-- Custom Materials -->
-  <div class="cm-section">
-    <h2>我的教材庫</h2>
-    <div id="customMaterialsList"></div>
-    <button class="cm-add-btn" onclick="showAddMaterial()">＋ 新增教材</button>
-    <div id="customMaterialForm" style="display:none"></div>
+  <!-- Custom Materials (entry point) -->
+  <div style="display:flex;gap:0.6rem;margin-bottom:1.5rem;flex-wrap:wrap">
+    <div onclick="openMaterialLibrary()" style="flex:1;min-width:200px;display:flex;align-items:center;gap:0.8rem;padding:1rem 1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:border-color 0.2s">
+      <span style="font-size:1.5rem">📦</span>
+      <div><div style="font-weight:700;color:var(--pri);font-size:0.9rem">我的教材庫</div><div style="font-size:0.7rem;color:var(--dim)">管理內建與自訂教材 · 新增 · 刪除</div></div>
+    </div>
   </div>
 
   <!-- My Courses -->
@@ -579,6 +582,28 @@
   </div>
 </div>
 
+<!-- ═══ Material Library View ═══ -->
+<div class="lobby" id="materialLibrary" style="display:none">
+  <div class="lobby-header">
+    <h1>📦 我的教材庫</h1>
+    <button onclick="closeMaterialLibrary()" style="padding:0.4rem 0.8rem;background:none;color:var(--dim);border:1px solid var(--border);border-radius:8px;font-size:0.85rem;cursor:pointer">← 返回大廳</button>
+  </div>
+
+  <!-- Built-in materials -->
+  <div class="room-list" style="margin-bottom:2rem">
+    <h2>內建教材（<span id="mlBuiltinCount">0</span> 個）</h2>
+    <div id="mlBuiltinList"></div>
+  </div>
+
+  <!-- Custom materials -->
+  <div class="room-list" style="margin-bottom:2rem">
+    <h2>自訂教材（<span id="mlCustomCount">0</span> 個）</h2>
+    <div id="mlCustomList"></div>
+    <button class="cm-add-btn" onclick="showAddMaterial()" style="margin-top:0.5rem">＋ 新增教材</button>
+    <div id="customMaterialForm" style="display:none"></div>
+  </div>
+</div>
+
 <!-- Dashboard (for standalone rooms + course session live view) -->
 <div class="dash" id="dash">
 
@@ -606,19 +631,27 @@
       <div class="step-card">
         <div class="step-title"><span class="step-num">2</span>教室入口</div>
         <div class="step-desc">分享 QR Code 或連結給學員加入教室</div>
-        <div class="info-panel" id="prepareQRPanel">
-          <div class="info-card">
-            <h3>📱 教室入口 QR</h3>
-            <div class="qr-small" id="qrHostPrepare"></div>
-            <div class="url-text" id="prepareHostUrl"></div>
-            <div style="margin-top:0.5rem;font-size:0.75rem;color:var(--dim)">學員連結：</div>
-            <div class="url-text" id="prepareStudentUrl" style="margin-top:0.2rem"></div>
-            <button onclick="copyStudentLink()">複製學員連結</button>
+        <div style="display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap">
+          <!-- Student QR (main) -->
+          <div style="text-align:center">
+            <div class="qr-small" id="qrHostPrepare" style="max-width:160px"></div>
+            <div style="font-size:0.75rem;color:var(--pri);font-weight:700;margin-top:0.3rem">學員掃碼加入</div>
           </div>
-          <div class="info-card">
-            <h3>🎮 老師手機遙控</h3>
-            <div class="qr-small" id="qrRemotePrepare"></div>
-            <div class="url-text" id="prepareRemoteUrl"></div>
+          <!-- Links -->
+          <div style="flex:1;min-width:200px">
+            <div style="margin-bottom:0.6rem">
+              <div style="font-size:0.75rem;color:var(--dim);margin-bottom:2px">學員連結</div>
+              <div class="url-text" id="prepareStudentUrl" style="word-break:break-all;font-size:0.8rem"></div>
+              <button onclick="copyStudentLink()" style="margin-top:0.4rem;padding:0.35rem 0.8rem;background:var(--pri);color:#fff;border:none;border-radius:6px;font-size:0.8rem;cursor:pointer">📋 複製學員連結</button>
+            </div>
+            <div style="margin-bottom:0.6rem">
+              <div style="font-size:0.75rem;color:var(--dim);margin-bottom:2px">講師後台</div>
+              <div class="url-text" id="prepareHostUrl" style="word-break:break-all;font-size:0.8rem"></div>
+            </div>
+            <div>
+              <div style="font-size:0.75rem;color:var(--dim);margin-bottom:2px">手機遙控</div>
+              <div class="url-text" id="prepareRemoteUrl" style="word-break:break-all;font-size:0.8rem"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -973,6 +1006,7 @@ const materials=[
   {title:'S14 Google Workspace CLI',icon:'🖥️',url:'/slides/supplements/S14_GWS.html',desc:'CLI工具・12頁'},
   {title:'S15 Google Cloud SDK',icon:'☁️',url:'/slides/supplements/S15_gcloud.html',desc:'雲端・12頁'},
   {title:'S16 clasp 開發工具',icon:'🔩',url:'/slides/supplements/S16_clasp.html',desc:'GAS開發・10頁'},
+  {title:'S17 未來辯論場',icon:'⚔️',url:'/slides/supplements/S17_Future_Debate_Arena.html',desc:'AI工作坊・24頁'},
   // ─── 學習系統 ───
   {title:'三問法學習系統',icon:'🧠',url:'/classroom/learn',desc:'自學・M01 AI 思維與治理'},
   // ─── 原有教材 ───
@@ -1002,6 +1036,7 @@ var deckOptions=[
   {name:'S14_GWS',label:'S14 Google Workspace CLI'},
   {name:'S15_gcloud',label:'S15 Google Cloud SDK'},
   {name:'S16_clasp',label:'S16 clasp'},
+  {name:'S17_Future_Debate_Arena',label:'S17 未來辯論場'},
 ];
 
 // ═══ Custom Materials ═══
@@ -1048,25 +1083,61 @@ function loadCustomMaterials(){
 }
 
 function renderCustomMaterialsList(){
-  var el=document.getElementById('customMaterialsList');
-  if(!el)return;
+  // If material library is open, refresh it
+  var mlEl=document.getElementById('materialLibrary');
+  if(mlEl && mlEl.classList.contains('active')){
+    renderMaterialLibrary();
+  }
+}
+
+// ═══ Material Library View ═══
+function openMaterialLibrary(){
+  document.getElementById('lobby').classList.remove('active');
+  document.getElementById('materialLibrary').style.display='block';
+  document.getElementById('materialLibrary').classList.add('active');
+  renderMaterialLibrary();
+}
+
+function closeMaterialLibrary(){
+  document.getElementById('materialLibrary').style.display='none';
+  document.getElementById('materialLibrary').classList.remove('active');
+  document.getElementById('lobby').classList.add('active');
+}
+
+function renderMaterialLibrary(){
+  // Built-in materials
+  var builtinEl=document.getElementById('mlBuiltinList');
+  document.getElementById('mlBuiltinCount').textContent=materials.length;
+  var bHtml='';
+  materials.forEach(function(m,idx){
+    var typeLabel=m.hasSlideControl?'投影片':'連結';
+    if(m.url==='/classroom/presenter') typeLabel='PPTX 圖片';
+    bHtml+='<div class="room-card" style="cursor:default">';
+    bHtml+='<span style="font-size:1.3rem;flex-shrink:0">'+m.icon+'</span>';
+    bHtml+='<div class="rc-info" style="cursor:default"><div class="rc-name">'+esc(m.title)+'</div><div class="rc-meta">'+(m.desc||'')+' · '+typeLabel+'</div></div>';
+    bHtml+='</div>';
+  });
+  builtinEl.innerHTML=bHtml;
+
+  // Custom materials
+  var customEl=document.getElementById('mlCustomList');
+  document.getElementById('mlCustomCount').textContent=customMaterials.length;
   if(!customMaterials.length){
-    el.innerHTML='<div class="cm-empty">尚無自訂教材。使用 convert-deck.sh 轉檔後，在此新增。</div>';
+    customEl.innerHTML='<div class="no-rooms">尚無自訂教材。點下方「新增教材」開始。</div>';
     return;
   }
-  var html='';
+  var cHtml='';
   customMaterials.forEach(function(m){
     var icon=m.type==='pptx'?'📽':m.type==='external'?'🔗':'📊';
     var typeLabel=m.type==='pptx'?'PPTX':m.type==='external'?'外部連結':'HTML';
     var detail=m.type==='pptx'?'deck: '+esc(m.deck||''):(m.url?esc(m.url):'');
-    html+='<div class="cm-card">';
-    html+='<span class="cm-icon">'+icon+'</span>';
-    html+='<div class="cm-info"><div class="cm-title">'+esc(m.title)+' <span style="font-size:0.7rem;color:var(--dim)">('+typeLabel+')</span></div>';
-    html+='<div class="cm-meta">'+(m.desc?esc(m.desc):'')+(detail?' · '+detail:'')+'</div></div>';
-    html+='<button class="cm-del" onclick="deleteCustomMaterial(\''+esc(m._key)+'\')">刪除</button>';
-    html+='</div>';
+    cHtml+='<div class="room-card" style="cursor:default">';
+    cHtml+='<span style="font-size:1.3rem;flex-shrink:0">'+icon+'</span>';
+    cHtml+='<div class="rc-info" style="cursor:default"><div class="rc-name">'+esc(m.title)+' <span style="font-size:0.7rem;color:var(--dim)">('+typeLabel+')</span></div><div class="rc-meta">'+(m.desc?esc(m.desc):'')+(detail?' · '+detail:'')+'</div></div>';
+    cHtml+='<button class="rc-del" onclick="deleteCustomMaterial(\''+esc(m._key)+'\')">刪除</button>';
+    cHtml+='</div>';
   });
-  el.innerHTML=html;
+  customEl.innerHTML=cHtml;
 }
 
 function showAddMaterial(){
@@ -1602,7 +1673,7 @@ function renderPreparingPhase(){
   });
   list.innerHTML=html;
 
-  // QR codes
+  // QR codes — only student QR, others as text links
   var studentUrl=location.origin+'/classroom/?room='+encodeURIComponent(roomId);
   var hostUrl=location.origin+'/classroom/host';
   var remoteUrl=location.origin+'/classroom/remote?room='+encodeURIComponent(roomId);
@@ -1610,8 +1681,7 @@ function renderPreparingPhase(){
   document.getElementById('prepareStudentUrl').textContent=studentUrl;
   document.getElementById('prepareRemoteUrl').textContent=remoteUrl;
   setTimeout(function(){
-    makeQR('qrHostPrepare',hostUrl);
-    makeQR('qrRemotePrepare',remoteUrl);
+    makeQR('qrHostPrepare',studentUrl);
   },50);
 
   // Update start button state
@@ -2168,7 +2238,10 @@ function renderCVPrepare(sess){
 
   var html='';
   html+='<div class="step-card"><div class="step-title"><span class="step-num">1</span>教材</div>';
-  html+='<div style="font-size:0.9rem;color:var(--text)">'+esc(deckLabel)+'</div>';
+  html+='<div style="display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap">';
+  html+='<div style="font-size:0.9rem;color:var(--text);flex:1">'+esc(deckLabel)+'</div>';
+  html+='<button onclick="editSession('+cvSelectedSessionIdx+')" style="padding:0.35rem 0.8rem;background:var(--bg);color:var(--pri);border:1px solid var(--pri);border-radius:6px;font-size:0.8rem;cursor:pointer">更換教材</button>';
+  html+='</div>';
   if(sess.shareLink){html+='<div style="font-size:0.8rem;color:var(--dim);margin-top:0.3rem">分享連結：<a href="'+esc(sess.shareLink)+'" target="_blank">'+esc(sess.shareLink)+'</a></div>'}
   html+='</div>';
 
