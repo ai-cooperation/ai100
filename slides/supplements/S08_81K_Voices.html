@@ -164,7 +164,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 .controls button{width:48px;height:48px;border:2px solid rgba(255,255,255,.15);border-radius:12px;background:rgba(0,0,0,.4);color:rgba(255,255,255,.8);font-size:1.2rem;cursor:pointer;transition:all .15s;backdrop-filter:blur(8px);}
 .controls button:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff;}
 .controls button:disabled{opacity:.2;cursor:default;}
-.slide-counter{position:fixed;bottom:1.5rem;left:1.2rem;z-index:100;color:rgba(255,255,255,.35);font-size:.85rem;font-weight:500;}
+.slide-counter{position:fixed;bottom:1.5rem;left:auto;right:5rem;z-index:100;color:rgba(255,255,255,.35);font-size:.85rem;font-weight:500;}
 .module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:rgba(249,171,0,.15);color:var(--gold);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;backdrop-filter:blur(8px);}
 .module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:rgba(255,255,255,.35);font-size:.85rem;font-weight:700;}
 .source-tag{position:absolute;bottom:1rem;left:1.5rem;font-size:.7rem;color:rgba(255,255,255,.25);z-index:2;}
@@ -190,7 +190,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
   .module-badge{font-size:.65rem;top:.6rem;right:.6rem;padding:.2rem .6rem;}
   .controls{bottom:.8rem;right:.8rem;}
   .controls button{width:40px;height:40px;font-size:1rem;}
-  .slide-counter{bottom:1rem;left:.8rem;font-size:.75rem;}
+  .slide-counter{bottom:1rem;left:auto;right:5rem;font-size:.75rem;}
 
   /* Steps / Agenda */
   .step-list{max-width:100%;}
@@ -283,6 +283,21 @@ p,li{font-size:1.1rem;line-height:1.8;}
   .tension-label{font-size:.65rem;}
   .gbar-label{width:75px!important;font-size:.75rem!important;}
 }
+
+/* ── Chapter Menu ── */
+.chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;font-family:system-ui,-apple-system,sans-serif;}
+.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.9);font-size:.8rem;cursor:pointer;transition:border-color .2s;}
+.chapter-btn:hover{border-color:var(--green);}
+.chapter-icon{color:var(--green);font-weight:700;}
+.chapter-arrow{font-size:.6rem;opacity:.5;transition:transform .2s;}
+.chapter-menu.open .chapter-arrow{transform:rotate(180deg);}
+.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:180px;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;}
+.chapter-menu.open .chapter-list{display:block;}
+.chapter-item{display:flex;align-items:center;gap:8px;padding:8px 14px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
+.chapter-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+.chapter-item.active{color:var(--green);font-weight:600;}
+.chapter-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;}
+.chapter-item.active .chapter-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
 </style>
 </head>
 <body>
@@ -292,7 +307,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 <div class="slides">
 
 <!-- ===== 0: COVER (Poster) ===== -->
-<div class="slide poster overlay-bottom" data-index="0" style="background-image:url('img/s08/cover.png');">
+<div class="slide poster overlay-bottom" data-act="開場" data-index="0" style="background-image:url('img/s08/cover.png');">
   <div style="flex:1;"></div>
   <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:.5rem;letter-spacing:.15em;">AI 100 講 — 補充單元</p>
   <h1 style="font-size:3.2rem;text-shadow:0 4px 20px rgba(0,0,0,.5);">AI 與人<br><span style="font-size:2.2rem;font-weight:700;">8 萬人的真心話</span></h1>
@@ -301,7 +316,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 1: 議程 (Clean) — fix #1 ===== -->
-<div class="slide clean" data-index="1">
+<div class="slide clean" data-act="開場" data-index="1">
   <h2>今天的旅程</h2>
   <div class="step-list">
     <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>這份研究是什麼？</strong><p>不是問卷，是 8 萬場一對一對話</p></div></div>
@@ -314,7 +329,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 2: 方法論 (Clean) ===== -->
-<div class="slide clean" data-index="2">
+<div class="slide clean" data-act="開場" data-index="2">
   <h2>這不是問卷調查</h2>
   <p style="color:var(--g600);max-width:700px;text-align:center;">Anthropic 用 AI 訪談員，一對一開放式對話<br>不選選項，讓人自由說出心裡的話</p>
   <div class="method-grid fragment" data-order="0">
@@ -330,7 +345,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 3: Top 5 希望 (DataViz) ===== -->
-<div class="slide dataviz" data-index="3">
+<div class="slide dataviz" data-act="開場" data-index="3">
   <h2>人們最希望 AI 做什麼？</h2>
   <div class="bar-chart">
     <div class="bar-row fragment" data-order="0">
@@ -358,7 +373,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 4: 追問一層 (Poster) — fix #2: 改用 cooking.png ===== -->
-<div class="slide poster overlay-heavy" data-index="4" style="background-image:url('img/s08/cooking.png');">
+<div class="slide poster overlay-heavy" data-act="真心話" data-index="4" style="background-image:url('img/s08/cooking.png');">
   <div style="flex:1;"></div>
   <div class="poster-quote">
     <div class="q-text fragment" data-order="0">「用 AI 我可以更有效率……<br>上週二，它讓我能和媽媽一起下廚，<br>而不是留下來加班。」</div>
@@ -369,7 +384,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 5: 81% 兌現 (DataViz) ===== -->
-<div class="slide dataviz" data-index="5">
+<div class="slide dataviz" data-act="真心話" data-index="5">
   <p style="color:rgba(255,255,255,.5);font-size:1rem;margin-bottom:.5rem;">AI 有兌現這些期望嗎？</p>
   <div class="big-num glow" style="color:var(--blue);">81%</div>
   <p style="font-size:1.3rem;font-weight:700;margin-top:.5rem;color:rgba(255,255,255,.8);">的受訪者說：有</p>
@@ -399,7 +414,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 6: 普通人的故事 (Poster) — fix #3: 加 padding-top ===== -->
-<div class="slide poster overlay-heavy" data-index="6" style="background-image:url('img/s08/triptych.png');padding-top:3.5rem;">
+<div class="slide poster overlay-heavy" data-act="真心話" data-index="6" style="background-image:url('img/s08/triptych.png');padding-top:3.5rem;">
   <div style="flex:1;"></div>
   <h2 style="color:#fff;font-size:1.5rem;margin-bottom:.6rem;text-shadow:0 2px 12px rgba(0,0,0,.6);">那些特別動人的，都是普通人</h2>
   <div style="display:flex;flex-direction:column;gap:.8rem;max-width:860px;width:100%;">
@@ -421,7 +436,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 7: 恐懼排行 (DataViz) — fix #4: 加寬 label ===== -->
-<div class="slide dataviz" data-index="7">
+<div class="slide dataviz" data-act="真心話" data-index="7">
   <h2>但人們也很害怕<span style="font-size:1rem;color:rgba(255,255,255,.4);font-weight:400;margin-left:.5rem;">平均每人提出 2.3 個擔憂</span></h2>
   <div class="bar-chart" style="max-width:750px;">
     <div class="bar-row fragment" data-order="0">
@@ -448,7 +463,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 8: 最意外的發現 (DataViz) ===== -->
-<div class="slide dataviz" data-index="8">
+<div class="slide dataviz" data-act="真心話" data-index="8">
   <h2>最意外的發現</h2>
   <div class="circle-compare fragment" data-order="0">
     <div class="circle-item">
@@ -472,13 +487,13 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 9: Section - 光與影 (Poster) ===== -->
-<div class="slide poster overlay-center" data-index="9" style="background-image:url('img/s08/light-shadow.png');">
+<div class="slide poster overlay-center" data-act="光與影" data-index="9" style="background-image:url('img/s08/light-shadow.png');">
   <p class="subtitle" style="color:rgba(255,255,255,.5);letter-spacing:.2em;">Part 5</p>
   <h1 style="font-size:2.8rem;text-shadow:0 4px 20px rgba(0,0,0,.5);margin-top:.5rem;">光與影<br><span style="font-size:1.8rem;font-weight:700;">同時住在每個人心裡</span></h1>
 </div>
 
 <!-- ===== 10: 配對矛盾 (DataViz) — fix #5: 用 bar 長短 ===== -->
-<div class="slide dataviz" data-index="10">
+<div class="slide dataviz" data-act="光與影" data-index="10">
   <h2>同一個人，同時擁有希望和恐懼</h2>
   <p style="color:rgba(255,255,255,.45);font-size:1rem;margin-bottom:1.2rem;">越喜歡某個好處，往往越害怕它的副作用</p>
   <div class="tension-grid">
@@ -543,7 +558,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 11: 情感·救贖 (Poster) — fix #6: 拆成兩頁 ===== -->
-<div class="slide poster overlay-heavy" data-index="11" style="background-image:url('img/s08/rescue.png');">
+<div class="slide poster overlay-heavy" data-act="光與影" data-index="11" style="background-image:url('img/s08/rescue.png');">
   <div style="flex:1;"></div>
   <div class="dq-box fragment" data-order="0" style="background:rgba(0,0,0,.5);border:2px solid rgba(249,171,0,.35);border-radius:16px;max-width:650px;">
     <div class="q-label" style="color:var(--gold);font-size:1rem;">☀ 救贖</div>
@@ -554,7 +569,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 12: 情感·風險 (Poster) — fix #6: 各自配圖 ===== -->
-<div class="slide poster overlay-heavy" data-index="12" style="background-image:url('img/s08/risk.png');">
+<div class="slide poster overlay-heavy" data-act="光與影" data-index="12" style="background-image:url('img/s08/risk.png');">
   <div style="flex:1;"></div>
   <div class="dq-box fragment" data-order="0" style="background:rgba(0,0,0,.5);border:2px solid rgba(124,58,237,.35);border-radius:16px;max-width:650px;">
     <div class="q-label" style="color:var(--purple);font-size:1rem;">☾ 風險</div>
@@ -566,7 +581,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 13: 自由工作者 (DataViz) — fix #7: 重新設計 ===== -->
-<div class="slide dataviz" data-index="13">
+<div class="slide dataviz" data-act="光與影" data-index="13">
   <h2>自由工作者：最弔詭的處境</h2>
   <p style="color:rgba(255,255,255,.45);font-size:1rem;margin-bottom:.5rem;">在所有族群中，創意自由工作者的好處與威脅幾乎等量</p>
   <div class="freelance-bar-wrap fragment" data-order="0">
@@ -597,7 +612,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 14: ROI 最高群體 (DataViz) ===== -->
-<div class="slide dataviz" data-index="14">
+<div class="slide dataviz" data-act="光與影" data-index="14">
   <h2>誰從 AI 獲益最多？</h2>
   <p style="color:rgba(255,255,255,.45);font-size:1rem;margin-bottom:.5rem;">經濟賦權比例（受訪者表示 AI 帶來實際經濟效益）</p>
   <div class="group-bars">
@@ -620,14 +635,14 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 15: Section - 東亞 vs 西方 (Poster) ===== -->
-<div class="slide poster overlay-split" data-index="15" style="background-image:url('img/s08/east-west.png');">
+<div class="slide poster overlay-split" data-act="兩種凝視" data-index="15" style="background-image:url('img/s08/east-west.png');">
   <p class="subtitle" style="color:rgba(255,255,255,.5);letter-spacing:.2em;">Part 6</p>
   <h1 style="font-size:2.8rem;text-shadow:0 4px 20px rgba(0,0,0,.5);margin-top:.5rem;">兩種凝視</h1>
   <p style="font-size:1.3rem;color:rgba(255,255,255,.7);margin-top:.5rem;text-shadow:0 2px 8px rgba(0,0,0,.5);">東亞往內看，西方往外看</p>
 </div>
 
 <!-- ===== 16: 東亞核心焦慮 (DataViz) ===== -->
-<div class="slide dataviz" data-index="16">
+<div class="slide dataviz" data-act="兩種凝視" data-index="16">
   <h2>東亞人看 AI，和西方很不一樣</h2>
   <div style="display:flex;gap:2.5rem;max-width:860px;width:100%;margin-top:.5rem;">
     <div style="flex:1;text-align:left;" class="fragment" data-order="0">
@@ -668,7 +683,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 17: Ending (Poster) — fix #8: 調整重疊 ===== -->
-<div class="slide poster overlay-bottom" data-index="17" style="background-image:url('img/s08/crossroads.png');">
+<div class="slide poster overlay-bottom" data-act="完成" data-index="17" style="background-image:url('img/s08/crossroads.png');">
   <div style="flex:1;"></div>
   <p style="font-size:1rem;color:rgba(255,255,255,.4);margin-bottom:1rem;">8 萬個人的答案，最後指向同一件事</p>
   <h1 style="font-size:2.2rem;line-height:1.6;text-shadow:0 4px 20px rgba(0,0,0,.5);">
@@ -681,6 +696,16 @@ p,li{font-size:1.1rem;line-height:1.8;}
   <span class="source-tag" style="bottom:2.5rem;">Data: Anthropic — What 81,000 People Want from AI (2026) · anthropic.com/81k-interviews</span>
 </div>
 
+</div>
+
+
+<div id="chapterMenu" class="chapter-menu">
+  <button id="chapterBtn" class="chapter-btn">
+    <span class="chapter-icon">§</span>
+    <span id="chapterLabel">開場</span>
+    <span class="chapter-arrow">▼</span>
+  </button>
+  <div id="chapterList" class="chapter-list"></div>
 </div>
 
 <div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
@@ -699,6 +724,16 @@ function ret(){const f=gf(slides[idx]);if(fi>=0){f[fi].classList.remove('visible
 document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
 document.addEventListener('keydown',e=>{if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}if(e.key==='Home'){e.preventDefault();go(0);}if(e.key==='End'){e.preventDefault();go(tot-1);}if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}});
 let tx=0;document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
+// ── Chapter Menu ──
+var chapterMenu=document.getElementById('chapterMenu'),chapterBtn=document.getElementById('chapterBtn'),chapterLabel=document.getElementById('chapterLabel'),chapterList=document.getElementById('chapterList');
+function getChapters(){var m=new Map();slides.forEach(function(s,i){var a=s.dataset.act;if(a&&!m.has(a))m.set(a,i);});return m;}
+function buildChapterMenu(){var ch=getChapters();chapterList.innerHTML='';var cur=slides[idx]&&slides[idx].dataset.act||'';ch.forEach(function(si,name){var d=document.createElement('div');d.className='chapter-item'+(name===cur?' active':'');d.innerHTML='<span class="chapter-dot"></span>'+name;d.onclick=function(){go(si);closeChapterMenu();};chapterList.appendChild(d);});chapterLabel.textContent=cur||'\u5c0e\u89bd';}
+function toggleChapterMenu(){chapterMenu.classList.toggle('open');if(chapterMenu.classList.contains('open'))buildChapterMenu();}
+function closeChapterMenu(){chapterMenu.classList.remove('open');}
+chapterBtn.onclick=toggleChapterMenu;
+document.addEventListener('click',function(e){if(!chapterMenu.contains(e.target))closeChapterMenu();});
+var _origUi=ui;ui=function(){_origUi();var cur=slides[idx]&&slides[idx].dataset.act||'';chapterLabel.textContent=cur||'\u5c0e\u89bd';};
+
 go(0);
 
 window.addEventListener('message', function(e) {

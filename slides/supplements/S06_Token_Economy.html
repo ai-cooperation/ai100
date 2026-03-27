@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S06 — Token 經濟學</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   grow.google 簡潔風 + Reading Glasses
+   投影教學用 (3-10m 觀看距離)
+   ═══════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--white);}
+
+/* Slides */
+.slides{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;opacity:0;transform:translateX(30px);pointer-events:none;transition:opacity .4s,transform .4s ease;background:var(--white);}
+.slide.active{opacity:1;transform:none;pointer-events:auto;}
+.slide.prev{opacity:0;transform:translateX(-30px);}
+.slide.cover{background:var(--navy);color:#fff;text-align:center;}
+.slide.section-title{background:var(--green);color:#fff;text-align:center;}
+.slide.break-slide{background:var(--offwhite);text-align:center;}
+
+/* Typography */
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:2rem;font-weight:700;color:var(--g900);margin-bottom:1rem;line-height:1.4;}
+h3{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.1rem;line-height:1.8;}
+.subtitle{font-size:1.15rem;color:var(--g600);font-weight:500;}
+.blue{color:var(--blue);}.green{color:var(--green);}.gold{color:var(--gold);}.red{color:var(--red);}.purple{color:var(--purple);}.dim{color:var(--g600);}.bold{font-weight:700;}
+
+/* Fragment */
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* Cards */
+.card-grid{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;margin-top:1.2rem;max-width:1100px;}
+.card{background:var(--white);border:2px solid var(--g100);border-radius:16px;padding:1.8rem;min-width:220px;max-width:300px;flex:1;transition:border-color .2s;}
+.card:hover{border-color:var(--blue);}
+.card .icon{font-size:2.5rem;margin-bottom:.6rem;}
+.card p{font-size:1rem;color:var(--g600);}
+
+/* Steps */
+.step-list{text-align:left;max-width:800px;width:100%;}
+.step{display:flex;gap:1.2rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:40px;height:40px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.1rem;}.step-content p{font-size:1rem;color:var(--g600);margin-top:.15rem;}
+
+/* Code */
+.code-block{background:var(--g50);border:2px solid var(--g200);border-radius:12px;padding:1.3rem 1.8rem;text-align:left;max-width:860px;width:100%;font-family:'Fira Code',monospace;font-size:1rem;line-height:1.8;margin:.8rem 0;color:var(--g900);}
+
+/* Table */
+.compare-table{border-collapse:collapse;font-size:1rem;margin-top:.8rem;width:100%;max-width:860px;}
+.compare-table th{background:var(--navy);color:#fff;padding:.7rem 1rem;text-align:left;font-size:1rem;}
+.compare-table td{padding:.7rem 1rem;border-bottom:1px solid var(--g100);font-size:1rem;}
+.compare-table tr:hover td{background:var(--g50);}
+
+/* Info boxes */
+.info-box{border-radius:12px;padding:1.3rem 1.8rem;max-width:800px;width:100%;text-align:left;margin-top:.8rem;}
+.info-box.analogy{background:var(--blue-lt);border-left:4px solid var(--blue);}
+.info-box.warning{background:var(--red-lt);border-left:4px solid var(--red);}
+.info-box.success{background:var(--green-lt);border-left:4px solid var(--green);}
+.info-box.tip{background:var(--gold-lt);border-left:4px solid var(--gold);}
+.info-box .label{font-weight:700;font-size:1rem;margin-bottom:.4rem;}
+.info-box p{font-size:1.05rem;}
+
+/* Flow */
+.flow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1.2rem 0;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.7rem 1rem;font-size:1rem;font-weight:700;text-align:center;}
+.flow-arrow{color:var(--blue);font-size:1.5rem;font-weight:900;}
+
+/* Two col */
+.two-col{display:flex;gap:2rem;width:100%;max-width:960px;text-align:left;}
+.two-col .col{flex:1;}
+
+/* Big number */
+.big-num{font-size:4.5rem;font-weight:900;color:var(--blue);line-height:1;}
+
+/* Banner */
+.exercise-banner{display:inline-block;background:var(--purple);color:#fff;padding:.35rem 1.4rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.8rem;}
+
+/* ═══════════════════════════════════════
+   TOKEN ECONOMY CUSTOM
+   ═══════════════════════════════════════ */
+
+/* Phase indicator */
+.phase-tag{display:inline-block;padding:.3rem 1rem;border-radius:100px;font-weight:700;font-size:.9rem;margin-bottom:.6rem;}
+.phase-tag.p1{background:var(--gold-lt);color:#B45309;}
+.phase-tag.p2{background:var(--purple-lt);color:var(--purple);}
+
+/* Gauge bar */
+.gauge{max-width:700px;width:100%;margin:.6rem 0;}
+.gauge-label{display:flex;justify-content:space-between;font-size:.85rem;color:var(--g600);margin-bottom:.3rem;}
+.gauge-track{height:20px;background:var(--g100);border-radius:10px;overflow:hidden;position:relative;}
+.gauge-fill{height:100%;border-radius:10px;transition:width 1s ease;}
+.gauge-fill.waste{background:linear-gradient(90deg,var(--red),var(--gold));}
+.gauge-fill.efficient{background:linear-gradient(90deg,var(--green),var(--blue));}
+.gauge-fill.tool-desc{background:var(--red);opacity:.8;}
+.gauge-fill.reasoning{background:var(--green);}
+.gauge-annotation{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:.7rem;font-weight:700;color:#fff;}
+
+/* Timeline */
+.timeline{max-width:800px;width:100%;position:relative;padding-left:40px;}
+.timeline::before{content:'';position:absolute;left:15px;top:0;bottom:0;width:3px;background:var(--g200);}
+.tl-item{position:relative;padding:.8rem 0 .8rem 1.5rem;border-bottom:1px solid transparent;}
+.tl-dot{position:absolute;left:-33px;top:1rem;width:14px;height:14px;border-radius:50%;border:3px solid var(--white);}
+.tl-dot.green{background:var(--green);}
+.tl-dot.blue{background:var(--blue);}
+.tl-dot.gold{background:var(--gold);}
+.tl-dot.purple{background:var(--purple);}
+.tl-dot.red{background:var(--red);}
+.tl-year{font-size:.8rem;color:var(--g400);font-weight:700;}
+.tl-title{font-weight:700;font-size:1.05rem;}
+.tl-desc{font-size:.9rem;color:var(--g600);}
+
+/* Split box */
+.split-box{display:flex;gap:0;max-width:860px;width:100%;border-radius:16px;overflow:hidden;border:2px solid var(--g200);margin:.8rem 0;}
+.split-box .half{flex:1;padding:1.5rem;}
+.split-box .half.left{background:var(--gold-lt);}
+.split-box .half.right{background:var(--purple-lt);}
+.split-box .half h3{margin-bottom:.6rem;}
+
+/* Quote */
+.quote-box{max-width:800px;width:100%;background:var(--g50);border-left:5px solid var(--navy);border-radius:0 12px 12px 0;padding:1.5rem 2rem;margin:.8rem 0;text-align:left;}
+.quote-box .quote-text{font-size:1.3rem;font-weight:700;line-height:1.6;color:var(--navy);}
+.quote-box .quote-src{font-size:.9rem;color:var(--g600);margin-top:.5rem;}
+
+/* Stacked bar */
+.stacked-bar{max-width:700px;width:100%;margin:.5rem 0;}
+.stacked-bar .bar-row{display:flex;height:36px;border-radius:8px;overflow:hidden;margin:.3rem 0;}
+.stacked-bar .bar-seg{display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;transition:width 1s ease;}
+.stacked-bar .bar-label{font-size:.85rem;font-weight:700;margin-bottom:.2rem;display:flex;justify-content:space-between;}
+
+/* Controls */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:var(--white);color:var(--g800);font-size:1.2rem;cursor:pointer;transition:all .15s;}
+.controls button:hover{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
+.controls button:disabled{opacity:.25;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;left:auto;right:5rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:var(--gold-lt);color:#B45309;padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
+.slide.poster{background-size:cover;background-position:center;color:#fff;text-align:center;}
+.slide.poster::before{content:'';position:absolute;inset:0;z-index:1;}
+.slide.poster>*{position:relative;z-index:2;}
+.slide.poster.overlay-bottom::before{background:linear-gradient(to bottom,rgba(0,0,0,.15) 0%,rgba(0,0,0,.75) 100%);}
+
+/* ── Chapter Menu ── */
+.chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;font-family:system-ui,-apple-system,sans-serif;}
+.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.9);font-size:.8rem;cursor:pointer;transition:border-color .2s;}
+.chapter-btn:hover{border-color:var(--green);}
+.chapter-icon{color:var(--green);font-weight:700;}
+.chapter-arrow{font-size:.6rem;opacity:.5;transition:transform .2s;}
+.chapter-menu.open .chapter-arrow{transform:rotate(180deg);}
+.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:180px;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;}
+.chapter-menu.open .chapter-list{display:block;}
+.chapter-item{display:flex;align-items:center;gap:8px;padding:8px 14px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
+.chapter-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+.chapter-item.active{color:var(--green);font-weight:600;}
+.chapter-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;}
+.chapter-item.active .chapter-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+</style>
+</head>
+<body>
+
+<div class="module-title">Token Economy</div>
+<div class="module-badge">S06 補充單元</div>
+<div class="slides">
+
+<!-- ===== 0: COVER ===== -->
+<div class="slide poster overlay-bottom" data-act="開場" data-index="0" style="background-image:url('img/s06/cover.png');background-color:var(--navy);">
+  <p style="font-size:1.1rem;color:rgba(255,255,255,.6);margin-bottom:1rem;">AI 100 講 — 補充單元</p>
+  <h1>Token 經濟學<br><span style="font-size:2rem;">從敢花到會花的思維轉換</span></h1>
+  <p class="subtitle" style="margin-top:1.5rem;font-size:1.3rem;">AI 時代的「油錢」管理</p>
+  <p style="color:rgba(255,255,255,.4);margin-top:3rem;font-size:.9rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- ===== 1: 議程 ===== -->
+<div class="slide" data-act="開場" data-index="1">
+  <h2>今天的旅程</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>Token 是什麼？</strong><p>AI 世界的貨幣單位</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--gold);">2</div><div class="step-content"><strong>Phase 1：敢花 Token</strong><p>黃仁勳的 50% 法則 — 先用起來</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--purple);">3</div><div class="step-content"><strong>Phase 2：會花 Token</strong><p>MCP 爭議揭示的效率革命</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--green);">4</div><div class="step-content"><strong>工具架構演進</strong><p>CLI → API → MCP → Agent OS</p></div></div>
+    <div class="step fragment" data-order="4"><div class="step-num" style="background:var(--red);">5</div><div class="step-content"><strong>你的學習路徑升級</strong><p>從用工具到 Token 管理思維</p></div></div>
+  </div>
+</div>
+
+<!-- ===== 2: 你的 AI 學習旅程回顧 ===== -->
+<div class="slide" data-act="開場" data-index="2">
+  <h2>回顧：你的 AI 學習旅程</h2>
+  <div class="flow" style="margin-top:1rem;">
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">用工具<br><span class="dim" style="font-size:.8rem;">學會 AI 對話</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);">選工具<br><span class="dim" style="font-size:.8rem;">找最適合的 AI</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--purple-lt);border-color:var(--purple);">創工具<br><span class="dim" style="font-size:.8rem;">自己做 AI 工具</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--red-lt);border-color:var(--red);">改流程<br><span class="dim" style="font-size:.8rem;">重新設計工作</span></div>
+  </div>
+  <div class="info-box analogy fragment" data-order="0" style="margin-top:1.5rem;">
+    <div class="label">但是...</div>
+    <p>學會開車（用工具）、選了好車（選工具）、甚至改裝了車（創工具）<br>
+    <strong>你有沒有想過「油錢」怎麼花最值得？</strong></p>
+  </div>
+</div>
+
+<!-- ===== SECTION: Token 是什麼 ===== -->
+<div class="slide section-title" data-act="Token 是什麼" data-index="3">
+  <p class="subtitle">Part 1</p>
+  <h1>Token 是什麼？</h1>
+  <p class="subtitle" style="margin-top:.5rem;">AI 世界的貨幣單位</p>
+</div>
+
+<!-- ===== 4: Token 解釋 ===== -->
+<div class="slide" data-act="Token 是什麼" data-index="4">
+  <h2>Token = AI 的「字」</h2>
+  <div class="two-col">
+    <div class="col">
+      <h3>你輸入的每一個字</h3>
+      <div class="code-block" style="font-size:.95rem;">
+        <span style="color:var(--blue);">「幫我寫一封請假信」</span><br><br>
+        中文 ≈ 1.5~2 token / 字<br>
+        這句話 ≈ <strong style="color:var(--red);">14 tokens</strong>
+      </div>
+      <p class="fragment" data-order="0" style="margin-top:.5rem;font-size:1rem;color:var(--g600);">你打字 = 花錢<br>AI 回覆 = 也花錢</p>
+    </div>
+    <div class="col">
+      <h3 class="fragment" data-order="1">生活比喻</h3>
+      <div class="fragment" data-order="1">
+        <div class="info-box tip" style="margin-top:0;">
+          <p><strong>Token 就像手機的「通話分鐘數」</strong><br><br>
+          你講話 = 花分鐘數（輸入 token）<br>
+          對方回答 = 也花分鐘數（輸出 token）<br>
+          通話品質 = 選什麼方案（選什麼模型）</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 5: Token 在哪裡花掉 ===== -->
+<div class="slide" data-act="Token 是什麼" data-index="5">
+  <h2>你的 Token 花在哪裡？</h2>
+  <p class="subtitle" style="margin-bottom:.5rem;">每次跟 AI 對話，Token 都在燒</p>
+  <div class="stacked-bar" style="margin-top:1rem;">
+    <div class="bar-label"><span>一般對話</span><span class="green">效率高</span></div>
+    <div class="bar-row">
+      <div class="bar-seg" style="width:15%;background:var(--blue);">你的問題</div>
+      <div class="bar-seg" style="width:5%;background:var(--g400);">系統</div>
+      <div class="bar-seg" style="width:80%;background:var(--green);">AI 的回答</div>
+    </div>
+  </div>
+  <div class="stacked-bar fragment" data-order="0">
+    <div class="bar-label"><span>使用 MCP 工具的 Agent</span><span class="red">效率低</span></div>
+    <div class="bar-row">
+      <div class="bar-seg" style="width:10%;background:var(--blue);">問題</div>
+      <div class="bar-seg" style="width:72%;background:var(--red);">工具描述</div>
+      <div class="bar-seg" style="width:18%;background:var(--green);">回答</div>
+    </div>
+  </div>
+  <div class="stacked-bar fragment" data-order="1">
+    <div class="bar-label"><span>下一代 Agent OS</span><span class="green">最佳化</span></div>
+    <div class="bar-row">
+      <div class="bar-seg" style="width:12%;background:var(--blue);">問題</div>
+      <div class="bar-seg" style="width:3%;background:var(--g400);">系統</div>
+      <div class="bar-seg" style="width:85%;background:var(--purple);">推理 + 執行</div>
+    </div>
+  </div>
+  <div class="info-box warning fragment" data-order="2" style="margin-top:.6rem;">
+    <div class="label">關鍵數字</div>
+    <p>MCP 協定可能讓 <strong>72% 的 Token 花在「告訴 AI 有哪些工具」</strong>，而不是「完成任務」</p>
+  </div>
+</div>
+
+<!-- ===== SECTION: Phase 1 敢花 ===== -->
+<div class="slide section-title" data-act="敢花 Token" data-index="6" style="background:var(--gold);">
+  <span class="phase-tag" style="background:rgba(255,255,255,.3);color:#fff;">Phase 1</span>
+  <h1>敢花 Token</h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.9);margin-top:.5rem;">黃仁勳的 50% 法則</p>
+</div>
+
+<!-- ===== 7: 黃仁勳名言 ===== -->
+<div class="slide" data-act="敢花 Token" data-index="7">
+  <div class="quote-box">
+    <div class="quote-text">「除了薪水之外，多給 50% 的 Token 預算，<br>換取 10 倍的生產力。」</div>
+    <div class="quote-src">— Jensen Huang, NVIDIA CEO</div>
+  </div>
+  <div class="fragment" data-order="0" style="margin-top:1.5rem;max-width:800px;width:100%;">
+    <h3>他在對誰說？</h3>
+    <div class="card-grid" style="margin-top:.6rem;">
+      <div class="card" style="border-color:var(--gold);max-width:240px;">
+        <div class="icon" style="font-size:2rem;">老闆</div>
+        <p>別省 AI 預算<br>先砸下去</p>
+      </div>
+      <div class="card" style="border-color:var(--gold);max-width:240px;">
+        <div class="icon" style="font-size:2rem;">員工</div>
+        <p>大膽使用<br>不要怕花 token</p>
+      </div>
+      <div class="card" style="border-color:var(--gold);max-width:240px;">
+        <div class="icon" style="font-size:2rem;">產業</div>
+        <p>AI 滲透率<br>還太低</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 8: Phase 1 的邏輯 ===== -->
+<div class="slide" data-act="敢花 Token" data-index="8">
+  <span class="phase-tag p1">Phase 1 — 敢花 Token</span>
+  <h2>KPI：你用了多少 Token？</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <h3>這個階段的重點</h3>
+      <div class="step-list">
+        <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--gold);">1</div><div class="step-content"><strong>先用起來</strong><p>多數人連 AI 都還沒開始用</p></div></div>
+        <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--gold);">2</div><div class="step-content"><strong>量是關鍵</strong><p>用越多 = AI 滲透率越高</p></div></div>
+        <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--gold);">3</div><div class="step-content"><strong>不要省</strong><p>省 token = 等於不給員工電腦</p></div></div>
+      </div>
+    </div>
+    <div class="col fragment" data-order="3">
+      <h3>生活比喻</h3>
+      <div class="info-box analogy" style="margin-top:0;">
+        <div class="label">就像早期的雲端</div>
+        <p>2015 年企業上雲：<br>
+        「<strong>先上雲再說！</strong>」<br>
+        花多少錢不重要<br>
+        重要的是先跑起來<br><br>
+        現在的 AI 也在同一個階段：<br>
+        「<strong>先用 AI 再說！</strong>」</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 9: Phase 1 你該做的事 ===== -->
+<div class="slide" data-act="敢花 Token" data-index="9">
+  <span class="phase-tag p1">Phase 1 — 敢花 Token</span>
+  <h2>你現在該做的事</h2>
+  <div class="card-grid" style="margin-top:.6rem;">
+    <div class="card fragment" data-order="0" style="border-color:var(--green);padding:1.2rem;">
+      <h3>訂閱一個 AI</h3>
+      <p>ChatGPT Plus / Claude Pro / Gemini Advanced<br>月費 = 一杯咖啡 × 4</p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:var(--blue);padding:1.2rem;">
+      <h3>每天都用</h3>
+      <p>寫信、整理資料、找答案<br>不要想著「省著用」</p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-color:var(--purple);padding:1.2rem;">
+      <h3>嘗試不同任務</h3>
+      <p>不只問問題<br>讓 AI 寫程式、做表格、分析數據</p>
+    </div>
+  </div>
+  <div class="info-box success fragment" data-order="3" style="margin-top:.6rem;padding:1rem 1.5rem;">
+    <p><strong>Phase 1 的贏家 = 敢花 Token 的人。</strong>他們建立了 AI 習慣，也讓 AI 了解了他們。</p>
+  </div>
+</div>
+
+<!-- ===== SECTION: Phase 2 會花 ===== -->
+<div class="slide section-title" data-act="會花 Token" data-index="10" style="background:var(--purple);">
+  <span class="phase-tag" style="background:rgba(255,255,255,.3);color:#fff;">Phase 2</span>
+  <h1>會花 Token</h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.9);margin-top:.5rem;">從量變質的轉折點</p>
+</div>
+
+<!-- ===== 11: MCP 爭議引爆點 ===== -->
+<div class="slide" data-act="會花 Token" data-index="11">
+  <h2>2026 年 3 月：MCP 爭議爆發</h2>
+  <div class="timeline">
+    <div class="tl-item fragment" data-order="0">
+      <div class="tl-dot red"></div>
+      <div class="tl-year">Ask 2026 開發者大會</div>
+      <div class="tl-title">Perplexity CTO：「我們內部已棄用 MCP」</div>
+      <div class="tl-desc">回歸傳統 API 與 CLI，更快更省</div>
+    </div>
+    <div class="tl-item fragment" data-order="1">
+      <div class="tl-dot gold"></div>
+      <div class="tl-year">YC CEO</div>
+      <div class="tl-title">「我自創的 CLI 比 MCP 可靠 100 倍」</div>
+      <div class="tl-desc">社群平台一陣牆倒眾人推</div>
+    </div>
+    <div class="tl-item fragment" data-order="2">
+      <div class="tl-dot blue"></div>
+      <div class="tl-year">同時間</div>
+      <div class="tl-title">Google、AWS、OpenAI 持續投入 MCP</div>
+      <div class="tl-desc">產業分歧，不是死亡</div>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="3" style="margin-top:.5rem;">
+    <div class="label">本質問題</div>
+    <p>不是「MCP 好不好」，是「<strong>Token 該花在描述工具，還是完成任務？</strong>」</p>
+  </div>
+</div>
+
+<!-- ===== 12: Phase 2 的邏輯 ===== -->
+<div class="slide" data-act="會花 Token" data-index="12">
+  <span class="phase-tag p2">Phase 2 — 會花 Token</span>
+  <h2>KPI：同樣的 Token，完成多少有效任務？</h2>
+  <div class="split-box">
+    <div class="half left">
+      <h3 style="color:#B45309;">Phase 1 — 敢花</h3>
+      <p style="font-size:1rem;"><strong>KPI = Token 用量</strong></p>
+      <p style="font-size:.95rem;color:var(--g600);">用越多越好<br>採用率是關鍵<br>不要省著用<br><br>
+      「你今天用了幾次 AI？」</p>
+    </div>
+    <div class="half right">
+      <h3 style="color:var(--purple);">Phase 2 — 會花</h3>
+      <p style="font-size:1rem;"><strong>KPI = Token 效率</strong></p>
+      <p style="font-size:.95rem;color:var(--g600);">每個 token 都要有產出<br>品質比數量重要<br>避免浪費<br><br>
+      「同樣額度，你完成了幾個任務？」</p>
+    </div>
+  </div>
+  <div class="info-box analogy fragment" data-order="0" style="margin-top:.8rem;">
+    <div class="label">轉折比喻</div>
+    <p>Phase 1 = <strong>「先上雲再說」</strong> → Phase 2 = <strong>FinOps（每一塊雲端支出都要有 ROI）</strong><br>
+    Token 經濟會壓縮在 1-2 年內走完這個轉換</p>
+  </div>
+</div>
+
+<!-- ===== 13: 履歷表比喻 ===== -->
+<div class="slide" data-act="會花 Token" data-index="13">
+  <h2>你在花錢聽 AI 念履歷表</h2>
+  <div class="two-col">
+    <div class="col">
+      <div class="gauge" style="margin-top:1rem;">
+        <div class="gauge-label"><span>MCP 時代的 Token 分配</span></div>
+        <div class="gauge-track">
+          <div class="gauge-fill waste" style="width:72%;">
+            <span class="gauge-annotation">72% 工具描述</span>
+          </div>
+        </div>
+      </div>
+      <div class="gauge">
+        <div class="gauge-track">
+          <div class="gauge-fill efficient" style="width:28%;">
+            <span class="gauge-annotation">28% 真正工作</span>
+          </div>
+        </div>
+      </div>
+      <p class="fragment" data-order="0" style="font-size:.95rem;color:var(--g600);margin-top:.8rem;">
+        你請了一位年薪百萬的顧問<br>
+        開會的前 70% 時間他在念自己的履歷
+      </p>
+    </div>
+    <div class="col fragment" data-order="1">
+      <h3>Agent OS 時代</h3>
+      <div class="gauge" style="margin-top:1rem;">
+        <div class="gauge-label"><span>未來的 Token 分配</span></div>
+        <div class="gauge-track">
+          <div class="gauge-fill" style="width:5%;background:var(--g400);">
+            <span class="gauge-annotation" style="right:auto;left:2px;font-size:.6rem;">3%</span>
+          </div>
+        </div>
+      </div>
+      <div class="gauge">
+        <div class="gauge-track">
+          <div class="gauge-fill efficient" style="width:95%;">
+            <span class="gauge-annotation">97% 推理 + 執行任務</span>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:.95rem;color:var(--g600);margin-top:.8rem;">
+        工具描述編譯進 runtime<br>
+        <strong>Token 100% 用在理解任務和推理</strong>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION: 工具架構演進 ===== -->
+<div class="slide section-title" data-act="工具架構演進" data-index="14">
+  <p class="subtitle">Part 4</p>
+  <h1>工具架構演進</h1>
+  <p class="subtitle" style="margin-top:.5rem;">CLI → API → MCP → Agent OS</p>
+</div>
+
+<!-- ===== 15: 四階段演進 ===== -->
+<div class="slide" data-act="工具架構演進" data-index="15">
+  <h2 style="margin-bottom:.5rem;">Agent 工具架構：四個時代</h2>
+  <table class="compare-table" style="font-size:.95rem;">
+    <thead>
+      <tr><th>時代</th><th>技術</th><th>Token 成本</th><th>特點</th></tr>
+    </thead>
+    <tbody>
+      <tr class="fragment" data-order="0">
+        <td><strong style="color:var(--green);">CLI</strong></td>
+        <td>命令列工具</td>
+        <td style="color:var(--green);font-weight:700;">近乎 0</td>
+        <td>最快、本地執行</td>
+      </tr>
+      <tr class="fragment" data-order="1">
+        <td><strong style="color:var(--blue);">Web API</strong></td>
+        <td>REST / Function Calling</td>
+        <td style="color:var(--blue);font-weight:700;">Low</td>
+        <td>成熟生態、最小 schema</td>
+      </tr>
+      <tr class="fragment" data-order="2">
+        <td><strong style="color:var(--gold);">MCP</strong></td>
+        <td>Model Context Protocol</td>
+        <td style="color:var(--red);font-weight:700;">HIGH</td>
+        <td>標準化、但吃 context</td>
+      </tr>
+      <tr class="fragment" data-order="3">
+        <td><strong style="color:var(--purple);">Agent OS</strong></td>
+        <td>原生工具整合</td>
+        <td style="color:var(--green);font-weight:700;">Minimal</td>
+        <td>工具編譯進 runtime</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="info-box tip fragment" data-order="4" style="margin-top:.5rem;padding:1rem 1.5rem;">
+    <p>不是誰取代誰，是<strong>場景決定工具</strong>：個人用 CLI、SaaS 用 API、平台用 MCP/Agent OS</p>
+  </div>
+</div>
+
+<!-- ===== 16: 雲端類比 ===== -->
+<div class="slide" data-act="工具架構演進" data-index="16">
+  <h2 style="margin-bottom:.3rem;">歷史總是驚人地相似</h2>
+  <table class="compare-table" style="font-size:.95rem;">
+    <thead>
+      <tr><th></th><th>雲端運算</th><th>手機上網</th><th>Token 經濟</th></tr>
+    </thead>
+    <tbody>
+      <tr class="fragment" data-order="0">
+        <td><strong>Phase 1</strong></td>
+        <td>「先上雲再說」<br><span class="dim">花多少不重要</span></td>
+        <td>「吃到飽」<br><span class="dim">流量隨便用</span></td>
+        <td>「先用 AI 再說」<br><span class="dim">Token 用量是 KPI</span></td>
+      </tr>
+      <tr class="fragment" data-order="1">
+        <td><strong>Phase 2</strong></td>
+        <td>FinOps<br><span class="dim">每塊支出要 ROI</span></td>
+        <td>分級方案<br><span class="dim">省流量、Wi-Fi 優先</span></td>
+        <td><strong>TokenOps</strong><br><span class="dim">每個 Token 要產出</span></td>
+      </tr>
+      <tr class="fragment" data-order="2">
+        <td><strong>轉折點</strong></td>
+        <td>帳單爆炸</td>
+        <td>降速通知</td>
+        <td>Context window 塞滿</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="info-box warning fragment" data-order="3" style="margin-top:.5rem;padding:1rem 1.5rem;">
+    <p>錢可以一直加，但 <strong>Context Window 有物理上限</strong> — 塞滿了就是塞滿了，逼你提早最佳化<br>
+    <span class="dim">就像手機流量用完被降速 — 你不會等月底，你會馬上學會省著用</span></p>
+  </div>
+</div>
+
+<!-- ===== 17: 產業路線分裂 ===== -->
+<div class="slide" data-act="工具架構演進" data-index="17">
+  <h2>產業正在分裂成兩條路線</h2>
+  <div class="split-box">
+    <div class="half left" style="background:var(--green-lt);padding:1.2rem;">
+      <h3 style="color:var(--green);">輕量派</h3>
+      <p style="font-size:.9rem;"><strong>代表：</strong>Perplexity、YC</p>
+      <p style="font-size:.9rem;color:var(--g600);margin-top:.3rem;">
+        CLI + API + Function Calling<br>
+        快、省 token、工程簡單<br>
+        <strong>適合：</strong>個人工具、SaaS、高頻任務
+      </p>
+    </div>
+    <div class="half right" style="background:var(--blue-lt);padding:1.2rem;">
+      <h3 style="color:var(--blue);">標準化派</h3>
+      <p style="font-size:.9rem;"><strong>代表：</strong>OpenAI、Google、AWS</p>
+      <p style="font-size:.9rem;color:var(--g600);margin-top:.3rem;">
+        MCP / A2A / Agent Protocol<br>
+        標準化、平台化、企業級<br>
+        <strong>適合：</strong>多 Agent 協作、企業整合
+      </p>
+    </div>
+  </div>
+  <div class="info-box analogy fragment" data-order="0" style="margin-top:.5rem;padding:1rem 1.5rem;">
+    <p>你不需要選邊站 — 就像你同時用 LINE（輕量）和 Email（標準化），<strong>場景決定工具</strong></p>
+  </div>
+</div>
+
+<!-- ===== SECTION: 學習路徑升級 ===== -->
+<div class="slide section-title" data-act="Token 思維" data-index="18" style="background:var(--navy);">
+  <p class="subtitle" style="color:rgba(255,255,255,.7);">Part 5</p>
+  <h1>用 Token 思維看四階段</h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.7);margin-top:.5rem;">同樣的路徑，不同的效率</p>
+</div>
+
+<!-- ===== 19: 升級後的學習路徑 ===== -->
+<div class="slide" data-act="Token 思維" data-index="19">
+  <h2>同樣四個階段，加入 Token 思維</h2>
+  <div style="max-width:860px;width:100%;margin-top:.8rem;">
+    <!-- Phase 1 bracket -->
+    <div style="display:flex;align-items:stretch;gap:0;margin-bottom:.3rem;">
+      <div style="flex:1;text-align:center;background:var(--gold-lt);border-radius:8px 8px 0 0;padding:.4rem .6rem;border:2px solid var(--gold);border-bottom:none;">
+        <span style="font-weight:700;color:#B45309;font-size:.9rem;">Phase 1 — 敢花 Token</span><br>
+        <span style="color:var(--g600);font-size:.8rem;">先突破「不用」的障礙</span>
+      </div>
+      <div style="width:2rem;"></div>
+      <div style="flex:1;text-align:center;background:var(--purple-lt);border-radius:8px 8px 0 0;padding:.4rem .6rem;border:2px solid var(--purple);border-bottom:none;">
+        <span style="font-weight:700;color:var(--purple);font-size:.9rem;">Phase 2 — 會花 Token</span><br>
+        <span style="color:var(--g600);font-size:.8rem;">讓每個 Token 都有價值</span>
+      </div>
+    </div>
+    <div class="flow" style="margin:0;">
+      <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);font-size:.95rem;flex:1;">
+        <strong>用工具</strong><br><span class="dim" style="font-size:.8rem;">大膽嘗試、什麼都問</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);font-size:.95rem;flex:1;">
+        <strong>選工具</strong><br><span class="dim" style="font-size:.8rem;">廣撒網、每個 AI 都試</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--purple-lt);border-color:var(--purple);font-size:.95rem;flex:1;">
+        <strong>創工具</strong><br><span class="dim" style="font-size:.8rem;">少即是多、精準整合</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--purple-lt);border-color:var(--purple);font-size:.95rem;flex:1;">
+        <strong>改流程</strong><br><span class="dim" style="font-size:.8rem;">精準部署、高 ROI 優先</span>
+      </div>
+    </div>
+  </div>
+  <div class="info-box success fragment" data-order="0" style="margin-top:1rem;padding:1rem 1.5rem;">
+    <p>前兩步突破<strong>「敢花」</strong>— 先建立 AI 習慣、廣泛接觸<br>
+    後兩步進入<strong>「會花」</strong>— 知道什麼值得自動化、什麼不值得<br>
+    <strong>同樣的四個階段，Token 思維讓你在每一步都更有效率</strong></p>
+  </div>
+</div>
+
+<!-- ===== 20: 二維矩陣 ===== -->
+<div class="slide" data-act="Token 思維" data-index="20">
+  <h2 style="margin-bottom:.5rem;">四階段 × Token 思維</h2>
+  <table class="compare-table" style="max-width:860px;font-size:.95rem;">
+    <thead>
+      <tr><th>階段</th><th>Token 心態</th><th>行為</th><th>關鍵詞</th></tr>
+    </thead>
+    <tbody>
+      <tr class="fragment" data-order="0" style="background:var(--gold-lt);">
+        <td><strong>用工具</strong></td>
+        <td rowspan="2" style="vertical-align:middle;background:var(--gold-lt);border-left:4px solid var(--gold);font-weight:700;color:#B45309;">敢花<br>Token</td>
+        <td>每天問 AI 各種問題<br>什麼都試、不要省</td>
+        <td><span class="gold bold">廣撒網</span></td>
+      </tr>
+      <tr class="fragment" data-order="1" style="background:var(--gold-lt);">
+        <td><strong>選工具</strong></td>
+        <td>每個 AI 都體驗一遍<br>找到各工具的強項</td>
+        <td><span class="gold bold">多嘗試</span></td>
+      </tr>
+      <tr class="fragment" data-order="2" style="background:var(--purple-lt);">
+        <td><strong>創工具</strong></td>
+        <td rowspan="2" style="vertical-align:middle;background:var(--purple-lt);border-left:4px solid var(--purple);font-weight:700;color:var(--purple);">會花<br>Token</td>
+        <td>只留真正需要的工具<br>避免 MCP 式浪費</td>
+        <td><span class="purple bold">少即是多</span></td>
+      </tr>
+      <tr class="fragment" data-order="3" style="background:var(--purple-lt);">
+        <td><strong>改流程</strong></td>
+        <td>只在高 ROI 環節用 AI<br>人做人擅長的事</td>
+        <td><span class="purple bold">精準部署</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 21: 實際例子 ===== -->
+<div class="slide" data-act="Token 思維" data-index="21">
+  <h2>實際例子：同一件事，兩種花法</h2>
+  <div class="split-box">
+    <div class="half left" style="padding:1.2rem;">
+      <h3 style="color:#B45309;margin-bottom:.3rem;">Phase 1 做法</h3>
+      <p style="font-size:.85rem;color:var(--g600);line-height:1.6;">
+        <strong>任務：</strong>查今天台北天氣<br>
+        裝好天氣 MCP Server<br>
+        → AI 載入 MCP schema（<strong style="color:var(--red);">800 tokens</strong>）<br>
+        → 你問「台北天氣」（10 tokens）<br>
+        → AI 回答（100 tokens）<br>
+        <strong style="color:var(--red);font-size:.95rem;">總計：~910 tokens</strong>
+      </p>
+    </div>
+    <div class="half right" style="padding:1.2rem;">
+      <h3 style="color:var(--purple);margin-bottom:.3rem;">Phase 2 做法</h3>
+      <p style="font-size:.85rem;color:var(--g600);line-height:1.6;">
+        <strong>任務：</strong>查今天台北天氣<br>
+        直接跟 AI 說「幫我查台北天氣」<br>
+        → AI 用內建搜尋（<strong style="color:var(--green);">0 schema</strong>）<br>
+        → AI 回答（100 tokens）<br>
+        <strong style="color:var(--green);font-size:.95rem;">總計：~110 tokens</strong>
+      </p>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="0" style="margin-top:.5rem;padding:1rem 1.5rem;">
+    <p><strong>8 倍效率差距</strong> — 同樣的結果，Phase 2 省了 <strong>88% 的 Token</strong>。乘以一天 100 次查詢 = 巨大差異</p>
+  </div>
+</div>
+
+<!-- ===== 22: 你今天能做的三件事 ===== -->
+<div class="slide" data-act="Token 思維" data-index="22">
+  <h2>你今天能做的三件事</h2>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step fragment" data-order="0">
+      <div class="step-num" style="background:var(--gold);">1</div>
+      <div class="step-content">
+        <strong>Phase 1：先用起來（如果你還沒開始）</strong>
+        <p>訂閱一個 AI、每天至少用 5 次、不要省</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--purple);">2</div>
+      <div class="step-content">
+        <strong>Phase 2：檢查你的 Token 花在哪裡</strong>
+        <p>打開 AI 的用量設定，看看每次對話消耗多少 token<br>
+        思考：「這些 token 有產出嗎？」</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="background:var(--green);">3</div>
+      <div class="step-content">
+        <strong>建立你的判斷框架</strong>
+        <p>每次要用 AI 前問自己：<br>
+        「這個任務值得花多少 token？有沒有更精簡的做法？」</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 23: 結語金句 ===== -->
+<div class="slide cover" data-act="完成" data-index="23">
+  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:2rem;">一句話記住這堂課</p>
+  <h1 style="font-size:2.6rem;line-height:1.5;">
+    Phase 1 的贏家是<br>
+    <span style="color:var(--gold);">「敢花 Token 的人」</span><br><br>
+    Phase 2 的贏家是<br>
+    <span style="color:#c4b5fd;">「會花 Token 的人」</span>
+  </h1>
+  <p style="color:rgba(255,255,255,.5);margin-top:1rem;font-size:1.1rem;">你現在在哪一個 Phase？</p>
+  <p style="color:rgba(255,255,255,.4);margin-top:1.5rem;font-size:.9rem;">ai100.cooperation.tw</p>
+</div>
+
+</div>
+
+
+<div id="chapterMenu" class="chapter-menu">
+  <button id="chapterBtn" class="chapter-btn">
+    <span class="chapter-icon">§</span>
+    <span id="chapterLabel">開場</span>
+    <span class="chapter-arrow">▼</span>
+  </button>
+  <div id="chapterList" class="chapter-list"></div>
+</div>
+
+<div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>←</button><button id="next">→</button></div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),tot=slides.length;
+let idx=0,fi=-1;
+document.getElementById('total').textContent=tot;
+const gf=el=>el.querySelectorAll('.fragment');
+function go(n){slides.forEach((s,i)=>{s.classList.remove('active','prev');if(i<n)s.classList.add('prev');s.querySelectorAll('.fragment').forEach(f=>f.classList.remove('visible'));});idx=n;fi=-1;slides[idx].classList.add('active');ui();}
+function ui(){document.getElementById('current').textContent=idx+1;document.getElementById('prev').disabled=idx===0&&fi<=0;const f=gf(slides[idx]);document.getElementById('next').disabled=idx===tot-1&&fi>=f.length-1;document.getElementById('progress').style.width=((idx+1)/tot*100)+'%';}
+function adv(){const f=gf(slides[idx]);if(fi<f.length-1){fi++;f[fi].classList.add('visible');ui();}else if(idx<tot-1)go(idx+1);}
+function ret(){const f=gf(slides[idx]);if(fi>=0){f[fi].classList.remove('visible');fi--;ui();}else if(idx>0){go(idx-1);const p=gf(slides[idx]);p.forEach(x=>x.classList.add('visible'));fi=p.length-1;ui();}}
+document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
+document.addEventListener('keydown',e=>{if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}if(e.key==='Home'){e.preventDefault();go(0);}if(e.key==='End'){e.preventDefault();go(tot-1);}if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}});
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
+// ── Chapter Menu ──
+var chapterMenu=document.getElementById('chapterMenu'),chapterBtn=document.getElementById('chapterBtn'),chapterLabel=document.getElementById('chapterLabel'),chapterList=document.getElementById('chapterList');
+function getChapters(){var m=new Map();slides.forEach(function(s,i){var a=s.dataset.act;if(a&&!m.has(a))m.set(a,i);});return m;}
+function buildChapterMenu(){var ch=getChapters();chapterList.innerHTML='';var cur=slides[idx]&&slides[idx].dataset.act||'';ch.forEach(function(si,name){var d=document.createElement('div');d.className='chapter-item'+(name===cur?' active':'');d.innerHTML='<span class="chapter-dot"></span>'+name;d.onclick=function(){go(si);closeChapterMenu();};chapterList.appendChild(d);});chapterLabel.textContent=cur||'\u5c0e\u89bd';}
+function toggleChapterMenu(){chapterMenu.classList.toggle('open');if(chapterMenu.classList.contains('open'))buildChapterMenu();}
+function closeChapterMenu(){chapterMenu.classList.remove('open');}
+chapterBtn.onclick=toggleChapterMenu;
+document.addEventListener('click',function(e){if(!chapterMenu.contains(e.target))closeChapterMenu();});
+var _origUi=ui;ui=function(){_origUi();var cur=slides[idx]&&slides[idx].dataset.act||'';chapterLabel.textContent=cur||'\u5c0e\u89bd';};
+
+go(0);
+
+// postMessage bridge for iframe embedding
+window.addEventListener('message', function(e) {
+  if (!e.data || e.data.type !== 'slideControl') return;
+  var d = e.data;
+  if (d.action === 'next') adv();
+  else if (d.action === 'prev') ret();
+  else if (d.action === 'goto' && typeof d.index === 'number') go(d.index);
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'slideState', current: idx, total: tot }, '*');
+  }
+});
+
+var _origGo = go;
+go = function(n) {
+  _origGo(n);
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'slideState', current: idx, total: tot }, '*');
+  }
+};
+</script>
+</body>
+</html>

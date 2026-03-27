@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S07 — NotebookLM 深度學習術</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   grow.google 簡潔風 + Reading Glasses
+   投影教學用 (3-10m 觀看距離)
+   ═══════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--white);}
+
+/* Slides */
+.slides{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem 4rem 1.5rem;opacity:0;transform:translateX(30px);pointer-events:none;transition:opacity .4s,transform .4s ease;background:var(--white);overflow-y:auto;}
+.slide.active{opacity:1;transform:none;pointer-events:auto;}
+.slide.prev{opacity:0;transform:translateX(-30px);}
+.slide.cover{background:var(--navy);color:#fff;text-align:center;}
+.slide.section-title{background:var(--green);color:#fff;text-align:center;}
+.slide.break-slide{background:var(--offwhite);text-align:center;}
+
+/* Typography */
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:2rem;font-weight:700;color:var(--g900);margin-bottom:1rem;line-height:1.4;}
+h3{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.1rem;line-height:1.8;}
+.subtitle{font-size:1.15rem;color:var(--g600);font-weight:500;}
+.blue{color:var(--blue);}.green{color:var(--green);}.gold{color:var(--gold);}.red{color:var(--red);}.purple{color:var(--purple);}.dim{color:var(--g600);}.bold{font-weight:700;}
+
+/* Fragment */
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* Cards */
+.card-grid{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;margin-top:1.2rem;max-width:1100px;}
+.card{background:var(--white);border:2px solid var(--g100);border-radius:16px;padding:1.8rem;min-width:220px;max-width:300px;flex:1;transition:border-color .2s;}
+.card:hover{border-color:var(--blue);}
+.card .icon{font-size:2.5rem;margin-bottom:.6rem;}
+.card p{font-size:1rem;color:var(--g600);}
+
+/* Steps */
+.step-list{text-align:left;max-width:800px;width:100%;}
+.step{display:flex;gap:1.2rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:40px;height:40px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.1rem;}.step-content p{font-size:1rem;color:var(--g600);margin-top:.15rem;}
+
+/* Code */
+.code-block{background:var(--g50);border:2px solid var(--g200);border-radius:12px;padding:1.3rem 1.8rem;text-align:left;max-width:860px;width:100%;font-family:'Fira Code',monospace;font-size:1rem;line-height:1.8;margin:.8rem 0;color:var(--g900);}
+
+/* Table */
+.compare-table{border-collapse:collapse;font-size:1rem;margin-top:.8rem;width:100%;max-width:860px;}
+.compare-table th{background:var(--navy);color:#fff;padding:.7rem 1rem;text-align:left;font-size:1rem;}
+.compare-table td{padding:.7rem 1rem;border-bottom:1px solid var(--g100);font-size:1rem;}
+.compare-table tr:hover td{background:var(--g50);}
+
+/* Info boxes */
+.info-box{border-radius:12px;padding:1.3rem 1.8rem;max-width:800px;width:100%;text-align:left;margin-top:.8rem;}
+.info-box.analogy{background:var(--blue-lt);border-left:4px solid var(--blue);}
+.info-box.warning{background:var(--red-lt);border-left:4px solid var(--red);}
+.info-box.success{background:var(--green-lt);border-left:4px solid var(--green);}
+.info-box.tip{background:var(--gold-lt);border-left:4px solid var(--gold);}
+.info-box .label{font-weight:700;font-size:1rem;margin-bottom:.4rem;}
+.info-box p{font-size:1.05rem;}
+
+/* Flow */
+.flow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1.2rem 0;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.7rem 1rem;font-size:1rem;font-weight:700;text-align:center;}
+.flow-arrow{color:var(--blue);font-size:1.5rem;font-weight:900;}
+
+/* Two col */
+.two-col{display:flex;gap:2rem;width:100%;max-width:960px;text-align:left;}
+.two-col .col{flex:1;}
+
+/* Big number */
+.big-num{font-size:4.5rem;font-weight:900;color:var(--blue);line-height:1;}
+
+/* Banner */
+.exercise-banner{display:inline-block;background:var(--purple);color:#fff;padding:.35rem 1.4rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.8rem;}
+
+/* Quote */
+.quote-box{max-width:800px;width:100%;background:var(--g50);border-left:5px solid var(--navy);border-radius:0 12px 12px 0;padding:1.5rem 2rem;margin:.8rem 0;text-align:left;}
+.quote-box .quote-text{font-size:1.3rem;font-weight:700;line-height:1.6;color:var(--navy);}
+.quote-box .quote-src{font-size:.9rem;color:var(--g600);margin-top:.5rem;}
+
+/* Split box */
+.split-box{display:flex;gap:0;max-width:860px;width:100%;border-radius:16px;overflow:hidden;border:2px solid var(--g200);margin:.8rem 0;}
+.split-box .half{flex:1;padding:1.5rem;}
+.split-box .half.left{background:var(--gold-lt);}
+.split-box .half.right{background:var(--purple-lt);}
+.split-box .half h3{margin-bottom:.6rem;}
+
+/* S07 custom: prompt card */
+.prompt-card{max-width:800px;width:100%;background:var(--g50);border:2px solid var(--blue);border-radius:16px;padding:1.5rem 2rem;margin:.8rem 0;text-align:left;}
+.prompt-card .prompt-label{display:inline-block;background:var(--blue);color:#fff;padding:.15rem .8rem;border-radius:100px;font-size:.85rem;font-weight:700;margin-bottom:.8rem;}
+.prompt-card .prompt-zh{font-size:1.15rem;font-weight:700;color:var(--g900);line-height:1.6;margin-bottom:.5rem;}
+.prompt-card .prompt-en{font-size:.95rem;color:var(--g600);font-style:italic;line-height:1.6;font-family:'Fira Code',monospace;}
+
+/* Versus */
+.vs-grid{display:flex;gap:1.5rem;max-width:860px;width:100%;margin-top:.8rem;}
+.vs-box{flex:1;border-radius:16px;padding:1.5rem;text-align:center;}
+.vs-box.old{background:var(--red-lt);border:2px solid var(--red);}
+.vs-box.new{background:var(--green-lt);border:2px solid var(--green);}
+.vs-box h3{margin-bottom:.6rem;}
+.vs-box ul{text-align:left;list-style:none;padding:0;}
+.vs-box li{padding:.3rem 0;font-size:1rem;}
+.vs-box li::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:.5rem;vertical-align:middle;}
+.vs-box.old li::before{background:var(--red);}
+.vs-box.new li::before{background:var(--green);}
+
+/* Controls */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:var(--white);color:var(--g800);font-size:1.2rem;cursor:pointer;transition:all .15s;}
+.controls button:hover{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
+.controls button:disabled{opacity:.25;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;left:auto;right:5rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:var(--gold-lt);color:#B45309;padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
+.slide.poster{background-size:cover;background-position:center;color:#fff;text-align:center;}
+.slide.poster::before{content:'';position:absolute;inset:0;z-index:1;}
+.slide.poster>*{position:relative;z-index:2;}
+.slide.poster.overlay-bottom::before{background:linear-gradient(to bottom,rgba(0,0,0,.15) 0%,rgba(0,0,0,.75) 100%);}
+
+/* ── Chapter Menu ── */
+.chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;font-family:system-ui,-apple-system,sans-serif;}
+.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.9);font-size:.8rem;cursor:pointer;transition:border-color .2s;}
+.chapter-btn:hover{border-color:var(--green);}
+.chapter-icon{color:var(--green);font-weight:700;}
+.chapter-arrow{font-size:.6rem;opacity:.5;transition:transform .2s;}
+.chapter-menu.open .chapter-arrow{transform:rotate(180deg);}
+.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:180px;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;}
+.chapter-menu.open .chapter-list{display:block;}
+.chapter-item{display:flex;align-items:center;gap:8px;padding:8px 14px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
+.chapter-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+.chapter-item.active{color:var(--green);font-weight:600;}
+.chapter-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;}
+.chapter-item.active .chapter-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+</style>
+</head>
+<body>
+
+<div class="module-title">NotebookLM</div>
+<div class="module-badge">S07 補充單元</div>
+<div class="slides">
+
+<!-- ===== 0: COVER ===== -->
+<div class="slide poster overlay-bottom" data-act="開場" data-index="0" style="background-image:url('img/s07/cover.png');background-color:var(--navy);">
+  <p style="font-size:1.1rem;color:rgba(255,255,255,.6);margin-bottom:1rem;">AI 100 講 — 補充單元</p>
+  <h1>NotebookLM 深度學習術<br><span style="font-size:2rem;">48 小時通過資格考的三個問題</span></h1>
+  <p class="subtitle" style="margin-top:1.5rem;font-size:1.3rem;">把 AI 從螢光筆變成私人家教</p>
+  <p style="color:rgba(255,255,255,.4);margin-top:3rem;font-size:.9rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- ===== 1: 議程 ===== -->
+<div class="slide" data-act="開場" data-index="1">
+  <h2>今天的旅程</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>NotebookLM 是什麼？</strong><p>Google 的 AI 筆記助手，為什麼它不一樣</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--green);">2</div><div class="step-content"><strong>核心功能快覽</strong><p>上傳、摘要、問答、Podcast、筆記</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--gold);">3</div><div class="step-content"><strong>MIT 案例：三問學習法</strong><p>一名研究生如何 48 小時通過資格考</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--purple);">4</div><div class="step-content"><strong>方法拆解與遷移</strong><p>為什麼這三個問題有效？你也能用</p></div></div>
+    <div class="step fragment" data-order="4"><div class="step-num" style="background:var(--red);">5</div><div class="step-content"><strong>現場實作</strong><p>挑一個主題，跑一遍三問法</p></div></div>
+  </div>
+</div>
+
+<!-- ===== SECTION: NotebookLM 是什麼 ===== -->
+<div class="slide section-title" data-act="NotebookLM 是什麼" data-index="2">
+  <p class="subtitle">Part 1</p>
+  <h1>NotebookLM 是什麼？</h1>
+  <p class="subtitle" style="margin-top:.5rem;">Google 的「你的資料專屬 AI」</p>
+</div>
+
+<!-- ===== 3: 定位 ===== -->
+<div class="slide" data-act="NotebookLM 是什麼" data-index="3">
+  <h2>一句話定位</h2>
+  <div class="quote-box">
+    <div class="quote-text">NotebookLM 只根據你上傳的資料回答問題<br>不會用網路上的資訊「腦補」</div>
+    <div class="quote-src">— 這是它跟 ChatGPT / Gemini 最大的差異</div>
+  </div>
+  <div class="info-box analogy fragment" data-order="0" style="margin-top:1rem;">
+    <div class="label">生活比喻</div>
+    <p><strong>ChatGPT</strong> = 百科全書型家教（什麼都能聊，但偶爾會瞎掰）<br>
+    <strong>NotebookLM</strong> = 只讀過你指定教材的家教（不會超出範圍，但回答有根據）</p>
+  </div>
+</div>
+
+<!-- ===== 4: 免費 ===== -->
+<div class="slide" data-act="NotebookLM 是什麼" data-index="4">
+  <h2>關鍵：完全免費</h2>
+  <div class="card-grid">
+    <div class="card" style="border-color:var(--green);">
+      <div class="icon">💰</div>
+      <h3>免費使用</h3>
+      <p>Google 帳號登入即可<br>不需要訂閱任何方案</p>
+    </div>
+    <div class="card" style="border-color:var(--blue);">
+      <div class="icon">📄</div>
+      <h3>50 個來源</h3>
+      <p>每個筆記本最多 50 份文件<br>PDF、網頁、影片、文字</p>
+    </div>
+    <div class="card" style="border-color:var(--purple);">
+      <div class="icon">🔒</div>
+      <h3>資料隔離</h3>
+      <p>你的資料不會被拿去訓練<br>每個筆記本獨立運作</p>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="0" style="margin-top:1rem;">
+    <div class="label">網址</div>
+    <p><strong>notebooklm.google.com</strong> — 登入 Google 帳號即可開始</p>
+  </div>
+</div>
+
+<!-- ===== 5: 支援格式 ===== -->
+<div class="slide" data-act="NotebookLM 是什麼" data-index="5">
+  <h2>可以餵給它什麼？</h2>
+  <table class="compare-table">
+    <tr><th style="width:30%;">來源類型</th><th>說明</th><th style="width:20%;">上限</th></tr>
+    <tr><td><strong>PDF 文件</strong></td><td>教科書、論文、報告、講義</td><td>每份 500K 字</td></tr>
+    <tr><td><strong>Google Docs</strong></td><td>直接從雲端匯入</td><td>同上</td></tr>
+    <tr><td><strong>Google Slides</strong></td><td>簡報投影片的文字內容</td><td>同上</td></tr>
+    <tr><td><strong>網頁 URL</strong></td><td>貼上網址，自動擷取內容</td><td>同上</td></tr>
+    <tr class="fragment" data-order="0"><td><strong>YouTube 影片</strong></td><td>自動抓字幕，轉為可搜尋文本</td><td>同上</td></tr>
+    <tr class="fragment" data-order="0"><td><strong>純文字 / Markdown</strong></td><td>直接貼上文字</td><td>同上</td></tr>
+    <tr class="fragment" data-order="0"><td><strong>音訊檔案</strong></td><td>mp3、wav 等，自動轉逐字稿</td><td>同上</td></tr>
+  </table>
+</div>
+
+<!-- ===== SECTION: 核心功能 ===== -->
+<div class="slide section-title" data-act="五大核心功能" data-index="6" style="background:var(--blue);">
+  <p class="subtitle">Part 2</p>
+  <h1>五大核心功能</h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.9);margin-top:.5rem;">上傳 → 摘要 → 問答 → Podcast → 筆記</p>
+</div>
+
+<!-- ===== 7: 功能一覽 ===== -->
+<div class="slide" data-act="五大核心功能" data-index="7">
+  <h2>功能一覽</h2>
+  <div class="flow" style="margin-top:.5rem;">
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);">上傳來源<br><span class="dim" style="font-size:.8rem;">建立知識庫</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">自動摘要<br><span class="dim" style="font-size:.8rem;">秒懂全貌</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);">深度問答<br><span class="dim" style="font-size:.8rem;">附引用出處</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--purple-lt);border-color:var(--purple);">Audio Overview<br><span class="dim" style="font-size:.8rem;">AI Podcast</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--red-lt);border-color:var(--red);">筆記整理<br><span class="dim" style="font-size:.8rem;">FAQ、大綱</span></div>
+  </div>
+
+  <div class="two-col" style="margin-top:1.5rem;">
+    <div class="col fragment" data-order="0">
+      <div class="info-box success" style="margin-top:0;">
+        <div class="label">最殺功能：Audio Overview</div>
+        <p>把你的文件變成兩人對談的 Podcast<br>
+        通勤時「聽」教科書，理解速度大幅提升</p>
+      </div>
+    </div>
+    <div class="col fragment" data-order="1">
+      <div class="info-box analogy" style="margin-top:0;">
+        <div class="label">每個回答都有引用</div>
+        <p>點擊引用標記可以直接跳到原文段落<br>
+        <strong>你永遠知道 AI 的答案從哪來</strong></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 8: 使用場景 ===== -->
+<div class="slide" data-act="五大核心功能" data-index="8">
+  <h2>誰適合用？什麼場景用？</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-color:var(--blue);">
+      <div class="icon">🎓</div>
+      <h3>學生 / 考生</h3>
+      <p>上傳整學期教材<br>產出摘要、出考題、做筆記</p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:var(--green);">
+      <div class="icon">🔬</div>
+      <h3>研究者</h3>
+      <p>丟入 20 篇論文<br>快速掌握研究脈絡和爭論點</p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-color:var(--gold);">
+      <div class="icon">💼</div>
+      <h3>上班族</h3>
+      <p>上傳會議記錄、規格書<br>秒找關鍵資訊，不用翻文件海</p>
+    </div>
+    <div class="card fragment" data-order="3" style="border-color:var(--purple);">
+      <div class="icon">📚</div>
+      <h3>終身學習者</h3>
+      <p>把有興趣的書籍、文章丟進去<br>讓 AI 幫你建立學習架構</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION: MIT 三問法 ===== -->
+<div class="slide section-title" data-act="MIT 三問學習法" data-index="9" style="background:var(--gold);">
+  <p class="subtitle">Part 3 — 核心案例</p>
+  <h1>MIT 三問學習法</h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.9);margin-top:.5rem;">48 小時從零到通過資格考</p>
+</div>
+
+<!-- ===== 10: 案例背景 ===== -->
+<div class="slide" data-act="MIT 三問學習法" data-index="10">
+  <h2>案例：MIT 研究生的挑戰</h2>
+  <div class="two-col" style="margin-top:.5rem;">
+    <div class="col">
+      <div class="info-box warning" style="margin-top:0;">
+        <div class="label">困境</div>
+        <p>面對一門<strong>從未修過</strong>的學科<br>
+        必須在 48 小時內準備資格考<br>
+        這門課的教材量 = 整個學期</p>
+      </div>
+      <div class="info-box success fragment" data-order="0" style="margin-top:.8rem;">
+        <div class="label">結果</div>
+        <p>48 小時後能與指導教授深度對話<br>
+        <strong>順利通過資格考</strong></p>
+      </div>
+    </div>
+    <div class="col fragment" data-order="1">
+      <h3>他做的第一步</h3>
+      <div class="step-list">
+        <div class="step">
+          <div class="step-num" style="background:var(--navy);">1</div>
+          <div class="step-content">
+            <strong>上傳 6 本教科書</strong>
+            <p>該領域的核心教材</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--navy);">2</div>
+          <div class="step-content">
+            <strong>上傳 15 篇研究論文</strong>
+            <p>重要的學術文獻</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--navy);">3</div>
+          <div class="step-content">
+            <strong>上傳所有講義逐字稿</strong>
+            <p>教授的授課內容</p>
+          </div>
+        </div>
+      </div>
+      <p class="dim" style="font-size:.95rem;margin-top:.5rem;">建立完整的知識語料庫</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 11: 關鍵轉折 ===== -->
+<div class="slide" data-act="MIT 三問學習法" data-index="11">
+  <h2>關鍵轉折：他「不」做的事</h2>
+  <div class="vs-grid">
+    <div class="vs-box old">
+      <h3 style="color:var(--red);">一般人會這樣問</h3>
+      <ul>
+        <li>幫我整理重點</li>
+        <li>幫我做筆記</li>
+        <li>幫我畫螢光筆</li>
+        <li>這本書在講什麼？</li>
+      </ul>
+      <p style="margin-top:.8rem;font-weight:700;color:var(--red);font-size:1.05rem;">被動接收資訊</p>
+    </div>
+    <div class="vs-box new">
+      <h3 style="color:var(--green);">他這樣問</h3>
+      <ul>
+        <li>專家的心智模型是什麼？</li>
+        <li>哪裡有根本分歧？</li>
+        <li>出題測試我的理解深度</li>
+        <li>我哪裡理解錯了？</li>
+      </ul>
+      <p style="margin-top:.8rem;font-weight:700;color:var(--green);font-size:1.05rem;">主動挑戰認知</p>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="0" style="margin-top:.8rem;">
+    <div class="label">核心洞見</div>
+    <p>多數人把 NotebookLM 當<strong>高級螢光筆</strong>，他把它當成<strong>讀過所有文獻的私人家教</strong></p>
+  </div>
+</div>
+
+<!-- ===== 12: Q1 結構提取 ===== -->
+<div class="slide" data-act="MIT 三問學習法" data-index="12">
+  <h2><span class="blue">問題一</span>：找出基礎框架 <span class="dim" style="font-size:1rem;">Structure Extraction</span></h2>
+  <div class="prompt-card" style="margin-top:.6rem;">
+    <div class="prompt-label">Prompt</div>
+    <div class="prompt-zh">「這個領域所有專家共享的 5 個核心心智模型是什麼？」</div>
+    <div class="prompt-en">What are the 5 core mental models every expert shares?</div>
+  </div>
+  <div class="two-col fragment" data-order="0" style="margin-top:1rem;">
+    <div class="col">
+      <div class="info-box analogy" style="margin-top:0;">
+        <div class="label">為什麼有效</div>
+        <p>不是問「內容」，而是問「思考方式」<br>
+        AI 交叉比對所有文獻，抽出<strong>教授們花多年才建立的認知框架</strong></p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="info-box success" style="margin-top:0;">
+        <div class="label">你得到的是</div>
+        <p>這個領域的「骨架」<br>
+        後續所有細節都能掛在這個骨架上<br>
+        <strong>摘要給你資訊，框架給你思考方式</strong></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 13: Q2 張力定位 ===== -->
+<div class="slide" data-act="MIT 三問學習法" data-index="13">
+  <h2><span class="gold">問題二</span>：找出爭論 <span class="dim" style="font-size:1rem;">Tension Mapping</span></h2>
+  <div class="prompt-card" style="margin-top:.6rem;border-color:var(--gold);">
+    <div class="prompt-label" style="background:var(--gold);">Prompt</div>
+    <div class="prompt-zh">「這個領域的專家在哪 3 個地方存在根本分歧？各方最強的論點是什麼？」</div>
+    <div class="prompt-en">Show me the 3 places where experts fundamentally disagree, and what each side's strongest argument is.</div>
+  </div>
+  <div class="two-col fragment" data-order="0" style="margin-top:.8rem;">
+    <div class="col">
+      <div class="info-box warning" style="margin-top:0;">
+        <div class="label">違反直覺</div>
+        <p>一般人：先基礎再看爭議<br>
+        三問法：<strong>先爭議，再定義基礎邊界</strong></p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="info-box success" style="margin-top:0;">
+        <div class="label">效果</div>
+        <p>20 分鐘建構出多數學生需<strong>數月</strong>才能摸索的學術脈絡</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 14: Q3 錯誤驅動 ===== -->
+<div class="slide" data-act="MIT 三問學習法" data-index="14">
+  <h2><span class="purple">問題三</span>：測試深度理解 <span class="dim" style="font-size:1rem;">Error-Driven Learning</span></h2>
+  <div class="prompt-card" style="margin-top:.6rem;border-color:var(--purple);">
+    <div class="prompt-label" style="background:var(--purple);">Prompt</div>
+    <div class="prompt-zh">「生成 10 個能區分深度理解與死背知識的問題」</div>
+    <div class="prompt-en">Generate 10 questions that would expose whether someone deeply<br>understands this subject versus someone who just memorized facts.</div>
+  </div>
+  <div class="step-list fragment" data-order="0" style="margin-top:.8rem;">
+    <div class="step">
+      <div class="step-num" style="background:var(--purple);">1</div>
+      <div class="step-content"><strong>拿到 10 道鑑別題</strong><p>這些題目專門區分「真懂」vs「死背」</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--purple);">2</div>
+      <div class="step-content"><strong>花 6 小時認真作答</strong><p>參考資料回答，不是考記憶</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--red);">3</div>
+      <div class="step-content"><strong>每答錯一題就追問</strong><p>「解釋這個答案為什麼錯，我漏掉了什麼」<br>從錯誤中修正 > 反覆閱讀</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 15: 三問法全景圖 ===== -->
+<div class="slide" data-act="MIT 三問學習法" data-index="15">
+  <h2>三問法全景圖</h2>
+  <div class="flow" style="margin-top:.5rem;">
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);min-width:200px;">
+      <span class="blue bold">Q1</span> 框架<br>
+      <span class="dim" style="font-size:.85rem;">20 分鐘</span>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);min-width:200px;">
+      <span class="gold bold">Q2</span> 爭論<br>
+      <span class="dim" style="font-size:.85rem;">20 分鐘</span>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--purple-lt);border-color:var(--purple);min-width:200px;">
+      <span class="purple bold">Q3</span> 測試<br>
+      <span class="dim" style="font-size:.85rem;">6 小時</span>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);min-width:120px;">
+      通過考試
+    </div>
+  </div>
+
+  <table class="compare-table fragment" data-order="0" style="margin-top:1.5rem;">
+    <tr><th>維度</th><th>傳統學習</th><th style="color:var(--gold);">三問學習法</th></tr>
+    <tr><td><strong>方向</strong></td><td>由下而上（先背細節）</td><td>由上而下（先抓框架）</td></tr>
+    <tr><td><strong>角色</strong></td><td>AI 當螢光筆（被動整理）</td><td>AI 當家教（主動挑戰）</td></tr>
+    <tr><td><strong>目標</strong></td><td>追求覆蓋率（看完多少）</td><td>追求鑑別力（理解多深）</td></tr>
+    <tr><td><strong>錯誤</strong></td><td>避免犯錯（舒適區）</td><td>刻意暴露盲區（學習區）</td></tr>
+    <tr><td><strong>時間</strong></td><td>整學期</td><td>48 小時</td></tr>
+  </table>
+</div>
+
+<!-- ===== SECTION: 方法拆解 ===== -->
+<div class="slide section-title" data-act="為什麼有效" data-index="16" style="background:var(--purple);">
+  <p class="subtitle">Part 4</p>
+  <h1>為什麼有效？</h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.9);margin-top:.5rem;">認知科學 × 提問策略</p>
+</div>
+
+<!-- ===== 17: 三層原理 ===== -->
+<div class="slide" data-act="為什麼有效" data-index="17">
+  <h2>背後的認知科學</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-color:var(--blue);min-width:260px;">
+      <div class="icon">🧠</div>
+      <h3>先有架構再填細節</h3>
+      <p>認知負荷理論：先建「資料夾」，再往裡面放文件<br><strong>→ Q1 就是在建資料夾</strong></p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:var(--gold);min-width:260px;">
+      <div class="icon">⚡</div>
+      <h3>爭議 = 最強記憶錨點</h3>
+      <p>大腦對「衝突」的記憶遠比「事實」深刻<br><strong>→ Q2 製造認知衝突</strong></p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-color:var(--purple);min-width:260px;">
+      <div class="icon">🔄</div>
+      <h3>測試效應</h3>
+      <p>研究證實：自我測試比重複閱讀有效 2-3 倍<br><strong>→ Q3 就是刻意練習</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 18: 提問品質光譜 ===== -->
+<div class="slide" data-act="為什麼有效" data-index="18">
+  <h2>提問品質光譜</h2>
+  <p class="subtitle">同一個工具，不同的提問 = 完全不同的結果</p>
+  <div class="step-list" style="margin-top:1rem;">
+    <div class="step fragment" data-order="0">
+      <div class="step-num" style="background:var(--red);">低</div>
+      <div class="step-content">
+        <strong>「幫我整理這本書的重點」</strong>
+        <p>得到：條列式摘要 → 看完就忘</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--gold);">中</div>
+      <div class="step-content">
+        <strong>「比較 A 理論和 B 理論的差異」</strong>
+        <p>得到：比較表 → 理解概念但不知道脈絡</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="background:var(--green);">高</div>
+      <div class="step-content">
+        <strong>「這個領域的專家在哪裡存在根本分歧？」</strong>
+        <p>得到：學術地圖 → 看清整個知識地形</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="3">
+      <div class="step-num" style="background:var(--blue);">最高</div>
+      <div class="step-content">
+        <strong>「出題測試我是真懂還是死背，然後告訴我哪裡錯」</strong>
+        <p>得到：深度理解 + 即時修正 → 真正學會</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 19: 可遷移 Prompt 模板 ===== -->
+<div class="slide" data-act="為什麼有效" data-index="19">
+  <h2>帶走的 Prompt 模板 <span class="dim" style="font-size:1rem;">不只 NotebookLM，任何 AI 都能用</span></h2>
+  <div class="prompt-card fragment" data-order="0" style="margin-top:.5rem;padding:1rem 1.5rem;">
+    <div class="prompt-label">Step 1 — 結構提取</div>
+    <div class="prompt-zh" style="font-size:1.05rem;">「這些資料中，反覆出現的 N 個核心概念／原則是什麼？」</div>
+  </div>
+  <div class="prompt-card fragment" data-order="1" style="border-color:var(--gold);padding:1rem 1.5rem;">
+    <div class="prompt-label" style="background:var(--gold);">Step 2 — 張力定位</div>
+    <div class="prompt-zh" style="font-size:1.05rem;">「專家之間最根本的分歧在哪？各方最強論點是什麼？」</div>
+  </div>
+  <div class="prompt-card fragment" data-order="2" style="border-color:var(--purple);padding:1rem 1.5rem;">
+    <div class="prompt-label" style="background:var(--purple);">Step 3 — 錯誤驅動</div>
+    <div class="prompt-zh" style="font-size:1.05rem;">「生成能區分真正理解與表面記憶的問題」</div>
+  </div>
+  <div class="prompt-card fragment" data-order="3" style="border-color:var(--red);padding:1rem 1.5rem;">
+    <div class="prompt-label" style="background:var(--red);">Step 4 — 追問修正</div>
+    <div class="prompt-zh" style="font-size:1.05rem;">「解釋這個答案為什麼錯，我漏掉了什麼概念？」</div>
+  </div>
+</div>
+
+<!-- ===== SECTION: 實作 ===== -->
+<div class="slide section-title" data-act="現場實作" data-index="20" style="background:var(--red);">
+  <p class="subtitle">Part 5</p>
+  <h1>現場實作</h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.9);margin-top:.5rem;">10 分鐘跑一遍三問法</p>
+</div>
+
+<!-- ===== 21: 實作指引 ===== -->
+<div class="slide" data-act="現場實作" data-index="21">
+  <h2><span class="exercise-banner" style="font-size:.85rem;vertical-align:middle;margin-right:.5rem;">實作</span>現場跑一遍三問法</h2>
+  <div class="step-list" style="margin-top:.3rem;">
+    <div class="step fragment" data-order="0" style="padding:.5rem 0;">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <strong>開啟 NotebookLM</strong>
+        <p>notebooklm.google.com → 建立新筆記本</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="1" style="padding:.5rem 0;">
+      <div class="step-num" style="background:var(--green);">2</div>
+      <div class="step-content">
+        <strong>上傳 2-3 份資料</strong>
+        <p>iPAS 考古題 PDF、上課講義、或任何你想學的文件</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2" style="padding:.5rem 0;">
+      <div class="step-num" style="background:var(--blue);">3</div>
+      <div class="step-content">
+        <strong>問 Q1：框架</strong>
+        <p>「這些資料中反覆出現的 5 個核心概念是什麼？」</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="3" style="padding:.5rem 0;">
+      <div class="step-num" style="background:var(--gold);">4</div>
+      <div class="step-content">
+        <strong>問 Q2：爭論</strong>
+        <p>「哪些觀點之間存在不同看法或爭議？」</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="4" style="padding:.5rem 0;">
+      <div class="step-num" style="background:var(--purple);">5</div>
+      <div class="step-content">
+        <strong>問 Q3：測試</strong>
+        <p>「出 5 個能區分深度理解與死背的問題」→ 試答一題</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 22: 延伸用法 ===== -->
+<div class="slide" data-act="現場實作" data-index="22">
+  <h2>延伸用法：不只是學習</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-color:var(--blue);">
+      <div class="icon">🎧</div>
+      <h3>通勤學習</h3>
+      <p>用 Audio Overview 把文件變 Podcast<br>開車、搭捷運時「聽」教材</p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:var(--green);">
+      <div class="icon">📋</div>
+      <h3>會議摘要</h3>
+      <p>上傳會議錄音逐字稿<br>問「有哪些待辦？誰負責？」</p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-color:var(--gold);">
+      <div class="icon">📊</div>
+      <h3>報告分析</h3>
+      <p>丟入多份報告<br>問「跨報告的共同趨勢是什麼？」</p>
+    </div>
+    <div class="card fragment" data-order="3" style="border-color:var(--purple);">
+      <div class="icon">🏗️</div>
+      <h3>專案文件庫</h3>
+      <p>上傳專案所有規格書<br>新人加入時直接問 AI 搞懂全貌</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 23: 結語金句 ===== -->
+<div class="slide cover" data-act="完成" data-index="23">
+  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:2rem;">一句話記住這堂課</p>
+  <h1 style="font-size:2.6rem;line-height:1.5;">
+    不要問 AI 幫你整理<br><br>
+    要問 AI 幫你看見<br>
+    <span style="color:var(--gold);">你看不見的結構、爭議和盲區</span>
+  </h1>
+  <p style="color:rgba(255,255,255,.5);margin-top:2rem;font-size:1.1rem;">決定學習成效的不是內容多寡，而是<strong style="color:var(--gold);">提問的品質</strong></p>
+  <p style="color:rgba(255,255,255,.4);margin-top:1.5rem;font-size:.9rem;">ai100.cooperation.tw</p>
+</div>
+
+</div>
+
+
+<div id="chapterMenu" class="chapter-menu">
+  <button id="chapterBtn" class="chapter-btn">
+    <span class="chapter-icon">§</span>
+    <span id="chapterLabel">開場</span>
+    <span class="chapter-arrow">▼</span>
+  </button>
+  <div id="chapterList" class="chapter-list"></div>
+</div>
+
+<div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>←</button><button id="next">→</button></div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),tot=slides.length;
+let idx=0,fi=-1;
+document.getElementById('total').textContent=tot;
+const gf=el=>el.querySelectorAll('.fragment');
+function go(n){slides.forEach((s,i)=>{s.classList.remove('active','prev');if(i<n)s.classList.add('prev');s.querySelectorAll('.fragment').forEach(f=>f.classList.remove('visible'));});idx=n;fi=-1;slides[idx].classList.add('active');ui();}
+function ui(){document.getElementById('current').textContent=idx+1;document.getElementById('prev').disabled=idx===0&&fi<=0;const f=gf(slides[idx]);document.getElementById('next').disabled=idx===tot-1&&fi>=f.length-1;document.getElementById('progress').style.width=((idx+1)/tot*100)+'%';}
+function adv(){const f=gf(slides[idx]);if(fi<f.length-1){fi++;f[fi].classList.add('visible');ui();}else if(idx<tot-1)go(idx+1);}
+function ret(){const f=gf(slides[idx]);if(fi>=0){f[fi].classList.remove('visible');fi--;ui();}else if(idx>0){go(idx-1);const p=gf(slides[idx]);p.forEach(x=>x.classList.add('visible'));fi=p.length-1;ui();}}
+document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
+document.addEventListener('keydown',e=>{if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}if(e.key==='Home'){e.preventDefault();go(0);}if(e.key==='End'){e.preventDefault();go(tot-1);}if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}});
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
+// ── Chapter Menu ──
+var chapterMenu=document.getElementById('chapterMenu'),chapterBtn=document.getElementById('chapterBtn'),chapterLabel=document.getElementById('chapterLabel'),chapterList=document.getElementById('chapterList');
+function getChapters(){var m=new Map();slides.forEach(function(s,i){var a=s.dataset.act;if(a&&!m.has(a))m.set(a,i);});return m;}
+function buildChapterMenu(){var ch=getChapters();chapterList.innerHTML='';var cur=slides[idx]&&slides[idx].dataset.act||'';ch.forEach(function(si,name){var d=document.createElement('div');d.className='chapter-item'+(name===cur?' active':'');d.innerHTML='<span class="chapter-dot"></span>'+name;d.onclick=function(){go(si);closeChapterMenu();};chapterList.appendChild(d);});chapterLabel.textContent=cur||'\u5c0e\u89bd';}
+function toggleChapterMenu(){chapterMenu.classList.toggle('open');if(chapterMenu.classList.contains('open'))buildChapterMenu();}
+function closeChapterMenu(){chapterMenu.classList.remove('open');}
+chapterBtn.onclick=toggleChapterMenu;
+document.addEventListener('click',function(e){if(!chapterMenu.contains(e.target))closeChapterMenu();});
+var _origUi=ui;ui=function(){_origUi();var cur=slides[idx]&&slides[idx].dataset.act||'';chapterLabel.textContent=cur||'\u5c0e\u89bd';};
+
+go(0);
+
+// postMessage bridge for iframe embedding
+window.addEventListener('message', function(e) {
+  if (!e.data || typeof e.data !== 'object') return;
+  if (e.data.type === 'slide-control') {
+    if (e.data.action === 'next') adv();
+    else if (e.data.action === 'prev') ret();
+    else if (e.data.action === 'goto' && typeof e.data.index === 'number') go(e.data.index);
+  }
+});
+</script>
+</body>
+</html>

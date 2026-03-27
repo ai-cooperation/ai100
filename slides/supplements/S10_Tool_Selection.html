@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 簡報工具怎麼選？ — Gamma × NotebookLM × Claude Code</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+/* ═══════════════════════════════════════
+   S10: Tool Selection — Dark Poster + DataViz
+   Design ref: S09 v2 cinematic system
+   ═══════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+  --orange:#E8710A; --orange-lt:#FEF0E1;
+  --dark:#0a0a14; --dark2:#111122; --dark3:#16213e;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--dark);}
+
+/* ── Slides Core ── */
+.slides{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;opacity:0;transform:translateX(30px);pointer-events:none;transition:opacity .5s,transform .5s ease;overflow:hidden;}
+.slide.active{opacity:1;transform:none;pointer-events:auto;}
+.slide.prev{opacity:0;transform:translateX(-30px);}
+
+/* ── Clean Mode (white bg) ── */
+.slide.clean{background:var(--white);color:var(--g900);padding-top:3.5rem;overflow-y:auto;justify-content:flex-start;}
+.slide.clean::before,.slide.clean::after{content:'';flex:1 0 0px;}
+
+/* ── Poster Mode ── */
+.slide.poster{background-size:cover;background-position:center;color:#fff;text-align:center;}
+.slide.poster::before{content:'';position:absolute;inset:0;z-index:1;}
+.slide.poster>*{position:relative;z-index:2;}
+.slide.poster.overlay-bottom::before{background:linear-gradient(to bottom,rgba(0,0,0,.15) 0%,rgba(0,0,0,.78) 100%);}
+.slide.poster.overlay-heavy::before{background:linear-gradient(to bottom,rgba(0,0,0,.45) 0%,rgba(0,0,0,.85) 100%);}
+.slide.poster.overlay-center::before{background:radial-gradient(ellipse at center,rgba(0,0,0,.3) 0%,rgba(0,0,0,.8) 100%);}
+
+/* ── DataViz Mode (dark bg) ── */
+.slide.dataviz{background:var(--dark);color:#fff;padding-top:3.5rem;}
+
+/* ── Typography ── */
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:2rem;font-weight:700;color:var(--g900);margin-bottom:1rem;line-height:1.4;}
+.slide.dataviz h2,.slide.poster h2{color:#fff;}
+h3{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.1rem;line-height:1.8;}
+.subtitle{font-size:1.15rem;font-weight:500;}
+.dim{opacity:.6;}
+
+/* ── Fragment ── */
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* ── Steps ── */
+.step-list{text-align:left;max-width:800px;width:100%;}
+.step{display:flex;gap:1.2rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:40px;height:40px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.1rem;}.step-content p{font-size:1rem;color:var(--g600);margin-top:.15rem;}
+
+/* ── Stat Grid (dark mode) ── */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;max-width:860px;width:100%;margin-top:1rem;}
+.stat-box{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:16px;padding:1.3rem;text-align:center;}
+.stat-box .val{font-size:2.4rem;font-weight:900;color:var(--blue);line-height:1.1;}
+.stat-box .label{font-size:.9rem;color:rgba(255,255,255,.5);margin-top:.3rem;}
+
+/* ── Table (dark mode) ── */
+.compare-table{border-collapse:collapse;font-size:1rem;margin-top:.6rem;width:100%;max-width:860px;}
+.compare-table th{background:rgba(255,255,255,.08);color:rgba(255,255,255,.9);padding:.5rem 1rem;text-align:left;font-size:.95rem;}
+.compare-table td{padding:.5rem 1rem;border-bottom:1px solid rgba(255,255,255,.06);font-size:.95rem;color:rgba(255,255,255,.75);}
+.compare-table tr:hover td{background:rgba(255,255,255,.03);}
+.compare-table .highlight{color:var(--blue);font-weight:700;}
+.compare-table .warn{color:var(--orange);font-weight:700;}
+.compare-table .danger{color:var(--red);font-weight:700;}
+
+/* ── Info boxes (dark mode default) ── */
+.info-box{border-radius:12px;padding:1.3rem 1.8rem;max-width:800px;width:100%;text-align:left;margin-top:.8rem;}
+.info-box.analogy{background:rgba(26,115,232,.1);border-left:4px solid var(--blue);}
+.info-box.analogy .label{color:var(--blue);}
+.info-box.analogy p{color:rgba(255,255,255,.75);}
+.info-box.warning{background:rgba(217,48,37,.1);border-left:4px solid var(--red);}
+.info-box.warning .label{color:var(--red);}
+.info-box.warning p{color:rgba(255,255,255,.75);}
+.info-box.success{background:rgba(15,157,138,.1);border-left:4px solid var(--green);}
+.info-box.success .label{color:var(--green);}
+.info-box.success p{color:rgba(255,255,255,.75);}
+.info-box.tip{background:rgba(249,171,0,.1);border-left:4px solid var(--gold);}
+.info-box.tip .label{color:var(--gold);}
+.info-box.tip p{color:rgba(255,255,255,.75);}
+.info-box .label{font-weight:700;font-size:1rem;margin-bottom:.4rem;}
+.info-box p{font-size:1.05rem;}
+/* clean mode overrides for info-box */
+.slide.clean .info-box.analogy{background:var(--blue-lt);border-left:4px solid var(--blue);}
+.slide.clean .info-box.analogy .label{color:var(--blue);}
+.slide.clean .info-box.analogy p{color:var(--g900);}
+.slide.clean .info-box.warning{background:var(--red-lt);border-left:4px solid var(--red);}
+.slide.clean .info-box.warning .label{color:var(--red);}
+.slide.clean .info-box.warning p{color:var(--g900);}
+.slide.clean .info-box.success{background:var(--green-lt);border-left:4px solid var(--green);}
+.slide.clean .info-box.success .label{color:var(--green);}
+.slide.clean .info-box.success p{color:var(--g900);}
+.slide.clean .info-box.tip{background:var(--gold-lt);border-left:4px solid var(--gold);}
+.slide.clean .info-box.tip .label{color:#B45309;}
+.slide.clean .info-box.tip p{color:var(--g900);}
+
+/* ── Quote (dark mode) ── */
+.quote-box{max-width:800px;width:100%;background:rgba(255,255,255,.04);border-left:5px solid var(--gold);border-radius:0 12px 12px 0;padding:1.5rem 2rem;margin:.8rem 0;text-align:left;}
+.quote-box .quote-text{font-size:1.3rem;font-weight:700;line-height:1.6;color:#fff;}
+.quote-box .quote-src{font-size:.9rem;color:rgba(255,255,255,.4);margin-top:.5rem;}
+
+/* ── Cards (clean mode) ── */
+.card-grid{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;margin-top:1.2rem;max-width:1100px;}
+.card{background:var(--white);border:2px solid var(--g100);border-radius:16px;padding:1.8rem;min-width:220px;max-width:300px;flex:1;transition:border-color .2s;}
+.card:hover{border-color:var(--blue);}
+.card .icon{font-size:2.5rem;margin-bottom:.6rem;}
+.card p{font-size:1rem;color:var(--g600);}
+
+/* ── Flow ── */
+.flow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1.2rem 0;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.7rem 1rem;font-size:1rem;font-weight:700;text-align:center;}
+.flow-arrow{color:var(--blue);font-size:1.5rem;font-weight:900;}
+
+/* ── Two col ── */
+.two-col{display:flex;gap:2rem;width:100%;max-width:960px;text-align:left;}
+.two-col .col{flex:1;}
+
+/* ── Code block ── */
+.code-block{background:var(--g50);border:2px solid var(--g200);border-radius:12px;padding:1.3rem 1.8rem;text-align:left;max-width:860px;width:100%;font-family:'Fira Code',monospace;font-size:1rem;line-height:1.8;margin:.8rem 0;color:var(--g900);}
+
+/* ── Big number ── */
+.big-num{font-size:4.5rem;font-weight:900;color:var(--blue);line-height:1;}
+
+/* ── Exercise banner ── */
+.exercise-banner{display:inline-block;background:var(--purple);color:#fff;padding:.35rem 1.4rem;border-radius:100px;font-weight:700;font-size:1rem;margin-bottom:.8rem;}
+
+/* ── Poster text helpers ── */
+.poster-subtitle{font-size:1.3rem;font-weight:500;color:rgba(255,255,255,.7);}
+
+/* ── Bottom line (dark mode) ── */
+.bottom-line{max-width:800px;width:100%;background:rgba(26,115,232,.08);border:2px solid rgba(26,115,232,.25);border-radius:16px;padding:2rem;text-align:center;margin-top:1rem;}
+.bottom-line h3{font-size:1.6rem;color:var(--blue);margin-bottom:.8rem;}
+.bottom-line p{font-size:1.05rem;color:rgba(255,255,255,.7);max-width:640px;margin:0 auto;line-height:1.7;}
+
+/* ── Controls ── */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid rgba(255,255,255,.15);border-radius:12px;background:rgba(0,0,0,.4);color:rgba(255,255,255,.8);font-size:1.2rem;cursor:pointer;transition:all .15s;backdrop-filter:blur(8px);}
+.controls button:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff;}
+.controls button:disabled{opacity:.2;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;left:auto;right:5rem;z-index:100;color:rgba(255,255,255,.35);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:rgba(15,157,138,.15);color:var(--green);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;backdrop-filter:blur(8px);}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:rgba(255,255,255,.35);font-size:.85rem;font-weight:700;}
+.source-tag{position:absolute;bottom:1rem;left:1.5rem;font-size:.7rem;color:rgba(255,255,255,.2);z-index:2;}
+
+/* ── Chart container ── */
+.chart-wrap{max-width:700px;width:100%;margin:1rem auto 0;}
+
+/* ═══ MOBILE ═══ */
+@media(max-width:768px){
+  html,body{font-size:16px;}
+  .slide{padding:1rem 1.2rem 1rem;}
+  .slide.clean{padding-top:3rem;}
+  .slide.poster{justify-content:flex-end;padding-bottom:1.5rem;}
+  h1{font-size:1.8rem;}h2{font-size:1.4rem;margin-bottom:.6rem;}
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:.8rem;}
+  .stat-box .val{font-size:1.8rem;}
+  .card-grid{gap:.8rem;}
+  .card{min-width:140px;padding:1rem;}
+  .two-col{flex-direction:column;gap:1rem;}
+  .flow{gap:.4rem;}
+  .flow-box{padding:.5rem .7rem;font-size:.85rem;}
+  .compare-table th,.compare-table td{padding:.5rem .6rem;font-size:.85rem;}
+  .controls button{width:40px;height:40px;font-size:1rem;}
+  .module-title{font-size:.7rem;left:.8rem;top:.6rem;}
+  .module-badge{font-size:.65rem;top:.6rem;right:.6rem;padding:.2rem .6rem;}
+  .quote-box .quote-text{font-size:1.05rem;}
+  .big-num{font-size:3rem;}
+  .code-block{font-size:.85rem;padding:1rem;}
+  .chart-wrap{max-width:100%;}
+}
+
+/* ── Chapter Menu ── */
+.chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;font-family:system-ui,-apple-system,sans-serif;}
+.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.9);font-size:.8rem;cursor:pointer;transition:border-color .2s;}
+.chapter-btn:hover{border-color:var(--green);}
+.chapter-icon{color:var(--green);font-weight:700;}
+.chapter-arrow{font-size:.6rem;opacity:.5;transition:transform .2s;}
+.chapter-menu.open .chapter-arrow{transform:rotate(180deg);}
+.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:180px;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;}
+.chapter-menu.open .chapter-list{display:block;}
+.chapter-item{display:flex;align-items:center;gap:8px;padding:8px 14px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
+.chapter-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+.chapter-item.active{color:var(--green);font-weight:600;}
+.chapter-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;}
+.chapter-item.active .chapter-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+</style>
+</head>
+<body>
+
+<div class="module-title">工具選擇分析</div>
+<div class="module-badge">S10 補充單元</div>
+<div class="slides">
+
+<!-- ===== 0: COVER — poster ===== -->
+<div class="slide poster overlay-bottom active" data-act="開場" data-index="0" style="background-image:url('img/s10/cover.png');background-color:var(--dark);">
+  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:1rem;">AI 100 講 — 補充單元</p>
+  <h1>AI 簡報工具<br><span style="color:var(--gold);">怎麼選？</span></h1>
+  <p class="poster-subtitle" style="margin-top:1.5rem;">Gamma × NotebookLM × Claude Code — 系統化決策分析</p>
+  <p style="color:rgba(255,255,255,.3);margin-top:3rem;font-size:.85rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- ===== 1: 議程 — clean ===== -->
+<div class="slide clean" data-act="開場" data-index="1">
+  <h2>分析路線</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>工具能力維度</strong><p>每個工具能做什麼、不能做什麼</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--purple);">2</div><div class="step-content"><strong>模型特性維度</strong><p>背後的 AI 模型決定天花板</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--green);">3</div><div class="step-content"><strong>人的架構力</strong><p>工具再強，也需要人來駕馭</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--gold);">4</div><div class="step-content"><strong>需求與預算</strong><p>不同場景的最佳選擇</p></div></div>
+    <div class="step fragment" data-order="4"><div class="step-num" style="background:var(--orange);">5</div><div class="step-content"><strong>應用場景</strong><p>五種角色、五種答案</p></div></div>
+    <div class="step fragment" data-order="5"><div class="step-num" style="background:var(--red);">6</div><div class="step-content"><strong>決策框架</strong><p>三步驟選出你的最佳組合</p></div></div>
+  </div>
+</div>
+
+<!-- ===== 2: Part 1 section — poster ===== -->
+<div class="slide poster overlay-heavy" data-act="工具能力" data-index="2" style="background-color:var(--dark);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 1</p>
+  <h1>工具能力維度</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">每個工具能做什麼、不能做什麼</p>
+</div>
+
+<!-- ===== 3: Gamma — clean ===== -->
+<div class="slide clean" data-act="工具能力" data-index="3">
+  <h2>Gamma — 最快出好看簡報</h2>
+  <div class="two-col">
+    <div class="col">
+      <h3 style="color:var(--green);">能力</h3>
+      <div class="step-list">
+        <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--green);width:32px;height:32px;font-size:.85rem;">&#10003;</div><div class="step-content"><strong>套版設計</strong><p>數十種專業模板</p></div></div>
+        <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--green);width:32px;height:32px;font-size:.85rem;">&#10003;</div><div class="step-content"><strong>自動配圖</strong><p>AI 搜尋 + 插入圖片</p></div></div>
+        <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--green);width:32px;height:32px;font-size:.85rem;">&#10003;</div><div class="step-content"><strong>動畫轉場</strong><p>內建轉場效果</p></div></div>
+        <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--green);width:32px;height:32px;font-size:.85rem;">&#10003;</div><div class="step-content"><strong>網頁簡報</strong><p>線上分享、嵌入</p></div></div>
+        <div class="step fragment" data-order="4"><div class="step-num" style="background:var(--green);width:32px;height:32px;font-size:.85rem;">&#10003;</div><div class="step-content"><strong>AI 一鍵生成</strong><p>給主題自動產出</p></div></div>
+      </div>
+    </div>
+    <div class="col">
+      <h3 style="color:var(--red);">限制</h3>
+      <div class="step-list">
+        <div class="step fragment" data-order="5"><div class="step-num" style="background:var(--red);width:32px;height:32px;font-size:.85rem;">&#10007;</div><div class="step-content"><strong>匯出浮水印</strong><p>免費版 PPTX 有浮水印</p></div></div>
+        <div class="step fragment" data-order="6"><div class="step-num" style="background:var(--red);width:32px;height:32px;font-size:.85rem;">&#10007;</div><div class="step-content"><strong>客製化受限</strong><p>CSS / 排版無法微調</p></div></div>
+        <div class="step fragment" data-order="7"><div class="step-num" style="background:var(--red);width:32px;height:32px;font-size:.85rem;">&#10007;</div><div class="step-content"><strong>無批次量產</strong><p>每份都要手動操作</p></div></div>
+        <div class="step fragment" data-order="8"><div class="step-num" style="background:var(--red);width:32px;height:32px;font-size:.85rem;">&#10007;</div><div class="step-content"><strong>無版本控制</strong><p>協作追蹤困難</p></div></div>
+        <div class="step fragment" data-order="9"><div class="step-num" style="background:var(--red);width:32px;height:32px;font-size:.85rem;">&#10007;</div><div class="step-content"><strong>程式碼排版差</strong><p>技術內容呈現不佳</p></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 4: NotebookLM — clean ===== -->
+<div class="slide clean" data-act="工具能力" data-index="4">
+  <h2>NotebookLM — 文件理解之王</h2>
+  <div class="two-col">
+    <div class="col">
+      <h3 style="color:var(--green);">能力</h3>
+      <div class="step-list">
+        <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--green);width:32px;height:32px;font-size:.85rem;">&#10003;</div><div class="step-content"><strong>文件深度理解</strong><p>上傳 PDF/文件後精準摘要</p></div></div>
+        <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--green);width:32px;height:32px;font-size:.85rem;">&#10003;</div><div class="step-content"><strong>簡報圖片生成</strong><p>將文件轉為投影片圖片</p></div></div>
+        <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--green);width:32px;height:32px;font-size:.85rem;">&#10003;</div><div class="step-content"><strong>Podcast 生成</strong><p>兩人對話式音訊</p></div></div>
+        <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--green);width:32px;height:32px;font-size:.85rem;">&#10003;</div><div class="step-content"><strong>影片概覽</strong><p>自動產出摘要影片</p></div></div>
+        <div class="step fragment" data-order="4"><div class="step-num" style="background:var(--green);width:32px;height:32px;font-size:.85rem;">&#10003;</div><div class="step-content"><strong>完全免費</strong><p>Google 帳號即可使用</p></div></div>
+      </div>
+    </div>
+    <div class="col">
+      <h3 style="color:var(--red);">限制</h3>
+      <div class="step-list">
+        <div class="step fragment" data-order="5"><div class="step-num" style="background:var(--red);width:32px;height:32px;font-size:.85rem;">&#10007;</div><div class="step-content"><strong>結構控制差</strong><p>無法精確控制每頁內容</p></div></div>
+        <div class="step fragment" data-order="6"><div class="step-num" style="background:var(--red);width:32px;height:32px;font-size:.85rem;">&#10007;</div><div class="step-content"><strong>無法匯出 PPTX</strong><p>只能產出圖片格式</p></div></div>
+        <div class="step fragment" data-order="7"><div class="step-num" style="background:var(--red);width:32px;height:32px;font-size:.85rem;">&#10007;</div><div class="step-content"><strong>風格固定</strong><p>視覺風格無法自訂</p></div></div>
+        <div class="step fragment" data-order="8"><div class="step-num" style="background:var(--red);width:32px;height:32px;font-size:.85rem;">&#10007;</div><div class="step-content"><strong>技術內容差</strong><p>程式碼、公式呈現不佳</p></div></div>
+        <div class="step fragment" data-order="9"><div class="step-num" style="background:var(--red);width:32px;height:32px;font-size:.85rem;">&#10007;</div><div class="step-content"><strong>無互動元素</strong><p>產出為靜態內容</p></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 5: Claude Code — clean ===== -->
+<div class="slide clean" data-act="工具能力" data-index="5">
+  <h2>Claude Code — 完全可控的工程師路線</h2>
+  <div class="two-col">
+    <div class="col">
+      <h3 style="color:var(--green);">能力</h3>
+      <div class="step-list">
+        <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--green);width:32px;height:32px;font-size:.85rem;">&#10003;</div><div class="step-content"><strong>完全客製化</strong><p>CSS、JS、版型全部自訂</p></div></div>
+        <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--green);width:32px;height:32px;font-size:.85rem;">&#10003;</div><div class="step-content"><strong>批次量產</strong><p>腳本化一次產 50 份</p></div></div>
+        <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--green);width:32px;height:32px;font-size:.85rem;">&#10003;</div><div class="step-content"><strong>版控整合</strong><p>Git 追蹤每一次改動</p></div></div>
+        <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--green);width:32px;height:32px;font-size:.85rem;">&#10003;</div><div class="step-content"><strong>邏輯控制</strong><p>條件判斷、動態內容</p></div></div>
+        <div class="step fragment" data-order="4"><div class="step-num" style="background:var(--green);width:32px;height:32px;font-size:.85rem;">&#10003;</div><div class="step-content"><strong>100% 可重現</strong><p>同一指令同一結果</p></div></div>
+      </div>
+    </div>
+    <div class="col">
+      <h3 style="color:var(--red);">限制</h3>
+      <div class="step-list">
+        <div class="step fragment" data-order="5"><div class="step-num" style="background:var(--red);width:32px;height:32px;font-size:.85rem;">&#10007;</div><div class="step-content"><strong>視覺設計弱</strong><p>配色、構圖需人工審美</p></div></div>
+        <div class="step fragment" data-order="6"><div class="step-num" style="background:var(--red);width:32px;height:32px;font-size:.85rem;">&#10007;</div><div class="step-content"><strong>圖片需外部 API</strong><p>不內建圖片生成</p></div></div>
+        <div class="step fragment" data-order="7"><div class="step-num" style="background:var(--red);width:32px;height:32px;font-size:.85rem;">&#10007;</div><div class="step-content"><strong>學習曲線陡峭</strong><p>需要 CLI 和程式基礎</p></div></div>
+        <div class="step fragment" data-order="8"><div class="step-num" style="background:var(--red);width:32px;height:32px;font-size:.85rem;">&#10007;</div><div class="step-content"><strong>開發時間長</strong><p>首份簡報需數小時設定</p></div></div>
+        <div class="step fragment" data-order="9"><div class="step-num" style="background:var(--red);width:32px;height:32px;font-size:.85rem;">&#10007;</div><div class="step-content"><strong>工程師風格</strong><p>非設計師友善</p></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 6: Radar chart — dataviz ===== -->
+<div class="slide dataviz" data-act="工具能力" data-index="6">
+  <h2>六維能力雷達圖</h2>
+  <div class="chart-wrap" style="max-width:560px;">
+    <canvas id="radarChart"></canvas>
+  </div>
+</div>
+
+<!-- ===== 7: Part 2 section — poster ===== -->
+<div class="slide poster overlay-heavy" data-act="模型特性" data-index="7" style="background-color:var(--dark);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 2</p>
+  <h1>模型特性維度</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">背後的 AI 模型決定了工具的天花板</p>
+</div>
+
+<!-- ===== 8: 模型比較表 — dataviz ===== -->
+<div class="slide dataviz" data-act="模型特性" data-index="8">
+  <h2>三款工具的 AI 引擎</h2>
+  <table class="compare-table">
+    <thead><tr><th>工具</th><th>AI 模型</th><th>擅長</th><th>生成物</th><th>一致性</th><th>上下文</th></tr></thead>
+    <tbody>
+      <tr class="fragment" data-order="0">
+        <td class="highlight">Gamma</td>
+        <td>GPT-4o + 自研排版</td>
+        <td>版面美學</td>
+        <td>網頁 / PPTX</td>
+        <td class="warn">中等</td>
+        <td>單次對話</td>
+      </tr>
+      <tr class="fragment" data-order="1">
+        <td class="highlight">NotebookLM</td>
+        <td>Gemini 2.5 Pro</td>
+        <td>文件理解</td>
+        <td>圖片 / 音訊</td>
+        <td style="color:var(--green);font-weight:700;">高</td>
+        <td>上傳文件</td>
+      </tr>
+      <tr class="fragment" data-order="2">
+        <td class="highlight">Claude Code</td>
+        <td>Claude Opus / Sonnet</td>
+        <td>程式推理</td>
+        <td>HTML / PPTX / PDF</td>
+        <td style="color:var(--green);font-weight:700;">極高</td>
+        <td>整個專案</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 9: 三個 info-box — dataviz ===== -->
+<div class="slide dataviz" data-act="模型特性" data-index="9">
+  <h2>模型性格決定產出風格</h2>
+  <div class="info-box tip fragment" data-order="0" style="border-left-color:var(--gold);">
+    <div class="label" style="color:var(--gold);">Gamma 模型 — 擅長好看，弱於精確</div>
+    <p>GPT-4o 的視覺審美強，能搭配配色和版型。但結構化內容（數據表、程式碼）容易「看起來漂亮但內容錯」。</p>
+  </div>
+  <div class="info-box analogy fragment" data-order="1" style="border-left-color:var(--blue);">
+    <div class="label" style="color:var(--blue);">NotebookLM 模型 — 擅長理解，弱於創作</div>
+    <p>Gemini 的長文理解力頂尖，能精準摘要 200 頁 PDF。但「從零創作」能力弱，給一份空白簡報它會不知所措。</p>
+  </div>
+  <div class="info-box success fragment" data-order="2" style="border-left-color:var(--green);">
+    <div class="label" style="color:var(--green);">Claude 模型 — 擅長推理，弱於視覺</div>
+    <p>Opus 的推理和程式能力業界領先，能產出結構嚴謹的 HTML 簡報。但「配色好不好看」需要人來決定。</p>
+  </div>
+</div>
+
+<!-- ===== 10: Part 3 — poster ===== -->
+<div class="slide poster overlay-heavy" data-act="人的架構力" data-index="10" style="background-image:url('img/s10/fork.png');background-color:var(--dark);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 3</p>
+  <h1>人的架構與技術力</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">工具再強，也需要人來駕馭</p>
+</div>
+
+<!-- ===== 11: 技術力光譜 — clean ===== -->
+<div class="slide clean" data-act="人的架構力" data-index="11">
+  <h2>技術力光譜 → 工具匹配</h2>
+  <div class="flow" style="margin-top:1.5rem;">
+    <div class="flow-box fragment" data-order="0" style="background:var(--blue-lt);border-color:var(--blue);">完全不會程式<br><span class="dim" style="font-size:.8rem;">NotebookLM</span></div>
+    <div class="flow-arrow fragment" data-order="1">→</div>
+    <div class="flow-box fragment" data-order="1" style="background:var(--gold-lt);border-color:var(--gold);">會基本操作<br><span class="dim" style="font-size:.8rem;">Gamma</span></div>
+    <div class="flow-arrow fragment" data-order="2">→</div>
+    <div class="flow-box fragment" data-order="2" style="background:var(--green-lt);border-color:var(--green);">會寫程式<br><span class="dim" style="font-size:.8rem;">Claude Code</span></div>
+    <div class="flow-arrow fragment" data-order="3">→</div>
+    <div class="flow-box fragment" data-order="3" style="background:var(--purple-lt);border-color:var(--purple);">會系統架構<br><span class="dim" style="font-size:.8rem;">三者組合</span></div>
+  </div>
+  <div class="info-box tip fragment" data-order="4" style="margin-top:1.5rem;">
+    <div class="label">關鍵洞察</div>
+    <p>技術力不只決定你「能用哪個工具」，更決定你「能從工具中榨出多少價值」。</p>
+  </div>
+</div>
+
+<!-- ===== 12: Level 1-2 — clean ===== -->
+<div class="slide clean" data-act="人的架構力" data-index="12">
+  <h2>Level 1-2：入門到進階操作</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-color:var(--blue);max-width:400px;">
+      <h3 style="color:var(--blue);">Level 1 — 不會程式</h3>
+      <p><strong>首選：NotebookLM</strong></p>
+      <p style="margin-top:.5rem;">上傳文件 → 自動產出簡報圖片<br>零學習曲線，立即可用<br>品質約 <strong style="color:var(--blue);">60-70 分</strong></p>
+      <p style="margin-top:.5rem;font-size:.9rem;color:var(--g400);">適合：學生報告、讀書心得、會議摘要</p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:var(--gold);max-width:400px;">
+      <h3 style="color:var(--gold);">Level 2 — 會基本操作</h3>
+      <p><strong>首選：Gamma</strong></p>
+      <p style="margin-top:.5rem;">給主題 → AI 生成 → 微調版面<br>30 分鐘完成一份漂亮簡報<br>品質約 <strong style="color:var(--gold);">75-85 分</strong></p>
+      <p style="margin-top:.5rem;font-size:.9rem;color:var(--g400);">適合：行銷提案、產品介紹、商業簡報</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 13: Level 3-4 — clean ===== -->
+<div class="slide clean" data-act="人的架構力" data-index="13">
+  <h2>Level 3-4：工程師到架構師</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-color:var(--green);max-width:400px;">
+      <h3 style="color:var(--green);">Level 3 — 會寫程式</h3>
+      <p><strong>首選：Claude Code</strong></p>
+      <p style="margin-top:.5rem;">用程式碼掌控每一個像素<br>首份耗時，之後批量複製<br>內容品質 <strong style="color:var(--green);">可達 95 分</strong></p>
+      <p style="margin-top:.5rem;font-size:.9rem;color:var(--g400);">適合：技術演講、培訓教材、系列課程</p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:var(--purple);max-width:400px;">
+      <h3 style="color:var(--purple);">Level 4 — 會系統架構</h3>
+      <p><strong>首選：Pipeline 三者組合</strong></p>
+      <p style="margin-top:.5rem;">NotebookLM 摘要 → Claude Code 生成<br>→ Gamma 視覺優化 → 自動化部署<br>全方位 <strong style="color:var(--purple);">85-95 分</strong></p>
+      <p style="margin-top:.5rem;font-size:.9rem;color:var(--g400);">適合：企業培訓體系、教育平台、內容工廠</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 14: Quote — poster ===== -->
+<div class="slide poster overlay-heavy" data-act="人的架構力" data-index="14" style="background-image:url('img/s10/craftsman.png');background-color:var(--dark);">
+  <div class="quote-box" style="background:rgba(0,0,0,.5);border-color:var(--gold);">
+    <div class="quote-text" style="font-size:1.8rem;">「差異不在工具，在人。」</div>
+    <div class="quote-src" style="margin-top:1rem;">同一份教材，有架構力的人用出來效果差 10 倍</div>
+  </div>
+</div>
+
+<!-- ===== 15: Part 4 — poster ===== -->
+<div class="slide poster overlay-center" data-act="需求與預算" data-index="15" style="background-color:var(--dark);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 4</p>
+  <h1>需求與預算維度</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">不同場景，不同最佳解</p>
+</div>
+
+<!-- ===== 16: 需求矩陣 — dataviz ===== -->
+<div class="slide dataviz" data-act="需求與預算" data-index="16">
+  <h2>需求場景 → 工具推薦</h2>
+  <table class="compare-table">
+    <thead><tr><th>需求場景</th><th>首選</th><th>原因</th></tr></thead>
+    <tbody>
+      <tr class="fragment" data-order="0"><td>一次性商業簡報</td><td class="highlight">Gamma</td><td>最快好看，30 分鐘搞定</td></tr>
+      <tr class="fragment" data-order="1"><td>讀書報告 / 文件摘要</td><td class="highlight">NotebookLM</td><td>上傳即出，免費</td></tr>
+      <tr class="fragment" data-order="2"><td>系列培訓教材（50 份）</td><td style="color:var(--green);font-weight:700;">Claude Code</td><td>批量自動化，一致風格</td></tr>
+      <tr class="fragment" data-order="3"><td>技術演講（含程式碼）</td><td style="color:var(--green);font-weight:700;">Claude Code</td><td>程式碼排版精確</td></tr>
+      <tr class="fragment" data-order="4"><td>新創 Pitch Deck</td><td class="highlight">Gamma</td><td>投資人看視覺第一印象</td></tr>
+      <tr class="fragment" data-order="5"><td>客戶報告（數據密集）</td><td style="color:var(--green);font-weight:700;">Claude Code</td><td>Chart.js 動態圖表</td></tr>
+      <tr class="fragment" data-order="6"><td>預算為零</td><td class="highlight">NotebookLM</td><td>完全免費，立即可用</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 17: Budget tree — clean ===== -->
+<div class="slide clean" data-act="需求與預算" data-index="17">
+  <h2>預算決策樹</h2>
+  <div class="code-block" style="font-size:.95rem;line-height:2;">
+<span style="color:var(--blue);font-weight:700;">預算 = 0（免費）</span>
+├── 有技術力 → <span style="color:var(--green);font-weight:700;">Claude Code</span>（Max 訂閱自帶）
+└── 沒技術力 → <span style="color:var(--blue);font-weight:700;">NotebookLM</span>（Google 免費）
+
+<span style="color:var(--gold);font-weight:700;">預算 &lt; NT$500/月</span>
+├── 量大（&gt;5 份/月）→ <span style="color:var(--green);font-weight:700;">Claude Code</span>（邊際成本趨零）
+└── 量小（1-2 份）→ <span style="color:var(--gold);font-weight:700;">Gamma</span>（快速高品質）
+
+<span style="color:var(--purple);font-weight:700;">預算 &gt; NT$500/月（企業）</span>
+└── 全部都用 → <span style="color:var(--purple);font-weight:700;">Pipeline 組合</span>（最大效率）
+  </div>
+</div>
+
+<!-- ===== 18: Line chart — dataviz ===== -->
+<div class="slide dataviz" data-act="需求與預算" data-index="18">
+  <h2>時間成本交叉點</h2>
+  <div class="chart-wrap" style="max-width:640px;">
+    <canvas id="lineChart"></canvas>
+  </div>
+  <p style="font-size:.9rem;color:rgba(255,255,255,.4);margin-top:.8rem;">X 軸 = 累計簡報份數 ｜ Y 軸 = 累計花費時間（分鐘）</p>
+</div>
+
+<!-- ===== 19: Crossover — poster ===== -->
+<div class="slide poster overlay-center" data-act="需求與預算" data-index="19" style="background-image:url('img/s10/tracks.png');background-color:var(--dark);">
+  <div class="big-num" style="color:#fff;">第 3-4 份</div>
+  <p class="poster-subtitle" style="margin-top:1rem;font-size:1.5rem;color:var(--gold);">Claude Code 的投資回報開始超越</p>
+  <p style="color:rgba(255,255,255,.4);margin-top:1rem;font-size:1rem;">前期投入高，但邊際成本趨近於零</p>
+</div>
+
+<!-- ===== 20: Part 5 — poster ===== -->
+<div class="slide poster overlay-heavy" data-act="應用場景" data-index="20" style="background-color:var(--dark);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 5</p>
+  <h1>應用場景</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">五種角色，五種答案</p>
+</div>
+
+<!-- ===== 21: 場景 A+B — clean ===== -->
+<div class="slide clean" data-act="應用場景" data-index="21">
+  <h2>場景 A &amp; B</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-color:var(--gold);max-width:420px;">
+      <h3>A — 個人自由工作者</h3>
+      <p style="color:var(--g600);">每月 3-5 份提案簡報<br>客戶看第一印象，視覺優先</p>
+      <p style="margin-top:.8rem;"><strong style="color:var(--gold);">推薦：Gamma</strong></p>
+      <p style="font-size:.95rem;color:var(--g600);margin-top:.3rem;">30 分鐘出一份，CP 值最高。<br>付費版去浮水印即可。</p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:var(--green);max-width:420px;">
+      <h3>B — 企業培訓部門</h3>
+      <p style="color:var(--g600);">年產 50+ 份訓練教材<br>品牌一致性、批量更新</p>
+      <p style="margin-top:.8rem;"><strong style="color:var(--green);">推薦：Claude Code + Gamma</strong></p>
+      <p style="font-size:.95rem;color:var(--g600);margin-top:.3rem;">Claude 批量生成骨架，<br>Gamma 做視覺優化。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 22: 場景 C+D — clean ===== -->
+<div class="slide clean" data-act="應用場景" data-index="22">
+  <h2>場景 C &amp; D</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-color:var(--green);max-width:420px;">
+      <h3>C — 技術講師</h3>
+      <p style="color:var(--g600);">含程式碼、架構圖、互動 demo<br>版本迭代頻繁，需 Git 追蹤</p>
+      <p style="margin-top:.8rem;"><strong style="color:var(--green);">推薦：Claude Code</strong></p>
+      <p style="font-size:.95rem;color:var(--g600);margin-top:.3rem;">HTML 簡報 + Chart.js + 版控<br>= 技術講師的最佳工作流。</p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:var(--blue);max-width:420px;">
+      <h3>D — 學生</h3>
+      <p style="color:var(--g600);">讀書報告、期末專題、論文簡報<br>零預算，快速完成</p>
+      <p style="margin-top:.8rem;"><strong style="color:var(--blue);">推薦：NotebookLM</strong></p>
+      <p style="font-size:.95rem;color:var(--g600);margin-top:.3rem;">上傳教科書 PDF → 一鍵產出<br>免費且品質穩定。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 23: 場景 E + quiz — clean ===== -->
+<div class="slide clean" data-act="應用場景" data-index="23">
+  <h2>場景 E — 新創 Pitch</h2>
+  <div class="card-grid" style="margin-bottom:1.5rem;">
+    <div class="card" style="border-color:var(--gold);max-width:500px;">
+      <h3>新創公司要做 Pitch Deck</h3>
+      <p style="color:var(--g600);">投資人看視覺品質 + 敘事邏輯<br>一份定生死，不能出錯</p>
+      <p style="margin-top:.8rem;"><strong style="color:var(--gold);">推薦：Gamma</strong>（+ 設計師微調）</p>
+      <p style="font-size:.95rem;color:var(--g600);margin-top:.3rem;">Gamma 出 80 分稿，設計師補最後 20 分。</p>
+    </div>
+  </div>
+  <div class="info-box warning" style="max-width:800px;">
+    <div class="label">隨堂思考</div>
+    <p><strong>你是企業 HR，要做 50 份新人訓練教材，你選？</strong></p>
+    <p class="fragment" data-order="0" style="margin-top:.5rem;">A. Gamma — 每份手動做，視覺漂亮</p>
+    <p class="fragment" data-order="1">B. NotebookLM — 上傳 SOP 文件自動產出</p>
+    <p class="fragment" data-order="2">C. <strong style="color:var(--green);">Claude Code — 寫腳本批量生成 50 份</strong> &#10003;</p>
+  </div>
+</div>
+
+<!-- ===== 24: Part 6 — poster ===== -->
+<div class="slide poster overlay-heavy" data-act="決策框架" data-index="24" style="background-color:var(--dark);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 6</p>
+  <h1>決策框架總結</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">三步驟，選出你的最佳組合</p>
+</div>
+
+<!-- ===== 25: 三步決策 — clean ===== -->
+<div class="slide clean" data-act="決策框架" data-index="25">
+  <h2>三步驟決策法</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0">
+      <div class="step-num" style="background:var(--blue);">1</div>
+      <div class="step-content">
+        <strong>辨識需求</strong>
+        <p>量大還是量小？需要技術內容嗎？視覺優先還是內容優先？是否為系列教材？</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--gold);">2</div>
+      <div class="step-content">
+        <strong>評估條件</strong>
+        <p>你的技術力？預算多少？時間限制？團隊配合度？</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="background:var(--green);">3</div>
+      <div class="step-content">
+        <strong>匹配工具</strong>
+        <p>
+          <strong style="color:var(--blue);">快速 + 好看 →</strong> Gamma<br>
+          <strong style="color:var(--blue);">免費 + 摘要 →</strong> NotebookLM<br>
+          <strong style="color:var(--green);">量大 + 精準 →</strong> Claude Code<br>
+          <strong style="color:var(--purple);">全方位 →</strong> Pipeline 三者組合
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 26: Closing — poster ===== -->
+<div class="slide poster overlay-bottom" data-act="決策框架" data-index="26" style="background-image:url('img/s10/triangle.png');background-color:var(--dark);">
+  <h1 style="font-size:2.4rem;">工具選擇三角模型</h1>
+  <p style="color:var(--gold);font-size:1.3rem;font-weight:700;margin-top:1.5rem;line-height:1.8;">
+    選擇工具的能力 &gt; 使用工具的能力 &gt; 擁有工具
+  </p>
+  <p style="color:rgba(255,255,255,.5);margin-top:2rem;font-size:1rem;">
+    不是「哪個工具最好」，而是「哪個組合最適合你」
+  </p>
+  <p style="color:rgba(255,255,255,.25);margin-top:2rem;font-size:.85rem;">AI 100 講 — 補充單元 S10</p>
+</div>
+
+</div><!-- /slides -->
+
+<div id="chapterMenu" class="chapter-menu">
+  <button id="chapterBtn" class="chapter-btn">
+    <span class="chapter-icon">§</span>
+    <span id="chapterLabel">開場</span>
+    <span class="chapter-arrow">▼</span>
+  </button>
+  <div id="chapterList" class="chapter-list"></div>
+</div>
+
+<div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>&larr;</button><button id="next">&rarr;</button></div>
+
+<script>
+/* ── Slideshow Engine (same as S09 v2) ── */
+const slides=document.querySelectorAll('.slide'),tot=slides.length;
+let idx=0,fi=-1;
+document.getElementById('total').textContent=tot;
+const gf=el=>el.querySelectorAll('.fragment');
+function go(n){slides.forEach((s,i)=>{s.classList.remove('active','prev');if(i<n)s.classList.add('prev');s.querySelectorAll('.fragment').forEach(f=>f.classList.remove('visible'));});idx=n;fi=-1;slides[idx].classList.add('active');ui();renderCharts();}
+function ui(){document.getElementById('current').textContent=idx+1;document.getElementById('prev').disabled=idx===0&&fi<=0;const f=gf(slides[idx]);document.getElementById('next').disabled=idx===tot-1&&fi>=f.length-1;document.getElementById('progress').style.width=((idx+1)/tot*100)+'%';}
+function adv(){const f=gf(slides[idx]);if(fi<f.length-1){fi++;f[fi].classList.add('visible');ui();}else if(idx<tot-1)go(idx+1);}
+function ret(){const f=gf(slides[idx]);if(fi>=0){f[fi].classList.remove('visible');fi--;ui();}else if(idx>0){go(idx-1);const p=gf(slides[idx]);p.forEach(x=>x.classList.add('visible'));fi=p.length-1;ui();}}
+document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
+document.addEventListener('keydown',e=>{if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}if(e.key==='Home'){e.preventDefault();go(0);}if(e.key==='End'){e.preventDefault();go(tot-1);}if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}});
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
+window.addEventListener('message',function(e){if(!e.data||typeof e.data!=='object')return;if(e.data.type==='slide-control'){if(e.data.action==='next')adv();else if(e.data.action==='prev')ret();else if(e.data.action==='goto'&&typeof e.data.index==='number')go(e.data.index);}});
+
+/* ── Chart.js Instances ── */
+let radarInstance=null,lineInstance=null;
+function renderCharts(){
+  /* Radar — slide 6 */
+  if(idx===6&&!radarInstance){
+    const ctx=document.getElementById('radarChart');
+    if(ctx){
+      radarInstance=new Chart(ctx,{
+        type:'radar',
+        data:{
+          labels:['視覺設計','客製化','批次量產','技術內容','低門檻','成本效益'],
+          datasets:[
+            {label:'Gamma',data:[9,3,2,4,9,6],borderColor:'#F9AB00',backgroundColor:'rgba(249,171,0,.15)',pointBackgroundColor:'#F9AB00',borderWidth:2},
+            {label:'NotebookLM',data:[5,2,2,3,10,9],borderColor:'#1A73E8',backgroundColor:'rgba(26,115,232,.15)',pointBackgroundColor:'#1A73E8',borderWidth:2},
+            {label:'Claude Code',data:[4,10,9,9,3,7],borderColor:'#0F9D8A',backgroundColor:'rgba(15,157,138,.15)',pointBackgroundColor:'#0F9D8A',borderWidth:2}
+          ]
+        },
+        options:{
+          responsive:true,maintainAspectRatio:true,
+          scales:{r:{min:0,max:10,ticks:{stepSize:2,color:'rgba(255,255,255,.3)',backdropColor:'transparent'},grid:{color:'rgba(255,255,255,.1)'},pointLabels:{color:'rgba(255,255,255,.7)',font:{size:13,weight:'bold'}}}},
+          plugins:{legend:{labels:{color:'rgba(255,255,255,.7)',font:{size:13},usePointStyle:true,pointStyle:'circle'}}}
+        }
+      });
+    }
+  }
+  /* Line — slide 18 */
+  if(idx===18&&!lineInstance){
+    const ctx=document.getElementById('lineChart');
+    if(ctx){
+      /* Gamma: 30 min per deck (cumulative linear)
+         Claude: 240 min first deck, then 10 min each (cumulative) */
+      const gd=[30,60,90,120,150,180,210,240,270,300];
+      const cd=[240,250,260,270,280,290,300,310,320,330];
+      lineInstance=new Chart(ctx,{
+        type:'line',
+        data:{
+          labels:['1','2','3','4','5','6','7','8','9','10'],
+          datasets:[
+            {label:'Gamma（每份 30 min）',data:gd,borderColor:'#F9AB00',backgroundColor:'rgba(249,171,0,.1)',borderWidth:3,tension:.3,fill:false,pointRadius:4,pointBackgroundColor:'#F9AB00'},
+            {label:'Claude Code（首份 240 min，之後 10 min）',data:cd,borderColor:'#0F9D8A',backgroundColor:'rgba(15,157,138,.1)',borderWidth:3,tension:.3,fill:false,pointRadius:4,pointBackgroundColor:'#0F9D8A'}
+          ]
+        },
+        options:{
+          responsive:true,maintainAspectRatio:true,
+          scales:{
+            x:{title:{display:true,text:'累計簡報份數',color:'rgba(255,255,255,.5)'},ticks:{color:'rgba(255,255,255,.4)'},grid:{color:'rgba(255,255,255,.06)'}},
+            y:{title:{display:true,text:'累計時間（分鐘）',color:'rgba(255,255,255,.5)'},ticks:{color:'rgba(255,255,255,.4)'},grid:{color:'rgba(255,255,255,.06)'}}
+          },
+          plugins:{legend:{labels:{color:'rgba(255,255,255,.7)',font:{size:12}}}}
+        }
+      });
+    }
+  }
+}
+
+
+// ── Chapter Menu ──
+var chapterMenu=document.getElementById('chapterMenu'),chapterBtn=document.getElementById('chapterBtn'),chapterLabel=document.getElementById('chapterLabel'),chapterList=document.getElementById('chapterList');
+function getChapters(){var m=new Map();slides.forEach(function(s,i){var a=s.dataset.act;if(a&&!m.has(a))m.set(a,i);});return m;}
+function buildChapterMenu(){var ch=getChapters();chapterList.innerHTML='';var cur=slides[idx]&&slides[idx].dataset.act||'';ch.forEach(function(si,name){var d=document.createElement('div');d.className='chapter-item'+(name===cur?' active':'');d.innerHTML='<span class="chapter-dot"></span>'+name;d.onclick=function(){go(si);closeChapterMenu();};chapterList.appendChild(d);});chapterLabel.textContent=cur||'\u5c0e\u89bd';}
+function toggleChapterMenu(){chapterMenu.classList.toggle('open');if(chapterMenu.classList.contains('open'))buildChapterMenu();}
+function closeChapterMenu(){chapterMenu.classList.remove('open');}
+chapterBtn.onclick=toggleChapterMenu;
+document.addEventListener('click',function(e){if(!chapterMenu.contains(e.target))closeChapterMenu();});
+var _origUi=ui;ui=function(){_origUi();var cur=slides[idx]&&slides[idx].dataset.act||'';chapterLabel.textContent=cur||'\u5c0e\u89bd';};
+go(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S13 — Google Apps Script</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   S13: Google Apps Script — Light Theme
+   Based on S06 design system
+   ═══════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--white);}
+
+.slides{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;opacity:0;transform:translateX(30px);pointer-events:none;transition:opacity .4s,transform .4s ease;background:var(--white);}
+.slide.active{opacity:1;transform:none;pointer-events:auto;}
+.slide.prev{opacity:0;transform:translateX(-30px);}
+.slide.cover{background:var(--navy);color:#fff;text-align:center;}
+.slide.section-title{background:var(--green);color:#fff;text-align:center;}
+.slide.break-slide{background:var(--offwhite);text-align:center;}
+
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:2rem;font-weight:700;color:var(--g900);margin-bottom:1rem;line-height:1.4;}
+h3{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.1rem;line-height:1.8;}
+.subtitle{font-size:1.15rem;color:var(--g600);font-weight:500;}
+.blue{color:var(--blue);}.green{color:var(--green);}.gold{color:var(--gold);}.red{color:var(--red);}.purple{color:var(--purple);}.dim{color:var(--g600);}.bold{font-weight:700;}
+
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+.card-grid{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;margin-top:1.2rem;max-width:1100px;}
+.card{background:var(--white);border:2px solid var(--g100);border-radius:16px;padding:1.8rem;min-width:220px;max-width:300px;flex:1;transition:border-color .2s;}
+.card:hover{border-color:var(--green);}
+.card .icon{font-size:2.5rem;margin-bottom:.6rem;}
+.card p{font-size:1rem;color:var(--g600);}
+
+.step-list{text-align:left;max-width:800px;width:100%;}
+.step{display:flex;gap:1.2rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:40px;height:40px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.1rem;}.step-content p{font-size:1rem;color:var(--g600);margin-top:.15rem;}
+
+.code-block{background:var(--g50);border:2px solid var(--g200);border-radius:12px;padding:1.3rem 1.8rem;text-align:left;max-width:860px;width:100%;font-family:'Fira Code',monospace;font-size:1rem;line-height:1.8;margin:.8rem 0;color:var(--g900);}
+
+.compare-table{border-collapse:collapse;font-size:1rem;margin-top:.8rem;width:100%;max-width:860px;}
+.compare-table th{background:var(--navy);color:#fff;padding:.7rem 1rem;text-align:left;font-size:1rem;}
+.compare-table td{padding:.7rem 1rem;border-bottom:1px solid var(--g100);font-size:1rem;}
+.compare-table tr:hover td{background:var(--g50);}
+
+.info-box{border-radius:12px;padding:1.3rem 1.8rem;max-width:800px;width:100%;text-align:left;margin-top:.8rem;}
+.info-box.analogy{background:var(--blue-lt);border-left:4px solid var(--blue);}
+.info-box.warning{background:var(--red-lt);border-left:4px solid var(--red);}
+.info-box.success{background:var(--green-lt);border-left:4px solid var(--green);}
+.info-box.tip{background:var(--gold-lt);border-left:4px solid var(--gold);}
+.info-box .label{font-weight:700;font-size:1rem;margin-bottom:.4rem;}
+.info-box p{font-size:1.05rem;}
+
+.flow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1.2rem 0;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.7rem 1rem;font-size:1rem;font-weight:700;text-align:center;}
+.flow-arrow{color:var(--green);font-size:1.5rem;font-weight:900;}
+
+.two-col{display:flex;gap:2rem;width:100%;max-width:960px;text-align:left;}
+.two-col .col{flex:1;}
+
+.quote-box{max-width:800px;width:100%;background:var(--g50);border-left:5px solid var(--navy);border-radius:0 12px 12px 0;padding:1.5rem 2rem;margin:.8rem 0;text-align:left;}
+.quote-box .quote-text{font-size:1.3rem;font-weight:700;line-height:1.6;color:var(--navy);}
+.quote-box .quote-src{font-size:.9rem;color:var(--g600);margin-top:.5rem;}
+
+.slide.poster{background-size:cover;background-position:center;color:#fff;text-align:center;}
+.slide.poster::before{content:'';position:absolute;inset:0;z-index:1;}
+.slide.poster>*{position:relative;z-index:2;}
+.slide.poster.overlay-bottom::before{background:linear-gradient(to bottom,rgba(0,0,0,.15) 0%,rgba(0,0,0,.75) 100%);}
+
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:var(--white);color:var(--g800);font-size:1.2rem;cursor:pointer;transition:all .15s;}
+.controls button:hover{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
+.controls button:disabled{opacity:.25;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;left:auto;right:5rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:rgba(15,157,138,.15);color:var(--green);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
+
+@media(max-width:768px){
+  html,body{font-size:16px;}
+  .slide{padding:1rem 1.2rem 1rem;}
+  h1{font-size:1.8rem;}h2{font-size:1.4rem;margin-bottom:.6rem;}
+  .card-grid{flex-direction:column;align-items:center;}
+  .card{max-width:100%;min-width:0;}
+  .two-col{flex-direction:column;gap:1rem;}
+  .compare-table th,.compare-table td{padding:.5rem .6rem;font-size:.85rem;}
+  .controls button{width:40px;height:40px;font-size:1rem;}
+  .module-title{font-size:.7rem;left:.8rem;top:.6rem;}
+  .module-badge{font-size:.65rem;top:.6rem;right:.6rem;padding:.2rem .6rem;}
+}
+
+/* ── Chapter Menu ── */
+.chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;font-family:system-ui,-apple-system,sans-serif;}
+.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.9);font-size:.8rem;cursor:pointer;transition:border-color .2s;}
+.chapter-btn:hover{border-color:var(--green);}
+.chapter-icon{color:var(--green);font-weight:700;}
+.chapter-arrow{font-size:.6rem;opacity:.5;transition:transform .2s;}
+.chapter-menu.open .chapter-arrow{transform:rotate(180deg);}
+.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:180px;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;}
+.chapter-menu.open .chapter-list{display:block;}
+.chapter-item{display:flex;align-items:center;gap:8px;padding:8px 14px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
+.chapter-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+.chapter-item.active{color:var(--green);font-weight:600;}
+.chapter-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;}
+.chapter-item.active .chapter-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+</style>
+</head>
+<body>
+
+<div class="module-title">Google Apps Script</div>
+<div class="module-badge">S13 補充單元</div>
+<div class="slides">
+
+<!-- ===== 0: COVER ===== -->
+<div class="slide cover active" data-act="開場" data-index="0">
+  <p style="font-size:1.1rem;color:rgba(255,255,255,.6);margin-bottom:1rem;">AI 100 講 — 補充單元</p>
+  <h1>Google Apps Script<br><span style="font-size:2rem;">最低門檻的自動化入口</span></h1>
+  <p class="subtitle" style="margin-top:1.5rem;font-size:1.3rem;color:rgba(255,255,255,.7);">不需要伺服器、不需要域名、只需要 Google 帳號</p>
+  <p style="color:rgba(255,255,255,.4);margin-top:3rem;font-size:.9rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- ===== 1: 議程 ===== -->
+<div class="slide" data-act="開場" data-index="1">
+  <h2>今天的旅程</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>為什麼要學 GAS？</strong><p>最低門檻的自動化工具</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--blue);">2</div><div class="step-content"><strong>能做什麼？</strong><p>Sheets、Gmail、Drive、Calendar 全自動化</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--gold);">3</div><div class="step-content"><strong>核心概念</strong><p>容器綁定、觸發器、執行限制</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--purple);">4</div><div class="step-content"><strong>實戰範例</strong><p>每日報表 & Telegram Bot</p></div></div>
+    <div class="step fragment" data-order="4"><div class="step-num" style="background:var(--red);">5</div><div class="step-content"><strong>GAS 在 AI 時代的角色</strong><p>從手寫到 AI 自動開發</p></div></div>
+  </div>
+</div>
+
+<!-- ===== 2: Section — 為什麼 ===== -->
+<div class="slide section-title" data-act="為什麼GAS" data-index="2">
+  <p class="subtitle" style="color:rgba(255,255,255,.8);">Part 1</p>
+  <h1>為什麼要學 GAS？</h1>
+  <p class="subtitle" style="margin-top:.5rem;color:rgba(255,255,255,.8);">四個零門檻</p>
+</div>
+
+<!-- ===== 3: 自動化比喻 ===== -->
+<div class="slide" data-act="為什麼GAS" data-index="3">
+  <h2>你每天的重複操作</h2>
+  <div class="flow" style="margin-top:1rem;">
+    <div class="flow-box" style="background:var(--red-lt);border-color:var(--red);">每天手動<br><span class="dim" style="font-size:.8rem;">在 Sheets 整理數據</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);">寫一段 GAS<br><span class="dim" style="font-size:.8rem;">+ 時間觸發器</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">自動化<br><span class="dim" style="font-size:.8rem;">每天 8 點自動完成</span></div>
+  </div>
+  <div class="card-grid fragment" data-order="0" style="margin-top:1.5rem;">
+    <div class="card" style="border-color:var(--green);padding:1.2rem;">
+      <h3 class="green">不需要伺服器</h3>
+      <p>跑在 Google 的雲端上</p>
+    </div>
+    <div class="card" style="border-color:var(--green);padding:1.2rem;">
+      <h3 class="green">不需要域名</h3>
+      <p>Google 幫你搞定</p>
+    </div>
+    <div class="card" style="border-color:var(--green);padding:1.2rem;">
+      <h3 class="green">不需要安裝</h3>
+      <p>瀏覽器就能寫</p>
+    </div>
+    <div class="card" style="border-color:var(--green);padding:1.2rem;">
+      <h3 class="green">只需 Google 帳號</h3>
+      <p>每個人都有</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 4: 能做什麼 ===== -->
+<div class="slide" data-act="為什麼GAS" data-index="4">
+  <h2>GAS 能自動化什麼？</h2>
+  <table class="compare-table">
+    <thead><tr><th>服務</th><th>自動化範例</th></tr></thead>
+    <tbody>
+      <tr class="fragment" data-order="0"><td><strong class="green">Sheets</strong></td><td>定時匯總數據、自動產生報表、資料清洗</td></tr>
+      <tr class="fragment" data-order="1"><td><strong class="green">Gmail</strong></td><td>自動回覆、批次轉寄、郵件分類</td></tr>
+      <tr class="fragment" data-order="2"><td><strong class="green">Drive</strong></td><td>檔案自動歸檔、權限批次管理、備份</td></tr>
+      <tr class="fragment" data-order="3"><td><strong class="green">Calendar</strong></td><td>自動建立會議、衝突偵測、提醒通知</td></tr>
+      <tr class="fragment" data-order="4"><td><strong class="green">Forms</strong></td><td>表單提交後自動處理、寄確認信</td></tr>
+      <tr class="fragment" data-order="5"><td><strong class="green">Docs / Slides</strong></td><td>自動產生文件/簡報、批次更新內容</td></tr>
+    </tbody>
+  </table>
+  <div class="info-box analogy fragment" data-order="6">
+    <div class="label">還有更多</div>
+    <p>用 <code>UrlFetchApp</code> 可以呼叫任何外部 API — Telegram Bot、LINE Bot、Slack、Notion 都行。</p>
+  </div>
+</div>
+
+<!-- ===== 5: Section — 核心概念 ===== -->
+<div class="slide section-title" data-act="核心概念" data-index="5" style="background:var(--blue);">
+  <p class="subtitle" style="color:rgba(255,255,255,.8);">Part 2</p>
+  <h1>核心概念</h1>
+  <p class="subtitle" style="margin-top:.5rem;color:rgba(255,255,255,.8);">容器綁定、觸發器、限制</p>
+</div>
+
+<!-- ===== 6: 容器綁定 vs 獨立 ===== -->
+<div class="slide" data-act="核心概念" data-index="6">
+  <h2>容器綁定 vs 獨立專案</h2>
+  <div class="two-col" style="margin-top:1rem;">
+    <div class="col">
+      <h3 class="blue">容器綁定 (Container-bound)</h3>
+      <div class="code-block" style="font-size:.95rem;">
+        Sheets → 工具 → Apps Script<br>
+        <span style="color:var(--g600);">專屬於這個 Sheets</span><br>
+        <span style="color:var(--g600);">可以直接操作它的資料</span>
+      </div>
+    </div>
+    <div class="col fragment" data-order="0">
+      <h3 class="blue">獨立專案 (Standalone)</h3>
+      <div class="code-block" style="font-size:.95rem;">
+        script.google.com → 新專案<br>
+        <span style="color:var(--g600);">獨立存在</span><br>
+        <span style="color:var(--g600);">不綁定任何文件</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 7: 觸發器 ===== -->
+<div class="slide" data-act="核心概念" data-index="7">
+  <h2>觸發器（Trigger）</h2>
+  <table class="compare-table">
+    <thead><tr><th>類型</th><th>說明</th><th>範例</th></tr></thead>
+    <tbody>
+      <tr class="fragment" data-order="0"><td><strong class="green">時間觸發</strong></td><td>定時執行</td><td>每天 8:00 寄報表</td></tr>
+      <tr class="fragment" data-order="1"><td><strong class="blue">表單觸發</strong></td><td>提交時觸發</td><td>填完表單自動寄確認信</td></tr>
+      <tr class="fragment" data-order="2"><td><strong class="gold">編輯觸發</strong></td><td>修改時觸發</td><td>Sheets 被改時自動驗證</td></tr>
+      <tr class="fragment" data-order="3"><td><strong class="purple">開啟觸發</strong></td><td>打開文件觸發</td><td>開 Sheets 時更新資料</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 8: 執行限制 ===== -->
+<div class="slide" data-act="核心概念" data-index="8">
+  <h2>執行限制</h2>
+  <table class="compare-table">
+    <thead><tr><th>限制</th><th>免費帳號</th><th>Workspace 帳號</th></tr></thead>
+    <tbody>
+      <tr class="fragment" data-order="0"><td>單次執行時間</td><td><strong class="red">6 分鐘</strong></td><td><strong class="green">30 分鐘</strong></td></tr>
+      <tr class="fragment" data-order="1"><td>每日觸發器</td><td>20 個</td><td>20 個</td></tr>
+      <tr class="fragment" data-order="2"><td>每日 Email</td><td><strong class="red">100 封</strong></td><td><strong class="green">1,500 封</strong></td></tr>
+      <tr class="fragment" data-order="3"><td>每日 UrlFetch</td><td>20,000 次</td><td>100,000 次</td></tr>
+    </tbody>
+  </table>
+  <div class="info-box tip fragment" data-order="4">
+    <div class="label">免費夠用</div>
+    <p>一般個人使用，免費帳號的額度已經非常充足。</p>
+  </div>
+</div>
+
+<!-- ===== 9: Section — 實戰 ===== -->
+<div class="slide section-title" data-act="實戰範例" data-index="9" style="background:var(--gold);">
+  <p class="subtitle" style="color:rgba(255,255,255,.8);">Part 3</p>
+  <h1>實戰範例</h1>
+  <p class="subtitle" style="margin-top:.5rem;color:rgba(255,255,255,.8);">每日報表 & Telegram Bot</p>
+</div>
+
+<!-- ===== 10: 每日報表 ===== -->
+<div class="slide" data-act="實戰範例" data-index="10">
+  <h2>範例一：每日自動寄報表</h2>
+  <div class="code-block" style="font-size:.9rem;">
+    <span style="color:var(--blue);font-weight:700;">function</span> sendDailyReport() {<br>
+    &nbsp;&nbsp;<span style="color:var(--g600);">// 讀取 Sheets 資料</span><br>
+    &nbsp;&nbsp;<span style="color:var(--blue);">const</span> sheet = SpreadsheetApp.getActive().getSheetByName(<span style="color:var(--green);">"銷售"</span>);<br>
+    &nbsp;&nbsp;<span style="color:var(--blue);">const</span> data = sheet.getDataRange().getValues();<br><br>
+    &nbsp;&nbsp;<span style="color:var(--g600);">// 計算總額</span><br>
+    &nbsp;&nbsp;<span style="color:var(--blue);">const</span> total = data.slice(1).reduce((sum, row) => sum + row[2], 0);<br><br>
+    &nbsp;&nbsp;<span style="color:var(--g600);">// 寄 Email</span><br>
+    &nbsp;&nbsp;GmailApp.sendEmail(<span style="color:var(--green);">"boss@company.com"</span>,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--green);">"每日銷售報表"</span>,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--green);">`今日銷售總額：${total} 元`</span>);<br>
+    }<br>
+    <span style="color:var(--g600);">// 設定時間觸發器 → 每天 08:00 自動執行</span>
+  </div>
+</div>
+
+<!-- ===== 11: Telegram Bot ===== -->
+<div class="slide" data-act="實戰範例" data-index="11">
+  <h2>範例二：Telegram Bot Webhook</h2>
+  <div class="code-block" style="font-size:.9rem;">
+    <span style="color:var(--blue);font-weight:700;">function</span> doPost(e) {<br>
+    &nbsp;&nbsp;<span style="color:var(--blue);">const</span> data = JSON.parse(e.postData.contents);<br>
+    &nbsp;&nbsp;<span style="color:var(--blue);">const</span> chatId = data.message.chat.id;<br>
+    &nbsp;&nbsp;<span style="color:var(--blue);">const</span> text = data.message.text;<br><br>
+    &nbsp;&nbsp;<span style="color:var(--g600);">// 回覆訊息</span><br>
+    &nbsp;&nbsp;UrlFetchApp.fetch(<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--green);">`https://api.telegram.org/bot${TOKEN}/sendMessage`</span>,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;{ method: <span style="color:var(--green);">"post"</span>, payload: { chat_id: chatId, text: <span style="color:var(--green);">`你說了: ${text}`</span> } }<br>
+    &nbsp;&nbsp;);<br>
+    }
+  </div>
+  <div class="info-box success fragment" data-order="0">
+    <p><strong>免費的 Telegram Bot 後端</strong> — 不需要租伺服器，GAS 就是你的 webhook 處理器。</p>
+  </div>
+</div>
+
+<!-- ===== 12: GAS 的限制 ===== -->
+<div class="slide" data-act="實戰範例" data-index="12">
+  <h2>GAS 的限制（也是為什麼需要 clasp）</h2>
+  <table class="compare-table">
+    <thead><tr><th>限制</th><th>影響</th></tr></thead>
+    <tbody>
+      <tr class="fragment" data-order="0"><td><strong>網頁編輯器功能陽春</strong></td><td>沒有 Copilot、沒有自動補全</td></tr>
+      <tr class="fragment" data-order="1"><td><strong>沒有版本控制</strong></td><td>改壞了回不去</td></tr>
+      <tr class="fragment" data-order="2"><td><strong>無法多人協作</strong></td><td>程式碼衝突沒辦法 merge</td></tr>
+      <tr class="fragment" data-order="3"><td><strong>只支援 JavaScript</strong></td><td>不支援 TypeScript</td></tr>
+      <tr class="fragment" data-order="4"><td><strong>偵錯工具有限</strong></td><td>console.log 要到 Execution log 看</td></tr>
+    </tbody>
+  </table>
+  <div class="info-box analogy fragment" data-order="5">
+    <div class="label">解決方案</div>
+    <p><strong>clasp</strong> — 把 GAS 搬回 VS Code 本地開發，完整 Git + TypeScript + Copilot 支援。（見 S16）</p>
+  </div>
+</div>
+
+<!-- ===== 13: AI 時代角色 ===== -->
+<div class="slide" data-act="實戰範例" data-index="13">
+  <h2>GAS 在 AI 時代的角色</h2>
+  <div class="step-list" style="margin-top:.8rem;">
+    <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--g400);">1</div><div class="step-content"><strong>Level 1：手動寫 GAS</strong><p>在網頁編輯器裡一行一行寫</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--blue);">2</div><div class="step-content"><strong>Level 2：AI 幫你寫 GAS</strong><p>ChatGPT 生成 → 複製貼上到編輯器</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--green);">3</div><div class="step-content"><strong>Level 3：clasp + Claude Code</strong><p>AI 直接在本地開發 + 部署到 Google</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--purple);">4</div><div class="step-content"><strong>Level 4：gws MCP + AI Agent</strong><p>AI 自主操控 Google 服務，不再需要寫腳本</p></div></div>
+  </div>
+  <div class="info-box success fragment" data-order="4">
+    <p>GAS 是 Google 自動化的<strong>地基</strong>，後面的 clasp、gcloud、gws 都是在這個地基上蓋更高的樓。</p>
+  </div>
+</div>
+
+<!-- ===== 14: 封底 ===== -->
+<div class="slide cover" data-act="總結" data-index="14">
+  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:2rem;">一句話記住這堂課</p>
+  <h1 style="font-size:2.6rem;line-height:1.5;">
+    每個人都有一個<br>
+    <span style="color:var(--green);">免費的自動化引擎</span><br><br>
+    它叫 Google Apps Script
+  </h1>
+  <p style="color:rgba(255,255,255,.5);margin-top:1.5rem;font-size:1.1rem;">不需要伺服器、不需要域名、只需要一個 Google 帳號</p>
+  <p style="color:rgba(255,255,255,.4);margin-top:1.5rem;font-size:.9rem;">developers.google.com/apps-script</p>
+</div>
+
+</div><!-- /slides -->
+
+<div id="chapterMenu" class="chapter-menu">
+  <button id="chapterBtn" class="chapter-btn">
+    <span class="chapter-icon">§</span>
+    <span id="chapterLabel">開場</span>
+    <span class="chapter-arrow">▼</span>
+  </button>
+  <div id="chapterList" class="chapter-list"></div>
+</div>
+
+<div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>&larr;</button><button id="next">&rarr;</button></div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),tot=slides.length;
+let idx=0,fi=-1;
+document.getElementById('total').textContent=tot;
+const gf=el=>el.querySelectorAll('.fragment');
+function go(n){slides.forEach((s,i)=>{s.classList.remove('active','prev');if(i<n)s.classList.add('prev');s.querySelectorAll('.fragment').forEach(f=>f.classList.remove('visible'));});idx=n;fi=-1;slides[idx].classList.add('active');ui();}
+function ui(){document.getElementById('current').textContent=idx+1;document.getElementById('prev').disabled=idx===0&&fi<=0;const f=gf(slides[idx]);document.getElementById('next').disabled=idx===tot-1&&fi>=f.length-1;document.getElementById('progress').style.width=((idx+1)/tot*100)+'%';}
+function adv(){const f=gf(slides[idx]);if(fi<f.length-1){fi++;f[fi].classList.add('visible');ui();}else if(idx<tot-1)go(idx+1);}
+function ret(){const f=gf(slides[idx]);if(fi>=0){f[fi].classList.remove('visible');fi--;ui();}else if(idx>0){go(idx-1);const p=gf(slides[idx]);p.forEach(x=>x.classList.add('visible'));fi=p.length-1;ui();}}
+document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
+document.addEventListener('keydown',e=>{if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}if(e.key==='Home'){e.preventDefault();go(0);}if(e.key==='End'){e.preventDefault();go(tot-1);}if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}});
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
+window.addEventListener('message',function(e){if(!e.data||typeof e.data!=='object')return;if(e.data.type==='slide-control'){if(e.data.action==='next')adv();else if(e.data.action==='prev')ret();else if(e.data.action==='goto'&&typeof e.data.index==='number')go(e.data.index);}});
+
+// ── Chapter Menu ──
+var chapterMenu=document.getElementById('chapterMenu'),chapterBtn=document.getElementById('chapterBtn'),chapterLabel=document.getElementById('chapterLabel'),chapterList=document.getElementById('chapterList');
+function getChapters(){var m=new Map();slides.forEach(function(s,i){var a=s.dataset.act;if(a&&!m.has(a))m.set(a,i);});return m;}
+function buildChapterMenu(){var ch=getChapters();chapterList.innerHTML='';var cur=slides[idx]&&slides[idx].dataset.act||'';ch.forEach(function(si,name){var d=document.createElement('div');d.className='chapter-item'+(name===cur?' active':'');d.innerHTML='<span class="chapter-dot"></span>'+name;d.onclick=function(){go(si);closeChapterMenu();};chapterList.appendChild(d);});chapterLabel.textContent=cur||'\u5c0e\u89bd';}
+function toggleChapterMenu(){chapterMenu.classList.toggle('open');if(chapterMenu.classList.contains('open'))buildChapterMenu();}
+function closeChapterMenu(){chapterMenu.classList.remove('open');}
+chapterBtn.onclick=toggleChapterMenu;
+document.addEventListener('click',function(e){if(!chapterMenu.contains(e.target))closeChapterMenu();});
+var _origUi=ui;ui=function(){_origUi();var cur=slides[idx]&&slides[idx].dataset.act||'';chapterLabel.textContent=cur||'\u5c0e\u89bd';};
+go(0);
+</script>
+</body>
+</html>

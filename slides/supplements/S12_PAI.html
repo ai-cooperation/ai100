@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S12 — Personal AI Infrastructure</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   S12: PAI — Dark Cinematic
+   Based on S09 v2 design system
+   ═══════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+  --orange:#E8710A; --orange-lt:#FEF0E1;
+  --dark:#0a0a14; --dark2:#111122; --dark3:#16213e;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--dark);}
+
+.slides{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;opacity:0;transform:translateX(30px);pointer-events:none;transition:opacity .5s,transform .5s ease;overflow:hidden;}
+.slide.active{opacity:1;transform:none;pointer-events:auto;}
+.slide.prev{opacity:0;transform:translateX(-30px);}
+
+.slide.clean{background:var(--white);color:var(--g900);padding-top:3.5rem;overflow-y:auto;justify-content:flex-start;}
+.slide.clean::before,.slide.clean::after{content:'';flex:1 0 0px;}
+
+.slide.poster{background-size:cover;background-position:center;color:#fff;text-align:center;}
+.slide.poster::before{content:'';position:absolute;inset:0;z-index:1;}
+.slide.poster>*{position:relative;z-index:2;}
+.slide.poster.overlay-bottom::before{background:linear-gradient(to bottom,rgba(0,0,0,.15) 0%,rgba(0,0,0,.78) 100%);}
+.slide.poster.overlay-heavy::before{background:linear-gradient(to bottom,rgba(0,0,0,.45) 0%,rgba(0,0,0,.85) 100%);}
+.slide.poster.overlay-center::before{background:radial-gradient(ellipse at center,rgba(0,0,0,.3) 0%,rgba(0,0,0,.8) 100%);}
+
+.slide.dataviz{background:var(--dark);color:#fff;padding-top:3.5rem;}
+
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:2rem;font-weight:700;color:var(--g900);margin-bottom:1rem;line-height:1.4;}
+.slide.dataviz h2,.slide.poster h2{color:#fff;}
+h3{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.1rem;line-height:1.8;}
+.subtitle{font-size:1.15rem;font-weight:500;}
+.dim{opacity:.6;}
+
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+.step-list{text-align:left;max-width:800px;width:100%;}
+.step{display:flex;gap:1.2rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:40px;height:40px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.1rem;}.step-content p{font-size:1rem;color:var(--g600);margin-top:.15rem;}
+
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;max-width:860px;width:100%;margin-top:1rem;}
+.stat-box{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:16px;padding:1.3rem;text-align:center;}
+.stat-box .val{font-size:2.4rem;font-weight:900;color:var(--purple);line-height:1.1;}
+.stat-box .label{font-size:.9rem;color:rgba(255,255,255,.5);margin-top:.3rem;}
+
+.compare-table{border-collapse:collapse;font-size:1rem;margin-top:.6rem;width:100%;max-width:860px;}
+.compare-table th{background:rgba(255,255,255,.08);color:rgba(255,255,255,.9);padding:.5rem 1rem;text-align:left;font-size:.95rem;}
+.compare-table td{padding:.5rem 1rem;border-bottom:1px solid rgba(255,255,255,.06);font-size:.95rem;color:rgba(255,255,255,.75);}
+.compare-table tr:hover td{background:rgba(255,255,255,.03);}
+.compare-table .highlight{color:var(--green);font-weight:700;}
+.compare-table .warn{color:var(--orange);font-weight:700;}
+.compare-table .hl-purple{color:var(--purple);font-weight:700;}
+
+.card-grid{display:flex;gap:1.2rem;flex-wrap:wrap;justify-content:center;margin-top:1rem;max-width:960px;}
+.card{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:16px;padding:1.5rem;min-width:200px;max-width:280px;flex:1;transition:border-color .2s;}
+.card:hover{border-color:var(--purple);}
+.card h3{color:#fff;margin-bottom:.3rem;}
+.card p{font-size:.95rem;color:rgba(255,255,255,.55);line-height:1.6;}
+
+.code-block{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:12px;padding:1.3rem 1.8rem;text-align:left;max-width:860px;width:100%;font-family:'Fira Code',monospace;font-size:.95rem;line-height:1.8;margin:.8rem 0;color:rgba(255,255,255,.85);}
+.code-block .comment{color:rgba(255,255,255,.35);}
+.code-block .cmd{color:var(--purple);}
+
+.flow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1.2rem 0;}
+.flow-box{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.12);border-radius:12px;padding:.7rem 1rem;font-size:1rem;font-weight:700;text-align:center;color:#fff;}
+.flow-arrow{color:var(--purple);font-size:1.5rem;font-weight:900;}
+
+.info-box{border-radius:12px;padding:1.3rem 1.8rem;max-width:800px;width:100%;text-align:left;margin-top:.8rem;}
+.info-box.success{background:rgba(15,157,138,.1);border-left:4px solid var(--green);}
+.info-box.success .label{color:var(--green);}
+.info-box.success p{color:rgba(255,255,255,.75);}
+.info-box.tip{background:rgba(124,58,237,.1);border-left:4px solid var(--purple);}
+.info-box.tip .label{color:var(--purple);}
+.info-box.tip p{color:rgba(255,255,255,.75);}
+
+.quote-box{max-width:800px;width:100%;background:rgba(255,255,255,.04);border-left:5px solid var(--purple);border-radius:0 12px 12px 0;padding:1.5rem 2rem;margin:.8rem 0;text-align:left;}
+.quote-box .quote-text{font-size:1.3rem;font-weight:700;line-height:1.6;color:#fff;}
+.quote-box .quote-src{font-size:.9rem;color:rgba(255,255,255,.4);margin-top:.5rem;}
+
+.bottom-line{max-width:800px;width:100%;background:rgba(124,58,237,.08);border:2px solid rgba(124,58,237,.25);border-radius:16px;padding:2rem;text-align:center;margin-top:1rem;}
+.bottom-line h3{font-size:1.6rem;color:var(--purple);margin-bottom:.8rem;}
+.bottom-line p{font-size:1.05rem;color:rgba(255,255,255,.7);max-width:640px;margin:0 auto;line-height:1.7;}
+
+.poster-subtitle{font-size:1.3rem;font-weight:500;color:rgba(255,255,255,.7);}
+
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid rgba(255,255,255,.15);border-radius:12px;background:rgba(0,0,0,.4);color:rgba(255,255,255,.8);font-size:1.2rem;cursor:pointer;transition:all .15s;backdrop-filter:blur(8px);}
+.controls button:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff;}
+.controls button:disabled{opacity:.2;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;left:auto;right:5rem;z-index:100;color:rgba(255,255,255,.35);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:rgba(15,157,138,.15);color:var(--green);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;backdrop-filter:blur(8px);}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:rgba(255,255,255,.35);font-size:.85rem;font-weight:700;}
+
+@media(max-width:768px){
+  html,body{font-size:16px;}
+  .slide{padding:1rem 1.2rem 1rem;}
+  .slide.clean{padding-top:3rem;}
+  .slide.poster{justify-content:flex-end;padding-bottom:1.5rem;}
+  h1{font-size:1.8rem;}h2{font-size:1.4rem;margin-bottom:.6rem;}
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:.8rem;}
+  .stat-box .val{font-size:1.8rem;}
+  .card-grid{flex-direction:column;align-items:center;}
+  .card{max-width:100%;min-width:0;}
+  .compare-table th,.compare-table td{padding:.5rem .6rem;font-size:.85rem;}
+  .controls button{width:40px;height:40px;font-size:1rem;}
+  .module-title{font-size:.7rem;left:.8rem;top:.6rem;}
+  .module-badge{font-size:.65rem;top:.6rem;right:.6rem;padding:.2rem .6rem;}
+  .quote-box .quote-text{font-size:1.05rem;}
+}
+
+/* ── Chapter Menu ── */
+.chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;font-family:system-ui,-apple-system,sans-serif;}
+.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.9);font-size:.8rem;cursor:pointer;transition:border-color .2s;}
+.chapter-btn:hover{border-color:var(--green);}
+.chapter-icon{color:var(--green);font-weight:700;}
+.chapter-arrow{font-size:.6rem;opacity:.5;transition:transform .2s;}
+.chapter-menu.open .chapter-arrow{transform:rotate(180deg);}
+.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:180px;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;}
+.chapter-menu.open .chapter-list{display:block;}
+.chapter-item{display:flex;align-items:center;gap:8px;padding:8px 14px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
+.chapter-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+.chapter-item.active{color:var(--green);font-weight:600;}
+.chapter-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;}
+.chapter-item.active .chapter-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+</style>
+</head>
+<body>
+
+<div class="module-title">Personal AI Infrastructure</div>
+<div class="module-badge">S12 補充單元</div>
+<div class="slides">
+
+<!-- ===== 0: COVER ===== -->
+<div class="slide poster overlay-heavy active" data-act="開場" data-index="0" style="background-image:url('img/s12/cover.png');">
+  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:1rem;">AI 100 講 — 補充單元</p>
+  <h1>Personal AI<br><span style="color:var(--purple);">Infrastructure</span></h1>
+  <p class="poster-subtitle" style="margin-top:1.5rem;">打造「真正了解你」的 AI 助手 — 目標、風格、偏好，持續學習</p>
+  <p style="color:rgba(255,255,255,.3);margin-top:3rem;font-size:.85rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- ===== 1: 議程 — clean ===== -->
+<div class="slide clean" data-act="開場" data-index="1">
+  <h2>今天的旅程</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--purple);">1</div><div class="step-content"><strong>AI 系統的三個層次</strong><p>Chatbot → Agent → PAI</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--blue);">2</div><div class="step-content"><strong>核心架構</strong><p>TELOS、三層記憶、6 層客製化</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--gold);">3</div><div class="step-content"><strong>PAI vs ECC vs 一般 Claude Code</strong><p>三者定位比較</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--green);">4</div><div class="step-content"><strong>7 個設計原則</strong><p>以人為本的 AI 系統哲學</p></div></div>
+  </div>
+</div>
+
+<!-- ===== 2: Part 1 — poster ===== -->
+<div class="slide poster overlay-heavy" data-act="三個層次" data-index="2" style="background-image:url('img/s12/layers.png');">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 1</p>
+  <h1>AI 系統的三個層次</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">從聊天到個人基礎設施</p>
+</div>
+
+<!-- ===== 3: 三層次 — dataviz ===== -->
+<div class="slide dataviz" data-act="三個層次" data-index="3">
+  <h2>三個層次</h2>
+  <div class="stat-grid">
+    <div class="stat-box fragment" data-order="0">
+      <div class="val" style="font-size:1.6rem;color:var(--g400);">Level 1</div>
+      <div class="label" style="font-size:1rem;color:rgba(255,255,255,.7);margin-top:.5rem;">Chatbot</div>
+      <div class="label">問 → 答 → 忘記<br>例：ChatGPT 網頁版</div>
+    </div>
+    <div class="stat-box fragment" data-order="1">
+      <div class="val" style="font-size:1.6rem;color:var(--blue);">Level 2</div>
+      <div class="label" style="font-size:1rem;color:rgba(255,255,255,.7);margin-top:.5rem;">Agentic Platform</div>
+      <div class="label">問 → 用工具 → 回傳<br>例：Claude Code、Cursor</div>
+    </div>
+    <div class="stat-box fragment" data-order="2" style="border-color:rgba(124,58,237,.4);">
+      <div class="val" style="font-size:1.6rem;">Level 3</div>
+      <div class="label" style="font-size:1rem;color:rgba(255,255,255,.7);margin-top:.5rem;">PAI</div>
+      <div class="label">觀察 → 思考 → 計劃<br>→ 執行 → 驗證 → 學習</div>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="3">
+    <div class="label" style="font-weight:700;font-size:1rem;margin-bottom:.4rem;">關鍵差異</div>
+    <p>PAI 不只幫你做事 — 它<strong>持續學習</strong>，為你量身打造，越用越懂你。</p>
+  </div>
+</div>
+
+<!-- ===== 4: TELOS — dataviz ===== -->
+<div class="slide dataviz" data-act="三個層次" data-index="4">
+  <h2>TELOS — 深度目標理解</h2>
+  <p style="color:rgba(255,255,255,.6);margin-bottom:.6rem;">10 個文件定義「你是誰」</p>
+  <table class="compare-table" style="max-width:700px;">
+    <thead><tr><th>文件</th><th>內容</th></tr></thead>
+    <tbody>
+      <tr class="fragment" data-order="0"><td class="hl-purple">MISSION.md</td><td>你的使命</td></tr>
+      <tr class="fragment" data-order="0"><td class="hl-purple">GOALS.md</td><td>你的目標</td></tr>
+      <tr class="fragment" data-order="1"><td class="hl-purple">PROJECTS.md</td><td>你的專案</td></tr>
+      <tr class="fragment" data-order="1"><td class="hl-purple">BELIEFS.md</td><td>你的信念</td></tr>
+      <tr class="fragment" data-order="2"><td class="hl-purple">MODELS.md</td><td>你的思維模型</td></tr>
+      <tr class="fragment" data-order="2"><td class="hl-purple">STRATEGIES.md</td><td>你的策略</td></tr>
+      <tr class="fragment" data-order="3"><td class="hl-purple">NARRATIVES.md</td><td>你的敘事</td></tr>
+      <tr class="fragment" data-order="3"><td class="hl-purple">LEARNED.md</td><td>你學到的</td></tr>
+      <tr class="fragment" data-order="4"><td class="hl-purple">CHALLENGES.md</td><td>你的挑戰</td></tr>
+      <tr class="fragment" data-order="4"><td class="hl-purple">IDEAS.md</td><td>你的想法</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 5: 三層記憶 — dataviz ===== -->
+<div class="slide dataviz" data-act="三個層次" data-index="5">
+  <h2>三層記憶系統</h2>
+  <div class="flow" style="margin-top:1rem;">
+    <div class="flow-box" style="border-color:var(--red);min-width:180px;">Hot Memory<br><span style="font-size:.8rem;opacity:.5;">近期互動（當前 session）</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--gold);min-width:180px;">Warm Memory<br><span style="font-size:.8rem;opacity:.5;">短期模式（近幾天）</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--purple);min-width:180px;">Cold Memory<br><span style="font-size:.8rem;opacity:.5;">歷史學習（長期累積）</span></div>
+  </div>
+  <div class="info-box success fragment" data-order="0" style="margin-top:1.2rem;">
+    <div class="label" style="font-weight:700;font-size:1rem;margin-bottom:.4rem;">持續改進循環</div>
+    <p>每次互動都會產生信號（評分、成功/失敗），回饋到持續改進循環 — AI 真的會「記住」什麼對你有效。</p>
+  </div>
+</div>
+
+<!-- ===== 6: USER/SYSTEM 分離 — dataviz ===== -->
+<div class="slide dataviz" data-act="三個層次" data-index="6">
+  <h2>USER / SYSTEM 分離架構</h2>
+  <div class="code-block">
+    ~/.claude/<br>
+    ├── <span class="cmd">USER/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">← 你的自訂（身份、偏好、工作流）</span><br>
+    │ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">  升級不會影響這些檔案</span><br>
+    └── <span class="cmd">SYSTEM/</span> &nbsp;&nbsp;&nbsp;<span class="comment">← PAI 系統（技能、工具、安全）</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">  升級時自動更新</span>
+  </div>
+  <div class="info-box tip fragment" data-order="0">
+    <div class="label" style="font-weight:700;font-size:1rem;margin-bottom:.4rem;">好處</div>
+    <p>升級 PAI 版本時，你的<strong>個人設定完全保留</strong> — 像手機系統升級不會刪除你的照片。</p>
+  </div>
+</div>
+
+<!-- ===== 7: 6 層客製化 — dataviz ===== -->
+<div class="slide dataviz" data-act="三個層次" data-index="7">
+  <h2>6 層客製化</h2>
+  <table class="compare-table">
+    <thead><tr><th>層級</th><th>內容</th><th>範例</th></tr></thead>
+    <tbody>
+      <tr class="fragment" data-order="0"><td class="hl-purple">Identity</td><td>名字、語氣、人格</td><td>"叫我 Alan，用繁中回答"</td></tr>
+      <tr class="fragment" data-order="1"><td class="hl-purple">Preferences</td><td>技術棧、工具偏好</td><td>"偏好 Python，用 pytest"</td></tr>
+      <tr class="fragment" data-order="2"><td class="hl-purple">Workflows</td><td>工作流程模式</td><td>"每次改完要跑測試"</td></tr>
+      <tr class="fragment" data-order="3"><td class="hl-purple">Skills</td><td>可用技能</td><td>40+ 內建技能</td></tr>
+      <tr class="fragment" data-order="4"><td class="hl-purple">Hooks</td><td>事件回應</td><td>session 結束時自動保存</td></tr>
+      <tr class="fragment" data-order="5"><td class="hl-purple">Memory</td><td>記憶規則</td><td>什麼值得記住</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 8: 通知 & 語音 — dataviz ===== -->
+<div class="slide dataviz" data-act="三個層次" data-index="8">
+  <h2>通知系統 & 語音系統</h2>
+  <div class="card-grid" style="max-width:700px;">
+    <div class="card fragment" data-order="0" style="border-color:rgba(124,58,237,.3);">
+      <h3 style="color:var(--purple);">ntfy 推播</h3>
+      <p>手機即時通知<br>長時間任務自動通知完成</p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:rgba(124,58,237,.3);">
+      <h3 style="color:var(--purple);">Discord 通知</h3>
+      <p>團隊通知頻道<br>重要更新即時推送</p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-color:rgba(124,58,237,.3);">
+      <h3 style="color:var(--purple);">ElevenLabs TTS</h3>
+      <p>任務完成語音回報<br>Session 摘要朗讀</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 9: Part 3 — poster ===== -->
+<div class="slide poster overlay-center" data-act="三者比較" data-index="9" style="background-image:url('img/s12/mirror.png');">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 3</p>
+  <h1>三者比較</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">一般 Claude Code vs ECC vs PAI</p>
+</div>
+
+<!-- ===== 10: 比較表 — dataviz ===== -->
+<div class="slide dataviz" data-act="三者比較" data-index="10">
+  <h2>PAI vs ECC vs 一般 Claude Code</h2>
+  <table class="compare-table" style="font-size:.9rem;">
+    <thead><tr><th></th><th>一般 Claude Code</th><th>ECC</th><th>PAI</th></tr></thead>
+    <tbody>
+      <tr class="fragment" data-order="0"><td style="color:rgba(255,255,255,.9);font-weight:700;">定位</td><td>程式碼助手</td><td>開發效能優化</td><td class="hl-purple">個人全面 AI 系統</td></tr>
+      <tr class="fragment" data-order="1"><td style="color:rgba(255,255,255,.9);font-weight:700;">記憶</td><td>CLAUDE.md</td><td>Hook 持久化</td><td class="hl-purple">三層記憶系統</td></tr>
+      <tr class="fragment" data-order="2"><td style="color:rgba(255,255,255,.9);font-weight:700;">目標</td><td>完成任務</td><td>寫更好的程式</td><td class="hl-purple">實現人生目標</td></tr>
+      <tr class="fragment" data-order="3"><td style="color:rgba(255,255,255,.9);font-weight:700;">學習</td><td>無</td><td>自動提取模式</td><td class="hl-purple">持續學習循環</td></tr>
+      <tr class="fragment" data-order="4"><td style="color:rgba(255,255,255,.9);font-weight:700;">範圍</td><td>軟體開發</td><td>軟體開發</td><td class="hl-purple">工作 + 生活全面</td></tr>
+      <tr class="fragment" data-order="5"><td style="color:rgba(255,255,255,.9);font-weight:700;">通知</td><td>無</td><td>無</td><td class="hl-purple">ntfy + Discord</td></tr>
+      <tr class="fragment" data-order="5"><td style="color:rgba(255,255,255,.9);font-weight:700;">語音</td><td>無</td><td>無</td><td class="hl-purple">ElevenLabs TTS</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 11: 安裝 — dataviz ===== -->
+<div class="slide dataviz" data-act="三者比較" data-index="11">
+  <h2>安裝 PAI</h2>
+  <div class="code-block">
+    <span class="comment"># 下載</span><br>
+    <span class="cmd">git clone https://github.com/danielmiessler/Personal_AI_Infrastructure.git</span><br>
+    <span class="cmd">cd Personal_AI_Infrastructure/Releases/v4.0.3</span><br><br>
+    <span class="comment"># 安裝到 ~/.claude/</span><br>
+    <span class="cmd">cp -r .claude ~/ && cd ~/.claude && bash install.sh</span><br><br>
+    <span class="comment"># 啟動</span><br>
+    <span class="cmd">source ~/.zshrc && pai</span>
+  </div>
+  <div class="info-box tip fragment" data-order="0">
+    <div class="label" style="font-weight:700;font-size:1rem;margin-bottom:.4rem;">自動偵測</div>
+    <p>安裝程式會自動偵測系統、安裝前置需求、設定個人化參數。</p>
+  </div>
+</div>
+
+<!-- ===== 12: 適合誰 — dataviz ===== -->
+<div class="slide dataviz" data-act="三者比較" data-index="12">
+  <h2>PAI 適合誰？</h2>
+  <div class="card-grid" style="max-width:860px;">
+    <div class="card fragment" data-order="0" style="border-color:rgba(124,58,237,.3);">
+      <h3>想要 AI 了解自己</h3>
+      <p>不只完成任務，還要知道你的目標和偏好</p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:rgba(124,58,237,.3);">
+      <h3>不只寫程式</h3>
+      <p>管理專案、研究、內容創作 — 全面 AI 助手</p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-color:rgba(124,58,237,.3);">
+      <h3>願意投入設定</h3>
+      <p>花時間寫 TELOS 文件（自我定義），換取長期效率</p>
+    </div>
+    <div class="card fragment" data-order="3" style="border-color:rgba(124,58,237,.3);">
+      <h3>想要持續改進</h3>
+      <p>AI 系統越用越好，持續學習優化</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 13: 7 設計原則 — dataviz ===== -->
+<div class="slide dataviz" data-act="三者比較" data-index="13">
+  <h2>7 個設計原則</h2>
+  <table class="compare-table" style="max-width:800px;">
+    <thead><tr><th>#</th><th>原則</th><th>精神</th></tr></thead>
+    <tbody>
+      <tr class="fragment" data-order="0"><td class="hl-purple">1</td><td>以人為本</td><td>AI 服務你的目標，不是反過來</td></tr>
+      <tr class="fragment" data-order="1"><td class="hl-purple">2</td><td>科學方法</td><td>觀察、假設、實驗、驗證</td></tr>
+      <tr class="fragment" data-order="2"><td class="hl-purple">3</td><td>先想清楚再動手</td><td>思考 > 提示詞 > 程式碼</td></tr>
+      <tr class="fragment" data-order="3"><td class="hl-purple">4</td><td>架構比模型重要</td><td>好的系統設計 > 換更強的模型</td></tr>
+      <tr class="fragment" data-order="4"><td class="hl-purple">5</td><td>確定性基礎</td><td>用程式碼和 CLI 控制，不靠 AI 猜測</td></tr>
+      <tr class="fragment" data-order="5"><td class="hl-purple">6</td><td>模組化</td><td>每個 skill 獨立，可組合</td></tr>
+      <tr class="fragment" data-order="5"><td class="hl-purple">7</td><td>持續改進</td><td>每次互動都是學習機會</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 14: 封底 ===== -->
+<div class="slide poster overlay-heavy" data-act="總結" data-index="14" style="background-image:url('img/s12/cover.png');">
+  <p style="font-size:1rem;color:rgba(255,255,255,.4);margin-bottom:2rem;">一句話記住</p>
+  <h1 style="font-size:2.6rem;line-height:1.5;">
+    AI 不該每次都從零開始<br><br>
+    PAI 讓它<br>
+    <span style="color:var(--purple);">真正了解你</span>
+  </h1>
+  <p style="color:rgba(255,255,255,.5);margin-top:2rem;font-size:1.1rem;">
+    <strong style="color:var(--purple);">架構比模型重要</strong> — 好的系統設計 > 換更強的模型
+  </p>
+  <p style="color:rgba(255,255,255,.25);margin-top:2rem;font-size:.85rem;">github.com/danielmiessler/Personal_AI_Infrastructure</p>
+</div>
+
+</div><!-- /slides -->
+
+<div id="chapterMenu" class="chapter-menu">
+  <button id="chapterBtn" class="chapter-btn">
+    <span class="chapter-icon">§</span>
+    <span id="chapterLabel">開場</span>
+    <span class="chapter-arrow">▼</span>
+  </button>
+  <div id="chapterList" class="chapter-list"></div>
+</div>
+
+<div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>&larr;</button><button id="next">&rarr;</button></div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),tot=slides.length;
+let idx=0,fi=-1;
+document.getElementById('total').textContent=tot;
+const gf=el=>el.querySelectorAll('.fragment');
+function go(n){slides.forEach((s,i)=>{s.classList.remove('active','prev');if(i<n)s.classList.add('prev');s.querySelectorAll('.fragment').forEach(f=>f.classList.remove('visible'));});idx=n;fi=-1;slides[idx].classList.add('active');ui();}
+function ui(){document.getElementById('current').textContent=idx+1;document.getElementById('prev').disabled=idx===0&&fi<=0;const f=gf(slides[idx]);document.getElementById('next').disabled=idx===tot-1&&fi>=f.length-1;document.getElementById('progress').style.width=((idx+1)/tot*100)+'%';}
+function adv(){const f=gf(slides[idx]);if(fi<f.length-1){fi++;f[fi].classList.add('visible');ui();}else if(idx<tot-1)go(idx+1);}
+function ret(){const f=gf(slides[idx]);if(fi>=0){f[fi].classList.remove('visible');fi--;ui();}else if(idx>0){go(idx-1);const p=gf(slides[idx]);p.forEach(x=>x.classList.add('visible'));fi=p.length-1;ui();}}
+document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
+document.addEventListener('keydown',e=>{if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}if(e.key==='Home'){e.preventDefault();go(0);}if(e.key==='End'){e.preventDefault();go(tot-1);}if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}});
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
+window.addEventListener('message',function(e){if(!e.data||typeof e.data!=='object')return;if(e.data.type==='slide-control'){if(e.data.action==='next')adv();else if(e.data.action==='prev')ret();else if(e.data.action==='goto'&&typeof e.data.index==='number')go(e.data.index);}});
+
+// ── Chapter Menu ──
+var chapterMenu=document.getElementById('chapterMenu'),chapterBtn=document.getElementById('chapterBtn'),chapterLabel=document.getElementById('chapterLabel'),chapterList=document.getElementById('chapterList');
+function getChapters(){var m=new Map();slides.forEach(function(s,i){var a=s.dataset.act;if(a&&!m.has(a))m.set(a,i);});return m;}
+function buildChapterMenu(){var ch=getChapters();chapterList.innerHTML='';var cur=slides[idx]&&slides[idx].dataset.act||'';ch.forEach(function(si,name){var d=document.createElement('div');d.className='chapter-item'+(name===cur?' active':'');d.innerHTML='<span class="chapter-dot"></span>'+name;d.onclick=function(){go(si);closeChapterMenu();};chapterList.appendChild(d);});chapterLabel.textContent=cur||'\u5c0e\u89bd';}
+function toggleChapterMenu(){chapterMenu.classList.toggle('open');if(chapterMenu.classList.contains('open'))buildChapterMenu();}
+function closeChapterMenu(){chapterMenu.classList.remove('open');}
+chapterBtn.onclick=toggleChapterMenu;
+document.addEventListener('click',function(e){if(!chapterMenu.contains(e.target))closeChapterMenu();});
+var _origUi=ui;ui=function(){_origUi();var cur=slides[idx]&&slides[idx].dataset.act||'';chapterLabel.textContent=cur||'\u5c0e\u89bd';};
+go(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S14 — Google Workspace CLI</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   S14: gws — Light Theme
+   Based on S06 design system
+   ═══════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--white);}
+
+.slides{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;opacity:0;transform:translateX(30px);pointer-events:none;transition:opacity .4s,transform .4s ease;background:var(--white);}
+.slide.active{opacity:1;transform:none;pointer-events:auto;}
+.slide.prev{opacity:0;transform:translateX(-30px);}
+.slide.cover{background:var(--navy);color:#fff;text-align:center;}
+.slide.section-title{background:var(--blue);color:#fff;text-align:center;}
+
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:2rem;font-weight:700;color:var(--g900);margin-bottom:1rem;line-height:1.4;}
+h3{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.1rem;line-height:1.8;}
+.subtitle{font-size:1.15rem;color:var(--g600);font-weight:500;}
+.blue{color:var(--blue);}.green{color:var(--green);}.gold{color:var(--gold);}.red{color:var(--red);}.purple{color:var(--purple);}.dim{color:var(--g600);}.bold{font-weight:700;}
+
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+.card-grid{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;margin-top:1.2rem;max-width:1100px;}
+.card{background:var(--white);border:2px solid var(--g100);border-radius:16px;padding:1.8rem;min-width:220px;max-width:300px;flex:1;transition:border-color .2s;}
+.card:hover{border-color:var(--blue);}
+.card .icon{font-size:2.5rem;margin-bottom:.6rem;}
+.card p{font-size:1rem;color:var(--g600);}
+
+.step-list{text-align:left;max-width:800px;width:100%;}
+.step{display:flex;gap:1.2rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:40px;height:40px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.1rem;}.step-content p{font-size:1rem;color:var(--g600);margin-top:.15rem;}
+
+.code-block{background:var(--g50);border:2px solid var(--g200);border-radius:12px;padding:1.3rem 1.8rem;text-align:left;max-width:860px;width:100%;font-family:'Fira Code',monospace;font-size:1rem;line-height:1.8;margin:.8rem 0;color:var(--g900);}
+
+.compare-table{border-collapse:collapse;font-size:1rem;margin-top:.8rem;width:100%;max-width:860px;}
+.compare-table th{background:var(--navy);color:#fff;padding:.7rem 1rem;text-align:left;font-size:1rem;}
+.compare-table td{padding:.7rem 1rem;border-bottom:1px solid var(--g100);font-size:1rem;}
+.compare-table tr:hover td{background:var(--g50);}
+
+.info-box{border-radius:12px;padding:1.3rem 1.8rem;max-width:800px;width:100%;text-align:left;margin-top:.8rem;}
+.info-box.analogy{background:var(--blue-lt);border-left:4px solid var(--blue);}
+.info-box.warning{background:var(--red-lt);border-left:4px solid var(--red);}
+.info-box.success{background:var(--green-lt);border-left:4px solid var(--green);}
+.info-box.tip{background:var(--gold-lt);border-left:4px solid var(--gold);}
+.info-box .label{font-weight:700;font-size:1rem;margin-bottom:.4rem;}
+.info-box p{font-size:1.05rem;}
+
+.flow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1.2rem 0;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.7rem 1rem;font-size:1rem;font-weight:700;text-align:center;}
+.flow-arrow{color:var(--blue);font-size:1.5rem;font-weight:900;}
+
+.two-col{display:flex;gap:2rem;width:100%;max-width:960px;text-align:left;}
+.two-col .col{flex:1;}
+
+.quote-box{max-width:800px;width:100%;background:var(--g50);border-left:5px solid var(--navy);border-radius:0 12px 12px 0;padding:1.5rem 2rem;margin:.8rem 0;text-align:left;}
+.quote-box .quote-text{font-size:1.3rem;font-weight:700;line-height:1.6;color:var(--navy);}
+.quote-box .quote-src{font-size:.9rem;color:var(--g600);margin-top:.5rem;}
+
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:var(--white);color:var(--g800);font-size:1.2rem;cursor:pointer;transition:all .15s;}
+.controls button:hover{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
+.controls button:disabled{opacity:.25;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;left:auto;right:5rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:rgba(15,157,138,.15);color:var(--green);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
+
+@media(max-width:768px){
+  html,body{font-size:16px;}
+  .slide{padding:1rem 1.2rem 1rem;}
+  h1{font-size:1.8rem;}h2{font-size:1.4rem;margin-bottom:.6rem;}
+  .card-grid{flex-direction:column;align-items:center;}
+  .card{max-width:100%;min-width:0;}
+  .two-col{flex-direction:column;gap:1rem;}
+  .compare-table th,.compare-table td{padding:.5rem .6rem;font-size:.85rem;}
+  .controls button{width:40px;height:40px;font-size:1rem;}
+  .module-title{font-size:.7rem;left:.8rem;top:.6rem;}
+  .module-badge{font-size:.65rem;top:.6rem;right:.6rem;padding:.2rem .6rem;}
+}
+
+/* ── Chapter Menu ── */
+.chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;font-family:system-ui,-apple-system,sans-serif;}
+.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.9);font-size:.8rem;cursor:pointer;transition:border-color .2s;}
+.chapter-btn:hover{border-color:var(--green);}
+.chapter-icon{color:var(--green);font-weight:700;}
+.chapter-arrow{font-size:.6rem;opacity:.5;transition:transform .2s;}
+.chapter-menu.open .chapter-arrow{transform:rotate(180deg);}
+.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:180px;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;}
+.chapter-menu.open .chapter-list{display:block;}
+.chapter-item{display:flex;align-items:center;gap:8px;padding:8px 14px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
+.chapter-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+.chapter-item.active{color:var(--green);font-weight:600;}
+.chapter-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;}
+.chapter-item.active .chapter-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+</style>
+</head>
+<body>
+
+<div class="module-title">Google Workspace CLI</div>
+<div class="module-badge">S14 補充單元</div>
+<div class="slides">
+
+<!-- ===== 0: COVER ===== -->
+<div class="slide cover active" data-act="開場" data-index="0">
+  <p style="font-size:1.1rem;color:rgba(255,255,255,.6);margin-bottom:1rem;">AI 100 講 — 補充單元</p>
+  <h1>Google Workspace CLI<br><span style="font-size:2rem;">一個指令操作所有 Google 服務</span></h1>
+  <p class="subtitle" style="margin-top:1.5rem;font-size:1.3rem;color:rgba(255,255,255,.7);">gws — Drive・Gmail・Calendar・Sheets・Docs</p>
+  <p style="color:rgba(255,255,255,.4);margin-top:3rem;font-size:.9rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- ===== 1: 議程 ===== -->
+<div class="slide" data-act="開場" data-index="1">
+  <h2>今天的旅程</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>gws 核心特色</strong><p>統一入口、動態生成、100+ Agent Skills</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--green);">2</div><div class="step-content"><strong>安裝與認證</strong><p>依賴 gcloud CLI</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--gold);">3</div><div class="step-content"><strong>使用範例</strong><p>Drive・Gmail・Sheets・Calendar</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--purple);">4</div><div class="step-content"><strong>作為 MCP Server</strong><p>讓 Claude Code 直接操作 Google</p></div></div>
+  </div>
+</div>
+
+<!-- ===== 2: 核心特色 ===== -->
+<div class="slide" data-act="核心特色" data-index="2">
+  <h2>gws 核心特色</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-color:var(--blue);padding:1.2rem;">
+      <h3 class="blue">統一入口</h3>
+      <p>一個 <code>gws</code> 指令<br>操作所有 Google 服務</p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:var(--blue);padding:1.2rem;">
+      <h3 class="blue">動態生成</h3>
+      <p>從 Discovery Service 自動建構<br>永遠跟上最新 API</p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-color:var(--blue);padding:1.2rem;">
+      <h3 class="blue">100+ Agent Skills</h3>
+      <p>內建常見工作流<br>的自動化技能</p>
+    </div>
+    <div class="card fragment" data-order="3" style="border-color:var(--purple);padding:1.2rem;">
+      <h3 class="purple">MCP Server</h3>
+      <p>可讓 AI 工具<br>直接呼叫 Google API</p>
+    </div>
+    <div class="card fragment" data-order="4" style="border-color:var(--green);padding:1.2rem;">
+      <h3 class="green">50+ Recipes</h3>
+      <p>Gmail、Drive、Docs<br>Calendar、Sheets 常用腳本</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 3: 安裝 ===== -->
+<div class="slide" data-act="核心特色" data-index="3">
+  <h2>安裝 gws</h2>
+  <div class="code-block">
+    <span style="color:var(--g600);"># 前置需求：gcloud CLI</span><br>
+    <span style="color:var(--blue);font-weight:700;">brew install --cask google-cloud-sdk</span><br>
+    <span style="color:var(--blue);font-weight:700;">gcloud auth login</span><br><br>
+    <span style="color:var(--g600);"># 安裝 gws</span><br>
+    <span style="color:var(--blue);font-weight:700;">npm install -g @googleworkspace/cli</span><br><br>
+    <span style="color:var(--g600);"># 認證設定</span><br>
+    <span style="color:var(--blue);font-weight:700;">gcloud config set project &lt;your-project-id&gt;</span><br>
+    <span style="color:var(--blue);font-weight:700;">gws auth setup</span>
+  </div>
+</div>
+
+<!-- ===== 4: Section — 使用範例 ===== -->
+<div class="slide section-title" data-act="使用範例" data-index="4">
+  <p class="subtitle" style="color:rgba(255,255,255,.8);">Part 2</p>
+  <h1>使用範例</h1>
+  <p class="subtitle" style="margin-top:.5rem;color:rgba(255,255,255,.8);">Drive・Gmail・Sheets・Calendar</p>
+</div>
+
+<!-- ===== 5: Drive ===== -->
+<div class="slide" data-act="使用範例" data-index="5">
+  <h2>Drive 操作</h2>
+  <div class="code-block">
+    <span style="color:var(--g600);"># 列出 Drive 檔案</span><br>
+    <span style="color:var(--blue);font-weight:700;">gws drive files list</span><br><br>
+    <span style="color:var(--g600);"># 搜尋檔案</span><br>
+    <span style="color:var(--blue);font-weight:700;">gws drive files list --query "name contains '報告'"</span><br><br>
+    <span style="color:var(--g600);"># 上傳檔案</span><br>
+    <span style="color:var(--blue);font-weight:700;">gws drive files upload --file ./report.pdf</span><br><br>
+    <span style="color:var(--g600);"># 刪除檔案（移到垃圾桶）</span><br>
+    <span style="color:var(--blue);font-weight:700;">gws drive files trash &lt;fileId&gt;</span>
+  </div>
+</div>
+
+<!-- ===== 6: Gmail & Sheets ===== -->
+<div class="slide" data-act="使用範例" data-index="6">
+  <h2>Gmail & Sheets 操作</h2>
+  <div class="two-col">
+    <div class="col">
+      <h3 class="blue">Gmail</h3>
+      <div class="code-block" style="font-size:.9rem;">
+        <span style="color:var(--g600);"># 搜尋郵件</span><br>
+        gws gmail messages list \<br>
+        &nbsp;&nbsp;--query "from:boss@co.com"<br><br>
+        <span style="color:var(--g600);"># 寄送郵件</span><br>
+        gws gmail messages send \<br>
+        &nbsp;&nbsp;--to "user@ex.com" \<br>
+        &nbsp;&nbsp;--subject "Hello" \<br>
+        &nbsp;&nbsp;--body "Hi there"
+      </div>
+    </div>
+    <div class="col fragment" data-order="0">
+      <h3 class="blue">Sheets</h3>
+      <div class="code-block" style="font-size:.9rem;">
+        <span style="color:var(--g600);"># 讀取試算表</span><br>
+        gws sheets spreadsheets \<br>
+        &nbsp;&nbsp;get &lt;spreadsheetId&gt;<br><br>
+        <span style="color:var(--g600);"># 讀取特定範圍</span><br>
+        gws sheets values get \<br>
+        &nbsp;&nbsp;&lt;spreadsheetId&gt; \<br>
+        &nbsp;&nbsp;--range "Sheet1!A1:D10"
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 7: Calendar ===== -->
+<div class="slide" data-act="使用範例" data-index="7">
+  <h2>Calendar 操作</h2>
+  <div class="code-block">
+    <span style="color:var(--g600);"># 列出行事曆事件</span><br>
+    <span style="color:var(--blue);font-weight:700;">gws calendar events list --calendar primary</span><br><br>
+    <span style="color:var(--g600);"># 建立事件</span><br>
+    <span style="color:var(--blue);font-weight:700;">gws calendar events create \</span><br>
+    <span style="color:var(--blue);font-weight:700;">&nbsp;&nbsp;--calendar primary \</span><br>
+    <span style="color:var(--blue);font-weight:700;">&nbsp;&nbsp;--summary "開會" \</span><br>
+    <span style="color:var(--blue);font-weight:700;">&nbsp;&nbsp;--start "2026-03-06T10:00:00"</span>
+  </div>
+</div>
+
+<!-- ===== 8: MCP Server ===== -->
+<div class="slide" data-act="使用範例" data-index="8">
+  <h2>作為 MCP Server</h2>
+  <p class="subtitle" style="margin-bottom:.8rem;">讓 Claude Code 直接操作 Google Workspace</p>
+  <div class="code-block" style="font-size:.95rem;">
+    <span style="color:var(--g600);">// ~/.claude/settings.json</span><br>
+    {<br>
+    &nbsp;&nbsp;<span style="color:var(--blue);">"mcpServers"</span>: {<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--green);">"google-workspace"</span>: {<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--blue);">"command"</span>: <span style="color:var(--green);">"gws"</span>,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--blue);">"args"</span>: [<span style="color:var(--green);">"mcp"</span>, <span style="color:var(--green);">"start"</span>]<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+    &nbsp;&nbsp;}<br>
+    }
+  </div>
+  <div class="info-box success fragment" data-order="0">
+    <div class="label">設定後 Claude Code 可以</div>
+    <p>搜尋 Drive 檔案、讀取 Sheets 資料、管理 Calendar 事件、寄送 Gmail — <strong>全部用自然語言指揮</strong></p>
+  </div>
+</div>
+
+<!-- ===== 9: clasp vs gws ===== -->
+<div class="slide" data-act="比較與總結" data-index="9">
+  <h2>clasp vs gws</h2>
+  <table class="compare-table">
+    <thead><tr><th></th><th>clasp</th><th>gws</th></tr></thead>
+    <tbody>
+      <tr class="fragment" data-order="0"><td><strong>用途</strong></td><td>開發 Google Apps Script</td><td><strong class="blue">操作 Google Workspace 服務</strong></td></tr>
+      <tr class="fragment" data-order="1"><td><strong>範圍</strong></td><td>只管 GAS 專案</td><td><strong class="blue">Drive・Gmail・Calendar・Sheets...</strong></td></tr>
+      <tr class="fragment" data-order="2"><td><strong>操作</strong></td><td>push / pull / deploy 程式碼</td><td><strong class="blue">CRUD 操作所有 Google 資源</strong></td></tr>
+      <tr class="fragment" data-order="3"><td><strong>適合</strong></td><td>寫 GAS 自動化腳本</td><td><strong class="blue">從 CLI 直接操作 Google</strong></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 10: 注意事項 ===== -->
+<div class="slide" data-act="比較與總結" data-index="10">
+  <h2>注意事項</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--gold);">!</div><div class="step-content"><strong>需要 GCP 專案</strong><p>先設定 GCP 專案和 OAuth 憑證</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--gold);">!</div><div class="step-content"><strong>OAuth Desktop Client</strong><p>首次使用需在 GCP Console 建立 OAuth Desktop Client</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--green);">!</div><div class="step-content"><strong>免費額度充足</strong><p>一般使用不會觸及限制</p></div></div>
+  </div>
+</div>
+
+<!-- ===== 11: 封底 ===== -->
+<div class="slide cover" data-act="比較與總結" data-index="11">
+  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:2rem;">一句話記住這堂課</p>
+  <h1 style="font-size:2.6rem;line-height:1.5;">
+    一個 <span style="color:var(--blue);">gws</span> 指令<br><br>
+    操作所有 Google 服務<br>
+    <span style="font-size:1.8rem;color:rgba(255,255,255,.6);">還能讓 AI 自己呼叫</span>
+  </h1>
+  <p style="color:rgba(255,255,255,.4);margin-top:2rem;font-size:.9rem;">github.com/googleworkspace/cli</p>
+</div>
+
+</div><!-- /slides -->
+
+<div id="chapterMenu" class="chapter-menu">
+  <button id="chapterBtn" class="chapter-btn">
+    <span class="chapter-icon">§</span>
+    <span id="chapterLabel">開場</span>
+    <span class="chapter-arrow">▼</span>
+  </button>
+  <div id="chapterList" class="chapter-list"></div>
+</div>
+
+<div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>&larr;</button><button id="next">&rarr;</button></div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),tot=slides.length;
+let idx=0,fi=-1;
+document.getElementById('total').textContent=tot;
+const gf=el=>el.querySelectorAll('.fragment');
+function go(n){slides.forEach((s,i)=>{s.classList.remove('active','prev');if(i<n)s.classList.add('prev');s.querySelectorAll('.fragment').forEach(f=>f.classList.remove('visible'));});idx=n;fi=-1;slides[idx].classList.add('active');ui();}
+function ui(){document.getElementById('current').textContent=idx+1;document.getElementById('prev').disabled=idx===0&&fi<=0;const f=gf(slides[idx]);document.getElementById('next').disabled=idx===tot-1&&fi>=f.length-1;document.getElementById('progress').style.width=((idx+1)/tot*100)+'%';}
+function adv(){const f=gf(slides[idx]);if(fi<f.length-1){fi++;f[fi].classList.add('visible');ui();}else if(idx<tot-1)go(idx+1);}
+function ret(){const f=gf(slides[idx]);if(fi>=0){f[fi].classList.remove('visible');fi--;ui();}else if(idx>0){go(idx-1);const p=gf(slides[idx]);p.forEach(x=>x.classList.add('visible'));fi=p.length-1;ui();}}
+document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
+document.addEventListener('keydown',e=>{if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}if(e.key==='Home'){e.preventDefault();go(0);}if(e.key==='End'){e.preventDefault();go(tot-1);}if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}});
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
+window.addEventListener('message',function(e){if(!e.data||typeof e.data!=='object')return;if(e.data.type==='slide-control'){if(e.data.action==='next')adv();else if(e.data.action==='prev')ret();else if(e.data.action==='goto'&&typeof e.data.index==='number')go(e.data.index);}});
+
+// ── Chapter Menu ──
+var chapterMenu=document.getElementById('chapterMenu'),chapterBtn=document.getElementById('chapterBtn'),chapterLabel=document.getElementById('chapterLabel'),chapterList=document.getElementById('chapterList');
+function getChapters(){var m=new Map();slides.forEach(function(s,i){var a=s.dataset.act;if(a&&!m.has(a))m.set(a,i);});return m;}
+function buildChapterMenu(){var ch=getChapters();chapterList.innerHTML='';var cur=slides[idx]&&slides[idx].dataset.act||'';ch.forEach(function(si,name){var d=document.createElement('div');d.className='chapter-item'+(name===cur?' active':'');d.innerHTML='<span class="chapter-dot"></span>'+name;d.onclick=function(){go(si);closeChapterMenu();};chapterList.appendChild(d);});chapterLabel.textContent=cur||'\u5c0e\u89bd';}
+function toggleChapterMenu(){chapterMenu.classList.toggle('open');if(chapterMenu.classList.contains('open'))buildChapterMenu();}
+function closeChapterMenu(){chapterMenu.classList.remove('open');}
+chapterBtn.onclick=toggleChapterMenu;
+document.addEventListener('click',function(e){if(!chapterMenu.contains(e.target))closeChapterMenu();});
+var _origUi=ui;ui=function(){_origUi();var cur=slides[idx]&&slides[idx].dataset.act||'';chapterLabel.textContent=cur||'\u5c0e\u89bd';};
+go(0);
+</script>
+</body>
+</html>

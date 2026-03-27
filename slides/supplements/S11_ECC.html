@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S11 — Everything Claude Code</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   S11: Everything Claude Code — Dark Cinematic
+   Based on S09 v2 design system
+   ═══════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+  --orange:#E8710A; --orange-lt:#FEF0E1;
+  --dark:#0a0a14; --dark2:#111122; --dark3:#16213e;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--dark);}
+
+/* ── Slides Core ── */
+.slides{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;opacity:0;transform:translateX(30px);pointer-events:none;transition:opacity .5s,transform .5s ease;overflow:hidden;}
+.slide.active{opacity:1;transform:none;pointer-events:auto;}
+.slide.prev{opacity:0;transform:translateX(-30px);}
+
+/* ── Clean Mode (white bg) ── */
+.slide.clean{background:var(--white);color:var(--g900);padding-top:3.5rem;overflow-y:auto;justify-content:flex-start;}
+.slide.clean::before,.slide.clean::after{content:'';flex:1 0 0px;}
+
+/* ── Poster Mode ── */
+.slide.poster{background-size:cover;background-position:center;color:#fff;text-align:center;}
+.slide.poster::before{content:'';position:absolute;inset:0;z-index:1;}
+.slide.poster>*{position:relative;z-index:2;}
+.slide.poster.overlay-bottom::before{background:linear-gradient(to bottom,rgba(0,0,0,.15) 0%,rgba(0,0,0,.78) 100%);}
+.slide.poster.overlay-heavy::before{background:linear-gradient(to bottom,rgba(0,0,0,.45) 0%,rgba(0,0,0,.85) 100%);}
+.slide.poster.overlay-center::before{background:radial-gradient(ellipse at center,rgba(0,0,0,.3) 0%,rgba(0,0,0,.8) 100%);}
+
+/* ── DataViz Mode (dark bg) ── */
+.slide.dataviz{background:var(--dark);color:#fff;padding-top:3.5rem;}
+
+/* ── Typography ── */
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:2rem;font-weight:700;color:var(--g900);margin-bottom:1rem;line-height:1.4;}
+.slide.dataviz h2,.slide.poster h2{color:#fff;}
+h3{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.1rem;line-height:1.8;}
+.subtitle{font-size:1.15rem;font-weight:500;}
+.dim{opacity:.6;}
+
+/* ── Fragment ── */
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* ── Steps ── */
+.step-list{text-align:left;max-width:800px;width:100%;}
+.step{display:flex;gap:1.2rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:40px;height:40px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.1rem;}.step-content p{font-size:1rem;color:var(--g600);margin-top:.15rem;}
+
+/* ── Stat Grid (dark mode) ── */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;max-width:860px;width:100%;margin-top:1rem;}
+.stat-box{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:16px;padding:1.3rem;text-align:center;}
+.stat-box .val{font-size:2.4rem;font-weight:900;color:var(--green);line-height:1.1;}
+.stat-box .label{font-size:.9rem;color:rgba(255,255,255,.5);margin-top:.3rem;}
+
+/* ── Table (dark mode) ── */
+.compare-table{border-collapse:collapse;font-size:1rem;margin-top:.6rem;width:100%;max-width:860px;}
+.compare-table th{background:rgba(255,255,255,.08);color:rgba(255,255,255,.9);padding:.5rem 1rem;text-align:left;font-size:.95rem;}
+.compare-table td{padding:.5rem 1rem;border-bottom:1px solid rgba(255,255,255,.06);font-size:.95rem;color:rgba(255,255,255,.75);}
+.compare-table tr:hover td{background:rgba(255,255,255,.03);}
+.compare-table .highlight{color:var(--green);font-weight:700;}
+.compare-table .warn{color:var(--orange);font-weight:700;}
+.compare-table .danger{color:var(--red);font-weight:700;}
+
+/* ── Card Grid (dark mode) ── */
+.card-grid{display:flex;gap:1.2rem;flex-wrap:wrap;justify-content:center;margin-top:1rem;max-width:960px;}
+.card{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:16px;padding:1.5rem;min-width:200px;max-width:280px;flex:1;transition:border-color .2s;}
+.card:hover{border-color:var(--green);}
+.card .icon{font-size:2.2rem;margin-bottom:.5rem;}
+.card h3{color:#fff;margin-bottom:.3rem;}
+.card p{font-size:.95rem;color:rgba(255,255,255,.55);line-height:1.6;}
+
+/* ── Code Block (dark mode) ── */
+.code-block{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:12px;padding:1.3rem 1.8rem;text-align:left;max-width:860px;width:100%;font-family:'Fira Code',monospace;font-size:.95rem;line-height:1.8;margin:.8rem 0;color:rgba(255,255,255,.85);}
+.code-block .comment{color:rgba(255,255,255,.35);}
+.code-block .cmd{color:var(--green);}
+
+/* ── Flow ── */
+.flow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1.2rem 0;}
+.flow-box{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.12);border-radius:12px;padding:.7rem 1rem;font-size:1rem;font-weight:700;text-align:center;color:#fff;}
+.flow-arrow{color:var(--green);font-size:1.5rem;font-weight:900;}
+
+/* ── Info boxes ── */
+.info-box{border-radius:12px;padding:1.3rem 1.8rem;max-width:800px;width:100%;text-align:left;margin-top:.8rem;}
+.info-box.success{background:rgba(15,157,138,.1);border-left:4px solid var(--green);}
+.info-box.success .label{color:var(--green);}
+.info-box.success p{color:rgba(255,255,255,.75);}
+.info-box.tip{background:rgba(249,171,0,.1);border-left:4px solid var(--gold);}
+.info-box.tip .label{color:var(--gold);}
+.info-box.tip p{color:rgba(255,255,255,.75);}
+
+/* ── Quote (dark mode) ── */
+.quote-box{max-width:800px;width:100%;background:rgba(255,255,255,.04);border-left:5px solid var(--green);border-radius:0 12px 12px 0;padding:1.5rem 2rem;margin:.8rem 0;text-align:left;}
+.quote-box .quote-text{font-size:1.3rem;font-weight:700;line-height:1.6;color:#fff;}
+.quote-box .quote-src{font-size:.9rem;color:rgba(255,255,255,.4);margin-top:.5rem;}
+
+/* ── Bottom line (dark mode) ── */
+.bottom-line{max-width:800px;width:100%;background:rgba(15,157,138,.08);border:2px solid rgba(15,157,138,.25);border-radius:16px;padding:2rem;text-align:center;margin-top:1rem;}
+.bottom-line h3{font-size:1.6rem;color:var(--green);margin-bottom:.8rem;}
+.bottom-line p{font-size:1.05rem;color:rgba(255,255,255,.7);max-width:640px;margin:0 auto;line-height:1.7;}
+
+/* ── Poster text helpers ── */
+.poster-subtitle{font-size:1.3rem;font-weight:500;color:rgba(255,255,255,.7);}
+.poster-badge{display:inline-block;padding:.3rem 1rem;border-radius:100px;font-size:.9rem;font-weight:700;margin-top:1rem;}
+
+/* ── Controls ── */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid rgba(255,255,255,.15);border-radius:12px;background:rgba(0,0,0,.4);color:rgba(255,255,255,.8);font-size:1.2rem;cursor:pointer;transition:all .15s;backdrop-filter:blur(8px);}
+.controls button:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff;}
+.controls button:disabled{opacity:.2;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;left:auto;right:5rem;z-index:100;color:rgba(255,255,255,.35);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:rgba(15,157,138,.15);color:var(--green);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;backdrop-filter:blur(8px);}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:rgba(255,255,255,.35);font-size:.85rem;font-weight:700;}
+.source-tag{position:absolute;bottom:1rem;left:1.5rem;font-size:.7rem;color:rgba(255,255,255,.2);z-index:2;}
+
+/* ═══ MOBILE ═══ */
+@media(max-width:768px){
+  html,body{font-size:16px;}
+  .slide{padding:1rem 1.2rem 1rem;}
+  .slide.clean{padding-top:3rem;}
+  .slide.poster{justify-content:flex-end;padding-bottom:1.5rem;}
+  h1{font-size:1.8rem;}h2{font-size:1.4rem;margin-bottom:.6rem;}
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:.8rem;}
+  .stat-box .val{font-size:1.8rem;}
+  .card-grid{flex-direction:column;align-items:center;}
+  .card{max-width:100%;min-width:0;}
+  .compare-table th,.compare-table td{padding:.5rem .6rem;font-size:.85rem;}
+  .controls button{width:40px;height:40px;font-size:1rem;}
+  .module-title{font-size:.7rem;left:.8rem;top:.6rem;}
+  .module-badge{font-size:.65rem;top:.6rem;right:.6rem;padding:.2rem .6rem;}
+  .quote-box .quote-text{font-size:1.05rem;}
+}
+
+/* ── Chapter Menu ── */
+.chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;font-family:system-ui,-apple-system,sans-serif;}
+.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.9);font-size:.8rem;cursor:pointer;transition:border-color .2s;}
+.chapter-btn:hover{border-color:var(--green);}
+.chapter-icon{color:var(--green);font-weight:700;}
+.chapter-arrow{font-size:.6rem;opacity:.5;transition:transform .2s;}
+.chapter-menu.open .chapter-arrow{transform:rotate(180deg);}
+.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:180px;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;}
+.chapter-menu.open .chapter-list{display:block;}
+.chapter-item{display:flex;align-items:center;gap:8px;padding:8px 14px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
+.chapter-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+.chapter-item.active{color:var(--green);font-weight:600;}
+.chapter-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;}
+.chapter-item.active .chapter-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+</style>
+</head>
+<body>
+
+<div class="module-title">Everything Claude Code</div>
+<div class="module-badge">S11 補充單元</div>
+<div class="slides">
+
+<!-- ===== 0: COVER — poster ===== -->
+<div class="slide poster overlay-heavy active" data-act="開場" data-index="0" style="background-image:url('img/s11/cover.png');">
+  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:1rem;">AI 100 講 — 補充單元</p>
+  <h1>Everything<br><span style="color:var(--green);">Claude Code</span></h1>
+  <p class="poster-subtitle" style="margin-top:1.5rem;">10 個月實戰打磨的 Skills + Agents + Memory + Security 框架</p>
+  <p style="color:rgba(255,255,255,.3);margin-top:3rem;font-size:.85rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- ===== 1: 議程 — clean ===== -->
+<div class="slide clean" data-act="開場" data-index="1">
+  <h2>今天的旅程</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--green);">1</div><div class="step-content"><strong>ECC 是什麼？</strong><p>Anthropic Hackathon 誕生的效能框架</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--blue);">2</div><div class="step-content"><strong>四大核心能力</strong><p>持續學習、Memory、AgentShield、多角色協作</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--gold);">3</div><div class="step-content"><strong>安裝與結構</strong><p>3 分鐘安裝、56+ Skills、32 指令</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--purple);">4</div><div class="step-content"><strong>安裝前 vs 安裝後</strong><p>實際效果對比</p></div></div>
+  </div>
+</div>
+
+<!-- ===== 2: Part 1 — poster ===== -->
+<div class="slide poster overlay-heavy" data-act="ECC是什麼" data-index="2" style="background-image:url('img/s11/learning.png');">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 1</p>
+  <h1>ECC 是什麼？</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">不只是設定檔，是完整的 AI 開發效能系統</p>
+</div>
+
+<!-- ===== 3: 定位 — dataviz ===== -->
+<div class="slide dataviz" data-act="ECC是什麼" data-index="3">
+  <h2>ECC 的定位</h2>
+  <div class="flow" style="margin-top:.5rem;">
+    <div class="flow-box" style="border-color:rgba(255,255,255,.15);">一般 Claude Code<br><span style="font-size:.8rem;opacity:.5;">問 → 答 → 忘記</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--green);">安裝 ECC<br><span style="font-size:.8rem;opacity:.5;">Skills + Agents + Memory</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--green);background:rgba(15,157,138,.1);">開發效能升級<br><span style="font-size:.8rem;opacity:.5;">自動學習、自動審查</span></div>
+  </div>
+  <div class="quote-box fragment" data-order="0" style="margin-top:1.2rem;">
+    <div class="quote-text">ECC 在 Anthropic Hackathon 中誕生，經過 10 個月以上的實戰打磨 — 不是 demo 專案，是真正在用的系統。</div>
+    <div class="quote-src">— GitHub: affaan-m/everything-claude-code</div>
+  </div>
+</div>
+
+<!-- ===== 4: Part 2 — poster ===== -->
+<div class="slide poster overlay-center" data-act="四大核心能力" data-index="4" style="background-image:url('img/s11/evolution.png');">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 2</p>
+  <h1>四大核心能力</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">學習、記憶、安全、協作</p>
+</div>
+
+<!-- ===== 5: 持續學習 — dataviz ===== -->
+<div class="slide dataviz" data-act="四大核心能力" data-index="5">
+  <h2>核心一：持續學習</h2>
+  <p style="color:rgba(255,255,255,.6);margin-bottom:.8rem;">ECC 自動從每次 session 提取模式，轉化為可重用技能</p>
+  <div class="code-block">
+    <span class="comment"># 你寫了 3 次類似的 API error handling</span><br>
+    &nbsp;&nbsp;<span class="cmd">↓ ECC 自動辨識</span><br>
+    <span class="comment"># 提取為 skill: "api-error-handling-pattern"</span><br>
+    &nbsp;&nbsp;<span class="cmd">↓ 下次遇到</span><br>
+    <span class="comment"># 自動套用最佳實踐</span>
+  </div>
+  <div class="info-box success fragment" data-order="0">
+    <div class="label" style="font-weight:700;font-size:1rem;margin-bottom:.4rem;">關鍵差異</div>
+    <p>一般 Claude Code 每次從零開始。ECC 讓它<strong>越用越聰明</strong>。</p>
+  </div>
+</div>
+
+<!-- ===== 6: Memory 持久化 — dataviz ===== -->
+<div class="slide dataviz" data-act="四大核心能力" data-index="6">
+  <h2>核心二：Memory 持久化</h2>
+  <p style="color:rgba(255,255,255,.6);margin-bottom:.8rem;">透過 Hooks 自動保存/載入 session 狀態</p>
+  <div class="flow">
+    <div class="flow-box" style="border-color:var(--blue);">Session A<br><span style="font-size:.8rem;opacity:.5;">研究 API 設計方案</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--gold);">自動保存<br><span style="font-size:.8rem;opacity:.5;">寫入 Memory</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--green);">Session B<br><span style="font-size:.8rem;opacity:.5;">延續決策繼續實作</span></div>
+  </div>
+  <div class="info-box tip fragment" data-order="0">
+    <div class="label" style="font-weight:700;font-size:1rem;margin-bottom:.4rem;">對話中斷不再遺失脈絡</div>
+    <p>每次 session 結束時自動保存狀態，下次開啟時自動載入 — 跟開 Chrome 自動恢復分頁一樣。</p>
+  </div>
+</div>
+
+<!-- ===== 7: AgentShield — dataviz ===== -->
+<div class="slide dataviz" data-act="四大核心能力" data-index="7">
+  <h2>核心三：AgentShield 安全掃描</h2>
+  <p style="color:rgba(255,255,255,.6);margin-bottom:.8rem;">三層防護架構</p>
+  <div class="stat-grid">
+    <div class="stat-box fragment" data-order="0"><div class="val">1,282</div><div class="label">測試案例</div></div>
+    <div class="stat-box fragment" data-order="1"><div class="val">102</div><div class="label">靜態分析規則</div></div>
+    <div class="stat-box fragment" data-order="2"><div class="val" style="color:var(--red);">OWASP</div><div class="label">Top 10 漏洞偵測</div></div>
+  </div>
+  <div class="flow fragment" data-order="3" style="margin-top:1.2rem;">
+    <div class="flow-box" style="border-color:var(--red);">紅隊攻擊<br><span style="font-size:.8rem;opacity:.5;">模擬攻擊</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--blue);">藍隊防禦<br><span style="font-size:.8rem;opacity:.5;">修補漏洞</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--green);">審計員裁決<br><span style="font-size:.8rem;opacity:.5;">最終判定</span></div>
+  </div>
+</div>
+
+<!-- ===== 8: 多角色 Agent — dataviz ===== -->
+<div class="slide dataviz" data-act="四大核心能力" data-index="8">
+  <h2>核心四：13 個專業 Agent 協作</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0">
+      <div class="icon">📋</div>
+      <h3>Planner</h3>
+      <p>任務規劃與拆解</p>
+    </div>
+    <div class="card fragment" data-order="1">
+      <div class="icon">🏗️</div>
+      <h3>Architect</h3>
+      <p>系統架構設計</p>
+    </div>
+    <div class="card fragment" data-order="2">
+      <div class="icon">🧪</div>
+      <h3>TDD Agent</h3>
+      <p>測試驅動開發</p>
+    </div>
+    <div class="card fragment" data-order="3">
+      <div class="icon">🔍</div>
+      <h3>Code Reviewer</h3>
+      <p>程式碼審查</p>
+    </div>
+    <div class="card fragment" data-order="4">
+      <div class="icon">🛡️</div>
+      <h3>Security Reviewer</h3>
+      <p>安全性審查</p>
+    </div>
+    <div class="card fragment" data-order="5">
+      <div class="icon">+8</div>
+      <h3>還有更多</h3>
+      <p>Release、QA、DevOps...</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 9: Part 3 — poster ===== -->
+<div class="slide poster overlay-heavy" data-act="安裝與結構" data-index="9" style="background:var(--dark3);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 3</p>
+  <h1>安裝與結構</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">3 分鐘安裝，立即提升</p>
+</div>
+
+<!-- ===== 10: 安裝 — dataviz ===== -->
+<div class="slide dataviz" data-act="安裝與結構" data-index="10">
+  <h2>3 分鐘安裝</h2>
+  <div class="code-block">
+    <span class="comment"># 下載</span><br>
+    <span class="cmd">git clone https://github.com/affaan-m/everything-claude-code.git</span><br>
+    <span class="cmd">cd everything-claude-code</span><br><br>
+    <span class="comment"># 安裝（選擇你用的語言）</span><br>
+    <span class="cmd">./install.sh python</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># 只裝 Python</span><br>
+    <span class="cmd">./install.sh typescript</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># 只裝 TypeScript</span><br>
+    <span class="cmd">./install.sh python typescript</span> <span class="comment"># 兩個都裝</span>
+  </div>
+  <div class="info-box success fragment" data-order="0">
+    <div class="label" style="font-weight:700;font-size:1rem;margin-bottom:.4rem;">安裝位置</div>
+    <p>Rules 放在 <code style="color:var(--green);">~/.claude/rules/</code>，Claude Code 和 Claude for VS Code 都會自動載入。</p>
+  </div>
+</div>
+
+<!-- ===== 11: 目錄結構 — dataviz ===== -->
+<div class="slide dataviz" data-act="安裝與結構" data-index="11">
+  <h2>安裝了什麼？</h2>
+  <div class="code-block" style="font-size:.9rem;">
+    ~/.claude/rules/<br>
+    ├── <span class="cmd">common/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># 通用規則（所有語言）</span><br>
+    │ &nbsp; ├── agents.md &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Agent 協作</span><br>
+    │ &nbsp; ├── coding-style.md &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># 程式碼風格</span><br>
+    │ &nbsp; ├── development-workflow.md<br>
+    │ &nbsp; ├── git-workflow.md<br>
+    │ &nbsp; ├── security.md &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># 安全規範</span><br>
+    │ &nbsp; └── testing.md &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># 測試規範</span><br>
+    ├── <span class="cmd">python/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Python 專屬</span><br>
+    └── <span class="cmd">typescript/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># TypeScript 專屬</span>
+  </div>
+</div>
+
+<!-- ===== 12: Skills & Commands — dataviz ===== -->
+<div class="slide dataviz" data-act="安裝與結構" data-index="12">
+  <h2>56+ Skills・32 Slash Commands</h2>
+  <table class="compare-table">
+    <thead><tr><th>類別</th><th>Skills 範例</th></tr></thead>
+    <tbody>
+      <tr class="fragment" data-order="0"><td class="highlight">後端</td><td>API 設計、資料庫模式、微服務</td></tr>
+      <tr class="fragment" data-order="1"><td class="highlight">前端</td><td>元件設計、狀態管理、效能優化</td></tr>
+      <tr class="fragment" data-order="2"><td class="highlight">測試</td><td>TDD 工作流、整合測試、E2E 測試</td></tr>
+      <tr class="fragment" data-order="3"><td class="highlight">安全</td><td>漏洞掃描、權限控制、加密</td></tr>
+      <tr class="fragment" data-order="4"><td class="highlight">DevOps</td><td>CI/CD、Docker、部署</td></tr>
+      <tr class="fragment" data-order="5"><td class="highlight">內容</td><td>文章撰寫、市場研究、簡報</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 13: 常用 Commands — dataviz ===== -->
+<div class="slide dataviz" data-act="安裝與結構" data-index="13">
+  <h2>常用 Slash Commands</h2>
+  <div class="code-block">
+    <span class="cmd">/plan "新增用戶認證"</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># 規劃任務</span><br>
+    <span class="cmd">/architect "設計 API"</span> &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># 架構設計</span><br>
+    <span class="cmd">/tdd "寫登入功能"</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># 測試驅動開發</span><br>
+    <span class="cmd">/review</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># 程式碼審查</span><br>
+    <span class="cmd">/security-scan</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># 安全掃描</span><br>
+    <span class="cmd">/learn-eval</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># 評估學到的模式</span>
+  </div>
+</div>
+
+<!-- ===== 14: 安裝前 vs 安裝後 — dataviz ===== -->
+<div class="slide dataviz" data-act="安裝與結構" data-index="14">
+  <h2>安裝前 vs 安裝後</h2>
+  <table class="compare-table">
+    <thead><tr><th></th><th>安裝前</th><th>安裝後（ECC）</th></tr></thead>
+    <tbody>
+      <tr class="fragment" data-order="0"><td style="color:rgba(255,255,255,.9);font-weight:700;">你說</td><td>「寫一個 API endpoint」</td><td>「寫一個 API endpoint」</td></tr>
+      <tr class="fragment" data-order="1"><td style="color:rgba(255,255,255,.9);font-weight:700;">Claude 做</td><td class="warn">直接寫 → 缺 error handling、沒有測試</td><td class="highlight">1. 規劃架構 2. 寫測試 3. 實作 4. Code Review 5. 安全掃描 6. 提取模式</td></tr>
+      <tr class="fragment" data-order="2"><td style="color:rgba(255,255,255,.9);font-weight:700;">品質</td><td class="danger">看運氣</td><td class="highlight">穩定高品質</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== 15: 支援語言 & 注意事項 — dataviz ===== -->
+<div class="slide dataviz" data-act="安裝與結構" data-index="15">
+  <h2>支援語言與部署方式</h2>
+  <div class="stat-grid" style="grid-template-columns:repeat(2,1fr);">
+    <div class="stat-box fragment" data-order="0">
+      <div class="val" style="font-size:1.8rem;">TS / JS</div>
+      <div class="label">完整支援</div>
+    </div>
+    <div class="stat-box fragment" data-order="1">
+      <div class="val" style="font-size:1.8rem;">Python</div>
+      <div class="label">完整支援</div>
+    </div>
+    <div class="stat-box fragment" data-order="2">
+      <div class="val" style="font-size:1.8rem;">Go</div>
+      <div class="label">支援</div>
+    </div>
+    <div class="stat-box fragment" data-order="3">
+      <div class="val" style="font-size:1.8rem;">Swift</div>
+      <div class="label">支援</div>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="4" style="margin-top:1rem;">
+    <div class="label" style="font-weight:700;font-size:1rem;margin-bottom:.4rem;">只裝在主機就好</div>
+    <p>ECC 裝在你跑 Claude Code 的主機器上即可（MacBook / VS Code），<strong>不需要裝在每台伺服器</strong>。Java、C++、Rust 透過通用 rules 支援。</p>
+  </div>
+</div>
+
+<!-- ===== 16: 封底 — poster ===== -->
+<div class="slide poster overlay-heavy" data-act="總結" data-index="16" style="background-image:url('img/s11/cover.png');">
+  <p style="font-size:1rem;color:rgba(255,255,255,.4);margin-bottom:2rem;">一句話記住</p>
+  <h1 style="font-size:2.6rem;line-height:1.5;">
+    Claude Code 很強<br><br>
+    ECC 讓它<br>
+    <span style="color:var(--green);">越用越強</span>
+  </h1>
+  <p style="color:rgba(255,255,255,.5);margin-top:2rem;font-size:1.1rem;">Skills + Agents + Memory + Security = <strong style="color:var(--green);">完整開發效能系統</strong></p>
+  <p style="color:rgba(255,255,255,.25);margin-top:2rem;font-size:.85rem;">github.com/affaan-m/everything-claude-code</p>
+</div>
+
+</div><!-- /slides -->
+
+<div id="chapterMenu" class="chapter-menu">
+  <button id="chapterBtn" class="chapter-btn">
+    <span class="chapter-icon">§</span>
+    <span id="chapterLabel">開場</span>
+    <span class="chapter-arrow">▼</span>
+  </button>
+  <div id="chapterList" class="chapter-list"></div>
+</div>
+
+<div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>&larr;</button><button id="next">&rarr;</button></div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),tot=slides.length;
+let idx=0,fi=-1;
+document.getElementById('total').textContent=tot;
+const gf=el=>el.querySelectorAll('.fragment');
+function go(n){slides.forEach((s,i)=>{s.classList.remove('active','prev');if(i<n)s.classList.add('prev');s.querySelectorAll('.fragment').forEach(f=>f.classList.remove('visible'));});idx=n;fi=-1;slides[idx].classList.add('active');ui();}
+function ui(){document.getElementById('current').textContent=idx+1;document.getElementById('prev').disabled=idx===0&&fi<=0;const f=gf(slides[idx]);document.getElementById('next').disabled=idx===tot-1&&fi>=f.length-1;document.getElementById('progress').style.width=((idx+1)/tot*100)+'%';}
+function adv(){const f=gf(slides[idx]);if(fi<f.length-1){fi++;f[fi].classList.add('visible');ui();}else if(idx<tot-1)go(idx+1);}
+function ret(){const f=gf(slides[idx]);if(fi>=0){f[fi].classList.remove('visible');fi--;ui();}else if(idx>0){go(idx-1);const p=gf(slides[idx]);p.forEach(x=>x.classList.add('visible'));fi=p.length-1;ui();}}
+document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
+document.addEventListener('keydown',e=>{if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}if(e.key==='Home'){e.preventDefault();go(0);}if(e.key==='End'){e.preventDefault();go(tot-1);}if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}});
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
+window.addEventListener('message',function(e){if(!e.data||typeof e.data!=='object')return;if(e.data.type==='slide-control'){if(e.data.action==='next')adv();else if(e.data.action==='prev')ret();else if(e.data.action==='goto'&&typeof e.data.index==='number')go(e.data.index);}});
+
+// ── Chapter Menu ──
+var chapterMenu=document.getElementById('chapterMenu'),chapterBtn=document.getElementById('chapterBtn'),chapterLabel=document.getElementById('chapterLabel'),chapterList=document.getElementById('chapterList');
+function getChapters(){var m=new Map();slides.forEach(function(s,i){var a=s.dataset.act;if(a&&!m.has(a))m.set(a,i);});return m;}
+function buildChapterMenu(){var ch=getChapters();chapterList.innerHTML='';var cur=slides[idx]&&slides[idx].dataset.act||'';ch.forEach(function(si,name){var d=document.createElement('div');d.className='chapter-item'+(name===cur?' active':'');d.innerHTML='<span class="chapter-dot"></span>'+name;d.onclick=function(){go(si);closeChapterMenu();};chapterList.appendChild(d);});chapterLabel.textContent=cur||'\u5c0e\u89bd';}
+function toggleChapterMenu(){chapterMenu.classList.toggle('open');if(chapterMenu.classList.contains('open'))buildChapterMenu();}
+function closeChapterMenu(){chapterMenu.classList.remove('open');}
+chapterBtn.onclick=toggleChapterMenu;
+document.addEventListener('click',function(e){if(!chapterMenu.contains(e.target))closeChapterMenu();});
+var _origUi=ui;ui=function(){_origUi();var cur=slides[idx]&&slides[idx].dataset.act||'';chapterLabel.textContent=cur||'\u5c0e\u89bd';};
+go(0);
+</script>
+</body>
+</html>
