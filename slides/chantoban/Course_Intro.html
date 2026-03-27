@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 工具應用與自動化流程實戰班 — 課程說明</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════
+   Reading Glasses + Safe Zone + grow.google 風格
+   產投班 Day1 — 投影教學用 (3-10m 觀看距離)
+
+   Safe Zone 規則：
+   - padding-top: 3.5rem（清除 module-badge top:1rem）
+   - padding-bottom: 4.5rem（清除 controls bottom:1.2rem + progress）
+   - justify-content: flex-start + ::before/::after 偽元素置中
+   - 安全內容高度 ≤ 30rem (660px)
+
+   Reading Glasses 規格：
+   - 正文 22px, 最小 16px, CJK 行高 ≥ 1.7
+   - 字重 ≥ 400, 按鈕 ≥ 48px
+   - 內容最大寬度 720px
+   ═══════════════════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+  --orange:#EA580C; --orange-lt:#FFF7ED;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--white);}
+
+/* ── Slide Layout (Safe Zone) ── */
+.slides{width:100%;height:100%;position:relative;}
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-start;          /* 不用 center，用偽元素置中 */
+  padding:3.5rem 4rem 6rem;             /* 上 3.5rem 清 badge, 下 6rem 清 controls+progress+buffer */
+  display:none;
+  background:var(--white);
+  overflow-y:auto;                     /* 長內容可捲動 */
+}
+/* 偽元素置中：短內容居中，長內容正常捲動 */
+/* Removed ::before/::after centering — was pushing short content off screen */
+
+.slide.active{display:flex;}
+/* .slide.prev removed — using display:none/flex */
+.slide.cover{background:var(--navy);color:#fff;text-align:center;}
+.slide.cover h2{color:#fff;}
+.slide.section-title{background:var(--green);color:#fff;text-align:center;}
+.slide.section-title h2{color:#fff;}
+.slide.break-slide{background:var(--offwhite);text-align:center;}
+
+/* ── Typography (Reading Glasses) ── */
+h1{font-size:2.8rem;font-weight:900;line-height:1.3;}           /* 投影 h1 */
+h2{font-size:1.8rem;font-weight:700;color:var(--g900);margin-bottom:.8rem;line-height:1.4;}  /* h2 ≥ 28px */
+h3{font-size:1.2rem;font-weight:700;margin-bottom:.4rem;}       /* h3 ≥ 24px */
+p,li{font-size:1.05rem;line-height:1.8;}                        /* 正文 ~23px */
+.subtitle{font-size:1.05rem;color:var(--g600);font-weight:500;}
+small,.caption{font-size:max(16px,0.75rem);}                    /* 最小 16px 保護 */
+.blue{color:var(--blue);}.green{color:var(--green);}.gold{color:var(--gold);}
+.red{color:var(--red);}.purple{color:var(--purple);}.dim{color:var(--g600);}.bold{font-weight:700;}
+
+/* ── Fragment animation (≤300ms) ── */
+.fragment{opacity:0;transform:translateY(8px);transition:opacity .25s,transform .25s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* ── Cards ── */
+.card-grid{display:flex;gap:1.2rem;flex-wrap:wrap;justify-content:center;margin-top:1rem;max-width:960px;}
+.card{background:var(--white);border:2px solid var(--g100);border-radius:16px;padding:1.4rem;min-width:140px;max-width:260px;flex:1;}
+.card:hover{border-color:var(--blue);}
+.card .icon{font-size:2rem;margin-bottom:.4rem;}
+.card h3{font-size:1.1rem;}
+.card p{font-size:.95rem;color:var(--g600);line-height:1.7;}
+
+/* ── Steps ── */
+.step-list{text-align:left;max-width:960px;width:100%;}
+.step{display:flex;gap:1rem;align-items:flex-start;padding:.6rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.05rem;}.step-content p{font-size:.95rem;color:var(--g600);margin-top:.1rem;}
+
+/* ── Code ── */
+.code-block{background:var(--g50);border:2px solid var(--g200);border-radius:12px;padding:1.2rem 1.5rem;text-align:left;max-width:960px;width:100%;font-family:'Fira Code',monospace;font-size:.9rem;line-height:1.8;margin:.6rem 0;color:var(--g900);white-space:pre-wrap;}
+
+/* ── Table ── */
+.compare-table{border-collapse:collapse;font-size:.95rem;margin-top:.6rem;width:100%;max-width:960px;}
+.compare-table th{background:var(--navy);color:#fff;padding:.5rem .8rem;text-align:left;font-size:.95rem;}
+.compare-table td{padding:.5rem .8rem;border-bottom:1px solid var(--g100);font-size:.95rem;}
+.compare-table tr:hover td{background:var(--g50);}
+
+/* ── Info boxes ── */
+.info-box{border-radius:12px;padding:1rem 1.5rem;max-width:960px;width:100%;text-align:left;margin-top:.6rem;}
+.info-box.analogy{background:var(--blue-lt);border-left:4px solid var(--blue);}
+.info-box.warning{background:var(--red-lt);border-left:4px solid var(--red);}
+.info-box.success{background:var(--green-lt);border-left:4px solid var(--green);}
+.info-box.tip{background:var(--gold-lt);border-left:4px solid var(--gold);}
+.info-box .label{font-weight:700;font-size:.95rem;margin-bottom:.3rem;}
+.info-box p{font-size:1rem;}
+
+/* ── Flow ── */
+.flow{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:center;margin:1rem 0;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.5rem .8rem;font-size:.95rem;font-weight:700;text-align:center;min-width:80px;}
+.flow-arrow{color:var(--blue);font-size:1.3rem;font-weight:900;}
+
+/* ── Two col ── */
+.two-col{display:flex;gap:1.5rem;width:100%;max-width:960px;text-align:left;}
+.two-col .col{flex:1;}
+
+/* ── Big number ── */
+.big-num{font-size:4rem;font-weight:900;color:var(--blue);line-height:1;}
+
+/* ── Banners ── */
+.exercise-banner{display:inline-block;background:var(--purple);color:#fff;padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:.95rem;margin-bottom:.6rem;}
+.demo-banner{display:inline-block;background:var(--blue);color:#fff;padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:.95rem;margin-bottom:.6rem;}
+.case-banner{display:inline-block;background:var(--orange);color:#fff;padding:.3rem 1.2rem;border-radius:100px;font-weight:700;font-size:.95rem;margin-bottom:.6rem;}
+
+/* ── Quote ── */
+.quote-box{max-width:960px;width:100%;background:var(--g50);border-left:5px solid var(--navy);border-radius:0 12px 12px 0;padding:1.2rem 1.5rem;margin:.6rem 0;text-align:left;}
+.quote-box .quote-text{font-size:1.2rem;font-weight:700;line-height:1.6;color:var(--navy);}
+.quote-box .quote-src{font-size:.9rem;color:var(--g600);margin-top:.4rem;}
+
+/* ── Mockup (simplified) ── */
+.mockup{max-width:960px;width:100%;border:2px solid var(--g200);border-radius:12px;overflow:hidden;margin:.6rem 0;text-align:left;background:var(--white);}
+.mockup-bar{background:var(--g100);padding:.4rem 1rem;font-size:.8rem;font-weight:700;color:var(--g600);border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:.4rem;}
+.mockup-bar::before{content:'● ● ●';font-size:.5rem;color:var(--g400);letter-spacing:3px;}
+.mockup-content{padding:1rem 1.2rem;}
+.chat-bubble{padding:.6rem 1rem;border-radius:12px;margin:.4rem 0;max-width:85%;font-size:.95rem;line-height:1.7;}
+.chat-bubble.user{background:var(--blue);color:#fff;margin-left:auto;border-bottom-right-radius:4px;}
+.chat-bubble.ai{background:var(--g50);color:var(--g900);margin-right:auto;border-bottom-left-radius:4px;}
+
+/* ── Copy button ── */
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:.3rem .8rem;font-size:.8rem;font-weight:700;cursor:pointer;opacity:.7;transition:opacity .2s;}
+.copy-btn:hover{opacity:1;}
+.copy-btn.copied{background:var(--green);}
+.code-block{position:relative;}
+
+/* ── Timer ── */
+.timer{display:inline-flex;align-items:center;gap:.5rem;background:var(--purple-lt);color:var(--purple);padding:.3rem 1rem;border-radius:100px;font-weight:700;font-size:1rem;margin-top:.5rem;}
+.timer::before{content:'⏱';}
+
+/* ── Push marker ── */
+[data-push]::before{content:'📲 推送';position:absolute;top:3.5rem;left:1rem;background:var(--green-lt);color:var(--green);padding:.2rem .6rem;border-radius:100px;font-size:.75rem;font-weight:700;z-index:10;}
+[data-push]{position:relative;}
+
+/* ── Typing animation ── */
+.typing .chat-bubble.ai{overflow:hidden;white-space:nowrap;border-right:3px solid var(--g400);animation:typing 2s steps(40) 0.5s forwards,blink .5s step-end infinite alternate;}
+@keyframes typing{from{max-width:0;opacity:1;}to{max-width:100%;opacity:1;}}
+@keyframes blink{50%{border-color:transparent;}}
+
+/* ── Cinematic dark slides ── */
+.slide.cinematic{background:var(--g900);color:#fff;}
+.slide.cinematic h2{color:#fff;}
+.slide.cinematic .subtitle{color:var(--g400);}
+
+/* ── Callout arrow ── */
+.callout{color:var(--red);font-weight:700;font-size:.95rem;margin-top:.4rem;}
+.callout::before{content:'👆 ';}
+
+/* ── Vote marker ── */
+.vote-slide{position:relative;}
+.vote-slide::after{content:'🗳️ 投票題';position:absolute;top:3.5rem;right:1rem;background:var(--gold-lt);color:#B45309;padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;z-index:10;}
+
+/* ── Section nav (left-bottom dropdown) ── */
+.section-nav{position:fixed;bottom:1.2rem;left:1.2rem;z-index:200;}
+.section-nav-btn{background:var(--white);border:2px solid var(--g200);border-radius:12px;padding:.4rem .8rem;font-size:.85rem;font-weight:600;color:var(--g600);cursor:pointer;display:flex;align-items:center;gap:.4rem;transition:all .15s;min-height:48px;}
+.section-nav-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-lt);}
+.section-nav-btn .nav-counter{font-weight:400;color:var(--g400);}
+.section-nav-menu{position:absolute;bottom:calc(100% + .5rem);left:0;background:var(--white);border:2px solid var(--g200);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:60vh;overflow-y:auto;min-width:280px;display:none;padding:.4rem;}
+.section-nav-menu.open{display:block;}
+.section-nav-item{display:flex;align-items:center;gap:.6rem;padding:.5rem .8rem;border-radius:8px;cursor:pointer;font-size:.85rem;color:var(--g600);transition:background .1s;}
+.section-nav-item:hover{background:var(--g50);}
+.section-nav-item.active{background:var(--blue-lt);color:var(--blue);font-weight:700;}
+.section-nav-item .nav-idx{width:24px;height:24px;border-radius:50%;background:var(--g100);color:var(--g600);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0;}
+.section-nav-item.active .nav-idx{background:var(--blue);color:#fff;}
+.section-nav-item .nav-title{flex:1;}
+
+/* ── Fixed overlays ── */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.8rem;}
+.controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:var(--white);color:var(--g800);font-size:1.2rem;cursor:pointer;transition:all .15s;}
+.controls button:hover{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
+.controls button:disabled{opacity:.25;cursor:default;}
+/* ── G key nav overlay (from ui-html-slides) ── */
+#navOverlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);overflow-y:auto;padding:2rem;}
+#navGrid{display:grid;grid-template-columns:repeat(6,1fr);gap:.8rem;max-width:960px;margin:0 auto;}
+.nav-card{cursor:pointer;border-radius:10px;overflow:hidden;border:2px solid var(--g200);transition:border-color .15s;background:var(--white);}
+.nav-card:hover{border-color:var(--gold);}
+.nav-card.current{border-color:var(--blue);}
+.nav-card-top{height:50px;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--g400);background:var(--offwhite);}
+.nav-card-top.dark{background:var(--navy);color:rgba(255,255,255,.4);}
+.nav-card-bottom{padding:.4rem;font-size:.65rem;}
+.nav-card-act{color:var(--blue);font-weight:700;margin-bottom:.1rem;}
+.nav-card-title{color:var(--g600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.module-badge{position:fixed;top:.8rem;right:1rem;z-index:100;background:var(--blue-lt);color:var(--blue);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;}
+.module-title{position:fixed;top:.8rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
+
+/* ── RWD ── */
+@media(max-width:768px){
+  html{font-size:16px;}
+  .slide{padding:3rem 1.2rem 5.5rem;}
+  h1{font-size:1.8rem;}h2{font-size:1.4rem;}p,li{font-size:.95rem;}
+  .card-grid{flex-direction:column;align-items:center;}
+  .card{max-width:100%;min-width:auto;}
+  .two-col{flex-direction:column;}
+  .mockup{max-width:100%;}
+  .controls button{width:40px;height:40px;}
+  .flow{gap:.3rem;}.flow-box{font-size:.85rem;padding:.4rem .6rem;min-width:65px;}
+}
+@media(max-width:480px){
+  h1{font-size:1.5rem;}
+  .big-num{font-size:2.8rem;}
+  .flow-box{min-width:55px;font-size:.8rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="module-title">AI 工具應用與自動化流程實戰班 — 課程說明</div>
+<div class="module-badge">產投班</div>
+
+<div class="module-title">課程說明</div>
+<div class="module-badge">產投班</div>
+<div class="slides">
+
+<!-- ===== 1: 封面 ===== -->
+<div class="slide cover active" data-act="課程說明">
+  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:.8rem;">產業人才投資方案 ｜ 政府補助 80%</p>
+  <h1 style="font-size:2.8rem;">AI 工具應用與<br>自動化流程實戰班</h1>
+  <p style="font-size:1.3rem;color:var(--mint);margin-top:1rem;">36 小時 ｜ 5 個週日 ｜ 全程實作</p>
+  <div style="margin-top:2rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+    <span style="background:rgba(255,255,255,.12);padding:.4rem 1.2rem;border-radius:100px;font-size:.95rem;color:#fff;">會打字就能學會</span>
+    <span style="background:rgba(255,255,255,.12);padding:.4rem 1.2rem;border-radius:100px;font-size:.95rem;color:#fff;">不需要程式基礎</span>
+    <span style="background:rgba(255,255,255,.12);padding:.4rem 1.2rem;border-radius:100px;font-size:.95rem;color:#fff;">自付約 $2,000</span>
+  </div>
+</div>
+
+<!-- ===== 2: 痛點 ===== -->
+<div class="slide" data-act="為什麼要學">
+  <h2>你是不是也有這些困擾？</h2>
+  <div class="card-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;max-width:800px;margin-top:1rem;">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:2rem;margin-bottom:.4rem;">😰</div>
+      <h3>聽過 AI 但不知從哪開始</h3>
+      <p>ChatGPT、Claude、Gemini<br>到底用哪個？</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:2rem;margin-bottom:.4rem;">🔁</div>
+      <h3>每天重複做一樣的事</h3>
+      <p>手動寄信、整理報表<br>複製貼上好累</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:2rem;margin-bottom:.4rem;">😟</div>
+      <h3>擔心被 AI 取代</h3>
+      <p>新聞天天說<br>但不知怎麼因應</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:2rem;margin-bottom:.4rem;">🤷</div>
+      <h3>試過 AI 但結果不好</h3>
+      <p>問 AI 都答非所問<br>覺得沒什麼用</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 3: 一句話 ===== -->
+<div class="slide cover" data-act="為什麼要學">
+  <h1 style="font-size:2.5rem;line-height:1.5;">這堂課教你<br>用「<span style="color:var(--gold);">對話</span>」讓 AI 幫你做事</h1>
+  <p style="color:var(--mint);font-size:1.2rem;margin-top:1.5rem;">五天後，你會驚訝自己居然做出了「AI 自動化系統」</p>
+</div>
+
+<!-- ===== 4: 五天總覽 ===== -->
+<div class="slide" data-act="五天課程">
+  <h2>五天課程總覽</h2>
+  <div style="display:flex;flex-direction:column;gap:.8rem;max-width:800px;margin-top:.8rem;">
+    <div style="display:flex;align-items:center;gap:1rem;background:var(--blue-lt);padding:1rem 1.5rem;border-radius:12px;border-left:4px solid var(--blue);">
+      <div style="font-size:1.5rem;font-weight:900;color:var(--blue);min-width:60px;">Day 1</div>
+      <div><strong>開場 × AI 素養 × 工具全體驗</strong><br><span style="color:var(--g600);font-size:.9rem;">認識 AI、安全風險、三大工具 PK、初階提示詞</span></div>
+      <div style="margin-left:auto;color:var(--blue);font-weight:700;">8hr</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;background:var(--purple-lt);padding:1rem 1.5rem;border-radius:12px;border-left:4px solid var(--purple);">
+      <div style="font-size:1.5rem;font-weight:900;color:var(--purple);min-width:60px;">Day 2</div>
+      <div><strong>提示詞系統化實戰</strong><br><span style="color:var(--g600);font-size:.9rem;">RTFC 四要素、四大職場輪站、提示詞互評</span></div>
+      <div style="margin-left:auto;color:var(--purple);font-weight:700;">7hr</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;background:var(--gold-lt);padding:1rem 1.5rem;border-radius:12px;border-left:4px solid var(--gold);">
+      <div style="font-size:1.5rem;font-weight:900;color:var(--gold);min-width:60px;">Day 3</div>
+      <div><strong>AI 個人助手設計</strong><br><span style="color:var(--g600);font-size:.9rem;">My GPTs、Gemini Gems、一人多助手策略</span></div>
+      <div style="margin-left:auto;color:var(--gold);font-weight:700;">7hr</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;background:var(--green-lt);padding:1rem 1.5rem;border-radius:12px;border-left:4px solid var(--green);">
+      <div style="font-size:1.5rem;font-weight:900;color:var(--green);min-width:60px;">Day 4</div>
+      <div><strong>AI 自動化流程實作</strong><br><span style="color:var(--g600);font-size:.9rem;">Google 自動化、跨服務串接、全班互寄問卷體驗</span></div>
+      <div style="margin-left:auto;color:var(--green);font-weight:700;">7hr</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;background:var(--red-lt);padding:1rem 1.5rem;border-radius:12px;border-left:4px solid var(--red);">
+      <div style="font-size:1.5rem;font-weight:900;color:var(--red);min-width:60px;">Day 5</div>
+      <div><strong>整合實戰 × 成果發表</strong><br><span style="color:var(--g600);font-size:.9rem;">迭代升級、分組專題重製、期末發表</span></div>
+      <div style="margin-left:auto;color:var(--red);font-weight:700;">7hr</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 5: 敘事線 ===== -->
+<div class="slide" data-act="五天課程">
+  <h2>五天學習路徑</h2>
+  <div class="flow" style="margin-top:1.5rem;">
+    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);min-width:120px;">
+      <div style="font-size:.85rem;color:var(--blue);">Day 1</div>
+      <div style="font-size:1.1rem;font-weight:700;">認識 AI</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--purple-lt);border-color:var(--purple);min-width:120px;">
+      <div style="font-size:.85rem;color:var(--purple);">Day 2</div>
+      <div style="font-size:1.1rem;font-weight:700;">精準對話</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);min-width:120px;">
+      <div style="font-size:.85rem;color:var(--gold);">Day 3</div>
+      <div style="font-size:1.1rem;font-weight:700;">打造助手</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);min-width:120px;">
+      <div style="font-size:.85rem;color:var(--green);">Day 4</div>
+      <div style="font-size:1.1rem;font-weight:700;">自動化</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="background:var(--red-lt);border-color:var(--red);min-width:120px;">
+      <div style="font-size:.85rem;color:var(--red);">Day 5</div>
+      <div style="font-size:1.1rem;font-weight:700;">整合發表</div>
+    </div>
+  </div>
+  <div class="info-box" style="background:var(--green-lt);border-left:4px solid var(--green);margin-top:1.5rem;">
+    <p style="font-size:1.1rem;"><strong>每天疊一層，最後一天整合。</strong>不用擔心跟不上 — 分組互學，有小教練協助。</p>
+  </div>
+</div>
+
+<!-- ===== 6: 五天帶走什麼 ===== -->
+<div class="slide" data-act="學習成果">
+  <h2>五天後你會帶走什麼？</h2>
+  <div style="max-width:700px;margin-top:1rem;">
+    <div style="display:flex;align-items:center;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--g100);">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">1</div>
+      <div><strong>AI 工具選擇能力</strong><span style="color:var(--g600);"> — 知道什麼任務用哪個 AI</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--g100);">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--purple);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">2</div>
+      <div><strong>一套提示詞模板庫</strong><span style="color:var(--g600);"> — 文書、分析、翻譯、企劃</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--g100);">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--gold);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">3</div>
+      <div><strong>你的專屬 AI 助手</strong><span style="color:var(--g600);"> — 上傳公司資料就能回答問題</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--g100);">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">4</div>
+      <div><strong>至少 1 個自動化流程</strong><span style="color:var(--g600);"> — 實際在 Google 環境中運作</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--g100);">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">5</div>
+      <div><strong>分組專題完整方案</strong><span style="color:var(--g600);"> — 從痛點到自動化的解決方案</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;padding:.7rem 0;">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">6</div>
+      <div><strong>15 個 iPAS 核心術語</strong><span style="color:var(--g600);"> — 為考證照做準備</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 7: 課程特色 ===== -->
+<div class="slide" data-act="課程特色">
+  <h2>為什麼選這堂課？</h2>
+  <div class="card-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;max-width:800px;margin-top:1rem;">
+    <div class="card" style="text-align:center;border-top:3px solid var(--blue);">
+      <div style="font-size:2rem;margin-bottom:.4rem;">🎯</div>
+      <h3>全程實作導向</h3>
+      <p>70% 講師示範 + 30% 動手做<br>不只聽講，每堂都有成果</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--green);">
+      <div style="font-size:2rem;margin-bottom:.4rem;">🤝</div>
+      <h3>分組互學</h3>
+      <p>混搭不同程度的學員<br>每組有小教練，不怕跟不上</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--purple);">
+      <div style="font-size:2rem;margin-bottom:.4rem;">📦</div>
+      <h3>成果帶回職場</h3>
+      <p>提示詞模板、AI 助手、自動化流程<br>做完直接帶回去用</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:3px solid var(--gold);">
+      <div style="font-size:2rem;margin-bottom:.4rem;">🤖</div>
+      <h3>AI 助教全程在線</h3>
+      <p>卡關隨時問 AI 助教「小助」<br>25 人同時卡關也能即時協助</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 8: 案例難度遞進 ===== -->
+<div class="slide" data-act="課程特色">
+  <h2>案例分級，循序漸進</h2>
+  <p style="color:var(--g600);margin-bottom:1rem;">每個單元都有 3-5 個案例，從簡單到挑戰</p>
+  <div style="max-width:700px;">
+    <div style="display:flex;align-items:center;gap:1rem;padding:.8rem 1.2rem;background:var(--green-lt);border-radius:12px;margin-bottom:.6rem;">
+      <span style="font-size:1.3rem;">⭐</span>
+      <div><strong>跟著做</strong><span style="color:var(--g600);"> — 講師帶著全班一步一步操作</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;padding:.8rem 1.2rem;background:var(--gold-lt);border-radius:12px;margin-bottom:.6rem;">
+      <span style="font-size:1.3rem;">⭐⭐</span>
+      <div><strong>自己試</strong><span style="color:var(--g600);"> — 換一個情境，自己動手做</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;padding:.8rem 1.2rem;background:var(--red-lt);border-radius:12px;margin-bottom:.6rem;">
+      <span style="font-size:1.3rem;">⭐⭐⭐</span>
+      <div><strong>挑戰</strong><span style="color:var(--g600);"> — 進階任務，組內互助完成</span></div>
+    </div>
+  </div>
+  <div class="info-box" style="background:var(--blue-lt);border-left:4px solid var(--blue);margin-top:1rem;">
+    <p><strong>做多少算多少</strong> — ⭐ 跟完就有收穫，⭐⭐⭐ 是額外加分，不會落後</p>
+  </div>
+</div>
+
+<!-- ===== 9: 專題設計 ===== -->
+<div class="slide" data-act="課程特色">
+  <h2>期末專題 — 每天疊一層</h2>
+  <p style="color:var(--g600);margin-bottom:1rem;">Day 1 就宣布，但不用擔心，五天自然組好</p>
+  <div style="max-width:600px;">
+    <div style="display:flex;align-items:center;gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--g100);">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0;">1</div>
+      <div><strong>Day 1 選題</strong> — 挑一個工作痛點</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--g100);">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--purple);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0;">2</div>
+      <div><strong>Day 2 拆解</strong> — 用提示詞拆成 AI 步驟</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--g100);">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--gold);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0;">3</div>
+      <div><strong>Day 3 助手</strong> — 建立專屬 AI 助手</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--g100);">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0;">4</div>
+      <div><strong>Day 4 自動化</strong> — 手動流程變自動</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;padding:.6rem 0;">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0;">5</div>
+      <div><strong>Day 5 整合發表</strong> — 串起來 Demo + 上台</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 10: 適合誰 ===== -->
+<div class="slide" data-act="適合誰">
+  <h2>適合誰來上？</h2>
+  <div style="display:flex;gap:1.5rem;max-width:800px;margin-top:1rem;">
+    <div style="flex:1;">
+      <h3 style="color:var(--green);margin-bottom:.8rem;">✅ 適合你</h3>
+      <div style="font-size:1rem;line-height:2.2;">
+        • 想學 AI 但不知從哪開始的上班族<br>
+        • 每天花時間做重複性工作的人<br>
+        • 行政、行銷、客服、業務人員<br>
+        • 中小企業主管或老闆<br>
+        • 對 AI 好奇但擔心太難的人
+      </div>
+    </div>
+    <div style="flex:1;">
+      <h3 style="color:var(--blue);margin-bottom:.8rem;">🚫 你不需要</h3>
+      <div style="font-size:1rem;line-height:2.2;">
+        • 程式設計基礎<br>
+        • AI 或資訊相關背景<br>
+        • 英文能力<br>
+        • 昂貴的電腦設備
+      </div>
+      <div style="background:var(--blue-lt);padding:.6rem 1rem;border-radius:8px;margin-top:.8rem;font-size:.95rem;color:var(--blue);font-weight:700;">
+        會打字、會上網就能學會
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 11: 費用 ===== -->
+<div class="slide" data-act="報名資訊">
+  <h2>費用與政府補助</h2>
+  <div style="max-width:600px;margin-top:1rem;text-align:center;">
+    <div style="background:var(--white);border:2px solid var(--g200);border-radius:16px;padding:2rem;box-shadow:0 2px 8px rgba(0,0,0,.08);">
+      <p style="color:var(--g600);font-size:1rem;">產業人才投資方案</p>
+      <div style="display:flex;justify-content:center;gap:3rem;margin-top:1rem;">
+        <div>
+          <p style="color:var(--g400);font-size:.9rem;">政府補助</p>
+          <div style="font-size:3rem;font-weight:900;color:var(--green);">80%</div>
+        </div>
+        <div style="width:1px;background:var(--g200);"></div>
+        <div>
+          <p style="color:var(--g400);font-size:.9rem;">你只要付</p>
+          <div style="font-size:2.5rem;font-weight:900;color:var(--blue);">~$2,000</div>
+          <p style="color:var(--g400);font-size:.85rem;">（原價約 $10,000）</p>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--green-lt);padding:.8rem;border-radius:8px;margin-top:1rem;font-size:.95rem;color:var(--green);font-weight:700;">
+      特定對象（中高齡、身心障礙、原住民等）補助 100%，完全免費
+    </div>
+  </div>
+</div>
+
+<!-- ===== 12: 報名資訊 ===== -->
+<div class="slide" data-act="報名資訊">
+  <h2>課程資訊</h2>
+  <div style="max-width:600px;margin-top:.8rem;">
+    <div style="display:flex;padding:.6rem 0;border-bottom:1px solid var(--g100);">
+      <div style="width:120px;font-weight:700;color:var(--navy);flex-shrink:0;">課程名稱</div>
+      <div>AI 工具應用與自動化流程實戰班</div>
+    </div>
+    <div style="display:flex;padding:.6rem 0;border-bottom:1px solid var(--g100);">
+      <div style="width:120px;font-weight:700;color:var(--navy);flex-shrink:0;">上課日期</div>
+      <div>115/08/16 ~ 09/13（週日，共 5 天）</div>
+    </div>
+    <div style="display:flex;padding:.6rem 0;border-bottom:1px solid var(--g100);">
+      <div style="width:120px;font-weight:700;color:var(--navy);flex-shrink:0;">上課時間</div>
+      <div>Day1 08:30–17:30 / Day2-5 09:00–17:00</div>
+    </div>
+    <div style="display:flex;padding:.6rem 0;border-bottom:1px solid var(--g100);">
+      <div style="width:120px;font-weight:700;color:var(--navy);flex-shrink:0;">總時數</div>
+      <div>36 小時（8hr + 7hr × 4）</div>
+    </div>
+    <div style="display:flex;padding:.6rem 0;border-bottom:1px solid var(--g100);">
+      <div style="width:120px;font-weight:700;color:var(--navy);flex-shrink:0;">上課人數</div>
+      <div>25 人（5 組 × 5 人）</div>
+    </div>
+    <div style="display:flex;padding:.6rem 0;border-bottom:1px solid var(--g100);">
+      <div style="width:120px;font-weight:700;color:var(--navy);flex-shrink:0;">自備</div>
+      <div>筆電（能上網）+ Google 帳號</div>
+    </div>
+    <div style="display:flex;padding:.6rem 0;">
+      <div style="width:120px;font-weight:700;color:var(--navy);flex-shrink:0;">講師</div>
+      <div>陳重光 ｜ 台灣智綠科技 營運長</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 13: CTA ===== -->
+<div class="slide cover" data-act="報名資訊">
+  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:1rem;">產業人才投資方案 ｜ 政府補助 80%</p>
+  <h1 style="font-size:2.5rem;">立即報名</h1>
+  <p style="color:var(--mint);font-size:1.2rem;margin-top:1rem;">名額有限，額滿即止</p>
+  <div style="margin-top:2rem;">
+    <p style="color:rgba(255,255,255,.7);font-size:1rem;">報名方式：台灣就業通 → 搜尋課程名稱 → 線上報名</p>
+  </div>
+  <div style="margin-top:2rem;background:rgba(255,255,255,.1);padding:1rem 2rem;border-radius:12px;display:inline-block;">
+    <p style="font-size:1.1rem;font-weight:700;">用對話讓 AI 幫你做事 — 會打字就能學會</p>
+  </div>
+</div>
+
+</div>
+
+<!-- Section Nav -->
+<div class="section-nav">
+  <button class="section-nav-btn" id="navBtn" onclick="toggleNav()">
+    <span id="navSection">課程說明</span>
+    <span class="nav-counter"><span id="current">1</span>/<span id="total"></span></span>
+  </button>
+  <div class="section-nav-menu" id="navMenu"></div>
+</div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>←</button><button id="next">→</button></div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),tot=slides.length;
+let idx=0,fi=-1;
+document.getElementById('total').textContent=tot;
+const gf=el=>[...el.querySelectorAll('.fragment')];
+
+function go(n){
+  if(n<0)n=0;if(n>=tot)n=tot-1;
+  slides.forEach(s=>{s.classList.remove('active');s.querySelectorAll('.fragment').forEach(f=>f.classList.remove('visible'));});
+  idx=n;fi=-1;slides[idx].classList.add('active');ui();
+}
+function ui(){
+  document.getElementById('current').textContent=idx+1;
+  document.getElementById('prev').disabled=idx===0&&fi<=0;
+  var f=gf(slides[idx]);
+  document.getElementById('next').disabled=idx===tot-1&&fi>=f.length-1;
+  document.getElementById('progress').style.width=((idx+1)/tot*100)+'%';
+  updateSectionLabel();
+}
+function adv(){var f=gf(slides[idx]);if(fi<f.length-1){fi++;f[fi].classList.add('visible');ui();}else if(idx<tot-1)go(idx+1);}
+function ret(){var f=gf(slides[idx]);if(fi>=0){f[fi].classList.remove('visible');fi--;ui();}else if(idx>0){go(idx-1);var p=gf(slides[idx]);p.forEach(x=>x.classList.add('visible'));fi=p.length-1;ui();}}
+document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
+document.addEventListener('keydown',e=>{
+  if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}
+  if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}
+  if(e.key==='Home'){e.preventDefault();go(0);}
+  if(e.key==='End'){e.preventDefault();go(tot-1);}
+  if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
+});
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});
+document.addEventListener('touchend',e=>{var d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
+
+var sections=[
+  {title:'課程說明',idx:0},
+  {title:'為什麼要學',idx:1},
+  {title:'五天課程',idx:3},
+  {title:'學習成果',idx:5},
+  {title:'課程特色',idx:6},
+  {title:'適合誰',idx:9},
+  {title:'報名資訊',idx:10},
+];
+var navMenu=document.getElementById('navMenu');
+var navSection=document.getElementById('navSection');
+sections.forEach(function(s){
+  var item=document.createElement('div');
+  item.className='section-nav-item';
+  item.innerHTML='<div class="nav-idx">'+(s.idx+1)+'</div><div class="nav-title">'+s.title+'</div>';
+  item.onclick=function(){go(s.idx);navMenu.classList.remove('open');};
+  navMenu.appendChild(item);
+});
+function toggleNav(){navMenu.classList.toggle('open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.section-nav'))navMenu.classList.remove('open');});
+function updateSectionLabel(){
+  var current='';
+  for(var i=sections.length-1;i>=0;i--){if(idx>=sections[i].idx){current=sections[i].title;break;}}
+  navSection.textContent=current||'課程說明';
+  navMenu.querySelectorAll('.section-nav-item').forEach(function(item,i){
+    var isActive=idx>=sections[i].idx&&(i===sections.length-1||idx<sections[i+1].idx);
+    item.classList.toggle('active',isActive);
+  });
+}
+
+go(0);
+</script>
+</body>
+</html>
