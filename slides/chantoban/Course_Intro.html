@@ -41,7 +41,7 @@ html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;colo
   position:absolute;inset:0;
   display:flex;flex-direction:column;align-items:center;
   justify-content:flex-start;          /* 不用 center，用偽元素置中 */
-  padding:3.5rem 4rem 6rem;             /* 上 3.5rem 清 badge, 下 6rem 清 controls+progress+buffer */
+  padding:2rem 3rem 3.5rem;             /* 上 3.5rem 清 badge, 下 6rem 清 controls+progress+buffer */
   display:none;
   background:var(--white);
   overflow-y:auto;                     /* 長內容可捲動 */
@@ -271,102 +271,65 @@ small,.caption{font-size:max(16px,0.75rem);}                    /* 最小 16px �
 <!-- ===== 3: 一句話 ===== -->
 <div class="slide cover" data-act="為什麼要學">
   <h1 style="font-size:2.5rem;line-height:1.5;">這堂課教你<br>用「<span style="color:var(--gold);">對話</span>」讓 AI 幫你做事</h1>
-  <p style="color:var(--mint);font-size:1.2rem;margin-top:1.5rem;">五天後，你會驚訝自己居然做出了「AI 自動化系統」</p>
+  <p style="color:var(--mint);font-size:1.2rem;margin-top:1.5rem;">5 天後，你會驚訝自己居然做出了「AI 自動化系統」</p>
 </div>
 
 <!-- ===== 4: 五天總覽 ===== -->
 <div class="slide" data-act="五天課程">
-  <h2>五天課程總覽</h2>
-  <div style="display:flex;flex-direction:column;gap:.8rem;max-width:800px;margin-top:.8rem;">
-    <div style="display:flex;align-items:center;gap:1rem;background:var(--blue-lt);padding:1rem 1.5rem;border-radius:12px;border-left:4px solid var(--blue);">
-      <div style="font-size:1.5rem;font-weight:900;color:var(--blue);min-width:60px;">Day 1</div>
-      <div><strong>開場 × AI 素養 × 工具全體驗</strong><br><span style="color:var(--g600);font-size:.9rem;">認識 AI、安全風險、三大工具 PK、初階提示詞</span></div>
-      <div style="margin-left:auto;color:var(--blue);font-weight:700;">8hr</div>
+  <h2>5 天課程總覽</h2>
+  <div style="display:flex;flex-direction:column;gap:.5rem;max-width:900px;margin-top:.5rem;">
+    <div style="display:flex;align-items:center;gap:.8rem;background:var(--blue-lt);padding:.6rem 1.2rem;border-radius:10px;border-left:4px solid var(--blue);">
+      <div style="font-weight:900;color:var(--blue);min-width:50px;">Day 1</div>
+      <div style="flex:1;font-size:.95rem;"><strong>開場 × AI 素養 × 工具全體驗</strong></div>
+      <div style="color:var(--blue);font-weight:700;font-size:.9rem;">8hr</div>
     </div>
-    <div style="display:flex;align-items:center;gap:1rem;background:var(--purple-lt);padding:1rem 1.5rem;border-radius:12px;border-left:4px solid var(--purple);">
-      <div style="font-size:1.5rem;font-weight:900;color:var(--purple);min-width:60px;">Day 2</div>
-      <div><strong>提示詞系統化實戰</strong><br><span style="color:var(--g600);font-size:.9rem;">RTFC 四要素、四大職場輪站、提示詞互評</span></div>
-      <div style="margin-left:auto;color:var(--purple);font-weight:700;">7hr</div>
+    <div style="display:flex;align-items:center;gap:.8rem;background:var(--purple-lt);padding:.6rem 1.2rem;border-radius:10px;border-left:4px solid var(--purple);">
+      <div style="font-weight:900;color:var(--purple);min-width:50px;">Day 2</div>
+      <div style="flex:1;font-size:.95rem;"><strong>提示詞系統化實戰</strong></div>
+      <div style="color:var(--purple);font-weight:700;font-size:.9rem;">7hr</div>
     </div>
-    <div style="display:flex;align-items:center;gap:1rem;background:var(--gold-lt);padding:1rem 1.5rem;border-radius:12px;border-left:4px solid var(--gold);">
-      <div style="font-size:1.5rem;font-weight:900;color:var(--gold);min-width:60px;">Day 3</div>
-      <div><strong>AI 個人助手設計</strong><br><span style="color:var(--g600);font-size:.9rem;">My GPTs、Gemini Gems、一人多助手策略</span></div>
-      <div style="margin-left:auto;color:var(--gold);font-weight:700;">7hr</div>
+    <div style="display:flex;align-items:center;gap:.8rem;background:var(--gold-lt);padding:.6rem 1.2rem;border-radius:10px;border-left:4px solid var(--gold);">
+      <div style="font-weight:900;color:var(--gold);min-width:50px;">Day 3</div>
+      <div style="flex:1;font-size:.95rem;"><strong>AI 個人助手設計</strong></div>
+      <div style="color:var(--gold);font-weight:700;font-size:.9rem;">7hr</div>
     </div>
-    <div style="display:flex;align-items:center;gap:1rem;background:var(--green-lt);padding:1rem 1.5rem;border-radius:12px;border-left:4px solid var(--green);">
-      <div style="font-size:1.5rem;font-weight:900;color:var(--green);min-width:60px;">Day 4</div>
-      <div><strong>AI 自動化流程實作</strong><br><span style="color:var(--g600);font-size:.9rem;">Google 自動化、跨服務串接、全班互寄問卷體驗</span></div>
-      <div style="margin-left:auto;color:var(--green);font-weight:700;">7hr</div>
+    <div style="display:flex;align-items:center;gap:.8rem;background:var(--green-lt);padding:.6rem 1.2rem;border-radius:10px;border-left:4px solid var(--green);">
+      <div style="font-weight:900;color:var(--green);min-width:50px;">Day 4</div>
+      <div style="flex:1;font-size:.95rem;"><strong>AI 自動化流程實作</strong></div>
+      <div style="color:var(--green);font-weight:700;font-size:.9rem;">7hr</div>
     </div>
-    <div style="display:flex;align-items:center;gap:1rem;background:var(--red-lt);padding:1rem 1.5rem;border-radius:12px;border-left:4px solid var(--red);">
-      <div style="font-size:1.5rem;font-weight:900;color:var(--red);min-width:60px;">Day 5</div>
-      <div><strong>整合實戰 × 成果發表</strong><br><span style="color:var(--g600);font-size:.9rem;">迭代升級、分組專題重製、期末發表</span></div>
-      <div style="margin-left:auto;color:var(--red);font-weight:700;">7hr</div>
+    <div style="display:flex;align-items:center;gap:.8rem;background:var(--red-lt);padding:.6rem 1.2rem;border-radius:10px;border-left:4px solid var(--red);">
+      <div style="font-weight:900;color:var(--red);min-width:50px;">Day 5</div>
+      <div style="flex:1;font-size:.95rem;"><strong>整合實戰 × 成果發表</strong></div>
+      <div style="color:var(--red);font-weight:700;font-size:.9rem;">7hr</div>
     </div>
   </div>
+  <p style="margin-top:.8rem;color:var(--g600);font-size:.95rem;">認識 AI → 精準對話 → 打造助手 → 自動化 → 整合發表</p>
 </div>
 
-<!-- ===== 5: 敘事線 ===== -->
-<div class="slide" data-act="五天課程">
-  <h2>五天學習路徑</h2>
-  <div class="flow" style="margin-top:1.5rem;">
-    <div class="flow-box" style="background:var(--blue-lt);border-color:var(--blue);min-width:120px;">
-      <div style="font-size:.85rem;color:var(--blue);">Day 1</div>
-      <div style="font-size:1.1rem;font-weight:700;">認識 AI</div>
-    </div>
-    <div class="flow-arrow">→</div>
-    <div class="flow-box" style="background:var(--purple-lt);border-color:var(--purple);min-width:120px;">
-      <div style="font-size:.85rem;color:var(--purple);">Day 2</div>
-      <div style="font-size:1.1rem;font-weight:700;">精準對話</div>
-    </div>
-    <div class="flow-arrow">→</div>
-    <div class="flow-box" style="background:var(--gold-lt);border-color:var(--gold);min-width:120px;">
-      <div style="font-size:.85rem;color:var(--gold);">Day 3</div>
-      <div style="font-size:1.1rem;font-weight:700;">打造助手</div>
-    </div>
-    <div class="flow-arrow">→</div>
-    <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);min-width:120px;">
-      <div style="font-size:.85rem;color:var(--green);">Day 4</div>
-      <div style="font-size:1.1rem;font-weight:700;">自動化</div>
-    </div>
-    <div class="flow-arrow">→</div>
-    <div class="flow-box" style="background:var(--red-lt);border-color:var(--red);min-width:120px;">
-      <div style="font-size:.85rem;color:var(--red);">Day 5</div>
-      <div style="font-size:1.1rem;font-weight:700;">整合發表</div>
-    </div>
-  </div>
-  <div class="info-box" style="background:var(--green-lt);border-left:4px solid var(--green);margin-top:1.5rem;">
-    <p style="font-size:1.1rem;"><strong>每天疊一層，最後一天整合。</strong>不用擔心跟不上 — 分組互學，有小教練協助。</p>
-  </div>
-</div>
-
-<!-- ===== 6: 五天帶走什麼 ===== -->
+<!-- ===== 5: 五天帶走什麼 ===== -->
 <div class="slide" data-act="學習成果">
-  <h2>五天後你會帶走什麼？</h2>
-  <div style="max-width:700px;margin-top:1rem;">
-    <div style="display:flex;align-items:center;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--g100);">
-      <div style="width:36px;height:36px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">1</div>
-      <div><strong>AI 工具選擇能力</strong><span style="color:var(--g600);"> — 知道什麼任務用哪個 AI</span></div>
+  <h2>5 天後你會帶走什麼？</h2>
+  <div style="max-width:800px;margin-top:.8rem;">
+    <div style="display:flex;align-items:center;gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--g100);">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0;">1</div>
+      <div style="font-size:1rem;"><strong>AI 工具選擇能力</strong> — 知道什麼任務用哪個 AI</div>
     </div>
-    <div style="display:flex;align-items:center;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--g100);">
-      <div style="width:36px;height:36px;border-radius:50%;background:var(--purple);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">2</div>
-      <div><strong>一套提示詞模板庫</strong><span style="color:var(--g600);"> — 文書、分析、翻譯、企劃</span></div>
+    <div style="display:flex;align-items:center;gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--g100);">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--purple);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0;">2</div>
+      <div style="font-size:1rem;"><strong>一套提示詞模板庫</strong> — 文書、分析、翻譯、企劃直接套用</div>
     </div>
-    <div style="display:flex;align-items:center;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--g100);">
-      <div style="width:36px;height:36px;border-radius:50%;background:var(--gold);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">3</div>
-      <div><strong>你的專屬 AI 助手</strong><span style="color:var(--g600);"> — 上傳公司資料就能回答問題</span></div>
+    <div style="display:flex;align-items:center;gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--g100);">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--gold);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0;">3</div>
+      <div style="font-size:1rem;"><strong>你的專屬 AI 助手</strong> — 上傳公司資料就能回答問題</div>
     </div>
-    <div style="display:flex;align-items:center;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--g100);">
-      <div style="width:36px;height:36px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">4</div>
-      <div><strong>至少 1 個自動化流程</strong><span style="color:var(--g600);"> — 實際在 Google 環境中運作</span></div>
+    <div style="display:flex;align-items:center;gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--g100);">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0;">4</div>
+      <div style="font-size:1rem;"><strong>至少 1 個自動化流程</strong> — 在 Google 環境中實際運作</div>
     </div>
-    <div style="display:flex;align-items:center;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--g100);">
-      <div style="width:36px;height:36px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">5</div>
-      <div><strong>分組專題完整方案</strong><span style="color:var(--g600);"> — 從痛點到自動化的解決方案</span></div>
-    </div>
-    <div style="display:flex;align-items:center;gap:1rem;padding:.7rem 0;">
-      <div style="width:36px;height:36px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">6</div>
-      <div><strong>15 個 iPAS 核心術語</strong><span style="color:var(--g600);"> — 為考證照做準備</span></div>
+    <div style="display:flex;align-items:center;gap:1rem;padding:.6rem 0;">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0;">5</div>
+      <div style="font-size:1rem;"><strong>分組專題完整方案</strong> — 從工作痛點到自動化的解決方案</div>
     </div>
   </div>
 </div>
@@ -398,53 +361,24 @@ small,.caption{font-size:max(16px,0.75rem);}                    /* 最小 16px �
   </div>
 </div>
 
-<!-- ===== 8: 案例難度遞進 ===== -->
+<!-- ===== 8: 不怕跟不上 ===== -->
 <div class="slide" data-act="課程特色">
-  <h2>案例分級，循序漸進</h2>
-  <p style="color:var(--g600);margin-bottom:1rem;">每個單元都有 3-5 個案例，從簡單到挑戰</p>
-  <div style="max-width:700px;">
-    <div style="display:flex;align-items:center;gap:1rem;padding:.8rem 1.2rem;background:var(--green-lt);border-radius:12px;margin-bottom:.6rem;">
-      <span style="font-size:1.3rem;">⭐</span>
-      <div><strong>跟著做</strong><span style="color:var(--g600);"> — 講師帶著全班一步一步操作</span></div>
+  <h2>不怕跟不上</h2>
+  <div style="display:flex;gap:1.5rem;max-width:900px;margin-top:.8rem;">
+    <div style="flex:1;">
+      <h3 style="color:var(--blue);margin-bottom:.6rem;">案例分級，做多少算多少</h3>
+      <div style="display:flex;align-items:center;gap:.6rem;padding:.5rem 0;"><span>⭐</span><strong>跟著做</strong><span style="color:var(--g600);font-size:.9rem;"> — 講師帶全班操作</span></div>
+      <div style="display:flex;align-items:center;gap:.6rem;padding:.5rem 0;"><span>⭐⭐</span><strong>自己試</strong><span style="color:var(--g600);font-size:.9rem;"> — 換情境動手做</span></div>
+      <div style="display:flex;align-items:center;gap:.6rem;padding:.5rem 0;"><span>⭐⭐⭐</span><strong>挑戰</strong><span style="color:var(--g600);font-size:.9rem;"> — 進階任務，組內互助</span></div>
     </div>
-    <div style="display:flex;align-items:center;gap:1rem;padding:.8rem 1.2rem;background:var(--gold-lt);border-radius:12px;margin-bottom:.6rem;">
-      <span style="font-size:1.3rem;">⭐⭐</span>
-      <div><strong>自己試</strong><span style="color:var(--g600);"> — 換一個情境，自己動手做</span></div>
-    </div>
-    <div style="display:flex;align-items:center;gap:1rem;padding:.8rem 1.2rem;background:var(--red-lt);border-radius:12px;margin-bottom:.6rem;">
-      <span style="font-size:1.3rem;">⭐⭐⭐</span>
-      <div><strong>挑戰</strong><span style="color:var(--g600);"> — 進階任務，組內互助完成</span></div>
-    </div>
-  </div>
-  <div class="info-box" style="background:var(--blue-lt);border-left:4px solid var(--blue);margin-top:1rem;">
-    <p><strong>做多少算多少</strong> — ⭐ 跟完就有收穫，⭐⭐⭐ 是額外加分，不會落後</p>
-  </div>
-</div>
-
-<!-- ===== 9: 專題設計 ===== -->
-<div class="slide" data-act="課程特色">
-  <h2>期末專題 — 每天疊一層</h2>
-  <p style="color:var(--g600);margin-bottom:1rem;">Day 1 就宣布，但不用擔心，五天自然組好</p>
-  <div style="max-width:600px;">
-    <div style="display:flex;align-items:center;gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--g100);">
-      <div style="width:32px;height:32px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0;">1</div>
-      <div><strong>Day 1 選題</strong> — 挑一個工作痛點</div>
-    </div>
-    <div style="display:flex;align-items:center;gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--g100);">
-      <div style="width:32px;height:32px;border-radius:50%;background:var(--purple);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0;">2</div>
-      <div><strong>Day 2 拆解</strong> — 用提示詞拆成 AI 步驟</div>
-    </div>
-    <div style="display:flex;align-items:center;gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--g100);">
-      <div style="width:32px;height:32px;border-radius:50%;background:var(--gold);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0;">3</div>
-      <div><strong>Day 3 助手</strong> — 建立專屬 AI 助手</div>
-    </div>
-    <div style="display:flex;align-items:center;gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--g100);">
-      <div style="width:32px;height:32px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0;">4</div>
-      <div><strong>Day 4 自動化</strong> — 手動流程變自動</div>
-    </div>
-    <div style="display:flex;align-items:center;gap:1rem;padding:.6rem 0;">
-      <div style="width:32px;height:32px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0;">5</div>
-      <div><strong>Day 5 整合發表</strong> — 串起來 Demo + 上台</div>
+    <div style="flex:1;">
+      <h3 style="color:var(--green);margin-bottom:.6rem;">專題每天疊一層</h3>
+      <div style="font-size:.95rem;line-height:2;">
+        Day 1 選題 → Day 2 拆解<br>
+        Day 3 建助手 → Day 4 自動化<br>
+        Day 5 整合發表
+      </div>
+      <p style="margin-top:.5rem;font-size:.9rem;color:var(--green);font-weight:700;">不用一次做完，每天只加一層</p>
     </div>
   </div>
 </div>
@@ -600,11 +534,11 @@ document.addEventListener('touchend',e=>{var d=tx-e.changedTouches[0].screenX;if
 var sections=[
   {title:'課程說明',idx:0},
   {title:'為什麼要學',idx:1},
-  {title:'五天課程',idx:3},
-  {title:'學習成果',idx:5},
-  {title:'課程特色',idx:6},
-  {title:'適合誰',idx:9},
-  {title:'報名資訊',idx:10},
+  {title:'5 天課程',idx:3},
+  {title:'學習成果',idx:4},
+  {title:'課程特色',idx:5},
+  {title:'適合誰',idx:8},
+  {title:'報名資訊',idx:9},
 ];
 var navMenu=document.getElementById('navMenu');
 var navSection=document.getElementById('navSection');
