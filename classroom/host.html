@@ -39,48 +39,30 @@
   a{color:var(--pri);text-decoration:none}
 
   /* Login / Landing Page */
-  .landing{min-height:100vh;background:var(--bg);overflow-y:auto}
-  .landing-hero{position:relative;padding:3rem 1.5rem 2rem;text-align:center;overflow:hidden}
-  .landing-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(6,182,212,0.12) 0%,transparent 70%);pointer-events:none}
-  .landing-hero .hero-icon{font-size:4rem;margin-bottom:0.5rem;display:block}
-  .landing-hero h1{font-size:2rem;font-weight:900;background:linear-gradient(135deg,var(--gold),#FF6B35);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:0.3rem}
-  .landing-hero .tagline{color:var(--dim);font-size:0.95rem;max-width:500px;margin:0 auto 1.5rem;line-height:1.6}
-  .landing-hero .hero-badge{display:inline-block;padding:0.3rem 0.8rem;background:rgba(255,200,87,0.12);color:var(--gold);border:1px solid rgba(255,200,87,0.25);border-radius:20px;font-size:0.75rem;font-weight:700;margin-bottom:1rem}
+  .landing{min-height:100vh;display:flex;flex-direction:column;position:relative;overflow:hidden}
+  .landing-bg{position:absolute;inset:0;z-index:0}
+  .landing-bg img{width:100%;height:100%;object-fit:cover;object-position:center 30%}
+  .landing-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(10,15,26,0.3) 0%,rgba(10,15,26,0.55) 40%,rgba(10,15,26,0.92) 75%,rgba(10,15,26,1) 100%)}
 
-  .landing-body{max-width:800px;margin:0 auto;padding:0 1.5rem 3rem}
+  .landing-content{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:2rem 1.5rem 2.5rem;max-width:700px;margin:0 auto;width:100%}
 
-  .landing-section{margin-bottom:2rem}
-  .landing-section h2{font-size:1.1rem;font-weight:900;color:var(--pri);margin-bottom:1rem;padding-left:0.8rem;border-left:3px solid var(--pri)}
+  .slogan{text-align:center;margin-bottom:2.5rem}
+  .slogan h1{font-size:2.8rem;font-weight:900;letter-spacing:0.05em;color:#fff;margin-bottom:0.6rem;text-shadow:0 2px 20px rgba(0,0,0,0.5)}
+  .slogan .sub1{font-size:1.15rem;color:rgba(255,200,87,0.95);font-weight:700;margin-bottom:0.4rem;text-shadow:0 1px 8px rgba(0,0,0,0.4)}
+  .slogan .sub2{font-size:0.9rem;color:rgba(255,255,255,0.6);font-weight:400;letter-spacing:0.08em}
 
-  .feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem}
-  .feature-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.2rem;transition:border-color 0.2s}
-  .feature-card:hover{border-color:rgba(6,182,212,0.4)}
-  .feature-card .fc-icon{font-size:1.5rem;margin-bottom:0.4rem;display:block}
-  .feature-card .fc-title{font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:0.2rem}
-  .feature-card .fc-desc{font-size:0.75rem;color:var(--dim);line-height:1.5}
-
-  .arch-flow{display:flex;align-items:center;gap:0.3rem;flex-wrap:wrap;justify-content:center;margin:1rem 0}
-  .arch-node{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0.6rem 1rem;text-align:center;min-width:80px}
-  .arch-node .an-icon{font-size:1.3rem;display:block}
-  .arch-node .an-label{font-size:0.7rem;color:var(--dim);margin-top:0.15rem}
-  .arch-arrow{color:var(--pri);font-size:1rem;flex-shrink:0}
-
-  .tech-tags{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.8rem}
-  .tech-tag{padding:0.25rem 0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-size:0.7rem;color:var(--dim);font-family:'JetBrains Mono',monospace}
-
-  .login-section{text-align:center;padding:2rem 1.5rem;background:var(--surface);border-radius:16px;border:1px solid var(--border);max-width:460px;margin:0 auto}
-  .login-section h3{color:var(--gold);font-size:1rem;margin-bottom:0.3rem}
-  .login-section .login-sub{color:var(--dim);font-size:0.8rem;margin-bottom:1.5rem}
-  .btn-google{display:flex;align-items:center;justify-content:center;gap:0.8rem;width:100%;padding:0.9rem;background:#fff;color:#333;font-size:1rem;font-weight:700;border-radius:10px;border:1px solid #ddd}
-  .btn-google:hover{box-shadow:0 2px 12px rgba(0,0,0,0.15)}
+  .login-box{background:rgba(22,27,34,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:1.8rem 2rem;text-align:center;max-width:420px;margin:0 auto;width:100%}
+  .login-box .login-label{color:rgba(255,255,255,0.5);font-size:0.8rem;margin-bottom:1rem}
+  .btn-google{display:flex;align-items:center;justify-content:center;gap:0.8rem;width:100%;padding:0.9rem;background:#fff;color:#333;font-size:1rem;font-weight:700;border-radius:10px;border:none;transition:all 0.2s}
+  .btn-google:hover{box-shadow:0 4px 20px rgba(255,255,255,0.15);transform:translateY(-1px)}
   .btn-google img{width:20px;height:20px}
-  .login-note{font-size:0.7rem;color:var(--dim);margin-top:1rem;line-height:1.5}
+  .login-box .login-note{font-size:0.65rem;color:rgba(255,255,255,0.3);margin-top:0.8rem;line-height:1.5}
+  .login-box .login-note a{color:rgba(15,157,138,0.8)}
 
   @media(max-width:600px){
-    .feature-grid{grid-template-columns:1fr}
-    .landing-hero h1{font-size:1.6rem}
-    .arch-flow{flex-direction:column}
-    .arch-arrow{transform:rotate(90deg)}
+    .slogan h1{font-size:2rem}
+    .slogan .sub1{font-size:1rem}
+    .login-box{padding:1.2rem 1.5rem}
   }
 
   /* Lobby */
@@ -485,117 +467,22 @@
 
 <!-- Landing Page / Login -->
 <div class="landing" id="loginScreen">
-
-  <!-- Hero -->
-  <div class="landing-hero">
-    <span class="hero-badge">Open Source · Coming Soon</span>
-    <span class="hero-icon">🦞</span>
-    <h1>ClassClaw</h1>
-    <p class="tagline">零安裝、純瀏覽器的課堂互動系統。手機就是遙控器，AI 是你的助教，Firebase 讓一切即時同步。</p>
+  <div class="landing-bg">
+    <img src="/classroom/classclaw-hero.png" alt="">
   </div>
-
-  <div class="landing-body">
-
-    <!-- Architecture -->
-    <div class="landing-section">
-      <h2>系統架構</h2>
-      <div class="arch-flow">
-        <div class="arch-node"><span class="an-icon">📱</span><span class="an-label">手機遙控</span></div>
-        <span class="arch-arrow">→</span>
-        <div class="arch-node" style="border-color:var(--pri)"><span class="an-icon">🔥</span><span class="an-label">Firebase</span></div>
-        <span class="arch-arrow">→</span>
-        <div class="arch-node"><span class="an-icon">🖥️</span><span class="an-label">投影簡報</span></div>
-      </div>
-      <div class="arch-flow" style="margin-top:0.5rem">
-        <div class="arch-node"><span class="an-icon">👩‍🎓</span><span class="an-label">學員互動</span></div>
-        <span class="arch-arrow">→</span>
-        <div class="arch-node" style="border-color:var(--pri)"><span class="an-icon">🔥</span><span class="an-label">Realtime DB</span></div>
-        <span class="arch-arrow">→</span>
-        <div class="arch-node"><span class="an-icon">👨‍🏫</span><span class="an-label">講師後台</span></div>
-      </div>
-      <div class="tech-tags">
-        <span class="tech-tag">Firebase Auth</span>
-        <span class="tech-tag">Realtime Database</span>
-        <span class="tech-tag">Gemini AI</span>
-        <span class="tech-tag">Web Speech API</span>
-        <span class="tech-tag">GitHub Pages</span>
-        <span class="tech-tag">GAS Email</span>
-        <span class="tech-tag">Zero Backend</span>
-      </div>
+  <div class="landing-content">
+    <div class="slogan">
+      <h1>ClassClaw</h1>
+      <div class="sub1">全新型態的課堂互動 — Agent 助教隨時在線</div>
+      <div class="sub2">OPEN SOURCE &nbsp;·&nbsp; FREE FOREVER</div>
     </div>
-
-    <!-- Features -->
-    <div class="landing-section">
-      <h2>核心功能</h2>
-      <div class="feature-grid">
-        <div class="feature-card">
-          <span class="fc-icon">💬</span>
-          <div class="fc-title">三模式互動</div>
-          <div class="fc-desc">訊息牆、即時投票、匿名問答，一鍵切換，學員手機即時參與</div>
-        </div>
-        <div class="feature-card">
-          <span class="fc-icon">🤖</span>
-          <div class="fc-title">AI 助教</div>
-          <div class="fc-desc">Gemini 驅動，自動回答學員問題，有溫度的學長姐風格，閒聊自動跳過</div>
-        </div>
-        <div class="feature-card">
-          <span class="fc-icon">📊</span>
-          <div class="fc-title">課程管理</div>
-          <div class="fc-desc">課程 → 堂次 → 教材 → 問卷，三階段 Dashboard（課前/課中/課後）</div>
-        </div>
-        <div class="feature-card">
-          <span class="fc-icon">📧</span>
-          <div class="fc-title">教材寄送</div>
-          <div class="fc-desc">課後自動收集 Email，一鍵寄送 PDF 教材，GAS Relay 不需要後端</div>
-        </div>
-        <div class="feature-card">
-          <span class="fc-icon">🎤</span>
-          <div class="fc-title">語音控制</div>
-          <div class="fc-desc">瀏覽器語音辨識 + jt-live-whisper 整合，口令操作簡報和模式切換</div>
-        </div>
-        <div class="feature-card">
-          <span class="fc-icon">📱</span>
-          <div class="fc-title">無電腦教學</div>
-          <div class="fc-desc">手機登入即可開課，現場電腦只需開瀏覽器投影，QR Code 掃碼串接</div>
-        </div>
-      </div>
+    <div class="login-box">
+      <div class="login-label">講師後台登入</div>
+      <button class="btn-google" onclick="googleLogin()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg">使用 Google 帳號登入
+      </button>
+      <p class="login-note">Beta · 開源版即將發布於 <a href="https://github.com/ai-cooperation" target="_blank">ai-cooperation</a></p>
     </div>
-
-    <!-- How it works -->
-    <div class="landing-section">
-      <h2>使用流程</h2>
-      <div style="display:flex;flex-direction:column;gap:0.6rem">
-        <div style="display:flex;align-items:center;gap:0.8rem;background:var(--surface);border-radius:10px;padding:0.8rem 1rem;border:1px solid var(--border)">
-          <span style="width:28px;height:28px;border-radius:50%;background:var(--pri);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:900;flex-shrink:0">1</span>
-          <div><div style="font-size:0.85rem;font-weight:700">登入</div><div style="font-size:0.75rem;color:var(--dim)">Google 帳號一鍵登入，手機或電腦都行</div></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:0.8rem;background:var(--surface);border-radius:10px;padding:0.8rem 1rem;border:1px solid var(--border)">
-          <span style="width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--navy);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:900;flex-shrink:0">2</span>
-          <div><div style="font-size:0.85rem;font-weight:700">建課選教材</div><div style="font-size:0.75rem;color:var(--dim)">建立課程 → 新增堂次 → 選擇內建或自訂簡報</div></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:0.8rem;background:var(--surface);border-radius:10px;padding:0.8rem 1rem;border:1px solid var(--border)">
-          <span style="width:28px;height:28px;border-radius:50%;background:var(--purple);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:900;flex-shrink:0">3</span>
-          <div><div style="font-size:0.85rem;font-weight:700">開始上課</div><div style="font-size:0.75rem;color:var(--dim)">學員掃 QR 加入 → 訊息牆/投票/問答即時互動</div></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:0.8rem;background:var(--surface);border-radius:10px;padding:0.8rem 1rem;border:1px solid var(--border)">
-          <span style="width:28px;height:28px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:900;flex-shrink:0">4</span>
-          <div><div style="font-size:0.85rem;font-weight:700">課後收尾</div><div style="font-size:0.75rem;color:var(--dim)">回饋問卷 → 自動收 Email → 一鍵寄送教材 PDF</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Login -->
-    <div class="landing-section">
-      <div class="login-section">
-        <h3>進入講師後台</h3>
-        <p class="login-sub">登入後即可建立課程、管理教材、開始上課</p>
-        <button class="btn-google" onclick="googleLogin()">
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg">使用 Google 帳號登入
-        </button>
-        <p class="login-note">目前為 Beta 階段，僅限授權講師使用。<br>開源版本即將發布於 <a href="https://github.com/ai-cooperation" target="_blank">ai-cooperation</a></p>
-      </div>
-    </div>
-
   </div>
 </div>
 
