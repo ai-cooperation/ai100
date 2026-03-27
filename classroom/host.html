@@ -448,6 +448,26 @@
     <div id="todayClassList"></div>
   </div>
 
+  <!-- Global Settings -->
+  <div style="display:flex;gap:0.6rem;margin-bottom:1rem;flex-wrap:wrap">
+    <div style="flex:1;min-width:200px;padding:0.8rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;">
+      <div style="font-size:0.8rem;color:var(--dim);margin-bottom:0.3rem">API Key</div>
+      <div style="display:flex;gap:0.5rem;align-items:center">
+        <input type="password" id="globalAIKey" placeholder="Gemini API Key" style="flex:1;padding:0.4rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem">
+        <button onclick="saveGlobalAIKey()" style="padding:0.4rem 0.6rem;background:var(--pri);color:#fff;border-radius:6px;font-size:0.75rem;white-space:nowrap">儲存</button>
+      </div>
+      <span id="globalAIKeyStatus" style="font-size:0.7rem;color:var(--dim)"></span>
+    </div>
+    <div style="flex:1;min-width:200px;padding:0.8rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;">
+      <div style="font-size:0.8rem;color:var(--dim);margin-bottom:0.3rem">Email Relay</div>
+      <div style="display:flex;gap:0.5rem;align-items:center">
+        <input type="url" id="globalGasUrl" placeholder="GAS URL" style="flex:1;padding:0.4rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem">
+        <button onclick="saveGlobalGasUrl()" style="padding:0.4rem 0.6rem;background:var(--pri);color:#fff;border-radius:6px;font-size:0.75rem;white-space:nowrap">儲存</button>
+      </div>
+      <span id="globalGasStatus" style="font-size:0.7rem;color:var(--dim)"></span>
+    </div>
+  </div>
+
   <!-- My Courses -->
   <div class="room-list" style="margin-bottom:2rem">
     <h2>我的課程</h2>
@@ -549,14 +569,16 @@
 
       <!-- Step 2: Student entrance -->
       <div class="step-card">
-        <div class="step-title"><span class="step-num">2</span>學員入口</div>
+        <div class="step-title"><span class="step-num">2</span>教室入口</div>
         <div class="step-desc">分享 QR Code 或連結給學員加入教室</div>
         <div class="info-panel" id="prepareQRPanel">
           <div class="info-card">
-            <h3>📱 學員掃碼加入</h3>
-            <div class="qr-small" id="qrStudentPrepare"></div>
-            <div class="url-text" id="prepareStudentUrl"></div>
-            <button onclick="copyStudentLink()">複製連結</button>
+            <h3>📱 教室入口 QR</h3>
+            <div class="qr-small" id="qrHostPrepare"></div>
+            <div class="url-text" id="prepareHostUrl"></div>
+            <div style="margin-top:0.5rem;font-size:0.75rem;color:var(--dim)">學員連結：</div>
+            <div class="url-text" id="prepareStudentUrl" style="margin-top:0.2rem"></div>
+            <button onclick="copyStudentLink()">複製學員連結</button>
           </div>
           <div class="info-card">
             <h3>🎮 老師手機遙控</h3>
@@ -603,6 +625,8 @@
       <span class="status-item" id="liveStatusDeck">📚 未選擇教材</span>
       <span class="status-item" id="liveStatusPage"></span>
       <span class="status-item" id="liveStatusMode"></span>
+      <span class="status-item"><span id="statusDotAI" style="color:#DC2626">●</span> API</span>
+      <span class="status-item"><span id="statusDotGAS" style="color:#DC2626">●</span> GAS</span>
     </div>
 
     <!-- Mode tabs -->
@@ -622,6 +646,7 @@
       <button class="tool-btn" onclick="toggleQR()">QR Code</button>
       <button class="tool-btn" id="btnAgentTool" onclick="toggleAgentPanel()">Agent</button>
       <button class="tool-btn" onclick="showReport()">報告</button>
+      <button class="tool-btn" onclick="showChangeMaterial()">更換教材</button>
       <span id="currentDeckLabel" class="deck-label" style="display:none"></span>
     </div>
 
@@ -685,6 +710,16 @@
           <input id="postDeckLink" placeholder="https://..." style="width:100%;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;">
         </div>
         <button onclick="postOpenEmailPanel()" style="width:100%;padding:0.6rem;background:#1A73E8;color:#fff;border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer">📧 寄送教材</button>
+      </div>
+
+      <!-- Feedback QR -->
+      <div class="post-section" id="postFeedbackQR">
+        <h3>📋 回饋問卷</h3>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem">
+          <button onclick="showFeedbackQROverlay()" style="padding:0.5rem 1rem;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:0.85rem;cursor:pointer">顯示 QR</button>
+          <button onclick="pushFeedbackQRToPresenter()" style="padding:0.5rem 1rem;background:var(--purple);color:#fff;border:none;border-radius:8px;font-size:0.85rem;cursor:pointer">推送到簡報</button>
+          <button onclick="pushFeedbackQRToStudents()" style="padding:0.5rem 1rem;background:var(--pri);color:#fff;border:none;border-radius:8px;font-size:0.85rem;cursor:pointer">推送到學員</button>
+        </div>
       </div>
 
       <!-- More actions -->
@@ -753,23 +788,6 @@
       <input type="text" id="inputPassword" placeholder="密碼" style="margin-top:0.5rem" class="hidden">
       <button class="sp-btn save" onclick="savePassword()">儲存</button>
     </div>
-    <div class="sp-section">
-      <h4>AI 助教</h4>
-      <p>填入 Gemini API Key，開啟 AI 後自動回答學員問題</p>
-      <input type="password" id="inputAIKey" placeholder="Gemini API Key">
-      <button class="sp-btn save" onclick="saveAIKey()">儲存 Key</button>
-      <button class="sp-btn test" onclick="testAIKey()">測試 AI 連線</button>
-      <p style="margin-top:0.3rem">Key 只存你的瀏覽器，不上傳</p>
-      <p id="aiKeyStatus" style="color:var(--pri);font-weight:700"></p>
-    </div>
-    <div class="sp-section">
-      <h4>📧 GAS Email Relay</h4>
-      <p>部署 GAS 後貼上 URL，用於課後寄信</p>
-      <input type="url" id="inputGasUrl" placeholder="https://script.google.com/macros/s/.../exec">
-      <button class="sp-btn save" onclick="saveGasUrl()">儲存</button>
-      <button class="sp-btn test" onclick="testGasUrl()">測試連線</button>
-      <p id="gasUrlStatus" style="color:var(--pri);font-weight:700"></p>
-    </div>
     <div class="sp-section"><h4>危險操作</h4><button class="sp-btn clear" onclick="clearRoom()">清除所有互動資料</button></div>
   </div>
 </div>
@@ -814,6 +832,7 @@
         <button onclick="quickPush('link','GitHub','https://github.com')" style="padding:4px 10px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:0.75rem;cursor:pointer;">GitHub</button>
         <button onclick="quickPush('link','ChatGPT','https://chatgpt.com')" style="padding:4px 10px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:0.75rem;cursor:pointer;">ChatGPT</button>
         <button onclick="quickPush('link','Google Sheet','https://sheets.new')" style="padding:4px 10px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:0.75rem;cursor:pointer;">Sheet</button>
+        <button onclick="pushClassroomQR()" style="padding:4px 10px;background:#0d1117;border:1px solid #0F9D8A;border-radius:6px;color:#0F9D8A;font-size:0.75rem;cursor:pointer;">教室 QR</button>
       </div>
     </div>
 
@@ -1400,11 +1419,13 @@ function renderPreparingPhase(){
 
   // QR codes
   var studentUrl=location.origin+'/classroom/?room='+encodeURIComponent(roomId);
+  var hostUrl=location.origin+'/classroom/host';
   var remoteUrl=location.origin+'/classroom/remote?room='+encodeURIComponent(roomId);
+  document.getElementById('prepareHostUrl').textContent=hostUrl;
   document.getElementById('prepareStudentUrl').textContent=studentUrl;
   document.getElementById('prepareRemoteUrl').textContent=remoteUrl;
   setTimeout(function(){
-    makeQR('qrStudentPrepare',studentUrl);
+    makeQR('qrHostPrepare',hostUrl);
     makeQR('qrRemotePrepare',remoteUrl);
   },50);
 
@@ -1581,6 +1602,7 @@ auth.onAuthStateChanged(function(user){
     document.getElementById('lobbyName').textContent=user.displayName||user.email;
     var today=new Date();
     document.getElementById('datePrefix').textContent=today.getFullYear()+String(today.getMonth()+1).padStart(2,'0')+String(today.getDate()).padStart(2,'0')+'-';
+    initGlobalSettings();
     loadCourseList();
     loadRoomList();
     loadTodayClasses();
@@ -1833,6 +1855,7 @@ function renderSessionList(){
       html+='<div class="sr-info"><div class="sr-title">'+esc(s.title||'未命名')+'</div><div class="sr-meta">'+dateDisplay+(s.duration?' · '+s.duration+'hr':'')+'</div></div>';
       if(s.deckId){html+='<span class="sr-deck">'+esc(s.deckId)+'</span>'}
       html+='<span class="sr-status '+statusClass+'">'+esc(statusLabels[s.status]||s.status)+'</span>';
+      html+='<button onclick="event.stopPropagation();editSession('+idx+')" style="padding:0.2rem 0.5rem;border-radius:4px;font-size:0.7rem;background:none;color:var(--dim);border:1px solid var(--border);cursor:pointer">編輯</button>';
       html+='</div>';
     });
     html+='</div>';
@@ -1867,6 +1890,51 @@ function selectSession(idx){
   } else {
     selectCoursePhase('prepare');
   }
+}
+
+function editSession(idx){
+  var sess=cvSessions[idx];
+  if(!sess)return;
+  var body=document.getElementById('cvMainBody');
+  document.getElementById('cvMainTitle').textContent='編輯堂次 — '+esc(sess.title||'');
+  var dateVal=sess.date?(sess.date.length===8?sess.date.substring(0,4)+'-'+sess.date.substring(4,6)+'-'+sess.date.substring(6,8):sess.date):'';
+  var h='<div class="new-session-form">';
+  h+='<h3>編輯堂次</h3>';
+  h+='<div class="nsf-field"><label>日期</label><input type="date" id="editSessDate" value="'+esc(dateVal)+'"></div>';
+  h+='<div class="nsf-field"><label>主題</label><input type="text" id="editSessTitle" value="'+esc(sess.title||'')+'"></div>';
+  h+='<div class="nsf-field"><label>時長（小時）</label><input type="number" id="editSessDuration" value="'+(sess.duration||3)+'" min="1" max="8"></div>';
+  h+='<div class="nsf-field"><label>教材</label>';
+  h+='<select id="editSessDeck" style="width:100%;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;">';
+  h+='<option value="">（不指定）</option>';
+  deckOptions.forEach(function(d){h+='<option value="'+d.name+'"'+(d.name===sess.deckId?' selected':'')+'>'+d.label+'</option>'});
+  h+='</select></div>';
+  h+='<button class="nsf-submit" onclick="saveSessionEdit('+idx+')">儲存</button>';
+  h+='<button class="nsf-cancel" onclick="renderSessionList()">取消</button>';
+  h+='</div>';
+  body.innerHTML=h;
+}
+
+function saveSessionEdit(idx){
+  var sess=cvSessions[idx];
+  if(!sess||!cvCourseId)return;
+  var date=(document.getElementById('editSessDate').value||'').replace(/-/g,'');
+  var title=document.getElementById('editSessTitle').value.trim();
+  var duration=parseInt(document.getElementById('editSessDuration').value)||3;
+  var deckId=document.getElementById('editSessDeck').value;
+  if(!title){alert('請填寫主題');return}
+  var updates={};
+  updates['courses/'+cvCourseId+'/sessions/'+sess.id+'/date']=date;
+  updates['courses/'+cvCourseId+'/sessions/'+sess.id+'/title']=title;
+  updates['courses/'+cvCourseId+'/sessions/'+sess.id+'/duration']=duration;
+  updates['courses/'+cvCourseId+'/sessions/'+sess.id+'/deckId']=deckId;
+  if(sess.roomId){
+    updates['rooms/'+sess.roomId+'/config/title']=title;
+    updates['rooms/'+sess.roomId+'/config/deck']=deckId||null;
+  }
+  db.ref().update(updates).then(function(){
+    showActionToast('堂次已更新');
+    renderSessionList();
+  }).catch(function(e){alert('更新失敗：'+e.message)});
 }
 
 function setPhaseCardsEnabled(enabled){
@@ -1915,7 +1983,7 @@ function renderCVPrepare(sess){
   if(sess.shareLink){html+='<div style="font-size:0.8rem;color:var(--dim);margin-top:0.3rem">分享連結：<a href="'+esc(sess.shareLink)+'" target="_blank">'+esc(sess.shareLink)+'</a></div>'}
   html+='</div>';
 
-  html+='<div class="step-card"><div class="step-title"><span class="step-num">2</span>學員入口</div>';
+  html+='<div class="step-card"><div class="step-title"><span class="step-num">2</span>教室入口</div>';
   if(sess.roomId){
     html+='<div style="font-size:0.8rem;color:var(--dim);margin-bottom:0.5rem;word-break:break-all">'+esc(studentUrl)+'</div>';
     html+='<div style="display:flex;gap:0.5rem"><div class="qr-small" id="cvQrStudent" style="max-width:120px"></div><div class="qr-small" id="cvQrRemote" style="max-width:120px"></div></div>';
@@ -2438,6 +2506,8 @@ function enterRoom(rid,title,phaseOverride){
   });
   // Keyboard
   document.getElementById('hostWallText').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();sendTeacherWall()}});
+  // Check service status
+  checkServiceStatus();
   // Start AI listener
   startAIListener();
   // Start Agent panel
@@ -2639,8 +2709,8 @@ async function handleAIRequest(question,source,qaId){
 
 // Test AI Key
 async function testAIKey(){
-  var key=document.getElementById('inputAIKey').value.trim()||localStorage.getItem('_ai_key');
-  var status=document.getElementById('aiKeyStatus');
+  var key=localStorage.getItem('_ai_key');
+  var status=document.getElementById('globalAIKeyStatus');
   if(!key){status.textContent='❌ 請先填入 Key';status.style.color='var(--red)';return}
   status.textContent='⏳ 測試中...';status.style.color='var(--dim)';
   try{
@@ -2747,17 +2817,27 @@ function renderInfoPanel(){
 var DEFAULT_GAS_URL='https://script.google.com/macros/s/AKfycbxGE9i-742LPKD-zXcmfmzY4pt2UL8kbJgAI7kzEaQt3upYL1U55C-P_NHRWfUpLuj9FA/exec';
 function loadSettings(){
   db.ref('rooms/'+roomId+'/config/password').once('value').then(function(s){var p=s.val();document.getElementById('chkPassword').checked=!!p;if(p){document.getElementById('inputPassword').value=p;document.getElementById('inputPassword').classList.remove('hidden')}});
-  var k=localStorage.getItem('_ai_key');if(k)document.getElementById('inputAIKey').value=k;
   if(!localStorage.getItem('_gas_url'))localStorage.setItem('_gas_url',DEFAULT_GAS_URL);
-  document.getElementById('inputGasUrl').value=localStorage.getItem('_gas_url');
 }
 function toggleSettings(){document.getElementById('settingsPanel').classList.toggle('open');document.getElementById('settingsOverlay').classList.toggle('show')}
 function savePassword(){var on=document.getElementById('chkPassword').checked,pwd=document.getElementById('inputPassword').value.trim();if(on&&!pwd){alert('請輸入密碼');return}db.ref('rooms/'+roomId+'/config/password').set(on?pwd:null).then(function(){alert(on?'密碼已設定':'密碼已關閉')})}
-function saveAIKey(){var k=document.getElementById('inputAIKey').value.trim();if(!k){localStorage.removeItem('_ai_key');alert('Key 已清除');return}localStorage.setItem('_ai_key',k);alert('Key 已儲存')}
-function toggleAI(){if(!localStorage.getItem('_ai_key')&&!aiEnabled){alert('請先在設定中填入 Gemini API Key 並測試');toggleSettings();return}db.ref('rooms/'+roomId+'/config/aiEnabled').set(!aiEnabled)}
+function toggleAI(){if(!localStorage.getItem('_ai_key')&&!aiEnabled){alert('請先在大廳全域設定填入 Gemini API Key');return}db.ref('rooms/'+roomId+'/config/aiEnabled').set(!aiEnabled)}
 function clearRoom(){if(!confirm('清除所有互動資料？'))return;db.ref('rooms/'+roomId).update({wall:null,votes:null,currentVote:null,qa:null,qaUps:null,qaReplies:null})}
-function saveGasUrl(){var u=document.getElementById('inputGasUrl').value.trim();if(!u){localStorage.removeItem('_gas_url');document.getElementById('gasUrlStatus').textContent='已清除';return}localStorage.setItem('_gas_url',u);document.getElementById('gasUrlStatus').textContent='✅ 已儲存'}
-function testGasUrl(){var u=localStorage.getItem('_gas_url');if(!u){document.getElementById('gasUrlStatus').textContent='❌ 請先儲存 URL';return}document.getElementById('gasUrlStatus').textContent='測試中...';fetch(u).then(function(r){return r.json()}).then(function(d){document.getElementById('gasUrlStatus').textContent=d.status==='ok'?'✅ 連線成功':'❌ 回應異常'}).catch(function(e){document.getElementById('gasUrlStatus').textContent='❌ '+e.message})}
+
+// ═══ Global Settings (lobby) ═══
+function checkServiceStatus(){
+  var aiKey=localStorage.getItem('_ai_key');
+  var gasUrl=localStorage.getItem('_gas_url');
+  var aiDot=document.getElementById('statusDotAI');
+  if(aiDot)aiDot.style.color=aiKey?'#22c55e':'#DC2626';
+  var gasDot=document.getElementById('statusDotGAS');
+  if(gasUrl){fetch(gasUrl).then(function(r){return r.json()}).then(function(d){if(gasDot)gasDot.style.color=d.status==='ok'?'#22c55e':'#FFC857'}).catch(function(){if(gasDot)gasDot.style.color='#DC2626'})}
+  else if(gasDot)gasDot.style.color='#DC2626';
+}
+
+function saveGlobalAIKey(){var k=document.getElementById('globalAIKey').value.trim();if(k){localStorage.setItem('_ai_key',k);document.getElementById('globalAIKeyStatus').textContent='已儲存'}else{localStorage.removeItem('_ai_key');document.getElementById('globalAIKeyStatus').textContent='已清除'}}
+function saveGlobalGasUrl(){var u=document.getElementById('globalGasUrl').value.trim();if(u){localStorage.setItem('_gas_url',u);document.getElementById('globalGasStatus').textContent='已儲存'}else{localStorage.removeItem('_gas_url');document.getElementById('globalGasStatus').textContent='已清除'}}
+function initGlobalSettings(){var k=localStorage.getItem('_ai_key');var g=localStorage.getItem('_gas_url')||DEFAULT_GAS_URL;if(k)document.getElementById('globalAIKey').value=k;document.getElementById('globalGasUrl').value=g;if(!localStorage.getItem('_gas_url'))localStorage.setItem('_gas_url',DEFAULT_GAS_URL)}
 
 // ═══ QR ═══
 function makeQR(elId,url){var el=document.getElementById(elId);if(!el)return;var qr=qrcode(0,'M');qr.addData(url);qr.make();el.innerHTML=qr.createSvgTag({cellSize:3,margin:2})}
@@ -2893,6 +2973,38 @@ function quickPush(type, title, content) {
   var log = document.getElementById('pushLogList');
   var icon = type==='link'?'🔗':'📝';
   log.innerHTML = '<div style="padding:3px 0;border-bottom:1px solid #30363d;">'+icon+' '+title+'</div>' + log.innerHTML;
+}
+
+function showFeedbackQROverlay(){
+  if(!roomId)return;
+  var url=location.origin+'/classroom/feedback?room='+encodeURIComponent(roomId);
+  document.getElementById('qrUrl').textContent=url;
+  var el=document.getElementById('qrBox');var qr=qrcode(0,'M');qr.addData(url);qr.make();el.innerHTML=qr.createSvgTag({cellSize:6,margin:4});
+  document.getElementById('qrOverlay').classList.add('show');
+}
+function pushFeedbackQRToPresenter(){
+  if(!roomId)return;
+  var url=location.origin+'/classroom/feedback?room='+encodeURIComponent(roomId);
+  db.ref('rooms/'+roomId+'/overlay').set({type:'feedback-qr',show:true,data:{url:url}});
+  showActionToast('已推送回饋 QR 到簡報');
+}
+function pushFeedbackQRToStudents(){
+  if(!roomId)return;
+  var url=location.origin+'/classroom/feedback?room='+encodeURIComponent(roomId);
+  var data={type:'qr',title:'課後回饋問卷',content:url,ts:firebase.database.ServerValue.TIMESTAMP};
+  db.ref('rooms/'+roomId+'/pushContent/current').set(data);
+  db.ref('rooms/'+roomId+'/pushContent/history').push(data);
+  showActionToast('已推送回饋連結給學員');
+}
+
+function pushClassroomQR(){
+  if(!roomId)return;
+  var url=location.origin+'/classroom/?room='+encodeURIComponent(roomId);
+  var data={type:'qr',title:'教室入口',content:url,ts:firebase.database.ServerValue.TIMESTAMP};
+  db.ref('rooms/'+roomId+'/pushContent/current').set(data);
+  db.ref('rooms/'+roomId+'/pushContent/history').push(data);
+  db.ref('rooms/'+roomId+'/overlay').set({type:'classroom-qr',show:true,data:{url:url}});
+  showActionToast('已推送教室 QR');
 }
 
 // ═══ Feedback Report ═══
@@ -3032,6 +3144,35 @@ function openMaterial(idx){
     });
   }
   window.open(url,'_blank');
+}
+
+// ═══ Change Material (live phase) ═══
+function showChangeMaterial(){
+  var el=document.getElementById('mainContent');
+  var html='<div style="max-width:600px;margin:1rem auto;padding:1rem">';
+  html+='<h3 style="color:var(--gold);margin-bottom:1rem">更換教材</h3>';
+  materials.forEach(function(m,idx){
+    html+='<div class="mat-radio" onclick="changeMaterialTo('+idx+')" style="cursor:pointer">';
+    html+='<span class="mat-icon">'+m.icon+'</span>';
+    html+='<div class="mat-info"><div class="mat-title">'+esc(m.title)+'</div><div class="mat-desc">'+(m.desc||'')+'</div></div>';
+    html+='</div>';
+  });
+  html+='<button onclick="renderContent()" style="margin-top:1rem;padding:0.5rem 1rem;background:var(--bg);color:var(--dim);border:1px solid var(--border);border-radius:8px;cursor:pointer">取消</button>';
+  html+='</div>';
+  el.innerHTML=html;
+}
+function changeMaterialTo(idx){
+  var m=materials[idx];if(!m||!roomId)return;
+  selectedMaterialIdx=idx;
+  var deckId=null;
+  if(m.queryExtra){var match=m.queryExtra.match(/deck=([^&]+)/);if(match)deckId=match[1]}
+  if(m.hasSlideControl){
+    var deckType=deckId?'slides':'html';
+    db.ref('rooms/'+roomId+'/presentation').set({mode:deckType,deck:deckId||m.url,current:0,title:m.title,ts:firebase.database.ServerValue.TIMESTAMP});
+  }
+  showActionToast('教材已更換：'+m.title);
+  updateLiveStatusBar();
+  renderContent();
 }
 
 // ═══ Start / End Class ═══
