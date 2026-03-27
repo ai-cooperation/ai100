@@ -324,6 +324,33 @@
   .ap-mod{font-size:0.6rem;padding:0.15rem 0.4rem;border-radius:4px;background:var(--bg);color:var(--dim);border:1px solid var(--border)}
   .ap-mod.active{border-color:var(--pri);color:var(--pri)}
 
+  /* ═══ Custom Materials ═══ */
+  .cm-section{background:var(--surface);border-radius:12px;padding:1.2rem;border:1px solid var(--border);margin-bottom:1.5rem}
+  .cm-section h2{font-size:1rem;color:var(--dim);margin-bottom:0.8rem}
+  .cm-card{display:flex;align-items:center;gap:0.8rem;padding:0.6rem 0.8rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);margin-bottom:0.4rem}
+  .cm-card .cm-icon{font-size:1.1rem;flex-shrink:0}
+  .cm-card .cm-info{flex:1;min-width:0}
+  .cm-card .cm-title{font-size:0.85rem;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cm-card .cm-meta{font-size:0.7rem;color:var(--dim)}
+  .cm-card .cm-del{padding:0.25rem 0.5rem;background:none;color:var(--dim);border:1px solid var(--border);border-radius:6px;font-size:0.7rem;cursor:pointer;flex-shrink:0}
+  .cm-card .cm-del:hover{color:var(--red);border-color:var(--red)}
+  .cm-empty{font-size:0.8rem;color:var(--dim);padding:0.8rem;text-align:center}
+  .cm-add-btn{width:100%;padding:0.5rem;background:var(--bg);color:var(--pri);border:1px dashed var(--pri);border-radius:8px;font-size:0.85rem;cursor:pointer;margin-top:0.5rem}
+  .cm-add-btn:hover{background:rgba(15,157,138,0.08)}
+  .cm-form{background:var(--bg);border-radius:8px;padding:1rem;border:1px solid var(--border);margin-top:0.5rem}
+  .cm-form label{display:block;font-size:0.8rem;color:var(--dim);margin-bottom:0.3rem;margin-top:0.6rem}
+  .cm-form label:first-child{margin-top:0}
+  .cm-form input,.cm-form select{width:100%;padding:0.5rem 0.6rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.85rem;outline:none}
+  .cm-form input:focus,.cm-form select:focus{border-color:var(--pri)}
+  .cm-form .cm-type-group{display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.3rem}
+  .cm-form .cm-type-opt{padding:0.4rem 0.7rem;border-radius:6px;font-size:0.8rem;border:1px solid var(--border);background:var(--surface);color:var(--dim);cursor:pointer}
+  .cm-form .cm-type-opt.selected{border-color:var(--pri);color:var(--pri);background:rgba(15,157,138,0.08)}
+  .cm-form .cm-form-actions{display:flex;gap:0.5rem;margin-top:0.8rem}
+  .cm-form .cm-form-actions button{flex:1;padding:0.5rem;border-radius:6px;font-size:0.85rem;font-weight:700;cursor:pointer;border:none}
+  .cm-form .cm-btn-save{background:var(--pri);color:#fff}
+  .cm-form .cm-btn-cancel{background:var(--bg);color:var(--dim);border:1px solid var(--border) !important}
+  .mat-cat-header{font-size:0.75rem;color:var(--dim);padding:0.5rem 0 0.3rem;border-bottom:1px solid var(--border);margin-bottom:0.4rem;font-weight:700}
+
   .hidden{display:none!important}
 
   /* ═══ Legacy toolbar compat (hidden, needed for JS references) ═══ */
@@ -466,6 +493,14 @@
       </div>
       <span id="globalGasStatus" style="font-size:0.7rem;color:var(--dim)"></span>
     </div>
+  </div>
+
+  <!-- Custom Materials -->
+  <div class="cm-section">
+    <h2>我的教材庫</h2>
+    <div id="customMaterialsList"></div>
+    <button class="cm-add-btn" onclick="showAddMaterial()">＋ 新增教材</button>
+    <div id="customMaterialForm" style="display:none"></div>
   </div>
 
   <!-- My Courses -->
@@ -969,6 +1004,131 @@ var deckOptions=[
   {name:'S16_clasp',label:'S16 clasp'},
 ];
 
+// ═══ Custom Materials ═══
+var customMaterials=[];
+
+function getAllMaterials(){
+  var all=materials.map(function(m,i){return Object.assign({_idx:i,_builtin:true},m)});
+  customMaterials.forEach(function(m){
+    var entry={
+      title:m.title,
+      icon:m.type==='pptx'?'📽':m.type==='external'?'🔗':'📊',
+      desc:m.desc||'',
+      _custom:true,
+      _key:m._key
+    };
+    if(m.type==='pptx'){
+      entry.url='/classroom/presenter';
+      entry.hasSlideControl=true;
+      entry.queryExtra='&deck='+m.deck;
+    } else if(m.type==='external'){
+      entry.url=m.url;
+      entry.hasSlideControl=false;
+    } else {
+      entry.url=m.url;
+      entry.hasSlideControl=true;
+    }
+    all.push(entry);
+  });
+  return all;
+}
+
+function loadCustomMaterials(){
+  if(!currentUser)return;
+  db.ref('users/'+currentUser.uid+'/customMaterials').on('value',function(snap){
+    customMaterials=[];
+    snap.forEach(function(c){
+      var m=c.val();
+      m._key=c.key;
+      m._custom=true;
+      customMaterials.push(m);
+    });
+    renderCustomMaterialsList();
+  });
+}
+
+function renderCustomMaterialsList(){
+  var el=document.getElementById('customMaterialsList');
+  if(!el)return;
+  if(!customMaterials.length){
+    el.innerHTML='<div class="cm-empty">尚無自訂教材。使用 convert-deck.sh 轉檔後，在此新增。</div>';
+    return;
+  }
+  var html='';
+  customMaterials.forEach(function(m){
+    var icon=m.type==='pptx'?'📽':m.type==='external'?'🔗':'📊';
+    var typeLabel=m.type==='pptx'?'PPTX':m.type==='external'?'外部連結':'HTML';
+    var detail=m.type==='pptx'?'deck: '+esc(m.deck||''):(m.url?esc(m.url):'');
+    html+='<div class="cm-card">';
+    html+='<span class="cm-icon">'+icon+'</span>';
+    html+='<div class="cm-info"><div class="cm-title">'+esc(m.title)+' <span style="font-size:0.7rem;color:var(--dim)">('+typeLabel+')</span></div>';
+    html+='<div class="cm-meta">'+(m.desc?esc(m.desc):'')+(detail?' · '+detail:'')+'</div></div>';
+    html+='<button class="cm-del" onclick="deleteCustomMaterial(\''+esc(m._key)+'\')">刪除</button>';
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+
+function showAddMaterial(){
+  var el=document.getElementById('customMaterialForm');
+  el.style.display='block';
+  el.innerHTML='<div class="cm-form">'
+    +'<label>教材名稱</label><input type="text" id="cmTitle" placeholder="例：碳足跡簡報">'
+    +'<label>類型</label>'
+    +'<div class="cm-type-group">'
+    +'<span class="cm-type-opt selected" onclick="selectCmType(this,\'pptx\')">已轉檔 PPTX</span>'
+    +'<span class="cm-type-opt" onclick="selectCmType(this,\'external\')">外部連結</span>'
+    +'<span class="cm-type-opt" onclick="selectCmType(this,\'html\')">HTML 簡報</span>'
+    +'</div>'
+    +'<div id="cmDeckField"><label>Deck 名稱</label><input type="text" id="cmDeck" placeholder="例：carbon-footprint（convert-deck.sh 產生的資料夾名稱）"></div>'
+    +'<div id="cmUrlField" style="display:none"><label>URL</label><input type="url" id="cmUrl" placeholder="https://..."></div>'
+    +'<label>說明（選填）</label><input type="text" id="cmDesc" placeholder="例：3小時・30頁">'
+    +'<div class="cm-form-actions">'
+    +'<button class="cm-btn-save" onclick="submitCustomMaterial()">新增</button>'
+    +'<button class="cm-btn-cancel" onclick="hideAddMaterial()">取消</button>'
+    +'</div></div>';
+  window._cmType='pptx';
+}
+
+function selectCmType(el,type){
+  document.querySelectorAll('.cm-type-opt').forEach(function(o){o.classList.remove('selected')});
+  el.classList.add('selected');
+  window._cmType=type;
+  document.getElementById('cmDeckField').style.display=type==='pptx'?'':'none';
+  document.getElementById('cmUrlField').style.display=type!=='pptx'?'':'none';
+}
+
+function hideAddMaterial(){
+  var el=document.getElementById('customMaterialForm');
+  el.style.display='none';
+  el.innerHTML='';
+}
+
+function submitCustomMaterial(){
+  var title=document.getElementById('cmTitle').value.trim();
+  if(!title){alert('請填寫教材名稱');return}
+  var type=window._cmType||'pptx';
+  var data={title:title,type:type,desc:document.getElementById('cmDesc').value.trim(),created:firebase.database.ServerValue.TIMESTAMP};
+  if(type==='pptx'){
+    var deck=document.getElementById('cmDeck').value.trim();
+    if(!deck){alert('請填寫 Deck 名稱');return}
+    data.deck=deck;
+  } else {
+    var url=document.getElementById('cmUrl').value.trim();
+    if(!url){alert('請填寫 URL');return}
+    data.url=url;
+  }
+  db.ref('users/'+currentUser.uid+'/customMaterials').push(data).then(function(){
+    hideAddMaterial();
+    showActionToast('教材已新增：'+title);
+  });
+}
+
+function deleteCustomMaterial(key){
+  if(!confirm('刪除此教材？'))return;
+  db.ref('users/'+currentUser.uid+'/customMaterials/'+key).remove();
+}
+
 // ═══ Survey Templates ═══
 var SURVEY_TEMPLATES = {
   'post-general': {
@@ -1424,8 +1584,15 @@ function showPhase(phase){
 // ═══ Preparing Phase Rendering ═══
 function renderPreparingPhase(){
   var list=document.getElementById('prepareMaterialList');
+  var all=getAllMaterials();
   var html='';
-  materials.forEach(function(m,idx){
+  var hasBuiltin=all.some(function(m){return m._builtin});
+  var hasCustom=all.some(function(m){return m._custom});
+  if(hasBuiltin && hasCustom){html+='<div class="mat-cat-header">── 內建教材 ──</div>'}
+  all.forEach(function(m,idx){
+    if(hasBuiltin && hasCustom && m._custom && idx>0 && all[idx-1]._builtin){
+      html+='<div class="mat-cat-header">── 我的教材 ──</div>';
+    }
     var sel=selectedMaterialIdx===idx;
     html+='<label class="mat-radio'+(sel?' selected':'')+'" onclick="selectPrepareMaterial('+idx+')">';
     html+='<input type="radio" name="prepareMat" '+(sel?'checked':'')+' value="'+idx+'">';
@@ -1478,7 +1645,9 @@ function updateStartButton(){
   var btn=document.getElementById('btnStartClassPrepare');
   var hint=document.getElementById('startClassHint');
   if(selectedMaterialIdx!==null){
-    var m=materials[selectedMaterialIdx];
+    var all=getAllMaterials();
+    var m=all[selectedMaterialIdx];
+    if(!m){btn.disabled=true;hint.textContent='請先選擇教材';hint.style.color='var(--dim)';return}
     btn.disabled=false;
     hint.textContent='教材：'+m.title+' ('+getMaterialTypeLabel(m)+')';
     hint.style.color='var(--pri)';
@@ -1503,7 +1672,8 @@ function updateLiveStatusBar(){
   if(window._currentDeckName){
     deckEl.textContent='📚 '+(window._currentDeckTitle||window._currentDeckName);
   } else if(selectedMaterialIdx!==null){
-    deckEl.textContent='📚 '+materials[selectedMaterialIdx].title;
+    var _allMats=getAllMaterials();
+    deckEl.textContent='📚 '+(_allMats[selectedMaterialIdx]?_allMats[selectedMaterialIdx].title:'未選擇教材');
   } else {
     deckEl.textContent='📚 未選擇教材';
   }
@@ -1621,6 +1791,7 @@ auth.onAuthStateChanged(function(user){
     var today=new Date();
     document.getElementById('datePrefix').textContent=today.getFullYear()+String(today.getMonth()+1).padStart(2,'0')+String(today.getDate()).padStart(2,'0')+'-';
     initGlobalSettings();
+    loadCustomMaterials();
     loadCourseList();
     loadRoomList();
     loadTodayClasses();
@@ -2270,8 +2441,10 @@ function showNewSessionForm(){
   deckOptions.forEach(function(d){html+='<option value="'+d.name+'">'+d.label+'</option>'});
   html+='</select></div>';
 
-  // PPTX select (placeholder)
-  html+='<div class="nsf-field" id="nsPptxField" style="display:none"><label>選擇已轉檔簡報</label><select id="nsPptxDeck"><option value="university-talk">大學演講</option><option value="demo">Demo</option></select></div>';
+  // PPTX select (built-in + custom)
+  html+='<div class="nsf-field" id="nsPptxField" style="display:none"><label>選擇已轉檔簡報</label><select id="nsPptxDeck"><option value="university-talk">大學演講</option><option value="demo">Demo</option>';
+  customMaterials.forEach(function(cm){if(cm.type==='pptx'&&cm.deck){html+='<option value="'+esc(cm.deck)+'">'+esc(cm.title)+'</option>'}});
+  html+='</select></div>';
 
   // External link
   html+='<div class="nsf-field" id="nsExternalField" style="display:none"><label>外部連結</label><input type="url" id="nsExternalUrl" placeholder="https://..."></div>';
@@ -3167,9 +3340,16 @@ function openMaterial(idx){
 // ═══ Change Material (live phase) ═══
 function showChangeMaterial(){
   var el=document.getElementById('mainContent');
+  var all=getAllMaterials();
   var html='<div style="max-width:600px;margin:1rem auto;padding:1rem">';
   html+='<h3 style="color:var(--gold);margin-bottom:1rem">更換教材</h3>';
-  materials.forEach(function(m,idx){
+  var hasBuiltin=all.some(function(m){return m._builtin});
+  var hasCustom=all.some(function(m){return m._custom});
+  if(hasBuiltin && hasCustom){html+='<div class="mat-cat-header">── 內建教材 ──</div>'}
+  all.forEach(function(m,idx){
+    if(hasBuiltin && hasCustom && m._custom && idx>0 && all[idx-1]._builtin){
+      html+='<div class="mat-cat-header">── 我的教材 ──</div>';
+    }
     html+='<div class="mat-radio" onclick="changeMaterialTo('+idx+')" style="cursor:pointer">';
     html+='<span class="mat-icon">'+m.icon+'</span>';
     html+='<div class="mat-info"><div class="mat-title">'+esc(m.title)+'</div><div class="mat-desc">'+(m.desc||'')+'</div></div>';
@@ -3180,7 +3360,8 @@ function showChangeMaterial(){
   el.innerHTML=html;
 }
 function changeMaterialTo(idx){
-  var m=materials[idx];if(!m||!roomId)return;
+  var all=getAllMaterials();
+  var m=all[idx];if(!m||!roomId)return;
   selectedMaterialIdx=idx;
   var deckId=null;
   if(m.queryExtra){var match=m.queryExtra.match(/deck=([^&]+)/);if(match)deckId=match[1]}
@@ -3205,7 +3386,8 @@ function startClass(){
   var openUrl=null; // The URL to open after update
 
   if(matIdx!==null){
-    var m=materials[matIdx];
+    var allMats=getAllMaterials();
+    var m=allMats[matIdx];
     // Extract deck id from queryExtra (for PPTX decks)
     var deckId=null;
     if(m.queryExtra){
