@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>未來辯論場 — AI 多角色模擬 × 人類決策工作坊</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+/* ═══════════════════════════════════════
+   未來辯論場 v4 — S09 style reference
+   Reading Glasses compliant (22px body, 16px min)
+   ═══════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --teal:#0F9D8A; --teal-lt:#E6F4F1;
+  --gold:#F0C050; --gold-lt:#FEF7E0;
+  --ember:#D4764E; --ember-lt:#FEF0E1;
+  --violet:#7C3AED; --violet-lt:#F3E8FF;
+  --rose:#C94F4F; --rose-lt:#FCE8E6;
+  --cyan:#4ECDC4;
+  --dark:#0a0a14; --dark2:#111122; --dark3:#16213e;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--dark);}
+
+/* ── Slides Core ── */
+.slides{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;opacity:0;transform:translateX(30px);pointer-events:none;transition:opacity .5s,transform .5s ease;overflow:hidden;}
+.slide.active{opacity:1;transform:none;pointer-events:auto;}
+.slide.prev{opacity:0;transform:translateX(-30px);}
+
+/* ── Clean Mode (white bg) ── */
+.slide.clean{background:var(--white);color:var(--g900);padding-top:3.5rem;overflow-y:auto;justify-content:flex-start;}
+.slide.clean::before,.slide.clean::after{content:'';flex:1 0 0px;}
+
+/* ── Poster Mode ── */
+.slide.poster{background-size:cover;background-position:center;color:#fff;text-align:center;}
+.slide.poster::before{content:'';position:absolute;inset:0;z-index:1;}
+.slide.poster>*{position:relative;z-index:2;}
+.slide.poster.overlay-heavy::before{background:linear-gradient(to bottom,rgba(10,10,20,.45) 0%,rgba(10,10,20,.88) 100%);}
+
+/* ── DataViz Mode ── */
+.slide.dataviz{background:var(--dark);color:#fff;padding-top:3.5rem;}
+
+/* ── Typography ── */
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:2rem;font-weight:700;color:var(--g900);margin-bottom:1rem;line-height:1.4;}
+.slide.dataviz h2,.slide.poster h2{color:#fff;}
+h3{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.1rem;line-height:1.8;}
+.dim{opacity:.6;}
+
+/* ── Fragment ── */
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* ── Cards (clean mode) ── */
+.card-grid{display:grid;gap:1.2rem;max-width:920px;width:100%;margin-top:1rem;}
+.card-grid.c2{grid-template-columns:1fr 1fr;}
+.card-grid.c3{grid-template-columns:1fr 1fr 1fr;}
+.card{background:var(--offwhite);border:2px solid var(--g100);border-radius:16px;padding:1.5rem;position:relative;overflow:hidden;transition:border-color .2s;}
+.card:hover{border-color:var(--g200);}
+.card .bar{position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:16px 0 0 16px;}
+.card h3{font-size:1.15rem;margin-bottom:.4rem;}
+.card p{font-size:1rem;color:var(--g600);line-height:1.7;}
+
+/* ── Dark cards ── */
+.dark-card{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:16px;padding:1.5rem;transition:border-color .2s;}
+.dark-card:hover{border-color:rgba(255,255,255,.15);}
+.dark-card h3{font-size:1.15rem;color:#fff;margin-bottom:.4rem;}
+.dark-card p{font-size:1rem;color:rgba(255,255,255,.55);line-height:1.7;}
+
+/* ── Steps ── */
+.step-list{max-width:800px;width:100%;text-align:left;}
+.step{display:flex;gap:1.2rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:40px;height:40px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.1rem;}.step-content p{font-size:1rem;color:var(--g600);margin-top:.15rem;}
+
+/* ── Flow (dark mode) ── */
+.flow-row{display:flex;align-items:center;gap:1rem;justify-content:center;flex-wrap:wrap;margin:1.5rem 0;}
+.flow-box{padding:1.2rem 2rem;border-radius:16px;text-align:center;min-width:170px;}
+.flow-box h3{font-size:1.15rem;color:#fff;margin-bottom:.2rem;}
+.flow-box p{font-size:.95rem;color:rgba(255,255,255,.65);}
+.flow-sep{font-size:1.5rem;color:var(--gold);font-weight:700;}
+
+/* ── Compare (dark mode) ── */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:0;max-width:920px;width:100%;border:2px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;margin-top:1rem;}
+.compare-col{padding:1.5rem;}
+.compare-col+.compare-col{border-left:2px solid rgba(255,255,255,.08);}
+.compare-col .tag{display:inline-block;font-size:.9rem;font-weight:700;padding:.2rem .8rem;border-radius:100px;margin-bottom:.8rem;}
+.compare-col .row{padding:.5rem 0;font-size:1rem;border-bottom:1px solid rgba(255,255,255,.06);color:rgba(255,255,255,.75);}
+.compare-col .row:last-of-type{border-bottom:0;}
+.compare-col .aside{margin-top:.8rem;font-size:.95rem;color:rgba(255,255,255,.35);font-style:italic;padding-top:.8rem;border-top:1px solid rgba(255,255,255,.06);}
+
+/* ── Journey timeline ── */
+.journey{position:relative;max-width:800px;width:100%;text-align:left;margin-top:1.5rem;}
+.journey::before{content:"";position:absolute;left:24px;top:10px;bottom:10px;width:3px;background:rgba(255,255,255,.1);border-radius:2px;}
+.j-item{position:relative;padding-left:64px;margin-bottom:2rem;}
+.j-item:last-child{margin-bottom:0;}
+.j-item .dot{position:absolute;left:12px;top:6px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;}
+.j-item .phase-label{font-size:.9rem;font-weight:700;margin-bottom:.3rem;}
+.j-item blockquote{font-size:1.05rem;color:rgba(255,255,255,.8);line-height:1.7;font-style:italic;margin:.3rem 0;}
+.j-item .state{display:inline-block;font-size:.85rem;font-weight:700;padding:.2rem .8rem;border-radius:100px;margin-top:.3rem;}
+
+/* ── Skill blocks ── */
+.sk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;max-width:920px;width:100%;margin-top:1rem;}
+.sk-block{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:16px;padding:1.5rem;text-align:center;transition:border-color .2s;}
+.sk-block:hover{border-color:rgba(255,255,255,.15);}
+.sk-block .n{font-size:3rem;font-weight:900;line-height:1;margin-bottom:.6rem;opacity:.2;}
+.sk-block h3{font-size:1.2rem;margin-bottom:.5rem;}
+.sk-block p{font-size:1rem;color:rgba(255,255,255,.55);line-height:1.7;}
+
+/* ── Topic grid ── */
+.topic-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;max-width:920px;width:100%;margin-top:1rem;}
+.topic-card{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:16px;padding:1.3rem;transition:border-color .2s;}
+.topic-card:hover{border-color:var(--teal);}
+.topic-card h3{font-size:1.05rem;color:#fff;margin-bottom:.3rem;}
+.topic-card p{font-size:.95rem;color:rgba(255,255,255,.45);}
+
+/* ── Team cards ── */
+.team-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;max-width:920px;width:100%;margin-top:1rem;}
+.team-card{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:16px;padding:1.5rem;transition:border-color .2s;}
+.team-card:hover{border-color:rgba(255,255,255,.15);}
+.team-card .role{display:inline-block;font-size:.85rem;font-weight:700;padding:.2rem .8rem;border-radius:100px;margin-bottom:.6rem;color:var(--dark);}
+.team-card h3{font-size:1.1rem;color:#fff;margin-bottom:.4rem;}
+.team-card p{font-size:1rem;color:rgba(255,255,255,.55);line-height:1.7;}
+
+/* ── QI ── */
+.qi-list{max-width:800px;width:100%;text-align:left;margin-top:.8rem;}
+.qi{padding:1rem 0;border-bottom:1px solid var(--g100);}
+.qi:last-child{border:none;}
+.qi h4{font-size:1.1rem;font-weight:700;margin-bottom:.2rem;}
+.qi p{font-size:1rem;color:var(--g600);line-height:1.7;}
+
+/* ── Discovery list ── */
+.disc-list{max-width:800px;width:100%;text-align:left;margin-top:.8rem;}
+.disc{display:flex;gap:1.2rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--g100);}
+.disc:last-child{border:none;}
+.disc .dn{flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;}
+.disc h4{font-size:1.05rem;font-weight:700;margin-bottom:.15rem;}
+.disc p{font-size:1rem;color:var(--g600);line-height:1.7;}
+
+/* ── Chart wrapper ── */
+.chart-wrap{max-width:800px;width:100%;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:16px;padding:1.5rem;margin-top:1rem;}
+
+/* ── Bottom line highlight ── */
+.highlight-box{max-width:800px;width:100%;background:rgba(15,157,138,.08);border:2px solid rgba(15,157,138,.25);border-radius:16px;padding:1.5rem 2rem;text-align:center;margin-top:1.5rem;}
+.highlight-box p{font-size:1.1rem;color:rgba(255,255,255,.7);}
+
+/* ── Controls ── */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--teal);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid rgba(255,255,255,.15);border-radius:12px;background:rgba(0,0,0,.4);color:rgba(255,255,255,.8);font-size:1.2rem;cursor:pointer;transition:all .15s;backdrop-filter:blur(8px);}
+.controls button:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff;}
+.controls button:disabled{opacity:.2;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;right:5rem;z-index:100;color:rgba(255,255,255,.35);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:rgba(15,157,138,.15);color:var(--teal);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;backdrop-filter:blur(8px);}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:rgba(255,255,255,.35);font-size:.85rem;font-weight:700;}
+
+/* ── Chapter Menu ── */
+.chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;}
+.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.9);font-size:.8rem;cursor:pointer;transition:border-color .2s;}
+.chapter-btn:hover{border-color:var(--teal);}
+.chapter-icon{color:var(--teal);font-weight:700;}
+.chapter-arrow{font-size:.6rem;opacity:.5;transition:transform .2s;}
+.chapter-menu.open .chapter-arrow{transform:rotate(180deg);}
+.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:200px;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;}
+.chapter-menu.open .chapter-list{display:block;}
+.chapter-item{display:flex;align-items:center;gap:8px;padding:8px 14px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
+.chapter-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+.chapter-item.active{color:var(--teal);font-weight:600;}
+.chapter-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;}
+.chapter-item.active .chapter-dot{background:var(--teal);box-shadow:0 0 6px var(--teal);}
+
+@media(max-width:768px){
+  html,body{font-size:18px;}
+  .slide{padding:1.2rem 1.5rem 1rem;}
+  h1{font-size:2rem;}h2{font-size:1.5rem;}
+  .card-grid.c3,.sk-grid,.topic-grid{grid-template-columns:1fr;}
+  .card-grid.c2,.compare,.team-grid{grid-template-columns:1fr;}
+  .compare-col+.compare-col{border-left:0;border-top:2px solid rgba(255,255,255,.08);}
+  .flow-row{flex-direction:column;}
+  .journey{padding-left:0;}.journey::before{display:none;}.j-item{padding-left:0;}
+  .j-item .dot{position:static;margin-bottom:.5rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="module-title">未來辯論場</div>
+<div class="module-badge">S17 補充單元</div>
+<div class="slides">
+
+<!-- 0: COVER -->
+<div class="slide poster overlay-heavy active" data-act="開場" data-index="0" style="background:linear-gradient(135deg,var(--dark) 0%,var(--dark3) 50%,#0d2137 100%);">
+  <p style="font-size:1rem;color:rgba(255,255,255,.4);margin-bottom:1.5rem;letter-spacing:.2em;">AI MULTI-AGENT SIMULATION WORKSHOP</p>
+  <h1>未來<span style="color:var(--teal)">辯論</span>場</h1>
+  <p style="font-size:1.4rem;color:var(--gold);font-weight:500;margin-top:1rem;">AI 多角色模擬 × 人類決策工作坊</p>
+  <p style="color:rgba(255,255,255,.35);margin-top:3rem;font-size:.95rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- 1: TAGLINE -->
+<div class="slide dataviz" data-act="開場" data-index="1">
+  <div style="max-width:700px;text-align:center;">
+    <p style="font-size:1.8rem;font-weight:700;color:#fff;line-height:1.6;margin-bottom:2rem;">人先辯，AI 再辯，最後一起辯<br><span style="color:var(--gold);">三輪下來，帶走的不是 AI 的結論</span><br>而是自己的盲點地圖</p>
+    <div style="width:60px;height:3px;background:var(--teal);margin:0 auto;"></div>
+  </div>
+</div>
+
+<!-- 2: PAIN POINTS -->
+<div class="slide clean" data-act="為什麼" data-index="2">
+  <h2>企業決策的三個痛點</h2>
+  <div class="card-grid c3">
+    <div class="card fragment" data-order="0"><div class="bar" style="background:var(--ember)"></div><h3 style="color:var(--ember)">單一視角的陷阱</h3><p>支持者聽支持者的演講，反對者在同溫層取暖。每個人都覺得自己是對的。</p></div>
+    <div class="card fragment" data-order="1"><div class="bar" style="background:var(--violet)"></div><h3 style="color:var(--violet)">趨勢報告的無力感</h3><p>不缺報告，缺的是連結感。讀完「嗯，知道了」，然後什麼都不做。</p></div>
+    <div class="card fragment" data-order="2"><div class="bar" style="background:var(--rose)"></div><h3 style="color:var(--rose)">缺乏安全練習場</h3><p>不能真的跟 IKEA 辯論漲價，不能在董事會測試極端立場。真實決策不能重來。</p></div>
+  </div>
+</div>
+
+<!-- 3: CORE FLOW -->
+<div class="slide dataviz" data-act="核心邏輯" data-index="3">
+  <h2>核心邏輯</h2>
+  <p style="color:rgba(255,255,255,.5);margin-bottom:1.5rem;">人跟 AI 的差異，就是學習素材</p>
+  <div class="flow-row fragment" data-order="0">
+    <div class="flow-box" style="background:var(--ember)"><h3>Phase 1</h3><p>人 vs 人<br>建立立場</p></div>
+    <div class="flow-sep">&rarr;</div>
+    <div class="flow-box" style="background:var(--teal)"><h3>Phase 2</h3><p>AI vs AI<br>對照差異</p></div>
+    <div class="flow-sep">&rarr;</div>
+    <div class="flow-box" style="background:var(--violet)"><h3>Phase 3</h3><p>人 + AI<br>質問整合</p></div>
+  </div>
+  <div class="highlight-box fragment" data-order="1">
+    <p style="color:var(--teal);font-weight:700;">三輪立場記錄 R1 → R2 → R3｜不是問感想，是看數字變了多少</p>
+  </div>
+</div>
+
+<!-- 4: PRINCIPLES -->
+<div class="slide clean" data-act="設計原則" data-index="4">
+  <h2>四大設計原則</h2>
+  <div class="card-grid c2">
+    <div class="card fragment" data-order="0"><div class="bar" style="background:var(--teal)"></div><h3 style="color:var(--teal)">人先，AI 後</h3><p>先辯論、先記錄立場，才揭曉 AI 結果。避免「驗證 AI」模式。</p></div>
+    <div class="card fragment" data-order="1"><div class="bar" style="background:var(--ember)"></div><h3 style="color:var(--ember)">衝突是設計出來的</h3><p>角色分配故意讓人演相反立場。議題文件刻意放入對立觀點。</p></div>
+    <div class="card fragment" data-order="2"><div class="bar" style="background:var(--violet)"></div><h3 style="color:var(--violet)">改變要可測量</h3><p>三個時間點記錄立場分數 1-10。不是感覺，是數字。</p></div>
+    <div class="card fragment" data-order="3"><div class="bar" style="background:var(--gold)"></div><h3 style="color:#8a7020">AI 是鏡子，不是老師</h3><p>AI 不給正確答案。讓你看到「沒想到的可能性」。</p></div>
+  </div>
+</div>
+
+<!-- 5: PHASE 0 SECTION -->
+<div class="slide poster overlay-heavy" data-act="Phase 0" data-index="5" style="background:linear-gradient(135deg,var(--dark) 0%,#1a1a0a 100%);">
+  <p style="font-size:1rem;color:var(--gold);letter-spacing:.15em;">PHASE 0 — 30 MIN</p>
+  <h1>暖身 + 議題共創</h1>
+  <p style="font-size:1.15rem;color:rgba(255,255,255,.5);margin-top:.8rem;">議題來自學員，不是講師硬塞的</p>
+</div>
+
+<!-- 6: PHASE 0 DETAIL -->
+<div class="slide dataviz" data-act="Phase 0" data-index="6">
+  <h2>Phase 0：三步建立種子</h2>
+  <div class="card-grid c3" style="margin-top:1rem;">
+    <div class="dark-card fragment" data-order="0"><h3 style="color:var(--teal)">破冰出題</h3><p>講師丟出核心議題，學員便利貼寫下一個事實、一個直覺判斷</p></div>
+    <div class="dark-card fragment" data-order="1"><h3 style="color:var(--gold)">AI 助教彙整</h3><p>即時整理成結構化議題文件，根據立場分佈建議角色分配</p></div>
+    <div class="dark-card fragment" data-order="2"><h3 style="color:var(--violet)">反向角色分配</h3><p>故意讓你演跟自己立場相反的角色 — 逼你理解對方的邏輯</p></div>
+  </div>
+</div>
+
+<!-- 7: PHASE 1 SECTION -->
+<div class="slide poster overlay-heavy" data-act="Phase 1" data-index="7" style="background:linear-gradient(135deg,#2a1508 0%,var(--dark) 100%);">
+  <p style="font-size:1rem;color:var(--ember);letter-spacing:.15em;">PHASE 1 — 60 MIN</p>
+  <h1>人辯論 <span style="color:var(--gold)">‖</span> AI 模擬</h1>
+  <p style="font-size:1.15rem;color:rgba(255,255,255,.5);margin-top:.8rem;">兩條線同時跑，互不影響</p>
+</div>
+
+<!-- 8: PHASE 1 PARALLEL -->
+<div class="slide dataviz" data-act="Phase 1" data-index="8">
+  <h2>雙軌並行</h2>
+  <div class="card-grid c2" style="margin-top:1rem;">
+    <div class="dark-card fragment" data-order="0" style="border-top:3px solid var(--ember)"><h3 style="color:var(--ember)">學員這邊</h3><p><strong>立場宣示</strong> — 每人 1 分鐘 + R1<br><strong>交叉質問</strong> — 正反方互提問題<br><strong>條件注入</strong> — 講師丟入新變數<br><strong>立場修正</strong> — R2 記錄</p></div>
+    <div class="dark-card fragment" data-order="1" style="border-top:3px solid var(--teal)"><h3 style="color:var(--teal)">Agent Team</h3><p><strong>上傳議題</strong> — 學員共創的議題<br><strong>建圖生成</strong> — 11+ Agent 建立<br><strong>30 回合模擬</strong> — Agent 社群辯論<br><strong>報告產出</strong> — 等 Phase 2 揭曉</p></div>
+  </div>
+</div>
+
+<!-- 9: THREE STAGES -->
+<div class="slide clean" data-act="Phase 1" data-index="9">
+  <h2>辯論三階段</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--ember)">1</div><div class="step-content"><strong>立場宣示</strong><p>每人 1 分鐘表明立場，記錄 R1 —「我很確定我是對的」</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--violet)">2</div><div class="step-content"><strong>交叉質問 + 條件注入</strong><p>正反方互相提問，講師注入新變數 —「他好像也有道理…」</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--teal)">3</div><div class="step-content"><strong>立場修正</strong><p>記錄 R2，報告誰改變了 —「分數動了一點，但核心沒變」</p></div></div>
+  </div>
+</div>
+
+<!-- 10: CONDITION INJECTION -->
+<div class="slide dataviz" data-act="Phase 1" data-index="10">
+  <h2>條件注入 — 打破平衡</h2>
+  <p style="color:rgba(255,255,255,.4);margin-bottom:1rem;">一個新事實可以瞬間翻轉立場</p>
+  <div class="card-grid c2">
+    <div class="dark-card fragment" data-order="0" style="border-left:4px solid var(--rose)"><h3 style="color:var(--rose)">CBAM 翻倍</h3><p>歐盟碳關稅稅率翻倍，出口製造業預估損失 500 億</p></div>
+    <div class="dark-card fragment" data-order="1" style="border-left:4px solid var(--ember)"><h3 style="color:var(--ember)">訂單取消</h3><p>上市公司因未完成碳盤查，被國際客戶取消 30 億訂單</p></div>
+    <div class="dark-card fragment" data-order="2" style="border-left:4px solid var(--teal)"><h3 style="color:var(--teal)">緩衝延長</h3><p>政府碳費緩衝期延長 3 年，但須提交轉型計畫書</p></div>
+    <div class="dark-card fragment" data-order="3" style="border-left:4px solid var(--gold)"><h3 style="color:var(--gold)">技術突破</h3><p>AI 碳盤查工具免費開放給年營收 10 億以下企業</p></div>
+  </div>
+</div>
+
+<!-- 11: PHASE 2 SECTION -->
+<div class="slide poster overlay-heavy" data-act="Phase 2" data-index="11" style="background:linear-gradient(135deg,#041a1a 0%,var(--dark) 100%);">
+  <p style="font-size:1rem;color:var(--teal);letter-spacing:.15em;">PHASE 2 — 30 MIN</p>
+  <h1>對照衝擊</h1>
+  <p style="font-size:1.15rem;color:rgba(255,255,255,.5);margin-top:.8rem;">全場最有衝擊力的環節</p>
+</div>
+
+<!-- 12: COMPARISON -->
+<div class="slide dataviz" data-act="Phase 2" data-index="12">
+  <h2>白板並列：人 vs AI</h2>
+  <div class="compare fragment" data-order="0">
+    <div class="compare-col">
+      <div class="tag" style="background:var(--ember);color:#fff;">人的辯論</div>
+      <div class="row">企業主 R1=3 → R2=5 <strong style="color:var(--ember)">(+2)</strong></div>
+      <div class="row">環保團體 R1=9 → R2=9 (不變)</div>
+      <div class="row">工會 R1=4 → R2=6 (+2)</div>
+      <div class="row">經濟學者 R1=2 → R2=3 (+1)</div>
+      <div class="aside">人看到但 AI 沒碰到：家族感情、面子文化</div>
+    </div>
+    <div class="compare-col">
+      <div class="tag" style="background:var(--teal);color:#fff;">AI 的辯論</div>
+      <div class="row">企業主 AI=2 → AI=7 <strong style="color:var(--teal)">(+5)</strong></div>
+      <div class="row">環保團體 AI=10 → AI=10 (不變)</div>
+      <div class="row">工會 AI=3 → AI=6 (+3)</div>
+      <div class="row">經濟學者 AI=2 → AI=4 (+2)</div>
+      <div class="aside">AI 看到但人沒討論：融資方案、成本試算</div>
+    </div>
+  </div>
+</div>
+
+<!-- 13: THREE QUESTIONS -->
+<div class="slide clean" data-act="Phase 2" data-index="13">
+  <h2>三個核心差異問題</h2>
+  <div class="qi-list">
+    <div class="qi fragment" data-order="0"><h4 style="color:var(--ember)">AI 比你們更容易改變立場，為什麼？</h4><p>AI 沒有面子問題，看到數據就改。你的「堅持」有多少是理性？有多少是情緒？</p></div>
+    <div class="qi fragment" data-order="1"><h4 style="color:var(--teal)">AI 看到了什麼你們沒看到的？</h4><p>AI 會算成本效益（省 500 萬 - 2000 萬），人停在「太貴」。你遺漏了哪些聲音？</p></div>
+    <div class="qi fragment" data-order="2"><h4 style="color:var(--violet)">你們看到了什麼 AI 完全沒提到的？</h4><p>家族感情、面子文化、基層焦慮、政治人脈。AI 看得到數據，看不到人情。</p></div>
+  </div>
+</div>
+
+<!-- 14: PHASE 3 SECTION -->
+<div class="slide poster overlay-heavy" data-act="Phase 3" data-index="14" style="background:linear-gradient(135deg,#1a0a2a 0%,var(--dark) 100%);">
+  <p style="font-size:1rem;color:var(--violet);letter-spacing:.15em;">PHASE 3 — 50 MIN</p>
+  <h1>人 + AI 混合辯論</h1>
+  <p style="font-size:1.15rem;color:rgba(255,255,255,.5);margin-top:.8rem;">跟立場相反的 AI Agent 一對一對話</p>
+</div>
+
+<!-- 15: PHASE 3 DETAIL -->
+<div class="slide dataviz" data-act="Phase 3" data-index="15">
+  <h2>Agent 訪談設計</h2>
+  <div class="card-grid c2" style="margin-top:1rem;">
+    <div class="dark-card fragment" data-order="0" style="border-top:3px solid var(--violet)"><h3 style="color:var(--violet)">訪談配對規則</h3><p>反對轉型（R2 &lt; 4）<br>→ 訪談支持方 Agent（環保團體、創業家）<br><br>支持轉型（R2 &gt; 7）<br>→ 訪談反對方 Agent（經濟學者、企業主）<br><br>中間搖擺（R2 = 4-7）<br>→ 訪談在模擬中改變立場的 Agent</p></div>
+    <div class="dark-card fragment" data-order="1" style="border-top:3px solid var(--gold)"><h3 style="color:var(--gold)">必問三題</h3><p>1. 你在模擬中為什麼改變立場？<br>2. 我跟你說「___」你怎麼回應？<br>3. 我們的辯論漏掉了什麼？</p></div>
+  </div>
+</div>
+
+<!-- 16: CHART -->
+<div class="slide dataviz" data-act="數據" data-index="16" style="padding:.8rem 2.5rem 1rem;justify-content:flex-start;">
+  <h2 style="margin:0 0 .1rem;font-size:1.6rem;">三輪立場變化</h2>
+  <p style="color:rgba(255,255,255,.4);font-size:.9rem;margin-bottom:.3rem;">R1 初始 → R2 人辯後 → R3 人+AI 後</p>
+  <div class="chart-wrap" style="flex:.8;width:100%;max-width:960px;padding:.8rem 1.2rem;display:flex;align-items:stretch;"><canvas id="stanceChart"></canvas></div>
+</div>
+
+<!-- 17: DISCOVERIES -->
+<div class="slide clean" data-act="預期發現" data-index="17">
+  <h2>學員會發現的五件事</h2>
+  <div class="disc-list">
+    <div class="disc fragment" data-order="0"><div class="dn">1</div><div><h4>我的反對不是因為邏輯，是因為情緒</h4><p>反對的真正原因是「改變太麻煩」。</p></div></div>
+    <div class="disc fragment" data-order="1"><div class="dn" style="background:var(--ember)">2</div><div><h4>我忽略了某個利害關係人的聲音</h4><p>AI 把所有角色放在一起，遺漏變得可見。</p></div></div>
+    <div class="disc fragment" data-order="2"><div class="dn" style="background:var(--violet)">3</div><div><h4>AI 比我更容易改變立場</h4><p>是 AI 太軟弱，還是我太固執？</p></div></div>
+    <div class="disc fragment" data-order="3"><div class="dn" style="background:var(--cyan)">4</div><div><h4>人看到了 AI 看不到的東西</h4><p>你的「非理性」有時更接近真實。</p></div></div>
+    <div class="disc fragment" data-order="4"><div class="dn" style="background:var(--gold)">5</div><div><h4>條件一變，一切都變</h4><p>決策韌性比決策本身更重要。</p></div></div>
+  </div>
+</div>
+
+<!-- 18: JOURNEY (timeline style) -->
+<div class="slide dataviz" data-act="感受路徑" data-index="18">
+  <h2>學員三階段感受路徑</h2>
+  <div class="journey">
+    <div class="j-item fragment" data-order="0">
+      <div class="dot" style="background:var(--ember)">1</div>
+      <div class="phase-label" style="color:var(--ember)">Phase 1 後</div>
+      <blockquote>「我的立場很穩，但承認對方有一兩個點我回答不了。」</blockquote>
+      <div class="state" style="background:rgba(240,192,80,.1);color:var(--gold)">自信但有微小裂痕</div>
+    </div>
+    <div class="j-item fragment" data-order="1">
+      <div class="dot" style="background:var(--teal)">2</div>
+      <div class="phase-label" style="color:var(--teal)">Phase 2 後</div>
+      <blockquote>「AI 比我容易被說服？但它提出的融資方案我們完全沒討論到。到底誰更接近真實？」</blockquote>
+      <div class="state" style="background:rgba(15,157,138,.1);color:var(--teal)">被打擊但很好奇</div>
+    </div>
+    <div class="j-item fragment" data-order="2">
+      <div class="dot" style="background:var(--violet)">3</div>
+      <div class="phase-label" style="color:var(--violet)">Phase 3 後</div>
+      <blockquote>「帶走的不是答案，而是一張自己的盲點地圖：我知道自己傾向忽略什麼、高估什麼、被什麼左右情緒。」</blockquote>
+      <div class="state" style="background:rgba(124,58,237,.1);color:var(--violet)">自我覺醒</div>
+    </div>
+  </div>
+</div>
+
+<!-- 19: META SKILLS -->
+<div class="slide dataviz" data-act="元能力" data-index="19">
+  <h2>這門課真正教的三個元能力</h2>
+  <div class="sk-grid">
+    <div class="sk-block fragment" data-order="0"><div class="n" style="color:var(--ember)">01</div><h3 style="color:var(--ember)">立場覺察</h3><p>你的「理性」有多少是情緒、面子、慣性造成的？</p></div>
+    <div class="sk-block fragment" data-order="1"><div class="n" style="color:var(--teal)">02</div><h3 style="color:var(--teal)">盲點辨識</h3><p>AI 看到你沒看到的數據，你看到 AI 沒看到的人情。差異 = 盲點。</p></div>
+    <div class="sk-block fragment" data-order="2"><div class="n" style="color:var(--violet)">03</div><h3 style="color:var(--violet)">決策韌性</h3><p>不是沒有立場，而是當條件改變時，你能多快重新評估。</p></div>
+  </div>
+</div>
+
+<!-- 20: TOPICS -->
+<div class="slide dataviz" data-act="適用場景" data-index="20">
+  <h2>適用任何多方衝突的決策情境</h2>
+  <p style="color:rgba(255,255,255,.4);margin-bottom:1rem;">人先辯 → AI 對照 → 混合辯論 → 盲點地圖</p>
+  <div class="topic-grid">
+    <div class="topic-card fragment" data-order="0"><h3 style="color:var(--teal)">企業永續轉型</h3><p>企業主、品牌客戶、工會、政府、環保團體</p></div>
+    <div class="topic-card fragment" data-order="1"><h3 style="color:var(--gold)">AI 導入決策</h3><p>CTO、基層員工、客戶、投資人、AI 廠商</p></div>
+    <div class="topic-card fragment" data-order="2"><h3 style="color:var(--cyan)">新市場進入</h3><p>產品經理、競爭對手、目標用戶、通路商</p></div>
+    <div class="topic-card fragment" data-order="3"><h3 style="color:var(--ember)">政策評估</h3><p>立法者、產業代表、學者、民眾、媒體</p></div>
+    <div class="topic-card fragment" data-order="4"><h3 style="color:var(--violet)">組織變革</h3><p>CEO、中階主管、基層員工、HR、顧問</p></div>
+    <div class="topic-card fragment" data-order="5"><h3 style="color:var(--rose)">你的議題</h3><p>只要有多方利害關係人，就能套用</p></div>
+  </div>
+</div>
+
+<!-- 21: AI TEAM -->
+<div class="slide dataviz" data-act="AI 團隊" data-index="21">
+  <p style="font-size:1rem;color:var(--teal);letter-spacing:.15em;margin-bottom:.5rem;">YOUR AI WORKSHOP TEAM</p>
+  <h2>全新 AI 工作坊模式</h2>
+  <div class="team-grid">
+    <div class="team-card fragment" data-order="0"><div class="role" style="background:var(--teal)">模擬 Agent</div><h3>多角色辯論引擎</h3><p>11+ 個 AI Agent 各持立場在模擬社群辯論，產出互動記錄與立場轉變軌跡</p></div>
+    <div class="team-card fragment" data-order="1"><div class="role" style="background:var(--violet)">訪談 Agent</div><h3>一對一深度對話</h3><p>學員跟個別 AI 角色對話，質問它為什麼改變立場，挑戰它的邏輯</p></div>
+    <div class="team-card fragment" data-order="2"><div class="role" style="background:var(--gold)">AI 助教</div><h3>全程引導 + 記錄</h3><p>即時彙整議題、記錄辯論重點、追蹤立場數據、建議講師引導方向</p></div>
+    <div class="team-card fragment" data-order="3"><div class="role" style="background:var(--ember)">分析 Agent</div><h3>對照報告產出</h3><p>自動生成模擬報告，並列人 vs AI 結果，標記差異與盲點</p></div>
+  </div>
+  <p style="text-align:center;margin-top:1.5rem;color:rgba(255,255,255,.3);font-size:.95rem;">一場工作坊的 AI 團隊｜模擬 Agent + 訪談 Agent + AI 助教 + 分析 Agent</p>
+</div>
+
+<!-- 22: CLOSING -->
+<div class="slide dataviz" data-act="結語" data-index="22">
+  <div style="max-width:700px;text-align:center;">
+    <div style="width:60px;height:3px;background:var(--teal);margin:0 auto 2rem;"></div>
+    <h1 style="font-size:2.5rem;margin-bottom:1rem;">你不需要 AI<br>告訴你該怎麼做</h1>
+    <p style="font-size:1.6rem;color:var(--gold);font-weight:700;margin-bottom:2rem;">你需要的是看清<br>自己為什麼這樣想</p>
+    <p style="color:rgba(255,255,255,.4);font-size:1.1rem;">看清之後，你自己會知道該怎麼做。</p>
+  </div>
+</div>
+
+<!-- 23: FINAL — echo opening -->
+<div class="slide poster overlay-heavy" data-act="結語" data-index="23" style="background:linear-gradient(135deg,var(--dark) 0%,var(--dark3) 50%,#0d2137 100%);">
+  <p style="font-size:1rem;color:var(--teal);letter-spacing:.2em;margin-bottom:1.5rem;">AI MULTI-AGENT SIMULATION WORKSHOP</p>
+  <h1 style="font-size:3.2rem;">未來<span style="color:var(--teal)">辯論</span>場</h1>
+  <p style="font-size:1.4rem;color:var(--gold);font-weight:500;margin-top:1.2rem;">人 × 未來 的辯論交流</p>
+  <div style="width:60px;height:3px;background:var(--teal);margin:2rem auto;"></div>
+  <p style="font-size:1.2rem;color:rgba(255,255,255,.7);line-height:1.8;">帶走的不是 AI 的結論<br><span style="color:var(--gold);font-weight:700;">而是自己獨特的觀點</span></p>
+</div>
+
+</div><!-- /slides -->
+
+<div class="progress" id="progress"></div>
+<div class="slide-counter"><span id="cur">1</span> / <span id="tot"></span></div>
+<div class="controls"><button id="pb" disabled>&larr;</button><button id="nb">&rarr;</button></div>
+
+<!-- Chapter Menu -->
+<div id="chapterMenu" class="chapter-menu">
+  <button id="chapterBtn" class="chapter-btn">
+    <span class="chapter-icon">&sect;</span>
+    <span id="chapterLabel">開場</span>
+    <span class="chapter-arrow">&#9660;</span>
+  </button>
+  <div id="chapterList" class="chapter-list"></div>
+</div>
+
+<script>
+const SS=Array.from(document.querySelectorAll('.slide'));
+const T=SS.length;
+let I=0;
+const cur=document.getElementById('cur'),tot=document.getElementById('tot'),prog=document.getElementById('progress');
+const pb=document.getElementById('pb'),nb=document.getElementById('nb');
+tot.textContent=T;
+
+function go(n){
+  if(n===I)return;
+  const old=I;
+  const fwd=n>old;
+  // Remove old slide with direction
+  SS[old].classList.remove('active');
+  SS[old].style.transform=fwd?'translateX(-30px)':'translateX(30px)';
+  SS[old].style.opacity='0';
+  setTimeout(()=>{SS[old].style.transform='';SS[old].style.opacity='';},500);
+  // Prep new slide entry direction
+  I=Math.max(0,Math.min(n,T-1));
+  SS[I].style.transition='none';
+  SS[I].style.transform=fwd?'translateX(30px)':'translateX(-30px)';
+  SS[I].style.opacity='0';
+  SS[I].classList.add('active');
+  // Force reflow then animate in
+  SS[I].offsetHeight;
+  SS[I].style.transition='opacity .5s,transform .5s ease';
+  SS[I].style.transform='none';
+  SS[I].style.opacity='1';
+  cur.textContent=I+1;
+  pb.disabled=I===0;nb.disabled=I===T-1;
+  prog.style.width=((I+1)/T*100)+'%';
+  updateChapter();
+  if(SS[I].querySelector('#stanceChart')&&!window._ci){initChart();window._ci=true}
+}
+
+function frags(s){return Array.from(s.querySelectorAll('.fragment'));}
+function nxt(){
+  const h=frags(SS[I]).filter(f=>!f.classList.contains('visible'));
+  if(h.length){h[0].classList.add('visible');return}
+  if(I<T-1)go(I+1);
+}
+function prv(){
+  const v=frags(SS[I]).filter(f=>f.classList.contains('visible'));
+  if(v.length){v[v.length-1].classList.remove('visible');return}
+  if(I>0)go(I-1);
+}
+nb.onclick=nxt;pb.onclick=prv;
+
+// Chapter menu
+const chMenu=document.getElementById('chapterMenu'),chBtn=document.getElementById('chapterBtn'),chLabel=document.getElementById('chapterLabel'),chList=document.getElementById('chapterList');
+function getCh(){const m=new Map();SS.forEach((s,i)=>{const a=s.dataset.act;if(a&&!m.has(a))m.set(a,i);});return m;}
+function buildCh(){const ch=getCh();chList.innerHTML='';const c=SS[I]?.dataset.act||'';ch.forEach((si,name)=>{const d=document.createElement('div');d.className='chapter-item'+(name===c?' active':'');d.innerHTML='<span class="chapter-dot"></span>'+name;d.onclick=()=>{go(si);closeCh()};chList.appendChild(d)});chLabel.textContent=c||'導覽';}
+function toggleCh(){chMenu.classList.toggle('open');if(chMenu.classList.contains('open'))buildCh();}
+function closeCh(){chMenu.classList.remove('open');}
+function updateChapter(){chLabel.textContent=SS[I]?.dataset.act||'導覽';}
+chBtn.onclick=toggleCh;
+document.addEventListener('click',e=>{if(!chMenu.contains(e.target))closeCh()});
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if(e.key==='f'||e.key==='F'){e.preventDefault();document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();return}
+  if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();nxt()}
+  if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();prv()}
+  if(e.key==='Home'){e.preventDefault();go(0)}
+  if(e.key==='End'){e.preventDefault();go(T-1)}
+});
+
+// Touch
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX});
+document.addEventListener('touchend',e=>{const d=e.changedTouches[0].screenX-tx;if(Math.abs(d)>50){d<0?nxt():prv()}});
+
+// Chart
+function initChart(){
+  new Chart(document.getElementById('stanceChart'),{
+    type:'line',
+    data:{
+      labels:['R1 初始','R2 人辯後','R3 人+AI後'],
+      datasets:[
+        {label:'中小企業主',data:[3,5,7],borderColor:'#d4764e',tension:.35,pointRadius:7,pointHoverRadius:10,borderWidth:2.5,backgroundColor:'transparent'},
+        {label:'環保團體',data:[9,9,9],borderColor:'#0F9D8A',tension:.35,pointRadius:7,pointHoverRadius:10,borderWidth:2.5,backgroundColor:'transparent'},
+        {label:'傳統工會',data:[4,6,7],borderColor:'#7C3AED',tension:.35,pointRadius:7,pointHoverRadius:10,borderWidth:2.5,backgroundColor:'transparent'},
+        {label:'經濟學者',data:[2,3,4],borderColor:'#4ECDC4',tension:.35,pointRadius:7,pointHoverRadius:10,borderWidth:2.5,backgroundColor:'transparent'},
+        {label:'銀行主管',data:[5,5,6],borderColor:'#F0C050',tension:.35,pointRadius:7,pointHoverRadius:10,borderWidth:2.5,backgroundColor:'transparent'},
+        {label:'品牌採購',data:[8,8,8],borderColor:'#C94F4F',tension:.35,pointRadius:7,pointHoverRadius:10,borderWidth:2.5,backgroundColor:'transparent'},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,aspectRatio:1.8,
+      plugins:{
+        legend:{position:'bottom',labels:{color:'rgba(255,255,255,.5)',font:{size:14,family:'Noto Sans TC'},padding:20,usePointStyle:true,pointStyle:'circle',pointStyleWidth:12}},
+        tooltip:{backgroundColor:'rgba(10,10,20,.95)',titleFont:{size:14},bodyFont:{size:13},padding:12,borderColor:'rgba(255,255,255,.1)',borderWidth:1}
+      },
+      scales:{
+        y:{min:0,max:10,ticks:{color:'rgba(255,255,255,.35)',stepSize:2,font:{size:13}},grid:{color:'rgba(255,255,255,.05)'},border:{color:'rgba(255,255,255,.08)'},title:{display:true,text:'立場分數 (1=反對 / 10=支持)',color:'rgba(255,255,255,.3)',font:{size:12}}},
+        x:{ticks:{color:'rgba(255,255,255,.6)',font:{size:14}},grid:{display:false},border:{color:'rgba(255,255,255,.08)'}}
+      },
+      layout:{padding:{top:10,bottom:10}}
+    }
+  });
+}
+
+go(0);
+</script>
+</body>
+</html>
