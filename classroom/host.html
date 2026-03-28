@@ -822,6 +822,9 @@
         <div id="postSuggestionsList"></div>
       </div>
 
+      <!-- Email list -->
+      <div class="post-section" id="postEmailList" style="display:none"></div>
+
       <!-- Post-class survey management -->
       <div class="post-section" id="postSurveyMgmt">
         <h3>📝 課後問卷管理</h3>
@@ -1868,12 +1871,14 @@ function renderPostClassPhase(){
     var satSum=0,satCount=0,recSum=0,recCount=0;
     var helpful={};
     var suggestions=[];
+    var postEmailList=[],postWantPdfCount=0;
 
     entries.forEach(function(e){
       if(e.ratings){
         if(e.ratings.satisfaction){satSum+=e.ratings.satisfaction;satCount++}
         if(e.ratings.recommend){recSum+=e.ratings.recommend;recCount++}
       }
+      if(e.email){postEmailList.push({email:e.email,name:e.name||''});if(e.wantPdf)postWantPdfCount++}
       if(e.answers){
         if(e.answers.helpful){
           var h=e.answers.helpful;
@@ -1912,6 +1917,24 @@ function renderPostClassPhase(){
       }).join('');
     } else {
       sugSection.style.display='none';
+    }
+
+    // Email list in post-class dashboard
+    var emailSection=document.getElementById('postEmailList');
+    if(emailSection){
+      if(postEmailList.length){
+        var eHtml='<h3>📧 收件人（'+postEmailList.length+' 人，'+postWantPdfCount+' 人要 PDF）</h3>';
+        eHtml+='<div style="max-height:150px;overflow-y:auto;background:var(--bg);border-radius:8px;padding:0.5rem;margin-top:0.5rem">';
+        postEmailList.forEach(function(r){
+          eHtml+='<div style="font-size:0.85rem;color:var(--text);padding:3px 0">'+esc(r.email)+(r.name?' <span style="color:var(--dim)">'+esc(r.name)+'</span>':'')+'</div>';
+        });
+        eHtml+='</div>';
+        emailSection.innerHTML=eHtml;
+        emailSection.style.display='block';
+      } else {
+        emailSection.innerHTML='<h3>📧 收件人</h3><div style="font-size:0.85rem;color:var(--dim);margin-top:0.3rem">尚無人留 email</div>';
+        emailSection.style.display='block';
+      }
     }
   });
 }
@@ -2267,6 +2290,8 @@ function saveSessionEdit(idx){
   if(sess.roomId){
     updates['rooms/'+sess.roomId+'/config/title']=title;
     updates['rooms/'+sess.roomId+'/config/deck']=deckId||null;
+    // Determine deckType from deckId (deckOptions are all HTML slides)
+    updates['rooms/'+sess.roomId+'/config/deckType']=deckId?'slides':null;
   }
   db.ref().update(updates).then(function(){
     showActionToast('堂次已更新');
@@ -3618,13 +3643,20 @@ function startClass(){
       openUrl='/classroom/presenter?room='+encodeURIComponent(roomId);
     }
   } else if(roomDeck){
+    var _deckMode=roomDeckType||'slides';
     updates['rooms/'+roomId+'/presentation']={
-      mode:roomDeckType||'pptx-slides',
+      mode:_deckMode,
       deck:roomDeck,
       current:0,
-      totalSlides:0
+      title:roomDeck.replace(/_/g,' '),
+      ts:firebase.database.ServerValue.TIMESTAMP
     };
-    openUrl='/classroom/presenter?room='+encodeURIComponent(roomId)+'&deck='+encodeURIComponent(roomDeck);
+    // HTML slides use the supplements path; PPTX use presenter with deck param
+    if(_deckMode==='slides'||_deckMode==='html-slides'){
+      openUrl='/slides/supplements/'+roomDeck+'.html?room='+encodeURIComponent(roomId);
+    } else {
+      openUrl='/classroom/presenter?room='+encodeURIComponent(roomId)+'&deck='+encodeURIComponent(roomDeck);
+    }
   }
 
   // Update session status in courses if linked
