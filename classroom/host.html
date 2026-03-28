@@ -458,8 +458,49 @@
     .phase-card{border-left:none;border-bottom:3px solid transparent;padding:0.6rem 1rem;white-space:nowrap}
     .phase-card.active{border-left-color:transparent;border-bottom-color:var(--pri)}
     .cs-footer{display:none}
-    .survey-editor{padding:0.5rem}
+    /* Survey editor mobile */
+    .survey-editor{padding:0.5rem;max-width:100%;overflow-x:hidden}
+    .se-header{flex-direction:column;align-items:flex-start;gap:0.5rem}
+    .se-header h2{font-size:0.9rem}
+    .se-header select{width:100%}
+    .se-question{padding:0.7rem}
+    .se-question .se-q-header{flex-wrap:wrap;gap:0.3rem}
+    .se-question .se-q-text{min-width:0;font-size:0.8rem}
+    .se-q-row{flex-direction:column;align-items:flex-start;gap:0.3rem}
+    .se-q-row select{width:100%}
+    .se-options{padding-left:0.5rem}
+    .se-opt-row input{min-width:0;font-size:0.8rem}
+    .se-add-q{font-size:0.8rem}
     .se-actions{flex-direction:column}
+    .se-actions button{min-width:auto}
+    /* Survey preview mobile */
+    .survey-preview{padding:1rem;max-width:100%;margin:0.5rem auto}
+    .survey-preview h3{font-size:0.9rem}
+    .sp-question .sp-label{font-size:0.85rem}
+    .sp-radio{padding:0.3rem 0.5rem;font-size:0.8rem}
+    .sp-text,.sp-email{font-size:0.8rem;padding:0.5rem}
+    /* Survey status buttons */
+    .survey-status{flex-direction:column;align-items:flex-start;gap:0.3rem}
+    .survey-status button{width:100%}
+    /* Course main body overflow */
+    .cm-body{padding:0.5rem;overflow-x:hidden}
+    /* Step cards overflow */
+    .step-card{padding:0.8rem;overflow:hidden;word-break:break-word}
+    .step-card .step-title{font-size:0.9rem}
+    /* Post sections overflow */
+    .post-section{padding:0.8rem;overflow:hidden;word-break:break-word}
+    /* KPI grid mobile */
+    .kpi-grid{gap:0.4rem}
+    .kpi-card{padding:0.8rem}
+    .kpi-card .kpi-val{font-size:1.5rem}
+    /* New session form mobile */
+    .new-session-form{padding:1rem;margin:0.5rem}
+    .nsf-radio .nr-label{font-size:0.8rem}
+    .nsf-radio .nr-sub{font-size:0.65rem}
+    /* General overflow safety */
+    .lobby,.dash,.course-view{overflow-x:hidden}
+    *{max-width:100%}
+    input,textarea,select{max-width:100%;box-sizing:border-box}
   }
 </style>
 </head>
