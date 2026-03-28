@@ -2406,6 +2406,16 @@ function renderCVPost(sess){
     h+='<button onclick="saveCVPostEmailConfig(\''+esc(sess.roomId)+'\')" style="width:100%;padding:0.6rem;background:var(--pri);color:#fff;border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer">💾 儲存設定</button>';
     h+='</div>';
 
+    // ── 回饋問卷 QR 推送 ──
+    var _rid=esc(sess.roomId);
+    h+='<div class="post-section" style="margin-top:1rem">';
+    h+='<h3>📋 回饋問卷</h3>';
+    h+='<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem">';
+    h+='<button onclick="cvShowFeedbackQR(\''+_rid+'\')" style="padding:0.5rem 1rem;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:0.85rem;cursor:pointer">顯示 QR</button>';
+    h+='<button onclick="cvPushFeedbackToPresenter(\''+_rid+'\')" style="padding:0.5rem 1rem;background:var(--purple);color:#fff;border:none;border-radius:8px;font-size:0.85rem;cursor:pointer">推送到簡報</button>';
+    h+='<button onclick="cvPushFeedbackToStudents(\''+_rid+'\')" style="padding:0.5rem 1rem;background:var(--pri);color:#fff;border:none;border-radius:8px;font-size:0.85rem;cursor:pointer">推送到學員</button>';
+    h+='</div></div>';
+
     h+='<div class="post-actions">';
     h+='<button onclick="enterSessionRoom(cvSessions['+cvSelectedSessionIdx+'],\'post-class\')">進入教室查看詳情</button>';
     h+='<button onclick="window.open(\'/classroom/feedback?room='+encodeURIComponent(sess.roomId)+'\',\'_blank\')">查看回饋頁</button>';
@@ -2463,6 +2473,26 @@ function saveCVPostEmailConfig(rid) {
   }).catch(function(e) {
     alert('儲存失敗：' + e.message);
   });
+}
+
+// CV Post — feedback QR helpers (use explicit roomId since global roomId may be empty)
+function cvShowFeedbackQR(rid){
+  var url=location.origin+'/classroom/feedback?room='+encodeURIComponent(rid);
+  document.getElementById('qrUrl').textContent=url;
+  var el=document.getElementById('qrBox');var qr=qrcode(0,'M');qr.addData(url);qr.make();el.innerHTML=qr.createSvgTag({cellSize:6,margin:4});
+  document.getElementById('qrOverlay').classList.add('show');
+}
+function cvPushFeedbackToPresenter(rid){
+  var url=location.origin+'/classroom/feedback?room='+encodeURIComponent(rid);
+  db.ref('rooms/'+rid+'/overlay').set({type:'feedback-qr',show:true,data:{url:url}});
+  showActionToast('已推送回饋 QR 到簡報');
+}
+function cvPushFeedbackToStudents(rid){
+  var url=location.origin+'/classroom/feedback?room='+encodeURIComponent(rid);
+  var data={type:'qr',title:'課後回饋問卷',content:url,ts:firebase.database.ServerValue.TIMESTAMP};
+  db.ref('rooms/'+rid+'/pushContent/current').set(data);
+  db.ref('rooms/'+rid+'/pushContent/history').push(data);
+  showActionToast('已推送回饋連結給學員');
 }
 
 function renderCVReport(sess){
