@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 能力自我檢測</title>
+<style>
+  :root {
+    --navy: #1B3A6B;
+    --teal: #0891B2;
+    --cyan: #06B6D4;
+    --green: #059669;
+    --orange: #EA580C;
+    --purple: #7C3AED;
+    --red: #DC2626;
+    --gold: #F59E0B;
+    --dark: #1E293B;
+    --gray: #64748B;
+    --light: #F8FAFC;
+    --lightBlue: #E0F2FE;
+    --greenBg: #D1FAE5;
+    --orangeBg: #FFF7ED;
+    --purpleBg: #EDE9FE;
+    --warmBg: #FEF3C7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--light);
+    color: var(--dark);
+    min-height: 100vh;
+    font-size: 20px;
+    line-height: 1.7;
+    font-weight: 400;
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 20px;
+  }
+
+  /* ── Cover ── */
+  .cover { text-align: center; padding: 48px 20px; }
+  .cover-badge {
+    display: inline-block;
+    background: var(--teal);
+    color: white;
+    padding: 8px 24px;
+    border-radius: 24px;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  .cover h1 {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--navy);
+    margin-bottom: 16px;
+    line-height: 1.3;
+  }
+  .cover p {
+    font-size: 20px;
+    color: var(--gray);
+    margin-bottom: 32px;
+  }
+  .cover-mountain {
+    font-size: 80px;
+    margin-bottom: 16px;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-block;
+    padding: 16px 48px;
+    font-size: 20px;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    min-height: 56px;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: var(--teal);
+    color: white;
+    box-shadow: 0 4px 12px rgba(8,145,178,0.3);
+  }
+
+  /* ── Quiz ── */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #E2E8F0;
+    border-radius: 4px;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal), var(--cyan));
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+
+  .q-number {
+    display: inline-block;
+    background: var(--navy);
+    color: white;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 44px;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .q-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+  .q-sub {
+    font-size: 16px;
+    color: var(--gray);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 20px 24px;
+    background: white;
+    border: 2px solid #E2E8F0;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--dark);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    min-height: 64px;
+    line-height: 1.5;
+  }
+  .option-btn:hover {
+    border-color: var(--teal);
+    background: var(--lightBlue);
+  }
+  .option-btn.selected {
+    border-color: var(--teal);
+    background: var(--lightBlue);
+    font-weight: 700;
+  }
+  .option-btn .icon { font-size: 28px; flex-shrink: 0; }
+
+  /* ══════════════════════════════════
+     MOUNTAIN RESULT
+  ══════════════════════════════════ */
+  .mountain-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto 16px;
+  }
+  .mountain-svg { width: 100%; height: auto; display: block; max-height: 52vh; }
+
+  /* Camp labels */
+  .camp {
+    position: absolute;
+    transform: translateX(-50%);
+    text-align: center;
+    transition: all 0.6s ease;
+  }
+  .camp-bubble {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    color: white;
+    white-space: nowrap;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+    position: relative;
+  }
+  .camp-bubble::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+  }
+  .camp-name {
+    display: block;
+    font-size: 13px;
+    color: var(--gray);
+    margin-top: 4px;
+    white-space: nowrap;
+  }
+  .camp.current .camp-bubble {
+    transform: scale(1.15);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .camp.current .camp-name {
+    font-weight: 700;
+    color: var(--dark);
+    font-size: 14px;
+  }
+  .camp.past { opacity: 0.45; }
+  .camp.future { opacity: 0.55; }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 3px 12px rgba(0,0,0,0.15); }
+    50% { box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
+  }
+
+  /* Climber */
+  .climber {
+    position: absolute;
+    font-size: 36px;
+    transform: translate(-50%, -100%);
+    animation: bounce 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    z-index: 10;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translate(-50%, -100%); }
+    50% { transform: translate(-50%, calc(-100% - 6px)); }
+  }
+
+  /* Result info */
+  .result-info {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .result-info .level-name {
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+  .result-info .level-desc {
+    font-size: 17px;
+    color: var(--gray);
+    line-height: 1.6;
+    max-width: 540px;
+    margin: 0 auto;
+  }
+
+  /* Course path */
+  .course-path {
+    background: white;
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    margin-bottom: 16px;
+  }
+  .course-path h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  .path-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: wrap;
+  }
+  .path-step {
+    text-align: center;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    line-height: 1.4;
+  }
+  .path-arrow {
+    font-size: 20px;
+    color: #CBD5E1;
+    padding: 0 4px;
+  }
+
+  .restart-btn {
+    display: block;
+    margin: 24px auto 0;
+    padding: 14px 40px;
+    font-size: 18px;
+    font-weight: 600;
+    background: var(--navy);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .cover h1 { font-size: 28px; }
+    .cover-mountain { font-size: 60px; }
+    .q-title { font-size: 22px; }
+    .option-btn { font-size: 16px; padding: 16px 18px; }
+    .option-btn .icon { font-size: 24px; }
+    .result-info .level-name { font-size: 26px; }
+    .camp-bubble { font-size: 13px; padding: 6px 12px; }
+    .camp-name { font-size: 12px; }
+    .climber { font-size: 28px; }
+    .path-step { font-size: 12px; padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ══ COVER ══ -->
+  <div id="cover" class="section active">
+    <div class="cover">
+      <div class="cover-mountain">🧗</div>
+      <div class="cover-badge">課前暖身</div>
+      <h1>你的 AI 能力<br>爬到第幾層？</h1>
+      <p>5 個問題，1 分鐘<br>看看你在 AI 這座山的哪一層</p>
+      <button class="btn btn-primary" onclick="startQuiz()">開始攀登</button>
+    </div>
+  </div>
+
+  <!-- ══ QUIZ ══ -->
+  <div id="quiz" class="section">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div id="questionArea"></div>
+  </div>
+
+  <!-- ══ RESULT ══ -->
+  <div id="result" class="section">
+    <div id="resultContent"></div>
+  </div>
+
+</div>
+
+<script>
+// ── Questions ──
+const questions = [
+  {
+    q: "你目前多常使用 AI 工具？",
+    options: [
+      { icon: "🌱", text: "幾乎沒用過", score: 1 },
+      { icon: "🔍", text: "偶爾試試，好奇為主", score: 2 },
+      { icon: "📅", text: "每週都會用到", score: 3 },
+      { icon: "☀️", text: "每天都在用，離不開了", score: 4 },
+    ],
+  },
+  {
+    q: "你最常用 AI 做什麼？",
+    options: [
+      { icon: "💭", text: "還沒認真用過", score: 1 },
+      { icon: "💬", text: "聊天、問問題、查資料", score: 2 },
+      { icon: "📝", text: "寫文件、翻譯、整理資料", score: 3 },
+      { icon: "🔗", text: "串接到工作流程，自動處理", score: 4 },
+    ],
+  },
+  {
+    q: "以下工具你用過哪些？",
+    sub: "ChatGPT、Gemini、Claude、NotebookLM、Gamma、Canva AI、Copilot⋯",
+    options: [
+      { icon: "0️⃣", text: "都沒用過", score: 1 },
+      { icon: "1️⃣", text: "只用過其中一種", score: 2 },
+      { icon: "✌️", text: "用過 2-3 種，大概知道差在哪", score: 3 },
+      { icon: "🎯", text: "不同任務會挑不同工具用", score: 4 },
+    ],
+  },
+  {
+    q: "你有沒有建立過「自己的 AI 助手」？",
+    sub: "例如 GPTs、Gems、自訂指令等",
+    options: [
+      { icon: "❓", text: "不知道那是什麼", score: 1 },
+      { icon: "👀", text: "聽過，但沒試過", score: 2 },
+      { icon: "🔧", text: "試過，建了一兩個", score: 3 },
+      { icon: "🏭", text: "有好幾個在用，還會更新維護", score: 4 },
+    ],
+  },
+  {
+    q: "你有沒有讓 AI「自動完成」工作？",
+    sub: "不是手動一個一個問，而是設定好讓它自己跑",
+    options: [
+      { icon: "🤔", text: "沒有，都是手動問答", score: 1 },
+      { icon: "💡", text: "想過，但不知道怎麼做", score: 2 },
+      { icon: "⚙️", text: "有做一些簡單的自動化", score: 3 },
+      { icon: "🚀", text: "有完整流程在跑，定時自動執行", score: 4 },
+    ],
+  },
+];
+
+// ── Levels ──
+const levels = [
+  {
+    id: 0, range: [5, 8],
+    tag: "起步營", tagColor: "#94A3B8", emoji: "🏕️", climber: "🚶",
+    title: "AI 新手村",
+    color: "#64748B",
+    desc: "你在山腳準備出發，這是最好的起點！多數人都從這裡開始，四天課程會帶你一路爬上去。",
+    ability: "用工具",
+    tools: "",
+    meter: 1,
+  },
+  {
+    id: 1, range: [9, 12],
+    tag: "探索營", tagColor: "#0891B2", emoji: "⛺", climber: "🥾",
+    title: "AI 對話者",
+    color: "#0891B2",
+    desc: "你已經會跟 AI 聊天了，但還停在「你問我答」。學會提示詞技巧後，同一個工具能給你完全不同等級的結果。",
+    ability: "用工具",
+    tools: "ChatGPT、Gemini",
+    meter: 2,
+  },
+  {
+    id: 2, range: [13, 16],
+    tag: "應用營", tagColor: "#7C3AED", emoji: "🏔️", climber: "🧗",
+    title: "AI 工具玩家",
+    color: "#7C3AED",
+    desc: "你到半山腰了！不同工具各有所長，你已經開始挑著用。接下來可以建立專屬的 AI 助手，讓它更懂你的工作。",
+    ability: "選工具",
+    tools: "NotebookLM、Gamma、Canva AI",
+    meter: 3,
+  },
+  {
+    id: 3, range: [17, 18],
+    tag: "整合營", tagColor: "#EA580C", emoji: "🌄", climber: "⛷️",
+    title: "AI 自動化玩家",
+    color: "#EA580C",
+    desc: "你已經讓 AI 自動幫你做事了，不再只是一問一答。你站的位置比大多數人都高，繼續往上就是系統級的能力。",
+    ability: "創工具",
+    tools: "GAS、n8n、Make",
+    meter: 4,
+  },
+  {
+    id: 4, range: [19, 20],
+    tag: "山頂", tagColor: "#059669", emoji: "🚩", climber: "🏔️",
+    title: "AI 系統建造者",
+    color: "#059669",
+    desc: "你已經登頂了！能用 AI 改造工作流程、打造自己的工具。你是少數走到這一步的人，下一步是帶團隊一起上來。",
+    ability: "改造流程",
+    tools: "Agent、API、自建系統",
+    meter: 5,
+  },
+];
+
+// ── State ──
+let currentQ = 0;
+let scores = [];
+
+function startQuiz() {
+  document.getElementById("cover").classList.remove("active");
+  document.getElementById("quiz").classList.add("active");
+  currentQ = 0;
+  scores = [];
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  const pct = ((currentQ) / questions.length) * 100;
+  document.getElementById("progressFill").style.width = pct + "%";
+
+  const area = document.getElementById("questionArea");
+  const qText = q.q.replace(/\n/g, "<br>");
+  const sub = q.sub ? `<div class="q-sub">${q.sub}</div>` : "";
+
+  let html = `
+    <div class="q-number">${currentQ + 1}</div>
+    <div class="q-title">${qText}</div>
+    ${sub}
+    <div class="options">
+  `;
+  q.options.forEach((opt, i) => {
+    html += `
+      <button class="option-btn" onclick="selectOption(${i}, ${opt.score})">
+        <span class="icon">${opt.icon}</span>
+        <span>${opt.text}</span>
+      </button>`;
+  });
+  html += `</div>`;
+  area.innerHTML = html;
+}
+
+function selectOption(idx, score) {
+  const btns = document.querySelectorAll(".option-btn");
+  btns.forEach(b => b.style.pointerEvents = "none");
+  btns[idx].classList.add("selected");
+  scores.push(score);
+  setTimeout(() => {
+    currentQ++;
+    if (currentQ < questions.length) renderQuestion();
+    else showResult();
+  }, 400);
+}
+
+function showResult() {
+  document.getElementById("quiz").classList.remove("active");
+  document.getElementById("result").classList.add("active");
+
+  const total = scores.reduce((a, b) => a + b, 0);
+  const level = levels.find(l => total >= l.range[0] && total <= l.range[1]) || levels[levels.length - 1];
+
+  // ── Camp positions (wider viewBox 720×360 for compact mountain) ──
+  const campSVG = [
+    { sx: 140, sy: 300 },  // 起步營
+    { sx: 245, sy: 240 },  // 探索營
+    { sx: 360, sy: 180 },  // 應用營
+    { sx: 465, sy: 120 },  // 整合營
+    { sx: 370, sy: 55  },  // 山頂
+  ];
+  const VW = 720, VH = 360;
+
+  // Label positions: [x, y, anchor, showBelow]
+  const labelPos = [
+    { dx: 0,   dy: 22,  anchor: 'middle' },  // 起步 — 下方
+    { dx: 28,  dy: -4,  anchor: 'start'  },  // 探索 — 右
+    { dx: -28, dy: -4,  anchor: 'end'    },  // 應用 — 左
+    { dx: 28,  dy: -4,  anchor: 'start'  },  // 整合 — 右
+    { dx: 32,  dy: 6,   anchor: 'start'  },  // 山頂 — 右
+  ];
+
+  const cSVG = campSVG[level.id];
+  const toX = (x) => (x / VW * 100).toFixed(1);
+  const toY = (y) => (y / VH * 100).toFixed(1);
+
+  let html = `
+    <!-- Result title -->
+    <div class="result-info">
+      <div class="level-name" style="color:${level.color};">${level.emoji} ${level.title}</div>
+      <div class="level-desc">${level.desc}</div>
+    </div>
+
+    <!-- Mountain (compact 720×360) -->
+    <div class="mountain-wrap">
+      <svg class="mountain-svg" viewBox="0 0 ${VW} ${VH}" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#C7D9F0"/>
+            <stop offset="100%" stop-color="#E8F1FB"/>
+          </linearGradient>
+          <linearGradient id="mtn-main" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#4B6A8A"/>
+            <stop offset="45%" stop-color="#5B7D99"/>
+            <stop offset="100%" stop-color="#3D8B6E"/>
+          </linearGradient>
+          <linearGradient id="mtn-back" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#8BA4BD"/>
+            <stop offset="100%" stop-color="#B0C4D8"/>
+          </linearGradient>
+        </defs>
+
+        <rect width="${VW}" height="${VH}" fill="url(#sky)"/>
+
+        <!-- Sun -->
+        <circle cx="620" cy="50" r="28" fill="#FBBF24" opacity="0.8"/>
+        <circle cx="620" cy="50" r="38" fill="#FBBF24" opacity="0.12"/>
+
+        <!-- Clouds -->
+        <g opacity="0.55">
+          <ellipse cx="90" cy="55" rx="45" ry="13" fill="white"/>
+          <ellipse cx="125" cy="50" rx="28" ry="9" fill="white"/>
+          <ellipse cx="500" cy="40" rx="40" ry="11" fill="white"/>
+        </g>
+
+        <!-- Back mountains -->
+        <polygon points="-10,360 150,110 310,360" fill="url(#mtn-back)" opacity="0.3"/>
+        <polygon points="420,360 580,130 740,360" fill="url(#mtn-back)" opacity="0.22"/>
+
+        <!-- Main mountain -->
+        <polygon points="50,360 370,38 690,360" fill="url(#mtn-main)"/>
+
+        <!-- Snow cap -->
+        <polygon points="345,38 370,38 400,72 378,66 365,78 340,68" fill="white" opacity="0.9"/>
+
+        <!-- Flag -->
+        <line x1="370" y1="20" x2="370" y2="44" stroke="#DC2626" stroke-width="2.5"/>
+        <polygon points="370,20 396,27 370,34" fill="#DC2626" opacity="0.9"/>
+
+        <!-- Climbing path (smooth curve) -->
+        <path d="M ${campSVG[0].sx},${campSVG[0].sy} C ${campSVG[0].sx+60},${campSVG[0].sy-40} ${campSVG[1].sx-30},${campSVG[1].sy+20} ${campSVG[1].sx},${campSVG[1].sy} S ${campSVG[2].sx-20},${campSVG[2].sy+15} ${campSVG[2].sx},${campSVG[2].sy} S ${campSVG[3].sx-20},${campSVG[3].sy+15} ${campSVG[3].sx},${campSVG[3].sy} S ${campSVG[4].sx+10},${campSVG[4].sy+20} ${campSVG[4].sx},${campSVG[4].sy}"
+              fill="none" stroke="white" stroke-width="2.5" stroke-dasharray="8,6" opacity="0.5" stroke-linecap="round"/>
+
+        <!-- Trees -->
+        <text x="25"  y="348" font-size="20" opacity="0.6">🌲</text>
+        <text x="55"  y="355" font-size="16" opacity="0.45">🌲</text>
+        <text x="620" y="350" font-size="18" opacity="0.55">🌲</text>
+        <text x="655" y="345" font-size="14" opacity="0.4">🌲</text>
+
+        <!-- Camp dots + labels -->
+        ${campSVG.map((c, i) => {
+          const isCur = i === level.id;
+          const isPast = i < level.id;
+          const isFut = i > level.id;
+          const color = levels[i].tagColor;
+          const r = isCur ? 11 : 7;
+          const op = isPast ? 0.4 : isFut ? 0.3 : 1;
+          const lp = labelPos[i];
+          const lx = c.sx + lp.dx;
+          const ly = c.sy + lp.dy;
+          const tag = levels[i].tag;
+          const fSize = isCur ? 13 : 10;
+          const fw = isCur ? 'bold' : 'normal';
+
+          let dot = `
+            <circle cx="${c.sx}" cy="${c.sy}" r="${r+3}" fill="white" opacity="${op*0.85}"/>
+            <circle cx="${c.sx}" cy="${c.sy}" r="${r}" fill="${color}" opacity="${op}"/>
+          `;
+          if (isCur) {
+            dot += `
+              <circle cx="${c.sx}" cy="${c.sy}" r="${r}" fill="${color}">
+                <animate attributeName="r" values="${r};${r+2};${r}" dur="1.8s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="${c.sx}" cy="${c.sy}" r="${r+8}" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.3">
+                <animate attributeName="r" values="${r+8};${r+16};${r+8}" dur="2.5s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.3;0.05;0.3" dur="2.5s" repeatCount="indefinite"/>
+              </circle>
+            `;
+          }
+
+          // Label
+          let label = '';
+          if (isCur) {
+            label = `
+              <g opacity="1">
+                <text x="${lx}" y="${ly}" font-size="${fSize}" font-weight="${fw}" fill="${color}" text-anchor="${lp.anchor}" font-family="'Noto Sans TC',sans-serif" stroke="white" stroke-width="3" paint-order="stroke">${tag}</text>
+                <text x="${lx}" y="${ly}" font-size="${fSize}" font-weight="${fw}" fill="${color}" text-anchor="${lp.anchor}" font-family="'Noto Sans TC',sans-serif">${tag}</text>
+                <text x="${lx}" y="${ly + 14}" font-size="10" fill="${color}" text-anchor="${lp.anchor}" font-family="'Noto Sans TC',sans-serif" opacity="0.8" stroke="white" stroke-width="2.5" paint-order="stroke">你在這裡</text>
+                <text x="${lx}" y="${ly + 14}" font-size="10" fill="${color}" text-anchor="${lp.anchor}" font-family="'Noto Sans TC',sans-serif" opacity="0.8">你在這裡</text>
+              </g>
+            `;
+          } else {
+            label = `
+              <g opacity="${op}">
+                <text x="${lx}" y="${ly}" font-size="${fSize}" fill="white" text-anchor="${lp.anchor}" font-family="'Noto Sans TC',sans-serif" stroke="${color}" stroke-width="0.3">${tag}</text>
+              </g>
+            `;
+          }
+
+          return dot + label;
+        }).join('')}
+      </svg>
+
+      <!-- Climber (different emoji per level) -->
+      <div class="climber" style="left:${toX(cSVG.sx)}%; top:${toY(cSVG.sy - 18)}%;">${level.climber}</div>
+    </div>
+
+    <!-- Course path (compact) -->
+    <div class="course-path">
+      <h3>這堂課帶你爬到哪？</h3>
+      <div class="path-steps">
+        <div class="path-step" style="background:#94A3B8;">Day1 認識AI</div>
+        <div class="path-arrow">→</div>
+        <div class="path-step" style="background:#0891B2;">Day2 精準溝通</div>
+        <div class="path-arrow">→</div>
+        <div class="path-step" style="background:#7C3AED;">Day3 打造助手</div>
+        <div class="path-arrow">→</div>
+        <div class="path-step" style="background:#EA580C;">Day4 自動化</div>
+      </div>
+    </div>
+
+    <button class="restart-btn" onclick="restart()">重新測驗</button>
+  `;
+
+  document.getElementById("resultContent").innerHTML = html;
+}
+
+function restart() {
+  document.getElementById("result").classList.remove("active");
+  document.getElementById("cover").classList.add("active");
+  currentQ = 0;
+  scores = [];
+}
+</script>
+
+</body>
+</html>

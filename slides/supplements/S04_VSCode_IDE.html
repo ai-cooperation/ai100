@@ -266,7 +266,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 .controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:var(--white);color:var(--g800);font-size:1.2rem;cursor:pointer;transition:all .15s;}
 .controls button:hover{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
 .controls button:disabled{opacity:.25;cursor:default;}
-.slide-counter{position:fixed;bottom:1.5rem;left:auto;right:5rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:500;}
+.slide-counter{position:fixed;bottom:1.5rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:500;}
 .module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:var(--green-lt);color:var(--green);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;}
 .module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
 
@@ -289,21 +289,10 @@ p,li{font-size:1.1rem;line-height:1.8;}
   display:flex;align-items:center;gap:.8rem;
 }
 .decision-node .arrow{color:var(--blue);font-weight:900;font-size:1.2rem;}
-
-/* ── Chapter Menu ── */
-.chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;font-family:system-ui,-apple-system,sans-serif;}
-.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.9);font-size:.8rem;cursor:pointer;transition:border-color .2s;}
-.chapter-btn:hover{border-color:var(--green);}
-.chapter-icon{color:var(--green);font-weight:700;}
-.chapter-arrow{font-size:.6rem;opacity:.5;transition:transform .2s;}
-.chapter-menu.open .chapter-arrow{transform:rotate(180deg);}
-.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:180px;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;}
-.chapter-menu.open .chapter-list{display:block;}
-.chapter-item{display:flex;align-items:center;gap:8px;padding:8px 14px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
-.chapter-item:hover{background:rgba(255,255,255,.08);color:#fff;}
-.chapter-item.active{color:var(--green);font-weight:600;}
-.chapter-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;}
-.chapter-item.active .chapter-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+.slide.poster{background-size:cover;background-position:center;color:#fff;text-align:center;}
+.slide.poster::before{content:'';position:absolute;inset:0;z-index:1;}
+.slide.poster>*{position:relative;z-index:2;}
+.slide.poster.overlay-bottom::before{background:linear-gradient(to bottom,rgba(0,0,0,.15) 0%,rgba(0,0,0,.75) 100%);}
 </style>
 </head>
 <body>
@@ -313,7 +302,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 <div class="slides">
 
 <!-- ===== 0: COVER ===== -->
-<div class="slide cover" data-act="開場" data-index="0">
+<div class="slide poster overlay-bottom" data-index="0" style="background-image:url('img/s04/cover.png');background-color:var(--navy);">
   <p style="font-size:1.1rem;color:rgba(255,255,255,.6);margin-bottom:1rem;">AI 100 講 — 補充單元</p>
   <h1>VS Code IDE</h1>
   <p class="subtitle" style="margin-top:.8rem;font-size:1.5rem;">看著 AI 在你旁邊工作</p>
@@ -322,7 +311,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 1: 議程 ===== -->
-<div class="slide" data-act="開場" data-index="1">
+<div class="slide" data-index="1">
   <h2>今天的旅程</h2>
   <div class="step-list">
     <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>為什麼需要 IDE + 安裝</strong><p>CLI 跟 IDE 的差別，裝好 Claude 擴充</p></div></div>
@@ -333,7 +322,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 2: S03 vs S04 ===== -->
-<div class="slide" data-act="開場" data-index="2">
+<div class="slide" data-index="2">
   <h2>S03 <span class="dim">建造者</span> vs S04 <span class="blue">改造者</span></h2>
   <div class="two-col" style="margin-top:1rem;">
     <div class="col">
@@ -365,7 +354,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 3: 為什麼需要 IDE ===== -->
-<div class="slide" data-act="開場" data-index="3">
+<div class="slide" data-index="3">
   <h2>為什麼需要 <span class="blue">IDE</span>？</h2>
   <div class="two-col" style="margin-top:1rem;">
     <div class="col">
@@ -400,7 +389,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 4: 額度確認 ===== -->
-<div class="slide" data-act="開場" data-index="4">
+<div class="slide" data-index="4">
   <h2>額度確認 <span class="red">FIRST</span></h2>
   <p class="dim" style="margin-bottom:.8rem;">裝完才發現沒額度 = 浪費時間</p>
   <div class="step-list" style="max-width:700px;">
@@ -421,7 +410,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 5: 安裝 Claude Extension ===== -->
-<div class="slide" data-act="開場" data-index="5">
+<div class="slide" data-index="5">
   <div class="exercise-banner">全班跟做</div>
   <h2>安裝 Claude for VS Code</h2>
   <div class="qr-solo"><div id="qr-install"></div></div>
@@ -467,7 +456,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 6: Sign In ===== -->
-<div class="slide" data-act="開場" data-index="6">
+<div class="slide" data-index="6">
   <div class="exercise-banner">全班跟做</div>
   <h2>登入帳號</h2>
   <div class="step-list" style="max-width:700px;">
@@ -482,14 +471,14 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 7: SECTION — 一星 ===== -->
-<div class="slide section-title" data-act="AI 回答問題" data-index="7">
+<div class="slide section-title" data-index="7">
   <div class="star-level"><span class="filled">&#9733;</span><span class="empty">&#9733;&#9733;&#9733;&#9733;</span></div>
   <h1>AI 回答問題</h1>
   <p class="subtitle" style="margin-top:.5rem;">"它看懂了"</p>
 </div>
 
 <!-- ===== 8: 問 AI — 選一段 ===== -->
-<div class="slide" data-act="AI 回答問題" data-index="8">
+<div class="slide" data-index="8">
   <div class="demo-banner">Demo + 跟做</div>
   <h2>選一段問它：「這段做什麼？」</h2>
   <div class="vscode-mockup">
@@ -545,7 +534,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 9: 問整個專案架構 ===== -->
-<div class="slide" data-act="AI 回答問題" data-index="9">
+<div class="slide" data-index="9">
   <div class="demo-banner">Demo + 跟做</div>
   <h2>問整個專案：「架構是什麼？」</h2>
   <div class="vscode-mockup">
@@ -593,7 +582,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 10: 學員練習 ===== -->
-<div class="slide" data-act="AI 回答問題" data-index="10">
+<div class="slide" data-index="10">
   <div class="exercise-banner">全班跟做</div>
   <h2>打開任一本地檔案 → 選取 → 問 Claude</h2>
   <div class="qr-solo"><div id="qr-exercise1"></div></div>
@@ -609,14 +598,14 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 11: SECTION — 二星 ===== -->
-<div class="slide section-title" data-act="AI 幫我改" data-index="11">
+<div class="slide section-title" data-index="11">
   <div class="star-level"><span class="filled">&#9733;&#9733;</span><span class="empty">&#9733;&#9733;&#9733;</span></div>
   <h1>AI 幫我改</h1>
   <p class="subtitle" style="margin-top:.5rem;">"8 個檔案都改了"</p>
 </div>
 
 <!-- ===== 12: 改中文 ===== -->
-<div class="slide" data-act="AI 幫我改" data-index="12">
+<div class="slide" data-index="12">
   <div class="demo-banner">Demo</div>
   <h2>「把英文介面改成繁體中文」</h2>
   <div class="vscode-mockup">
@@ -668,7 +657,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 13: 改配色 ===== -->
-<div class="slide" data-act="AI 幫我改" data-index="13">
+<div class="slide" data-index="13">
   <div class="demo-banner">Demo</div>
   <h2>「配色從藍改成綠」</h2>
   <div class="vscode-mockup">
@@ -712,7 +701,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 14: Diff 的價值 ===== -->
-<div class="slide" data-act="AI 幫我改" data-index="14">
+<div class="slide" data-index="14">
   <h2>Diff View 的價值</h2>
   <div class="two-col" style="margin-top:1rem;">
     <div class="col">
@@ -738,14 +727,14 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 15: SECTION — 三星 ===== -->
-<div class="slide section-title" data-act="AI 替我想" data-index="15">
+<div class="slide section-title" data-index="15">
   <div class="star-level"><span class="filled">&#9733;&#9733;&#9733;</span><span class="empty">&#9733;&#9733;</span></div>
   <h1>AI 替我想</h1>
   <p class="subtitle" style="margin-top:.5rem;">"它自己決定改哪"</p>
 </div>
 
 <!-- ===== 16: 二星 vs 三星 ===== -->
-<div class="slide" data-act="AI 替我想" data-index="16">
+<div class="slide" data-index="16">
   <h2>二星 vs 三星的差別</h2>
   <div class="two-col" style="margin-top:1rem;">
     <div class="col">
@@ -776,7 +765,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 17: 互動 Demo ===== -->
-<div class="slide" data-act="AI 替我想" data-index="17">
+<div class="slide" data-index="17">
   <div class="demo-banner">互動 Demo</div>
   <h2>你們想加什麼功能？</h2>
   <p class="dim" style="margin-bottom:1rem;">講師打開那個 Landing Page 專案，現場問大家</p>
@@ -789,7 +778,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 18: Claude 規劃 ===== -->
-<div class="slide" data-act="AI 替我想" data-index="18">
+<div class="slide" data-index="18">
   <div class="demo-banner">Demo</div>
   <h2>Claude 的規劃</h2>
   <div class="vscode-mockup">
@@ -833,7 +822,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 19: 結果預覽 ===== -->
-<div class="slide" data-act="AI 替我想" data-index="19">
+<div class="slide" data-index="19">
   <h2>Apply → Preview 結果</h2>
   <div class="flow" style="margin-top:1rem;">
     <div class="flow-box" style="border-color:var(--purple);background:var(--purple-lt);">Claude 規劃</div>
@@ -856,21 +845,21 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 20: BREAK ===== -->
-<div class="slide break-slide" data-act="休息" data-index="20">
+<div class="slide break-slide" data-index="20">
   <p style="font-size:5rem;">☕</p>
   <h2 style="margin-top:1rem;color:var(--g800);">休息 10 分鐘</h2>
   <p class="dim" style="margin-top:1rem;">接下來：AI 幫你找 Bug + 完整改造案例</p>
 </div>
 
 <!-- ===== 21: SECTION — 四星 ===== -->
-<div class="slide section-title" data-act="AI 找問題" data-index="21">
+<div class="slide section-title" data-index="21">
   <div class="star-level"><span class="filled">&#9733;&#9733;&#9733;&#9733;</span><span class="empty">&#9733;</span></div>
   <h1>AI 找問題</h1>
   <p class="subtitle" style="margin-top:.5rem;">"它比我先找到"</p>
 </div>
 
 <!-- ===== 22: 故意搞壞 ===== -->
-<div class="slide" data-act="AI 找問題" data-index="22">
+<div class="slide" data-index="22">
   <div class="demo-banner">Demo</div>
   <h2>講師故意搞壞一行 code</h2>
   <div class="vscode-mockup">
@@ -904,7 +893,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 23: 複製 Error ===== -->
-<div class="slide" data-act="AI 找問題" data-index="23">
+<div class="slide" data-index="23">
   <div class="demo-banner">Demo</div>
   <h2>Console Error → 貼給 Claude</h2>
   <div class="vscode-mockup">
@@ -946,7 +935,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 24: 一鍵修好 ===== -->
-<div class="slide" data-act="AI 找問題" data-index="24">
+<div class="slide" data-index="24">
   <h2>一鍵修好 → 網頁恢復</h2>
   <div class="flow" style="margin-top:1.5rem;">
     <div class="flow-box" style="border-color:var(--red);background:var(--red-lt);">Error 出現</div>
@@ -971,7 +960,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 25: 架構的重要性 ===== -->
-<div class="slide" data-act="AI 找問題" data-index="25">
+<div class="slide" data-index="25">
   <h2>為什麼<span class="blue">架構</span>很重要？</h2>
   <div class="two-col" style="margin-top:1rem;">
     <div class="col">
@@ -1000,7 +989,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 26: 架構範例 ===== -->
-<div class="slide" data-act="AI 找問題" data-index="26">
+<div class="slide" data-index="26">
   <h2>好架構的範例：AI 100 講網站</h2>
   <div class="vscode-mockup">
     <div class="vscode-titlebar">
@@ -1044,21 +1033,21 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 27: BREAK 2 ===== -->
-<div class="slide break-slide" data-act="休息" data-index="27">
+<div class="slide break-slide" data-index="27">
   <p style="font-size:5rem;">☕</p>
   <h2 style="margin-top:1rem;color:var(--g800);">休息 10 分鐘</h2>
   <p class="dim" style="margin-top:1rem;">最後：完整改造大 Demo + 工具全景</p>
 </div>
 
 <!-- ===== 28: SECTION — 五星 ===== -->
-<div class="slide section-title" data-act="完整改造" data-index="28">
+<div class="slide section-title" data-index="28">
   <div class="star-level"><span class="filled">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
   <h1>完整改造</h1>
   <p class="subtitle" style="margin-top:.5rem;">"開源模板變成我的產品"</p>
 </div>
 
 <!-- ===== 29: 咖啡店改造簡介 ===== -->
-<div class="slide" data-act="完整改造" data-index="29">
+<div class="slide" data-index="29">
   <h2>大 Demo：咖啡店模板 → 山海咖啡</h2>
   <p class="dim" style="margin-bottom:.5rem;">GitHub 上找到一個免費咖啡店模板，用五星改造流程把它變成自己的產品</p>
   <div class="flow" style="margin-top:1rem;">
@@ -1078,7 +1067,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 30: Step 1 — 找 ===== -->
-<div class="slide" data-act="完整改造" data-index="30">
+<div class="slide" data-index="30">
   <div class="demo-banner">Demo — Step 1</div>
   <h2>&#9733; 找：Clone 模板 + 問架構</h2>
   <div class="vscode-mockup">
@@ -1124,7 +1113,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 31: Step 2 — 改外觀 ===== -->
-<div class="slide" data-act="完整改造" data-index="31">
+<div class="slide" data-index="31">
   <div class="demo-banner">Demo — Step 2</div>
   <h2>&#9733;&#9733; 改外觀：店名 + 配色</h2>
   <p class="dim" style="margin-bottom:.3rem;">「店名改成山海咖啡，配色改成木質色系」</p>
@@ -1165,7 +1154,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 32: Step 3 — 加功能 ===== -->
-<div class="slide" data-act="完整改造" data-index="32">
+<div class="slide" data-index="32">
   <div class="demo-banner">Demo — Step 3</div>
   <h2>&#9733;&#9733;&#9733; 加功能：線上預約</h2>
   <p class="dim" style="margin-bottom:.3rem;">講師問：「咖啡店還需要什麼？」→「線上預約！」</p>
@@ -1208,7 +1197,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 33: Step 4 — 修問題 ===== -->
-<div class="slide" data-act="完整改造" data-index="33">
+<div class="slide" data-index="33">
   <div class="demo-banner">Demo — Step 4</div>
   <h2>&#9733;&#9733;&#9733;&#9733; 修問題：表單壞了</h2>
   <p class="dim" style="margin-bottom:.3rem;">故意搞壞預約表單 → 用四星流程修</p>
@@ -1248,7 +1237,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 34: Step 5 — 部署 ===== -->
-<div class="slide" data-act="完整改造" data-index="34">
+<div class="slide" data-index="34">
   <div class="demo-banner">Demo — Step 5</div>
   <h2>&#9733;&#9733;&#9733;&#9733;&#9733; 部署到 GitHub Pages</h2>
   <div class="vscode-mockup">
@@ -1287,7 +1276,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 35: 四合一畫面 ===== -->
-<div class="slide" data-act="完整改造" data-index="35">
+<div class="slide" data-index="35">
   <h2>VS Code 四合一</h2>
   <div class="vscode-mockup" style="max-width:920px;">
     <div class="vscode-titlebar">
@@ -1353,7 +1342,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 36: 改造流程回顧 ===== -->
-<div class="slide" data-act="完整改造" data-index="36">
+<div class="slide" data-index="36">
   <h2>改造者 Workflow 總結</h2>
   <div class="step-list" style="margin-top:.5rem;">
     <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--green);font-size:.8rem;">&#9733;</div><div class="step-content"><strong>找 — 問架構</strong><p>Clone 專案 → 問 Claude「架構是什麼？」→ 理解全貌</p></div></div>
@@ -1365,14 +1354,14 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 37: SECTION — 四大擴充 ===== -->
-<div class="slide section-title" data-act="四大 AI 擴充" data-index="37">
+<div class="slide section-title" data-index="37">
   <p class="subtitle">工具比較</p>
   <h1>四大 AI 擴充</h1>
   <p class="subtitle" style="margin-top:.5rem;">Claude / Copilot / Amazon Q / Continue</p>
 </div>
 
 <!-- ===== 38: 擴充比較表 ===== -->
-<div class="slide" data-act="四大 AI 擴充" data-index="38">
+<div class="slide" data-index="38">
   <h2>四大 AI 擴充比較</h2>
   <table class="compare-table">
     <tr><th style="width:160px;">擴充</th><th>特色</th><th>價格</th><th>推薦指數</th></tr>
@@ -1409,7 +1398,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 39: 什麼時候用什麼 ===== -->
-<div class="slide" data-act="四大 AI 擴充" data-index="39">
+<div class="slide" data-index="39">
   <h2>什麼時候用什麼？</h2>
   <div class="step-list" style="max-width:800px;">
     <div class="step fragment" data-order="0">
@@ -1432,14 +1421,14 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 40: SECTION — 工具全景 ===== -->
-<div class="slide section-title" data-act="工具決策樹" data-index="40">
+<div class="slide section-title" data-index="40">
   <p class="subtitle">決策指南</p>
   <h1>工具全景決策樹</h1>
   <p class="subtitle" style="margin-top:.5rem;">S01 ~ S05 什麼時候用什麼</p>
 </div>
 
 <!-- ===== 41: 決策樹 ===== -->
-<div class="slide" data-act="工具決策樹" data-index="41">
+<div class="slide" data-index="41">
   <h2>你要做什麼？</h2>
   <div class="decision-tree" style="margin-top:.5rem;">
     <div class="decision-node fragment" data-order="0" style="border-left-color:var(--green);background:var(--green-lt);">
@@ -1466,7 +1455,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 42: 五堂課進程 ===== -->
-<div class="slide" data-act="工具決策樹" data-index="42">
+<div class="slide" data-index="42">
   <h2>五堂課的進程</h2>
   <div class="flow" style="margin-top:1.5rem;">
     <div class="flow-box" style="background:var(--green-lt);border-color:var(--green);">S01<br><span style="font-size:.75rem;">GAS</span></div>
@@ -1492,7 +1481,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 43: Recap ===== -->
-<div class="slide" data-act="工具決策樹" data-index="43">
+<div class="slide" data-index="43">
   <h2>今天你學會了</h2>
   <div style="text-align:left;max-width:720px;margin-top:.5rem;">
     <div class="fragment" data-order="0" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--green-lt);border-radius:12px;border-left:4px solid var(--green);">
@@ -1514,7 +1503,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 44: 核心金句 ===== -->
-<div class="slide" data-act="工具決策樹" data-index="44">
+<div class="slide" data-index="44">
   <h2>帶走一句話</h2>
   <div style="margin-top:2rem;text-align:center;">
     <p style="font-size:2rem;font-weight:900;color:var(--blue);line-height:1.5;">
@@ -1530,7 +1519,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 45: 預告 S05 ===== -->
-<div class="slide" data-act="工具決策樹" data-index="45">
+<div class="slide" data-index="45">
   <h2>下一堂預告</h2>
   <p style="font-size:1.1rem;margin-top:1rem;line-height:2;color:var(--g600);">
     前四堂，AI 都是你開工具它才做事。
@@ -1557,7 +1546,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 46: END ===== -->
-<div class="slide cover" data-act="完成" data-index="46">
+<div class="slide cover" data-index="46">
   <p style="font-size:1rem;color:rgba(255,255,255,.6);margin-bottom:1rem;">S04 補充單元</p>
   <h1>完成！</h1>
   <p class="subtitle" style="margin-top:1.5rem;font-size:1.2rem;">
@@ -1567,16 +1556,6 @@ p,li{font-size:1.1rem;line-height:1.8;}
   <p style="color:rgba(255,255,255,.4);margin-top:3rem;font-size:.9rem;">ai100.cooperation.tw</p>
 </div>
 
-</div>
-
-
-<div id="chapterMenu" class="chapter-menu">
-  <button id="chapterBtn" class="chapter-btn">
-    <span class="chapter-icon">§</span>
-    <span id="chapterLabel">開場</span>
-    <span class="chapter-arrow">▼</span>
-  </button>
-  <div id="chapterList" class="chapter-list"></div>
 </div>
 
 <div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
@@ -1595,16 +1574,6 @@ function ret(){const f=gf(slides[idx]);if(fi>=0){f[fi].classList.remove('visible
 document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
 document.addEventListener('keydown',e=>{if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}if(e.key==='Home'){e.preventDefault();go(0);}if(e.key==='End'){e.preventDefault();go(tot-1);}if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}});
 let tx=0;document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
-// ── Chapter Menu ──
-var chapterMenu=document.getElementById('chapterMenu'),chapterBtn=document.getElementById('chapterBtn'),chapterLabel=document.getElementById('chapterLabel'),chapterList=document.getElementById('chapterList');
-function getChapters(){var m=new Map();slides.forEach(function(s,i){var a=s.dataset.act;if(a&&!m.has(a))m.set(a,i);});return m;}
-function buildChapterMenu(){var ch=getChapters();chapterList.innerHTML='';var cur=slides[idx]&&slides[idx].dataset.act||'';ch.forEach(function(si,name){var d=document.createElement('div');d.className='chapter-item'+(name===cur?' active':'');d.innerHTML='<span class="chapter-dot"></span>'+name;d.onclick=function(){go(si);closeChapterMenu();};chapterList.appendChild(d);});chapterLabel.textContent=cur||'\u5c0e\u89bd';}
-function toggleChapterMenu(){chapterMenu.classList.toggle('open');if(chapterMenu.classList.contains('open'))buildChapterMenu();}
-function closeChapterMenu(){chapterMenu.classList.remove('open');}
-chapterBtn.onclick=toggleChapterMenu;
-document.addEventListener('click',function(e){if(!chapterMenu.contains(e.target))closeChapterMenu();});
-var _origUi=ui;ui=function(){_origUi();var cur=slides[idx]&&slides[idx].dataset.act||'';chapterLabel.textContent=cur||'\u5c0e\u89bd';};
-
 go(0);
 
 // ─── QR Code Generation ───

@@ -163,7 +163,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 .controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:var(--white);color:var(--g800);font-size:1.2rem;cursor:pointer;transition:all .15s;}
 .controls button:hover{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
 .controls button:disabled{opacity:.25;cursor:default;}
-.slide-counter{position:fixed;bottom:1.5rem;left:auto;right:5rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:500;}
+.slide-counter{position:fixed;bottom:1.5rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:500;}
 .module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:var(--green-lt);color:var(--green);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;}
 /* 沒有 QR 的頁面顯示 badge，有 QR 的頁面 QR 蓋在上面 */
 .module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
@@ -178,21 +178,10 @@ p,li{font-size:1.1rem;line-height:1.8;}
 .slide.cover .subtitle{color:rgba(255,255,255,.8);}
 .slide.section-title h1{font-size:2.8rem;}
 .slide.section-title .subtitle{color:rgba(255,255,255,.85);font-size:1.1rem;}
-
-/* ── Chapter Menu ── */
-.chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;font-family:system-ui,-apple-system,sans-serif;}
-.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.9);font-size:.8rem;cursor:pointer;transition:border-color .2s;}
-.chapter-btn:hover{border-color:var(--green);}
-.chapter-icon{color:var(--green);font-weight:700;}
-.chapter-arrow{font-size:.6rem;opacity:.5;transition:transform .2s;}
-.chapter-menu.open .chapter-arrow{transform:rotate(180deg);}
-.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:180px;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;}
-.chapter-menu.open .chapter-list{display:block;}
-.chapter-item{display:flex;align-items:center;gap:8px;padding:8px 14px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
-.chapter-item:hover{background:rgba(255,255,255,.08);color:#fff;}
-.chapter-item.active{color:var(--green);font-weight:600;}
-.chapter-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;}
-.chapter-item.active .chapter-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+.slide.poster{background-size:cover;background-position:center;color:#fff;text-align:center;}
+.slide.poster::before{content:'';position:absolute;inset:0;z-index:1;}
+.slide.poster>*{position:relative;z-index:2;}
+.slide.poster.overlay-bottom::before{background:linear-gradient(to bottom,rgba(0,0,0,.15) 0%,rgba(0,0,0,.75) 100%);}
 </style>
 </head>
 <body>
@@ -202,7 +191,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 <div class="slides">
 
 <!-- ===== 0: COVER ===== -->
-<div class="slide cover" data-act="開場" data-index="0">
+<div class="slide poster overlay-bottom" data-index="0" style="background-image:url('img/s01/cover.png');background-color:var(--navy);">
   <p style="font-size:1.1rem;color:rgba(255,255,255,.6);margin-bottom:1rem;">AI 100 講 ─ 補充單元</p>
   <h1>GAS 自動化</h1>
   <p class="subtitle" style="margin-top:1rem;font-size:1.3rem;">三小時，從零到自動化</p>
@@ -210,7 +199,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 1: 議程 ===== -->
-<div class="slide" data-act="開場" data-index="1">
+<div class="slide" data-index="1">
   <h2>今天的旅程</h2>
   <div class="step-list">
     <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>拿到你的 AI 鑰匙</strong><p>免費申請，不用信用卡</p></div></div>
@@ -221,7 +210,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 2: 痛點 ===== -->
-<div class="slide" data-act="開場" data-index="2">
+<div class="slide" data-index="2">
   <h2>你每天花多少時間做<span class="red">重複的事</span>？</h2>
   <div class="card-grid">
     <div class="card fragment" data-order="0"><div class="icon">📧</div><h3>50 封 Email</h3><p>手動看、判斷、回覆<br>每天 45 分鐘</p></div>
@@ -232,7 +221,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 3: 解法 ===== -->
-<div class="slide" data-act="開場" data-index="3">
+<div class="slide" data-index="3">
   <h2>如果有一個助手…</h2>
   <div style="margin-top:1.5rem;text-align:left;max-width:600px;">
     <p class="fragment" data-order="0" style="font-size:1.4rem;padding:.5rem 0;">✅ <strong>24 小時</strong>不休息</p>
@@ -243,14 +232,14 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 4: SECTION ===== -->
-<div class="slide section-title" data-act="拿鑰匙" data-index="4">
+<div class="slide section-title" data-index="4">
   <p class="subtitle">第一段 · 0:10 – 0:25</p>
   <h1>🔑 拿到第一把 AI 鑰匙</h1>
   <p class="subtitle" style="margin-top:.5rem;">免費，不需要信用卡</p>
 </div>
 
 <!-- ===== 5: API 比喻 ===== -->
-<div class="slide" data-act="拿鑰匙" data-index="5">
+<div class="slide" data-index="5">
   <h2>API Key 是什麼？</h2>
   <div class="info-box analogy" style="margin-top:1rem;">
     <div class="label">🍽️ 餐廳比喻</div>
@@ -268,7 +257,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 6: 為什麼 Groq ===== -->
-<div class="slide" data-act="拿鑰匙" data-index="6">
+<div class="slide" data-index="6">
   <h2>為什麼選 <span class="blue">Groq</span>？</h2>
   <table class="compare-table">
     <tr><th></th><th style="color:var(--gold);">⭐ Groq</th><th>OpenAI</th><th>Gemini</th></tr>
@@ -279,7 +268,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 7: 操作畫面 — Groq 首頁 ===== -->
-<div class="slide" data-act="拿鑰匙" data-index="7">
+<div class="slide" data-index="7">
   <div class="exercise-banner">👨‍💻 跟著做</div>
   <h2>打開 Groq 網站，建立帳號</h2>
   <div class="qr-solo"><div id="qr-groq"></div></div>
@@ -303,7 +292,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 8: 操作畫面 — 建立 Key ===== -->
-<div class="slide" data-act="拿鑰匙" data-index="8">
+<div class="slide" data-index="8">
   <div class="exercise-banner">👨‍💻 跟著做</div>
   <h2>建立 API Key</h2>
   <div class="mockup-browser">
@@ -337,7 +326,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 9: Key 是什麼 ===== -->
-<div class="slide" data-act="拿鑰匙" data-index="9">
+<div class="slide" data-index="9">
   <h2>你拿到的東西</h2>
   <div class="code-block" style="text-align:center;font-size:1.3rem;padding:1.5rem;">
     gsk_<span class="str">aBcDeFgHiJkLmNoPqRsT...</span>
@@ -350,7 +339,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 10: 多模態 ===== -->
-<div class="slide" data-act="拿鑰匙" data-index="10">
+<div class="slide" data-index="10">
   <h2>加碼：AI 也能<span class="purple">看圖片</span></h2>
   <div class="mockup-browser">
     <div class="mockup-bar">
@@ -371,14 +360,14 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 11: SECTION ===== -->
-<div class="slide section-title" data-act="第一次成功" data-index="11">
+<div class="slide section-title" data-index="11">
   <p class="subtitle">第一段 · 0:25 – 0:45</p>
   <h1>🎉 第一次成功</h1>
   <p class="subtitle" style="margin-top:.5rem;">AI 在試算表裡回答你</p>
 </div>
 
 <!-- ===== 12: 流程 ===== -->
-<div class="slide" data-act="第一次成功" data-index="12">
+<div class="slide" data-index="12">
   <h2>接下來你要做的</h2>
   <div class="flow" style="margin-top:2rem;">
     <div class="flow-box fragment" data-order="0" style="font-size:1.1rem;">💬 問 ChatGPT</div>
@@ -393,7 +382,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 13: ChatGPT 操作畫面 ===== -->
-<div class="slide" data-act="第一次成功" data-index="13">
+<div class="slide" data-index="13">
   <div class="exercise-banner">👨‍💻 Step 1 — 問 ChatGPT</div>
   <h2>貼上這段話</h2>
   <div class="qr-solo"><div id="qr-prompt1"></div></div>
@@ -424,7 +413,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 14: GAS 編輯器畫面 ===== -->
-<div class="slide" data-act="第一次成功" data-index="14">
+<div class="slide" data-index="14">
   <div class="exercise-banner">👨‍💻 Step 2 — 打開 Apps Script</div>
   <h2>Google Sheet → 擴充功能 → Apps Script</h2>
   <div class="mockup-browser">
@@ -462,7 +451,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 15: GAS 編輯器 — 貼上 ===== -->
-<div class="slide" data-act="第一次成功" data-index="15">
+<div class="slide" data-index="15">
   <div class="exercise-banner">👨‍💻 Step 3 — 貼上程式碼</div>
   <h2>清空預設 → 貼上 → 存檔</h2>
   <div class="mockup-browser">
@@ -499,7 +488,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 16: 設定 Key ===== -->
-<div class="slide" data-act="第一次成功" data-index="16">
+<div class="slide" data-index="16">
   <div class="exercise-banner">👨‍💻 Step 4 — Key 鎖進保險箱</div>
   <h2>專案設定 → 指令碼屬性</h2>
   <div class="mockup-browser">
@@ -527,7 +516,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 17: 執行結果 ===== -->
-<div class="slide" data-act="第一次成功" data-index="17">
+<div class="slide" data-index="17">
   <div class="exercise-banner">👨‍💻 Step 5 — 執行！</div>
   <h2>在 A1 輸入問題 → 按執行 → 看 B1</h2>
   <div class="mockup-browser">
@@ -552,7 +541,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 18: 你做了什麼 ===== -->
-<div class="slide" data-act="第一次成功" data-index="18">
+<div class="slide" data-index="18">
   <h2>停一下，你做了什麼？</h2>
   <div style="margin-top:1.5rem;text-align:left;max-width:700px;">
     <p class="fragment" data-order="0" style="font-size:1.3rem;padding:.6rem 0;"><span class="green bold">① 拿到鑰匙</span> — API Key</p>
@@ -563,13 +552,13 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 19: SECTION — Key 保護 ===== -->
-<div class="slide section-title" data-act="Key 保護" data-index="19">
+<div class="slide section-title" data-index="19">
   <p class="subtitle">0:45 – 1:00</p>
   <h1>🔒 Key 為什麼要保護？</h1>
 </div>
 
 <!-- ===== 20: 錯誤示範 ===== -->
-<div class="slide" data-act="Key 保護" data-index="20">
+<div class="slide" data-index="20">
   <h2><span class="red">❌ 寫在程式碼裡</span></h2>
   <div class="code-block" style="font-size:1.1rem;">
     <span class="kw">const</span> API_KEY = <span class="str">"gsk_aBcDeFgH..."</span>;
@@ -581,7 +570,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 21: 正確 ===== -->
-<div class="slide" data-act="Key 保護" data-index="21">
+<div class="slide" data-index="21">
   <h2><span class="green">✅ PropertiesService</span>（保險箱）</h2>
   <div class="code-block" style="font-size:1.1rem;">
     <span class="kw">const</span> key = PropertiesService<br>
@@ -596,21 +585,21 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 22: BREAK ===== -->
-<div class="slide break-slide" data-act="休息" data-index="22">
+<div class="slide break-slide" data-index="22">
   <p style="font-size:5rem;">☕</p>
   <h2 style="margin-top:1rem;color:var(--g800);">休息 10 分鐘</h2>
   <p class="dim" style="margin-top:1rem;">回來：AI 一次處理 10 筆</p>
 </div>
 
 <!-- ===== 23: SECTION ===== -->
-<div class="slide section-title" data-act="批量處理" data-index="23">
+<div class="slide section-title" data-index="23">
   <p class="subtitle">第二段 · 1:10 – 1:40</p>
   <h1>📊 批量處理</h1>
   <p class="subtitle" style="margin-top:.5rem;">AI 一次看 10 筆</p>
 </div>
 
 <!-- ===== 24: 場景 — 帶畫面 ===== -->
-<div class="slide" data-act="批量處理" data-index="24">
+<div class="slide" data-index="24">
   <h2>場景：客戶回饋 → AI 自動分類</h2>
   <div class="mockup-browser">
     <div class="mockup-bar">
@@ -632,7 +621,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 25: Prompt ===== -->
-<div class="slide" data-act="批量處理" data-index="25">
+<div class="slide" data-index="25">
   <div class="exercise-banner">👨‍💻 跟著做</div>
   <h2>問 ChatGPT 升級程式碼</h2>
   <div class="mockup-browser">
@@ -653,7 +642,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 26: 練習 ===== -->
-<div class="slide" data-act="批量處理" data-index="26">
+<div class="slide" data-index="26">
   <div class="exercise-banner">👨‍💻 練習時間 — 20 分鐘</div>
   <h2>在 A 欄填 10 筆資料，執行看結果</h2>
   <div class="qr-solo"><div id="qr-data"></div></div>
@@ -673,7 +662,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 27: 成果 ===== -->
-<div class="slide" data-act="批量處理" data-index="27">
+<div class="slide" data-index="27">
   <h2>手動 vs AI</h2>
   <div class="two-col" style="margin-top:2rem;text-align:center;">
     <div class="col">
@@ -689,14 +678,14 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 28: SECTION — 案例遞進 ===== -->
-<div class="slide section-title" data-act="五個案例" data-index="28">
+<div class="slide section-title" data-index="28">
   <p class="subtitle">第二段 · 1:40 – 2:10</p>
   <h1>🚀 五個案例，逐層升級</h1>
   <p class="subtitle" style="margin-top:.5rem;">每個案例只加一個新概念</p>
 </div>
 
 <!-- ===== 29: 遞進總覽 ===== -->
-<div class="slide" data-act="五個案例" data-index="29">
+<div class="slide" data-index="29">
   <h2>案例難度地圖</h2>
   <div class="step-list" style="margin-top:.5rem;">
     <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--green);">⭐</div><div class="step-content"><strong>進階分析 — 一個輸入，三欄輸出</strong><p>新概念：更複雜的 AI Prompt 設計</p></div></div>
@@ -712,7 +701,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
      ═══════════════════════════════ -->
 
 <!-- ===== 30: ⭐ 案例一 說明 ===== -->
-<div class="slide" data-act="五個案例" data-index="30">
+<div class="slide" data-index="30">
   <h2><span class="green">⭐ 案例一</span>：進階分析 — 多欄輸出</h2>
   <p class="dim" style="margin-bottom:1rem;">前面學的：A 欄 → B 欄（一個輸出）。現在升級成三個輸出。</p>
   <div class="mockup-browser">
@@ -736,7 +725,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 31: ⭐ 案例一 操作 ===== -->
-<div class="slide" data-act="五個案例" data-index="31">
+<div class="slide" data-index="31">
   <div class="exercise-banner">👨‍💻 ⭐ 跟著做 — 15 分鐘</div>
   <div class="qr-solo"><div id="qr-practice2"></div></div>
   <h2>用模板資料跑多欄分析</h2>
@@ -753,7 +742,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
      ═══════════════════════════════ -->
 
 <!-- ===== 32: ⭐⭐ 問卷產生器 說明 ===== -->
-<div class="slide" data-act="五個案例" data-index="32">
+<div class="slide" data-index="32">
   <h2><span class="blue">⭐⭐ 案例二</span>：問卷產生器</h2>
   <p class="dim" style="margin-bottom:1rem;">前面的「部署」是讓程式跑。現在升級：讓 GAS 做出一個<strong>網頁表單</strong>。</p>
   <div class="mockup-browser">
@@ -790,7 +779,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 33: ⭐⭐ 問卷產生器 操作 ===== -->
-<div class="slide" data-act="五個案例" data-index="33">
+<div class="slide" data-index="33">
   <div class="exercise-banner">👨‍💻 ⭐⭐ 講師示範</div>
   <h2>建立 → 部署 → 分享</h2>
   <div class="step-list">
@@ -807,7 +796,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
      ═══════════════════════════════ -->
 
 <!-- ===== 34: ⭐⭐⭐ 即時分析 說明 ===== -->
-<div class="slide" data-act="五個案例" data-index="34">
+<div class="slide" data-index="34">
   <h2><span class="purple">⭐⭐⭐ 案例三</span>：全班互填 + AI 即時分析</h2>
   <p class="dim" style="margin-bottom:.8rem;">前面都是「你按 ▶️ 才跑」。現在升級：<strong>有人填就自動跑。</strong></p>
   <div class="flow" style="margin:1rem 0;">
@@ -827,7 +816,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 35: ⭐⭐⭐ 互填操作 ===== -->
-<div class="slide" data-act="五個案例" data-index="35">
+<div class="slide" data-index="35">
   <div class="exercise-banner">👨‍💻 ⭐⭐⭐ 全班一起做！</div>
   <h2>分享問卷 → 同學填寫 → 看即時分析</h2>
   <div class="step-list">
@@ -842,7 +831,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 36: ⭐⭐⭐ Sheet 即時畫面 ===== -->
-<div class="slide" data-act="五個案例" data-index="36">
+<div class="slide" data-index="36">
   <h2>Sheet 即時更新畫面</h2>
   <div class="mockup-browser">
     <div class="mockup-bar">
@@ -866,7 +855,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
      ═══════════════════════════════ -->
 
 <!-- ===== 37: ⭐⭐⭐⭐ 統計報表 ===== -->
-<div class="slide" data-act="五個案例" data-index="37">
+<div class="slide" data-index="37">
   <h2><span class="gold">⭐⭐⭐⭐ 案例四</span>：統計報表 → Google Docs</h2>
   <p class="dim" style="margin-bottom:.8rem;">問卷收齊了。現在升級：AI 匯整所有回覆，<strong>自動產出一份報告。</strong></p>
   <div class="two-col" style="margin-top:.5rem;">
@@ -900,7 +889,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 38: ⭐⭐⭐⭐ 報表操作 ===== -->
-<div class="slide" data-act="五個案例" data-index="38">
+<div class="slide" data-index="38">
   <div class="exercise-banner">👨‍💻 ⭐⭐⭐⭐ 講師示範</div>
   <h2>一鍵產出報告</h2>
   <div class="step-list">
@@ -919,7 +908,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
      ═══════════════════════════════ -->
 
 <!-- ===== 39: ⭐⭐⭐⭐⭐ RSS 說明 ===== -->
-<div class="slide" data-act="五個案例" data-index="39">
+<div class="slide" data-index="39">
   <h2><span class="red">⭐⭐⭐⭐⭐ 案例五</span>：RSS 週報工作流</h2>
   <p class="dim" style="margin-bottom:.8rem;">最後大魔王：把前面所有概念串起來，做一條完整自動化流水線。</p>
   <div class="flow" style="margin:.8rem 0;">
@@ -941,7 +930,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 40: ⭐⭐⭐⭐⭐ RSS 成果 ===== -->
-<div class="slide" data-act="五個案例" data-index="40">
+<div class="slide" data-index="40">
   <h2>成果：每週一自動收到 AI 週報</h2>
   <div class="mockup-browser">
     <div class="mockup-bar">
@@ -968,7 +957,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 41: 五案例回顧 ===== -->
-<div class="slide" data-act="五個案例" data-index="41">
+<div class="slide" data-index="41">
   <h2>五案例回顧：你學會了什麼</h2>
   <div class="step-list" style="margin-top:.5rem;">
     <div class="step"><div class="step-num" style="background:var(--green);">⭐</div><div class="step-content"><strong>進階分析</strong><p>學會多欄輸出、JSON Prompt 設計</p></div></div>
@@ -980,20 +969,20 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 42: BREAK ===== -->
-<div class="slide break-slide" data-act="休息" data-index="42">
+<div class="slide break-slide" data-index="42">
   <p style="font-size:5rem;">☕</p>
   <h2 style="margin-top:1rem;color:var(--g800);">休息 10 分鐘</h2>
   <p class="dim" style="margin-top:1rem;">最後：自動化排程 + 總結</p>
 </div>
 
 <!-- ===== SECTION: 收尾 ===== -->
-<div class="slide section-title" data-act="總結">
+<div class="slide section-title">
   <p class="subtitle">2:50 – 3:00</p>
   <h1>📋 總結</h1>
 </div>
 
 <!-- ===== Recap ===== -->
-<div class="slide" data-act="總結">
+<div class="slide">
   <h2>今天你學會了</h2>
   <div style="text-align:left;max-width:720px;margin-top:.5rem;">
     <div class="fragment" data-order="0" style="padding:.6rem 1.2rem;margin:.3rem 0;background:var(--green-lt);border-radius:12px;border-left:4px solid var(--green);"><strong class="green">API Key</strong> — AI VIP 卡，Groq 免費不綁卡</div>
@@ -1005,7 +994,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 42: Prompt 模板 ===== -->
-<div class="slide" data-act="休息" data-index="42">
+<div class="slide" data-index="42">
   <h2>帶走的 Prompt 模板</h2>
   <div class="code-block" style="font-family:'Noto Sans TC',sans-serif;">
     請幫我寫一段 Google Apps Script。<br>
@@ -1020,7 +1009,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 43: 免費資源 ===== -->
-<div class="slide" data-act="總結" data-index="43">
+<div class="slide" data-index="43">
   <h2>免費 AI API 資源（2026.03）</h2>
   <div class="qr-solo"><div id="qr-api"></div></div>
   <table class="compare-table">
@@ -1039,7 +1028,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 44: 預告 ===== -->
-<div class="slide" data-act="總結" data-index="44">
+<div class="slide" data-index="44">
   <h2>下一堂預告</h2>
   <p style="font-size:1.2rem;margin-top:1.5rem;line-height:2;">
     今天你<span class="dim">手動複製貼上</span>程式碼
@@ -1062,7 +1051,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 45: END ===== -->
-<div class="slide cover" data-act="完成" data-index="45">
+<div class="slide cover" data-index="45">
   <p style="font-size:1rem;color:rgba(255,255,255,.6);margin-bottom:1rem;">S01 補充單元</p>
   <h1>完成！</h1>
   <p class="subtitle" style="margin-top:1.5rem;font-size:1.2rem;">
@@ -1071,16 +1060,6 @@ p,li{font-size:1.1rem;line-height:1.8;}
   <p style="color:rgba(255,255,255,.4);margin-top:3rem;font-size:.9rem;">ai100.cooperation.tw</p>
 </div>
 
-</div>
-
-
-<div id="chapterMenu" class="chapter-menu">
-  <button id="chapterBtn" class="chapter-btn">
-    <span class="chapter-icon">§</span>
-    <span id="chapterLabel">開場</span>
-    <span class="chapter-arrow">▼</span>
-  </button>
-  <div id="chapterList" class="chapter-list"></div>
 </div>
 
 <div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
@@ -1099,16 +1078,6 @@ function ret(){const f=gf(slides[idx]);if(fi>=0){f[fi].classList.remove('visible
 document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
 document.addEventListener('keydown',e=>{if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}if(e.key==='Home'){e.preventDefault();go(0);}if(e.key==='End'){e.preventDefault();go(tot-1);}if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}});
 let tx=0;document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
-// ── Chapter Menu ──
-var chapterMenu=document.getElementById('chapterMenu'),chapterBtn=document.getElementById('chapterBtn'),chapterLabel=document.getElementById('chapterLabel'),chapterList=document.getElementById('chapterList');
-function getChapters(){var m=new Map();slides.forEach(function(s,i){var a=s.dataset.act;if(a&&!m.has(a))m.set(a,i);});return m;}
-function buildChapterMenu(){var ch=getChapters();chapterList.innerHTML='';var cur=slides[idx]&&slides[idx].dataset.act||'';ch.forEach(function(si,name){var d=document.createElement('div');d.className='chapter-item'+(name===cur?' active':'');d.innerHTML='<span class="chapter-dot"></span>'+name;d.onclick=function(){go(si);closeChapterMenu();};chapterList.appendChild(d);});chapterLabel.textContent=cur||'\u5c0e\u89bd';}
-function toggleChapterMenu(){chapterMenu.classList.toggle('open');if(chapterMenu.classList.contains('open'))buildChapterMenu();}
-function closeChapterMenu(){chapterMenu.classList.remove('open');}
-chapterBtn.onclick=toggleChapterMenu;
-document.addEventListener('click',function(e){if(!chapterMenu.contains(e.target))closeChapterMenu();});
-var _origUi=ui;ui=function(){_origUi();var cur=slides[idx]&&slides[idx].dataset.act||'';chapterLabel.textContent=cur||'\u5c0e\u89bd';};
-
 go(0);
 
 // ─── QR Code Generation ───
