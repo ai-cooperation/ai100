@@ -1079,6 +1079,9 @@ const materials=[
   {title:'S15 Google Cloud SDK',icon:'☁️',url:'/slides/supplements/S15_gcloud.html',desc:'雲端・12頁'},
   {title:'S16 clasp 開發工具',icon:'🔩',url:'/slides/supplements/S16_clasp.html',desc:'GAS開發・10頁'},
   {title:'S17 未來辯論場',icon:'⚔️',url:'/slides/supplements/S17_Future_Debate_Arena.html',desc:'AI工作坊・24頁'},
+  {title:'S18 AI簡報6種路線',icon:'🎯',url:'/slides/supplements/S18_AI_Slide_Routes.html',desc:'6路線全景・18頁'},
+  // ─── 產投班課程 ───
+  {title:'產投班 課程介紹',icon:'🏭',url:'/slides/chantoban/Course_Intro.html',desc:'招生版・11頁'},
   // ─── 學習系統 ───
   {title:'三問法學習系統',icon:'🧠',url:'/classroom/learn',desc:'自學・M01 AI 思維與治理'},
   // ─── 原有教材 ───
@@ -1109,6 +1112,7 @@ var deckOptions=[
   {name:'S15_gcloud',label:'S15 Google Cloud SDK'},
   {name:'S16_clasp',label:'S16 clasp'},
   {name:'S17_Future_Debate_Arena',label:'S17 未來辯論場'},
+  {name:'S18_AI_Slide_Routes',label:'S18 AI簡報6種路線'},
 ];
 
 // ═══ Custom Materials ═══
@@ -2290,8 +2294,16 @@ function saveSessionEdit(idx){
   if(sess.roomId){
     updates['rooms/'+sess.roomId+'/config/title']=title;
     updates['rooms/'+sess.roomId+'/config/deck']=deckId||null;
-    // Determine deckType from deckId (deckOptions are all HTML slides)
     updates['rooms/'+sess.roomId+'/config/deckType']=deckId?'slides':null;
+    // Also update presentation so live status bar reflects the change
+    if(deckId){
+      var deckTitle=deckId.replace(/_/g,' ');
+      // Find friendly title from deckOptions
+      deckOptions.forEach(function(d){if(d.name===deckId)deckTitle=d.label});
+      updates['rooms/'+sess.roomId+'/presentation/deck']=deckId;
+      updates['rooms/'+sess.roomId+'/presentation/title']=deckTitle;
+      updates['rooms/'+sess.roomId+'/presentation/mode']='slides';
+    }
   }
   db.ref().update(updates).then(function(){
     showActionToast('堂次已更新');
@@ -2873,6 +2885,23 @@ function enterRoom(rid,title,phaseOverride){
     roomSessionId=cfg.sessionId||null;
     roomDeck=cfg.deck||null;
     roomDeckType=cfg.deckType||null;
+
+    // Sync presentation with config deck (in case deck was changed via editSession)
+    if(roomDeck){
+      db.ref('rooms/'+roomId+'/presentation').once('value',function(presSnap){
+        var pres=presSnap.val()||{};
+        if(pres.deck!==roomDeck){
+          var deckTitle=roomDeck.replace(/_/g,' ');
+          deckOptions.forEach(function(d){if(d.name===roomDeck)deckTitle=d.label});
+          db.ref('rooms/'+roomId+'/presentation').update({
+            deck:roomDeck,
+            title:deckTitle,
+            mode:roomDeckType||'slides',
+            ts:firebase.database.ServerValue.TIMESTAMP
+          });
+        }
+      });
+    }
 
     // Determine phase from status
     var status=phaseOverride||cfg.status||'';
