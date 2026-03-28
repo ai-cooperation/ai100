@@ -1838,6 +1838,15 @@ function renderPostClassPhase(){
     });
   }
 
+  // Load saved emailConfig to pre-fill link
+  db.ref('rooms/'+roomId+'/emailConfig').once('value',function(ecSnap){
+    var ec=ecSnap.val();
+    if(ec){
+      var linkEl=document.getElementById('postDeckLink');
+      if(ec.shareLink && linkEl) linkEl.value=ec.shareLink;
+    }
+  });
+
   // Refresh survey management section
   refreshSurveyStatuses();
   refreshPostSurveyMgmtCount();
@@ -2401,11 +2410,13 @@ function renderCVPost(sess){
     var entries=data?Object.values(data):[];
     var total=entries.length;
     var satSum=0,satCount=0,recSum=0,recCount=0;
+    var emailList=[],wantPdfCount=0;
     entries.forEach(function(e){
       if(e.ratings){
         if(e.ratings.satisfaction){satSum+=e.ratings.satisfaction;satCount++}
         if(e.ratings.recommend){recSum+=e.ratings.recommend;recCount++}
       }
+      if(e.email){emailList.push({email:e.email,name:e.name||''});if(e.wantPdf)wantPdfCount++}
     });
     var satAvg=satCount?(satSum/satCount).toFixed(1):'-';
     var recAvg=recCount?(recSum/recCount).toFixed(1):'-';
@@ -2444,7 +2455,21 @@ function renderCVPost(sess){
     h+='<label style="font-size:0.85rem;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:4px;"><input type="radio" name="cvPostEmailMode" value="manual" checked style="accent-color:var(--pri);"> 手動（講師確認後寄）</label>';
     h+='</div>';
     h+='</div>';
-    h+='<button onclick="saveCVPostEmailConfig(\''+esc(sess.roomId)+'\')" style="width:100%;padding:0.6rem;background:var(--pri);color:#fff;border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer">💾 儲存設定</button>';
+    h+='<button onclick="saveCVPostEmailConfig(\''+esc(sess.roomId)+'\')" style="width:100%;padding:0.6rem;background:var(--pri);color:#fff;border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer;margin-bottom:0.8rem">💾 儲存設定</button>';
+
+    // Email recipient list
+    h+='<div style="margin-top:0.5rem;padding-top:0.5rem;border-top:1px solid var(--border)">';
+    h+='<div style="font-size:0.8rem;color:var(--dim);margin-bottom:0.4rem">📧 收件人（'+emailList.length+' 人，'+wantPdfCount+' 人要 PDF）</div>';
+    if(emailList.length){
+      h+='<div style="max-height:120px;overflow-y:auto;background:var(--bg);border-radius:8px;padding:0.5rem">';
+      emailList.forEach(function(r){
+        h+='<div style="font-size:0.8rem;color:var(--text);padding:2px 0">'+esc(r.email)+(r.name?' <span style="color:var(--dim)">'+esc(r.name)+'</span>':'')+'</div>';
+      });
+      h+='</div>';
+    } else {
+      h+='<div style="font-size:0.8rem;color:var(--dim)">尚無人留 email</div>';
+    }
+    h+='</div>';
     h+='</div>';
 
     // ── 回饋問卷 QR 推送 ──

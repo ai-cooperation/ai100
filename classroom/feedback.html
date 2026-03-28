@@ -66,10 +66,10 @@
   /* Star rating widget */
   .rating-section{padding:16px 0;animation:msgIn 0.3s ease-out}
   .rating-group{display:flex;flex-direction:column;gap:16px;padding:16px 0}
-  .rating-item{display:flex;align-items:center;gap:16px;padding:24px;background:var(--surface);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
-  .rating-label{font-size:20px;font-weight:700;color:var(--navy);min-width:5em}
-  .stars{display:flex;gap:8px}
-  .star{font-size:32px;cursor:pointer;transition:transform 0.15s;color:var(--border);user-select:none;-webkit-user-select:none;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
+  .rating-item{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:16px;background:var(--surface);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+  .rating-label{font-size:18px;font-weight:700;color:var(--navy)}
+  .stars{display:flex;gap:4px;position:relative;z-index:10}
+  .star{font-size:36px;cursor:pointer;transition:transform 0.15s;color:var(--border);user-select:none;-webkit-user-select:none;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
   .star.filled{color:var(--gold)}
   .star:active{transform:scale(1.3)}
 
@@ -123,7 +123,7 @@
   <div class="icon">✅</div>
   <h2>已完成回饋</h2>
   <p>感謝你的回饋，老師已收到！</p>
-  <a id="doneDownloadBtn" class="btn-download hidden" href="#" target="_blank">📥 下載簡報</a>
+  <p style="font-size:16px;color:var(--dim);margin-top:8px;">教材將由老師寄送到你的 Email</p>
 </div>
 
 <!-- Main chat app -->
@@ -200,7 +200,6 @@
           <input type="checkbox" id="wantPdf" checked style="width:18px;height:18px;"> 我要收到簡報 PDF
         </label>
       </div>
-      <a id="downloadBtn" class="btn-download hidden" href="#" target="_blank">📥 下載簡報</a>
       <button class="btn-done" id="btnDone">完成 🎉</button>
     </div>
   </div>
@@ -576,30 +575,14 @@
 
   // --- Completion ---
   function setupCompletion() {
-    var $downloadBtn = document.getElementById('downloadBtn');
     var $btnDone = document.getElementById('btnDone');
-
-    if (slideUrl) {
-      $downloadBtn.href = slideUrl;
-      show($downloadBtn);
-      $downloadBtn.addEventListener('click', function() {
-        trackDownload();
-      });
-    }
 
     $btnDone.addEventListener('click', function() {
       saveFeedback(function() {
         hide($app);
         show($done);
         $done.classList.add('active');
-        if (slideUrl) {
-          var $doneDownload = document.getElementById('doneDownloadBtn');
-          $doneDownload.href = slideUrl;
-          show($doneDownload);
-          $doneDownload.addEventListener('click', function() {
-            trackDownload();
-          });
-        }
+        // No download button — teacher sends materials via email
       });
     });
   }
@@ -635,27 +618,27 @@
         // Already submitted
         hide($loading);
         var existing = snap.val();
-        // Show slide download if available
-        return db.ref('rooms/' + roomId + '/presentation').once('value').then(function(presSnap) {
-          var pres = presSnap.val() || {};
-          if (pres.url) {
-            var $doneDownload = document.getElementById('doneDownloadBtn');
-            $doneDownload.href = pres.url;
-            show($doneDownload);
-          }
-          show($done);
-          $done.classList.add('active');
-        });
+        // Already submitted — show done screen (no download, teacher sends via email)
+        show($done);
+        $done.classList.add('active');
+        return;
       }
 
       // Load sections for step 1
       return db.ref('rooms/' + roomId + '/presentation').once('value').then(function(presSnap) {
         var pres = presSnap.val() || {};
-        sections = pres.sections || [];
+        var rawSections = pres.sections || [];
         slideUrl = pres.url || '';
 
+        // Normalize sections: might be strings or objects with title/name
+        sections = rawSections.map(function(s) {
+          if (typeof s === 'string') return s;
+          if (s && typeof s === 'object') return s.title || s.name || s.label || String(s);
+          return String(s);
+        }).filter(function(s) { return s && s !== '[object Object]'; });
+
         if (sections.length === 0) {
-          sections = ['全部都很有幫助'];
+          sections = ['實作練習', '案例分析', '講師講解', '互動討論', '教材內容'];
         }
 
         hide($loading);
