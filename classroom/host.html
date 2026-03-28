@@ -1081,7 +1081,7 @@ const materials=[
   {title:'S17 未來辯論場',icon:'⚔️',url:'/slides/supplements/S17_Future_Debate_Arena.html',desc:'AI工作坊・24頁'},
   {title:'S18 AI簡報6種路線',icon:'🎯',url:'/slides/supplements/S18_AI_Slide_Routes.html',desc:'6路線全景・18頁'},
   // ─── 產投班課程 ───
-  {title:'產投班 課程介紹',icon:'🏭',url:'/slides/chantoban/Course_Intro.html',desc:'招生版・11頁'},
+  {title:'產投班 課程介紹',icon:'🏭',url:'/slides/chantoban/Course_Intro.html',desc:'招生版・18頁'},
   // ─── 學習系統 ───
   {title:'三問法學習系統',icon:'🧠',url:'/classroom/learn',desc:'自學・M01 AI 思維與治理'},
   // ─── 原有教材 ───
@@ -3755,6 +3755,23 @@ function initEmailPanel() {
       sel.appendChild(opt);
     });
   }
+
+  // Load emailConfig to pre-fill link
+  db.ref('rooms/' + roomId + '/emailConfig').once('value', function(ecSnap) {
+    var ec = ecSnap.val();
+    if (ec) {
+      var linkEl = document.getElementById('emailLink');
+      if (ec.shareLink && linkEl && !linkEl.value) linkEl.value = ec.shareLink;
+      if (ec.subject) {
+        var subEl = document.getElementById('emailSubject');
+        if (subEl) subEl.value = ec.subject;
+      }
+      if (ec.message) {
+        var bodyEl = document.getElementById('emailBody');
+        if (bodyEl && !bodyEl.value.trim()) bodyEl.value = ec.message;
+      }
+    }
+  });
 
   // Load recipients from Firebase
   db.ref('rooms/' + roomId + '/feedback').once('value', function(snap) {
