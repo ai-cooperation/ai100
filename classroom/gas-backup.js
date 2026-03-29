@@ -55,7 +55,7 @@ function doPost(e) {
       for (var ei = 1; ei < existing.length; ei++) { emailIdx[existing[ei][0]] = ei + 1; }
       var imports = data.emails || [];
       var added = 0;
-      var now = new Date().toISOString();
+      var now = Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd HH:mm:ss');
       imports.forEach(function(item) {
         var email = (item.email || '').trim().toLowerCase();
         if (!email) return;
@@ -81,7 +81,7 @@ function doPost(e) {
     var qa         = data.qa || [];
     var feedbacks  = data.feedback || [];
     var presence   = data.presence || {};
-    var now        = new Date().toISOString();
+    var now        = Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd HH:mm:ss');
 
     // ── Sessions tab（防重複：同 roomId 更新而非新增）──
     var avgSat = avg(feedbacks, function(f) { return f.ratings && f.ratings.satisfaction; });
@@ -177,7 +177,25 @@ function doGet(e) {
       return jsonRes({ success: true, students: students });
     }
 
-    return jsonRes({ success: true, usage: 'GET ?action=history | ?action=students[&course=xxx]' });
+    if (action === 'registrations') {
+      var regSheet = ss.getSheetByName('Registrations');
+      if (!regSheet) return jsonRes({ success: true, registrations: [] });
+      var regData = regSheet.getDataRange().getValues();
+      var headers = regData[0] || [];
+      var regs = [];
+      for (var ri = 1; ri < regData.length; ri++) {
+        var obj = {};
+        headers.forEach(function(h, ci) { obj[h] = regData[ri][ci]; });
+        regs.push(obj);
+      }
+      var course = e.parameter.course || '';
+      if (course) {
+        regs = regs.filter(function(r) { return r.course === course; });
+      }
+      return jsonRes({ success: true, registrations: regs });
+    }
+
+    return jsonRes({ success: true, usage: 'GET ?action=history|students|registrations' });
   } catch (err) {
     return jsonRes({ success: false, message: err.message });
   }

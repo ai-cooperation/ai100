@@ -144,8 +144,14 @@ a{color:var(--pri);text-decoration:none}
   <!-- Section 2: Registration List -->
   <div class="section">
     <h2>📊 報名名單</h2>
-    <a class="btn-sheet" href="https://docs.google.com/spreadsheets/d/1XyE02dzKVZKx08wXpt4bSdv_HTB0EgzlshEUlreB4LY/edit" target="_blank" rel="noopener">📄 開啟 Google Sheet 查看名單</a>
-    <div class="sheet-note">報名資料在 Sheet 的 Registrations 分頁</div>
+    <div style="display:flex;gap:0.5rem;margin-bottom:0.8rem;flex-wrap:wrap;align-items:center">
+      <select id="regCourseFilter" onchange="loadRegistrations()" style="flex:1;min-width:150px;padding:0.5rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem">
+        <option value="">全部課程</option>
+      </select>
+      <button onclick="loadRegistrations()" style="padding:0.5rem 0.8rem;background:var(--bg);color:var(--pri);border:1px solid var(--pri);border-radius:8px;font-size:0.85rem;cursor:pointer">🔄 重新載入</button>
+      <button onclick="importRegsToNotify()" style="padding:0.5rem 0.8rem;background:var(--pri);color:#fff;border:none;border-radius:8px;font-size:0.85rem;cursor:pointer">📧 發通知給報名者</button>
+    </div>
+    <div id="regList" style="font-size:0.85rem;color:var(--dim)">載入中...</div>
   </div>
 
   <!-- Section 3: History -->
@@ -190,6 +196,7 @@ auth.onAuthStateChanged(function(user){
     document.getElementById('userName').textContent=user.displayName||user.email;
     setDefaultDate();
     renderHistory();
+    loadRegistrations();
   } else {
     document.getElementById('loginScreen').style.display='flex';
     document.getElementById('app').classList.remove('active');
@@ -271,6 +278,54 @@ function saveConfig(cfg){
   list.unshift(cfg);
   if(list.length>10)list=list.slice(0,10);
   localStorage.setItem('_reg_configs',JSON.stringify(list));
+}
+
+// ── Registration List ──
+var allRegs=[];
+function loadRegistrations(){
+  var gasUrl=localStorage.getItem('_gas_backup_url');
+  if(!gasUrl){document.getElementById('regList').innerHTML='<div style="color:var(--dim)">請先設定 Sheets 備份 URL</div>';return}
+  var course=document.getElementById('regCourseFilter').value;
+  var url=gasUrl+'?action=registrations'+(course?'&course='+encodeURIComponent(course):'');
+  document.getElementById('regList').innerHTML='載入中...';
+  fetch(url).then(function(r){return r.json()}).then(function(d){
+    allRegs=d.registrations||[];
+    // Build course filter
+    var sel=document.getElementById('regCourseFilter');
+    if(sel.options.length<=1){
+      var courses={};
+      allRegs.forEach(function(r){if(r.course)courses[r.course]=true});
+      Object.keys(courses).sort().forEach(function(c){
+        var opt=document.createElement('option');opt.value=c;opt.textContent=c;sel.appendChild(opt);
+      });
+    }
+    renderRegList(allRegs);
+  }).catch(function(e){
+    document.getElementById('regList').innerHTML='<div style="color:var(--red)">載入失敗：'+esc(e.message)+'</div>';
+  });
+}
+function renderRegList(regs){
+  var el=document.getElementById('regList');
+  if(!regs.length){el.innerHTML='<div style="color:var(--dim)">尚無報名資料</div>';return}
+  var html='<div style="margin-bottom:0.5rem;color:var(--pri);font-weight:700">共 '+regs.length+' 人報名</div>';
+  html+='<div style="max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:8px">';
+  regs.forEach(function(r,i){
+    html+='<div style="padding:0.5rem 0.8rem;border-bottom:1px solid var(--border);display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap'+(i%2===0?';background:var(--bg)':'')+'">';
+    html+='<span style="color:var(--text);font-weight:700;min-width:80px">'+esc(r.name||'—')+'</span>';
+    html+='<span style="color:var(--pri);flex:1;min-width:150px">'+esc(r.email||'')+'</span>';
+    if(r.company)html+='<span style="color:var(--dim);font-size:0.8rem">'+esc(r.company)+'</span>';
+    if(r.timestamp)html+='<span style="color:var(--dim);font-size:0.75rem;margin-left:auto">'+esc(String(r.timestamp).substring(0,16))+'</span>';
+    html+='</div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+function importRegsToNotify(){
+  if(!allRegs.length){alert('沒有報名資料');return}
+  // Collect emails and jump to notify
+  var emails=allRegs.filter(function(r){return r.email}).map(function(r){return r.email});
+  var link=window._currentRegUrl||'';
+  window.location='/classroom/notify?link='+encodeURIComponent(link);
 }
 
 function renderHistory(){
