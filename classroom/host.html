@@ -550,7 +550,7 @@
   <!-- Global Settings -->
   <div style="display:flex;gap:0.6rem;margin-bottom:1rem;flex-wrap:wrap">
     <div style="flex:1;min-width:200px;padding:0.8rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;">
-      <div style="font-size:0.8rem;color:var(--dim);margin-bottom:0.3rem">API Key</div>
+      <div style="font-size:0.8rem;color:var(--dim);margin-bottom:0.3rem"><span id="settingDotAI" style="color:#DC2626">●</span> API Key</div>
       <div style="display:flex;gap:0.5rem;align-items:center">
         <input type="password" id="globalAIKey" placeholder="Gemini API Key" style="flex:1;padding:0.4rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem">
         <button onclick="saveGlobalAIKey()" style="padding:0.4rem 0.6rem;background:var(--pri);color:#fff;border-radius:6px;font-size:0.75rem;white-space:nowrap">儲存</button>
@@ -558,7 +558,7 @@
       <span id="globalAIKeyStatus" style="font-size:0.7rem;color:var(--dim)"></span>
     </div>
     <div style="flex:1;min-width:200px;padding:0.8rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;">
-      <div style="font-size:0.8rem;color:var(--dim);margin-bottom:0.3rem">Email Relay</div>
+      <div style="font-size:0.8rem;color:var(--dim);margin-bottom:0.3rem"><span id="settingDotGAS" style="color:#DC2626">●</span> Email Relay</div>
       <div style="display:flex;gap:0.5rem;align-items:center">
         <input type="url" id="globalGasUrl" placeholder="GAS URL" style="flex:1;padding:0.4rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem">
         <button onclick="saveGlobalGasUrl()" style="padding:0.4rem 0.6rem;background:var(--pri);color:#fff;border-radius:6px;font-size:0.75rem;white-space:nowrap">儲存</button>
@@ -566,7 +566,7 @@
       <span id="globalGasStatus" style="font-size:0.7rem;color:var(--dim)"></span>
     </div>
     <div style="flex:1;min-width:200px;padding:0.8rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;">
-      <div style="font-size:0.8rem;color:var(--dim);margin-bottom:0.3rem">Sheets 備份</div>
+      <div style="font-size:0.8rem;color:var(--dim);margin-bottom:0.3rem"><span id="settingDotBackup" style="color:#DC2626">●</span> Sheets 備份</div>
       <div style="display:flex;gap:0.5rem;align-items:center">
         <input type="url" id="globalBackupUrl" placeholder="GAS Backup URL" style="flex:1;padding:0.4rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem">
         <button onclick="saveGlobalBackupUrl()" style="padding:0.4rem 0.6rem;background:var(--pri);color:#fff;border-radius:6px;font-size:0.75rem;white-space:nowrap">儲存</button>
@@ -591,6 +591,10 @@
     <a href="/classroom/notify" style="flex:1;min-width:150px;display:flex;align-items:center;gap:0.8rem;padding:1rem 1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text);transition:border-color 0.2s">
       <span style="font-size:1.5rem">📧</span>
       <div><div style="font-weight:700;color:var(--purple);font-size:0.9rem">通知中心</div><div style="font-size:0.7rem;color:var(--dim)">行銷通知 · 課程推廣</div></div>
+    </a>
+    <a href="/classroom/register" style="flex:1;min-width:150px;display:flex;align-items:center;gap:0.8rem;padding:1rem 1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text);transition:border-color 0.2s">
+      <span style="font-size:1.5rem">📝</span>
+      <div><div style="font-weight:700;color:var(--red);font-size:0.9rem">報名管理</div><div style="font-size:0.7rem;color:var(--dim)">建報名表 · 名單 · 連結</div></div>
     </a>
   </div>
 
@@ -2703,6 +2707,7 @@ function renderCVReport(sess){
 
     h+='<div style="margin-top:1rem;text-align:center">';
     h+='<button class="act-btn" style="margin:0.5rem" onclick="exportRoomData(\''+esc(sess.roomId)+'\',\''+esc(sess.title||sess.roomId)+'\')">匯出完整 HTML 報告</button>';
+    h+='<a href="/classroom/history" class="act-btn" style="margin:0.5rem;display:inline-block;text-decoration:none">📋 歷史紀錄查看完整資料</a>';
     h+='</div>';
 
     body.innerHTML=h;
@@ -3350,7 +3355,8 @@ function checkServiceStatus(){
 
 function saveGlobalAIKey(){var k=document.getElementById('globalAIKey').value.trim();if(k){localStorage.setItem('_ai_key',k);document.getElementById('globalAIKeyStatus').textContent='已儲存'}else{localStorage.removeItem('_ai_key');document.getElementById('globalAIKeyStatus').textContent='已清除'}}
 function saveGlobalGasUrl(){var u=document.getElementById('globalGasUrl').value.trim();if(u){localStorage.setItem('_gas_url',u);document.getElementById('globalGasStatus').textContent='已儲存'}else{localStorage.removeItem('_gas_url');document.getElementById('globalGasStatus').textContent='已清除'}}
-function initGlobalSettings(){var k=localStorage.getItem('_ai_key');var g=localStorage.getItem('_gas_url')||DEFAULT_GAS_URL;if(k)document.getElementById('globalAIKey').value=k;document.getElementById('globalGasUrl').value=g;if(!localStorage.getItem('_gas_url'))localStorage.setItem('_gas_url',DEFAULT_GAS_URL);var b=localStorage.getItem('_gas_backup_url');if(b)document.getElementById('globalBackupUrl').value=b}
+function initGlobalSettings(){var k=localStorage.getItem('_ai_key');var g=localStorage.getItem('_gas_url')||DEFAULT_GAS_URL;if(k)document.getElementById('globalAIKey').value=k;document.getElementById('globalGasUrl').value=g;if(!localStorage.getItem('_gas_url'))localStorage.setItem('_gas_url',DEFAULT_GAS_URL);var b=localStorage.getItem('_gas_backup_url');if(b)document.getElementById('globalBackupUrl').value=b;checkSettingsStatus()}
+function checkSettingsStatus(){var aiKey=localStorage.getItem('_ai_key');var gasUrl=localStorage.getItem('_gas_url');var backupUrl=localStorage.getItem('_gas_backup_url');var dot1=document.getElementById('settingDotAI');var dot2=document.getElementById('settingDotGAS');var dot3=document.getElementById('settingDotBackup');if(dot1)dot1.style.color=aiKey?'#22c55e':'#DC2626';if(dot2)dot2.style.color=gasUrl?'#22c55e':'#DC2626';if(dot3)dot3.style.color=backupUrl?'#22c55e':'#DC2626'}
 
 // ═══ QR ═══
 function makeQR(elId,url){var el=document.getElementById(elId);if(!el)return;var qr=qrcode(0,'M');qr.addData(url);qr.make();el.innerHTML=qr.createSvgTag({cellSize:3,margin:2})}

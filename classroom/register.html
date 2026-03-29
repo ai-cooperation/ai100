@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>報名管理 — ClassClaw</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+html{font-size:20px!important;line-height:1.7!important}
+:root{--pri:#0F9D8A;--pri-d:#0A7A6B;--navy:#0B3C5D;--gold:#FFC857;--gold-d:#d4a632;--red:#DC2626;--purple:#7C3AED;--bg:#0d1117;--surface:#161b22;--text:#e6edf3;--dim:#7d8590;--border:#30363d}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+button{font-family:inherit;cursor:pointer;border:none}input{font-family:inherit}
+a{color:var(--pri);text-decoration:none}
+
+/* Login */
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;text-align:center;max-width:400px;width:100%}
+.login-box h1{font-size:1.5rem;color:var(--gold);margin-bottom:0.3rem}
+.login-box .sub{font-size:0.8rem;color:var(--dim);margin-bottom:1.5rem}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:0.8rem;width:100%;padding:0.9rem;background:#fff;color:#333;font-size:1rem;font-weight:700;border-radius:10px;border:none;transition:all 0.2s}
+.btn-google:hover{box-shadow:0 4px 20px rgba(255,255,255,0.15);transform:translateY(-1px)}
+.btn-google img{width:20px;height:20px}
+
+/* Main */
+.app{display:none;min-height:100vh;padding:1rem 1.5rem 2rem;max-width:900px;margin:0 auto}
+.app.active{display:block}
+.header{display:flex;align-items:center;gap:0.8rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.header h1{font-size:1.3rem;color:var(--gold);flex:1}
+.header .user{font-size:0.75rem;color:var(--dim);display:flex;align-items:center;gap:0.4rem}
+.header .user img{width:24px;height:24px;border-radius:50%}
+.btn-back{padding:0.4rem 0.8rem;border-radius:8px;font-size:0.85rem;background:none;color:var(--dim);border:1px solid var(--border)}
+.btn-back:hover{color:var(--text);border-color:var(--text)}
+.btn-logout{padding:0.3rem 0.6rem;border-radius:6px;font-size:0.7rem;color:var(--red);background:none;border:1px solid var(--border)}
+
+/* Section */
+.section{background:var(--surface);border-radius:12px;border:1px solid var(--border);padding:1.2rem 1.5rem;margin-bottom:1.2rem}
+.section h2{font-size:1rem;color:var(--pri);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem}
+
+/* Form */
+.form-row{display:flex;gap:0.5rem;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap}
+.form-row label{width:4rem;font-size:0.85rem;color:var(--dim);flex-shrink:0}
+.form-row input{flex:1;padding:0.5rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;outline:none;min-width:0}
+.form-row input:focus{border-color:var(--pri)}
+.btn-gen{width:100%;padding:0.7rem;background:var(--pri);color:#fff;font-size:0.95rem;font-weight:700;border-radius:10px;margin-top:0.5rem;transition:all 0.2s}
+.btn-gen:hover{background:var(--pri-d);transform:translateY(-1px)}
+
+/* Link result */
+.link-result{display:none;margin-top:1rem;padding:1rem;background:var(--bg);border-radius:10px;border:1px solid var(--border)}
+.link-result.show{display:block}
+.link-url{font-size:0.7rem;color:var(--pri);word-break:break-all;margin-bottom:0.8rem;line-height:1.5}
+.link-actions{display:flex;gap:0.5rem;flex-wrap:wrap}
+.link-actions button{padding:0.5rem 1rem;border-radius:8px;font-size:0.85rem;font-weight:700;transition:all 0.2s}
+.btn-copy{background:var(--navy);color:#fff}
+.btn-copy:hover{opacity:0.85}
+.btn-qr{background:var(--purple);color:#fff}
+.btn-qr:hover{opacity:0.85}
+.btn-notify{background:var(--gold);color:var(--navy)}
+.btn-notify:hover{opacity:0.85}
+
+/* QR overlay */
+.qr-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:1rem}
+.qr-overlay.show{display:flex}
+.qr-overlay .qr-box{background:#fff;padding:1rem;border-radius:12px}
+.qr-overlay .qr-url{font-size:0.65rem;color:var(--dim);max-width:80vw;word-break:break-all;text-align:center}
+.qr-overlay .qr-close{padding:0.5rem 1.5rem;background:var(--surface);color:var(--text);border-radius:8px;font-size:0.85rem;border:1px solid var(--border)}
+
+/* Sheet link */
+.btn-sheet{display:inline-flex;align-items:center;gap:0.5rem;padding:0.6rem 1.2rem;background:var(--pri);color:#fff;font-size:0.9rem;font-weight:700;border-radius:10px;transition:all 0.2s}
+.btn-sheet:hover{background:var(--pri-d);transform:translateY(-1px)}
+.sheet-note{font-size:0.78rem;color:var(--dim);margin-top:0.6rem}
+
+/* History cards */
+.hist-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:0.8rem 1rem;margin-bottom:0.6rem;display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap}
+.hist-info{flex:1;min-width:0}
+.hist-title{font-weight:700;font-size:0.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-meta{font-size:0.75rem;color:var(--dim)}
+.hist-actions{display:flex;gap:0.4rem}
+.hist-actions button{padding:0.35rem 0.7rem;border-radius:6px;font-size:0.78rem;font-weight:700}
+
+/* Toast */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--pri);color:#fff;padding:0.6rem 1.5rem;border-radius:10px;font-size:0.85rem;font-weight:700;z-index:1000;opacity:0;transition:opacity 0.3s;pointer-events:none}
+.toast.show{opacity:1}
+
+.empty-state{text-align:center;padding:2rem 1rem;color:var(--dim);font-size:0.9rem}
+.empty-state .icon{font-size:2rem;margin-bottom:0.5rem}
+
+@media(max-width:600px){
+  .header h1{font-size:1.1rem}
+  .form-row{flex-direction:column;align-items:stretch}
+  .form-row label{width:auto}
+  .link-actions{flex-direction:column}
+  .link-actions button{width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="login" id="loginScreen">
+  <div class="login-box">
+    <h1>📝 報名管理</h1>
+    <p class="sub">ClassClaw 講師專用</p>
+    <button class="btn-google" onclick="googleLogin()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg">使用 Google 帳號登入
+    </button>
+  </div>
+</div>
+
+<!-- App -->
+<div class="app" id="app">
+  <div class="header">
+    <button class="btn-back" onclick="location.href='/classroom/host'">← 後台</button>
+    <h1>📝 報名管理</h1>
+    <div class="user">
+      <img id="avatar" src="">
+      <span id="userName"></span>
+      <button class="btn-logout" onclick="googleLogout()">登出</button>
+    </div>
+  </div>
+
+  <!-- Section 1: Create Form -->
+  <div class="section">
+    <h2>📋 建立報名表</h2>
+    <div class="form-row"><label>課程名稱</label><input id="fCourse" placeholder="例：AI工具應用班"></div>
+    <div class="form-row"><label>日期</label><input id="fDate" type="date"></div>
+    <div class="form-row"><label>地點</label><input id="fLocation" placeholder="例：台北市信義區"></div>
+    <div class="form-row"><label>費用</label><input id="fPrice" placeholder="例：免費 / NT$3,600"></div>
+    <div class="form-row"><label>講師</label><input id="fTeacher" value="陳重光"></div>
+    <div class="form-row"><label>名額</label><input id="fSeats" type="number" value="30" min="1"></div>
+    <button class="btn-gen" onclick="generateLink()">產生報名連結</button>
+
+    <!-- Link result -->
+    <div class="link-result" id="linkResult">
+      <div class="link-url" id="linkUrl"></div>
+      <div class="link-actions">
+        <button class="btn-copy" onclick="copyLink()">📋 複製連結</button>
+        <button class="btn-qr" onclick="showQR()">📱 QR Code</button>
+        <button class="btn-notify" onclick="goNotify()">📧 發通知</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Registration List -->
+  <div class="section">
+    <h2>📊 報名名單</h2>
+    <a class="btn-sheet" href="https://docs.google.com/spreadsheets/d/1XyE02dzKVZKx08wXpt4bSdv_HTB0EgzlshEUlreB4LY/edit" target="_blank" rel="noopener">📄 開啟 Google Sheet 查看名單</a>
+    <div class="sheet-note">報名資料在 Sheet 的 Registrations 分頁</div>
+  </div>
+
+  <!-- Section 3: History -->
+  <div class="section">
+    <h2>🕐 歷史報名表</h2>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<!-- QR Overlay -->
+<div class="qr-overlay" id="qrOverlay" onclick="closeQR()">
+  <div class="qr-box" id="qrBox" onclick="event.stopPropagation()"></div>
+  <div class="qr-url" id="qrUrl"></div>
+  <button class="qr-close" onclick="closeQR()">關閉</button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:['AIza','SyC5X5C0Uje6bCMzrvuUuq5Bz33ly0PR-vc'].join(''),
+  authDomain:'ai-classroom-70a97.firebaseapp.com',
+  projectId:'ai-classroom-70a97'
+});
+var auth=firebase.auth();
+var GAS_REG_URL='https://script.google.com/macros/s/AKfycbxrc67d8NgyrVoJLE3NY97erePNqFKptMNjV3A5gjNQ25BAcLrNns5T-w-xlyMe1rsKAQ/exec';
+var currentUrl='';
+
+function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2000)}
+
+// Auth
+auth.onAuthStateChanged(function(user){
+  if(user){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('app').classList.add('active');
+    document.getElementById('avatar').src=user.photoURL||'';
+    document.getElementById('userName').textContent=user.displayName||user.email;
+    setDefaultDate();
+    renderHistory();
+  } else {
+    document.getElementById('loginScreen').style.display='flex';
+    document.getElementById('app').classList.remove('active');
+  }
+});
+function googleLogin(){
+  var provider=new firebase.auth.GoogleAuthProvider();
+  if(/iPhone|iPad|Android/i.test(navigator.userAgent)){auth.signInWithRedirect(provider)}
+  else{auth.signInWithPopup(provider).catch(function(e){alert(e.message)})}
+}
+function googleLogout(){if(confirm('登出？'))auth.signOut().then(function(){location.reload()})}
+
+function setDefaultDate(){
+  var d=new Date();d.setDate(d.getDate()+7);
+  var s=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  var el=document.getElementById('fDate');
+  if(!el.value)el.value=s;
+}
+
+// Generate link
+function generateLink(){
+  var course=document.getElementById('fCourse').value.trim();
+  var date=document.getElementById('fDate').value;
+  var location_=document.getElementById('fLocation').value.trim();
+  var price=document.getElementById('fPrice').value.trim();
+  var teacher=document.getElementById('fTeacher').value.trim();
+  var seats=document.getElementById('fSeats').value.trim();
+  if(!course){toast('請填寫課程名稱');return}
+  if(!date){toast('請選擇日期');return}
+
+  var params=new URLSearchParams();
+  params.set('course',course);
+  params.set('date',date);
+  if(location_)params.set('location',location_);
+  if(price)params.set('price',price);
+  if(teacher)params.set('teacher',teacher);
+  if(seats)params.set('seats',seats);
+
+  currentUrl=GAS_REG_URL+'?'+params.toString();
+  document.getElementById('linkUrl').textContent=currentUrl;
+  document.getElementById('linkResult').classList.add('show');
+
+  saveConfig({course:course,date:date,location:location_,price:price,teacher:teacher,seats:seats,url:currentUrl,created:Date.now()});
+  renderHistory();
+  toast('報名連結已產生');
+}
+
+// Copy
+function copyLink(){
+  if(!currentUrl)return;
+  navigator.clipboard.writeText(currentUrl).then(function(){toast('已複製到剪貼簿')}).catch(function(){
+    var ta=document.createElement('textarea');ta.value=currentUrl;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('已複製到剪貼簿');
+  });
+}
+
+// QR
+function showQR(){
+  if(!currentUrl)return;
+  document.getElementById('qrUrl').textContent=currentUrl;
+  var el=document.getElementById('qrBox');
+  var qr=qrcode(0,'M');qr.addData(currentUrl);qr.make();
+  el.innerHTML=qr.createSvgTag({cellSize:6,margin:4});
+  document.getElementById('qrOverlay').classList.add('show');
+}
+function closeQR(){document.getElementById('qrOverlay').classList.remove('show')}
+
+// Notify
+function goNotify(){
+  if(!currentUrl)return;
+  window.location='/classroom/notify?link='+encodeURIComponent(currentUrl);
+}
+
+// LocalStorage configs
+function getConfigs(){
+  try{return JSON.parse(localStorage.getItem('_reg_configs'))||[]}catch(e){return[]}
+}
+function saveConfig(cfg){
+  var list=getConfigs();
+  list.unshift(cfg);
+  if(list.length>10)list=list.slice(0,10);
+  localStorage.setItem('_reg_configs',JSON.stringify(list));
+}
+
+function renderHistory(){
+  var list=getConfigs();
+  var el=document.getElementById('historyList');
+  if(!list.length){
+    el.innerHTML='<div class="empty-state"><div class="icon">📭</div>尚無歷史報名表</div>';
+    return;
+  }
+  var html='';
+  list.forEach(function(c,i){
+    html+='<div class="hist-card">';
+    html+='<div class="hist-info">';
+    html+='<div class="hist-title">'+esc(c.course)+'</div>';
+    html+='<div class="hist-meta">'+esc(c.date)+' · '+esc(c.location||'未填地點');
+    if(c.price)html+=' · '+esc(c.price);
+    html+='</div></div>';
+    html+='<div class="hist-actions">';
+    html+='<button class="btn-copy" onclick="copyHistUrl('+i+')">複製</button>';
+    html+='<button class="btn-notify" onclick="notifyHist('+i+')">通知</button>';
+    html+='</div></div>';
+  });
+  el.innerHTML=html;
+}
+function copyHistUrl(i){
+  var c=getConfigs()[i];if(!c||!c.url)return;
+  navigator.clipboard.writeText(c.url).then(function(){toast('已複製')}).catch(function(){toast('複製失敗')});
+}
+function notifyHist(i){
+  var c=getConfigs()[i];if(!c||!c.url)return;
+  window.location='/classroom/notify?link='+encodeURIComponent(c.url);
+}
+</script>
+</body>
+</html>

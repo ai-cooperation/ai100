@@ -232,6 +232,9 @@ auth.onAuthStateChanged(function(user){
     renderTemplates();
     applyTemplate('new-course');
     renderHistory();
+    var urlParams=new URLSearchParams(window.location.search);
+    var prefilledLink=urlParams.get('link');
+    if(prefilledLink){window._prefilledLink=prefilledLink;document.getElementById('emailLink').value=prefilledLink}
   } else {
     document.getElementById('loginScreen').style.display='flex';
     document.getElementById('app').classList.remove('active');
