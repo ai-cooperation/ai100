@@ -81,10 +81,10 @@ M05: {
     {id:'Q1', stem:'法務助理用 ChatGPT 整理判決書摘要，提交給律師後被發現引用了三個「不存在的判例」。法務助理說：「AI 回答得很有自信啊！」最根本的問題是？',
      model:'F1',
      options:[
-       {key:'A', text:'ChatGPT 的法律資料庫不夠完整', depth:2},
-       {key:'B', text:'法務助理應該用付費版才對', depth:1},
+       {key:'A', text:'ChatGPT 的法律資料庫不夠完整，補齊資料後就不會再出錯', depth:2},
+       {key:'B', text:'法務助理應該用付費版，付費版的回答比較準確可靠', depth:1},
        {key:'C', text:'LLM 本質是概率採樣——它生成「看起來像判例的文字」而非查詢真實判例，幻覺無法從「自信程度」來判斷', depth:4},
-       {key:'D', text:'這個任務不適合用 AI', depth:2}
+       {key:'D', text:'法律領域風險太高，這個任務根本不適合用任何 AI 工具', depth:2}
      ], correct:'C',
      diagnosis:{
        A:{gap:'把幻覺歸因於資料不足，忽略生成機制本質', followup:'即使餵了所有判例，LLM 仍可能把不同案件的要素混搭成不存在的「新判例」。為什麼？'},
@@ -95,10 +95,10 @@ M05: {
     {id:'Q2', stem:'行銷團隊用 AI 生成了一篇產品介紹文章，發布前主管發現其中一段「引用了哈佛商業評論 2024 年的研究」。搜尋後發現這篇研究根本不存在。最適當的處理方式是？',
      model:'F1',
      options:[
-       {key:'A', text:'刪掉那段引用，其他部分可以直接發布', depth:2},
-       {key:'B', text:'換一個 AI 工具重新生成', depth:1},
+       {key:'A', text:'刪掉那段引用就好，其他段落沒有明確引用應該不會有問題', depth:2},
+       {key:'B', text:'換一個更新更強的 AI 工具重新生成，新模型幻覺率比較低', depth:1},
        {key:'C', text:'整篇文章都需要人工逐一查核事實，因為幻覺可能散布在任何看起來「很真」的細節中', depth:4},
-       {key:'D', text:'以後禁止行銷團隊使用 AI 寫文章', depth:1}
+       {key:'D', text:'以後全面禁止行銷團隊使用 AI 寫文章，風險太大不值得', depth:1}
      ], correct:'C',
      diagnosis:{
        A:{gap:'以為幻覺只出現在明顯引用處', followup:'如果 AI 在另一段寫了「根據市調，78% 的消費者偏好…」但這個數字也是編的呢？你怎麼知道哪些「看起來正常」的數據是真的？'},
@@ -109,10 +109,10 @@ M05: {
     {id:'Q3', stem:'公司 CEO 在內部信寫道：「我們的 AI 客服系統已經『學會了』所有產品知識。」身為 AI 規劃師，你會如何修正這個說法？',
      model:'F1',
      options:[
-       {key:'A', text:'說法沒問題，AI 確實是透過學習來獲得知識的', depth:1},
-       {key:'B', text:'應該說「訓練過」而不是「學會了」', depth:2},
+       {key:'A', text:'說法沒問題，AI 確實是透過深度學習演算法來獲得並記憶知識的', depth:1},
+       {key:'B', text:'應該說「訓練過」而不是「學會了」，用詞更精確就不會誤導', depth:2},
        {key:'C', text:'AI 沒有「學會」知識——它是從大量文字中統計出模式，能生成看起來像正確答案的回應，但不理解內容也不保證正確', depth:4},
-       {key:'D', text:'只要接了 RAG 就算學會了', depth:2}
+       {key:'D', text:'只要接了 RAG 檢索知識庫就算學會了，資料在就等於理解了', depth:2}
      ], correct:'C',
      diagnosis:{
        A:{gap:'擬人化理解 AI 能力', followup:'一個「學會了所有產品知識」的系統，為什麼還會給客戶錯誤的規格參數？'},
@@ -124,10 +124,10 @@ M05: {
     {id:'Q4', stem:'新創公司用 7B 參數的開源模型做客服 chatbot，表現尚可。有人建議換成 70B 模型。CTO 問你：「大 10 倍就是好 10 倍嗎？」你的回答是？',
      model:'F2',
      options:[
-       {key:'A', text:'是的，參數量和效能成正比', depth:1},
+       {key:'A', text:'是的，參數量和效能成正比，大 10 倍理論上效果就好 10 倍', depth:1},
        {key:'B', text:'不一定——參數增加帶來的改善是非線性的，某些能力會在特定規模突然湧現，但也可能你需要的能力在 7B 就已足夠', depth:4},
-       {key:'C', text:'大模型一定比小模型好，只是成本問題', depth:2},
-       {key:'D', text:'開源模型不管多大都不如商用模型', depth:1}
+       {key:'C', text:'大模型一定比小模型好，差別只在推理成本和部署資源的問題', depth:2},
+       {key:'D', text:'開源模型不管參數多大品質都不如商用模型，應該直接用 API', depth:1}
      ], correct:'B',
      diagnosis:{
        A:{gap:'線性思維理解非線性現象', followup:'如果正比成立，13B 應該比 7B 好不到 2 倍。但實際上有些任務在 13B 突然能做到 7B 完全做不到的事。這怎麼解釋？'},
@@ -138,10 +138,10 @@ M05: {
     {id:'Q5', stem:'團隊用 GPT-4 做 In-context Learning（直接在 Prompt 給幾個範例讓 AI 學習格式）效果很好。PM 想改用便宜的小模型省成本。你預期會發生什麼？',
      model:'F2',
      options:[
-       {key:'A', text:'效果一樣好，In-context Learning 跟模型大小無關', depth:1},
+       {key:'A', text:'效果一樣好，In-context Learning 是通用技巧，跟模型大小無關', depth:1},
        {key:'B', text:'效果可能大幅下降——In-context Learning 是大規模模型的湧現能力，小模型可能完全無法從範例中學會規則', depth:4},
-       {key:'C', text:'只要多給幾個範例就能彌補', depth:2},
-       {key:'D', text:'小模型比較穩定，效果可能反而更好', depth:1}
+       {key:'C', text:'只要多給幾個範例就能彌補模型能力的差距，範例越多越好', depth:2},
+       {key:'D', text:'小模型推理比較穩定且快速，效果可能反而比大模型更好', depth:1}
      ], correct:'B',
      diagnosis:{
        A:{gap:'忽略湧現能力與規模的關係', followup:'如果跟模型大小無關，為什麼早期的 GPT-2 做不到 In-context Learning？'},
@@ -153,10 +153,10 @@ M05: {
     {id:'Q6', stem:'同事花了三天寫了一個超長的「超級 Prompt」，加了角色設定、任務分解、輸出格式、品質檢查清單。結果 AI 回答品質確實提升了。他結論：「只要 Prompt 寫得夠好，AI 什麼都能做。」你的看法是？',
      model:'F3',
      options:[
-       {key:'A', text:'同意，Prompt Engineering 就是讓 AI 無所不能的關鍵', depth:1},
+       {key:'A', text:'同意，Prompt Engineering 是讓 AI 無所不能的核心關鍵技術', depth:1},
        {key:'B', text:'Prompt 確實重要，但它像是在模型能力範圍內「解鎖最佳表現」，無法讓模型做到它根本做不到的事', depth:4},
-       {key:'C', text:'Prompt 越長效果越好', depth:1},
-       {key:'D', text:'Prompt 工程是噱頭，模型夠強就不需要', depth:2}
+       {key:'C', text:'Prompt 越長、細節越多，效果就一定越好，寫得夠完整就行', depth:1},
+       {key:'D', text:'Prompt 工程只是噱頭，模型本身夠強的話根本不需要技巧', depth:2}
      ], correct:'B',
      diagnosis:{
        A:{gap:'過度神化 Prompt 的力量', followup:'如果你用最完美的 Prompt 要求 GPT-4 精確預測明天的股價，它能做到嗎？為什麼？'},
@@ -167,10 +167,10 @@ M05: {
     {id:'Q7', stem:'行銷經理要求 AI 生成一份包含「真實數據」的市場分析報告。你用 CoT（思維鏈）Prompt 技巧要求 AI 逐步推理並標註來源。AI 生成了一份看起來很專業的報告，每個數據都有「來源」。你的下一步是？',
      model:'F3',
      options:[
-       {key:'A', text:'CoT 已經讓 AI 逐步推理了，報告應該可靠', depth:1},
-       {key:'B', text:'AI 有標註來源就代表資料是真的', depth:1},
+       {key:'A', text:'CoT 已經讓 AI 逐步推理了，有推理過程的報告應該比較可靠', depth:1},
+       {key:'B', text:'AI 有標註來源出處代表它有查證過，資料應該是真實的', depth:1},
        {key:'C', text:'必須逐一驗證每個「來源」是否存在且數據正確——CoT 改善的是推理品質，但不能防止 AI 編造看起來像真的來源', depth:4},
-       {key:'D', text:'用另一個 AI 交叉驗證就好', depth:2}
+       {key:'D', text:'用另一個 AI 工具交叉驗證就好，兩個 AI 都說對就可以信', depth:2}
      ], correct:'C',
      diagnosis:{
        A:{gap:'CoT 改善推理但不保證事實', followup:'CoT 讓 AI 的推理步驟更清楚，但如果推理的「前提」本身就是幻覺呢？'},
@@ -182,10 +182,10 @@ M05: {
     {id:'Q8', stem:'公司建了 RAG 系統讓客服 AI 根據產品手冊回答問題。上線後發現 AI 有時候會回答產品手冊中沒有的內容。最可能的原因是？',
      model:'F4',
      options:[
-       {key:'A', text:'RAG 系統有 bug', depth:2},
-       {key:'B', text:'產品手冊不夠完整', depth:2},
+       {key:'A', text:'RAG 系統的檢索元件有 bug，搜到了不該搜到的外部資料', depth:2},
+       {key:'B', text:'產品手冊內容不夠完整，AI 找不到資訊所以無法正確回答', depth:2},
        {key:'C', text:'RAG 檢索到的文件不一定包含完整答案，LLM 會自動用訓練知識「補完」——需要加上 Grounding 限制和回答不出時的兜底機制', depth:4},
-       {key:'D', text:'需要更好的 Embedding 模型', depth:2}
+       {key:'D', text:'需要換更好的 Embedding 模型，目前的語義理解能力不夠精確', depth:2}
      ], correct:'C',
      diagnosis:{
        A:{gap:'功能正常但期望不正確', followup:'RAG 的 R（檢索）可能正確執行了，問題在 G（生成）階段 LLM 自己「加料」。這是 bug 還是 LLM 的本質行為？'},
@@ -196,10 +196,10 @@ M05: {
     {id:'Q9', stem:'CTO 說：「我們已經建了 RAG，AI 幻覺問題應該解決了。」你的回應是？',
      model:'F4',
      options:[
-       {key:'A', text:'同意，RAG 就是為了解決幻覺而設計的', depth:1},
+       {key:'A', text:'同意，RAG 就是專門為了解決幻覺問題而設計的技術方案', depth:1},
        {key:'B', text:'RAG 大幅降低了幻覺但不能完全消除——需要多層防線：RAG 做檢索、Grounding 做限制、關鍵回答加人工審核', depth:4},
-       {key:'C', text:'RAG 只是第一步，把模型換成最新版才是關鍵', depth:2},
-       {key:'D', text:'幻覺問題只要調低 temperature 就能解決', depth:1}
+       {key:'C', text:'RAG 只是第一步，真正關鍵是把底層模型換成最新版本降低幻覺率', depth:2},
+       {key:'D', text:'幻覺問題只要調低 temperature 讓輸出更確定就能有效解決', depth:1}
      ], correct:'B',
      diagnosis:{
        A:{gap:'單一技術解決複雜問題的幻想', followup:'RAG 檢索到了錯誤的文件（文件切分不當）怎麼辦？或者檢索結果不完整，LLM 自行補充呢？'},
@@ -210,10 +210,10 @@ M05: {
     {id:'Q10', stem:'你負責評估一個企業知識庫 RAG 方案。供應商說「我們的向量搜尋準確率 95%」。你最應該追問的問題是？',
      model:'F4',
      options:[
-       {key:'A', text:'95% 很高了，可以直接採用', depth:1},
+       {key:'A', text:'95% 的準確率已經夠高了，超過多數人工搜尋，可以直接採用', depth:1},
        {key:'B', text:'「準確率」是怎麼測的？用什麼測試集？跟我們的實際文件格式和問法一致嗎？', depth:3},
        {key:'C', text:'那 5% 檢索失敗的情境是什麼？LLM 拿到錯誤文件後的行為是什麼？有沒有「無法回答」的兜底機制？', depth:4},
-       {key:'D', text:'我們需要 99% 以上才能用', depth:2}
+       {key:'D', text:'我們需要 99% 以上的準確率才能用在企業場景，95% 還不夠', depth:2}
      ], correct:'C',
      diagnosis:{
        A:{gap:'接受數字而不質疑情境', followup:'如果那 5% 恰好是客戶最常問的問題呢？檢索失敗後 AI 會說「我不知道」還是自信地胡說？'},
@@ -225,10 +225,10 @@ M05: {
     {id:'Q11', stem:'老闆看了 AI 展覽回來說：「我們也用 AI 幫每個客戶寫個人化生日祝福信吧！」公司有 2,000 名客戶。你的分析是？',
      model:'F5',
      options:[
-       {key:'A', text:'好主意！AI 最擅長寫文案', depth:2},
+       {key:'A', text:'好主意！AI 最擅長寫個人化文案，2,000 封很快就能生成完畢', depth:2},
        {key:'B', text:'技術上可行但要算 ROI：AI API 成本＋人工審核＋客戶資料整理 vs. 用 mail merge 套版的成本和效果差異，才知道值不值得', depth:4},
-       {key:'C', text:'直接用免費的 ChatGPT 就好，不需要額外成本', depth:1},
-       {key:'D', text:'2,000 封不算多，手寫就好', depth:1}
+       {key:'C', text:'直接用免費的 ChatGPT 就好，不花錢而且效果也夠用了', depth:1},
+       {key:'D', text:'2,000 封不算多，用傳統方式手寫就好，不需要動用 AI', depth:1}
      ], correct:'B',
      diagnosis:{
        A:{gap:'只看能力不看成本效益', followup:'AI 「能」寫不代表「應該」用 AI 寫。如果套版信效果差不多，花 10 倍成本做個人化值得嗎？'},
@@ -239,10 +239,10 @@ M05: {
     {id:'Q12', stem:'新創想用 GenAI 做醫療問診輔助。技術 demo 效果很好。投資人問：「商業模式可行嗎？」以下哪個分析最全面？',
      model:'F5',
      options:[
-       {key:'A', text:'技術好就能變現，先上線收費再說', depth:1},
-       {key:'B', text:'先申請醫療器材認證就能上市', depth:2},
+       {key:'A', text:'技術 demo 效果好就代表產品成熟，先上線收費快速搶佔市場', depth:1},
+       {key:'B', text:'先申請醫療器材認證，拿到證照就能合法上市販售了', depth:2},
        {key:'C', text:'Demo 好不等於商業可行——需要評估：醫療法規認證成本與時間、醫療責任歸屬、幻覺在醫療場景的風險容忍度、醫院採購流程、與 HIS 系統整合', depth:4},
-       {key:'D', text:'找大醫院合作就能解決所有問題', depth:2}
+       {key:'D', text:'找一家大醫院合作背書，有了合作夥伴就能解決所有問題', depth:2}
      ], correct:'C',
      diagnosis:{
        A:{gap:'忽略醫療領域的特殊監管', followup:'醫療 AI 需要什麼認證？沒有認證就收費會面臨什麼法律風險？'},
@@ -254,10 +254,10 @@ M05: {
     {id:'Q13', stem:'公司要部署一個 AI Agent 系統，讓它自動處理客戶退款流程（查訂單→判斷條件→執行退款→通知客戶）。上線前最關鍵的安全測試是？',
      model:'F6',
      options:[
-       {key:'A', text:'測試 Agent 的回答準確率就夠了', depth:1},
-       {key:'B', text:'確認 Agent 能正確呼叫 API 就好', depth:2},
+       {key:'A', text:'測試 Agent 的回答準確率就夠了，準確率高就代表可以上線', depth:1},
+       {key:'B', text:'確認 Agent 能正確呼叫各個 API 並取得回應就算測試完成', depth:2},
        {key:'C', text:'測試 Agent 的「行動邊界」——如果客戶用社交工程誘導 Agent 跳過條件判斷直接退款怎麼辦？越自主的 Agent 越需要權限控制、操作上限和人工審核觸發機制', depth:4},
-       {key:'D', text:'讓 Agent 先跑一天看看有沒有問題', depth:1}
+       {key:'D', text:'讓 Agent 先小規模跑一天觀察，有問題再即時修正就好', depth:1}
      ], correct:'C',
      diagnosis:{
        A:{gap:'Agent 不只是回答問題，它會「執行動作」', followup:'傳統 chatbot 回答錯了頂多誤導，但 Agent 執行錯了可能直接造成財務損失。你覺得測試重點該放在哪？'},
@@ -268,10 +268,10 @@ M05: {
     {id:'Q14', stem:'團隊在設計 AI Agent 架構時爭論：應該用 MCP（Model Context Protocol）還是 A2A（Agent-to-Agent）協議？使用場景是讓 AI 助理幫員工查詢 ERP 庫存、發送 Slack 訊息、更新 CRM 記錄。你的建議是？',
      model:'F6',
      options:[
-       {key:'A', text:'選最新的協議就好', depth:1},
+       {key:'A', text:'選最新發布的協議就好，新的技術標準一定比舊的更完善', depth:1},
        {key:'B', text:'用 MCP——這個場景是「一個 Agent 需要使用多種工具」，MCP 正是讓 AI 模型連接外部工具和資料來源的協議', depth:4},
-       {key:'C', text:'用 A2A——Agent 之間需要溝通', depth:2},
-       {key:'D', text:'兩個都不需要，直接寫 API 串接', depth:2}
+       {key:'C', text:'用 A2A——這個場景涉及多個系統互動，Agent 之間需要溝通協作', depth:2},
+       {key:'D', text:'兩個都不需要，直接寫 API 串接更靈活，不受協議限制', depth:2}
      ], correct:'B',
      diagnosis:{
        A:{gap:'新 ≠ 適合', followup:'MCP 和 A2A 解決不同問題。選協議要看使用場景，不是看發布日期。'},
@@ -283,10 +283,10 @@ M05: {
     {id:'Q15', stem:'團隊在用 LLM 做複雜決策分析。有人建議用 CoT（Chain-of-Thought，逐步推理），有人建議用 ToT（Tree-of-Thought，分支探索）。任務是：「評估公司是否該進入東南亞市場」。哪種方法更適合？',
      model:'F3',
      options:[
-       {key:'A', text:'CoT 就夠了——讓 AI 一步一步推理', depth:2},
+       {key:'A', text:'CoT 就夠了——讓 AI 一步一步推理，線性分析已經夠全面了', depth:2},
        {key:'B', text:'ToT 更適合——這個問題有多條可能的推理路徑（不同國家、不同進入策略、不同風險），ToT 能分支探索再比較，比單一推理鏈更全面', depth:4},
-       {key:'C', text:'兩個效果一樣，差別不大', depth:1},
-       {key:'D', text:'都不需要，直接問 AI 就好', depth:1}
+       {key:'C', text:'兩種技巧的效果其實差不多，選哪個都可以，差別不大', depth:1},
+       {key:'D', text:'都不需要特殊技巧，直接把問題丟給 AI 讓它自己判斷就好', depth:1}
      ], correct:'B',
      diagnosis:{
        A:{gap:'CoT 適合線性推理，但策略問題是多路徑的', followup:'如果 AI 沿著「先進越南」這條推理鏈走到底，可能忽略了「先進泰國」其實更好的可能性。CoT 能回頭比較嗎？'},
@@ -298,10 +298,10 @@ M05: {
     {id:'Q16', stem:'RAG 系統上線後，使用者回報「AI 的回答常常答非所問」。團隊要 debug，第一步應該檢查什麼？',
      model:'F4',
      options:[
-       {key:'A', text:'換更好的 LLM 模型', depth:1},
-       {key:'B', text:'增加更多文件到知識庫', depth:1},
+       {key:'A', text:'換更強的 LLM 模型，理解力更好回答就會更精準', depth:1},
+       {key:'B', text:'增加更多文件到知識庫，資料越多回答的涵蓋範圍越廣', depth:1},
        {key:'C', text:'分開檢查「檢索」和「生成」——先看檢索到的文件跟問題是否相關（檢索問題），再看 LLM 是否正確使用了檢索到的文件（生成問題）。兩者的修法完全不同', depth:4},
-       {key:'D', text:'調整 Prompt 模板', depth:2}
+       {key:'D', text:'調整 Prompt 模板的指令和格式，引導 AI 更聚焦在問題上', depth:2}
      ], correct:'C',
      diagnosis:{
        A:{gap:'可能根本不是模型的問題', followup:'如果檢索到的文件就是錯的，再強的 LLM 也只能用錯誤的資訊生成答案。你覺得問題出在哪一層？'},
@@ -315,10 +315,10 @@ M05: {
     F1: [
       {id:'R-F1-1', stem:'客戶打電話來抱怨：「你們的 AI 客服跟我說這個產品有終身保固，但合約上只有一年！」調查後發現 AI 確實回答了錯誤的保固資訊。這個事件最根本的教訓是？',
        options:[
-         {key:'A', text:'AI 客服的訓練資料中有錯誤的保固資訊', depth:2},
+         {key:'A', text:'AI 客服的訓練資料中混入了錯誤的保固資訊，修正資料就好', depth:2},
          {key:'B', text:'LLM 不是查詢資料庫——它在沒有明確資訊時會「創造性地生成」看似合理的答案。任何面向客戶的 AI 回答都需要事實查核機制', depth:4},
-         {key:'C', text:'應該把 AI 客服下線', depth:1},
-         {key:'D', text:'讓 AI 回答時加上「僅供參考」免責聲明就好', depth:2}
+         {key:'C', text:'AI 客服不夠可靠，應該立刻全面下線改回人工客服', depth:1},
+         {key:'D', text:'讓 AI 回答時統一加上「僅供參考」免責聲明，降低法律風險', depth:2}
        ], correct:'B',
        diagnosis:{
          A:{gap:'可能是原因之一但不是根本問題', followup:'即使訓練資料完全正確，LLM 仍可能在回答時混淆不同產品的條款。為什麼？'},
@@ -327,10 +327,10 @@ M05: {
        }},
       {id:'R-F1-2', stem:'會議上有人說：「GPT-5 出來以後幻覺問題就會解決了。」你的評估是？',
        options:[
-         {key:'A', text:'同意，新模型一定比舊模型更準確', depth:1},
+         {key:'A', text:'同意，每一代新模型都會大幅進步，幻覺問題遲早會被根除', depth:1},
          {key:'B', text:'幻覺率可能降低，但概率採樣的本質不變——只要是生成式模型就無法保證零幻覺，必須靠系統層面的防線', depth:4},
-         {key:'C', text:'要等實測才知道', depth:2},
-         {key:'D', text:'換成 Google 的模型可能更好', depth:1}
+         {key:'C', text:'要等 GPT-5 出來後用真實場景實測才知道，現在說什麼都太早', depth:2},
+         {key:'D', text:'與其等 GPT-5，不如換成 Google 或 Anthropic 的模型試試', depth:1}
        ], correct:'B',
        diagnosis:{
          A:{gap:'線性進步假設', followup:'從 GPT-3 到 GPT-4 幻覺確實減少了，但消失了嗎？從「減少」到「消除」的距離可能是無限大。'},
@@ -341,10 +341,10 @@ M05: {
     F2: [
       {id:'R-F2-1', stem:'開源社群發布了一個 3B 參數的小模型，號稱「在程式碼生成任務上接近 GPT-4」。這個說法的可信度如何評估？',
        options:[
-         {key:'A', text:'不可能，小模型永遠不如大模型', depth:1},
+         {key:'A', text:'不可能，小模型的參數量不夠，能力永遠不如大模型', depth:1},
          {key:'B', text:'完全可能——小模型在特定窄任務上可以透過特化訓練接近大模型，但在需要湧現能力的複雜推理任務上仍有差距', depth:4},
-         {key:'C', text:'看基準測試分數就知道了', depth:2},
-         {key:'D', text:'開源模型不可信', depth:1}
+         {key:'C', text:'看基準測試分數就知道了，跑一下 benchmark 就能判斷真假', depth:2},
+         {key:'D', text:'開源模型的品質無法保證，社群號稱的數據通常都有灌水', depth:1}
        ], correct:'B',
        diagnosis:{
          A:{gap:'絕對化思維', followup:'知識蒸餾和特化微調可以讓小模型在特定任務上達到大模型水準。但「特定任務」和「通用能力」的差距在哪？'},
@@ -355,10 +355,10 @@ M05: {
     F3: [
       {id:'R-F3-1', stem:'同事學了 Prompt 工程課程後，信心滿滿地說：「我用 CoT＋Few-shot＋角色設定，讓 AI 算出了一道數學題的正確答案。所以 Prompt 技巧可以讓 AI 變成數學家！」這個推論的問題是？',
        options:[
-         {key:'A', text:'沒問題，好的 Prompt 確實能大幅提升 AI 的數學能力', depth:2},
+         {key:'A', text:'沒問題，好的 Prompt 技巧確實能大幅提升 AI 的數學推理能力', depth:2},
          {key:'B', text:'一題成功不代表通用——Prompt 技巧讓 AI 在能力範圍內發揮最佳表現，但面對超出模型能力的問題仍然會失敗', depth:4},
-         {key:'C', text:'數學題用計算器更快', depth:1},
-         {key:'D', text:'需要更多測試才能下結論', depth:3}
+         {key:'C', text:'數學題直接用計算器或 Excel 更快更準確，不需要用 AI', depth:1},
+         {key:'D', text:'一題的樣本太小了，需要用更多不同難度的題目測試才能下結論', depth:3}
        ], correct:'B',
        diagnosis:{
          A:{gap:'把個案成功一般化', followup:'如果你把題目難度提高到大學數學甚至研究級問題，同樣的 Prompt 技巧還有效嗎？'},
@@ -369,10 +369,10 @@ M05: {
     F4: [
       {id:'R-F4-1', stem:'團隊建了 RAG 系統，用了最新的 Embedding 模型和向量資料庫。測試時發現一個問題：使用者問「退貨政策」，系統檢索到了「退貨政策」和「換貨政策」兩份文件，AI 把兩份文件的內容混在一起回答了。最佳解法是？',
        options:[
-         {key:'A', text:'換更好的 Embedding 模型來區分這兩份文件', depth:2},
-         {key:'B', text:'只返回最相似的一份文件', depth:2},
+         {key:'A', text:'換更好的 Embedding 模型來區分語義相近的文件，提高檢索精準度', depth:2},
+         {key:'B', text:'只返回相似度最高的一份文件，避免多份文件互相干擾混淆回答', depth:2},
          {key:'C', text:'在 RAG 流程中加入重排序（Re-ranking）篩選最相關文件，同時在 Prompt 中明確指示 AI 區分不同文件來源並分別回答', depth:4},
-         {key:'D', text:'把退貨和換貨政策合併成一份文件', depth:2}
+         {key:'D', text:'把退貨和換貨政策合併成一份文件，從源頭避免檢索到多份相似文件', depth:2}
        ], correct:'C',
        diagnosis:{
          A:{gap:'Embedding 區分語義相近文件的能力有限', followup:'「退貨政策」和「換貨政策」語義本來就很接近，換 Embedding 模型能拉開多少距離？'},
@@ -383,10 +383,10 @@ M05: {
     F5: [
       {id:'R-F5-1', stem:'競爭對手發布了一個 AI 功能引起業界關注。老闆緊急開會：「我們也要做！預算不是問題！」身為 AI 規劃師，你的第一個建議是？',
        options:[
-         {key:'A', text:'立刻開始開發，搶時間比什麼都重要', depth:1},
+         {key:'A', text:'立刻開始全力開發，市場講求速度，搶時間比什麼都重要', depth:1},
          {key:'B', text:'先用 72 小時做快速可行性評估：技術可行性、資料準備度、目標客群是否真的需要、ROI 初估，再決定 Build/Buy/API', depth:4},
-         {key:'C', text:'直接買競爭對手用的那套方案', depth:2},
-         {key:'D', text:'跟老闆說「AI 有泡沫，不用跟風」', depth:1}
+         {key:'C', text:'直接採購競爭對手用的那套方案，省去自己開發的時間和風險', depth:2},
+         {key:'D', text:'跟老闆說「AI 有泡沫，不用跟風」，等市場更明朗再行動', depth:1}
        ], correct:'B',
        diagnosis:{
          A:{gap:'FOMO 驅動而非價值驅動', followup:'不做可行性評估就衝，花了三個月做出來發現客戶根本不需要，損失的不只是錢還有機會成本。'},
@@ -397,10 +397,10 @@ M05: {
     F6: [
       {id:'R-F6-1', stem:'CTO 想讓 AI Agent 自動處理所有 IT 工單（從接收→分類→指派→追蹤→結案）。IT 團隊擔心 Agent 會誤判優先級或指派錯人。你的建議是？',
        options:[
-         {key:'A', text:'先讓 Agent 全自動跑，有問題再修', depth:1},
+         {key:'A', text:'先讓 Agent 全自動跑，實際運行中發現問題再即時修正就好', depth:1},
          {key:'B', text:'分階段：先讓 Agent 做分類和建議指派（人確認後執行），觀察一個月後再逐步開放自動執行低風險工單，高風險工單維持人工審核', depth:4},
-         {key:'C', text:'IT 工單不適合用 Agent', depth:1},
-         {key:'D', text:'只讓 Agent 做分類就好，其他都手動', depth:2}
+         {key:'C', text:'IT 工單牽涉太多判斷，這類任務根本不適合用 Agent 處理', depth:1},
+         {key:'D', text:'只讓 Agent 做工單分類就好，指派和追蹤都維持手動處理', depth:2}
        ], correct:'B',
        diagnosis:{
          A:{gap:'Agent 自主執行的錯誤成本可能很高', followup:'如果 Agent 把「伺服器當機」分類為低優先級，延遲 4 小時處理，業務損失多少？先全自動的風險你能承受嗎？'},
@@ -409,10 +409,10 @@ M05: {
        }},
       {id:'R-F6-2', stem:'有人說：「MCP 和 A2A 是競爭關係，選一個就好。」這個說法正確嗎？',
        options:[
-         {key:'A', text:'正確，選比較新的就好', depth:1},
+         {key:'A', text:'正確，兩者功能類似，選比較新、社群比較活躍的那個就好', depth:1},
          {key:'B', text:'不正確——MCP 是讓 Agent 連接工具和資料源（Agent-to-Tool），A2A 是讓多個 Agent 互相溝通協作（Agent-to-Agent），兩者互補而非競爭', depth:4},
-         {key:'C', text:'正確，功能重疊太多', depth:1},
-         {key:'D', text:'都不需要，自己寫 API 就好', depth:2}
+         {key:'C', text:'正確，兩個協議的功能重疊太多，同時導入只會增加複雜度', depth:1},
+         {key:'D', text:'都不需要，自己寫 API 串接更靈活，標準協議反而綁手綁腳', depth:2}
        ], correct:'B',
        diagnosis:{
          A:{gap:'把「不同層次的協議」當成競品', followup:'MCP 像是「手和工具的連接方式」，A2A 像是「兩個人之間的溝通語言」。你覺得這兩件事是互斥的嗎？'},
@@ -499,10 +499,10 @@ M06: {
     {id:'Q1', stem:'業務部門用 No-Code 平台自己建了一個客戶流失預測模型並開始使用。IT 部門完全不知情。三個月後模型出了錯誤決策，造成一批忠實客戶收到降級通知。這個事件反映的核心問題是？',
      model:'F1',
      options:[
-       {key:'A', text:'No-Code 工具品質太差', depth:1},
-       {key:'B', text:'業務部門不應該碰 AI', depth:1},
+       {key:'A', text:'No-Code 工具的品質太差，無法承擔正式業務場景的精確度要求', depth:1},
+       {key:'B', text:'業務部門缺乏技術背景，根本不應該自己碰 AI 建模工具', depth:1},
        {key:'C', text:'「民主化」缺少治理——公民開發者需要 IT 提供平台治理（審核、測試、監控），否則 Shadow IT 風險會造成業務損害', depth:4},
-       {key:'D', text:'應該限制所有部門使用 No-Code 工具', depth:2}
+       {key:'D', text:'應該全面限制所有部門使用 No-Code 工具，避免類似事件再發生', depth:2}
      ], correct:'C',
      diagnosis:{
        A:{gap:'工具可能沒問題，使用方式才是問題', followup:'同樣的工具如果經過 IT 審核和測試，結果可能完全不同。問題在工具還是流程？'},
@@ -513,10 +513,10 @@ M06: {
     {id:'Q2', stem:'IT 主管擔心 No-Code 平台會讓 IT 部門變得不重要。你會怎麼回應？',
      model:'F1',
      options:[
-       {key:'A', text:'確實，No-Code 的目的就是讓業務不需要 IT', depth:1},
+       {key:'A', text:'確實，No-Code 的設計目的就是讓業務部門不再需要 IT 支援', depth:1},
        {key:'B', text:'IT 的角色會從「幫每個部門建 AI」轉型為「建立和治理 AI 平台」——工作不是變少而是升級', depth:4},
-       {key:'C', text:'不用擔心，No-Code 只是玩具，做不了正經事', depth:1},
-       {key:'D', text:'IT 應該禁止 No-Code 工具來保護自己的地位', depth:1}
+       {key:'C', text:'不用擔心，No-Code 工具只是玩具等級，做不了企業正式環境的事', depth:1},
+       {key:'D', text:'IT 應該主動禁止 No-Code 工具進入公司，保護部門的專業地位', depth:1}
      ], correct:'B',
      diagnosis:{
        A:{gap:'把「減少某些任務」等同於「不需要 IT」', followup:'誰來管理 No-Code 平台的安全性？誰來確保資料品質？誰來處理平台間的整合？'},
@@ -527,10 +527,10 @@ M06: {
     {id:'Q3', stem:'公司決定讓業務團隊使用 No-Code 平台。以下哪個是最合適的第一步？',
      model:'F1',
      options:[
-       {key:'A', text:'全面開放，讓所有部門自由使用', depth:1},
+       {key:'A', text:'全面開放讓所有部門自由使用，鼓勵創新不應該設限制', depth:1},
        {key:'B', text:'先在一個部門試點，同時建立使用規範（資料權限、模型審核、上線流程），成功後再推廣', depth:4},
-       {key:'C', text:'先讓 IT 學會所有 No-Code 工具再開放', depth:2},
-       {key:'D', text:'買最貴的 No-Code 平台確保品質', depth:1}
+       {key:'C', text:'先讓 IT 部門學會所有 No-Code 工具的操作後，再逐步開放給業務', depth:2},
+       {key:'D', text:'買市場上最貴的企業級 No-Code 平台，用價格來確保品質和安全', depth:1}
      ], correct:'B',
      diagnosis:{
        A:{gap:'沒有治理就全面開放 = Shadow IT', followup:'如果 10 個部門各自建了不同的客戶分群模型，資料一致性怎麼辦？'},
@@ -542,10 +542,10 @@ M06: {
     {id:'Q4', stem:'業務經理用 AutoML 工具訓練了一個銷售預測模型，宣稱「準確率 93%」。你檢查後發現訓練資料中有 30% 的營收欄位是手動「估計值」。你的建議是？',
      model:'F2',
      options:[
-       {key:'A', text:'93% 很高，可以直接用', depth:1},
-       {key:'B', text:'AutoML 自動選了最好的模型，應該沒問題', depth:1},
+       {key:'A', text:'93% 的準確率已經很高了，在大多數商業場景中已經可以直接使用', depth:1},
+       {key:'B', text:'AutoML 自動搜尋了最好的模型和參數組合，結果應該沒問題', depth:1},
        {key:'C', text:'停下來先修資料——AutoML 能自動選模型但不能修資料品質。30% 的估計值意味著模型學到的可能是「人類的猜測規律」而非真實的銷售規律', depth:4},
-       {key:'D', text:'把估計值的那些資料排除掉再訓練', depth:3}
+       {key:'D', text:'把含有估計值的那些資料排除掉，用剩下 70% 乾淨資料重新訓練', depth:3}
      ], correct:'C',
      diagnosis:{
        A:{gap:'被數字迷惑，沒檢查資料品質', followup:'如果模型學到的是「人猜數字的規律」，93% 的準確率代表什麼？上線後用真實資料表現會如何？'},
@@ -556,10 +556,10 @@ M06: {
     {id:'Q5', stem:'AutoML 平台的行銷文案寫「一鍵建模，不需要任何資料科學背景」。你的理解是？',
      model:'F2',
      options:[
-       {key:'A', text:'太好了，我們不需要請資料科學家了', depth:1},
+       {key:'A', text:'太好了，有了 AutoML 我們就不需要請資料科學家了，省下大筆人事費', depth:1},
        {key:'B', text:'「一鍵建模」是真的，但結果好不好取決於：資料品質是否足夠、特徵選擇是否合理、評估指標是否匹配業務目標——這些判斷仍需要人', depth:4},
-       {key:'C', text:'行銷話術，AutoML 跟手動建模沒差別', depth:1},
-       {key:'D', text:'AutoML 只適合簡單問題', depth:2}
+       {key:'C', text:'純粹是行銷話術，AutoML 的效果跟資料科學家手動建模其實沒差別', depth:1},
+       {key:'D', text:'AutoML 只適合處理簡單的分類迴歸問題，複雜場景還是不行', depth:2}
      ], correct:'B',
      diagnosis:{
        A:{gap:'把自動化等同於不需要專業判斷', followup:'AutoML 幫你選了 XGBoost 作為最佳模型。你知道為什麼嗎？如果業務需要可解釋性，XGBoost 適合嗎？'},
@@ -571,10 +571,10 @@ M06: {
     {id:'Q6', stem:'分析師用 KNIME（拖拉式工具）建了一個資料分析 pipeline，跑 10 萬筆資料要 2 小時。工程師說用 Python 寫可以 5 分鐘跑完。但分析師說：「我的 pipeline 所有人都看得懂。」誰的說法更有道理？',
      model:'F3',
      options:[
-       {key:'A', text:'分析師——可讀性和協作比效能重要', depth:2},
-       {key:'B', text:'工程師——效能差 24 倍不可接受', depth:2},
+       {key:'A', text:'分析師說得對——可讀性和團隊協作比單純的執行效能更重要', depth:2},
+       {key:'B', text:'工程師說得對——效能差 24 倍在生產環境中完全不可接受', depth:2},
        {key:'C', text:'兩者都對——No-Code 的可解釋性和協作優勢是真的，但效能天花板也是真的。要根據使用場景決定哪個面向優先', depth:4},
-       {key:'D', text:'用更好的 No-Code 工具就能兼顧', depth:2}
+       {key:'D', text:'用更新更好的 No-Code 工具就能同時兼顧效能和可讀性', depth:2}
      ], correct:'C',
      diagnosis:{
        A:{gap:'忽略效能在生產環境的重要性', followup:'如果這個 pipeline 要每天跑，2 小時的延遲對業務決策有什麼影響？'},
@@ -585,10 +585,10 @@ M06: {
     {id:'Q7', stem:'團隊用 No-Code 工具建了 5 個 AI 模型，都跑在供應商的雲端平台上。現在供應商宣布漲價 40%。你的選擇是？',
      model:'F3',
      options:[
-       {key:'A', text:'接受漲價，反正已經用了', depth:1},
-       {key:'B', text:'立刻全部搬到另一個 No-Code 平台', depth:2},
+       {key:'A', text:'接受漲價繼續用，反正遷移成本也不低，搬走不一定更划算', depth:1},
+       {key:'B', text:'立刻全部搬到另一個更便宜的 No-Code 平台，降低營運成本', depth:2},
        {key:'C', text:'這就是供應商鎖定的風險——盤點哪些模型已到 No-Code 的天花板需要遷移到程式碼，哪些仍適合留在 No-Code，分批處理', depth:4},
-       {key:'D', text:'全部改用開源工具自建', depth:2}
+       {key:'D', text:'趁這個機會全部改用開源工具自建，徹底擺脫供應商依賴', depth:2}
      ], correct:'C',
      diagnosis:{
        A:{gap:'被動接受不利條件', followup:'如果明年再漲 40% 呢？沒有退路策略的話，你永遠是被動的。'},
@@ -599,10 +599,10 @@ M06: {
     {id:'Q8', stem:'行銷團隊用 No-Code 工具做 A/B 測試分析，一直用得很好。現在要加入一個需求：根據 A/B 測試結果自動調整廣告投放策略。No-Code 工具做不到。你的建議是？',
      model:'F3',
      options:[
-       {key:'A', text:'找另一個更強的 No-Code 工具', depth:2},
-       {key:'B', text:'等 No-Code 工具出新版支援這個功能', depth:1},
+       {key:'A', text:'找另一個功能更強大的 No-Code 工具，應該有平台能支援自動化投放', depth:2},
+       {key:'B', text:'等目前使用的 No-Code 工具出新版本，遲早會支援這個功能', depth:1},
        {key:'C', text:'這是 No-Code 的天花板——分析繼續用 No-Code，自動投放策略由工程師用程式碼實現，兩者透過 API 整合', depth:4},
-       {key:'D', text:'放棄自動化，繼續手動調整', depth:1}
+       {key:'D', text:'放棄自動化投放的需求，繼續用目前手動調整的方式也還行', depth:1}
      ], correct:'C',
      diagnosis:{
        A:{gap:'更強的 No-Code 仍有天花板', followup:'自動投放策略涉及即時決策、多目標優化、與廣告平台 API 整合。你確定 No-Code 能做到？'},
@@ -614,10 +614,10 @@ M06: {
     {id:'Q9', stem:'新創公司要選 No-Code AI 工具。以下哪個評估方法最合理？',
      model:'F4',
      options:[
-       {key:'A', text:'選市佔率最高的，大家用的一定好', depth:1},
-       {key:'B', text:'選功能最多的，未來擴充空間大', depth:2},
+       {key:'A', text:'選市佔率最高的平台，多數企業都在用的一定是經過驗證的好工具', depth:1},
+       {key:'B', text:'選功能最多最完整的平台，這樣未來業務擴張時擴充空間最大', depth:2},
        {key:'C', text:'建立評估矩陣：列出實際需求（資料格式、部署方式、中文支援、整合 API、預算），對 3-4 個工具做兩週試用比較', depth:4},
-       {key:'D', text:'請 AI 推薦最好的工具', depth:1}
+       {key:'D', text:'直接請 ChatGPT 推薦最適合新創公司的 No-Code AI 工具就好', depth:1}
      ], correct:'C',
      diagnosis:{
        A:{gap:'市佔率 ≠ 適合你', followup:'市佔率高可能是因為價格便宜或行銷做得好，不代表適合你的資料格式和業務場景。'},
@@ -628,10 +628,10 @@ M06: {
     {id:'Q10', stem:'公司的日本分部推薦了一款在日本很流行的 No-Code AI 工具。你的台灣團隊要導入。你第一個要確認的是？',
      model:'F4',
      options:[
-       {key:'A', text:'日本分部用得好，台灣應該也沒問題', depth:1},
+       {key:'A', text:'日本分部用得好代表工具品質沒問題，台灣導入應該也不會有問題', depth:1},
        {key:'B', text:'確認這個工具對繁體中文資料的支援程度——分詞、NLP、介面語言、文件是否完整', depth:4},
-       {key:'C', text:'看有沒有台灣的代理商', depth:2},
-       {key:'D', text:'先翻譯日本分部的使用手冊', depth:1}
+       {key:'C', text:'先看有沒有台灣本地的代理商，有在地支援後續維護比較方便', depth:2},
+       {key:'D', text:'先把日本分部的使用手冊和最佳實踐翻譯成中文再開始導入', depth:1}
      ], correct:'B',
      diagnosis:{
        A:{gap:'忽略語言和文化差異', followup:'日文和繁體中文的 NLP 差異很大。工具對日文支援好，不代表對繁體中文也好。'},
@@ -643,10 +643,10 @@ M06: {
     {id:'Q11', stem:'用 No-Code 工具做的 PoC 獲得老闆高度讚賞，直接說「下個月就上線到客戶端」。你的建議是？',
      model:'F5',
      options:[
-       {key:'A', text:'老闆滿意就上線，速度是競爭力', depth:1},
+       {key:'A', text:'老闆滿意就上線，在商業上速度是最重要的競爭力，不該拖延', depth:1},
        {key:'B', text:'PoC 直接上產線風險極高——需要經歷工程師評估（效能、安全、可靠性）→ MVP 開發 → 壓力測試 → 漸進式上線的過程', depth:4},
-       {key:'C', text:'再多做幾次 PoC 確認效果穩定', depth:2},
-       {key:'D', text:'PoC 效果好就代表上線也會好', depth:1}
+       {key:'C', text:'再用不同的資料集多做幾次 PoC，確認效果穩定後就可以上線', depth:2},
+       {key:'D', text:'PoC 效果好就代表產品成熟了，上線後表現應該也會一樣好', depth:1}
      ], correct:'B',
      diagnosis:{
        A:{gap:'PoC 成功 ≠ 上線成功', followup:'PoC 跑的是 100 筆乾淨測試資料，上線後面對 10 萬筆混亂的真實資料，效果能一樣嗎？'},
@@ -657,10 +657,10 @@ M06: {
     {id:'Q12', stem:'公司用 No-Code 工具已經兩年了，建了 8 個 AI 應用。現在技術長說要「全部遷移到自建平台」。你覺得最合適的策略是？',
      model:'F5',
      options:[
-       {key:'A', text:'一次全部遷移，徹底告別 No-Code', depth:1},
-       {key:'B', text:'不遷移，No-Code 用得好好的', depth:2},
+       {key:'A', text:'一次全部遷移到自建平台，徹底告別 No-Code 避免技術債累積', depth:1},
+       {key:'B', text:'不需要遷移，No-Code 目前用得好好的，沒必要花成本重建', depth:2},
        {key:'C', text:'分類評估：哪些已到 No-Code 天花板需要遷移、哪些仍適合留著、哪些可以淘汰。制定分批遷移計畫，每批遷移後驗證再繼續', depth:4},
-       {key:'D', text:'等 No-Code 平台升級就不用遷移了', depth:1}
+       {key:'D', text:'等 No-Code 平台下一次大版本升級，屆時功能更強就不用遷移了', depth:1}
      ], correct:'C',
      diagnosis:{
        A:{gap:'風險太高', followup:'8 個應用同時遷移，任何一個出問題都可能影響業務。你能承受全部同時停擺的風險嗎？'},
@@ -672,10 +672,10 @@ M06: {
     {id:'Q13', stem:'團隊要選 AI 輔助開發工具。目前有三個選項：(A) GitHub Copilot — 擅長程式碼補全和單檔建議、(B) Cursor — 整合 AI 到整個 IDE 支援跨檔案編輯和對話式重構、(C) Copilot Studio — 讓非工程師用視覺化方式建立 AI 助理和自動化流程。團隊有 3 名工程師和 5 名業務分析師，主要需求是「讓業務分析師能自己建立自動化報表流程」。你選哪個？',
      model:'F6',
      options:[
-       {key:'A', text:'GitHub Copilot — 最知名的 AI 開發工具', depth:1},
-       {key:'B', text:'Cursor — 功能最強大', depth:2},
+       {key:'A', text:'GitHub Copilot — 最知名的 AI 開發工具，業界標準，生態系最完整', depth:1},
+       {key:'B', text:'Cursor — 功能最強大的 AI IDE，開發效率提升最明顯', depth:2},
        {key:'C', text:'Copilot Studio — 需求是讓「非工程師」建自動化流程，Copilot Studio 的視覺化介面和低程式碼設計正是為這個場景打造的', depth:4},
-       {key:'D', text:'三個都買，讓大家自己選', depth:2}
+       {key:'D', text:'三個都買，讓工程師和分析師各自選擇最順手的工具就好', depth:2}
      ], correct:'C',
      diagnosis:{
        A:{gap:'Copilot 是給「會寫程式的人」用的', followup:'5 名業務分析師會用 VS Code 寫程式嗎？Copilot 的程式碼補全對他們有意義嗎？'},
@@ -686,10 +686,10 @@ M06: {
     {id:'Q14', stem:'初級工程師用 Vibe Coding（跟 AI 對話描述需求，讓 AI 直接生成整個應用）完成了一個內部工具。功能完全正確，主管很滿意。但資深工程師 code review 後臉色大變。最可能發現了什麼問題？',
      model:'F6',
      options:[
-       {key:'A', text:'程式碼風格不符合公司規範', depth:2},
+       {key:'A', text:'程式碼風格和命名慣例不符合公司規範，需要大量重構才能合併', depth:2},
        {key:'B', text:'AI 生成的程式碼存在嚴重安全漏洞——SQL injection 未防護、API key 硬編碼在前端、沒有輸入驗證。AI 生成的程式碼「能跑」不等於「安全」', depth:4},
-       {key:'C', text:'AI 寫的程式碼太複雜了', depth:1},
-       {key:'D', text:'用 AI 寫的程式碼不能用在公司專案', depth:1}
+       {key:'C', text:'AI 寫的程式碼過度複雜，可讀性差，後續很難維護和擴充', depth:1},
+       {key:'D', text:'公司政策規定 AI 生成的程式碼不能直接用在正式專案中', depth:1}
      ], correct:'B',
      diagnosis:{
        A:{gap:'風格問題是小事，安全才是大問題', followup:'程式碼風格可以自動格式化。但如果 API key 暴露在前端被惡意使用者拿走呢？這個損害能「自動修復」嗎？'},
@@ -703,10 +703,10 @@ M06: {
     F1: [
       {id:'R-F1-1', stem:'IT 主管發現公司已經有 12 個部門各自用不同的 No-Code AI 工具。每個部門都說自己的工具最好。這種情況最大的風險是？',
        options:[
-         {key:'A', text:'成本太高', depth:2},
+         {key:'A', text:'12 個工具的授權成本太高，應該統一採購來降低費用', depth:2},
          {key:'B', text:'Shadow IT 泛濫——沒有統一治理，資料散落在 12 個平台，合規、安全和資料一致性都無法保障', depth:4},
-         {key:'C', text:'IT 部門管理權被架空', depth:2},
-         {key:'D', text:'沒有風險，多元工具是好事', depth:1}
+         {key:'C', text:'IT 部門的管理權被架空，各部門各行其是不聽指揮', depth:2},
+         {key:'D', text:'沒有風險，多元工具能促進各部門創新，是好事不是壞事', depth:1}
        ], correct:'B',
        diagnosis:{
          A:{gap:'成本是問題但不是最大風險', followup:'比成本更嚴重的是：當法規要求「列出所有 AI 應用」時，你能列出來嗎？'},
@@ -717,10 +717,10 @@ M06: {
     F2: [
       {id:'R-F2-1', stem:'AutoML 工具顯示最佳模型是 Random Forest，準確率 89%。業務經理問：「能不能讓它跑出 95%？」你的回答是？',
        options:[
-         {key:'A', text:'調高模型參數就可以', depth:1},
-         {key:'B', text:'換更複雜的模型試試', depth:2},
+         {key:'A', text:'手動調高模型的超參數就可以，AutoML 的自動搜尋不一定最佳', depth:1},
+         {key:'B', text:'換更複雜的深度學習模型試試，Random Forest 太簡單了', depth:2},
          {key:'C', text:'AutoML 已經自動嘗試過多種模型和參數組合。要突破 89%，最有效的方式不是調模型，而是改善資料——補充特徵、修復品質問題、增加樣本多樣性', depth:4},
-         {key:'D', text:'89% 已經很好了，不用追求更高', depth:2}
+         {key:'D', text:'89% 的準確率在商業場景中已經很好了，不需要再追求更高', depth:2}
        ], correct:'C',
        diagnosis:{
          A:{gap:'AutoML 已經自動調過參數了', followup:'AutoML 的核心功能就是自動搜尋最佳參數。你手動調不太可能比自動搜尋的結果更好。'},
@@ -731,10 +731,10 @@ M06: {
     F3: [
       {id:'R-F3-1', stem:'資料分析師一直用 No-Code 工具做分析，最近發現需要處理即時串流資料（每秒數千筆），No-Code 工具完全無法處理。他問：「是不是該學程式了？」',
        options:[
-         {key:'A', text:'不用，等 No-Code 工具支援串流就好', depth:1},
+         {key:'A', text:'不用學程式，等 No-Code 工具下一版支援即時串流處理就好', depth:1},
          {key:'B', text:'是的——這就是 No-Code 的天花板。即時串流處理是需要程式碼的場景，建議學 Python 並用 Apache Kafka 等串流工具', depth:4},
-         {key:'C', text:'換一個更強的 No-Code 工具', depth:2},
-         {key:'D', text:'把串流資料存下來後再用 No-Code 處理就好', depth:2}
+         {key:'C', text:'換一個功能更強的 No-Code 工具，市面上應該有支援串流的平台', depth:2},
+         {key:'D', text:'把串流資料先存到資料庫，之後再用 No-Code 工具批次處理就好', depth:2}
        ], correct:'B',
        diagnosis:{
          A:{gap:'不確定的等待', followup:'No-Code 工具的視覺化引擎本身就有效能瓶頸，即時串流處理可能永遠不會支援到堪用的程度。'},
@@ -745,10 +745,10 @@ M06: {
     F4: [
       {id:'R-F4-1', stem:'公司在選 No-Code 工具時，A 工具功能最多但只支援英文、B 工具功能較少但中文支援好、C 工具介於中間但有本地代理商。你的建議是？',
        options:[
-         {key:'A', text:'選 A，功能最多未來最有彈性', depth:1},
-         {key:'B', text:'選 B，中文支援是台灣企業的基本需求', depth:2},
+         {key:'A', text:'選 A，功能最多的工具未來擴充彈性最大，語言問題可以後面再解決', depth:1},
+         {key:'B', text:'選 B，中文支援是台灣企業的基本需求，沒有中文支援其他都免談', depth:2},
          {key:'C', text:'三個都申請試用兩週，用公司的真實資料和真實需求跑一輪，根據試用結果填入評估矩陣再決定', depth:4},
-         {key:'D', text:'選 C，有代理商比較安心', depth:2}
+         {key:'D', text:'選 C，有本地代理商提供在地支援比較安心，出問題有人可以找', depth:2}
        ], correct:'C',
        diagnosis:{
          A:{gap:'功能多不代表用得到', followup:'如果公司 80% 的資料是中文，A 工具能處理嗎？功能再多用不了也沒意義。'},
@@ -759,10 +759,10 @@ M06: {
     F5: [
       {id:'R-F5-1', stem:'新創用 No-Code 工具在 2 週內完成了 PoC，客戶很滿意，簽了正式合約。現在有兩條路：(A) 繼續用 No-Code 交付、(B) 花 2 個月重建後再交付。客戶要求 1 個月內上線。最佳策略是？',
        options:[
-         {key:'A', text:'繼續用 No-Code，1 個月內交付', depth:2},
-         {key:'B', text:'跟客戶協商延期 2 個月，用程式碼重建', depth:2},
+         {key:'A', text:'繼續用 No-Code 在 1 個月內交付，先滿足客戶期限再說後面的事', depth:2},
+         {key:'B', text:'跟客戶協商延期 2 個月，花時間用程式碼從頭重建更穩定的版本', depth:2},
          {key:'C', text:'先用 No-Code 在 1 個月內交付 MVP，同時啟動程式碼版本的開發，3 個月後無縫切換到工程師版本', depth:4},
-         {key:'D', text:'放棄這個案子，風險太高', depth:1}
+         {key:'D', text:'No-Code 交付正式合約的風險太高，應該放棄這個案子避免損失', depth:1}
        ], correct:'C',
        diagnosis:{
          A:{gap:'短期可行但缺乏遷移規劃', followup:'客戶滿意後要求更多功能和更大流量，No-Code 撐得住嗎？到時候再遷移會更難。'},
@@ -773,10 +773,10 @@ M06: {
     F6: [
       {id:'R-F6-1', stem:'團隊開始大量使用 Vibe Coding 加速開發。三個月後發現：產出速度確實快了 3 倍，但線上 bug 數量也增加了 2 倍，且有一個安全漏洞差點導致客戶資料外洩。你的改善建議是？',
        options:[
-         {key:'A', text:'禁止使用 AI 輔助開發', depth:1},
-         {key:'B', text:'只讓資深工程師使用 AI 工具', depth:2},
+         {key:'A', text:'全面禁止使用 AI 輔助開發，安全比速度重要，回到傳統開發方式', depth:1},
+         {key:'B', text:'限制只讓資深工程師使用 AI 工具，他們比較能辨識安全風險', depth:2},
          {key:'C', text:'建立「AI 生成程式碼品質閘門」——所有 AI 生成的程式碼必須通過自動化安全掃描（SAST）、至少一位人類 code review、以及關鍵路徑的單元測試，才能合併', depth:4},
-         {key:'D', text:'換一個更好的 AI 工具', depth:1}
+         {key:'D', text:'換一個安全性更好的 AI 開發工具，目前的工具品質可能不夠好', depth:1}
        ], correct:'C',
        diagnosis:{
          A:{gap:'因噎廢食——3 倍速的生產力不該直接放棄', followup:'競爭對手繼續用 AI 加速開發，你全面禁止。一年後效率差距會有多大？'},
@@ -858,10 +858,10 @@ M07: {
     {id:'Q1', stem:'醫院想用 AI 分析病理切片影像。有兩個選擇：(A) 用通用的 GPT-4 Vision、(B) 用在百萬張病理影像上微調過的專科模型。你的建議是？',
      model:'F1',
      options:[
-       {key:'A', text:'用 GPT-4 Vision，它是最強的多模態模型', depth:2},
+       {key:'A', text:'用 GPT-4 Vision，它是目前最強的多模態模型，影像辨識能力最好', depth:2},
        {key:'B', text:'用專科模型——病理影像的「正常」和「異常」差異極細微，通用模型看不出來，需要在領域資料上微調過的模型才能辨識', depth:4},
-       {key:'C', text:'兩個都用，交叉驗證', depth:3},
-       {key:'D', text:'先用 GPT-4 Vision 試試，不行再換', depth:2}
+       {key:'C', text:'兩個都用來交叉驗證，雙重模型比對可以提高診斷的可靠度', depth:3},
+       {key:'D', text:'先用 GPT-4 Vision 快速試試看效果，不行的話再換專科模型', depth:2}
      ], correct:'B',
      diagnosis:{
        A:{gap:'最強的通用模型 ≠ 最適合的領域模型', followup:'GPT-4 Vision 能分辨貓和狗，但能分辨良性和惡性細胞嗎？這需要什麼樣的訓練資料？'},
@@ -872,10 +872,10 @@ M07: {
     {id:'Q2', stem:'電商公司想做中文商品評論的情感分析。工程師用 BERT-base 微調後效果很好，但 PM 看到新聞說 GPT-4 更強，要求換模型。你的看法是？',
      model:'F1',
      options:[
-       {key:'A', text:'GPT-4 確實更強，應該換', depth:2},
+       {key:'A', text:'GPT-4 在各項基準測試中確實更強，應該換成最新最強的模型', depth:2},
        {key:'B', text:'在特定的中文情感分析任務上，微調過的 BERT 可能效果更好且成本更低——通用能力強不等於每個任務都贏', depth:4},
-       {key:'C', text:'用 GPT-4 直接 Zero-shot 不用微調更省事', depth:2},
-       {key:'D', text:'BERT 太舊了，應該用新模型', depth:1}
+       {key:'C', text:'用 GPT-4 直接 Zero-shot 就好，不用微調更省事，維護也簡單', depth:2},
+       {key:'D', text:'BERT 是 2018 年的舊模型了，技術迭代太快應該盡快換成新模型', depth:1}
      ], correct:'B',
      diagnosis:{
        A:{gap:'「更強」是在什麼基準上？', followup:'GPT-4 在通用理解上更強，但在你的特定商品評論資料上也更強嗎？你做了 A/B 測試嗎？'},
@@ -886,10 +886,10 @@ M07: {
     {id:'Q3', stem:'供應商推薦一個「全能 AI 平台」，號稱可以同時做 NLP、CV、語音辨識、推薦系統。你第一個要確認的是？',
      model:'F1',
      options:[
-       {key:'A', text:'聽起來很方便，一個平台搞定所有需求', depth:1},
-       {key:'B', text:'確認價格和合約條件', depth:2},
+       {key:'A', text:'聽起來很方便，一個平台搞定所有需求，減少多系統整合的麻煩', depth:1},
+       {key:'B', text:'先確認價格和合約條件是否在預算內，性價比合理再考慮導入', depth:2},
        {key:'C', text:'每個模組在你的領域用真實資料測試——通用平台的每個功能可能都是 70 分，但你的場景可能需要某個功能達到 95 分', depth:4},
-       {key:'D', text:'看有沒有其他大企業在用', depth:2}
+       {key:'D', text:'先看有沒有其他知名大企業在用，有成功案例比較可以放心導入', depth:2}
      ], correct:'C',
      diagnosis:{
        A:{gap:'方便 ≠ 適合', followup:'什麼都能做的工具，通常什麼都做不到最好。你最核心的需求是什麼？那個功能在這個平台上表現如何？'},
@@ -901,10 +901,10 @@ M07: {
     {id:'Q4', stem:'公司要訓練一個辨識工廠瑕疵品的 CV 模型。目前有 10 萬張良品照片和 500 張瑕疵品照片。以下哪個策略最有效？',
      model:'F2',
      options:[
-       {key:'A', text:'資料夠多了（10 萬張），直接訓練', depth:1},
-       {key:'B', text:'花錢再拍 10 萬張瑕疵品照片', depth:2},
+       {key:'A', text:'10 萬張資料量已經夠多了，直接開始訓練，模型會自己學會分辨', depth:1},
+       {key:'B', text:'花錢再拍 10 萬張瑕疵品照片來平衡資料集，量夠大效果才會好', depth:2},
        {key:'C', text:'用資料增強（旋轉、翻轉、亮度調整）擴充瑕疵品樣本的多樣性，同時確保各種瑕疵類型（刮痕、變色、變形）都有代表', depth:4},
-       {key:'D', text:'只用瑕疵品照片訓練', depth:1}
+       {key:'D', text:'只用 500 張瑕疵品照片訓練，讓模型專注學習什麼是瑕疵就好', depth:1}
      ], correct:'C',
      diagnosis:{
        A:{gap:'量多但類別極度不平衡', followup:'10 萬良品 vs 500 瑕疵品，模型會學到「全部判良品就對了 99.5%」。這個模型有用嗎？'},
@@ -915,10 +915,10 @@ M07: {
     {id:'Q5', stem:'NLP 團隊蒐集了 50 萬筆客服對話來訓練意圖分類模型。測試準確率 94%。但上線後在「退款申請」這個類別的表現特別差。調查後發現訓練資料中「退款申請」只有 200 筆。最根本的問題是？',
      model:'F2',
      options:[
-       {key:'A', text:'50 萬筆不夠多', depth:1},
-       {key:'B', text:'模型選錯了', depth:1},
+       {key:'A', text:'50 萬筆還是不夠多，需要蒐集更多對話資料才能提升效果', depth:1},
+       {key:'B', text:'模型架構選錯了，應該換一個更適合多類別分類的深度學習模型', depth:1},
        {key:'C', text:'資料量充足但多樣性不均——「退款申請」類別樣本太少，模型無法學會這個意圖的各種表達方式', depth:4},
-       {key:'D', text:'94% 已經很好了，不用管個別類別', depth:2}
+       {key:'D', text:'整體 94% 已經很好了，個別類別表現差是正常現象不需要特別處理', depth:2}
      ], correct:'C',
      diagnosis:{
        A:{gap:'總量不是問題，分佈才是', followup:'再加 50 萬筆但「退款申請」仍然只有 200 筆，問題會解決嗎？'},
@@ -930,10 +930,10 @@ M07: {
     {id:'Q6', stem:'電商用純文字搜尋已經很好了。PM 想加入圖片搜尋功能。工程師說「多模態很複雜，不值得」。你怎麼分析？',
      model:'F3',
      options:[
-       {key:'A', text:'工程師說得對，純文字夠用就不要動', depth:2},
-       {key:'B', text:'PM 說得對，多模態是趨勢一定要做', depth:1},
+       {key:'A', text:'工程師說得對，純文字搜尋目前夠用就不要輕易動架構，穩定最重要', depth:2},
+       {key:'B', text:'PM 說得對，多模態是業界趨勢，不跟上遲早會被競爭對手甩開', depth:1},
        {key:'C', text:'先分析用戶行為：有多少搜尋失敗是因為用戶「說不出商品名稱」？如果比例高，圖片搜尋能直接解決這個盲區，多模態的互補性就有明確 ROI', depth:4},
-       {key:'D', text:'做 A/B 測試再說', depth:3}
+       {key:'D', text:'先做 A/B 測試看看用戶到底有沒有圖片搜尋的需求再做決定', depth:3}
      ], correct:'C',
      diagnosis:{
        A:{gap:'可能錯過重要的用戶需求', followup:'你知道有多少用戶因為搜不到東西而離開嗎？如果 20% 的搜尋失敗可以被圖片搜尋解決呢？'},
@@ -944,10 +944,10 @@ M07: {
     {id:'Q7', stem:'保險公司想用 AI 處理理賠。目前流程是：客戶上傳照片（車禍現場）＋填寫文字描述。只用其中一種資料夠嗎？',
      model:'F3',
      options:[
-       {key:'A', text:'只用照片就夠了，CV 可以判斷損壞程度', depth:2},
-       {key:'B', text:'只用文字描述就夠了，NLP 可以提取關鍵資訊', depth:2},
+       {key:'A', text:'只用照片就夠了，CV 模型可以從影像中精準判斷車輛的損壞程度', depth:2},
+       {key:'B', text:'只用文字描述就夠了，NLP 模型可以從描述中提取所有理賠關鍵資訊', depth:2},
        {key:'C', text:'兩者都不夠——照片看不出事故責任歸屬，文字描述看不出實際損壞程度。多模態融合才能得到完整判斷', depth:4},
-       {key:'D', text:'都不靠譜，還是人工處理', depth:1}
+       {key:'D', text:'AI 處理理賠都不夠靠譜，這種牽涉金額的判斷還是全部交給人工', depth:1}
      ], correct:'C',
      diagnosis:{
        A:{gap:'照片有看不到的資訊', followup:'照片能判斷「是誰的責任」嗎？「對方闖紅燈」這種資訊只存在文字描述中。'},
@@ -958,10 +958,10 @@ M07: {
     {id:'Q8', stem:'工廠想用 AI 做品質檢測。目前只用攝影機（CV）。有人建議加裝麥克風，用聲音判斷機器異常。你的看法是？',
      model:'F3',
      options:[
-       {key:'A', text:'多此一舉，攝影機看得到所有問題', depth:1},
-       {key:'B', text:'聲音資料太雜，工廠環境噪音多', depth:2},
+       {key:'A', text:'多此一舉，攝影機的視覺檢測已經能看到所有品質問題了', depth:1},
+       {key:'B', text:'聲音資料太雜亂了，工廠環境噪音多，很難從中提取有用的訊號', depth:2},
        {key:'C', text:'有價值——有些瑕疵外觀正常但機器聲音異常（如內部零件鬆動）。多模態可以捕捉單一攝影機看不到的問題', depth:4},
-       {key:'D', text:'用更好的攝影機就好', depth:2}
+       {key:'D', text:'與其加麥克風不如升級更好的攝影機，提高影像解析度就能看到更多細節', depth:2}
      ], correct:'C',
      diagnosis:{
        A:{gap:'攝影機有看不到的瑕疵', followup:'產品外觀完美但內部有裂痕——攝影機看得到嗎？用 X 光太貴的話，聲音分析是否是低成本替代？'},
@@ -973,10 +973,10 @@ M07: {
     {id:'Q9', stem:'電商平台的推薦系統做了兩個版本：A 版最大化點擊率，B 版加入「多樣性」指標。A 版點擊率高 15%，但 B 版的退貨率低 25% 且回購率高 20%。你選哪個？',
      model:'F4',
      options:[
-       {key:'A', text:'選 A，點擊率高代表推薦更準確', depth:1},
-       {key:'B', text:'選 B，退貨率低和回購率高代表用戶真正滿意', depth:3},
+       {key:'A', text:'選 A，點擊率高 15% 代表推薦更精準，用戶更願意點就是更好的推薦', depth:1},
+       {key:'B', text:'選 B，退貨率低和回購率高代表用戶是真正滿意，不只是衝動點擊', depth:3},
        {key:'C', text:'選 B，並用數據計算總體 ROI——B 版的較低退貨率＋較高回購率的長期價值很可能超過 A 版的短期點擊率優勢', depth:4},
-       {key:'D', text:'做更多 A/B 測試', depth:2}
+       {key:'D', text:'目前數據還不夠充分，應該做更大規模的 A/B 測試再做最終決策', depth:2}
      ], correct:'C',
      diagnosis:{
        A:{gap:'短期指標不等於長期價值', followup:'點擊率高但退貨率也高，代表什麼？用戶被「誘導」點了不真正需要的東西，退貨成本誰承擔？'},
@@ -987,10 +987,10 @@ M07: {
     {id:'Q10', stem:'新聞 App 推薦系統上線後，用戶只看到跟自己立場一致的新聞。產品經理說「數據很好」。倫理委員會說「資訊泡泡很危險」。你怎麼評估？',
      model:'F4',
      options:[
-       {key:'A', text:'數據好就好，用戶有選擇權', depth:1},
-       {key:'B', text:'倫理委員會反應過度', depth:1},
+       {key:'A', text:'數據表現好就好，用戶有選擇權，平台不應該干預用戶想看什麼', depth:1},
+       {key:'B', text:'倫理委員會反應過度了，商業產品的首要目標是用戶留存和營收', depth:1},
        {key:'C', text:'這是多目標困境——「用戶停留時間」和「觀點多樣性」是衝突的目標。建議在推薦演算法中加入多樣性指標，並定期審計泡泡效應', depth:4},
-       {key:'D', text:'取消推薦系統，回到時間排序', depth:2}
+       {key:'D', text:'取消推薦系統回到純時間排序，讓用戶自己決定要看什麼內容', depth:2}
      ], correct:'C',
      diagnosis:{
        A:{gap:'用戶不知道自己被困在泡泡裡', followup:'用戶「選擇」的前提是有多元選項。如果系統從源頭就過濾了不同觀點，用戶的選擇權在哪？'},
@@ -1002,10 +1002,10 @@ M07: {
     {id:'Q11', stem:'公司花了一年建了產品知識圖譜，包含所有產品的規格、零件、相容性資訊。上線後客服人員說搜尋比以前準確多了，但有時候會找不到最近上市的新產品。最可能的原因是？',
      model:'F5',
      options:[
-       {key:'A', text:'知識圖譜系統有 bug', depth:1},
+       {key:'A', text:'知識圖譜系統有 bug，檢索功能沒有正確索引到新上架的產品資料', depth:1},
        {key:'B', text:'知識圖譜建好後不會自動更新——新產品的資訊沒有被加入圖譜。這驗證了「知識圖譜永遠不完整」的特性，需要持續維護機制', depth:4},
-       {key:'C', text:'新產品太新，系統還沒來得及學習', depth:2},
-       {key:'D', text:'應該換更好的搜尋引擎', depth:1}
+       {key:'C', text:'新產品太新了，系統還沒來得及從網路上學習到這些產品的資訊', depth:2},
+       {key:'D', text:'應該換更好的搜尋引擎，目前的檢索能力不足以涵蓋所有產品', depth:1}
      ], correct:'B',
      diagnosis:{
        A:{gap:'不是 bug 而是設計預期', followup:'知識圖譜本來就不會自動跑去抓新產品資訊。這不是錯誤，而是需要維護流程。'},
@@ -1016,10 +1016,10 @@ M07: {
     {id:'Q12', stem:'CTO 問：「知識圖譜跟 RAG 有什麼不同？我們已經有 RAG 了，還需要知識圖譜嗎？」以下哪個回答最準確？',
      model:'F5',
      options:[
-       {key:'A', text:'知識圖譜比 RAG 先進，應該升級', depth:1},
-       {key:'B', text:'RAG 夠用了，不需要知識圖譜', depth:2},
+       {key:'A', text:'知識圖譜是比 RAG 更先進的技術，應該升級取代現有的 RAG 系統', depth:1},
+       {key:'B', text:'RAG 已經夠用了，知識圖譜的建置成本太高，不需要額外投資', depth:2},
        {key:'C', text:'兩者互補——RAG 擅長從文件中檢索段落回答問題，知識圖譜擅長結構化關係查詢（如「跟 A 產品相容的所有零件」）。組合使用可以讓 AI 既能回答開放問題又能做精確關係查詢', depth:4},
-       {key:'D', text:'一樣的東西，叫法不同', depth:1}
+       {key:'D', text:'本質上是一樣的東西只是叫法不同，都是從資料中找答案的技術', depth:1}
      ], correct:'C',
      diagnosis:{
        A:{gap:'不是高低之分而是互補', followup:'知識圖譜的「精確」和 RAG 的「靈活」各有優勢。你覺得哪些問題適合圖譜、哪些適合 RAG？'},
@@ -1033,10 +1033,10 @@ M07: {
     F1: [
       {id:'R-F1-1', stem:'團隊直接用通用 LLM 做中醫處方推薦，因為「GPT-4 什麼都會」。結果推薦的藥方出現了明顯的配伍禁忌（兩種藥不能一起用）。這個失敗案例的教訓是？',
        options:[
-         {key:'A', text:'GPT-4 的中醫知識不夠，要等更新版', depth:1},
+         {key:'A', text:'GPT-4 的中醫知識覆蓋不夠完整，要等下一代模型訓練更多中醫資料', depth:1},
          {key:'B', text:'通用模型缺乏中醫領域的深度知識——配伍禁忌是領域特有的規則，需要在中醫專業資料上微調或用知識圖譜約束才能避免', depth:4},
-         {key:'C', text:'AI 不應該用在醫療', depth:1},
-         {key:'D', text:'多問幾次就會對了', depth:1}
+         {key:'C', text:'醫療領域的風險太高，AI 根本不應該用在任何醫療相關的場景', depth:1},
+         {key:'D', text:'LLM 有隨機性，多問幾次取最常出現的答案就會是對的', depth:1}
        ], correct:'B',
        diagnosis:{
          A:{gap:'更新版也不一定有深度領域知識', followup:'中醫配伍禁忌有數百條，通用訓練資料中的覆蓋率可能很低。等更新是否能解決？'},
@@ -1047,10 +1047,10 @@ M07: {
     F2: [
       {id:'R-F2-1', stem:'自駕車公司在加州蒐集了 100 萬公里的路測資料。把模型部署到台灣後，在下雨天和機車穿梭的情境中表現大幅下降。問題出在哪？',
        options:[
-         {key:'A', text:'100 萬公里不夠多', depth:1},
+         {key:'A', text:'100 萬公里的路測資料還是不夠多，需要累積到更大的資料量', depth:1},
          {key:'B', text:'資料量充足但多樣性不足——加州的路況缺乏台灣常見的大雨、機車、狹窄巷弄等情境，模型面對分佈外樣本時泛化能力不足', depth:4},
-         {key:'C', text:'台灣的交通規則跟美國不同，要重新訓練', depth:2},
-         {key:'D', text:'硬體不夠好', depth:1}
+         {key:'C', text:'台灣的交通規則和駕駛習慣跟美國不同，模型需要針對台灣重新訓練', depth:2},
+         {key:'D', text:'台灣部署的感測器硬體不夠好，偵測精度跟不上加州的設備水準', depth:1}
        ], correct:'B',
        diagnosis:{
          A:{gap:'量不是問題，覆蓋範圍才是', followup:'再加 100 萬公里加州資料，台灣下雨天的表現會改善嗎？'},
@@ -1061,10 +1061,10 @@ M07: {
     F3: [
       {id:'R-F3-1', stem:'客服中心想用 AI 判斷客戶的情緒狀態。目前只分析文字對話內容。你建議增加什麼來提升準確度？',
        options:[
-         {key:'A', text:'用更好的 NLP 模型', depth:2},
+         {key:'A', text:'換用更強的 NLP 模型，語義理解能力越好情緒判斷就越準確', depth:2},
          {key:'B', text:'增加語音分析（語調、語速、音量），因為文字看不出客戶「是在生氣地打字還是平靜地陳述」——多模態融合能捕捉文字無法傳達的情緒線索', depth:4},
-         {key:'C', text:'分析客戶的打字速度', depth:2},
-         {key:'D', text:'直接問客戶「你現在情緒如何」', depth:1}
+         {key:'C', text:'分析客戶的打字速度和修改頻率，這些行為特徵能反映情緒狀態', depth:2},
+         {key:'D', text:'在對話開始時直接問客戶「你現在情緒如何」，最直接也最準確', depth:1}
        ], correct:'B',
        diagnosis:{
          A:{gap:'同一模態的天花板', followup:'再好的 NLP 模型，看到「好的我知道了」也無法判斷客戶是無奈接受還是真的沒問題。語調才能分辨。'},
@@ -1075,10 +1075,10 @@ M07: {
     F4: [
       {id:'R-F4-1', stem:'音樂串流平台發現：推薦系統讓用戶只聽同類型音樂，新歌手和冷門音樂完全沒有曝光機會。長期下來小眾音樂人在平台上消失了。這反映了推薦系統的什麼問題？',
        options:[
-         {key:'A', text:'推薦系統很精準，用戶喜歡就好', depth:1},
+         {key:'A', text:'推薦系統很精準，用戶只聽喜歡的音樂是好事，代表推薦做得好', depth:1},
          {key:'B', text:'這是推薦系統只最大化「點擊率」的後果——冷啟動問題讓新歌手沒機會被推薦，加上同溫層效應讓用戶只聽熟悉的，最終破壞了平台的內容多樣性', depth:4},
-         {key:'C', text:'小眾音樂本來就受眾少', depth:2},
-         {key:'D', text:'多打廣告就好了', depth:1}
+         {key:'C', text:'小眾音樂本來受眾就少，在任何平台上曝光都有限，這不是推薦的問題', depth:2},
+         {key:'D', text:'讓新歌手多打廣告增加曝光就好，推薦演算法本身不需要改動', depth:1}
        ], correct:'B',
        diagnosis:{
          A:{gap:'短期精準 ≠ 長期健康', followup:'如果平台上只剩流行音樂，用戶遲早會覺得無聊。Spotify 已經在用「探索推薦」來解決這個問題。'},
@@ -1089,10 +1089,10 @@ M07: {
     F5: [
       {id:'R-F5-1', stem:'法律事務所花了半年建了「法規知識圖譜」，包含所有法條和判例的關係。剛上線就碰到一個新修訂的法規，知識圖譜中的舊資訊導致律師差點給出錯誤建議。這個事件的最重要教訓是？',
        options:[
-         {key:'A', text:'知識圖譜不適合法律領域', depth:1},
-         {key:'B', text:'半年的建置時間太長了', depth:1},
+         {key:'A', text:'法律領域變動太頻繁，知識圖譜根本不適合用在這種動態的領域', depth:1},
+         {key:'B', text:'半年的建置時間太長了，建置期間法規就已經在變了，永遠追不上', depth:1},
          {key:'C', text:'知識圖譜「永遠不完整」——必須建立持續更新機制（例如監控法規修訂並自動觸發圖譜更新），否則靜態的圖譜遲早會變成錯誤的來源', depth:4},
-         {key:'D', text:'讓 AI 自動更新就好', depth:2}
+         {key:'D', text:'讓 AI 自動監控法規變動並即時更新知識圖譜，不需要人工介入', depth:2}
        ], correct:'C',
        diagnosis:{
          A:{gap:'法律恰恰是知識圖譜最有價值的領域之一', followup:'法條之間的引用關係、判例的適用條件——這些結構化關係非常適合知識圖譜。問題在維護不在適用性。'},
