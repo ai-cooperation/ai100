@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>課堂歷史紀錄 — ClassClaw</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+html{font-size:20px!important;line-height:1.7!important}
+:root{--pri:#0F9D8A;--pri-d:#0A7A6B;--navy:#0B3C5D;--gold:#FFC857;--gold-d:#d4a632;--red:#DC2626;--purple:#7C3AED;--bg:#0d1117;--surface:#161b22;--text:#e6edf3;--dim:#7d8590;--border:#30363d}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+button{font-family:inherit;cursor:pointer;border:none}
+a{color:var(--pri);text-decoration:none}
+
+/* Login */
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;text-align:center;max-width:400px;width:100%}
+.login-box h1{font-size:1.5rem;color:var(--gold);margin-bottom:0.3rem}
+.login-box .sub{font-size:0.8rem;color:var(--dim);margin-bottom:1.5rem}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:0.8rem;width:100%;padding:0.9rem;background:#fff;color:#333;font-size:1rem;font-weight:700;border-radius:10px;border:none;transition:all 0.2s}
+.btn-google:hover{box-shadow:0 4px 20px rgba(255,255,255,0.15);transform:translateY(-1px)}
+.btn-google img{width:20px;height:20px}
+
+/* Main */
+.app{display:none;min-height:100vh;padding:1rem 1.5rem 2rem;max-width:900px;margin:0 auto}
+.app.active{display:block}
+.header{display:flex;align-items:center;gap:0.8rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.header h1{font-size:1.3rem;color:var(--gold);flex:1}
+.header .user{font-size:0.75rem;color:var(--dim);display:flex;align-items:center;gap:0.4rem}
+.header .user img{width:24px;height:24px;border-radius:50%}
+.btn-back{padding:0.4rem 0.8rem;border-radius:8px;font-size:0.85rem;background:none;color:var(--dim);border:1px solid var(--border)}
+.btn-back:hover{color:var(--text);border-color:var(--text)}
+.btn-logout{padding:0.3rem 0.6rem;border-radius:6px;font-size:0.7rem;color:var(--red);background:none;border:1px solid var(--border)}
+
+/* Filter */
+.filter-row{margin-bottom:1.2rem;display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap}
+.filter-row select{padding:0.5rem 0.8rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;outline:none}
+.filter-row select:focus{border-color:var(--pri)}
+.filter-row .count{font-size:0.8rem;color:var(--dim);margin-left:auto}
+
+/* Session card */
+.session-card{background:var(--surface);border-radius:12px;border:1px solid var(--border);margin-bottom:0.8rem;overflow:hidden;transition:border-color 0.2s}
+.session-card:hover{border-color:var(--pri)}
+.sc-header{padding:1rem 1.2rem;cursor:pointer;display:flex;align-items:center;gap:1rem}
+.sc-date{font-size:0.75rem;color:var(--pri);white-space:nowrap;font-weight:700}
+.sc-info{flex:1;min-width:0}
+.sc-title{font-weight:700;font-size:0.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc-stats{display:flex;gap:0.8rem;font-size:0.75rem;color:var(--dim);margin-top:0.2rem;flex-wrap:wrap}
+.sc-stats .stat{display:flex;align-items:center;gap:0.2rem}
+.sc-arrow{font-size:0.8rem;color:var(--dim);transition:transform 0.2s}
+.session-card.open .sc-arrow{transform:rotate(90deg)}
+
+.sc-detail{display:none;padding:0 1.2rem 1rem;border-top:1px solid var(--border)}
+.session-card.open .sc-detail{display:block}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-top:0.8rem}
+.detail-box{background:var(--bg);border-radius:8px;padding:0.8rem 1rem;border:1px solid var(--border)}
+.detail-box h4{font-size:0.75rem;color:var(--pri);margin-bottom:0.4rem}
+.detail-box .val{font-size:1.2rem;font-weight:900;color:var(--gold)}
+.detail-box .sub{font-size:0.7rem;color:var(--dim);margin-top:0.2rem}
+.detail-box ul{list-style:none;font-size:0.78rem;color:var(--text);margin-top:0.3rem}
+.detail-box ul li{padding:0.15rem 0;border-bottom:1px solid var(--border)}
+.detail-box ul li:last-child{border:none}
+
+/* States */
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--dim);font-size:0.95rem}
+.empty-state .icon{font-size:2.5rem;margin-bottom:0.8rem}
+.error-msg{background:rgba(220,38,38,0.1);border:1px solid var(--red);border-radius:10px;padding:1rem;color:var(--red);font-size:0.85rem;text-align:center;margin:1rem 0}
+.loading{text-align:center;padding:3rem;color:var(--dim);font-size:0.9rem}
+
+@media(max-width:600px){
+  .detail-grid{grid-template-columns:1fr}
+  .header h1{font-size:1.1rem}
+  .sc-stats{gap:0.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="login" id="loginScreen">
+  <div class="login-box">
+    <h1>📋 課堂歷史紀錄</h1>
+    <p class="sub">ClassClaw 講師專用</p>
+    <button class="btn-google" onclick="googleLogin()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg">使用 Google 帳號登入
+    </button>
+  </div>
+</div>
+
+<!-- App -->
+<div class="app" id="app">
+  <div class="header">
+    <button class="btn-back" onclick="location.href='/classroom/host'">← 後台</button>
+    <h1>📋 課堂歷史紀錄</h1>
+    <div class="user">
+      <img id="avatar" src="">
+      <span id="userName"></span>
+      <button class="btn-logout" onclick="googleLogout()">登出</button>
+    </div>
+  </div>
+
+  <div class="filter-row">
+    <select id="courseFilter" onchange="renderSessions()">
+      <option value="">全部課程</option>
+    </select>
+    <span class="count" id="sessionCount"></span>
+  </div>
+
+  <div id="content">
+    <div class="loading">載入中...</div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:['AIza','SyC5X5C0Uje6bCMzrvuUuq5Bz33ly0PR-vc'].join(''),
+  authDomain:'ai-classroom-70a97.firebaseapp.com',
+  databaseURL:'https://ai-classroom-70a97-default-rtdb.firebaseio.com',
+  projectId:'ai-classroom-70a97'
+});
+var auth=firebase.auth();
+var currentUser=null;
+var sessions=[];
+
+function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function timeStr(t){if(!t)return'';var d=new Date(t);return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')}
+function dateStr(t){if(!t)return'';var d=new Date(t);return d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')}
+
+// Auth
+auth.onAuthStateChanged(function(user){
+  currentUser=user;
+  if(user){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('app').classList.add('active');
+    document.getElementById('avatar').src=user.photoURL||'';
+    document.getElementById('userName').textContent=user.displayName||user.email;
+    loadHistory();
+  } else {
+    document.getElementById('loginScreen').style.display='flex';
+    document.getElementById('app').classList.remove('active');
+  }
+});
+function googleLogin(){
+  var provider=new firebase.auth.GoogleAuthProvider();
+  if(/iPhone|iPad|Android/i.test(navigator.userAgent)){auth.signInWithRedirect(provider)}
+  else{auth.signInWithPopup(provider).catch(function(e){alert(e.message)})}
+}
+function googleLogout(){if(confirm('登出？'))auth.signOut().then(function(){location.reload()})}
+
+// Load history from GAS
+function loadHistory(){
+  var gasUrl=localStorage.getItem('_gas_backup_url');
+  if(!gasUrl){
+    document.getElementById('content').innerHTML=
+      '<div class="empty-state"><div class="icon">⚙️</div>請先在講師後台設定 Sheets 備份 URL</div>';
+    return;
+  }
+  document.getElementById('content').innerHTML='<div class="loading">載入歷史紀錄中...</div>';
+
+  fetch(gasUrl+'?action=history')
+    .then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    })
+    .then(function(data){
+      if(!data || !Array.isArray(data.sessions)){
+        sessions=[];
+      } else {
+        sessions=data.sessions.sort(function(a,b){
+          return new Date(b.date||b.created||0)-new Date(a.date||a.created||0);
+        });
+      }
+      buildFilter();
+      renderSessions();
+    })
+    .catch(function(err){
+      document.getElementById('content').innerHTML=
+        '<div class="error-msg">載入失敗：'+esc(err.message)+'<br><br>請確認 Sheets 備份 URL 是否正確，以及 GAS 已部署為網頁應用程式。</div>';
+    });
+}
+
+function buildFilter(){
+  var sel=document.getElementById('courseFilter');
+  var names={};
+  sessions.forEach(function(s){
+    var name=s.courseName||s.title||'未命名';
+    names[name]=true;
+  });
+  var options='<option value="">全部課程</option>';
+  Object.keys(names).sort().forEach(function(n){
+    options+='<option value="'+esc(n)+'">'+esc(n)+'</option>';
+  });
+  sel.innerHTML=options;
+}
+
+function renderSessions(){
+  var filter=document.getElementById('courseFilter').value;
+  var filtered=sessions.filter(function(s){
+    if(!filter) return true;
+    return (s.courseName||s.title||'未命名')===filter;
+  });
+
+  document.getElementById('sessionCount').textContent=filtered.length+' 筆紀錄';
+
+  if(!filtered.length){
+    document.getElementById('content').innerHTML=
+      '<div class="empty-state"><div class="icon">📭</div>尚無歷史紀錄'+(filter?'（目前篩選：'+esc(filter)+'）':'，請先在課後頁面備份資料')+'</div>';
+    return;
+  }
+
+  var html='';
+  filtered.forEach(function(s,i){
+    var title=esc(s.courseName||s.title||'未命名課程');
+    var date=dateStr(s.date||s.created);
+    var fc=s.feedbackCount||0;
+    var avg=s.avgSatisfaction?Number(s.avgSatisfaction).toFixed(1):'—';
+    var ec=s.emailCount||0;
+    var wc=s.wallCount||0;
+    var qc=s.qaCount||0;
+
+    html+='<div class="session-card" id="sc'+i+'">';
+    html+='<div class="sc-header" onclick="toggleCard('+i+')">';
+    html+='<span class="sc-date">'+esc(date)+'</span>';
+    html+='<div class="sc-info"><div class="sc-title">'+title+'</div>';
+    html+='<div class="sc-stats">';
+    if(fc) html+='<span class="stat">💬 '+fc+' 回饋</span>';
+    if(avg!=='—') html+='<span class="stat">⭐ '+avg+'</span>';
+    if(ec) html+='<span class="stat">📧 '+ec+' 信</span>';
+    if(wc) html+='<span class="stat">🧱 '+wc+' 留言</span>';
+    if(qc) html+='<span class="stat">❓ '+qc+' 問答</span>';
+    if(!fc&&avg==='—'&&!ec&&!wc&&!qc) html+='<span class="stat" style="color:var(--dim)">無互動資料</span>';
+    html+='</div></div>';
+    html+='<span class="sc-arrow">▶</span>';
+    html+='</div>';
+
+    // Detail
+    html+='<div class="sc-detail">';
+    html+='<div class="detail-grid">';
+
+    // Feedback stats
+    html+='<div class="detail-box"><h4>回饋統計</h4>';
+    html+='<div class="val">'+fc+'</div><div class="sub">份回饋</div>';
+    if(avg!=='—') html+='<div style="margin-top:0.4rem;font-size:0.8rem">平均滿意度：<strong style="color:var(--gold)">'+avg+' / 5</strong></div>';
+    html+='</div>';
+
+    // Email
+    html+='<div class="detail-box"><h4>Email 收集</h4>';
+    html+='<div class="val">'+ec+'</div><div class="sub">封 Email</div>';
+    if(s.emails&&s.emails.length){
+      html+='<ul>';
+      s.emails.slice(0,10).forEach(function(e){html+='<li>'+esc(e)+'</li>'});
+      if(s.emails.length>10) html+='<li style="color:var(--dim)">...還有 '+(s.emails.length-10)+' 筆</li>';
+      html+='</ul>';
+    }
+    html+='</div>';
+
+    // Wall / QA
+    html+='<div class="detail-box"><h4>課堂互動</h4>';
+    html+='<div style="font-size:0.85rem">🧱 留言牆：<strong>'+wc+'</strong></div>';
+    html+='<div style="font-size:0.85rem">❓ 問答區：<strong>'+qc+'</strong></div>';
+    html+='</div>';
+
+    // Suggestions
+    html+='<div class="detail-box"><h4>改進建議</h4>';
+    if(s.suggestions&&s.suggestions.length){
+      html+='<ul>';
+      s.suggestions.slice(0,5).forEach(function(sg){html+='<li>'+esc(sg)+'</li>'});
+      if(s.suggestions.length>5) html+='<li style="color:var(--dim)">...還有 '+(s.suggestions.length-5)+' 筆</li>';
+      html+='</ul>';
+    } else {
+      html+='<div class="sub">無建議</div>';
+    }
+    html+='</div>';
+
+    html+='</div>'; // detail-grid
+    html+='</div>'; // sc-detail
+    html+='</div>'; // session-card
+  });
+
+  document.getElementById('content').innerHTML=html;
+}
+
+function toggleCard(i){
+  var el=document.getElementById('sc'+i);
+  if(el) el.classList.toggle('open');
+}
+</script>
+</body>
+</html>

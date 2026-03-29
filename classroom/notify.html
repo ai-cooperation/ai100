@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>通知中心 — ClassClaw</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+html{font-size:20px!important;line-height:1.7!important}
+:root{--pri:#0F9D8A;--pri-d:#0A7A6B;--navy:#0B3C5D;--gold:#FFC857;--gold-d:#d4a632;--red:#DC2626;--purple:#7C3AED;--bg:#0d1117;--surface:#161b22;--text:#e6edf3;--dim:#7d8590;--border:#30363d}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+button{font-family:inherit;cursor:pointer;border:none}
+input,textarea,select{font-family:inherit;font-size:1rem!important}
+a{color:var(--pri);text-decoration:none}
+
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;text-align:center;max-width:400px;width:100%}
+.login-box h1{font-size:1.5rem;color:var(--gold);margin-bottom:0.3rem}
+.login-box .sub{font-size:0.8rem;color:var(--dim);margin-bottom:1.5rem}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:0.8rem;width:100%;padding:0.9rem;background:#fff;color:#333;font-size:1rem;font-weight:700;border-radius:10px;border:none;transition:all 0.2s}
+.btn-google:hover{box-shadow:0 4px 20px rgba(255,255,255,0.15);transform:translateY(-1px)}
+.btn-google img{width:20px;height:20px}
+
+.app{display:none;min-height:100vh;padding:1rem 1.5rem 2rem;max-width:900px;margin:0 auto}
+.app.active{display:block}
+.header{display:flex;align-items:center;gap:0.8rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.header h1{font-size:1.3rem;color:var(--gold);flex:1}
+.header .user{font-size:0.75rem;color:var(--dim);display:flex;align-items:center;gap:0.4rem}
+.header .user img{width:24px;height:24px;border-radius:50%}
+.btn-back{padding:0.4rem 0.8rem;border-radius:8px;font-size:0.85rem;background:none;color:var(--dim);border:1px solid var(--border)}
+.btn-back:hover{color:var(--text);border-color:var(--text)}
+.btn-logout{padding:0.3rem 0.6rem;border-radius:6px;font-size:0.7rem;color:var(--red);background:none;border:1px solid var(--border)}
+
+/* Sections */
+.section{background:var(--surface);border-radius:12px;border:1px solid var(--border);padding:1.2rem;margin-bottom:1rem}
+.section h2{font-size:0.95rem;color:var(--pri);margin-bottom:0.8rem}
+.section h3{font-size:0.85rem;color:var(--dim);margin-bottom:0.5rem}
+
+/* Radio group */
+.radio-row{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.8rem}
+.radio-opt{padding:0.4rem 0.8rem;border-radius:8px;font-size:0.8rem;background:var(--bg);color:var(--dim);border:1px solid var(--border);cursor:pointer;transition:all 0.2s}
+.radio-opt:hover{border-color:var(--pri);color:var(--pri)}
+.radio-opt.active{background:var(--pri);color:#fff;border-color:var(--pri)}
+
+/* Recipient list */
+.recip-actions{display:flex;gap:0.5rem;align-items:center;margin-bottom:0.5rem;flex-wrap:wrap}
+.recip-actions button{padding:0.3rem 0.6rem;border-radius:6px;font-size:0.75rem;background:var(--bg);color:var(--dim);border:1px solid var(--border)}
+.recip-actions button:hover{border-color:var(--pri);color:var(--pri)}
+.recip-count{font-size:0.8rem;color:var(--gold);font-weight:700;margin-left:auto}
+.recip-list{max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;background:var(--bg);padding:0.3rem}
+.recip-item{display:flex;align-items:center;gap:0.5rem;padding:0.35rem 0.6rem;border-radius:6px;font-size:0.78rem;cursor:pointer;transition:background 0.15s}
+.recip-item:hover{background:rgba(255,255,255,0.03)}
+.recip-item input{accent-color:var(--pri);width:16px;height:16px;flex-shrink:0}
+.recip-item .rname{color:var(--text);font-weight:700}
+.recip-item .remail{color:var(--dim);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recip-item .rcourse{font-size:0.7rem;color:var(--pri)}
+.manual-input{width:100%;padding:0.5rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);outline:none;margin-top:0.5rem;display:none}
+.manual-input:focus{border-color:var(--pri)}
+
+/* Template */
+.tpl-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.8rem}
+.tpl-btn{padding:0.6rem 0.8rem;border-radius:8px;font-size:0.8rem;background:var(--bg);color:var(--dim);border:1px solid var(--border);cursor:pointer;text-align:left;transition:all 0.2s}
+.tpl-btn:hover{border-color:var(--pri);color:var(--pri)}
+.tpl-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(255,200,87,0.08)}
+
+/* Form */
+.field{margin-bottom:0.8rem}
+.field label{display:block;font-size:0.78rem;color:var(--dim);margin-bottom:0.3rem}
+.field input,.field textarea{width:100%;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);outline:none}
+.field input:focus,.field textarea:focus{border-color:var(--pri)}
+.field textarea{min-height:120px;resize:vertical;line-height:1.6}
+
+/* Buttons */
+.btn-row{display:flex;gap:0.5rem;flex-wrap:wrap}
+.btn-pri{padding:0.6rem 1.2rem;background:var(--pri);color:#fff;border-radius:8px;font-size:0.9rem;font-weight:700;border:none}
+.btn-pri:hover{background:var(--pri-d)}
+.btn-pri:disabled{opacity:0.4;cursor:not-allowed}
+.btn-sec{padding:0.6rem 1.2rem;background:none;color:var(--dim);border:1px solid var(--border);border-radius:8px;font-size:0.9rem}
+.btn-sec:hover{color:var(--text);border-color:var(--text)}
+
+/* Preview */
+.preview-box{display:none;background:#fff;border-radius:10px;padding:0;margin-top:0.8rem;overflow:hidden}
+
+/* Status */
+.send-status{margin-top:0.8rem;font-size:0.85rem;padding:0.6rem 1rem;border-radius:8px}
+.send-status.ok{background:rgba(15,157,138,0.1);color:var(--pri)}
+.send-status.err{background:rgba(220,38,38,0.1);color:var(--red)}
+
+/* History */
+.hist-item{display:flex;align-items:center;gap:0.8rem;padding:0.5rem 0;border-bottom:1px solid var(--border);font-size:0.78rem}
+.hist-item:last-child{border:none}
+.hist-date{color:var(--dim);white-space:nowrap}
+.hist-subj{flex:1;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-count{color:var(--pri);white-space:nowrap}
+
+.empty-state{text-align:center;padding:2rem 1rem;color:var(--dim);font-size:0.9rem}
+.error-msg{background:rgba(220,38,38,0.1);border:1px solid var(--red);border-radius:10px;padding:1rem;color:var(--red);font-size:0.85rem;text-align:center;margin:1rem 0}
+
+@media(max-width:600px){
+  .tpl-grid{grid-template-columns:1fr}
+  .header h1{font-size:1.1rem}
+  .radio-row{gap:0.3rem}
+}
+</style>
+</head>
+<body>
+
+<div class="login" id="loginScreen">
+  <div class="login-box">
+    <h1>📨 通知中心</h1>
+    <p class="sub">ClassClaw 講師專用</p>
+    <button class="btn-google" onclick="googleLogin()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg">使用 Google 帳號登入
+    </button>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <div class="header">
+    <button class="btn-back" onclick="location.href='/classroom/host'">← 後台</button>
+    <h1>📨 通知中心</h1>
+    <div class="user">
+      <img id="avatar" src="">
+      <span id="userName"></span>
+      <button class="btn-logout" onclick="googleLogout()">登出</button>
+    </div>
+  </div>
+
+  <!-- Step 1: Recipients -->
+  <div class="section" id="secRecip">
+    <h2>1. 選擇收件人</h2>
+    <div class="radio-row" id="recipMode">
+      <button class="radio-opt active" onclick="setRecipMode('all')">全部</button>
+      <button class="radio-opt" onclick="setRecipMode('course')">按課程</button>
+      <button class="radio-opt" onclick="setRecipMode('manual')">手動輸入</button>
+    </div>
+    <div id="courseFilterWrap" style="display:none;margin-bottom:0.5rem">
+      <select id="courseFilter" onchange="filterByCourse()" style="width:100%;padding:0.5rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);outline:none">
+        <option value="">選擇課程</option>
+      </select>
+    </div>
+    <div class="recip-actions">
+      <button onclick="selectAll(true)">全選</button>
+      <button onclick="selectAll(false)">取消全選</button>
+      <span class="recip-count" id="recipCount">已選 0 人</span>
+    </div>
+    <div class="recip-list" id="recipList">
+      <div class="empty-state">載入中...</div>
+    </div>
+    <textarea class="manual-input" id="manualEmails" placeholder="每行一個 email，格式：名稱 <email> 或直接填 email"></textarea>
+  </div>
+
+  <!-- Step 2: Template -->
+  <div class="section">
+    <h2>2. 選擇範本</h2>
+    <div class="tpl-grid" id="tplGrid"></div>
+  </div>
+
+  <!-- Step 3: Edit -->
+  <div class="section">
+    <h2>3. 編輯內容</h2>
+    <div class="field">
+      <label>主旨</label>
+      <input id="emailSubject" placeholder="Email 主旨">
+    </div>
+    <div class="field">
+      <label>內文（支援 {name} 和 {link} 佔位符）</label>
+      <textarea id="emailBody"></textarea>
+    </div>
+    <div class="field">
+      <label>連結（取代 {link}）</label>
+      <input id="emailLink" placeholder="https://...">
+    </div>
+    <div class="btn-row">
+      <button class="btn-sec" onclick="previewEmail()">預覽</button>
+      <button class="btn-pri" id="btnSend" onclick="confirmSend()">發送通知</button>
+    </div>
+    <div class="preview-box" id="previewBox"></div>
+    <div class="send-status" id="sendStatus" style="display:none"></div>
+  </div>
+
+  <!-- Send history -->
+  <div class="section">
+    <h2>發送紀錄</h2>
+    <div id="historyList">
+      <div class="empty-state">尚無發送紀錄</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:['AIza','SyC5X5C0Uje6bCMzrvuUuq5Bz33ly0PR-vc'].join(''),
+  authDomain:'ai-classroom-70a97.firebaseapp.com',
+  databaseURL:'https://ai-classroom-70a97-default-rtdb.firebaseio.com',
+  projectId:'ai-classroom-70a97'
+});
+var auth=firebase.auth();
+var currentUser=null;
+var allStudents=[];
+var recipMode='all';
+var currentTpl='new-course';
+
+var TEMPLATES={
+  'new-course':{name:'新課程開班通知',subject:'新課程開班通知',body:'Hi {name}，\n\n新一期課程即將開課！\n\n\u{1F4C5} 日期：\n\u{1F4CD} 地點：\n\u{1F517} 報名：{link}\n\n— AI 100 講'},
+  'early-bird':{name:'早鳥優惠提醒',subject:'早鳥優惠倒數',body:'Hi {name}，\n\n早鳥優惠即將截止！\n\n\u23F0 截止：\n\u{1F517} 報名：{link}\n\n— AI 100 講'},
+  'followup':{name:'課後跟進',subject:'感謝參加 — 後續資源',body:'Hi {name}，\n\n感謝參加課程！\n\n\u{1F4CE} 教材：{link}\n\n有問題歡迎回信。\n\n— AI 100 講'},
+  'custom':{name:'自訂通知',subject:'',body:'Hi {name}，\n\n\n\n— AI 100 講'}
+};
+
+function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function timeStr(t){if(!t)return'';var d=new Date(t);return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')}
+function dateStr(t){if(!t)return'';var d=new Date(t);return d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')}
+
+// Auth
+auth.onAuthStateChanged(function(user){
+  currentUser=user;
+  if(user){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('app').classList.add('active');
+    document.getElementById('avatar').src=user.photoURL||'';
+    document.getElementById('userName').textContent=user.displayName||user.email;
+    loadStudents();
+    renderTemplates();
+    applyTemplate('new-course');
+    renderHistory();
+  } else {
+    document.getElementById('loginScreen').style.display='flex';
+    document.getElementById('app').classList.remove('active');
+  }
+});
+function googleLogin(){
+  var provider=new firebase.auth.GoogleAuthProvider();
+  if(/iPhone|iPad|Android/i.test(navigator.userAgent)){auth.signInWithRedirect(provider)}
+  else{auth.signInWithPopup(provider).catch(function(e){alert(e.message)})}
+}
+function googleLogout(){if(confirm('登出？'))auth.signOut().then(function(){location.reload()})}
+
+// Load students
+function loadStudents(){
+  var gasUrl=localStorage.getItem('_gas_backup_url');
+  if(!gasUrl){
+    document.getElementById('recipList').innerHTML='<div class="empty-state">請先在講師後台設定 Sheets 備份 URL</div>';
+    return;
+  }
+  fetch(gasUrl+'?action=students')
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
+    .then(function(data){
+      allStudents=(data.students||data||[]).filter(function(s){return s.email});
+      buildCourseFilter();
+      renderRecipients();
+    })
+    .catch(function(err){
+      document.getElementById('recipList').innerHTML='<div class="error-msg">載入失敗：'+esc(err.message)+'</div>';
+    });
+}
+
+function buildCourseFilter(){
+  var names={};
+  allStudents.forEach(function(s){if(s.courseName)names[s.courseName]=true});
+  var sel=document.getElementById('courseFilter');
+  var html='<option value="">選擇課程</option>';
+  Object.keys(names).sort().forEach(function(n){html+='<option value="'+esc(n)+'">'+esc(n)+'</option>'});
+  sel.innerHTML=html;
+}
+
+function setRecipMode(mode){
+  recipMode=mode;
+  var btns=document.querySelectorAll('#recipMode .radio-opt');
+  btns.forEach(function(b){b.classList.remove('active')});
+  var labels={'all':'全部','course':'按課程','manual':'手動輸入'};
+  btns.forEach(function(b){if(b.textContent===labels[mode])b.classList.add('active')});
+
+  document.getElementById('courseFilterWrap').style.display=mode==='course'?'block':'none';
+  document.getElementById('manualEmails').style.display=mode==='manual'?'block':'none';
+  document.getElementById('recipList').style.display=mode==='manual'?'none':'block';
+  document.querySelector('.recip-actions').style.display=mode==='manual'?'none':'flex';
+
+  if(mode==='all'){document.getElementById('courseFilter').value=''}
+  renderRecipients();
+}
+
+function filterByCourse(){renderRecipients()}
+
+function getFilteredStudents(){
+  if(recipMode==='course'){
+    var course=document.getElementById('courseFilter').value;
+    if(!course)return allStudents;
+    return allStudents.filter(function(s){return s.courseName===course});
+  }
+  return allStudents;
+}
+
+function renderRecipients(){
+  if(recipMode==='manual'){updateCount();return}
+  var list=getFilteredStudents();
+  var el=document.getElementById('recipList');
+  if(!list.length){el.innerHTML='<div class="empty-state">無符合條件的學員</div>';updateCount();return}
+  var html='';
+  list.forEach(function(s,i){
+    var checked=recipMode==='all'||s._checked?' checked':'';
+    html+='<label class="recip-item"><input type="checkbox" data-idx="'+i+'"'+checked+' onchange="onCheckChange(this)">';
+    html+='<span class="rname">'+esc(s.name||'匿名')+'</span>';
+    html+='<span class="remail">'+esc(s.email)+'</span>';
+    if(s.courseName)html+='<span class="rcourse">'+esc(s.courseName)+'</span>';
+    html+='</label>';
+  });
+  el.innerHTML=html;
+  updateCount();
+}
+
+function onCheckChange(cb){
+  var list=getFilteredStudents();
+  var idx=parseInt(cb.dataset.idx);
+  if(list[idx])list[idx]._checked=cb.checked;
+  updateCount();
+}
+
+function selectAll(val){
+  var cbs=document.querySelectorAll('#recipList input[type="checkbox"]');
+  var list=getFilteredStudents();
+  cbs.forEach(function(cb){
+    cb.checked=val;
+    var idx=parseInt(cb.dataset.idx);
+    if(list[idx])list[idx]._checked=val;
+  });
+  updateCount();
+}
+
+function updateCount(){
+  var n=getSelectedRecipients().length;
+  document.getElementById('recipCount').textContent='已選 '+n+' 人';
+}
+
+function getSelectedRecipients(){
+  if(recipMode==='manual'){
+    var text=document.getElementById('manualEmails').value;
+    var results=[];
+    text.split('\n').forEach(function(line){
+      line=line.trim();if(!line)return;
+      var m=line.match(/<([^>]+)>/);
+      if(m){
+        var name=line.replace(/<[^>]+>/,'').trim();
+        results.push({email:m[1],name:name||m[1]});
+      } else if(line.indexOf('@')>-1){
+        results.push({email:line,name:line});
+      }
+    });
+    return results;
+  }
+  var list=getFilteredStudents();
+  var cbs=document.querySelectorAll('#recipList input[type="checkbox"]');
+  var selected=[];
+  cbs.forEach(function(cb){
+    if(cb.checked){
+      var idx=parseInt(cb.dataset.idx);
+      if(list[idx])selected.push(list[idx]);
+    }
+  });
+  return selected;
+}
+
+// Templates
+function renderTemplates(){
+  var html='';
+  Object.keys(TEMPLATES).forEach(function(key){
+    html+='<button class="tpl-btn" data-tpl="'+key+'" onclick="applyTemplate(\''+key+'\')">'+esc(TEMPLATES[key].name)+'</button>';
+  });
+  document.getElementById('tplGrid').innerHTML=html;
+}
+
+function applyTemplate(key){
+  currentTpl=key;
+  var tpl=TEMPLATES[key];
+  document.getElementById('emailSubject').value=tpl.subject;
+  document.getElementById('emailBody').value=tpl.body;
+  var btns=document.querySelectorAll('.tpl-btn');
+  btns.forEach(function(b){b.classList.toggle('active',b.dataset.tpl===key)});
+}
+
+// Email
+function buildEmailHtml(bodyText,link){
+  var lines=bodyText.replace(/\{link\}/g,link?'<a href="'+esc(link)+'" style="color:#0F9D8A;">'+esc(link)+'</a>':'（未設定連結）');
+  return '<div style="font-family:Noto Sans TC,sans-serif;max-width:600px;margin:0 auto;padding:20px;">'
+    +'<div style="background:#0B3C5D;color:#fff;padding:20px;border-radius:12px 12px 0 0;text-align:center;">'
+    +'<h1 style="margin:0;font-size:1.3rem;">AI 100 講</h1>'
+    +'<p style="margin:5px 0 0;color:#FFC857;">課程通知</p></div>'
+    +'<div style="background:#F8F9FA;padding:24px;border-radius:0 0 12px 12px;">'
+    +'<div style="font-size:1rem;line-height:1.8;color:#333;white-space:pre-wrap;">'+lines.replace(/\n/g,'<br>')+'</div>'
+    +'</div></div>';
+}
+
+function previewEmail(){
+  var body=document.getElementById('emailBody').value;
+  var link=document.getElementById('emailLink').value;
+  var html=buildEmailHtml(body,link).replace(/\{name\}/g,'小明');
+  var el=document.getElementById('previewBox');
+  el.innerHTML=html;
+  el.style.display=el.style.display==='none'||!el.style.display?'block':'none';
+}
+
+function confirmSend(){
+  var recipients=getSelectedRecipients();
+  if(!recipients.length){alert('請選擇至少一位收件人');return}
+  var subject=document.getElementById('emailSubject').value.trim();
+  if(!subject){alert('請填寫主旨');return}
+  if(!confirm('確定發送給 '+recipients.length+' 人？'))return;
+  sendEmails(recipients,subject);
+}
+
+function sendEmails(recipients,subject){
+  var gasUrl=localStorage.getItem('_gas_url');
+  if(!gasUrl){alert('請先在講師後台設定 GAS Email Relay URL');return}
+
+  var bodyText=document.getElementById('emailBody').value;
+  var link=document.getElementById('emailLink').value;
+  var btn=document.getElementById('btnSend');
+  var status=document.getElementById('sendStatus');
+  btn.disabled=true;
+  btn.textContent='⏳ 寄送中...';
+  status.style.display='none';
+
+  // Build per-recipient emails with {name} replaced
+  var emailList=recipients.map(function(r){return r.email});
+  var htmlBody=buildEmailHtml(bodyText,link);
+  // For simplicity, send as batch with {name} replaced to first name
+  // GAS relay handles bulk send
+  var finalHtml=htmlBody.replace(/\{name\}/g,'同學');
+
+  fetch(gasUrl,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain'},
+    body:JSON.stringify({
+      recipients:emailList,
+      subject:subject,
+      body:finalHtml,
+      senderName:'AI 100 講'
+    })
+  })
+  .then(function(r){return r.json()})
+  .then(function(d){
+    btn.disabled=false;
+    btn.textContent='發送通知';
+    if(d.success){
+      status.className='send-status ok';
+      status.textContent='發送成功！共 '+(d.sent||emailList.length)+' 封'+(d.failed?' (失敗 '+d.failed+' 封)':'');
+      status.style.display='block';
+      saveSendHistory(subject,emailList.length);
+    } else {
+      status.className='send-status err';
+      status.textContent='發送失敗：'+(d.error||d.message||'未知錯誤');
+      status.style.display='block';
+    }
+  })
+  .catch(function(err){
+    btn.disabled=false;
+    btn.textContent='發送通知';
+    status.className='send-status err';
+    status.textContent='發送失敗：'+err.message;
+    status.style.display='block';
+  });
+}
+
+// Send history
+function saveSendHistory(subject,count){
+  var hist=[];
+  try{hist=JSON.parse(localStorage.getItem('_notify_history')||'[]')}catch(e){}
+  hist.unshift({date:new Date().toISOString(),subject:subject,count:count});
+  if(hist.length>50)hist=hist.slice(0,50);
+  localStorage.setItem('_notify_history',JSON.stringify(hist));
+  renderHistory();
+}
+
+function renderHistory(){
+  var hist=[];
+  try{hist=JSON.parse(localStorage.getItem('_notify_history')||'[]')}catch(e){}
+  var el=document.getElementById('historyList');
+  if(!hist.length){el.innerHTML='<div class="empty-state">尚無發送紀錄</div>';return}
+  var html='';
+  hist.slice(0,10).forEach(function(h){
+    html+='<div class="hist-item">';
+    html+='<span class="hist-date">'+dateStr(h.date)+' '+timeStr(h.date)+'</span>';
+    html+='<span class="hist-subj">'+esc(h.subject)+'</span>';
+    html+='<span class="hist-count">'+h.count+' 人</span>';
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+</script>
+</body>
+</html>

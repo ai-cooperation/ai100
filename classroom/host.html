@@ -565,6 +565,14 @@
       </div>
       <span id="globalGasStatus" style="font-size:0.7rem;color:var(--dim)"></span>
     </div>
+    <div style="flex:1;min-width:200px;padding:0.8rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;">
+      <div style="font-size:0.8rem;color:var(--dim);margin-bottom:0.3rem">Sheets 備份</div>
+      <div style="display:flex;gap:0.5rem;align-items:center">
+        <input type="url" id="globalBackupUrl" placeholder="GAS Backup URL" style="flex:1;padding:0.4rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem">
+        <button onclick="saveGlobalBackupUrl()" style="padding:0.4rem 0.6rem;background:var(--pri);color:#fff;border-radius:6px;font-size:0.75rem;white-space:nowrap">儲存</button>
+      </div>
+      <span id="globalBackupStatus" style="font-size:0.7rem;color:var(--dim)"></span>
+    </div>
   </div>
 
   <!-- Custom Materials (entry point) -->
@@ -573,6 +581,17 @@
       <span style="font-size:1.5rem">📦</span>
       <div><div style="font-weight:700;color:var(--pri);font-size:0.9rem">我的教材庫</div><div style="font-size:0.7rem;color:var(--dim)">管理內建與自訂教材 · 新增 · 刪除</div></div>
     </div>
+  </div>
+
+  <div style="display:flex;gap:0.6rem;margin-bottom:1.5rem;flex-wrap:wrap">
+    <a href="/classroom/history" style="flex:1;min-width:150px;display:flex;align-items:center;gap:0.8rem;padding:1rem 1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text);transition:border-color 0.2s">
+      <span style="font-size:1.5rem">📋</span>
+      <div><div style="font-weight:700;color:var(--gold);font-size:0.9rem">歷史紀錄</div><div style="font-size:0.7rem;color:var(--dim)">查看過去課堂資料</div></div>
+    </a>
+    <a href="/classroom/notify" style="flex:1;min-width:150px;display:flex;align-items:center;gap:0.8rem;padding:1rem 1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text);transition:border-color 0.2s">
+      <span style="font-size:1.5rem">📧</span>
+      <div><div style="font-weight:700;color:var(--purple);font-size:0.9rem">通知中心</div><div style="font-size:0.7rem;color:var(--dim)">行銷通知 · 課程推廣</div></div>
+    </a>
   </div>
 
   <!-- My Courses -->
@@ -859,6 +878,16 @@
           <button onclick="showFeedbackQROverlay()" style="padding:0.5rem 1rem;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:0.85rem;cursor:pointer">顯示 QR</button>
           <button onclick="pushFeedbackQRToPresenter()" style="padding:0.5rem 1rem;background:var(--purple);color:#fff;border:none;border-radius:8px;font-size:0.85rem;cursor:pointer">推送到簡報</button>
           <button onclick="pushFeedbackQRToStudents()" style="padding:0.5rem 1rem;background:var(--pri);color:#fff;border:none;border-radius:8px;font-size:0.85rem;cursor:pointer">推送到學員</button>
+        </div>
+      </div>
+
+      <!-- Backup -->
+      <div class="post-section" id="postBackup">
+        <h3>💾 資料備份</h3>
+        <p style="font-size:0.8rem;color:var(--dim);margin-bottom:0.5rem">備份回饋、訊息牆、問答到 Google Sheets</p>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+          <button onclick="backupToSheets(roomId,roomTitle)" style="padding:0.5rem 1rem;background:var(--pri);color:#fff;border:none;border-radius:8px;font-size:0.85rem;cursor:pointer">📤 備份到 Sheets</button>
+          <button onclick="clearRoomData(roomId)" style="padding:0.5rem 1rem;background:none;color:var(--red);border:1px solid var(--red);border-radius:8px;font-size:0.85rem;cursor:pointer">🗑 清空互動資料</button>
         </div>
       </div>
 
@@ -2519,6 +2548,15 @@ function renderCVPost(sess){
     h+='<button onclick="cvPushFeedbackToStudents(\''+_rid+'\')" style="padding:0.5rem 1rem;background:var(--pri);color:#fff;border:none;border-radius:8px;font-size:0.85rem;cursor:pointer">推送到學員</button>';
     h+='</div></div>';
 
+    // ── 資料備份 ──
+    h+='<div class="post-section" style="margin-top:1rem">';
+    h+='<h3>💾 資料備份</h3>';
+    h+='<p style="font-size:0.8rem;color:var(--dim);margin-bottom:0.5rem">備份回饋、訊息牆、問答到 Google Sheets</p>';
+    h+='<div style="display:flex;gap:0.5rem;flex-wrap:wrap">';
+    h+='<button onclick="backupToSheets(\''+esc(sess.roomId)+'\',\''+esc(sess.title||'')+'\')">📤 備份到 Sheets</button>';
+    h+='<button onclick="clearRoomData(\''+esc(sess.roomId)+'\')" style="color:var(--red);border-color:var(--red)">🗑 清空互動資料</button>';
+    h+='</div></div>';
+
     h+='<div class="post-actions">';
     h+='<button onclick="enterSessionRoom(cvSessions['+cvSelectedSessionIdx+'],\'post-class\')">進入教室查看詳情</button>';
     h+='</div>';
@@ -3312,7 +3350,7 @@ function checkServiceStatus(){
 
 function saveGlobalAIKey(){var k=document.getElementById('globalAIKey').value.trim();if(k){localStorage.setItem('_ai_key',k);document.getElementById('globalAIKeyStatus').textContent='已儲存'}else{localStorage.removeItem('_ai_key');document.getElementById('globalAIKeyStatus').textContent='已清除'}}
 function saveGlobalGasUrl(){var u=document.getElementById('globalGasUrl').value.trim();if(u){localStorage.setItem('_gas_url',u);document.getElementById('globalGasStatus').textContent='已儲存'}else{localStorage.removeItem('_gas_url');document.getElementById('globalGasStatus').textContent='已清除'}}
-function initGlobalSettings(){var k=localStorage.getItem('_ai_key');var g=localStorage.getItem('_gas_url')||DEFAULT_GAS_URL;if(k)document.getElementById('globalAIKey').value=k;document.getElementById('globalGasUrl').value=g;if(!localStorage.getItem('_gas_url'))localStorage.setItem('_gas_url',DEFAULT_GAS_URL)}
+function initGlobalSettings(){var k=localStorage.getItem('_ai_key');var g=localStorage.getItem('_gas_url')||DEFAULT_GAS_URL;if(k)document.getElementById('globalAIKey').value=k;document.getElementById('globalGasUrl').value=g;if(!localStorage.getItem('_gas_url'))localStorage.setItem('_gas_url',DEFAULT_GAS_URL);var b=localStorage.getItem('_gas_backup_url');if(b)document.getElementById('globalBackupUrl').value=b}
 
 // ═══ QR ═══
 function makeQR(elId,url){var el=document.getElementById(elId);if(!el)return;var qr=qrcode(0,'M');qr.addData(url);qr.make();el.innerHTML=qr.createSvgTag({cellSize:3,margin:2})}
@@ -4071,6 +4109,81 @@ function applyVoiceAlias(text) {
     if (VOICE_ALIASES.hasOwnProperty(key) && t.indexOf(key) !== -1) return VOICE_ALIASES[key];
   }
   return text;
+}
+
+// ═══ Sheets Backup ═══
+function saveGlobalBackupUrl(){
+  var u=document.getElementById('globalBackupUrl').value.trim();
+  if(u){localStorage.setItem('_gas_backup_url',u);document.getElementById('globalBackupStatus').textContent='已儲存'}
+  else{localStorage.removeItem('_gas_backup_url');document.getElementById('globalBackupStatus').textContent='已清除'}
+}
+
+async function backupToSheets(rid,title){
+  var gasUrl=localStorage.getItem('_gas_backup_url');
+  if(!gasUrl){alert('請先在大廳設定 Sheets 備份 URL');return}
+
+  showActionToast('📤 備份中...');
+
+  try{
+    // Read all room data
+    var [wallSnap,qaSnap,qaRepliesSnap,feedbackSnap,presSnap,configSnap]=await Promise.all([
+      db.ref('rooms/'+rid+'/wall').orderByChild('ts').once('value'),
+      db.ref('rooms/'+rid+'/qa').once('value'),
+      db.ref('rooms/'+rid+'/qaReplies').once('value'),
+      db.ref('rooms/'+rid+'/feedback').once('value'),
+      db.ref('rooms/'+rid+'/presence').once('value'),
+      db.ref('rooms/'+rid+'/config').once('value')
+    ]);
+
+    var cfg=configSnap.val()||{};
+    var wallArr=[];wallSnap.forEach(function(c){wallArr.push(c.val())});
+    var qaArr=[];qaSnap.forEach(function(c){var v=c.val();v._id=c.key;qaArr.push(v)});
+    var feedbackArr=feedbackSnap.val()?Object.values(feedbackSnap.val()):[];
+
+    var payload={
+      action:'backup',
+      roomId:rid,
+      title:title,
+      courseName:cfg.courseId||'',
+      date:rid.substring(0,8),
+      presence:{count:presSnap.numChildren()},
+      wall:wallArr,
+      qa:qaArr,
+      qaReplies:qaRepliesSnap.val()||{},
+      feedback:feedbackArr
+    };
+
+    var res=await fetch(gasUrl,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify(payload)
+    });
+    var result=await res.json();
+
+    if(result.success){
+      showActionToast('✅ 已備份：'+result.feedbackAdded+'筆回饋、'+result.studentsAdded+'個學員、'+(wallArr.length)+'則訊息');
+    } else {
+      alert('備份失敗：'+(result.error||'未知錯誤'));
+    }
+  }catch(e){
+    alert('備份失敗：'+e.message);
+  }
+}
+
+function clearRoomData(rid){
+  if(!confirm('確定清空此教室的互動資料？\n（config、教材設定、問卷設定會保留）'))return;
+  if(!confirm('再次確認：清空後無法復原，請確認已備份到 Sheets'))return;
+
+  var updates={};
+  ['wall','qa','qaUps','qaReplies','currentVote','votes','presence','feedback','feedbackAnalysis','voiceCommands','agentActions','agentAdvice','agentStatus'].forEach(function(path){
+    updates['rooms/'+rid+'/'+path]=null;
+  });
+
+  db.ref().update(updates).then(function(){
+    showActionToast('🗑 已清空互動資料');
+  }).catch(function(e){
+    alert('清空失敗：'+e.message);
+  });
 }
 
 // ═══ Voice Control ═══
