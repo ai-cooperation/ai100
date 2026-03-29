@@ -180,7 +180,22 @@ function loadHistory(){
       if(!data || !Array.isArray(data.sessions)){
         sessions=[];
       } else {
-        sessions=data.sessions.sort(function(a,b){
+        // Merge feedback details into sessions
+        var fbByRoom={};
+        (data.feedback||[]).forEach(function(f){
+          var rid=f.roomId||'';
+          if(!fbByRoom[rid]) fbByRoom[rid]={emails:[],suggestions:[],unclear:[]};
+          if(f.email) fbByRoom[rid].emails.push(f.email);
+          if(f.suggestion && f.suggestion!=='(跳過)' && f.suggestion.trim()) fbByRoom[rid].suggestions.push(f.suggestion);
+          if(f.unclear && f.unclear.trim()) fbByRoom[rid].unclear.push(f.unclear);
+        });
+        sessions=data.sessions.map(function(s){
+          var fb=fbByRoom[s.roomId]||{};
+          s.emails=fb.emails||[];
+          s.suggestions=fb.suggestions||[];
+          s.unclearList=fb.unclear||[];
+          return s;
+        }).sort(function(a,b){
           return String(b.date||b.created||0).localeCompare(String(a.date||a.created||0));
         });
       }
@@ -272,6 +287,18 @@ function renderSessions(){
     html+='<div class="detail-box"><h4>課堂互動</h4>';
     html+='<div style="font-size:0.85rem">🧱 留言牆：<strong>'+wc+'</strong></div>';
     html+='<div style="font-size:0.85rem">❓ 問答區：<strong>'+qc+'</strong></div>';
+    html+='</div>';
+
+    // Unclear
+    html+='<div class="detail-box"><h4>不清楚的地方</h4>';
+    if(s.unclearList&&s.unclearList.length){
+      html+='<ul>';
+      s.unclearList.slice(0,5).forEach(function(u){html+='<li>'+esc(u)+'</li>'});
+      if(s.unclearList.length>5) html+='<li style="color:var(--dim)">...還有 '+(s.unclearList.length-5)+' 筆</li>';
+      html+='</ul>';
+    } else {
+      html+='<div class="sub">無</div>';
+    }
     html+='</div>';
 
     // Suggestions

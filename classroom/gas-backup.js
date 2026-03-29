@@ -30,6 +30,44 @@ var TABS = {
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
+
+    // ── cleanup action: delete old data for a roomId ──
+    if (data.action === 'cleanup') {
+      var ss2 = SpreadsheetApp.getActiveSpreadsheet();
+      var rid = data.roomId || '';
+      var deleted = { sessions: 0, feedback: 0 };
+      ['sessions', 'feedback'].forEach(function(tabKey) {
+        var sheet = getOrCreateSheet(ss2, tabKey);
+        var vals = sheet.getDataRange().getValues();
+        for (var i = vals.length - 1; i >= 1; i--) {
+          if (String(vals[i][0]) === rid) { sheet.deleteRow(i + 1); deleted[tabKey]++; }
+        }
+      });
+      return jsonRes({ success: true, deleted: deleted });
+    }
+
+    // ── import action: add emails to Students tab ──
+    if (data.action === 'import') {
+      var ss3 = SpreadsheetApp.getActiveSpreadsheet();
+      var studentSheet = getOrCreateSheet(ss3, 'students');
+      var existing = studentSheet.getDataRange().getValues();
+      var emailIdx = {};
+      for (var ei = 1; ei < existing.length; ei++) { emailIdx[existing[ei][0]] = ei + 1; }
+      var imports = data.emails || [];
+      var added = 0;
+      var now = new Date().toISOString();
+      imports.forEach(function(item) {
+        var email = (item.email || '').trim().toLowerCase();
+        if (!email) return;
+        if (!emailIdx[email]) {
+          studentSheet.appendRow([email, item.name || '', 'FALSE', item.source || 'import', '', now]);
+          emailIdx[email] = studentSheet.getLastRow();
+          added++;
+        }
+      });
+      return jsonRes({ success: true, imported: added });
+    }
+
     if (data.action !== 'backup') {
       return jsonRes({ success: false, message: 'Unknown action: ' + data.action });
     }
