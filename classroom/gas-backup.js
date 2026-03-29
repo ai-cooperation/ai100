@@ -22,7 +22,7 @@
 var TABS = {
   students:  { name: 'Students',  headers: ['email','name','wantPdf','courseName','sessionDate','addedAt'] },
   sessions:  { name: 'Sessions',  headers: ['roomId','date','title','courseName','presenceCount','wallCount','qaCount','feedbackCount','avgSatisfaction','avgRecommend','emailCount','backedUpAt'] },
-  feedback:  { name: 'Feedback',  headers: ['roomId','date','name','email','wantPdf','satisfaction','recommend','helpful','pacing','unclear','suggestion'] }
+  feedback:  { name: 'Feedback',  headers: ['roomId','date','courseName','title','name','email','wantPdf','satisfaction','recommend','helpful','pacing','unclear','suggestion'] }
 };
 
 // ── POST：接收備份 ────────────────────────────────────────
@@ -40,7 +40,7 @@ function doPost(e) {
         var sheet = getOrCreateSheet(ss2, tabKey);
         var vals = sheet.getDataRange().getValues();
         for (var i = vals.length - 1; i >= 1; i--) {
-          if (String(vals[i][0]) === rid) { sheet.deleteRow(i + 1); deleted[tabKey]++; }
+          if (String(vals[i][0]) === String(rid)) { sheet.deleteRow(i + 1); deleted[tabKey]++; }
         }
       });
       return jsonRes({ success: true, deleted: deleted });
@@ -92,7 +92,7 @@ function doPost(e) {
     var sessData = sessSheet.getDataRange().getValues();
     var sessRow = -1;
     for (var si = 1; si < sessData.length; si++) {
-      if (sessData[si][0] === roomId) { sessRow = si + 1; break; }
+      if (String(sessData[si][0]) === String(roomId)) { sessRow = si + 1; break; }
     }
     var sessValues = [roomId, date, title, courseName, presence.count || 0, wall.length, qa.length, feedbacks.length, avgSat, avgRec, emailCount, now];
     if (sessRow > 0) {
@@ -106,13 +106,13 @@ function doPost(e) {
     var fbData = fbSheet.getDataRange().getValues();
     // Delete existing rows for this roomId (reverse order to avoid index shift)
     for (var fi = fbData.length - 1; fi >= 1; fi--) {
-      if (fbData[fi][0] === roomId) { fbSheet.deleteRow(fi + 1); }
+      if (String(fbData[fi][0]) === String(roomId)) { fbSheet.deleteRow(fi + 1); }
     }
     feedbacks.forEach(function(f) {
       var r = f.ratings || {};
       var a = f.answers || {};
       fbSheet.appendRow([
-        roomId, date,
+        roomId, date, courseName, title,
         f.name || '', f.email || '', f.wantPdf ? 'TRUE' : 'FALSE',
         r.satisfaction || '', r.recommend || '',
         a.helpful || '', a.pacing || '', a.unclear || '', a.suggestion || ''
