@@ -127,7 +127,18 @@ var sessions=[];
 
 function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function timeStr(t){if(!t)return'';var d=new Date(t);return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')}
-function dateStr(t){if(!t)return'';var d=new Date(t);return d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')}
+function dateStr(t){
+  if(!t)return'';
+  var s=String(t);
+  // Handle YYYYMMDD format (integer or string)
+  if(/^\d{8}$/.test(s)){
+    return s.substring(0,4)+'/'+s.substring(4,6)+'/'+s.substring(6,8);
+  }
+  // Handle ISO string or other date formats
+  var d=new Date(t);
+  if(isNaN(d.getTime()))return s;
+  return d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0');
+}
 
 // Auth
 auth.onAuthStateChanged(function(user){
@@ -170,7 +181,7 @@ function loadHistory(){
         sessions=[];
       } else {
         sessions=data.sessions.sort(function(a,b){
-          return new Date(b.date||b.created||0)-new Date(a.date||a.created||0);
+          return String(b.date||b.created||0).localeCompare(String(a.date||a.created||0));
         });
       }
       buildFilter();

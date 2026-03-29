@@ -45,23 +45,35 @@ function doPost(e) {
     var presence   = data.presence || {};
     var now        = new Date().toISOString();
 
-    // ── Sessions tab ──
+    // ── Sessions tab（防重複：同 roomId 更新而非新增）──
     var avgSat = avg(feedbacks, function(f) { return f.ratings && f.ratings.satisfaction; });
     var avgRec = avg(feedbacks, function(f) { return f.ratings && f.ratings.recommend; });
     var emailCount = feedbacks.filter(function(f) { return f.email; }).length;
 
-    appendRow(ss, 'sessions', [
-      roomId, date, title, courseName,
-      presence.count || 0,
-      wall.length, qa.length, feedbacks.length,
-      avgSat, avgRec, emailCount, now
-    ]);
+    var sessSheet = getOrCreateSheet(ss, 'sessions');
+    var sessData = sessSheet.getDataRange().getValues();
+    var sessRow = -1;
+    for (var si = 1; si < sessData.length; si++) {
+      if (sessData[si][0] === roomId) { sessRow = si + 1; break; }
+    }
+    var sessValues = [roomId, date, title, courseName, presence.count || 0, wall.length, qa.length, feedbacks.length, avgSat, avgRec, emailCount, now];
+    if (sessRow > 0) {
+      sessSheet.getRange(sessRow, 1, 1, sessValues.length).setValues([sessValues]);
+    } else {
+      sessSheet.appendRow(sessValues);
+    }
 
-    // ── Feedback tab ──
+    // ── Feedback tab（同 roomId 先清舊再寫新）──
+    var fbSheet = getOrCreateSheet(ss, 'feedback');
+    var fbData = fbSheet.getDataRange().getValues();
+    // Delete existing rows for this roomId (reverse order to avoid index shift)
+    for (var fi = fbData.length - 1; fi >= 1; fi--) {
+      if (fbData[fi][0] === roomId) { fbSheet.deleteRow(fi + 1); }
+    }
     feedbacks.forEach(function(f) {
       var r = f.ratings || {};
       var a = f.answers || {};
-      appendRow(ss, 'feedback', [
+      fbSheet.appendRow([
         roomId, date,
         f.name || '', f.email || '', f.wantPdf ? 'TRUE' : 'FALSE',
         r.satisfaction || '', r.recommend || '',

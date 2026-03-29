@@ -4140,11 +4140,20 @@ async function backupToSheets(rid,title){
     var qaArr=[];qaSnap.forEach(function(c){var v=c.val();v._id=c.key;qaArr.push(v)});
     var feedbackArr=feedbackSnap.val()?Object.values(feedbackSnap.val()):[];
 
+    // Resolve course name from courseId
+    var cName=title;
+    if(cfg.courseId){
+      try{
+        var cSnap=await db.ref('courses/'+cfg.courseId+'/config/title').once('value');
+        if(cSnap.val()) cName=cSnap.val();
+      }catch(e){}
+    }
+
     var payload={
       action:'backup',
       roomId:rid,
       title:title,
-      courseName:cfg.courseId||'',
+      courseName:cName,
       date:rid.substring(0,8),
       presence:{count:presSnap.numChildren()},
       wall:wallArr,
@@ -4161,9 +4170,16 @@ async function backupToSheets(rid,title){
     var result=await res.json();
 
     if(result.success){
-      showActionToast('✅ 已備份：'+result.feedbackAdded+'筆回饋、'+result.studentsAdded+'個學員、'+(wallArr.length)+'則訊息');
+      var msg='✅ 備份完成\n\n'+
+        '📊 回饋：'+(result.feedbackSaved||0)+' 筆\n'+
+        '👥 學員：'+(result.studentsUpserted||0)+' 人\n'+
+        '💬 訊息牆：'+wallArr.length+' 則\n'+
+        '❓ 問答：'+qaArr.length+' 則';
+      if(confirm(msg+'\n\n要開啟 Google Sheet 查看嗎？')){
+        window.open('https://drive.google.com/open?id=1XyE02dzKVZKx08wXpt4bSdv_HTB0EgzlshEUlreB4LY','_blank');
+      }
     } else {
-      alert('備份失敗：'+(result.error||'未知錯誤'));
+      alert('備份失敗：'+(result.message||result.error||'未知錯誤'));
     }
   }catch(e){
     alert('備份失敗：'+e.message);
