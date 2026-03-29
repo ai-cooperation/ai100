@@ -2664,7 +2664,7 @@ function renderCVReport(sess){
     h+='<p style="color:var(--border);font-size:0.7rem;text-align:center;margin-top:1rem">Room: '+esc(sess.roomId)+'</p>';
 
     h+='<div style="margin-top:1rem;text-align:center">';
-    h+='<button class="act-btn" style="margin:0.5rem" onclick="enterSessionRoom(cvSessions['+cvSelectedSessionIdx+'],\'live\');setTimeout(function(){exportData()},500)">匯出完整 HTML 報告</button>';
+    h+='<button class="act-btn" style="margin:0.5rem" onclick="exportRoomData(\''+esc(sess.roomId)+'\',\''+esc(sess.title||sess.roomId)+'\')">匯出完整 HTML 報告</button>';
     h+='</div>';
 
     body.innerHTML=h;
@@ -3389,6 +3389,42 @@ function startFeedback(){
 }
 
 // ═══ Export ═══
+async function exportRoomData(rid,title){
+  // Standalone export using explicit roomId (for CV Report)
+  var _rid=rid,_title=title;
+  var _ws=await db.ref('rooms/'+_rid+'/wall').orderByChild('ts').once('value');
+  var _qs=await db.ref('rooms/'+_rid+'/qa').once('value');
+  var _fb=await db.ref('rooms/'+_rid+'/feedback').once('value');
+  var _ps=await db.ref('rooms/'+_rid+'/presence').once('value');
+  var _rps=(await db.ref('rooms/'+_rid+'/qaReplies').once('value')).val()||{};
+
+  var msgs=[];_ws.forEach(function(c){msgs.push(c.val())});
+  var qas=[];_qs.forEach(function(c){qas.push({id:c.key,text:c.val().text,name:c.val().name,ts:c.val().ts,ups:c.val().ups})});
+  qas.sort(function(a,b){return(b.ups||0)-(a.ups||0)});
+  var fbEntries=_fb.val()?Object.values(_fb.val()):[];
+
+  // Build HTML
+  var ds=new Date().toISOString().slice(0,10);
+  var wH='';if(msgs.length){wH='<div class="section"><h2>💬 訊息牆('+msgs.length+')</h2>';msgs.forEach(function(m){var r=m.role||'student';wH+='<div class="msg '+r+'"><b class="'+r+'">'+(r==='ai'?'🤖':r==='teacher'?'👨‍🏫':'')+esc(m.name)+'</b> <small>'+timeStr(m.ts)+'</small><p>'+esc(m.text)+'</p></div>'});wH+='</div>'}
+  var qH='';if(qas.length){qH='<div class="section"><h2>❓ 問答('+qas.length+')</h2>';qas.forEach(function(q){qH+='<div class="qa"><b>▲'+(q.ups||0)+'</b> '+esc(q.text)+' <small>—'+esc(q.name)+'</small>';var replies=_rps[q.id]?Object.values(_rps[q.id]).sort(function(a,b){return a.ts-b.ts}):[];replies.forEach(function(r){qH+='<div class="rp '+r.role+'"><b>'+(r.role==='ai'?'🤖':'👨‍🏫')+esc(r.name)+'</b> '+esc(r.text)+'</div>'});qH+='</div>'});qH+='</div>'}
+
+  // Feedback summary
+  var fH='';if(fbEntries.length){
+    var satS=0,satC=0,recS=0,recC=0,emails=[];
+    fbEntries.forEach(function(e){if(e.ratings){if(e.ratings.satisfaction){satS+=e.ratings.satisfaction;satC++}if(e.ratings.recommend){recS+=e.ratings.recommend;recC++}}if(e.email)emails.push(e.email)});
+    fH='<div class="section"><h2>📊 課後回饋('+fbEntries.length+'人)</h2>';
+    fH+='<p>滿意度：'+(satC?(satS/satC).toFixed(1):'-')+'/5 · 推薦度：'+(recC?(recS/recC).toFixed(1):'-')+'/5</p>';
+    if(emails.length){fH+='<p>📧 Email('+emails.length+'人)：</p><ul>';emails.forEach(function(e){fH+='<li>'+esc(e)+'</li>'});fH+='</ul>'}
+    // Suggestions
+    var sugs=[];fbEntries.forEach(function(e){if(e.answers&&e.answers.suggestion&&e.answers.suggestion!=='(跳過)')sugs.push(e.answers.suggestion)});
+    if(sugs.length){fH+='<p><b>💡 建議：</b></p>';sugs.forEach(function(s){fH+='<div style="padding:4px 8px;margin:2px 0;background:#f5f5f5;border-radius:6px;border-left:3px solid #7C3AED;">'+esc(s)+'</div>'})}
+    fH+='</div>';
+  }
+
+  var html='<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>'+esc(_title)+' 成果</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:\'Noto Sans TC\',system-ui,sans-serif;background:#F5F7FA;color:#1A1A1A;padding:2rem;max-width:900px;margin:0 auto}.hd{background:#0B3C5D;color:#fff;padding:2rem;border-radius:12px;margin-bottom:2rem;text-align:center}.hd h1{color:#FFC857;font-size:1.8rem}.hd .m{color:#D4F0EB;margin-top:0.5rem}.section{background:#fff;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.06)}.section h2{color:#0B3C5D;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid #D4F0EB}.msg{padding:0.5rem 0;border-bottom:1px solid #eee}.msg.ai{background:#EDE9FE;padding:0.5rem;border-radius:6px;margin:0.2rem 0}.msg.teacher{background:#FEF3C7;padding:0.5rem;border-radius:6px;margin:0.2rem 0}.msg b.ai{color:#7C3AED}.msg b.teacher{color:#d4a632}.msg p{margin-top:0.2rem;white-space:pre-wrap}.qa{padding:0.6rem 0;border-bottom:1px solid #eee}.rp{padding:0.4rem 0.6rem;margin:0.3rem 0 0.3rem 2rem;border-radius:6px}.rp.ai{background:#EDE9FE}.rp.teacher{background:#FEF3C7}ul{padding-left:1.5rem}li{margin:0.2rem 0}</style></head><body><div class="hd"><h1>'+esc(_title)+'</h1><div class="m">'+ds+' · '+_ps.numChildren()+'人 · '+esc(_rid)+'</div></div>'+wH+qH+fH+'<div style="text-align:center;color:#999;font-size:0.8rem;margin-top:2rem">ClassClaw 課堂互動成果報告</div></body></html>';
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=_rid+'.html';a.click();
+}
+
 async function exportData(){
   var ws=await db.ref('rooms/'+roomId+'/wall').orderByChild('ts').once('value');
   var qs=await db.ref('rooms/'+roomId+'/qa').once('value');
