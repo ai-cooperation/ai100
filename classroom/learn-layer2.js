@@ -22,37 +22,28 @@ function updateTokenDisplay(){
   el.textContent = `API ${tokenUsage.calls} | ${(totalIn/1000).toFixed(1)}K↑ ${(totalOut/1000).toFixed(1)}K↓`;
 }
 
-const GROQ_KEYS = [
-  ['gsk_','A268WAZBMohKSeT9nqAGWGdyb3FY93gQoVEQZb7psbMum8CIn6Ro'].join(''),
-  ['gsk_','Fo8pRoEMXVh69Icj4jWlWGdyb3FYBlNkA5cOGZ2fhQLU2434XDX6'].join('')
-];
-let _groqKeyIdx = 0;
+// API keys now stored server-side in Cloudflare Worker
+// LEARN_API_PROXY is defined in learn.html
 
 async function callGroq(prompt, maxTokens){
   const models = ['meta-llama/llama-4-scout-17b-16e-instruct','qwen/qwen3-32b'];
   for(const model of models){
-    for(let k = 0; k < GROQ_KEYS.length; k++){
-      const key = GROQ_KEYS[(_groqKeyIdx + k) % GROQ_KEYS.length];
-      try {
-        const res = await fetch('https://api.groq.com/openai/v1/chat/completions',{
-          method:'POST',
-          headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},
-          body:JSON.stringify({model, messages:[{role:'user',content:prompt}], max_tokens:maxTokens||4096, temperature:0.7})
-        });
-        if(res.status === 429){
-          _groqKeyIdx = (_groqKeyIdx+1) % GROQ_KEYS.length; // rotate key
-          continue;
-        }
-        if(!res.ok) continue;
-        const data = await res.json();
-        const u = data.usage || {};
-        tokenUsage.groq_in += u.prompt_tokens || 0;
-        tokenUsage.groq_out += u.completion_tokens || 0;
-        tokenUsage.calls++;
-        updateTokenDisplay();
-        return data.choices?.[0]?.message?.content || '';
-      } catch(e){ continue; }
-    }
+    try {
+      const res = await fetch(`${LEARN_API_PROXY}/api/groq`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model, messages:[{role:'user',content:prompt}], max_tokens:maxTokens||4096, temperature:0.7})
+      });
+      if(res.status === 429) continue;
+      if(!res.ok) continue;
+      const data = await res.json();
+      const u = data.usage || {};
+      tokenUsage.groq_in += u.prompt_tokens || 0;
+      tokenUsage.groq_out += u.completion_tokens || 0;
+      tokenUsage.calls++;
+      updateTokenDisplay();
+      return data.choices?.[0]?.message?.content || '';
+    } catch(e){ continue; }
   }
   // Fallback to Gemini if Groq fails
   return callGemini(prompt);

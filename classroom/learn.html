@@ -754,11 +754,14 @@ const MODULES = {
   });
 });
 
+// API Proxy — keys stored server-side
+const LEARN_API_PROXY = 'https://api.cooperation.tw';
+
 // ═══════════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════════
 let state = {
-  name:'', email:'', key:['AIza','SyD03Wc6coK5l5hkXReanQD6BnWLyAYeedM'].join(''), moduleId:'',
+  name:'', email:'', key:'', moduleId:'',
   phase1: {ratings:{}},         // F1:3, F2:5 ...
   phase2: {choices:{}},         // D1:'A', D2:'B' ...
   phase3: {answers:{},scores:{}}, // Q1:'C', scores: Q1:4
@@ -1049,8 +1052,7 @@ function startLearning(){
   // Capture email from entry screen
   const entryEmail = document.getElementById('loginEmail').value.trim();
   if(entryEmail && entryEmail.includes('@')) state.email = entryEmail;
-  const userKey = document.getElementById('inputKey').value.trim();
-  if(userKey && userKey.startsWith('AIza')) state.key = userKey;
+  // API key now handled by server-side proxy
   state.startTime = Date.now();
   showScreen('screenPhase1');
   renderPhase1();
@@ -1241,10 +1243,7 @@ async function answerQ(qid, chosen){
       </div>
       <button class="btn btn-secondary btn-block" onclick="nextQ()" style="margin-top:.8rem;">繼續下一題 →</button>
     `;
-    // If Gemini key available, add AI prompt
-    if(!state.key){
-      fb.querySelector('.ai-input-row').innerHTML = '<span style="font-size:.85rem;color:var(--g400);padding:.5rem;">設定 Gemini API Key 可啟用 AI 動態追問</span>';
-    }
+    // AI chat always available via server-side proxy
   }
 }
 
@@ -1261,10 +1260,7 @@ async function sendChat(qid){
   body.innerHTML += `<div class="ai-msg from-user">${escHtml(msg)}</div>`;
   body.scrollTop = body.scrollHeight;
 
-  if(!state.key){
-    body.innerHTML += `<div class="ai-msg from-ai">需要 Gemini API Key 才能進行 AI 追問。</div>`;
-    return;
-  }
+  // API key handled by server-side proxy
 
   setCooldown(8000); // 3s cooldown to avoid RPM
   body.innerHTML += `<div class="ai-msg from-ai" id="aiLoading-${qid}" style="opacity:.5;">思考中...</div>`;
@@ -1325,11 +1321,10 @@ ${chatMsgs}
 // gemini-2.5-flash is a thinking model — needs high maxOutputTokens to avoid truncation
 // Free tier RPM is low, so retry with backoff on 429
 async function callGemini(prompt){
-  if(!state.key) return '';
   const waits = [5,10,15]; // seconds to wait on 429, 3 retries
   for(let attempt = 0; attempt <= waits.length; attempt++){
     try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${state.key}`,{
+      const res = await fetch(`${LEARN_API_PROXY}/api/gemini`,{
         method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:8192,temperature:0.7}})
       });
@@ -1550,13 +1545,8 @@ function goPhase5(){
   if(qs.length > 0){
     renderReinforceQ();
   } else {
-    // No pre-built questions, try AI generation
-    if(state.key){
-      generateAIReinforcement();
-    } else {
-      document.getElementById('reinforceArea').innerHTML = '<div class="info green">沒有額外加強題。你的弱點已在 Phase 3 追問中處理過。</div>';
-      document.getElementById('reinforceDone').style.display = 'block';
-    }
+    // No pre-built questions, try AI generation via proxy
+    generateAIReinforcement();
   }
 }
 
@@ -1623,10 +1613,7 @@ async function answerR(qid, chosen){
           <div class="ai-msg from-ai">${diag?.followup || '想想看，這個情境跟你之前答錯的題目有什麼共通點？'}</div>
         </div>
         <div class="ai-input-row">
-          ${state.key
-            ? `<input type="text" id="rChatInput-${qid}" placeholder="輸入你的想法..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendRChat('${qid}');}"><button onclick="sendRChat('${qid}')">送出</button>`
-            : '<span style="font-size:.85rem;color:var(--g400);padding:.5rem;">設定 Gemini API Key 可啟用 AI 動態追問</span>'
-          }
+          <input type="text" id="rChatInput-${qid}" placeholder="輸入你的想法..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendRChat('${qid}');}"><button onclick="sendRChat('${qid}')">送出</button>
         </div>
       </div>
       <div class="info blue" style="margin-top:.8rem;">
@@ -1642,7 +1629,7 @@ async function sendRChat(qid){
   const input = document.getElementById(`rChatInput-${qid}`);
   if(!input) return;
   const msg = input.value.trim();
-  if(!msg || !state.key) return;
+  if(!msg) return;
   input.value = '';
   input.blur();
 
@@ -1890,9 +1877,9 @@ function renderFinalReport(){
 function initFirebase(){
   try {
     firebase.initializeApp({
-      apiKey: ['AIza','SyC5X5C0Uje6bCMzrvuUuq5Bz33ly0PR-vc'].join(''),
-      databaseURL: 'https://ai-classroom-70a97-default-rtdb.firebaseio.com',
-      projectId: 'ai-classroom-70a97'
+      apiKey: 'AIzaSyDgszkIcRMPVWZWrkQcVONy4-Xol0kpFZk',
+      databaseURL: 'https://ai-learn-system-default-rtdb.firebaseio.com',
+      projectId: 'ai-learn-system'
     });
     console.log('Firebase connected for learn system');
 
