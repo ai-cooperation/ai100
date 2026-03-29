@@ -2521,7 +2521,6 @@ function renderCVPost(sess){
 
     h+='<div class="post-actions">';
     h+='<button onclick="enterSessionRoom(cvSessions['+cvSelectedSessionIdx+'],\'post-class\')">進入教室查看詳情</button>';
-    h+='<button onclick="window.open(\'/classroom/feedback?room='+encodeURIComponent(sess.roomId)+'\',\'_blank\')">查看回饋頁</button>';
     h+='</div>';
 
     body.innerHTML=h;
@@ -2609,6 +2608,7 @@ function renderCVReport(sess){
 
   body.innerHTML='<div style="text-align:center;padding:1rem;color:var(--dim)">載入中...</div>';
 
+  // Read all data sources
   Promise.all([
     db.ref('rooms/'+sess.roomId+'/presence').once('value'),
     db.ref('rooms/'+sess.roomId+'/wall').once('value'),
@@ -2620,9 +2620,25 @@ function renderCVReport(sess){
     var wallCount=results[1].numChildren();
     var qaCount=results[2].numChildren();
     var voteCount=results[3].numChildren();
-    var feedbackCount=results[4].numChildren();
+    var feedbackData=results[4].val();
+    var feedbackEntries=feedbackData?Object.values(feedbackData):[];
+    var feedbackCount=feedbackEntries.length;
+
+    // Calculate satisfaction/recommend from feedback
+    var satSum=0,satCount=0,recSum=0,recCount=0;
+    var emailCount=0;
+    feedbackEntries.forEach(function(e){
+      if(e.ratings){
+        if(e.ratings.satisfaction){satSum+=e.ratings.satisfaction;satCount++}
+        if(e.ratings.recommend){recSum+=e.ratings.recommend;recCount++}
+      }
+      if(e.email) emailCount++;
+    });
+    var satAvg=satCount?(satSum/satCount).toFixed(1):'-';
+    var recAvg=recCount?(recSum/recCount).toFixed(1):'-';
 
     var h='';
+    // Interaction stats
     h+='<div class="kpi-grid" style="grid-template-columns:1fr 1fr">';
     h+='<div class="kpi-card"><div class="kpi-val" style="color:var(--pri)">'+presCount+'</div><div class="kpi-label">出席人數</div></div>';
     h+='<div class="kpi-card"><div class="kpi-val" style="color:var(--gold)">'+wallCount+'</div><div class="kpi-label">訊息牆留言</div></div>';
@@ -2630,7 +2646,24 @@ function renderCVReport(sess){
     h+='<div class="kpi-card"><div class="kpi-val" style="color:#06B6D4">'+voteCount+'</div><div class="kpi-label">投票數</div></div>';
     h+='</div>';
 
-    h+='<div style="margin-top:1rem;text-align:center"><p style="color:var(--dim);font-size:0.85rem;margin-bottom:0.5rem">回饋填寫：'+feedbackCount+' 人</p>';
+    // Feedback stats
+    if(feedbackCount>0){
+      h+='<div class="kpi-grid" style="margin-top:1rem">';
+      h+='<div class="kpi-card"><div class="kpi-val" style="color:var(--pri)">'+feedbackCount+'</div><div class="kpi-label">回饋人數</div></div>';
+      h+='<div class="kpi-card"><div class="kpi-val" style="color:var(--gold)">'+satAvg+'</div><div class="kpi-label">滿意度 /5</div></div>';
+      h+='<div class="kpi-card"><div class="kpi-val" style="color:#1A73E8">'+recAvg+'</div><div class="kpi-label">推薦度 /5</div></div>';
+      h+='</div>';
+      if(emailCount>0){
+        h+='<p style="color:var(--dim);font-size:0.85rem;text-align:center;margin-top:0.5rem">📧 收集到 '+emailCount+' 個 email</p>';
+      }
+    } else {
+      h+='<p style="color:var(--dim);font-size:0.85rem;text-align:center;margin-top:1rem">尚無回饋資料</p>';
+    }
+
+    // Room ID debug info
+    h+='<p style="color:var(--border);font-size:0.7rem;text-align:center;margin-top:1rem">Room: '+esc(sess.roomId)+'</p>';
+
+    h+='<div style="margin-top:1rem;text-align:center">';
     h+='<button class="act-btn" style="margin:0.5rem" onclick="enterSessionRoom(cvSessions['+cvSelectedSessionIdx+'],\'live\');setTimeout(function(){exportData()},500)">匯出完整 HTML 報告</button>';
     h+='</div>';
 

@@ -652,16 +652,8 @@
         var rawSections = pres.sections || [];
         slideUrl = pres.url || '';
 
-        // Normalize sections: might be strings or objects with title/name
-        sections = rawSections.map(function(s) {
-          if (typeof s === 'string') return s;
-          if (s && typeof s === 'object') return s.title || s.name || s.label || String(s);
-          return String(s);
-        }).filter(function(s) { return s && s !== '[object Object]'; });
-
-        if (sections.length === 0) {
-          sections = ['實作練習', '案例分析', '講師講解', '互動討論', '教材內容'];
-        }
+        // Always use generic teaching activity options (slide titles confuse students)
+        sections = ['實作練習', '案例分析', '講師講解', '互動討論', '教材內容'];
 
         hide($loading);
         show($app);
