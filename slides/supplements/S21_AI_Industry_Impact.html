@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 的產業化衝擊</title>
+<style>
+:root{
+  --teal:#0F9D8A;--teal-light:#12B89F;--teal-dark:#0A7A6B;
+  --gold:#FFC857;--gold-dark:#E6A820;
+  --cyan:#06B6D4;--orange:#E07A3A;--red:#DC2626;--purple:#7C3AED;
+  --primary:#1A2744;--primary-light:#243556;
+  --dark-bg:#12121f;
+  --card:rgba(255,255,255,0.06);--border:rgba(255,255,255,0.1);
+  --t1:rgba(255,255,255,0.92);--t2:rgba(255,255,255,0.6);--t3:rgba(255,255,255,0.35);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;
+  font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  font-size:22px;line-height:1.7;color:var(--t1)}
+body{cursor:pointer}
+
+/* === Slides === */
+#wrap{position:relative;width:100vw;height:100vh}
+.s{position:absolute;inset:0;display:none !important;flex-direction:column;overflow:hidden;background:var(--dark-bg)}
+.s.on{display:flex !important}
+
+/* === Fragment === */
+.f{opacity:0;transform:translateY(14px);transition:opacity .4s,transform .4s}
+.f.v{opacity:1;transform:translateY(0)}
+
+/* === Header === */
+.hd{padding:1.2rem 4rem .6rem;display:flex;flex-direction:column;gap:.2rem}
+.hd .tag{font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--teal);padding:6px 16px;border:1px solid var(--teal);border-radius:6px;width:fit-content;margin-bottom:.4rem}
+.hd h2{font-size:32px;font-weight:800;line-height:1.3}
+.hd .sub{font-size:20px;color:var(--t2);margin-top:.3rem}
+.hd::after{content:"";display:block;width:60px;height:4px;background:var(--gold);margin-top:.4rem;border-radius:2px}
+
+/* === Section === */
+.sec{display:flex;flex-direction:column;justify-content:center;padding:0 5rem}
+.sec .badge{font-size:18px;font-weight:700;letter-spacing:3px;color:var(--teal);border:1.5px solid var(--teal);padding:8px 20px;border-radius:8px;width:fit-content;margin-bottom:1.5rem}
+.sec .bar{width:5px;height:100px;background:var(--teal);margin-bottom:1.5rem;border-radius:3px}
+.sec h1{font-size:52px;font-weight:800;line-height:1.25;margin-bottom:1rem}
+.sec p{font-size:24px;color:var(--t2)}
+
+/* === Cards === */
+.g{display:grid;gap:.8rem;padding:.6rem 4rem}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}.g4{grid-template-columns:1fr 1fr 1fr 1fr}
+.c{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.2rem;position:relative;overflow:hidden}
+.c h3{font-size:22px;font-weight:700;margin-bottom:.3rem;line-height:1.3}
+.c p,.c li{font-size:19px;color:var(--t2);line-height:1.6}
+.c ul{list-style:none;padding:0}
+.c li{padding:.3rem 0}
+.c .n{font-size:42px;font-weight:800;line-height:1.1}
+.c .nl{font-size:18px;color:var(--t2)}
+.c.bt{border-color:var(--teal)}.c.bg{border-color:var(--gold-dark)}.c.br{border-color:var(--red)}.c.bo{border-color:var(--orange)}
+.at{position:absolute;top:0;left:0;right:0;height:4px;border-radius:14px 14px 0 0}
+
+/* === Compare === */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:.6rem 4rem}
+.cmp>div{background:var(--card);border-radius:14px;padding:1.2rem;border:1px solid var(--border)}
+
+/* === List === */
+.li{padding:.3rem 4rem;display:flex;flex-direction:column;gap:.5rem}
+.li>div{display:flex;align-items:center;gap:1rem;padding:.7rem 1.2rem;background:var(--card);border:1px solid var(--border);border-radius:12px}
+.li .ic{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;flex-shrink:0}
+.li h4{font-size:20px;font-weight:700}
+.li p{font-size:17px;color:var(--t2);line-height:1.4}
+.li .tg{font-size:16px;padding:4px 12px;border-radius:20px;border:1px solid;font-weight:600;margin-left:auto;white-space:nowrap}
+
+/* === Poster (image bg) === */
+.poster{background-size:cover;background-position:center;position:relative}
+.poster .ov{position:absolute;inset:0;z-index:1}
+.poster .pc{position:relative;z-index:2;height:100%;display:flex;flex-direction:column}
+
+/* === Info === */
+.info{margin:0 4rem;padding:1rem 1.5rem;background:rgba(15,157,138,.12);border:1px solid rgba(15,157,138,.25);border-radius:10px;font-size:20px;color:var(--teal-light);line-height:1.5}
+.info.w{background:rgba(220,38,38,.1);border-color:rgba(220,38,38,.25);color:var(--red)}
+.info.gd{background:rgba(255,200,87,.1);border-color:rgba(255,200,87,.25);color:var(--gold)}
+
+/* === Quote === */
+.qt{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:3rem 6rem;text-align:center}
+.qt h2{font-size:44px;font-weight:700;line-height:1.4;max-width:800px}
+
+/* === Funnel === */
+.fn{display:flex;flex-direction:column;align-items:center;gap:0;padding:1rem 2rem;flex:1;justify-content:center}
+.fn>div{display:flex;align-items:center;gap:1rem;width:100%;margin:2px 0}
+.fn .fl{flex:1;text-align:right;font-size:18px;color:var(--t2)}
+.fn .fb{height:28px;border-radius:14px;flex-shrink:0}
+.fn .fr{flex:1;font-size:18px;font-weight:600}
+
+/* === Bottom UI === */
+.ctr{position:fixed;bottom:16px;right:20px;z-index:100;font-size:16px;color:rgba(255,255,255,.5);background:rgba(0,0,0,.6);padding:6px 14px;border-radius:8px;backdrop-filter:blur(4px);cursor:pointer}
+.prg{position:fixed;bottom:0;left:0;height:3px;background:var(--teal);z-index:100;transition:width .3s}
+.ctl{position:fixed;bottom:14px;right:90px;z-index:100;display:flex;gap:8px}
+.ctl button{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:18px;backdrop-filter:blur(4px);min-height:48px;min-width:48px}
+.ctl button:hover{border-color:var(--teal);color:#fff}
+
+/* === Chapter Menu === */
+.cm{position:fixed;bottom:16px;left:16px;z-index:150}
+.cm button.cb{display:flex;align-items:center;gap:8px;padding:10px 16px;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:rgba(255,255,255,.9);font-size:18px;cursor:pointer;min-height:48px}
+.cm button.cb:hover{border-color:var(--teal)}
+.cm .cl{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:220px;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px 0;max-height:60vh;overflow-y:auto}
+.cm.open .cl{display:block}
+.cm .ci{display:flex;align-items:center;gap:10px;padding:10px 16px;color:rgba(255,255,255,.7);font-size:18px;cursor:pointer;white-space:nowrap;min-height:44px}
+.cm .ci:hover{background:rgba(255,255,255,.08);color:#fff}
+.cm .ci.ac{color:var(--teal);font-weight:600}
+.cm .ci .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0}
+.cm .ci.ac .dot{background:var(--teal);box-shadow:0 0 6px var(--teal)}
+
+/* === Helpers === */
+.tc{color:var(--teal)}.gc{color:var(--gold)}.rc{color:var(--red)}.oc{color:var(--orange)}.cc{color:var(--cyan)}
+.ph{padding-left:4rem;padding-right:4rem}
+.tx{text-align:center}
+
+@media(max-width:768px){
+  .hd{padding:1.2rem 1.5rem .6rem}.g{padding:.8rem 1.5rem}
+  .g3,.g4{grid-template-columns:1fr 1fr}.cmp{grid-template-columns:1fr;padding:.8rem 1.5rem}
+  .sec{padding:0 2rem}.sec h1{font-size:36px}.qt h2{font-size:32px}
+  .ph{padding-left:1.5rem;padding-right:1.5rem}
+}
+</style>
+</head>
+<body>
+<div id="wrap">
+
+<!-- ====== S01: COVER ====== -->
+<div class="s on" data-act="開場" data-title="封面">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:4rem 5rem;background:linear-gradient(135deg,#12121f 0%,#1a2744 50%,#0a3d35 100%)">
+    <div style="font-size:18px;font-weight:600;color:var(--t2);letter-spacing:1px;margin-bottom:2rem">2026 產業趨勢</div>
+    <h1 style="font-size:64px;font-weight:900;line-height:1.2;margin-bottom:1rem">AI的<br>產業化衝擊</h1>
+    <div style="width:80px;height:5px;background:var(--gold);border-radius:3px;margin-bottom:2rem"></div>
+    <div style="display:flex;gap:2rem;margin-top:1rem">
+      <div style="display:flex;align-items:center;gap:.8rem">
+        <div style="width:48px;height:48px;background:var(--teal);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px">&#x1F9E0;</div>
+        <div><div style="font-size:16px;color:var(--t3)">Multi-Agent</div><div style="font-size:22px;font-weight:700">多智體協同</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:.8rem">
+        <div style="width:48px;height:48px;background:var(--gold-dark);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px">&#x1F916;</div>
+        <div><div style="font-size:16px;color:var(--t3)">Physical AI</div><div style="font-size:22px;font-weight:700">物理世界交互</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S02: AI TIMELINE ====== -->
+<div class="s" data-act="AI演進" data-title="AI發展重要時期">
+  <div class="hd">
+    <span class="tag">THREE STAGES OF EVOLUTION</span>
+    <h2>AI 發展重要時期</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:0 4rem;flex:1;min-height:0;align-items:center">
+    <div style="display:flex;flex-direction:column;gap:.5rem">
+      <div style="display:flex;align-items:center;gap:.8rem;padding:.6rem 1rem;background:var(--card);border-radius:8px;border-left:3px solid var(--teal)">
+        <span style="font-size:24px;font-weight:800;color:var(--gold);min-width:60px">1956</span>
+        <span style="font-size:17px;color:var(--t2)">達特茅斯會議開啟AI紀元，專家系統繁榮後陷入寒冬</span>
+      </div>
+      <div class="f" style="display:flex;align-items:center;gap:.8rem;padding:.6rem 1rem;background:var(--card);border-radius:8px;border-left:3px solid var(--teal)">
+        <span style="font-size:24px;font-weight:800;color:var(--gold);min-width:60px">1997</span>
+        <span style="font-size:17px;color:var(--t2)">統計機器學習崛起，SVM、貝葉斯方法成為主流</span>
+      </div>
+      <div class="f" style="display:flex;align-items:center;gap:.8rem;padding:.6rem 1rem;background:var(--card);border-radius:8px;border-left:3px solid var(--teal)">
+        <span style="font-size:24px;font-weight:800;color:var(--gold);min-width:60px">2012</span>
+        <span style="font-size:17px;color:var(--t2)">AlexNet顛覆ImageNet，深度學習推動語音、視覺飛躍</span>
+      </div>
+      <div class="f" style="display:flex;align-items:center;gap:.8rem;padding:.6rem 1rem;background:var(--card);border-radius:8px;border-left:3px solid var(--teal)">
+        <span style="font-size:24px;font-weight:800;color:var(--gold);min-width:60px">2016</span>
+        <span style="font-size:17px;color:var(--t2)">AlphaGo擊敗李世石，強化學習結合深度學習</span>
+      </div>
+      <div class="f" style="display:flex;align-items:center;gap:.8rem;padding:.6rem 1rem;background:var(--card);border-radius:8px;border-left:3px solid var(--gold)">
+        <span style="font-size:24px;font-weight:800;color:var(--gold);min-width:60px">2017</span>
+        <span style="font-size:17px;color:var(--t2)">Transformer架構橫空出世，為大模型爆發埋下伏筆</span>
+      </div>
+      <div class="f" style="display:flex;align-items:center;gap:.8rem;padding:.6rem 1rem;background:var(--card);border-radius:8px;border-left:3px solid var(--red)">
+        <span style="font-size:24px;font-weight:800;color:var(--red);min-width:60px">2022</span>
+        <span style="font-size:17px;color:var(--t1)">ChatGPT引爆全球，AI從實驗室走向每個人</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.6rem;align-self:stretch;justify-content:center">
+      <div style="font-size:18px;color:var(--t3);text-align:center;margin-bottom:.3rem">技術突破指數</div>
+      <div style="display:flex;align-items:flex-end;gap:.3rem;height:60%;padding:0 1rem">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:.3rem"><div style="background:var(--teal);border-radius:4px 4px 0 0;width:100%;height:30px"></div><div style="font-size:14px;color:var(--t3)">1956</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:.3rem"><div style="background:var(--teal);border-radius:4px 4px 0 0;width:100%;height:55px"></div><div style="font-size:14px;color:var(--t3)">1997</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:.3rem"><div style="background:var(--teal);border-radius:4px 4px 0 0;width:100%;height:90px"></div><div style="font-size:14px;color:var(--t3)">2012</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:.3rem"><div style="background:var(--teal);border-radius:4px 4px 0 0;width:100%;height:120px"></div><div style="font-size:14px;color:var(--t3)">2016</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:.3rem"><div style="background:var(--gold);border-radius:4px 4px 0 0;width:100%;height:160px"></div><div style="font-size:14px;color:var(--t3)">2018</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:.3rem"><div style="background:var(--gold);border-radius:4px 4px 0 0;width:100%;height:210px"></div><div style="font-size:14px;color:var(--t3)">2020</div></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:.3rem"><div style="background:var(--red);border-radius:4px 4px 0 0;width:100%;height:300px"></div><div style="font-size:14px;color:var(--gold)">2022</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S03: SECTION 寒武紀 ====== -->
+<div class="s sec" data-act="寒武紀爆發" data-title="AI的寒武紀爆發">
+  <div class="badge">CHAPTER 01</div>
+  <div class="bar"></div>
+  <h1>AI的寒武紀爆發</h1>
+  <p>從LLM到Physical AI的演進之路</p>
+  <div style="display:flex;gap:1.2rem;margin-top:2rem">
+    <div class="f" style="padding:1.2rem 1.8rem;background:var(--card);border:1px solid var(--border);border-radius:12px;min-width:140px">
+      <div style="font-size:36px;font-weight:800;color:var(--t3)">2023</div><div style="font-size:18px;color:var(--t2)">LLM元年</div>
+    </div>
+    <div class="f" style="padding:1.2rem 1.8rem;background:var(--card);border:1px solid var(--border);border-radius:12px;min-width:140px">
+      <div style="font-size:36px;font-weight:800;color:var(--gold)">2024</div><div style="font-size:18px;color:var(--t2)">Agent爆發</div>
+    </div>
+    <div class="f" style="padding:1.2rem 1.8rem;background:var(--card);border:1px solid var(--gold);border-radius:12px;min-width:140px">
+      <div style="font-size:36px;font-weight:800;color:var(--gold)">2025</div><div style="font-size:18px;color:var(--t2)">Physical AI</div>
+    </div>
+    <div class="f" style="padding:1.2rem 1.8rem;background:var(--card);border:1px solid var(--red);border-radius:12px;min-width:140px">
+      <div style="font-size:36px;font-weight:800;color:var(--red)">2026</div><div style="font-size:18px;color:var(--t2)">Clawdbot</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S04: 三次躍遷 ====== -->
+<div class="s" data-act="寒武紀爆發" data-title="AI的三次躍遷">
+  <div class="hd"><span class="tag">AI EVOLUTION</span><h2>AI的三次躍遷：從語言到物理世界</h2></div>
+  <div class="g g4" style="flex:1;align-content:start">
+    <div class="c f"><div class="at" style="background:var(--t3)"></div><h3 style="color:var(--t2)">LLM</h3><p style="font-size:16px;color:var(--t3)">大語言模型</p><p style="font-size:18px"><strong class="tc">能力邊界：</strong>理解、生成、推理語言，處理文本、程式碼、影像等數位資訊</p><p style="font-size:16px;color:var(--t3);margin-top:.5rem">局限：停留在數位世界</p></div>
+    <div class="c f"><div class="at" style="background:var(--teal)"></div><h3 class="tc">AI Agent</h3><p style="font-size:16px;color:var(--t3)">智能體</p><p style="font-size:18px"><strong class="tc">能力邊界：</strong>自主規劃、工具調用、任務執行，具備數位世界的行動力</p><p style="font-size:16px;color:var(--t3);margin-top:.5rem">局限：缺乏直接感知與操控能力</p></div>
+    <div class="c bg f"><div class="at" style="background:var(--gold)"></div><h3 class="gc">Physical AI</h3><p style="font-size:16px;color:var(--t3)">物理化AI</p><p style="font-size:18px"><strong class="gc">能力邊界：</strong>直接感知物理世界，即時決策，操控機器人、車輛、設備</p><p style="font-size:16px;color:var(--t3);margin-top:.5rem">突破：數位智能與物理世界深度融合</p></div>
+    <div class="c br f"><div class="at" style="background:var(--red)"></div><h3 class="rc">Clawdbot</h3><p style="font-size:16px;color:var(--t3)">數位員工</p><p style="font-size:18px"><strong class="rc">能力邊界：</strong>直接感知物理世界，即時決策，操控機器人、車輛、設備</p><p style="font-size:16px;color:var(--t3);margin-top:.5rem">突破：AI不再是工具，而是與人類共生的數位夥伴</p></div>
+  </div>
+  <div style="padding:0 4rem 1.2rem"><div class="info">Physical AI標誌著AI從<strong class="gc">觀察者</strong>轉變為<strong class="gc">行動者</strong> &mdash; <strong>2025 = Physical AI元年</strong></div></div>
+</div>
+
+<!-- ====== S05: Physical AI核心突破 ====== -->
+<div class="s" data-act="寒武紀爆發" data-title="Physical AI核心突破">
+  <div class="hd"><span class="tag">PHYSICAL AI BREAKTHROUGH</span><h2>OpenAI五級智能 &amp; Physical AI核心突破</h2></div>
+  <div style="padding:0 4rem;display:flex;gap:.5rem;margin-bottom:1.2rem">
+    <div class="f" style="flex:1;padding:1rem;background:var(--card);border-radius:10px;text-align:center;border-bottom:3px solid var(--t3)"><div style="font-size:16px;color:var(--t3)">Level 1</div><div style="font-size:20px;font-weight:700">聊天機器人</div></div>
+    <div class="f" style="flex:1;padding:1rem;background:var(--card);border-radius:10px;text-align:center;border-bottom:3px solid var(--gold)"><div style="font-size:16px;color:var(--gold)">Level 2 ← 當前</div><div style="font-size:20px;font-weight:700">推理者</div></div>
+    <div class="f" style="flex:1;padding:1rem;background:rgba(15,157,138,.15);border-radius:10px;text-align:center;border:1.5px solid var(--teal);border-bottom:3px solid var(--teal)"><div style="font-size:16px;color:var(--teal)">Level 3 → 目標</div><div style="font-size:20px;font-weight:700;color:var(--teal)">智能體</div></div>
+    <div class="f" style="flex:1;padding:1rem;background:var(--card);border-radius:10px;text-align:center;border-bottom:3px solid var(--t3)"><div style="font-size:16px;color:var(--t3)">Level 4</div><div style="font-size:20px;font-weight:700">創新者</div></div>
+    <div class="f" style="flex:1;padding:1rem;background:var(--card);border-radius:10px;text-align:center;border-bottom:3px solid var(--t3)"><div style="font-size:16px;color:var(--t3)">Level 5</div><div style="font-size:20px;font-weight:700">組織</div></div>
+  </div>
+  <div class="g g4">
+    <div class="c f tx"><div style="font-size:36px;margin-bottom:.5rem">&#x1F441;</div><h3 style="font-size:22px">即時感知</h3><p style="font-size:18px">直接感知物理環境的狀態、變化和風險</p></div>
+    <div class="c f tx"><div style="font-size:36px;margin-bottom:.5rem">&#x26A1;</div><h3 style="font-size:22px">即時決策</h3><p style="font-size:18px">基於即時資料快速最優決策，無需干預</p></div>
+    <div class="c f tx"><div style="font-size:36px;margin-bottom:.5rem">&#x1F91D;</div><h3 style="font-size:22px">精準操控</h3><p style="font-size:18px">透過機器人、車輛等設備精確執行操作</p></div>
+    <div class="c f tx"><div style="font-size:36px;margin-bottom:.5rem">&#x1F517;</div><h3 style="font-size:22px">多體協同</h3><p style="font-size:18px">多智能體協同完成複雜任務，形成智能網路</p></div>
+  </div>
+</div>
+
+<!-- ====== S06: 智能群體爆發 ====== -->
+<div class="s" data-act="寒武紀爆發" data-title="智能群體的爆發">
+  <div class="hd"><span class="tag">EXPLOSION OF INTELLIGENCE</span><h2>智能群體的爆發</h2><div class="sub">資料來源：摩根士丹利2025年發布《機器人年鑑》</div></div>
+  <div style="display:flex;gap:1.5rem;padding:0 4rem;margin-bottom:.8rem">
+    <div class="c f" style="flex:1;text-align:center;padding:1.2rem"><div class="n tc">25萬億美元</div><div class="nl">人形機器人硬體市場（2050年）</div></div>
+    <div class="c f" style="flex:1;text-align:center;padding:1.2rem"><div class="n gc">65億台</div><div class="nl">全球機器人（2050年）</div></div>
+  </div>
+  <div class="g g3" style="padding-top:0">
+    <div class="c f"><h3 style="color:var(--t3);font-size:20px">01 傳統燃油設備</h3><p style="font-size:18px">燃油動力系統 / 人工操作控制 / 機械維護成本高</p><div style="font-size:16px;color:var(--teal);margin-top:.5rem;padding:.4rem .8rem;background:rgba(15,157,138,.1);border-radius:6px">典型：柴油工程機械、燃油車輛</div></div>
+    <div class="c f"><h3 style="color:var(--gold);font-size:20px">02 單一設備智能化</h3><p style="font-size:18px">新能源動力系統 / 單機AI決策 / 感測器感知環境</p><div style="font-size:16px;color:var(--teal);margin-top:.5rem;padding:.4rem .8rem;background:rgba(15,157,138,.1);border-radius:6px">典型：電動自動駕駛車輛、智能農機</div></div>
+    <div class="c bt f"><h3 class="tc" style="font-size:20px">03 群體設備智能</h3><p style="font-size:18px">分布式協同網路 / 雲端大腦調度 / 群體智能湧現</p><div style="font-size:16px;color:var(--teal);margin-top:.5rem;padding:.4rem .8rem;background:rgba(15,157,138,.1);border-radius:6px">典型：智能工廠、機器人集群、無人農場</div></div>
+  </div>
+</div>
+
+<!-- ====== S07: 25萬億市場 ====== -->
+<div class="s" data-act="寒武紀爆發" data-title="25萬億機器人市場">
+  <div class="hd"><span class="tag">ROBOTICS MARKET</span><h2>未來25萬億的機器人市場全景</h2></div>
+  <div class="g g3" style="flex:1">
+    <div class="c f" style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem"><div><div style="font-size:18px;font-weight:700">自動駕駛車輛</div><div style="font-size:16px;color:var(--t3)">乘用車、卡車、公交、計程車</div></div><div style="font-size:28px;font-weight:800;color:var(--teal)">$5.5T</div></div>
+    <div class="c f" style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem"><div><div style="font-size:18px;font-weight:700">工業機器人</div><div style="font-size:16px;color:var(--t3)">製造、裝配、質檢、倉儲</div></div><div style="font-size:28px;font-weight:800;color:var(--teal)">$6.1T</div></div>
+    <div class="c f" style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem"><div><div style="font-size:18px;font-weight:700">專業服務機器人</div><div style="font-size:16px;color:var(--t3)">醫療、教育、金融、零售</div></div><div style="font-size:28px;font-weight:800;color:var(--gold)">$4.8T</div></div>
+    <div class="c f" style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem"><div><div style="font-size:18px;font-weight:700">大型垂直起降飛行器</div><div style="font-size:16px;color:var(--t3)">城市空中交通、物流運輸</div></div><div style="font-size:28px;font-weight:800;color:var(--gold)">$3.2T</div></div>
+    <div class="c f" style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem"><div><div style="font-size:18px;font-weight:700">人形機器人</div><div style="font-size:16px;color:var(--t3)">家庭服務、陪伴、通用勞動</div></div><div style="font-size:28px;font-weight:800;color:var(--cyan)">$2.8T</div></div>
+    <div class="c f" style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem"><div><div style="font-size:18px;font-weight:700">家用 &amp; 小型無人機</div><div style="font-size:16px;color:var(--t3)">清潔、烹飪、航拍、巡檢</div></div><div style="font-size:28px;font-weight:800;color:var(--cyan)">$3.1T</div></div>
+  </div>
+</div>
+
+<!-- ====== S08: 不同視角 ====== -->
+<div class="s" data-act="寒武紀爆發" data-title="不同視角">
+  <div class="hd"><span class="tag">PERSPECTIVE</span><h2>不同視角下的智能世界</h2></div>
+  <div class="cmp" style="flex:1">
+    <div style="border-left:4px solid var(--teal);display:flex;flex-direction:column;gap:1rem">
+      <h3 style="font-size:28px;font-weight:700">&#x1F464; 人視角</h3>
+      <p style="font-size:20px">機器對智能世界的理解，是<strong class="gc">超越人類</strong>，在速度、精度、耐力、計算能力等維度實現指數級提升</p>
+      <div class="f" style="font-size:20px">&#x25CF; 更強壯</div>
+      <div class="f" style="font-size:20px">&#x25CF; 更聰明</div>
+      <div class="f" style="font-size:20px">&#x25CF; 網路化協同</div>
+      <div style="padding:.8rem 1rem;background:rgba(15,157,138,.1);border-radius:8px;margin-top:auto"><div style="font-size:16px;color:var(--t3)">核心理念</div><div style="font-size:22px;font-weight:700;color:var(--teal)">完成任務</div></div>
+    </div>
+    <div style="border-left:4px solid var(--gold);display:flex;flex-direction:column;gap:1rem">
+      <h3 style="font-size:28px;font-weight:700">&#x1F916; 機器視角</h3>
+      <p style="font-size:20px">人類對智能世界的期待，是<strong class="gc">讓機器像人一樣</strong>，能夠理解人類的意圖、模仿人類的行為、與人類協同工作</p>
+      <div class="f" style="font-size:20px">&#x25CF; 具備智能</div>
+      <div class="f" style="font-size:20px">&#x25CF; 像人一樣運轉</div>
+      <div class="f" style="font-size:20px">&#x25CF; 人機協作</div>
+      <div style="padding:.8rem 1rem;background:rgba(255,200,87,.1);border-radius:8px;margin-top:auto"><div style="font-size:16px;color:var(--t3)">核心理念</div><div style="font-size:22px;font-weight:700;color:var(--gold)">交付結果</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S09: 爆發數據 ====== -->
+<div class="s" data-act="寒武紀爆發" data-title="AI爆發時代">
+  <div class="hd"><span class="tag">AI ERA</span><h2>AI 的爆發時代：數據全景</h2></div>
+  <div class="g g2" style="flex:1">
+    <div class="c bt f tx" style="display:flex;flex-direction:column;justify-content:center;padding:2rem"><div style="font-size:56px;font-weight:900;color:var(--teal)">$25<span style="font-size:32px">萬億</span></div><div style="font-size:22px;font-weight:700;margin-top:.5rem">預測總值</div><div style="font-size:18px;color:var(--t2)">全球AI機器人產值（2050年）</div></div>
+    <div class="c bg f tx" style="display:flex;flex-direction:column;justify-content:center;padding:2rem"><div style="font-size:56px;font-weight:900;color:var(--gold)">65<span style="font-size:32px">億台</span></div><div style="font-size:22px;font-weight:700;margin-top:.5rem">預測規模</div><div style="font-size:18px;color:var(--t2)">全球AI機器人設備數（2050年）</div></div>
+    <div class="c bt f tx" style="display:flex;flex-direction:column;justify-content:center;padding:2rem"><div style="font-size:56px;font-weight:900;color:var(--teal)">$500<span style="font-size:32px">萬億</span></div><div style="font-size:22px;font-weight:700;margin-top:.5rem">預測GDP</div><div style="font-size:18px;color:var(--t2)">AI將推動全球GDP超<strong class="gc">7%</strong>年度增長</div></div>
+    <div class="c bg f tx" style="display:flex;flex-direction:column;justify-content:center;padding:2rem"><div style="font-size:56px;font-weight:900;color:var(--gold)">450<span style="font-size:32px">億台</span></div><div style="font-size:22px;font-weight:700;margin-top:.5rem">預測規模</div><div style="font-size:18px;color:var(--t2)">全球物聯網連接數</div></div>
+  </div>
+</div>
+
+<!-- ====== S10: SECTION Clawdbot ====== -->
+<div class="s sec" data-act="Clawdbot時代" data-title="Clawdbot時代">
+  <div class="badge">CHAPTER 02</div>
+  <div class="bar" style="background:var(--gold)"></div>
+  <h1>Clawdbot時代</h1>
+  <p>執行型AI的全民破圈 &mdash; 從「對話顧問」到「數位員工」</p>
+</div>
+
+<!-- ====== S11: Clawdbot概念 ====== -->
+<div class="s" data-act="Clawdbot時代" data-title="執行型AI破圈">
+  <div class="hd"><span class="tag">CLAWDBOT ERA</span><h2>Clawdbot &mdash; 執行型AI的全民破圈</h2><div class="sub">從「對話顧問」到「數位員工」的範式躍遷</div></div>
+  <div class="g g4">
+    <div class="c f tx"><h3 style="font-size:20px;color:var(--teal)">AI 自己迭代自己</h3><p style="font-size:18px">從被動回應到主動服務<br>24小時「數位同事」<br>未來「一人公司」增多</p></div>
+    <div class="c f tx"><h3 style="font-size:20px;color:var(--gold)">Skills = 新時代的 Apps</h3><p style="font-size:18px">未來的模式：不需要交互入口，僅需開發一個Skill，發布到Skill Store，等待被大量Agent發現、調用</p></div>
+    <div class="c f tx"><h3 style="font-size:20px;color:var(--cyan)">Memory as a File System</h3><p style="font-size:18px">Memory等同於self-evolving。沒有memory，Agent基本上就沒有進化的能力</p></div>
+    <div class="c f tx"><h3 style="font-size:20px;color:var(--orange)">終極形態 A2A 互動</h3><p style="font-size:18px">不是人與AI的互動，而是它真正做到了AI與AI互動的可能</p></div>
+  </div>
+</div>
+
+<!-- ====== S12: GTC 2026 ====== -->
+<div class="s" data-act="Clawdbot時代" data-title="英偉達GTC 2026">
+  <div class="hd"><span class="tag">NVIDIA GTC 2026</span><h2>英偉達 GTC 2026 &mdash; 算力狂飆4000萬倍</h2></div>
+  <div class="g g3" style="flex:1">
+    <div class="c bt f"><h3 class="tc" style="font-size:24px">V &mdash; Vera Rubin</h3><p style="font-size:18px"><strong class="oc">算力怪獸</strong> &mdash; 7種晶片5種架構</p><p style="font-size:18px;color:var(--t2);margin-top:.5rem">&#x2022; 推理性能提升 <strong class="gc">35倍</strong><br>&#x2022; 每瓦吞吐量提升 <strong class="gc">10倍</strong><br>&#x2022; Token生成率暴漲 <strong class="gc">350倍</strong></p></div>
+    <div class="c bg f"><h3 class="gc" style="font-size:24px">N &mdash; NemoClaw</h3><p style="font-size:18px"><strong class="oc">企業級安全方案</strong></p><p style="font-size:18px;color:var(--t2);margin-top:.5rem">為OpenClaw套上「安全殼」。被譽為「新時代的作業系統」。每家SaaS公司都將變成GaaS公司。</p></div>
+    <div class="c bo f"><h3 class="oc" style="font-size:24px">A &mdash; AI走進物理世界</h3><p style="font-size:18px"><strong class="oc">機器人技術</strong> &mdash; Jetson超級電腦 + Cosmos世界模型 + Omniverse數位孿生</p><p style="font-size:18px;color:var(--t2);margin-top:.5rem">新增比亞迪、吉利、五十鈴、日產等合作夥伴</p></div>
+  </div>
+  <div style="display:flex;gap:.5rem;padding:0 4rem 1rem">
+    <div class="f" style="flex:1;text-align:center;padding:.8rem;background:var(--card);border-radius:8px"><div style="font-size:16px;color:var(--t3)">算力提升（10年）</div><div style="font-size:28px;font-weight:800;color:var(--teal)">4000萬倍</div></div>
+    <div class="f" style="flex:1;text-align:center;padding:.8rem;background:var(--card);border-radius:8px"><div style="font-size:16px;color:var(--t3)">2027年訂單預測</div><div style="font-size:28px;font-weight:800;color:var(--gold)">1萬億美元</div></div>
+    <div class="f" style="flex:1;text-align:center;padding:.8rem;background:var(--card);border-radius:8px"><div style="font-size:16px;color:var(--t3)">2027年市值預測</div><div style="font-size:28px;font-weight:800;color:var(--orange)">10萬億美元</div></div>
+  </div>
+</div>
+
+<!-- ====== S13: OpenClaw ====== -->
+<div class="s" data-act="Clawdbot時代" data-title="什麼是OpenClaw">
+  <div class="hd"><span class="tag">OPEN CLAW FRAMEWORK</span><h2>什麼是Open Claw？</h2><div class="sub">爆火的桌面AI Agent框架</div></div>
+  <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:1.5rem;padding:0 4rem">
+    <div class="c f"><h3 class="tc">定義</h3><p style="font-size:20px;margin-top:.5rem">一款可部署在個人電腦上的<strong class="tc">開源AI智能體框架</strong>（因「龍蝦」圖標得名，圈內稱「養龍蝦」）。</p></div>
+    <div class="c bt f"><h3 class="tc">核心能力</h3><p style="font-size:20px;margin-top:.5rem">&#x2714; 高權限操作電腦<br>&#x2714; 調用帳號<br>&#x2714; 具備記憶能力<br>&#x2714; 替人完成複雜工作流</p></div>
+  </div>
+  <div style="padding:1rem 4rem"><div class="c f"><h3 class="gc">案例</h3><p style="font-size:22px">傅盛用其搭建<strong class="gc">8個Agent</strong>，完成拜年、寫稿、做影片，實現<strong class="gc">「一人公司」</strong>。</p></div></div>
+</div>
+
+<!-- ====== S14: OpenClaw適合誰 ====== -->
+<div class="s" data-act="Clawdbot時代" data-title="OpenClaw適合誰">
+  <div class="hd"><span class="tag">TARGET USERS</span><h2>Open Claw最適合誰？</h2></div>
+  <div class="g g3">
+    <div class="c f"><h3 style="font-size:22px">技術極客與開發者</h3><p style="font-size:18px">&#x2795; 可透過程式碼實現高度客製</p><p style="font-size:18px;color:var(--gold)">&#x26A0; 可能因技術術語面臨安裝障礙</p></div>
+    <div class="c bt f"><h3 style="font-size:22px">追求極致效率的超級個體</h3><p style="font-size:18px">&#x2795; 適合自由工作者和小企業主</p><p style="font-size:18px">&#x2795; 專注自動化套利和客戶服務</p></div>
+    <div class="c f"><h3 style="font-size:22px">企業IT部門</h3><p style="font-size:18px">&#x2795; 探索內部自動化可能性</p><p style="font-size:18px;color:var(--gold)">&#x26A0; 必須直接面對安全風險</p></div>
+  </div>
+  <div style="padding:.8rem 4rem"><div class="c bo f"><h3 class="oc">重要提醒</h3><p style="font-size:20px">將Open Claw視為<strong class="oc">沒有經驗但執行力強的實習生</strong>。潛在風險：意外刪除檔案、資料洩露。</p></div></div>
+</div>
+
+<!-- ====== S15: 國產替代 ====== -->
+<div class="s" data-act="Clawdbot時代" data-title="國產替代方案">
+  <div class="hd"><span class="tag">DOMESTIC ALTERNATIVES</span><h2>Open Claw 的國產替代方案</h2></div>
+  <div class="li">
+    <div class="f"><div class="ic" style="background:var(--teal)">M</div><div style="flex:1"><h4>MiniMax</h4><p>MaxClaw，雲端部署無需自備伺服器</p></div><span class="tg" style="color:var(--teal);border-color:var(--teal)">雲端</span></div>
+    <div class="f"><div class="ic" style="background:var(--primary-light)">K</div><div style="flex:1"><h4>Kimi</h4><p>Kimi Claw，擴展AI助手能力邊界</p></div><span class="tg" style="color:var(--cyan);border-color:var(--cyan)">助手</span></div>
+    <div class="f"><div class="ic" style="background:var(--teal-dark)">A</div><div style="flex:1"><h4>阿里巴巴</h4><p>開源CoPaw，支援本地/雲端及二次開發</p></div><span class="tg" style="color:var(--orange);border-color:var(--orange)">開源</span></div>
+    <div class="f"><div class="ic" style="background:var(--primary)">B</div><div style="flex:1"><h4>百度智能雲</h4><p>移動版OpenClaw，雲端環境隔離更安全</p></div><span class="tg" style="color:var(--purple);border-color:var(--purple)">移動</span></div>
+    <div class="f" style="border-color:var(--teal)"><div class="ic" style="background:var(--teal)">L</div><div style="flex:1"><h4>LongCat（龍貓）</h4><p>穩定合規的官方免費API，避免帳號安全風險</p></div><span class="tg" style="color:var(--teal-light);border-color:var(--teal-light);background:rgba(15,157,138,.1)">推薦</span></div>
+  </div>
+</div>
+
+<!-- ====== S16: SECTION 效率恐慌 ====== -->
+<div class="s sec" data-act="效率恐慌" data-title="效率恐慌與安全">
+  <div class="badge">CHAPTER 03</div>
+  <div class="bar" style="background:var(--orange)"></div>
+  <h1>效率恐慌與安全風險</h1>
+  <p>所謂效率革命的恐慌 &mdash; 當AI開始取代人類工作</p>
+</div>
+
+<!-- ====== S17: 效率革命 ====== -->
+<div class="s" data-act="效率恐慌" data-title="效率革命的恐慌">
+  <div class="hd"><span class="tag">EFFICIENCY PANIC</span><h2>所謂效率革命的恐慌</h2></div>
+  <div class="g g3" style="flex:1">
+    <div class="c bt f" style="display:flex;flex-direction:column"><div style="font-size:48px;font-weight:800;color:var(--t3)">01</div><h3 style="font-size:22px">Claude Code：150%產出躍升</h3><p style="font-size:18px;margin-top:.8rem;flex:1">Anthropic內部資料顯示，工程師使用Claude Code後人均產出提升150%，程式碼品質與交付速度同步改善。</p></div>
+    <div class="c bg f" style="display:flex;flex-direction:column"><div style="font-size:48px;font-weight:800;color:var(--t3)">02</div><h3 style="font-size:22px">Cursor AI：30人撐起90億估值</h3><p style="font-size:18px;margin-top:.8rem;flex:1">AI原生開發工具Cursor僅憑30人團隊實現90億美元估值，人均價值創造達傳統軟體公司的數十倍。</p></div>
+    <div class="c bo f" style="display:flex;flex-direction:column"><div style="font-size:48px;font-weight:800;color:var(--t3)">03</div><h3 style="font-size:22px">Seedance 2.0：兩行提示詞的好萊塢</h3><p style="font-size:18px;margin-top:.8rem;flex:1">字節視頻生成模型僅需兩行提示詞即可產出電影級畫面，製作週期從數月壓縮至分鐘級。</p></div>
+  </div>
+</div>
+
+<!-- ====== S18: 安全風險 ====== -->
+<div class="s" data-act="效率恐慌" data-title="安全風險">
+  <div class="hd"><span class="tag" style="color:var(--red);border-color:var(--red)">SECURITY RISKS</span><h2>安全風險：隱憂與挑戰</h2></div>
+  <div class="g g2">
+    <div class="c br f"><h3 class="rc">高危漏洞</h3><p style="font-size:20px">安全團隊披露OpenClaw漏洞<strong class="rc">&quot;ClawJacked&quot;</strong>，可遠端控制本地AI Agent。</p></div>
+    <div class="c bo f"><h3 class="oc">資料洩露</h3><p style="font-size:20px">使用者暴露預設端口，無密碼防護，設備被入侵挖礦。</p></div>
+  </div>
+  <div style="padding:0 4rem"><div class="c bo f"><h3 class="oc">&quot;幻覺&quot;破壞</h3><p style="font-size:20px">模型理解偏差導致錯誤執行系統指令，<strong class="rc">清空專案資料夾甚至導致系統崩潰</strong>。</p></div></div>
+  <div style="padding:1rem 4rem"><div class="info w">從「工具火爆」到「應用爆發」，還需填平效率與安全的鴻溝。</div></div>
+</div>
+
+<!-- ====== S19: SECTION 產業衝擊 ====== -->
+<div class="s sec" data-act="產業衝擊" data-title="產業衝擊">
+  <div class="badge">CHAPTER 04</div>
+  <div class="bar" style="background:var(--red)"></div>
+  <h1>產業衝擊</h1>
+  <p>Citrini Research鬼故事 &mdash; 裁員風暴與市場分化</p>
+</div>
+
+<!-- ====== S20: Citrini鬼故事 ====== -->
+<div class="s" data-act="產業衝擊" data-title="Citrini鬼故事">
+  <div class="hd"><span class="tag" style="color:var(--red);border-color:var(--red)">DYSTOPIAN SCENARIO</span><h2>Citrini Research報告 &mdash; 鬼故事</h2></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:0 4rem;flex:1;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:.6rem">
+      <div class="c f" style="padding:.8rem 1rem"><h3 class="oc" style="font-size:20px;margin-bottom:.2rem">報告來源</h3><p style="font-size:18px">Citrini Research近期瘋傳的一份深度文章。</p></div>
+      <div class="c bo f" style="padding:.8rem 1rem"><h3 class="oc" style="font-size:20px;margin-bottom:.3rem">核心情景（2028年設想）</h3>
+        <div style="display:flex;gap:.6rem;margin-top:.4rem">
+          <div style="flex:1;padding:.6rem;background:rgba(220,38,38,.08);border-radius:8px;border-bottom:3px solid var(--red)"><div style="font-size:16px">就業衝擊</div><div style="font-size:20px;font-weight:800;color:var(--red)">失業率 10.2%</div></div>
+          <div style="flex:1;padding:.6rem;background:rgba(220,38,38,.08);border-radius:8px;border-bottom:3px solid var(--red)"><div style="font-size:16px">經濟衝擊</div><div style="font-size:20px;font-weight:800;color:var(--red)">美股暴跌 38%</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.4rem">
+      <div class="c f" style="padding:.6rem .8rem"><div style="font-size:17px;font-weight:700;color:var(--gold)">階段一：技術突破（2025-2026）</div><p style="font-size:17px;line-height:1.5">AI智能體能力躍升，白領核心工作被低成本替代。SaaS收費模式崩塌。</p></div>
+      <div class="c f" style="padding:.6rem .8rem"><div style="font-size:17px;font-weight:700;color:var(--orange)">階段二：就業崩塌（2026-2027）</div><p style="font-size:17px;line-height:1.5">「AI提效→裁員降本→再投AI」閉環。高收入白領被迫進入零工經濟。</p></div>
+      <div class="c f" style="padding:.6rem .8rem"><div style="font-size:17px;font-weight:700;color:var(--red)">階段三：消費萎縮 &amp; 金融傳導（2027-2028）</div><p style="font-size:17px;line-height:1.5">前20%收入群體停止消費→私募信貸違約→$13萬億房貸市場危機。</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S21: 下行漏斗 ====== -->
+<div class="s poster" data-act="產業衝擊" data-title="資產快速奔潰" style="background-image:url('slides-img/funnel-down.png')">
+  <div class="ov" style="background:radial-gradient(ellipse at center,rgba(18,18,31,.55) 0%,rgba(18,18,31,.82) 100%)"></div>
+  <div class="pc" style="justify-content:center;align-items:center;padding:2rem 4rem 3.5rem">
+    <div style="margin-bottom:.6rem"><span style="font-size:16px;font-weight:700;letter-spacing:2px;color:var(--red);padding:6px 16px;border:1px solid var(--red);border-radius:6px">DYSTOPIAN SCENARIO</span></div>
+    <h2 style="font-size:32px;font-weight:800;margin-bottom:.3rem;text-align:center">鬼故事 &mdash; 優質資產的快速奔潰</h2>
+    <div style="width:60px;height:4px;background:var(--red);border-radius:2px;margin:.5rem auto .8rem"></div>
+    <div style="display:flex;flex-direction:column;gap:.3rem;width:100%;max-width:480px">
+      <div class="f" style="font-size:18px;padding:.4rem .8rem;background:rgba(167,139,250,.15);border-left:3px solid #a78bfa;border-radius:0 6px 6px 0;text-align:center">AI快速應用，提升公司效率</div>
+      <div class="f" style="font-size:18px;padding:.4rem .8rem;background:rgba(147,197,253,.12);border-left:3px solid #93c5fd;border-radius:0 6px 6px 0;text-align:center">所以公司開始裁員</div>
+      <div class="f" style="font-size:18px;padding:.4rem .8rem;background:rgba(103,232,249,.1);border-left:3px solid #67e8f9;border-radius:0 6px 6px 0;text-align:center">個人消費降低</div>
+      <div class="f" style="font-size:18px;padding:.4rem .8rem;background:rgba(110,231,183,.1);border-left:3px solid #6ee7b7;border-radius:0 6px 6px 0;color:var(--gold);text-align:center">車貸斷供</div>
+      <div class="f" style="font-size:18px;padding:.4rem .8rem;background:rgba(134,239,172,.08);border-left:3px solid #86efac;border-radius:0 6px 6px 0;color:var(--gold);text-align:center">房貸斷供</div>
+      <div class="f" style="font-size:18px;padding:.4rem .8rem;background:rgba(253,224,71,.08);border-left:3px solid #fde047;border-radius:0 6px 6px 0;color:var(--orange);text-align:center">消費地產貶值</div>
+      <div class="f" style="font-size:18px;padding:.4rem .8rem;background:rgba(251,191,36,.08);border-left:3px solid #fbbf24;border-radius:0 6px 6px 0;color:var(--orange);text-align:center">住房地產貶值</div>
+      <div class="f" style="font-size:18px;padding:.4rem .8rem;background:rgba(248,113,113,.08);border-left:3px solid #f87171;border-radius:0 6px 6px 0;color:var(--red);text-align:center">經濟下行</div>
+      <div class="f" style="font-size:18px;padding:.4rem .8rem;background:rgba(220,38,38,.08);border-left:3px solid #dc2626;border-radius:0 6px 6px 0;color:var(--red);text-align:center">更加實用AI</div>
+      <div class="f" style="font-size:18px;padding:.4rem .8rem;background:rgba(185,28,28,.12);border-left:3px solid #b91c1c;border-radius:0 6px 6px 0;color:var(--red);font-weight:700;text-align:center">加速裁員和上面過程 &#x21BB;</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S22: 裁員風暴 ====== -->
+<div class="s" data-act="產業衝擊" data-title="全球裁員風暴">
+  <div class="hd" style="padding-bottom:.3rem"><h2 class="rc">AI衝擊下的全球裁員風暴</h2><div class="sub">2024-2025年各行業裁員數據與趨勢分析</div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;padding:0 4rem;flex:1">
+    <div style="display:flex;flex-direction:column;gap:.5rem">
+      <div style="font-size:20px;font-weight:700;margin-bottom:.3rem">科技巨頭裁員規模</div>
+      <div class="c f" style="padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center"><span style="font-size:18px">亞馬遜</span><span style="font-size:22px;font-weight:800;color:var(--red)">30,000</span></div>
+      <div class="c f" style="padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center"><span style="font-size:18px">英特爾</span><span style="font-size:22px;font-weight:800;color:var(--orange)">21,000</span></div>
+      <div class="c f" style="padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center"><span style="font-size:18px">微軟</span><span style="font-size:22px;font-weight:800;color:var(--orange)">15,000</span></div>
+      <div class="c f" style="padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center"><span style="font-size:18px">IBM</span><span style="font-size:22px;font-weight:800;color:var(--gold)">5,000</span></div>
+      <div class="c f" style="padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center"><span style="font-size:18px">Meta</span><span style="font-size:22px;font-weight:800;color:var(--gold)">4,200</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.5rem">
+      <div style="font-size:20px;font-weight:700;margin-bottom:.3rem">關鍵數據</div>
+      <div class="c f" style="padding:.8rem"><div style="font-size:16px;color:var(--t3)">2024全球科技裁員</div><div style="font-size:28px;font-weight:800;color:var(--red)">15.2萬人</div></div>
+      <div class="c f" style="padding:.8rem"><div style="font-size:16px;color:var(--t3)">微軟AI寫程式碼佔比</div><div style="font-size:28px;font-weight:800;color:var(--gold)">52%</div></div>
+      <div class="c f" style="padding:.8rem"><div style="font-size:16px;color:var(--t3)">41%雇主計劃</div><div style="font-size:22px;font-weight:800;color:var(--orange)">因AI縮減規模</div></div>
+      <div class="c f" style="padding:.8rem"><div style="font-size:16px;color:var(--t3)">AI導致裁員佔比</div><div style="font-size:22px;font-weight:800;color:var(--t2)">僅4-5%</div></div>
+    </div>
+  </div>
+  <div style="padding:.3rem 4rem .8rem"><div class="info w" style="font-size:18px">核心洞察：AI並非唯一推手，但已成為企業「戰略重組」的最佳藉口 | 60%高管因預期AI影響裁員，僅2%因實際應用</div></div>
+</div>
+
+<!-- ====== S23: 市場分化 ====== -->
+<div class="s" data-act="產業衝擊" data-title="市場反應與分化">
+  <div class="hd"><span class="tag" style="color:var(--orange);border-color:var(--orange)">MARKET REACTION</span><h2>市場反應與分化</h2><div class="sub">恐慌下的資金輪動與產業分化</div></div>
+  <div class="cmp" style="flex:1">
+    <div style="border-left:4px solid var(--red);display:flex;flex-direction:column;gap:1rem">
+      <h3 style="font-size:28px;color:var(--red)">&#x2B07; 輸家</h3>
+      <div style="padding:1rem;background:rgba(220,38,38,.06);border-radius:10px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:20px">美國軟體股指數</span><span style="font-size:36px;font-weight:800;color:var(--red)">-24%</span></div>
+      <div class="f" style="font-size:20px">&#x2716; 程式碼成本趨近於零</div>
+      <div class="f" style="font-size:20px">&#x2716; 易受AI自動化影響</div>
+      <div class="f" style="font-size:20px">&#x2716; 軟體與服務公司</div>
+    </div>
+    <div style="border-left:4px solid var(--teal-light);display:flex;flex-direction:column;gap:1rem">
+      <h3 style="font-size:28px;color:var(--teal-light)">&#x2B06; 贏家</h3>
+      <div style="padding:1rem;background:var(--card);border-radius:10px"><div style="display:flex;justify-content:space-between;padding:.4rem 0;font-size:20px"><span>台積電 (TSMC)</span><span style="font-size:28px;font-weight:800;color:var(--teal-light)">翻倍</span></div><div style="display:flex;justify-content:space-between;padding:.4rem 0;font-size:20px"><span>SK 海力士</span><span style="font-size:28px;font-weight:800;color:var(--teal-light)">翻倍</span></div></div>
+      <div class="f" style="font-size:20px">&#x2714; AI算力需求激增</div>
+      <div class="f" style="font-size:20px">&#x2714; 晶片、資料中心</div>
+      <div class="f" style="font-size:20px">&#x2714; 穩定能源供應鏈</div>
+    </div>
+  </div>
+  <div style="padding:0 4rem .8rem"><div class="info">投資者拋售易受自動化衝擊的股票，資金向AI基礎設施集中</div></div>
+</div>
+
+<!-- ====== S24: Taalas vs NVIDIA ====== -->
+<div class="s" data-act="產業衝擊" data-title="反轉：老師傅被錘">
+  <div class="hd"><span class="tag" style="color:var(--orange);border-color:var(--orange)">MARKET REACTION</span><h2>反轉之再反轉：老師傅被錘</h2><div class="sub">3月3日，英偉達被一家加拿大創業公司錘了，跌了 <strong class="rc">-8%</strong></div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;padding:0 4rem;flex:1">
+    <div style="display:flex;flex-direction:column;gap:1rem">
+      <div class="c f"><p style="font-size:20px">Taalas成立於2023年，由前AMD、英偉達的資深架構師創立。核心技術<strong class="gc">「模型即晶片」</strong>，將AI大模型的權重和邏輯透過「硬連線」直接固化在晶片的物理電路上。</p></div>
+      <div class="c bg f"><h3 class="gc">顛覆性的性能提升</h3><p style="font-size:18px">HC1晶片推理速度可達英偉達B200的約<strong class="gc">48倍</strong>，硬體成本僅為傳統方案的<strong class="gc">1/20</strong>，功耗大幅降低。</p></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.5rem">
+      <div style="font-size:20px;font-weight:700">Tokens Per Second Per User (Llama 3.1 8B)</div>
+      <div class="c f" style="padding:.6rem 1rem;display:flex;justify-content:space-between"><span style="font-size:18px">Nvidia H200</span><span style="font-size:20px;font-weight:700;color:var(--cyan)">230</span></div>
+      <div class="c f" style="padding:.6rem 1rem;display:flex;justify-content:space-between"><span style="font-size:18px">Nvidia B200</span><span style="font-size:20px;font-weight:700;color:var(--cyan)">353</span></div>
+      <div class="c f" style="padding:.6rem 1rem;display:flex;justify-content:space-between"><span style="font-size:18px">Groq</span><span style="font-size:20px;font-weight:700;color:var(--teal)">594</span></div>
+      <div class="c f" style="padding:.6rem 1rem;display:flex;justify-content:space-between"><span style="font-size:18px">Sambanova</span><span style="font-size:20px;font-weight:700;color:var(--teal)">932</span></div>
+      <div class="c f" style="padding:.6rem 1rem;display:flex;justify-content:space-between"><span style="font-size:18px">Cerebras</span><span style="font-size:20px;font-weight:700;color:var(--red)">1,981</span></div>
+      <div class="c f" style="padding:.6rem 1rem;display:flex;justify-content:space-between;border:1px solid var(--gold)"><span style="font-size:18px;font-weight:700">Taalas HC1</span><span style="font-size:24px;font-weight:800;color:var(--gold)">16,960</span></div>
+    </div>
+  </div>
+  <div style="padding:0 4rem .8rem"><div class="info gd">目標市場邊緣計算，專用晶片（ASIC）可能會逐步蠶食英偉達通用GPU的市場份額</div></div>
+</div>
+
+<!-- ====== S25: Block裁員 ====== -->
+<div class="s" data-act="產業衝擊" data-title="Block裁員40%">
+  <div class="hd"><span class="tag" style="color:var(--red);border-color:var(--red)">CASE STUDY</span><h2>Block裁員40% &mdash; 華爾街的狂歡</h2></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;padding:0 4rem;flex:1">
+    <div style="display:flex;flex-direction:column;gap:1rem">
+      <div class="c br f"><div style="font-size:42px;font-weight:900">Block裁員40%</div><p style="font-size:20px;margin-top:.5rem">將員工總數從萬餘人直接砍至<strong class="gc">6000人</strong>以下。裁員支出4.5至5億美元。</p></div>
+      <div class="c f"><div style="font-size:36px;font-weight:900;color:var(--teal-light)">股價卻暴漲24%：330億美金</div><div style="font-size:28px;font-weight:800;color:var(--gold);margin-top:.5rem">每裁一人，市值增加1500萬美元</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;gap:2rem">
+      <div class="f tx"><div style="font-size:20px;color:var(--t3)">消失的</div><div style="font-size:48px;font-weight:900">4000 人</div><div style="font-size:20px;color:var(--t2);margin-top:.5rem">執行層、初級分析師、冗餘的中層管理</div></div>
+      <div style="text-align:center;font-size:28px;color:var(--t3)">&#x2193;</div>
+      <div class="f tx"><div style="font-size:20px;color:var(--t3)">留下的</div><div style="font-size:48px;font-weight:900;color:var(--teal)">6000 人</div><div style="font-size:22px;color:var(--gold);margin-top:.5rem">&quot;利用AI進行自動化的超級個體&quot;</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S26: SECTION 理性反思 ====== -->
+<div class="s sec" data-act="理性反思" data-title="理性反思">
+  <div class="badge">CHAPTER 05</div>
+  <div class="bar" style="background:var(--cyan)"></div>
+  <h1>理性反思</h1>
+  <p>不要全盤接受 &mdash; 批判與反思</p>
+</div>
+
+<!-- ====== S27: 雙面漏斗 ====== -->
+<div class="s poster" data-act="理性反思" data-title="新型資產蓬勃發展" style="background-image:url('slides-img/funnel-down.png')">
+  <div class="ov" style="background:radial-gradient(ellipse at center,rgba(18,18,31,.6) 0%,rgba(18,18,31,.88) 100%)"></div>
+  <div class="pc" style="padding:1.5rem 3rem 3.5rem">
+    <div style="margin-bottom:.4rem;text-align:center"><span style="font-size:16px;font-weight:700;letter-spacing:2px;color:var(--teal);padding:6px 16px;border:1px solid var(--teal);border-radius:6px">POSITIVE SCENARIO</span></div>
+    <h2 style="font-size:28px;font-weight:800;text-align:center;margin-bottom:.5rem">鬼故事的另一面 &mdash; 新型優質資產的蓬勃發展</h2>
+    <div style="width:60px;height:4px;background:var(--gold);border-radius:2px;margin:0 auto .6rem"></div>
+    <!-- 雙欄：左下行(固定) → 右上行(fragment由下往上) -->
+    <div style="display:grid;grid-template-columns:1fr 30px 1fr;flex:1;min-height:0;align-items:center">
+      <!-- 左：下行面（固定，不用fragment） -->
+      <div style="display:flex;flex-direction:column;gap:.2rem">
+        <div style="font-size:16px;font-weight:700;color:var(--red);margin-bottom:.2rem;text-align:center">&#x25BC; 悲觀螺旋</div>
+        <div style="font-size:16px;padding:.3rem .6rem;border-left:3px solid #a78bfa;border-radius:0 4px 4px 0;background:rgba(167,139,250,.12);text-align:center">AI提升效率</div>
+        <div style="font-size:16px;padding:.3rem .6rem;border-left:3px solid #93c5fd;border-radius:0 4px 4px 0;background:rgba(147,197,253,.08);text-align:center">公司開始裁員</div>
+        <div style="font-size:16px;padding:.3rem .6rem;border-left:3px solid #67e8f9;border-radius:0 4px 4px 0;background:rgba(103,232,249,.07);text-align:center">個人消費降低</div>
+        <div style="font-size:16px;padding:.3rem .6rem;border-left:3px solid #6ee7b7;border-radius:0 4px 4px 0;background:rgba(110,231,183,.06);color:var(--gold);text-align:center">車貸斷供</div>
+        <div style="font-size:16px;padding:.3rem .6rem;border-left:3px solid #86efac;border-radius:0 4px 4px 0;background:rgba(134,239,172,.05);color:var(--gold);text-align:center">房貸斷供</div>
+        <div style="font-size:16px;padding:.3rem .6rem;border-left:3px solid #fde047;border-radius:0 4px 4px 0;background:rgba(253,224,71,.05);color:var(--orange);text-align:center">地產貶值</div>
+        <div style="font-size:16px;padding:.3rem .6rem;border-left:3px solid #fb923c;border-radius:0 4px 4px 0;background:rgba(251,146,60,.05);color:var(--orange);text-align:center">經濟下行</div>
+        <div style="font-size:16px;padding:.3rem .6rem;border-left:3px solid #f87171;border-radius:0 4px 4px 0;background:rgba(248,113,113,.06);color:var(--red);text-align:center">更加實用AI</div>
+        <div style="font-size:16px;padding:.3rem .6rem;border-left:3px solid #dc2626;border-radius:0 4px 4px 0;background:rgba(220,38,38,.08);color:var(--red);font-weight:700;text-align:center">加速裁員 &#x21BB;</div>
+      </div>
+      <!-- 中：箭頭 -->
+      <div style="display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--gold)">&#x27A1;</div>
+      <!-- 右：上行面（fragment由下往上，順序反轉） -->
+      <div style="display:flex;flex-direction:column-reverse;gap:.2rem">
+        <div class="f" style="font-size:16px;padding:.3rem .6rem;border-right:3px solid var(--teal-light);border-radius:4px 0 0 4px;background:rgba(18,184,159,.12);color:var(--teal-light);font-weight:700;text-align:center">AI提升公司效率 &#x21BB;</div>
+        <div class="f" style="font-size:16px;padding:.3rem .6rem;border-right:3px solid var(--teal-light);border-radius:4px 0 0 4px;background:rgba(18,184,159,.08);color:var(--teal-light);text-align:center">傳統設備效率快速提升</div>
+        <div class="f" style="font-size:16px;padding:.3rem .6rem;border-right:3px solid var(--cyan);border-radius:4px 0 0 4px;background:rgba(6,182,212,.07);color:var(--cyan);text-align:center">加速電動化轉型</div>
+        <div class="f" style="font-size:16px;padding:.3rem .6rem;border-right:3px solid var(--cyan);border-radius:4px 0 0 4px;background:rgba(6,182,212,.06);color:var(--cyan);text-align:center">加速無人化應用</div>
+        <div class="f" style="font-size:16px;padding:.3rem .6rem;border-right:3px solid var(--gold);border-radius:4px 0 0 4px;background:rgba(255,200,87,.06);color:var(--gold);text-align:center">降低人力損傷</div>
+        <div class="f" style="font-size:16px;padding:.3rem .6rem;border-right:3px solid var(--gold);border-radius:4px 0 0 4px;background:rgba(255,200,87,.07);color:var(--gold);text-align:center">加速24小時持續作業</div>
+        <div class="f" style="font-size:16px;padding:.3rem .6rem;border-right:3px solid var(--teal);border-radius:4px 0 0 4px;background:rgba(15,157,138,.07);color:var(--teal);text-align:center">加速單體基礎工業生產</div>
+        <div class="f" style="font-size:16px;padding:.3rem .6rem;border-right:3px solid var(--teal);border-radius:4px 0 0 4px;background:rgba(15,157,138,.08);color:var(--teal);text-align:center">加速群體社會工業生產</div>
+        <div class="f" style="font-size:16px;padding:.3rem .6rem;border-right:3px solid var(--teal);border-radius:4px 0 0 4px;background:rgba(15,157,138,.1);color:var(--teal);text-align:center">達成7%全社會GDP增長</div>
+        <div style="font-size:16px;font-weight:700;color:var(--teal-light);margin-bottom:.2rem;text-align:center">&#x25B2; 樂觀轉化</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S28: 理性視角 ====== -->
+<div class="s" data-act="理性反思" data-title="批判與反思">
+  <div class="hd"><span class="tag cc">RATIONAL PERSPECTIVE</span><h2>理性視角：批判與反思</h2><div class="sub">專家呼籲：不要全盤接受</div></div>
+  <div class="g g2">
+    <div class="c f"><h3 class="tc">經濟適應能力</h3><p style="font-size:20px">報告可能<strong class="gc">低估</strong>了經濟的適應能力。歷史表明，技術革命往往創造新的就業機會。</p></div>
+    <div class="c f"><h3 class="tc">AI的生產力作用</h3><p style="font-size:20px">AI根本上<strong class="gc">提升工人生產力</strong>，而非僅消除工作。它是增強工具而非替代工具。</p></div>
+  </div>
+  <div style="padding:0 4rem"><div class="c bt f"><h3 class="oc">早期行動的優勢</h3><p style="font-size:20px">最大優勢在於<strong class="gc">早期理解和適應AI</strong>。那些能夠快速學習並將AI整合到工作流程中的人和企業將獲得競爭優勢。</p></div></div>
+  <div style="padding:.8rem 4rem"><div class="c br f"><h3 class="rc">核心衝突</h3><p style="font-size:20px">AI的真正影響是<strong class="rc">「大規模替代」</strong>還是<strong class="tc">「人機協作新範式」</strong>？</p>
+    <div style="display:flex;gap:1rem;margin-top:.8rem">
+      <div style="flex:1;padding:.8rem;background:rgba(220,38,38,.06);border-radius:8px;text-align:center"><div style="font-size:16px;color:var(--t3)">悲觀視角</div><div style="font-size:22px;font-weight:700">大規模失業</div></div>
+      <div style="flex:1;padding:.8rem;background:rgba(15,157,138,.08);border:1px solid var(--teal);border-radius:8px;text-align:center"><div style="font-size:16px;color:var(--teal)">樂觀視角</div><div style="font-size:22px;font-weight:700;color:var(--teal)">人機協作</div></div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ====== S29: Quote ====== -->
+<div class="s" data-act="理性反思" data-title="結語">
+  <div class="qt">
+    <div style="width:80px;height:5px;background:var(--gold);border-radius:3px;margin-bottom:2rem"></div>
+    <h2 class="f">技術不會消滅工作，</h2>
+    <h2 class="f gc" style="margin-top:.5rem">但會徹底重塑工作的性質與分布</h2>
+    <div style="width:80px;height:5px;background:var(--gold);border-radius:3px;margin-top:2rem"></div>
+  </div>
+</div>
+
+<!-- ====== S30: Closing (簡潔) ====== -->
+<div class="s" data-act="結尾" data-title="結尾">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:3rem;background:linear-gradient(135deg,#12121f 0%,#1a2744 40%,#0a3d35 100%)">
+    <div style="width:80px;height:5px;background:var(--gold);border-radius:3px;margin-bottom:2rem"></div>
+    <h1 class="f" style="font-size:48px;font-weight:900;line-height:1.4">謝謝聆聽</h1>
+    <div style="width:80px;height:5px;background:var(--teal);border-radius:3px;margin-top:2rem"></div>
+  </div>
+</div>
+
+</div><!-- end #wrap -->
+
+<!-- UI -->
+<div class="cm" id="cm">
+  <button class="cb" id="cbtn"><span style="color:var(--teal);font-weight:700">&sect;</span> <span id="clbl">開場</span> <span style="font-size:12px;opacity:.5">&#9660;</span></button>
+  <div class="cl" id="clist"></div>
+</div>
+<div class="ctr" id="ctr"><span id="cur">1</span> / <span id="tot"></span></div>
+<div class="prg" id="prg"></div>
+<div class="ctl"><button id="pb">&larr;</button><button id="nb">&rarr;</button></div>
+
+<script>
+(function(){
+  "use strict";
+  var S=document.querySelectorAll('.s');
+  var N=S.length;
+  var I=0;
+  var cur=document.getElementById('cur');
+  var tot=document.getElementById('tot');
+  var prg=document.getElementById('prg');
+  var pb=document.getElementById('pb');
+  var nb=document.getElementById('nb');
+  tot.textContent=N;
+
+  function go(n){
+    S[I].classList.remove('on');
+    S[I].style.display='none';
+    I=Math.max(0,Math.min(n,N-1));
+    S[I].classList.add('on');
+    S[I].style.display='flex';
+    cur.textContent=I+1;
+    pb.disabled=I===0;
+    nb.disabled=I===N-1;
+    prg.style.width=((I+1)/N*100)+'%';
+    updCh();
+  }
+
+  function frags(s){return Array.prototype.slice.call(s.querySelectorAll('.f'));}
+
+  function nxt(){
+    var fs=frags(S[I]);
+    for(var i=0;i<fs.length;i++){
+      if(!fs[i].classList.contains('v')){fs[i].classList.add('v');return;}
+    }
+    if(I<N-1)go(I+1);
+  }
+
+  function prv(){
+    var fs=frags(S[I]);
+    for(var i=fs.length-1;i>=0;i--){
+      if(fs[i].classList.contains('v')){fs[i].classList.remove('v');return;}
+    }
+    if(I>0)go(I-1);
+  }
+
+  nb.onclick=nxt;
+  pb.onclick=prv;
+
+  // Click to advance
+  document.getElementById('wrap').addEventListener('click',function(e){
+    if(e.target.closest('button,a,.cm,.ctl,.ctr'))return;
+    nxt();
+  });
+
+  // Keyboard
+  document.addEventListener('keydown',function(e){
+    var k=e.key;
+    if(k==='ArrowRight'||k===' '||k==='PageDown'){e.preventDefault();nxt();}
+    else if(k==='ArrowLeft'||k==='PageUp'){e.preventDefault();prv();}
+    else if(k==='Home'){e.preventDefault();go(0);}
+    else if(k==='End'){e.preventDefault();go(N-1);}
+    else if(k==='f'||k==='F'){e.preventDefault();if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}
+  });
+
+  // Touch
+  var tx=0,ty=0;
+  document.addEventListener('touchstart',function(e){tx=e.changedTouches[0].screenX;ty=e.changedTouches[0].screenY;});
+  document.addEventListener('touchend',function(e){
+    var dx=e.changedTouches[0].screenX-tx;
+    var dy=e.changedTouches[0].screenY-ty;
+    if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){if(dx<0)nxt();else prv();}
+  });
+
+  // Chapter menu
+  var cm=document.getElementById('cm');
+  var cbtn=document.getElementById('cbtn');
+  var clbl=document.getElementById('clbl');
+  var clist=document.getElementById('clist');
+
+  function updCh(){clbl.textContent=S[I].dataset.act||'';}
+
+  function buildCh(){
+    clist.innerHTML='';
+    var seen={};
+    for(var i=0;i<N;i++){
+      var a=S[i].dataset.act;
+      if(a&&!seen[a]){
+        seen[a]=true;
+        (function(idx,name){
+          var d=document.createElement('div');
+          d.className='ci'+(name===S[I].dataset.act?' ac':'');
+          d.innerHTML='<span class="dot"></span>'+name;
+          d.onclick=function(){go(idx);cm.classList.remove('open');};
+          clist.appendChild(d);
+        })(i,a);
+      }
+    }
+  }
+
+  cbtn.onclick=function(e){
+    e.stopPropagation();
+    cm.classList.toggle('open');
+    if(cm.classList.contains('open'))buildCh();
+  };
+  document.addEventListener('click',function(e){
+    if(!cm.contains(e.target))cm.classList.remove('open');
+  });
+
+  go(0);
+
+  // Toast
+  var t=document.createElement('div');
+  t.textContent='\u2713 \u7C21\u5831\u5DF2\u8F09\u5165 '+N+' \u9801 \u2014 \u9EDE\u64CA\u6216\u6309\u2192\u63DB\u9801';
+  t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(15,157,138,.95);color:#fff;padding:12px 24px;border-radius:10px;font-size:18px;font-weight:600;transition:opacity 1s;pointer-events:none';
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';},3000);
+  setTimeout(function(){t.remove();},4000);
+})();
+</script>
+</body>
+</html>
