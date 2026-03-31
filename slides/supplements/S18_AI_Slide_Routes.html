@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 簡報生成 6 種路線 — 全景比較</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+/* ═══════════════════════════════════════
+   S18: AI Slide Routes — 6 種路線全景
+   Design ref: S10 cinematic system
+   ═══════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+  --orange:#E8710A; --orange-lt:#FEF0E1;
+  --cyan:#06B6D4; --cyan-lt:#E0F7FA;
+  --dark:#0a0a14; --dark2:#111122; --dark3:#16213e;
+  --teal:#0F9D8A; --teal-dark:#065f52;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--dark);}
+
+/* ── Slides Core ── */
+.slides{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:3.5rem 4rem 4.5rem;pointer-events:none;overflow-y:auto;}
+.slide.active{display:flex;pointer-events:auto;animation:fadeIn .35s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ── Clean Mode ── */
+.slide.clean{background:var(--white);color:var(--g900);justify-content:flex-start;}
+.slide.clean::before,.slide.clean::after{content:'';flex:1 0 0px;}
+
+/* ── Poster Mode ── */
+.slide.poster{background-size:cover;background-position:center;color:#fff;text-align:center;}
+.slide.poster::before{content:'';position:absolute;inset:0;z-index:1;}
+.slide.poster>*{position:relative;z-index:2;}
+.slide.poster.overlay-bottom::before{background:linear-gradient(to bottom,rgba(0,0,0,.15) 0%,rgba(0,0,0,.78) 100%);}
+.slide.poster.overlay-heavy::before{background:linear-gradient(to bottom,rgba(0,0,0,.45) 0%,rgba(0,0,0,.85) 100%);}
+.slide.poster.overlay-center::before{background:radial-gradient(ellipse at center,rgba(0,0,0,.3) 0%,rgba(0,0,0,.8) 100%);}
+
+/* ── DataViz Mode ── */
+.slide.dataviz{background:var(--dark);color:#fff;padding-top:3.5rem;}
+
+/* ── Typography ── */
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:1.8rem;font-weight:700;color:var(--g900);margin-bottom:.6rem;line-height:1.4;}
+.slide.dataviz h2,.slide.poster h2{color:#fff;}
+h3{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.1rem;line-height:1.8;}
+.subtitle{font-size:1.15rem;font-weight:500;}
+.dim{opacity:.6;}
+
+/* ── Fragment ── */
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* ── Steps ── */
+.step-list{text-align:left;max-width:800px;width:100%;}
+.step{display:flex;gap:1rem;align-items:flex-start;padding:.6rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:40px;height:40px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.1rem;}.step-content p{font-size:1rem;color:var(--g600);margin-top:.15rem;}
+
+/* ── Stat Grid ── */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;max-width:860px;width:100%;margin-top:1rem;}
+.stat-box{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:16px;padding:1.3rem;text-align:center;}
+.stat-box .val{font-size:2.4rem;font-weight:900;color:var(--blue);line-height:1.1;}
+.stat-box .label{font-size:.9rem;color:rgba(255,255,255,.5);margin-top:.3rem;}
+
+/* ── Table ── */
+.compare-table{border-collapse:collapse;font-size:1rem;margin-top:.6rem;width:100%;max-width:960px;}
+.compare-table th{background:rgba(255,255,255,.08);color:rgba(255,255,255,.9);padding:.5rem .8rem;text-align:left;font-size:.9rem;}
+.compare-table td{padding:.5rem .8rem;border-bottom:1px solid rgba(255,255,255,.06);font-size:.9rem;color:rgba(255,255,255,.75);}
+.compare-table tr:hover td{background:rgba(255,255,255,.03);}
+.compare-table .highlight{color:var(--blue);font-weight:700;}
+.compare-table .warn{color:var(--orange);font-weight:700;}
+.compare-table .best{color:var(--green);font-weight:700;}
+/* clean mode table */
+.slide.clean .compare-table th{background:var(--navy);color:#fff;}
+.slide.clean .compare-table td{color:var(--g800);border-bottom:1px solid var(--g100);}
+.slide.clean .compare-table tr:hover td{background:var(--g50);}
+.slide.clean .compare-table .highlight{color:var(--blue);}
+.slide.clean .compare-table .best{color:var(--green);}
+
+/* ── Info boxes ── */
+.info-box{border-radius:10px;padding:1rem 1.4rem;max-width:800px;width:100%;text-align:left;margin-top:.6rem;}
+.info-box.analogy{background:rgba(26,115,232,.1);border-left:4px solid var(--blue);}
+.info-box.analogy .label{color:var(--blue);}
+.info-box.analogy p{color:rgba(255,255,255,.75);}
+.info-box.warning{background:rgba(217,48,37,.1);border-left:4px solid var(--red);}
+.info-box.warning .label{color:var(--red);}
+.info-box.warning p{color:rgba(255,255,255,.75);}
+.info-box.success{background:rgba(15,157,138,.1);border-left:4px solid var(--green);}
+.info-box.success .label{color:var(--green);}
+.info-box.success p{color:rgba(255,255,255,.75);}
+.info-box.tip{background:rgba(249,171,0,.1);border-left:4px solid var(--gold);}
+.info-box.tip .label{color:var(--gold);}
+.info-box.tip p{color:rgba(255,255,255,.75);}
+.info-box .label{font-weight:700;font-size:.95rem;margin-bottom:.2rem;}
+.info-box p{font-size:.95rem;}
+/* clean overrides */
+.slide.clean .info-box.analogy{background:var(--blue-lt);}.slide.clean .info-box.analogy .label{color:var(--blue);}.slide.clean .info-box.analogy p{color:var(--g900);}
+.slide.clean .info-box.warning{background:var(--red-lt);}.slide.clean .info-box.warning .label{color:var(--red);}.slide.clean .info-box.warning p{color:var(--g900);}
+.slide.clean .info-box.success{background:var(--green-lt);}.slide.clean .info-box.success .label{color:var(--green);}.slide.clean .info-box.success p{color:var(--g900);}
+.slide.clean .info-box.tip{background:var(--gold-lt);}.slide.clean .info-box.tip .label{color:#B45309;}.slide.clean .info-box.tip p{color:var(--g900);}
+
+/* ── Quote ── */
+.quote-box{max-width:800px;width:100%;background:rgba(255,255,255,.04);border-left:5px solid var(--gold);border-radius:0 12px 12px 0;padding:1.5rem 2rem;margin:.8rem 0;text-align:left;}
+.quote-box .quote-text{font-size:1.3rem;font-weight:700;line-height:1.6;color:#fff;}
+.quote-box .quote-src{font-size:.9rem;color:rgba(255,255,255,.4);margin-top:.5rem;}
+
+/* ── Cards ── */
+.card-grid{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-top:.8rem;max-width:1100px;}
+.card{background:var(--white);border:2px solid var(--g100);border-radius:14px;padding:1.2rem 1.4rem;min-width:220px;max-width:300px;flex:1;transition:border-color .2s;}
+.card:hover{border-color:var(--blue);}
+.card .icon{font-size:2.5rem;margin-bottom:.6rem;}
+.card h3{font-size:1.15rem;}
+.card p{font-size:.9rem;color:var(--g600);line-height:1.5;}
+
+/* ── Route Cards (overview) ── */
+.route-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:960px;width:100%;margin-top:1rem;}
+.route-card{border-radius:14px;padding:1.2rem 1.5rem;color:#fff;cursor:default;transition:transform .2s;}
+.route-card:hover{transform:scale(1.03);}
+.route-card .rnum{display:inline-flex;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.9);align-items:center;justify-content:center;font-size:.9rem;font-weight:800;margin-bottom:.5rem;}
+.route-card h3{font-size:1.05rem;margin-bottom:.3rem;}
+.route-card p{font-size:.85rem;color:rgba(255,255,255,.8);line-height:1.4;}
+
+/* ── Two col ── */
+.two-col{display:flex;gap:2rem;width:100%;max-width:960px;text-align:left;}
+.two-col .col{flex:1;}
+
+/* ── Flow ── */
+.flow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1.2rem 0;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.7rem 1rem;font-size:1rem;font-weight:700;text-align:center;}
+.flow-arrow{color:var(--blue);font-size:1.5rem;font-weight:900;}
+
+/* ── Code block ── */
+.code-block{background:var(--g50);border:2px solid var(--g200);border-radius:12px;padding:1.3rem 1.8rem;text-align:left;max-width:860px;width:100%;font-family:'Fira Code',monospace;font-size:1rem;line-height:1.8;margin:.8rem 0;color:var(--g900);}
+
+/* ── Big number ── */
+.big-num{font-size:4.5rem;font-weight:900;color:var(--blue);line-height:1;}
+
+/* ── Poster text ── */
+.poster-subtitle{font-size:1.3rem;font-weight:500;color:rgba(255,255,255,.7);}
+
+/* ── Bottom line ── */
+.bottom-line{max-width:800px;width:100%;background:rgba(26,115,232,.08);border:2px solid rgba(26,115,232,.25);border-radius:16px;padding:2rem;text-align:center;margin-top:1rem;}
+.bottom-line h3{font-size:1.6rem;color:var(--blue);margin-bottom:.8rem;}
+
+/* ── Live Demo Button ── */
+.demo-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.8rem 1.8rem;border-radius:12px;font-size:1.1rem;font-weight:700;text-decoration:none;transition:transform .2s,box-shadow .2s;border:none;cursor:pointer;}
+.demo-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.15);}
+
+/* ── Pros/Cons ── */
+.pros-cons{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:.6rem;max-width:860px;width:100%;}
+.pros-box{background:var(--green-lt);border-left:4px solid var(--green);border-radius:0 10px 10px 0;padding:.7rem 1rem;}
+.cons-box{background:var(--red-lt);border-left:4px solid var(--red);border-radius:0 10px 10px 0;padding:.7rem 1rem;}
+.pros-box h4{color:var(--teal);font-size:.9rem;margin-bottom:.2rem;}
+.cons-box h4{color:var(--red);font-size:.9rem;margin-bottom:.2rem;}
+.pros-box li,.cons-box li{font-size:.85rem;margin-left:1rem;line-height:1.5;}
+
+/* ── Chart ── */
+.chart-wrap{max-width:700px;width:100%;margin:1rem auto 0;}
+
+/* ── Controls ── */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid rgba(255,255,255,.15);border-radius:12px;background:rgba(0,0,0,.4);color:rgba(255,255,255,.8);font-size:1.2rem;cursor:pointer;transition:all .15s;backdrop-filter:blur(8px);}
+.controls button:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff;}
+.controls button:disabled{opacity:.2;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;left:auto;right:5rem;z-index:100;color:rgba(255,255,255,.35);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:rgba(15,157,138,.15);color:var(--green);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;backdrop-filter:blur(8px);}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:rgba(255,255,255,.35);font-size:.85rem;font-weight:700;}
+
+/* ── Chapter Menu ── */
+.chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;font-family:system-ui,-apple-system,sans-serif;}
+.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.9);font-size:.8rem;cursor:pointer;transition:border-color .2s;}
+.chapter-btn:hover{border-color:var(--green);}
+.chapter-icon{color:var(--green);font-weight:700;}
+.chapter-arrow{font-size:.6rem;opacity:.5;transition:transform .2s;}
+.chapter-menu.open .chapter-arrow{transform:rotate(180deg);}
+.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:180px;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;}
+.chapter-menu.open .chapter-list{display:block;}
+.chapter-item{display:flex;align-items:center;gap:8px;padding:8px 14px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
+.chapter-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+.chapter-item.active{color:var(--green);font-weight:600;}
+.chapter-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;}
+.chapter-item.active .chapter-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+
+/* ═══ MOBILE ═══ */
+@media(max-width:768px){
+  html,body{font-size:16px;}
+  .slide{padding:3rem 1.2rem 4.5rem;}
+  .slide.poster{justify-content:flex-end;}
+  h1{font-size:1.8rem;}h2{font-size:1.4rem;margin-bottom:.6rem;}
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:.8rem;}
+  .stat-box .val{font-size:1.8rem;}
+  .route-grid{grid-template-columns:repeat(2,1fr);gap:.6rem;}
+  .card-grid{gap:.8rem;}
+  .card{min-width:140px;padding:1rem;}
+  .two-col{flex-direction:column;gap:1rem;}
+  .flow{gap:.4rem;}
+  .flow-box{padding:.5rem .7rem;font-size:.85rem;}
+  .compare-table th,.compare-table td{padding:.4rem .5rem;font-size:.8rem;}
+  .pros-cons{grid-template-columns:1fr;}
+  .controls button{width:40px;height:40px;font-size:1rem;}
+  .module-title{font-size:.7rem;left:.8rem;top:.6rem;}
+  .module-badge{font-size:.65rem;top:.6rem;right:.6rem;padding:.2rem .6rem;}
+  .quote-box .quote-text{font-size:1.05rem;}
+  .big-num{font-size:3rem;}
+  .chart-wrap{max-width:100%;}
+}
+</style>
+</head>
+<body>
+
+<div class="module-title">AI 簡報 6 種路線</div>
+<div class="module-badge">S18 補充單元</div>
+<div class="slides">
+
+<!-- ===== 0: COVER ===== -->
+<div class="slide poster overlay-heavy active" data-act="開場" data-index="0" style="background:linear-gradient(135deg,var(--navy) 0%,var(--dark3) 50%,var(--dark) 100%);">
+  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:1rem;">AI 100 講 — 補充單元</p>
+  <h1>AI 簡報生成<br><span style="color:var(--gold);">6 種路線</span></h1>
+  <p class="poster-subtitle" style="margin-top:1.5rem;">從傳統 AI 內嵌到程式自動化 — 找出最適合你的簡報工作流</p>
+  <p style="color:rgba(255,255,255,.3);margin-top:3rem;font-size:.85rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- ===== 1: 總覽 — dataviz ===== -->
+<div class="slide dataviz" data-act="開場" data-index="1">
+  <h2>6 種簡報生成路線</h2>
+  <div class="route-grid">
+    <div class="route-card fragment" data-order="0" style="background:linear-gradient(135deg,var(--teal),var(--teal-dark));">
+      <div class="rnum" style="color:var(--teal);">1</div>
+      <h3>傳統 + AI 內嵌</h3>
+      <p>Copilot · Claude for PPT · Google Slides + Gemini</p>
+    </div>
+    <div class="route-card fragment" data-order="1" style="background:linear-gradient(135deg,#E6A820,#c48a10);">
+      <div class="rnum" style="color:#E6A820;">2</div>
+      <h3>AI 原生平台</h3>
+      <p>Gamma · Canva AI · Beautiful.ai · NotebookLM</p>
+    </div>
+    <div class="route-card fragment" data-order="2" style="background:linear-gradient(135deg,var(--cyan),#0891b2);">
+      <div class="rnum" style="color:var(--cyan);">3</div>
+      <h3>AI 對話生成</h3>
+      <p>Claude Artifacts · ChatGPT · Gemini</p>
+    </div>
+    <div class="route-card fragment" data-order="3" style="background:linear-gradient(135deg,var(--purple),#5b21b6);">
+      <div class="rnum" style="color:var(--purple);">4</div>
+      <h3>AI Agent</h3>
+      <p>Manus（Meta 收購）· Felo AI</p>
+    </div>
+    <div class="route-card fragment" data-order="4" style="background:linear-gradient(135deg,var(--orange),#c05621);">
+      <div class="rnum" style="color:var(--orange);">5</div>
+      <h3>IDE 程式生成</h3>
+      <p>Claude Code + pptxgenjs · Codex · Cursor</p>
+    </div>
+    <div class="route-card fragment" data-order="5" style="background:linear-gradient(135deg,var(--navy),#0a2840);">
+      <div class="rnum" style="color:var(--navy);">6</div>
+      <h3>Markdown 框架</h3>
+      <p>Slidev · Marp · reveal.js</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 2: Route 1 Section ===== -->
+<div class="slide poster overlay-heavy" data-act="路線 1-3" data-index="2" style="background:linear-gradient(135deg,var(--teal),var(--dark));">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">路線 1</p>
+  <h1>傳統 + AI 內嵌</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">在熟悉的 PPT / Slides 裡用 AI 加速</p>
+</div>
+
+<!-- ===== 3: Route 1 Detail ===== -->
+<div class="slide clean" data-act="路線 1-3" data-index="3">
+  <h2>路線 1：傳統 + AI 內嵌</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-color:var(--teal);max-width:280px;">
+      <h3 style="color:var(--teal);">PowerPoint + Copilot</h3>
+      <p style="color:var(--orange);font-weight:700;font-size:.9rem;">$30/user/月</p>
+      <p>微軟原生整合 · Word → PPT 一鍵轉換 · 支援動畫/轉場生成</p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:var(--navy);max-width:280px;">
+      <h3 style="color:var(--navy);">Claude for PPT</h3>
+      <p style="color:var(--orange);font-weight:700;font-size:.9rem;">Pro $20/月起</p>
+      <p>Claude 推理品質 · 讀取現有母版/品牌 · 2026/2 研究預覽上線</p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-color:var(--gold);max-width:280px;">
+      <h3 style="color:#B45309;">Google Slides + Gemini</h3>
+      <p style="color:var(--orange);font-weight:700;font-size:.9rem;">Workspace + AI</p>
+      <p>Google 生態整合 · 從草圖/語音生版面 · 多人即時協作</p>
+    </div>
+  </div>
+  <div class="pros-cons fragment" data-order="3">
+    <div class="pros-box"><h4>優點</h4><ul><li>生成後就是正常 PPT，可完全手動微調</li><li>學習門檻最低</li><li>模板/動畫支援完整</li></ul></div>
+    <div class="cons-box"><h4>缺點</h4><ul><li>批量生產困難（一份一份做）</li><li>跨份統一性要靠自律</li><li>每月費用不低</li></ul></div>
+  </div>
+  <div class="info-box tip fragment" data-order="4">
+    <div class="label">最適合</div>
+    <p>需要精緻排版 + 手動微調的「單份」商業簡報</p>
+  </div>
+</div>
+
+<!-- ===== 4: Route 2 ===== -->
+<div class="slide clean" data-act="路線 1-3" data-index="4">
+  <h2>路線 2：AI 原生平台</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-color:var(--teal);max-width:220px;">
+      <h3 style="color:var(--teal);">Gamma</h3>
+      <p style="color:var(--orange);font-weight:700;font-size:.85rem;">Free – $20/月</p>
+      <p>市場龍頭 · 70M 用戶 · 漂亮模板 · 匯出 PPTX/PDF</p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:var(--gold);max-width:220px;">
+      <h3 style="color:#B45309;">Canva AI</h3>
+      <p style="color:var(--orange);font-weight:700;font-size:.85rem;">Free – $15/月</p>
+      <p>模板最多 · 4 份同時生成 · PPTX 匯出需付費</p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-color:var(--purple);max-width:220px;">
+      <h3 style="color:var(--purple);">Beautiful.ai</h3>
+      <p style="color:var(--orange);font-weight:700;font-size:.85rem;">$12-16/月</p>
+      <p>智慧排版引擎 · 品牌一致性佳 · 適合團隊</p>
+    </div>
+    <div class="card fragment" data-order="3" style="border-color:var(--cyan);max-width:220px;">
+      <h3 style="color:var(--cyan);">NotebookLM</h3>
+      <p style="color:var(--green);font-weight:700;font-size:.85rem;">免費</p>
+      <p>文件理解之王 · 零幻覺風險 · 可匯出 PPTX · Podcast</p>
+    </div>
+  </div>
+  <div class="info-box warning fragment" data-order="4" style="max-width:860px;">
+    <div class="label">Tome 的教訓</div>
+    <p>2000 萬用戶、$81M 融資，仍在 2025/4 關站。AI 簡報淘汰賽已開始 — 光靠「AI 生簡報」不夠，必須有獨特價值才能存活。</p>
+  </div>
+</div>
+
+<!-- ===== 5: Route 3 ===== -->
+<div class="slide clean" data-act="路線 1-3" data-index="5">
+  <h2>路線 3：AI 對話生成</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-color:var(--teal);max-width:280px;">
+      <h3 style="color:var(--teal);">Claude Artifacts</h3>
+      <p>推理品質最強 · HTML 即時預覽 + 下載 PPTX · 版面多樣 · 適合深度內容</p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:var(--gold);max-width:280px;">
+      <h3 style="color:#B45309;">ChatGPT</h3>
+      <p>內容構思佳 · 排版能力弱（千篇一律）· Code Interpreter 可生 PPTX 但品質不穩</p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-color:var(--navy);max-width:280px;">
+      <h3 style="color:var(--navy);">Gemini</h3>
+      <p>透過 Slides 整合最佳 · 單獨使用偏弱 · 適合 Google 生態用戶</p>
+    </div>
+  </div>
+  <div class="info-box tip fragment" data-order="3">
+    <div class="label">定位</div>
+    <p>適合「構思大綱 + 快速草稿」，不適合直接當成品使用。Claude Artifacts 版面多樣性 > ChatGPT。</p>
+  </div>
+</div>
+
+<!-- ===== 6: Route 4 Section ===== -->
+<div class="slide poster overlay-heavy" data-act="路線 4-6" data-index="6" style="background:linear-gradient(135deg,var(--purple),var(--dark));">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">路線 4</p>
+  <h1>AI Agent</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">全自動研究 + 生成，零操作但無法控制</p>
+</div>
+
+<!-- ===== 7: Route 4 Detail ===== -->
+<div class="slide clean" data-act="路線 4-6" data-index="7">
+  <h2>路線 4：AI Agent</h2>
+  <div class="two-col">
+    <div class="col">
+      <div class="card fragment" data-order="0" style="border-color:var(--purple);max-width:400px;">
+        <h3 style="color:var(--purple);">Manus</h3>
+        <p style="color:var(--red);font-weight:700;font-size:.9rem;">2025/12 被 Meta 收購</p>
+        <p>全自動流程 · 約 7 分鐘完成一份 · 引用來源可追溯 · 22M 月訪問量</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card fragment" data-order="1" style="border-color:var(--teal);max-width:400px;">
+        <h3 style="color:var(--teal);">Felo AI</h3>
+        <p style="color:var(--green);font-weight:700;font-size:.9rem;">Free + 付費</p>
+        <p>Claude Code 整合 · 靈感主題自動設計 · YouTube/PDF → PPT 一鍵轉換</p>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;gap:1.5rem;margin-top:1.2rem;max-width:860px;width:100%;" class="fragment" data-order="2">
+    <div style="flex:1;background:var(--green-lt);padding:1rem;border-radius:12px;text-align:center;border-left:4px solid var(--green);">
+      <div style="font-weight:700;color:var(--teal);">自動化程度：最高</div>
+      <div style="font-size:.9rem;color:var(--g600);margin-top:.3rem;">給主題 → 搜資料 → 寫內容 → 設計</div>
+    </div>
+    <div style="flex:1;background:var(--red-lt);padding:1rem;border-radius:12px;text-align:center;border-left:4px solid var(--red);">
+      <div style="font-weight:700;color:var(--red);">控制程度：最低</div>
+      <div style="font-size:.9rem;color:var(--g600);margin-top:.3rem;">無法指定版型/配色/字體/頁數</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 8: Route 5 ===== -->
+<div class="slide clean" data-act="路線 4-6" data-index="8">
+  <h2>路線 5：IDE 程式生成</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-color:var(--orange);max-width:270px;">
+      <h3 style="color:var(--orange);">Claude Code + pptxgenjs</h3>
+      <p>像素級精準控制 · 設計系統程式化 · 批量生產最強 · Node.js 生態</p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:var(--gold);max-width:270px;">
+      <h3 style="color:#B45309;">Codex (OpenAI)</h3>
+      <p>雲端 Agent · python-pptx 或 pptxgenjs · 自主完成任務 · 較不互動</p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-color:var(--teal);max-width:270px;">
+      <h3 style="color:var(--teal);">Cursor / Antigravity</h3>
+      <p>IDE 原生整合 · 即時預覽 · Background Agents · 多 Agent 協作</p>
+    </div>
+  </div>
+  <div class="info-box success fragment" data-order="3">
+    <div class="label">核心優勢：設計系統程式化</div>
+    <p>色彩、字體、元件全部用程式碼定義 → 跑 8 份簡報，風格 100% 一致。改一次設計系統 = 所有簡報同步更新。<br><strong>實戰案例：AI100 講 = 8 份簡報 │ 709 頁投影片 │ 統一設計系統</strong></p>
+  </div>
+</div>
+
+<!-- ===== 9: Route 6 + Live Demo ===== -->
+<div class="slide clean" data-act="路線 4-6" data-index="9">
+  <h2>路線 6：Markdown / HTML 框架</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-color:var(--teal);max-width:270px;">
+      <h3 style="color:var(--teal);">Slidev</h3>
+      <p>Vue 3 · 程式碼高亮動畫 · Mermaid 圖表</p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:var(--gold);max-width:270px;">
+      <h3 style="color:#B45309;">Marp</h3>
+      <p>純 Markdown · <strong>唯一可匯出 PPTX</strong> · CSS 主題</p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-color:var(--navy);max-width:270px;">
+      <h3 style="color:var(--navy);">reveal.js</h3>
+      <p>HTML 完全自由 · Fragment 動畫 · 互動 Demo</p>
+    </div>
+  </div>
+  <div class="fragment" data-order="3" style="margin-top:.8rem;text-align:center;">
+    <p style="font-size:.9rem;color:var(--g600);margin-bottom:.5rem;">這份簡報本身就是路線 6 的成果 — 點擊體驗完整對比版：</p>
+    <a href="../../ai-pptx-routes.html" target="_blank" class="demo-btn" style="background:var(--navy);color:#fff;">
+      📊 開啟「6 路線對比器」互動版 →
+    </a>
+  </div>
+  <div class="info-box tip fragment" data-order="4" style="padding:.7rem 1.2rem;">
+    <div class="label" style="font-size:.85rem;">取捨</div>
+    <p style="font-size:.85rem;">全部免費開源、Git 版控友善。但 Slidev/reveal.js 不產 PPTX、非開發者難用。</p>
+  </div>
+</div>
+
+<!-- ===== 10: 6×6 比較表 ===== -->
+<div class="slide dataviz" data-act="綜合比較" data-index="10">
+  <h2>6×6 維度比較</h2>
+  <table class="compare-table">
+    <thead><tr><th>維度</th><th>1.傳統+AI</th><th>2.AI原生</th><th>3.對話生成</th><th>4.Agent</th><th>5.IDE程式</th><th>6.Markdown</th></tr></thead>
+    <tbody>
+      <tr class="fragment" data-order="0"><td>視覺品質</td><td>高</td><td>高</td><td>中</td><td>中高</td><td>中</td><td>中高</td></tr>
+      <tr class="fragment" data-order="1"><td>批量能力</td><td>低</td><td>低</td><td>低</td><td>低</td><td class="best">最強</td><td>中</td></tr>
+      <tr class="fragment" data-order="2"><td>精確控制</td><td>高(GUI)</td><td>低</td><td>中</td><td>最低</td><td class="best">最強</td><td>高</td></tr>
+      <tr class="fragment" data-order="3"><td>學習門檻</td><td class="best">最低</td><td>低</td><td>低</td><td>最低</td><td class="warn">高</td><td>中高</td></tr>
+      <tr class="fragment" data-order="4"><td>版控友善</td><td>差</td><td>差</td><td>差</td><td>差</td><td class="best">最強</td><td class="best">最強</td></tr>
+      <tr class="fragment" data-order="5"><td>成本效益</td><td>中</td><td>高(單份)</td><td>高</td><td>中</td><td class="best">最強(批量)</td><td class="best">免費</td></tr>
+    </tbody>
+  </table>
+  <div class="info-box tip fragment" data-order="6" style="max-width:960px;">
+    <div class="label">洞察</div>
+    <p>IDE 程式生成在 6 維中拿下 5 個最強，但學習門檻高是最大障礙。選擇取決於你的技術力和使用場景。</p>
+  </div>
+</div>
+
+<!-- ===== 11: Radar ===== -->
+<div class="slide dataviz" data-act="綜合比較" data-index="11">
+  <h2>六維能力雷達圖</h2>
+  <div class="chart-wrap" style="max-width:560px;">
+    <canvas id="radarChart"></canvas>
+  </div>
+</div>
+
+<!-- ===== 12: 技術力光譜 ===== -->
+<div class="slide clean" data-act="決策指南" data-index="12">
+  <h2>技術力光譜 → 工具匹配</h2>
+  <div class="flow" style="margin-top:1.5rem;">
+    <div class="flow-box fragment" data-order="0" style="background:var(--blue-lt);border-color:var(--blue);">Level 1<br>不會程式<br><span class="dim" style="font-size:.85rem;">→ NotebookLM</span></div>
+    <div class="flow-arrow fragment" data-order="1">→</div>
+    <div class="flow-box fragment" data-order="1" style="background:var(--gold-lt);border-color:var(--gold);">Level 2<br>會基本操作<br><span class="dim" style="font-size:.85rem;">→ Gamma / Copilot</span></div>
+    <div class="flow-arrow fragment" data-order="2">→</div>
+    <div class="flow-box fragment" data-order="2" style="background:var(--green-lt);border-color:var(--green);">Level 3<br>會寫程式<br><span class="dim" style="font-size:.85rem;">→ Claude Code</span></div>
+    <div class="flow-arrow fragment" data-order="3">→</div>
+    <div class="flow-box fragment" data-order="3" style="background:var(--purple-lt);border-color:var(--purple);">Level 4<br>會系統架構<br><span class="dim" style="font-size:.85rem;">→ Pipeline 組合</span></div>
+  </div>
+  <div class="info-box analogy fragment" data-order="4" style="margin-top:1.5rem;">
+    <div class="label">關鍵洞察</div>
+    <p>技術力不只決定你「能用哪個工具」，更決定你「能從工具中榨出多少價值」。同一份教材，有架構力的人用出來效果差 10 倍。</p>
+  </div>
+</div>
+
+<!-- ===== 13: 三步決策法 ===== -->
+<div class="slide clean" data-act="決策指南" data-index="13">
+  <h2>三步驟決策法</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0">
+      <div class="step-num" style="background:var(--blue);">1</div>
+      <div class="step-content"><strong>辨識需求</strong><p>量大還是量小？需要技術內容嗎？視覺優先還是內容優先？</p></div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--gold);">2</div>
+      <div class="step-content"><strong>評估條件</strong><p>你的技術力？預算多少？時間限制？團隊配合度？</p></div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="background:var(--green);">3</div>
+      <div class="step-content"><strong>匹配工具</strong><p>
+        <strong style="color:var(--blue);">快速 + 好看 →</strong> Gamma<br>
+        <strong style="color:var(--blue);">免費 + 摘要 →</strong> NotebookLM<br>
+        <strong style="color:var(--green);">量大 + 精準 →</strong> Claude Code<br>
+        <strong style="color:var(--purple);">全自動 →</strong> Manus / Felo<br>
+        <strong style="color:var(--navy);">技術演講 →</strong> Slidev / reveal.js
+      </p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 14: 情境練習 ===== -->
+<div class="slide clean" data-act="決策指南" data-index="14">
+  <h2>情境練習 — 你會怎麼選？</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;max-width:900px;width:100%;margin-top:.5rem;">
+    <div class="fragment" data-order="0" style="background:var(--gold-lt);border-left:4px solid var(--gold);border-radius:0 10px 10px 0;padding:.7rem 1rem;">
+      <div style="font-weight:700;font-size:.95rem;">行銷經理 — 明天要給客戶簡報</div>
+      <div style="color:var(--teal);font-weight:700;font-size:.9rem;">→ Gamma（快、好看、一次性）</div>
+    </div>
+    <div class="fragment" data-order="1" style="background:var(--orange-lt);border-left:4px solid var(--orange);border-radius:0 10px 10px 0;padding:.7rem 1rem;">
+      <div style="font-weight:700;font-size:.95rem;">技術講師 — 12 週全套教材</div>
+      <div style="color:var(--teal);font-weight:700;font-size:.9rem;">→ Claude Code（批量、版控）</div>
+    </div>
+    <div class="fragment" data-order="2" style="background:var(--blue-lt);border-left:4px solid var(--cyan);border-radius:0 10px 10px 0;padding:.7rem 1rem;">
+      <div style="font-weight:700;font-size:.95rem;">大學生 — 下週畢業報告</div>
+      <div style="color:var(--teal);font-weight:700;font-size:.9rem;">→ NotebookLM（免費、丟文件）</div>
+    </div>
+    <div class="fragment" data-order="3" style="background:var(--purple-lt);border-left:4px solid var(--purple);border-radius:0 10px 10px 0;padding:.7rem 1rem;">
+      <div style="font-weight:700;font-size:.95rem;">企業 HR — 50 份新人教材</div>
+      <div style="color:var(--teal);font-weight:700;font-size:.9rem;">→ Claude Code（腳本批量生成）</div>
+    </div>
+  </div>
+  <div class="info-box analogy fragment" data-order="4" style="margin-top:.6rem;padding:.7rem 1.2rem;">
+    <div class="label" style="font-size:.85rem;">規律</div>
+    <p style="font-size:.85rem;">一次性 → AI 原生平台 ｜ 批量系列 → IDE 程式生成 ｜ 零預算 → NotebookLM</p>
+  </div>
+</div>
+
+<!-- ===== 15: 預算決策樹 ===== -->
+<div class="slide dataviz" data-act="決策指南" data-index="15">
+  <h2>預算決策樹</h2>
+  <div style="max-width:820px;width:100%;margin-top:.5rem;">
+    <!-- Tier 1: Free -->
+    <div class="fragment" data-order="0" style="display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem;">
+      <div style="flex-shrink:0;width:160px;background:rgba(26,115,232,.15);border:2px solid var(--blue);border-radius:12px;padding:.6rem .8rem;text-align:center;">
+        <div style="font-size:1.6rem;">🆓</div>
+        <div style="color:var(--blue);font-weight:700;font-size:.9rem;">預算 = 0</div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:.4rem;">
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <div style="color:rgba(255,255,255,.3);font-size:1.2rem;">→</div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.4rem .8rem;font-size:.85rem;color:rgba(255,255,255,.6);">有技術力</div>
+          <div style="color:var(--green);font-size:1.2rem;font-weight:700;">→</div>
+          <div style="background:rgba(15,157,138,.15);border:2px solid var(--green);border-radius:8px;padding:.4rem 1rem;font-weight:700;color:var(--green);font-size:.9rem;">Claude Code</div>
+          <span style="font-size:.75rem;color:rgba(255,255,255,.35);">Max 訂閱自帶</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <div style="color:rgba(255,255,255,.3);font-size:1.2rem;">→</div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.4rem .8rem;font-size:.85rem;color:rgba(255,255,255,.6);">沒技術力</div>
+          <div style="color:var(--blue);font-size:1.2rem;font-weight:700;">→</div>
+          <div style="background:rgba(26,115,232,.15);border:2px solid var(--blue);border-radius:8px;padding:.4rem 1rem;font-weight:700;color:var(--blue);font-size:.9rem;">NotebookLM</div>
+          <span style="font-size:.75rem;color:rgba(255,255,255,.35);">Google 免費</span>
+        </div>
+      </div>
+    </div>
+    <!-- Tier 2: <500 -->
+    <div class="fragment" data-order="1" style="display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem;">
+      <div style="flex-shrink:0;width:160px;background:rgba(249,171,0,.12);border:2px solid var(--gold);border-radius:12px;padding:.6rem .8rem;text-align:center;">
+        <div style="font-size:1.6rem;">💰</div>
+        <div style="color:var(--gold);font-weight:700;font-size:.9rem;">&lt; NT$500/月</div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:.4rem;">
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <div style="color:rgba(255,255,255,.3);font-size:1.2rem;">→</div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.4rem .8rem;font-size:.85rem;color:rgba(255,255,255,.6);">量大 &gt;5 份/月</div>
+          <div style="color:var(--green);font-size:1.2rem;font-weight:700;">→</div>
+          <div style="background:rgba(15,157,138,.15);border:2px solid var(--green);border-radius:8px;padding:.4rem 1rem;font-weight:700;color:var(--green);font-size:.9rem;">Claude Code</div>
+          <span style="font-size:.75rem;color:rgba(255,255,255,.35);">邊際成本趨零</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <div style="color:rgba(255,255,255,.3);font-size:1.2rem;">→</div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.4rem .8rem;font-size:.85rem;color:rgba(255,255,255,.6);">量小 1-2 份</div>
+          <div style="color:var(--gold);font-size:1.2rem;font-weight:700;">→</div>
+          <div style="background:rgba(249,171,0,.12);border:2px solid var(--gold);border-radius:8px;padding:.4rem 1rem;font-weight:700;color:var(--gold);font-size:.9rem;">Gamma</div>
+          <span style="font-size:.75rem;color:rgba(255,255,255,.35);">快速高品質</span>
+        </div>
+      </div>
+    </div>
+    <!-- Tier 3: Enterprise -->
+    <div class="fragment" data-order="2" style="display:flex;align-items:center;gap:.8rem;">
+      <div style="flex-shrink:0;width:160px;background:rgba(124,58,237,.12);border:2px solid var(--purple);border-radius:12px;padding:.6rem .8rem;text-align:center;white-space:nowrap;">
+        <div style="font-size:1.6rem;">🏢</div>
+        <div style="color:var(--purple);font-weight:700;font-size:.9rem;">&gt; NT$500/月</div>
+      </div>
+      <div style="flex:1;display:flex;align-items:center;gap:.5rem;flex-wrap:nowrap;">
+        <div style="color:rgba(255,255,255,.3);font-size:1.2rem;">→</div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.4rem .8rem;font-size:.85rem;color:rgba(255,255,255,.6);white-space:nowrap;">企業級</div>
+        <div style="color:var(--purple);font-size:1.2rem;font-weight:700;">→</div>
+        <div style="background:rgba(124,58,237,.12);border:2px solid var(--purple);border-radius:8px;padding:.4rem 1rem;font-weight:700;color:var(--purple);font-size:.9rem;white-space:nowrap;">Pipeline 全組合</div>
+        <span style="font-size:.75rem;color:rgba(255,255,255,.35);white-space:nowrap;">三者各取所長</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 16: 時間成本交叉 ===== -->
+<div class="slide dataviz" data-act="綜合比較" data-index="16">
+  <h2>時間成本交叉點</h2>
+  <div class="chart-wrap" style="max-width:640px;">
+    <canvas id="lineChart"></canvas>
+  </div>
+  <p style="font-size:.9rem;color:rgba(255,255,255,.4);margin-top:.8rem;">第 3-4 份後，Claude Code 的投資回報開始超越 Gamma</p>
+</div>
+
+<!-- ===== 17: Closing ===== -->
+<div class="slide poster overlay-heavy" data-act="結語" data-index="17" style="background:linear-gradient(135deg,var(--navy) 0%,var(--dark3) 50%,var(--dark) 100%);">
+  <h1 style="font-size:2.4rem;">工具選擇三角模型</h1>
+  <div class="quote-box" style="background:rgba(0,0,0,.5);border-color:var(--gold);margin-top:1.5rem;">
+    <div class="quote-text" style="font-size:1.8rem;">選擇工具的能力 > 使用工具的能力 > 擁有工具</div>
+    <div class="quote-src">不是「哪個工具最好」，而是「哪個組合最適合你」</div>
+  </div>
+  <div style="margin-top:2rem;">
+    <a href="../../ai-pptx-routes.html" target="_blank" class="demo-btn" style="background:var(--gold);color:var(--navy);">
+      📊 完整互動版：6 路線對比器 →
+    </a>
+  </div>
+  <p style="color:rgba(255,255,255,.25);margin-top:2rem;font-size:.85rem;">AI 100 講 — 補充單元 S18</p>
+</div>
+
+</div><!-- /slides -->
+
+<div id="chapterMenu" class="chapter-menu">
+  <button id="chapterBtn" class="chapter-btn">
+    <span class="chapter-icon">§</span>
+    <span id="chapterLabel">開場</span>
+    <span class="chapter-arrow">▼</span>
+  </button>
+  <div id="chapterList" class="chapter-list"></div>
+</div>
+
+<div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>&larr;</button><button id="next">&rarr;</button></div>
+
+<script>
+/* ── Slideshow Engine ── */
+const slides=document.querySelectorAll('.slide'),tot=slides.length;
+let idx=0,fi=-1;
+document.getElementById('total').textContent=tot;
+const gf=el=>el.querySelectorAll('.fragment');
+function go(n){slides.forEach(s=>{s.classList.remove('active');s.querySelectorAll('.fragment').forEach(f=>f.classList.remove('visible'));});idx=n;fi=-1;slides[idx].classList.add('active');ui();renderCharts();}
+function ui(){document.getElementById('current').textContent=idx+1;document.getElementById('prev').disabled=idx===0&&fi<=0;const f=gf(slides[idx]);document.getElementById('next').disabled=idx===tot-1&&fi>=f.length-1;document.getElementById('progress').style.width=((idx+1)/tot*100)+'%';}
+function adv(){const f=gf(slides[idx]);if(fi<f.length-1){fi++;f[fi].classList.add('visible');ui();}else if(idx<tot-1)go(idx+1);}
+function ret(){const f=gf(slides[idx]);if(fi>=0){f[fi].classList.remove('visible');fi--;ui();}else if(idx>0){go(idx-1);const p=gf(slides[idx]);p.forEach(x=>x.classList.add('visible'));fi=p.length-1;ui();}}
+document.getElementById('next').onclick=adv;document.getElementById('prev').onclick=ret;
+document.addEventListener('keydown',e=>{if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();adv();}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();ret();}if(e.key==='Home'){e.preventDefault();go(0);}if(e.key==='End'){e.preventDefault();go(tot-1);}if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}});
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50){d>0?adv():ret();}});
+window.addEventListener('message',function(e){if(!e.data||typeof e.data!=='object')return;if(e.data.type==='slide-control'){if(e.data.action==='next')adv();else if(e.data.action==='prev')ret();else if(e.data.action==='goto'&&typeof e.data.index==='number')go(e.data.index);}});
+
+/* ── Charts ── */
+let radarInstance=null,lineInstance=null;
+function renderCharts(){
+  if(idx===11&&!radarInstance){
+    const ctx=document.getElementById('radarChart');
+    if(ctx){
+      radarInstance=new Chart(ctx,{
+        type:'radar',
+        data:{
+          labels:['視覺品質','批量能力','精確控制','學習門檻(易)','版控友善','成本效益'],
+          datasets:[
+            {label:'1.傳統+AI',data:[8,2,8.5,9.5,1.5,5],borderColor:'var(--teal)',backgroundColor:'rgba(15,157,138,.1)',pointBackgroundColor:'var(--teal)',borderWidth:2},
+            {label:'2.AI原生',data:[8.5,2.5,3,9,1,7],borderColor:'#F9AB00',backgroundColor:'rgba(249,171,0,.1)',pointBackgroundColor:'#F9AB00',borderWidth:2},
+            {label:'3.對話生成',data:[5.5,2,5,9.2,1.5,7.5],borderColor:'#06B6D4',backgroundColor:'rgba(6,182,212,.1)',pointBackgroundColor:'#06B6D4',borderWidth:2},
+            {label:'4.Agent',data:[6.5,3,1,9.8,1,5],borderColor:'#7C3AED',backgroundColor:'rgba(124,58,237,.1)',pointBackgroundColor:'#7C3AED',borderWidth:2},
+            {label:'5.IDE程式',data:[6,9.8,9.5,2.5,9.5,8],borderColor:'#E8710A',backgroundColor:'rgba(232,113,10,.15)',pointBackgroundColor:'#E8710A',borderWidth:2.5},
+            {label:'6.Markdown',data:[7,6,8,4,9.5,9],borderColor:'#0B3C5D',backgroundColor:'rgba(11,60,93,.1)',pointBackgroundColor:'#0B3C5D',borderWidth:2}
+          ]
+        },
+        options:{
+          responsive:true,maintainAspectRatio:true,
+          scales:{r:{min:0,max:10,ticks:{stepSize:2,color:'rgba(255,255,255,.3)',backdropColor:'transparent'},grid:{color:'rgba(255,255,255,.1)'},pointLabels:{color:'rgba(255,255,255,.7)',font:{size:12,weight:'bold'}}}},
+          plugins:{legend:{labels:{color:'rgba(255,255,255,.7)',font:{size:11},usePointStyle:true,pointStyle:'circle'}}}
+        }
+      });
+    }
+  }
+  if(idx===16&&!lineInstance){
+    const ctx=document.getElementById('lineChart');
+    if(ctx){
+      const gd=[30,60,90,120,150,180,210,240,270,300];
+      const cd=[240,250,260,270,280,290,300,310,320,330];
+      lineInstance=new Chart(ctx,{
+        type:'line',
+        data:{
+          labels:['1','2','3','4','5','6','7','8','9','10'],
+          datasets:[
+            {label:'Gamma（每份 30 min）',data:gd,borderColor:'#F9AB00',borderWidth:3,tension:.3,fill:false,pointRadius:4,pointBackgroundColor:'#F9AB00'},
+            {label:'Claude Code（首份 240 min，之後 10 min）',data:cd,borderColor:'#0F9D8A',borderWidth:3,tension:.3,fill:false,pointRadius:4,pointBackgroundColor:'#0F9D8A'}
+          ]
+        },
+        options:{
+          responsive:true,maintainAspectRatio:true,
+          scales:{
+            x:{title:{display:true,text:'累計簡報份數',color:'rgba(255,255,255,.5)'},ticks:{color:'rgba(255,255,255,.4)'},grid:{color:'rgba(255,255,255,.06)'}},
+            y:{title:{display:true,text:'累計時間（分鐘）',color:'rgba(255,255,255,.5)'},ticks:{color:'rgba(255,255,255,.4)'},grid:{color:'rgba(255,255,255,.06)'}}
+          },
+          plugins:{legend:{labels:{color:'rgba(255,255,255,.7)',font:{size:12}}}}
+        }
+      });
+    }
+  }
+}
+
+/* ── Chapter Menu ── */
+var chapterMenu=document.getElementById('chapterMenu'),chapterBtn=document.getElementById('chapterBtn'),chapterLabel=document.getElementById('chapterLabel'),chapterList=document.getElementById('chapterList');
+function getChapters(){var m=new Map();slides.forEach(function(s,i){var a=s.dataset.act;if(a&&!m.has(a))m.set(a,i);});return m;}
+function buildChapterMenu(){var ch=getChapters();chapterList.innerHTML='';var cur=slides[idx]&&slides[idx].dataset.act||'';ch.forEach(function(si,name){var d=document.createElement('div');d.className='chapter-item'+(name===cur?' active':'');d.innerHTML='<span class="chapter-dot"></span>'+name;d.onclick=function(){go(si);closeChapterMenu();};chapterList.appendChild(d);});chapterLabel.textContent=cur||'\u5c0e\u89bd';}
+function toggleChapterMenu(){chapterMenu.classList.toggle('open');if(chapterMenu.classList.contains('open'))buildChapterMenu();}
+function closeChapterMenu(){chapterMenu.classList.remove('open');}
+chapterBtn.onclick=toggleChapterMenu;
+document.addEventListener('click',function(e){if(!chapterMenu.contains(e.target))closeChapterMenu();});
+var _origUi=ui;ui=function(){_origUi();var cur=slides[idx]&&slides[idx].dataset.act||'';chapterLabel.textContent=cur||'\u5c0e\u89bd';};
+go(0);
+</script>
+</body>
+</html>

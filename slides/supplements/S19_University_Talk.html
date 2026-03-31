@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人駕馭 AI Token — 大學演講 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   S19: University Talk — S09 Style
+   ═══════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+  --orange:#E8710A; --orange-lt:#FEF0E1;
+  --cyan:#06B6D4; --cyan-lt:#E0F7FA;
+  --dark:#0a0a14; --dark2:#111122; --dark3:#16213e;
+  --teal:#0F9D8A; --teal-light:#12B89F; --teal-dark:#0A7A6B;
+  --primary:#0B3C5D;
+  --warm-bg:#FEF3C7; --purple-bg:#EDE9FE; --red-bg:#FEE2E2;
+  --dark-text:#1A1A1A; --gray-text:#5A6B7A; --light-tint:#E8F4F2;
+  --gold-dark:#E6A820;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--dark);}
+/* ── Reading Glasses: 老花眼友善 ── */
+/* 正文 22px, 最小字 16px, CJK 行高 1.7, 字重 ≥ 400, 按鈕 ≥ 48px */
+small,.caption,.label{font-size:max(16px,0.75rem)!important;}
+
+/* ── Slides Core ── */
+.slides{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3.5rem 4rem 4.5rem;pointer-events:none;overflow-y:auto;opacity:0;pointer-events:none;}
+.slide.active{opacity:1;pointer-events:auto;}
+
+/* ── Clean Mode ── */
+.slide.clean{background:var(--white);color:var(--g900);justify-content:flex-start;}
+.slide.clean::before,.slide.clean::after{content:'';flex:1 0 0px;}
+
+/* ── Poster Mode ── */
+.slide.poster{background-size:cover;background-position:center;color:#fff;text-align:center;}
+.slide.poster::before{content:'';position:absolute;inset:0;z-index:1;}
+.slide.poster>*{position:relative;z-index:2;}
+.slide.poster.overlay-bottom::before{background:linear-gradient(to bottom,rgba(0,0,0,.15) 0%,rgba(0,0,0,.78) 100%);}
+.slide.poster.overlay-heavy::before{background:linear-gradient(to bottom,rgba(0,0,0,.45) 0%,rgba(0,0,0,.85) 100%);}
+.slide.poster.overlay-center::before{background:radial-gradient(ellipse at center,rgba(0,0,0,.3) 0%,rgba(0,0,0,.8) 100%);}
+
+/* ── DataViz Mode ── */
+.slide.dataviz{background:var(--dark);color:#fff;padding-top:3.5rem;}
+
+/* ── Typography (reading-glasses: 正文≥22px, h1≥36px, h2≥28px, h3≥24px, 最小16px) ── */
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:1.8rem;font-weight:700;color:var(--g900);margin-bottom:.8rem;line-height:1.4;}
+.slide.dataviz h2,.slide.poster h2{color:#fff;}
+h3{font-size:1.25rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.05rem;line-height:1.8;}
+.dim{opacity:.6;}
+.card p{font-size:.95rem;line-height:1.7;}
+.card .card-sub{font-size:.85rem;}
+.tip-box,.tip-box-dark{font-size:.95rem;}
+.controls button{min-height:48px;min-width:48px;padding:8px 14px;font-size:.9rem;}
+
+/* ── Fragment ── */
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* ── Cards ── */
+.card-grid{display:grid;gap:1rem;padding:1.5rem 3rem;}
+.card-grid.cols-2{grid-template-columns:1fr 1fr;}
+.card-grid.cols-3{grid-template-columns:1fr 1fr 1fr;}
+.card-grid.cols-4{grid-template-columns:1fr 1fr 1fr 1fr;}
+.card{background:var(--white);border-radius:8px;padding:1.2rem;box-shadow:0 2px 8px rgba(0,0,0,.08);position:relative;overflow:hidden;}
+.card-accent{position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--teal);}
+.card h3{font-size:1.05rem;font-weight:600;color:var(--teal);margin-bottom:.4rem;}
+.card p{font-size:.9rem;color:var(--dark-text);line-height:1.6;}
+.card .card-icon{font-size:1.8rem;margin-bottom:.3rem;}
+.card .card-sub{font-size:.8rem;color:var(--gray-text);margin-top:.3rem;}
+.card-dark{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);box-shadow:none;color:#fff;}
+.card-dark h3{color:var(--teal-light);}
+.card-dark p{color:rgba(255,255,255,.7);}
+.card-dark .card-sub{color:rgba(255,255,255,.4);}
+
+/* ── Tip Box ── */
+.tip-box{margin:.8rem 3rem;padding:.8rem 1.2rem;background:var(--light-tint);border-radius:8px;font-size:.9rem;color:var(--teal-dark);}
+.tip-box-dark{margin:.8rem 3rem;padding:.8rem 1.2rem;background:rgba(15,157,138,.1);border:1px solid rgba(15,157,138,.3);border-radius:8px;font-size:.9rem;color:var(--teal-light);}
+
+/* ── Section Divider ── */
+.section-accent-top,.section-accent-bottom{height:4px;background:var(--teal);}
+.section-bar{width:4px;height:120px;background:var(--teal);margin-bottom:1rem;}
+.section-subtitle{color:var(--mint);font-size:1.2rem;margin-bottom:.5rem;}
+.section-title{color:#fff;font-size:2.8rem;font-weight:700;line-height:1.2;}
+.section-content{padding:0 4rem;flex:1;display:flex;flex-direction:column;justify-content:center;}
+
+/* ── Process Steps ── */
+.process-steps{display:flex;align-items:stretch;justify-content:center;gap:.5rem;padding:1.5rem 2rem;}
+.step{flex:1;border-radius:12px;padding:1.2rem .8rem;text-align:center;color:#fff;}
+.step-num{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.9);font-size:1.2rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto .6rem;}
+.step h3{font-size:.95rem;font-weight:600;margin-bottom:.3rem;}
+.step p{font-size:.8rem;opacity:.85;line-height:1.4;}
+.step-arrow{font-size:1.5rem;color:var(--gray-text);flex-shrink:0;display:flex;align-items:center;}
+
+/* ── Comparison ── */
+.comparison-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;padding:1.5rem 3rem;align-items:start;}
+.comp-col{display:flex;flex-direction:column;gap:.8rem;}
+.comp-badge{display:inline-block;padding:.3rem .8rem;border-radius:20px;color:#fff;font-size:.8rem;font-weight:700;margin-bottom:.3rem;}
+.comp-card{background:var(--white);border-radius:8px;padding:1.2rem;box-shadow:0 1px 6px rgba(0,0,0,.06);}
+.comp-arrow{font-size:2rem;color:var(--gray-text);display:flex;align-items:center;padding-top:2rem;}
+
+/* ── Quiz ── */
+.quiz-question{margin:1.5rem 3rem;padding:1.2rem 1.5rem;background:var(--warm-bg);border-radius:10px;font-size:1.1rem;line-height:1.6;color:var(--dark-text);}
+.quiz-choices{padding:.5rem 3rem;display:flex;flex-direction:column;gap:.8rem;}
+.quiz-choice{display:flex;align-items:center;gap:1rem;padding:.8rem 1.2rem;background:var(--white);border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer;transition:transform .2s;}
+.quiz-choice:hover{transform:translateX(4px);}
+.choice-label{width:36px;height:36px;border-radius:50%;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* ── Pyramid (for dataviz) ── */
+.pyramid{display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:1rem 3rem;max-width:800px;width:100%;}
+.pyramid-row{display:flex;align-items:center;gap:1rem;border-radius:12px;padding:.8rem 1.5rem;margin:0 auto;}
+.pyramid-level{font-size:1.6rem;font-weight:900;min-width:50px;text-align:center;flex-shrink:0;}
+.pyramid-name{font-size:1.05rem;font-weight:700;}
+.pyramid-desc{font-size:.85rem;opacity:.6;}
+
+/* ── Stat Grid ── */
+.stat-grid{display:grid;gap:1rem;padding:1rem 3rem;}
+.stat-box{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:center;}
+.stat-box .val{font-size:2.4rem;font-weight:900;line-height:1.1;}
+.stat-box .label{font-size:.8rem;color:rgba(255,255,255,.5);margin-top:.2rem;}
+
+/* ── Quote ── */
+.quote-wrap{padding:2rem 4rem;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;position:relative;z-index:2;}
+.quote-text{font-size:1.8rem;font-weight:700;line-height:1.6;max-width:700px;text-align:center;}
+.quote-src{font-size:.9rem;color:rgba(255,255,255,.45);margin-top:1rem;}
+.quote-bar{width:60px;height:4px;background:var(--gold);margin-bottom:1rem;}
+
+/* ── Bottom Bar ── */
+.slide-counter{position:fixed;bottom:16px;right:20px;z-index:100;font-size:.75rem;color:rgba(255,255,255,.5);cursor:pointer;background:rgba(0,0,0,.6);padding:4px 10px;border-radius:6px;backdrop-filter:blur(4px);}
+.progress{position:fixed;bottom:0;left:0;height:3px;background:var(--teal);z-index:100;transition:width .3s;}
+.controls{position:fixed;bottom:14px;right:80px;z-index:100;display:flex;gap:6px;}
+.controls button{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.8rem;backdrop-filter:blur(4px);}
+.controls button:hover{border-color:var(--teal);color:#fff;}
+
+/* ── Chapter Menu ── */
+.chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;font-family:system-ui,-apple-system,sans-serif;}
+.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.9);font-size:.8rem;cursor:pointer;transition:border-color .2s;}
+.chapter-btn:hover{border-color:var(--teal);}
+.chapter-icon{color:var(--teal);font-weight:700;}
+.chapter-arrow{font-size:.6rem;opacity:.5;transition:transform .2s;}
+.chapter-menu.open .chapter-arrow{transform:rotate(180deg);}
+.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:200px;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;}
+.chapter-menu.open .chapter-list{display:block;}
+.chapter-item{display:flex;align-items:center;gap:8px;padding:8px 14px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
+.chapter-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+.chapter-item.active{color:var(--teal);font-weight:600;}
+.chapter-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;}
+.chapter-item.active .chapter-dot{background:var(--teal);box-shadow:0 0 6px var(--teal);}
+
+@media(max-width:768px){
+  .slide-header{padding:1rem 1.5rem .6rem;}
+  .card-grid{padding:1rem 1.5rem;}
+  .card-grid.cols-2,.card-grid.cols-3,.card-grid.cols-4{grid-template-columns:1fr;}
+  .process-steps{flex-direction:column;padding:1rem 1.5rem;}
+  .step-arrow{transform:rotate(90deg);}
+  .comparison-grid{grid-template-columns:1fr;padding:1rem 1.5rem;}
+  .comp-arrow{transform:rotate(90deg);justify-content:center;}
+  .stat-grid{padding:1rem 1.5rem;}
+  .tip-box,.tip-box-dark{margin:.8rem 1.5rem;}
+  .quote-wrap{padding:2rem 1.5rem;}
+  .pyramid{padding:1rem 1.5rem;}
+  .section-content{padding:0 2rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="slides" >
+
+<!-- ═══════════ 1: COVER ═══════════ -->
+<div class="slide poster overlay-heavy active" data-act="開場" style="background:linear-gradient(135deg,var(--navy) 0%,var(--dark3) 40%,var(--dark) 100%);">
+
+    <p style="font-size:.9rem;color:var(--gold);letter-spacing:.3rem;margin-bottom:.5rem;">UNIVERSITY TALK 2026</p>
+    <h1 style="font-size:3.5rem;font-weight:800;">人駕馭 AI Token</h1>
+    <p style="font-size:2rem;color:var(--gold);font-weight:700;margin-top:.3rem;">產生無限可能</p>
+    <p style="font-size:1.1rem;color:rgba(255,255,255,.5);margin-top:1rem;">從火的馴化到 AI 的駕馭 — 一場關於人類潛能的演講</p>
+</div>
+
+<!-- ═══════════ 2: AGENDA ═══════════ -->
+<div class="slide clean" data-act="開場">
+  <h2>今天的旅程</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:960px;width:100%;margin-top:.8rem;" style="flex:1;align-content:center;">
+    <div class="card fragment"><div class="card-accent"></div><h3>01 人類駕馭力的演進</h3><p>火 → 獸力 → 科技 → AI Token</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--gold-dark)"></div><h3>02 你在哪裡？</h3><p>81億人口中的 AI 使用分布與 Token 經濟</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--purple)"></div><h3>03 三個核心能力</h3><p>用工具 → 選工具 → 造工具</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--orange)"></div><h3>04 AI 成熟度五層</h3><p>從使用工具到方法創新（L1→L5）</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--cyan)"></div><h3>05 實戰行動</h3><p>GitHub 學生方案、AI 工具、第一步</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--red)"></div><h3>06 未來展望</h3><p>老黃語錄、Token 預算、學習路徑</p></div>
+  </div>
+</div>
+
+<!-- ═══════════ 3: PART 1 DIVIDER ═══════════ -->
+<div class="slide poster overlay-heavy" style="background:linear-gradient(135deg,var(--primary) 0%,#0a0a14 100%);" data-act="駕馭力演進">
+  
+  <div style="position:relative;z-index:2;text-align:center;">
+    
+    <p style="color:var(--green);font-size:1rem;letter-spacing:.3rem;">Part 1</p>
+    <h1 style="color:#fff;font-size:2.8rem;font-weight:900;margin-top:.3rem;">人類駕馭力的演進</h1>
+  </div>
+  
+</div>
+
+<!-- ═══════════ 4: 四階段演進 ═══════════ -->
+<div class="slide clean" data-act="駕馭力演進">
+  <h2>從火到 AI — 人類駕馭力的演進</h2>
+  <div class="process-steps">
+    <div class="step fragment" style="background:var(--red);">
+      <div class="step-num" style="color:var(--red);">🔥</div>
+      <h3>火</h3>
+      <p>駕馭火 = 出現文明<br>烹飪、取暖、夜間活動<br>人類脫離動物界</p>
+    </div>
+    <div class="step-arrow">▶</div>
+    <div class="step fragment" style="background:var(--orange);">
+      <div class="step-num" style="color:var(--orange);">🐎</div>
+      <h3>獸力·機械</h3>
+      <p>駕馭獸力 = 產生效率<br>農耕、運輸、工業革命<br>一人抵百人</p>
+    </div>
+    <div class="step-arrow">▶</div>
+    <div class="step fragment" style="background:var(--teal);">
+      <div class="step-num" style="color:var(--teal);">💻</div>
+      <h3>科技</h3>
+      <p>駕馭科技 = 數位創新<br>網路、軟體、平台<br>改變商業模式</p>
+    </div>
+    <div class="step-arrow">▶</div>
+    <div class="step fragment" style="background:var(--primary);">
+      <div class="step-num" style="color:var(--primary);">🤖</div>
+      <h3>AI Token</h3>
+      <p>駕馭 Token = 無限可能<br>生成式 AI、Agent<br>一人 = 一間公司</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 5: 駕馭火 ═══════════ -->
+<div class="slide clean" data-act="駕馭力演進">
+  <h2>駕馭火 — 文明的起點</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;max-width:900px;width:100%;margin-top:.8rem;" style="flex:1;align-content:center;">
+    <div class="card">
+      <div class="card-accent" style="background:var(--red)"></div>
+      <h3 style="color:var(--red);">40 萬年前，人類學會控制火</h3>
+      <p>• 烹飪 → 大腦發展<br>• 夜間活動 → 社交文化<br>• 冶煉金屬 → 工具進化</p>
+    </div>
+    <div class="card">
+      <div class="card-accent" style="background:var(--orange)"></div>
+      <h3 style="color:var(--orange);">核心邏輯</h3>
+      <p>火不是人類發明的，但人類學會「駕馭」它。<br><strong>驅動力是人對工具的掌控能力。</strong></p>
+    </div>
+  </div>
+  <div class="tip-box">🔥 火是第一個「通用技術」— AI 是最新的，而你正站在駕馭它的起點</div>
+</div>
+
+<!-- ═══════════ 6: 獸力與機械 ═══════════ -->
+<div class="slide clean" data-act="駕馭力演進">
+  <h2>駕馭獸力與機械 — 效率的爆發</h2>
+  <div class="process-steps">
+    <div class="step fragment" style="background:var(--teal);">
+      <div class="step-num" style="color:var(--teal);">🌾</div>
+      <h3>農業時代</h3>
+      <p>~10000 BC<br>牛耕田、馬運輸<br>一頭牛 = 5個人力</p>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step fragment" style="background:var(--orange);">
+      <div class="step-num" style="color:var(--orange);">⚙️</div>
+      <h3>工業革命</h3>
+      <p>1760s<br>蒸汽機、紡織機<br>一台機器 = 100個工人</p>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step fragment" style="background:var(--gold-dark);">
+      <div class="step-num" style="color:var(--gold-dark);">⚡</div>
+      <h3>電力時代</h3>
+      <p>1880s<br>電動機、生產線<br>亨利·福特的流水線</p>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step fragment" style="background:var(--primary);">
+      <div class="step-num" style="color:var(--primary);">🤖</div>
+      <h3>自動化</h3>
+      <p>1970s<br>CNC、機器人<br>精準度超越人手</p>
+    </div>
+  </div>
+  <div class="tip-box">關鍵不是誰擁有工具，而是誰能駕馭工具。今天的 AI 也是同樣邏輯。</div>
+</div>
+
+<!-- ═══════════ 7: 駕馭科技 ═══════════ -->
+<div class="slide clean" data-act="駕馭力演進">
+  <h2>駕馭科技 — 數位創新</h2>
+  <div class="process-steps">
+    <div class="step fragment" style="background:var(--teal);">
+      <div class="step-num" style="color:var(--teal);">🌐</div>
+      <h3>1990s 網路</h3>
+      <p>撥接到寬頻<br>資訊傳播從天變秒<br>電子商務誕生</p>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step fragment" style="background:var(--purple);">
+      <div class="step-num" style="color:var(--purple);">💿</div>
+      <h3>2000s 軟體</h3>
+      <p>SaaS 雲端服務<br>Google, Facebook<br>軟體吃掉世界</p>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step fragment" style="background:var(--orange);">
+      <div class="step-num" style="color:var(--orange);">📱</div>
+      <h3>2010s 平台</h3>
+      <p>Uber, Airbnb<br>共享經濟、App Store<br>人人都是創業家</p>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step fragment" style="background:var(--primary);">
+      <div class="step-num" style="color:var(--primary);">🤖</div>
+      <h3>2020s AI</h3>
+      <p>ChatGPT, Claude<br>生成式 AI 革命<br>人人都是開發者</p>
+    </div>
+  </div>
+  <div class="tip-box">每個時代的贏家，都是最早學會「駕馭」新技術的人。你現在就在 AI 時代的起點。</div>
+</div>
+
+<!-- ═══════════ 8: 人比AI凶 ═══════════ -->
+<div class="slide poster overlay-heavy" data-act="駕馭力演進" style="background-color:#1a0a0a;">
+  <div class="quote-wrap">
+    <div style="font-size:1.1rem;color:rgba(255,255,255,.35);margin-bottom:1.5rem;max-width:600px;text-align:center;">「人要比車兇」「看到我尾燈算你贏」<br><span style="font-size:.9rem;">— 鄭伊健《烈火戰車2：極速傳說》1999</span></div>
+    <div class="quote-bar"></div>
+    <div class="quote-text">「人比 AI 凶」</div>
+    <p style="font-size:1.2rem;color:rgba(255,255,255,.7);margin-top:.8rem;">不是 AI 有多強，是你用 AI 有多狠</p>
+    <div class="quote-src">— 萬維鋼《精英日課》</div>
+    <p class="fragment" style="margin-top:2rem;font-size:1rem;color:rgba(255,255,255,.4);max-width:600px;text-align:center;">車子再好，不會開也沒用。AI 再強，不會用也是零。決定勝負的永遠是駕馭者。</p>
+  </div>
+</div>
+
+<!-- ═══════════ 9: 工業革命 1.0-5.0 ═══════════ -->
+<div class="slide clean" data-act="駕馭力演進">
+  <h2>工業革命的演進 — 從 1.0 到 5.0</h2>
+  <div class="process-steps">
+    <div class="step fragment" style="background:var(--teal);">
+      <div class="step-num" style="color:var(--teal);font-size:1rem;">1.0</div>
+      <h3>動力與機械化</h3>
+      <p>1784 · 蒸汽機<br>操作導向</p>
+    </div>
+    <div class="step-arrow">▶</div>
+    <div class="step fragment" style="background:var(--gold-dark);">
+      <div class="step-num" style="color:var(--gold-dark);font-size:1rem;">2.0</div>
+      <h3>電力與規模化</h3>
+      <p>1870 · 電力驅動<br>流程導向</p>
+    </div>
+    <div class="step-arrow">▶</div>
+    <div class="step fragment" style="background:var(--cyan);">
+      <div class="step-num" style="color:var(--cyan);font-size:1rem;">3.0</div>
+      <h3>資訊與自動化</h3>
+      <p>1969 · PLC/IT<br>IT 導向</p>
+    </div>
+    <div class="step-arrow">▶</div>
+    <div class="step fragment" style="background:var(--purple);">
+      <div class="step-num" style="color:var(--purple);font-size:1rem;">4.0</div>
+      <h3>數據與智慧化</h3>
+      <p>2011 · IoT/AI<br>數據導向</p>
+    </div>
+    <div class="step-arrow">▶</div>
+    <div class="step fragment" style="background:var(--red);">
+      <div class="step-num" style="color:var(--red);font-size:1rem;">5.0</div>
+      <h3>人機與永續化</h3>
+      <p>NOW · 人本/ESG<br>價值導向</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 10: 工業5.0三力 ═══════════ -->
+<div class="slide clean" data-act="駕馭力演進">
+  <h2>工業 5.0 帶出現代人的三個能力</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:960px;width:100%;margin-top:.8rem;" style="flex:1;align-content:center;">
+    <div class="card fragment">
+      <div class="card-accent" style="background:var(--cyan)"></div>
+      <div class="card-icon">💻</div>
+      <h3 style="color:var(--cyan);">數位力</h3>
+      <p>理解工具、運用科技<br>提升決策與效率<br>AI 工具應用與數據處理能力<br>已列入企業職能地圖</p>
+    </div>
+    <div class="card fragment">
+      <div class="card-accent" style="background:var(--purple)"></div>
+      <div class="card-icon">🔗</div>
+      <h3 style="color:var(--purple);">系統力</h3>
+      <p>看見因果、跨域影響<br>理解整體架構與連動關係<br>ESG 跨部門影響分析<br>供應鏈風險管理核心能力</p>
+    </div>
+    <div class="card fragment">
+      <div class="card-accent" style="background:var(--teal)"></div>
+      <div class="card-icon">🌱</div>
+      <h3>永續力</h3>
+      <p>掌握風險、經營未來<br>長期價值與利害關係人<br>從合規揭露到戰略 ESG<br>永續 = 競爭力</p>
+    </div>
+  </div>
+  <div class="tip-box">工業 5.0 = 人本 + 永續 + 韌性</div>
+</div>
+
+<!-- ═══════════ 11: PART 2 DIVIDER ═══════════ -->
+<div class="slide poster overlay-heavy" style="background:linear-gradient(135deg,var(--primary) 0%,#0a0a14 100%);" data-act="你在哪裡">
+  
+  <div style="position:relative;z-index:2;text-align:center;">
+    
+    <p style="color:var(--green);font-size:1rem;letter-spacing:.3rem;">Part 2</p>
+    <h1 style="color:#fff;font-size:2.8rem;font-weight:900;margin-top:.3rem;">你在哪裡？</h1>
+    <p style="color:var(--mint);font-size:1rem;margin-top:.5rem;">AI 使用現狀與 Token 經濟</p>
+  </div>
+  
+</div>
+
+<!-- ═══════════ 12: 81億人口 ═══════════ -->
+<div class="slide dataviz" data-act="你在哪裡">
+  <h2>世界總人口 81 億 — 你在哪個方塊？</h2>
+  <div style="display:flex;align-items:center;gap:2rem;flex:1;max-width:960px;width:100%;">
+    <div style="flex:1;text-align:center;">
+      <img src="81billion.png" alt="81 Billion AI Usage" style="max-width:100%;max-height:60vh;border-radius:8px;">
+      <p style="font-size:.75rem;color:rgba(255,255,255,.3);margin-top:.3rem;">Source: r/vibecoding (Reddit, Feb 2026)</p>
+    </div>
+    <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:.6rem;">
+      <div class="stat-box fragment" style="padding:1rem;">
+        <div class="val" style="color:var(--gray-text);font-size:2rem;">84%</div>
+        <div style="font-size:1rem;font-weight:900;color:var(--gray-text);">68.8 億</div>
+        <div class="label" style="font-size:.85rem;">沒用過 AI</div>
+      </div>
+      <div class="stat-box fragment" style="border-color:var(--teal);padding:1rem;">
+        <div class="val" style="color:var(--teal);font-size:2rem;">16%</div>
+        <div style="font-size:1rem;font-weight:900;color:var(--teal);">13.8 億</div>
+        <div class="label" style="font-size:.85rem;">對話過</div>
+      </div>
+      <div class="stat-box fragment" style="border-color:var(--gold);padding:1rem;">
+        <div class="val" style="color:var(--gold);font-size:2rem;">0.3%</div>
+        <div style="font-size:1rem;font-weight:900;color:var(--gold);">2,500 萬</div>
+        <div class="label" style="font-size:.85rem;">付費訂閱</div>
+      </div>
+      <div class="stat-box fragment" style="border-color:var(--red);padding:1rem;">
+        <div class="val" style="color:var(--red);font-size:2rem;">0.04%</div>
+        <div style="font-size:1rem;font-weight:900;color:var(--red);">500 萬</div>
+        <div class="label" style="font-size:.85rem;">AI 產出專案</div>
+      </div>
+    </div>
+  </div>
+  <div class="tip-box-dark">每個方塊代表 320 萬人。你現在在哪一格？今天結束後，你至少會在綠色方塊。</div>
+</div>
+
+<!-- ═══════════ 13: 84% 沒用過 ═══════════ -->
+<div class="slide clean" data-act="你在哪裡">
+  <h2>84% 的人 — 從來沒用過 AI</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;max-width:900px;width:100%;margin-top:.8rem;" style="flex:1;align-content:center;">
+    <div class="card">
+      <div class="card-accent" style="background:var(--gray-text)"></div>
+      <h3 style="color:var(--gray-text);">為什麼這麼多人沒用過？</h3>
+      <p>• 基礎設施不足（網路、設備）<br>• 語言障礙（英語為主）<br>• 年齡與數位落差<br>• 不知道 AI 能做什麼<br>• 沒有動機</p>
+    </div>
+    <div class="card fragment">
+      <div class="card-accent" style="background:var(--teal)"></div>
+      <h3>這代表什麼機會？</h3>
+      <p>你是大學生，你有：<br>• 網路 ✓ &nbsp; • 設備 ✓<br>• 英文能力 ✓ &nbsp; • 學習動機 ✓<br><br><strong>你已經比 84% 的人更有條件。<br>問題只剩：你願不願意開始？</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 14: 16% 對話過 ═══════════ -->
+<div class="slide clean" data-act="你在哪裡">
+  <h2>16% 的人 — 跟 AI 對話過</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;max-width:900px;width:100%;margin-top:.8rem;" style="flex:1;align-content:center;">
+    <div class="card">
+      <div class="card-accent" style="background:var(--teal)"></div>
+      <h3>這群人怎麼用 AI？</h3>
+      <p>• 問問題、查資料（取代 Google）<br>• 翻譯、摘要、改文法<br>• 聊天、好奇試玩<br>• 偶爾寫寫文案</p>
+    </div>
+    <div class="card fragment">
+      <div class="card-accent" style="background:var(--orange)"></div>
+      <h3 style="color:var(--orange);">停留在這層的問題</h3>
+      <p>• 不會 Prompt Engineering<br>• 沒有系統性的使用場景<br>• 不知道 AI 的極限在哪<br>• 「AI 好像也沒那麼厲害」</p>
+    </div>
+  </div>
+  <div class="tip-box">從「用過」到「會用」的距離 — 就像會開車 ≠ 會賽車。今天的目標：讓你坐上駕駛座。</div>
+</div>
+
+<!-- ═══════════ 15: 0.3% + 0.04% ═══════════ -->
+<div class="slide clean" data-act="你在哪裡">
+  <h2>頂端的 0.3% 和 0.04%</h2>
+  <div class="comparison-grid" style="flex:1;align-content:center;">
+    <div class="comp-col">
+      <div class="comp-badge" style="background:var(--gold-dark);">0.3% · 2,500 萬人</div>
+      <div class="comp-card">
+        <h3 style="color:var(--gold-dark);font-size:1rem;">付費訂閱 AI 服務</h3>
+        <p style="font-size:.9rem;">• ChatGPT Plus ($20/月)<br>• Claude Pro ($20/月)<br>• Gemini Advanced ($20/月)<br>• Copilot Pro ($10/月)<br>• Cursor Pro ($20/月)</p>
+      </div>
+    </div>
+    <div class="comp-arrow">→</div>
+    <div class="comp-col">
+      <div class="comp-badge" style="background:var(--red);">0.04% · 200-500 萬人</div>
+      <div class="comp-card">
+        <h3 style="color:var(--red);font-size:1rem;">用 AI 產出程式專案</h3>
+        <p style="font-size:.9rem;">• Vibe Coding（氛圍編程）<br>• AI 輔助全棧開發<br>• 自動化腳本與工具<br>• AI Agent 應用<br>• 開源專案貢獻</p>
+      </div>
+    </div>
+  </div>
+  <div class="tip-box">這些人 = 新時代的「駕馭者」</div>
+</div>
+
+<!-- ═══════════ 16: 舉手互動 ═══════════ -->
+<div class="slide clean" data-act="你在哪裡">
+  <h2>你現在在哪個方塊？</h2>
+  <div class="quiz-question" style="font-size:1.3rem;text-align:center;">舉手看看！你在哪一格？</div>
+  <div class="quiz-choices">
+    <div class="quiz-choice fragment"><span class="choice-label" style="background:var(--gray-text);">⬜</span><span style="font-size:1rem;">灰色 — 從沒用過 AI</span></div>
+    <div class="quiz-choice fragment"><span class="choice-label" style="background:var(--teal);">🟩</span><span style="font-size:1rem;">綠色 — 用過、聊過</span></div>
+    <div class="quiz-choice fragment"><span class="choice-label" style="background:var(--gold-dark);">🟨</span><span style="font-size:1rem;">黃色 — 付費訂閱中</span></div>
+    <div class="quiz-choice fragment"><span class="choice-label" style="background:var(--red);">🟥</span><span style="font-size:1rem;">紅色 — 已產出 AI 專案</span></div>
+  </div>
+</div>
+
+<!-- ═══════════ 17: Token 金字塔 ═══════════ -->
+<div class="slide dataviz" data-act="你在哪裡">
+  <h2>Token 消費金字塔 — 你在哪一層？</h2>
+  <div class="pyramid" style="flex:1;justify-content:center;">
+    <div class="pyramid-row fragment" style="background:rgba(220,38,38,.12);border:2px solid var(--red);width:40%;"><div class="pyramid-level" style="color:var(--red);">💎</div><div><div class="pyramid-name" style="color:var(--red);">API = 信用卡額度</div><div class="pyramid-desc">Token 消費 = 生產力投資</div></div></div>
+    <div class="pyramid-row fragment" style="background:rgba(255,200,87,.1);border:2px solid var(--gold);width:55%;"><div class="pyramid-level" style="color:var(--gold);">$200</div><div><div class="pyramid-name" style="color:var(--gold);">$200/月 重度使用</div><div class="pyramid-desc">Claude Max / Teams / API</div></div></div>
+    <div class="pyramid-row fragment" style="background:rgba(6,182,212,.1);border:2px solid var(--cyan);width:70%;"><div class="pyramid-level" style="color:var(--cyan);">$20</div><div><div class="pyramid-name" style="color:var(--cyan);">$20/月 基本訂閱</div><div class="pyramid-desc">ChatGPT Plus / Claude Pro</div></div></div>
+    <div class="pyramid-row fragment" style="background:rgba(15,157,138,.1);border:2px solid var(--teal);width:85%;"><div class="pyramid-level" style="color:var(--teal);">🆓</div><div><div class="pyramid-name" style="color:var(--teal);">免費額度</div><div class="pyramid-desc">偶爾用用 ChatGPT 免費版</div></div></div>
+    <div class="pyramid-row fragment" style="background:rgba(255,255,255,.03);border:2px solid rgba(255,255,255,.1);width:100%;"><div class="pyramid-level" style="color:rgba(255,255,255,.3);">⬜</div><div><div class="pyramid-name" style="color:rgba(255,255,255,.3);">沒用過 AI — 68.8 億人</div></div></div>
+  </div>
+</div>
+
+<!-- ═══════════ 18: 一個人的價值 ═══════════ -->
+<div class="slide poster" data-act="你在哪裡" style="background-color:var(--primary);">
+  <div class="quote-wrap">
+    <p style="font-size:1.2rem;color:rgba(255,255,255,.5);">一個人的價值</p>
+    <div class="quote-text" style="color:var(--gold);margin-top:.5rem;">決定在你能駕馭多少 Token</div>
+    <p class="fragment" style="margin-top:1.5rem;font-size:1.2rem;color:rgba(255,255,255,.7);">薪資 = 2× · Token 預算 = 10 人的產出</p>
+    <p class="fragment" style="margin-top:1rem;font-size:.95rem;color:rgba(255,255,255,.4);max-width:600px;text-align:center;">一個年薪百萬的工程師，加上一筆 Token 預算，可以產出過去需要 10 個人才能完成的工作量。這不是未來 — 這是矽谷現在正在發生的事。</p>
+  </div>
+</div>
+
+<!-- ═══════════ 19: Jensen Huang ═══════════ -->
+<div class="slide poster" data-act="你在哪裡" style="background-color:#12121f;">
+  <div class="quote-wrap">
+    <div class="quote-bar"></div>
+    <div class="quote-text" style="font-size:1.5rem;">「我完全可以想像，在未來，<br>我們公司每一位工程師<br>都將有一筆年度 Token 預算。」</div>
+    <p class="fragment" style="margin-top:1rem;font-size:1.2rem;color:rgba(255,255,255,.6);">「工程師的年薪可能是幾十萬，我可能會在薪水之上再給他們一半的金額作為 Token，讓他們的生產力放大十倍。」</p>
+    <div class="quote-src">— NVIDIA Jensen Huang</div>
+    <p class="fragment" style="margin-top:1.5rem;font-size:.9rem;color:var(--gold);font-weight:700;">矽谷最新招募籌碼：你的 Offer 包含多少 Token？</p>
+  </div>
+</div>
+
+<!-- ═══════════ 20: 衡量能力 ═══════════ -->
+<div class="slide clean" data-act="你在哪裡">
+  <h2>衡量能力的辦法 — 指標多元化</h2>
+  <div class="comparison-grid" style="flex:1;align-content:center;">
+    <div class="comp-col">
+      <div class="comp-badge" style="background:var(--gray-text);">傳統衡量方式</div>
+      <div class="comp-card">
+        <p>• GPA / 成績排名<br>• 學歷（哪個學校畢業）<br>• 證照數量<br>• 工作年資<br>• 職位頭銜</p>
+        <p style="margin-top:.5rem;font-size:.85rem;color:var(--gray-text);">單一維度、線性累積</p>
+      </div>
+    </div>
+    <div class="comp-arrow">▶</div>
+    <div class="comp-col">
+      <div class="comp-badge" style="background:var(--teal);">AI 時代衡量方式</div>
+      <div class="comp-card">
+        <p>• GitHub Stars / 專案數量<br>• 追蹤人數 / 影響力<br>• AI 工具的使用深度<br>• 能解決問題的複雜度<br>• 作品集（Portfolio）</p>
+        <p style="margin-top:.5rem;font-size:.85rem;color:var(--teal);">多元維度、指數成長</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 21: PART 3 DIVIDER ═══════════ -->
+<div class="slide poster overlay-heavy" style="background:linear-gradient(135deg,var(--primary) 0%,#0a0a14 100%);" data-act="三個核心能力">
+  
+  <div style="position:relative;z-index:2;text-align:center;">
+    
+    <p style="color:var(--green);font-size:1rem;letter-spacing:.3rem;">Part 3</p>
+    <h1 style="color:#fff;font-size:2.8rem;font-weight:900;margin-top:.3rem;">三個核心能力</h1>
+    <p style="color:var(--mint);font-size:1rem;margin-top:.5rem;">用工具 → 選工具 → 造工具</p>
+  </div>
+  
+</div>
+
+<!-- ═══════════ 22: 學習三階段 ═══════════ -->
+<div class="slide clean" data-act="三個核心能力">
+  <h2>學習的三個階段</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:960px;width:100%;margin-top:.8rem;" style="flex:1;align-content:center;">
+    <div class="card fragment">
+      <div class="card-accent" style="background:var(--teal)"></div>
+      <h3>🎓 大學生</h3>
+      <p><strong>教你知識跟工具，去解決問題</strong><br><br>給你問題 ✓<br>給你工具 ✓<br>給你方法 ✓</p>
+    </div>
+    <div class="card fragment">
+      <div class="card-accent" style="background:var(--gold-dark)"></div>
+      <h3 style="color:var(--gold-dark);">🔬 碩士</h3>
+      <p><strong>給你問題，自己找工具跟解決方法</strong><br><br>給你問題 ✓<br>找工具 ⬆<br>找方法 ⬆</p>
+    </div>
+    <div class="card fragment">
+      <div class="card-accent" style="background:var(--red)"></div>
+      <h3 style="color:var(--red);">🏆 博士</h3>
+      <p><strong>自己找問題，自己解決</strong><br><br>找問題 ⬆⬆<br>找工具 ⬆<br>找方法 ⬆</p>
+    </div>
+  </div>
+  <div class="tip-box">AI 時代模糊了這三個階段 — 大學生也可以「自己找問題、自己解決」。</div>
+</div>
+
+<!-- ═══════════ 23: 用→選→造 ═══════════ -->
+<div class="slide clean" data-act="三個核心能力">
+  <h2>三個階段的學習路徑</h2>
+  <div class="process-steps" style="flex:1;align-items:center;">
+    <div class="step fragment" style="background:var(--teal);">
+      <div class="step-num" style="color:var(--teal);font-size:1.5rem;">1</div>
+      <h3>學會用工具</h3>
+      <p style="font-size:.8rem;">Tool User<br><br>• 會用 ChatGPT / Claude / Gemini<br>• 會寫基本 Prompt<br>• 能用 AI 完成作業報告<br>• 理解 AI 的能力邊界</p>
+    </div>
+    <div class="step-arrow">▶</div>
+    <div class="step fragment" style="background:var(--gold-dark);">
+      <div class="step-num" style="color:var(--gold-dark);font-size:1.5rem;">2</div>
+      <h3>學會選工具</h3>
+      <p style="font-size:.8rem;">Tool Selector<br><br>• 知道不同 AI 的強項<br>• 能為特定任務選對工具<br>• 會評估 AI 輸出品質<br>• 建立自己的 AI 工作流</p>
+    </div>
+    <div class="step-arrow">▶</div>
+    <div class="step fragment" style="background:var(--red);">
+      <div class="step-num" style="color:var(--red);font-size:1.5rem;">3</div>
+      <h3>學會創建工具</h3>
+      <p style="font-size:.8rem;">Tool Creator<br><br>• 用 AI 寫程式、建系統<br>• 設計 AI Agent 流程<br>• 整合 API 與自動化<br>• 從消費者變成創造者</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 24: 企業要什麼 ═══════════ -->
+<div class="slide clean" data-act="三個核心能力">
+  <h2>企業要的是什麼？</h2>
+  <div class="comparison-grid" style="flex:1;align-content:center;">
+    <div class="comp-col">
+      <div class="comp-badge" style="background:var(--orange);">企業不缺的 ✕</div>
+      <div class="comp-card">
+        <p>• 會用 ChatGPT 聊天的人<br>• 把 AI 當搜尋引擎用的人<br>• 只會 copy-paste 的人<br>• 「我會 Prompt Engineering」<br>（但只會基本對話）</p>
+      </div>
+    </div>
+    <div class="comp-arrow">→</div>
+    <div class="comp-col">
+      <div class="comp-badge" style="background:var(--teal);">企業真正要的 ✓</div>
+      <div class="comp-card">
+        <p>• 能用 AI 改造工作流程的人<br>• 能識別哪些流程可 AI 化的人<br>• 能評估 AI 方案 ROI 的人<br>• 能設計 AI + 人的協作模式的人</p>
+      </div>
+    </div>
+  </div>
+  <div class="tip-box">「會用 AI」是門檻，「能用 AI 改造流程」才是價值。你的畢業競爭力，不是你用過多少 AI 工具，而是你能用 AI 解決多複雜的問題。</div>
+</div>
+
+<!-- ═══════════ 25: 診斷流程 ═══════════ -->
+<div class="slide clean" data-act="三個核心能力">
+  <h2>企業 AI 服務診斷流程</h2>
+  <div class="process-steps" style="flex:1;align-items:center;">
+    <div class="step fragment" style="background:var(--teal);"><div class="step-num" style="color:var(--teal);">1</div><h3>識別痛點</h3><p>哪些流程耗時？重複性高？容易出錯？</p></div>
+    <div class="step-arrow">→</div>
+    <div class="step fragment" style="background:var(--cyan);"><div class="step-num" style="color:var(--cyan);">2</div><h3>評估可行性</h3><p>這個流程適合 AI 處理嗎？資料是否足夠？</p></div>
+    <div class="step-arrow">→</div>
+    <div class="step fragment" style="background:var(--gold-dark);"><div class="step-num" style="color:var(--gold-dark);">3</div><h3>選擇工具</h3><p>ChatGPT API？自建模型？現成 SaaS？</p></div>
+    <div class="step-arrow">→</div>
+    <div class="step fragment" style="background:var(--purple);"><div class="step-num" style="color:var(--purple);">4</div><h3>設計流程</h3><p>AI + 人怎麼協作？誰做最後決策？</p></div>
+    <div class="step-arrow">→</div>
+    <div class="step fragment" style="background:var(--orange);"><div class="step-num" style="color:var(--orange);">5</div><h3>驗證優化</h3><p>實際效果如何？成本合理？持續迭代</p></div>
+  </div>
+</div>
+
+<!-- ═══════════ 26: 終點vs過程 ═══════════ -->
+<div class="slide clean" data-act="三個核心能力">
+  <h2>想看的是終點，卻忽略了過程</h2>
+  <div class="comparison-grid" style="flex:1;align-content:center;">
+    <div class="comp-col">
+      <div class="comp-badge" style="background:var(--gold-dark);">大多數人看到的</div>
+      <div class="comp-card"><p>• 別人的完成品、成功案例<br>• AI 工具的酷炫 Demo<br>• 一夜之間成功的故事<br>• 「AI 好厲害」的新聞標題</p></div>
+    </div>
+    <div class="comp-arrow">→</div>
+    <div class="comp-col">
+      <div class="comp-badge" style="background:var(--teal);">他們沒看到的</div>
+      <div class="comp-card"><p>• 無數次失敗的 Prompt 嘗試<br>• 學習工具的時間投入<br>• 建立工作流的反覆迭代<br>• 從 0 到 1 的痛苦過程</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 27: 學位新定義 ═══════════ -->
+<div class="slide clean" data-act="三個核心能力">
+  <h2>AI 時代 — 學習方法的新定義</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:960px;width:100%;margin-top:.8rem;" style="flex:1;align-content:center;">
+    <div class="card fragment">
+      <div class="card-accent"></div>
+      <h3>🎓 大學 + AI</h3>
+      <p><strong>AI 就是你的超級工具箱</strong><br>每個科目都能用 AI 加速學習</p>
+      <p class="card-sub">💡 每堂課試著用 AI 協作完成</p>
+    </div>
+    <div class="card fragment">
+      <div class="card-accent" style="background:var(--gold-dark)"></div>
+      <h3 style="color:var(--gold-dark);">🔬 碩士 + AI</h3>
+      <p><strong>AI 幫你搜文獻、做實驗、跑數據</strong><br>你負責問對問題和驗證結果</p>
+      <p class="card-sub">💡 用 AI 做文獻回顧，自己判斷 research gap</p>
+    </div>
+    <div class="card fragment">
+      <div class="card-accent" style="background:var(--red)"></div>
+      <h3 style="color:var(--red);">🏆 博士 + AI</h3>
+      <p><strong>AI 幫你探索未知領域</strong><br>你定義什麼問題值得解決</p>
+      <p class="card-sub">💡 用 AI 做創新性分析，原創洞察來自你</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 28: 消費者→創造者 ═══════════ -->
+<div class="slide clean" data-act="三個核心能力">
+  <h2>從消費者到創造者 — 身分轉換</h2>
+  <div class="comparison-grid" style="flex:1;align-content:center;">
+    <div class="comp-col">
+      <div class="comp-badge" style="background:var(--gray-text);">AI 消費者</div>
+      <div class="comp-card"><p>• 用別人做好的 AI 產品<br>• 在現成介面裡打字<br>• AI 給什麼就接受什麼<br>• 被動等待新功能<br>• 「AI 好厲害但跟我無關」</p><p style="color:var(--gray-text);font-size:.85rem;margin-top:.5rem;">你是 AI 的使用者，但不是駕馭者</p></div>
+    </div>
+    <div class="comp-arrow">▶</div>
+    <div class="comp-col">
+      <div class="comp-badge" style="background:var(--teal);">AI 創造者</div>
+      <div class="comp-card"><p>• 用 AI 建造自己的工具<br>• 設計自己的 AI 工作流<br>• 能判斷 AI 的輸出品質<br>• 主動探索 AI 的邊界<br>• 「我能用 AI 做什麼？」</p><p style="color:var(--teal);font-size:.85rem;margin-top:.5rem;font-weight:700;">你是 AI 的駕馭者，而且比 AI 凶 🔥</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 29: WEF 2025 ═══════════ -->
+<div class="slide clean" data-act="三個核心能力">
+  <h2>WEF 2025 關鍵技能 × 三力模型</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:960px;width:100%;margin-top:.8rem;" style="flex:1;align-content:center;">
+    <div class="card fragment"><div class="card-accent" style="background:var(--purple)"></div><h3 style="color:var(--purple);">系統力</h3><p>01 批判性思維<br>02 韌性與彈性</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--teal)"></div><h3>永續力</h3><p>03 領導力與社會影響力<br>05 自我激勵與自我覺察</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--cyan)"></div><h3 style="color:var(--cyan);">數位力</h3><p>04 創意思維<br>06 科技素養<br>07 好奇心與終身學習</p></div>
+  </div>
+  <div class="tip-box">Source: World Economic Forum — Future of Jobs Report 2025。三力覆蓋所有關鍵技能。</div>
+</div>
+
+<!-- ═══════════ 30: Stanford AI Index ═══════════ -->
+<div class="slide dataviz" data-act="三個核心能力">
+  <h2>Stanford AI Index Report 2025 — 關鍵數據</h2>
+  <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);flex:1;align-content:center;">
+    <div class="stat-box fragment"><div class="val" style="color:var(--teal);">56,000+</div><div class="label">AI 專利申請數（2024）<br>年增 31%</div></div>
+    <div class="stat-box fragment"><div class="val" style="color:var(--gold);">$67B</div><div class="label">AI 企業投資（2024）<br>生成式 AI 爆發</div></div>
+    <div class="stat-box fragment"><div class="val" style="color:var(--cyan);">3.5x</div><div class="label">AI 人才需求 vs 2019<br>各行業搶人</div></div>
+    <div class="stat-box fragment"><div class="val" style="color:var(--orange);">240K+</div><div class="label">AI 論文發表量（2024）<br>中美領先</div></div>
+  </div>
+  <div class="tip-box-dark">Source: Stanford HAI — AI Index Report 2025</div>
+</div>
+
+<!-- ═══════════ 31: PART 4 DIVIDER — AI成熟度 ═══════════ -->
+<div class="slide poster overlay-heavy" style="background:linear-gradient(135deg,var(--primary) 0%,#0a0a14 100%);" data-act="AI 成熟度五層">
+  
+  <div style="position:relative;z-index:2;text-align:center;">
+    
+    <p style="color:var(--green);font-size:1rem;letter-spacing:.3rem;">Part 4 — 進階</p>
+    <h1 style="color:#fff;font-size:2.8rem;font-weight:900;margin-top:.3rem;">AI 應用成熟度五層</h1>
+    <p style="color:var(--mint);font-size:1rem;margin-top:.5rem;">從使用工具到方法創新</p>
+  </div>
+  
+</div>
+
+<!-- ═══════════ 32: 五層成熟度 ═══════════ -->
+<div class="slide dataviz" data-act="AI 成熟度五層">
+  <h2>五層 AI 成熟度模型</h2>
+  <div style="display:flex;gap:.6rem;max-width:960px;width:100%;margin-top:1rem;align-items:stretch;">
+    <div class="fragment" style="flex:1;background:rgba(15,157,138,.1);border:2px solid var(--teal);border-radius:12px;padding:1rem;text-align:center;display:flex;flex-direction:column;justify-content:center;">
+      <div style="font-size:2rem;font-weight:900;color:var(--teal);">L1</div>
+      <div style="font-size:1.05rem;font-weight:700;color:var(--teal);margin-top:.3rem;">使用工具</div>
+      <div style="font-size:.85rem;color:rgba(255,255,255,.5);margin-top:.3rem;">AI 幫我做事<br>→ 單次結果</div>
+    </div>
+    <div style="display:flex;align-items:center;color:rgba(255,255,255,.2);font-size:1.2rem;">▶</div>
+    <div class="fragment" style="flex:1;background:rgba(6,182,212,.1);border:2px solid var(--cyan);border-radius:12px;padding:1rem;text-align:center;display:flex;flex-direction:column;justify-content:center;">
+      <div style="font-size:2rem;font-weight:900;color:var(--cyan);">L2</div>
+      <div style="font-size:1.05rem;font-weight:700;color:var(--cyan);margin-top:.3rem;">工具組合</div>
+      <div style="font-size:.85rem;color:rgba(255,255,255,.5);margin-top:.3rem;">我會串工具流程<br>→ 標準流程</div>
+    </div>
+    <div style="display:flex;align-items:center;color:rgba(255,255,255,.2);font-size:1.2rem;">▶</div>
+    <div class="fragment" style="flex:1;background:rgba(224,122,58,.1);border:2px solid var(--orange);border-radius:12px;padding:1rem;text-align:center;display:flex;flex-direction:column;justify-content:center;">
+      <div style="font-size:2rem;font-weight:900;color:var(--orange);">L3</div>
+      <div style="font-size:1.05rem;font-weight:700;color:var(--orange);margin-top:.3rem;">創建工具</div>
+      <div style="font-size:.85rem;color:rgba(255,255,255,.5);margin-top:.3rem;">我做 AI 工具<br>→ 可重複資產</div>
+    </div>
+    <div style="display:flex;align-items:center;color:rgba(255,255,255,.2);font-size:1.2rem;">▶</div>
+    <div class="fragment" style="flex:1;background:rgba(124,58,237,.1);border:2px solid var(--purple);border-radius:12px;padding:1rem;text-align:center;display:flex;flex-direction:column;justify-content:center;">
+      <div style="font-size:2rem;font-weight:900;color:var(--purple);">L4</div>
+      <div style="font-size:1.05rem;font-weight:700;color:var(--purple);margin-top:.3rem;">改造流程</div>
+      <div style="font-size:.85rem;color:rgba(255,255,255,.5);margin-top:.3rem;">我用 AI 改 SOP<br>→ 系統級效率</div>
+    </div>
+    <div style="display:flex;align-items:center;color:rgba(255,255,255,.2);font-size:1.2rem;">▶</div>
+    <div class="fragment" style="flex:1;background:rgba(220,38,38,.1);border:2px solid var(--red);border-radius:12px;padding:1rem;text-align:center;display:flex;flex-direction:column;justify-content:center;">
+      <div style="font-size:2rem;font-weight:900;color:var(--red);">L5</div>
+      <div style="font-size:1.05rem;font-weight:700;color:var(--red);margin-top:.3rem;">方法創新</div>
+      <div style="font-size:.85rem;color:rgba(255,255,255,.5);margin-top:.3rem;">AI 讓我創新方法<br>→ 新範式</div>
+    </div>
+  </div>
+  <div class="tip-box-dark" style="margin-top:1rem;">從左到右，你現在站在哪一格？大多數人在 L1，今天帶你看到 L5 的可能。</div>
+</div>
+
+<!-- ═══════════ 33: L1 使用工具 ═══════════ -->
+<div class="slide clean" data-act="AI 成熟度五層">
+  <h2>L1 使用特定工具 — 單點加速</h2>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;max-width:960px;width:100%;margin-top:.8rem;" style="flex:1;align-content:center;">
+    <div class="card fragment"><div class="card-accent"></div><div class="card-icon">📝</div><h3>論文寫作</h3><p>用 ChatGPT 改寫 abstract<br>用 Claude 摘要文獻<br>用 AI Studio 潤英文</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--gold-dark)"></div><div class="card-icon">📊</div><h3 style="color:var(--gold-dark);">做簡報</h3><p>用 ChatGPT 生成大綱<br>用 Canva AI 生版型</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--purple)"></div><div class="card-icon">🧠</div><h3 style="color:var(--purple);">知識管理</h3><p>用 NotebookLM 問 PDF<br>用 Obsidian AI tag</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--cyan)"></div><div class="card-icon">📋</div><h3 style="color:var(--cyan);">問卷設計</h3><p>AI 幫寫題目<br>Likert 題項優化</p></div>
+  </div>
+  <div class="tip-box">判斷指標：還是「人做主流程」，AI 只是單點助手</div>
+</div>
+
+<!-- ═══════════ 34: L2 工具組合 ═══════════ -->
+<div class="slide clean" data-act="AI 成熟度五層">
+  <h2>L2 不同工具組合 — Workflow</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;max-width:900px;width:100%;margin-top:.8rem;" style="flex:1;align-content:center;">
+    <div class="card fragment"><div class="card-accent" style="background:var(--cyan)"></div><h3 style="color:var(--cyan);">📝 論文寫作</h3><p>PDF → NotebookLM → ChatGPT → R code → Word</p><p class="card-sub">成果：從片段生成進入「可完成一輪初稿」</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--gold-dark)"></div><h3 style="color:var(--gold-dark);">📊 做簡報</h3><p>會議錄音 → AI 摘要 → 自動投影片 → 圖像生成 → 講稿</p><p class="card-sub">成果：可上台簡報版本 + speaker note</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--purple)"></div><h3 style="color:var(--purple);">🧠 知識管理</h3><p>Google Drive → Obsidian → Notion Dashboard → 每日摘要</p><p class="card-sub">成果：專案知識地圖、文件對應關係</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--orange)"></div><h3 style="color:var(--orange);">📋 問卷設計</h3><p>研究目的 → 題項生成 → 專家效度 → Google Form</p><p class="card-sub">成果：可發放問卷 + 題項維度 mapping</p></div>
+  </div>
+  <div class="tip-box">AI 開始參與完整流程，而非單點。</div>
+</div>
+
+<!-- ═══════════ 35: L3 創建工具 ═══════════ -->
+<div class="slide clean" data-act="AI 成熟度五層">
+  <h2>L3 創建工具 — Builder</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;max-width:900px;width:100%;margin-top:.8rem;" style="flex:1;align-content:center;">
+    <div class="card fragment"><div class="card-accent" style="background:var(--orange)"></div><h3 style="color:var(--orange);">📝 論文自動化工具</h3><p>• 文獻矩陣生成器<br>• 統計表自動產生器<br>• Reference formatter</p><p class="card-sub">一鍵生成 appendix、一鍵產出 regression table</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--orange)"></div><h3 style="color:var(--orange);">📊 簡報模板產生器</h3><p>• 課程簡報模板產生器<br>• 自動案例填充系統</p><p class="card-sub">同主題快速客製不同客戶版</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--orange)"></div><h3 style="color:var(--orange);">🧠 知識庫引擎</h3><p>• CLI 自動分類器<br>• Google Sheet RAG 索引器</p><p class="card-sub">可搜尋知識庫</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--orange)"></div><h3 style="color:var(--orange);">📋 題庫系統</h3><p>• 題庫生成器<br>• 反向題自動化<br>• 信效度預檢工具</p><p class="card-sub">快速生成多版本問卷</p></div>
+  </div>
+  <div class="tip-box">開始把高頻工作產品化 — 做出來的工具可以重複使用。</div>
+</div>
+
+<!-- ═══════════ 36: L4 改造流程 ═══════════ -->
+<div class="slide clean" data-act="AI 成熟度五層">
+  <h2>L4 改造流程 — Process Re-engineering</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;max-width:900px;width:100%;margin-top:.8rem;" style="flex:1;align-content:center;">
+    <div class="card fragment" style="border-left:4px solid var(--gray-text);"><h3 style="color:var(--gray-text);">傳統論文流程</h3><p>RQ → 文獻 → 理論 → 方法 → 寫作</p></div>
+    <div class="card fragment" style="border-left:4px solid var(--purple);"><h3 style="color:var(--purple);">L4 論文流程</h3><p>RQ → Agent 文獻地圖 → 自動假說候選 → 模型實驗 → Reviewer Critic → 成稿</p></div>
+    <div class="card fragment" style="border-left:4px solid var(--gray-text);"><h3 style="color:var(--gray-text);">傳統簡報流程</h3><p>自己做 → 改版 → 排版</p></div>
+    <div class="card fragment" style="border-left:4px solid var(--purple);"><h3 style="color:var(--purple);">L4 簡報流程</h3><p>知識庫 → Audience Persona → 自動故事線 → 版型 → 練講稿</p></div>
+  </div>
+  <div class="tip-box" style="background:var(--purple-bg);color:var(--purple);">不只是快，而是改變事情本來怎麼做。從「存檔」變成「問題驅動知識生產系統」。</div>
+</div>
+
+<!-- ═══════════ 37: L5 方法創新 ═══════════ -->
+<div class="slide poster overlay-heavy" data-act="AI 成熟度五層" style="background-color:#1a0a1e;">
+  <div class="quote-wrap">
+    <div class="quote-bar" style="background:var(--red);"></div>
+    <p style="font-size:1.3rem;color:var(--red);font-weight:700;letter-spacing:.2rem;">L5 — 最高層</p>
+    <div class="quote-text" style="margin-top:.8rem;font-size:2rem;">不是用 AI 做更快，<br>而是因為 AI 的存在，<br><span style="color:var(--red);">工作方法本身被重新定義</span></div>
+    <div style="display:flex;gap:.8rem;margin-top:1.5rem;flex-wrap:wrap;justify-content:center;max-width:800px;" class="fragment">
+      <div class="card card-dark" style="padding:1rem 1.2rem;text-align:center;flex:1;min-width:160px;"><p style="color:var(--red);font-weight:700;font-size:1rem;">論文</p><p style="font-size:.9rem;">Multi-Agent Scientific Research</p></div>
+      <div class="card card-dark" style="padding:1rem 1.2rem;text-align:center;flex:1;min-width:160px;"><p style="color:var(--gold);font-weight:700;font-size:1rem;">簡報</p><p style="font-size:.9rem;">AI-driven Persuasion Methodology</p></div>
+      <div class="card card-dark" style="padding:1rem 1.2rem;text-align:center;flex:1;min-width:160px;"><p style="color:var(--teal-light);font-weight:700;font-size:1rem;">知識管理</p><p style="font-size:.9rem;">Knowledge-to-Insight Engine</p></div>
+      <div class="card card-dark" style="padding:1rem 1.2rem;text-align:center;flex:1;min-width:160px;"><p style="color:var(--purple);font-weight:700;font-size:1rem;">問卷</p><p style="font-size:.9rem;">AI-native Psychometric Method</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 38: L5 深入 ═══════════ -->
+<div class="slide clean" data-act="AI 成熟度五層">
+  <h2>L5 方法創新 — 四場景深入</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;max-width:900px;width:100%;margin-top:.8rem;" style="flex:1;align-content:center;">
+    <div class="card fragment"><div class="card-accent" style="background:var(--red)"></div><h3 style="color:var(--red);">論文：AI 成為研究方法</h3><p>建立 Multi-Agent Scientific Research Framework：Literature Agent + Theory Agent + Experiment Agent + Reviewer Agent</p><p class="card-sub">研究貢獻不只是結果，而是如何用 Agent 改造 scientific discovery</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--gold-dark)"></div><h3 style="color:var(--gold-dark);">簡報：從投影片變決策系統</h3><p>AI 根據受眾自動生成不同說服路徑：對 CFO 講 ROI、對工務講節能、對董事會講風險</p><p class="card-sub">AI-driven persuasion methodology</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--teal)"></div><h3>知識：從儲存變知識生產</h3><p>論文→教案、案例→模板、問卷結果→新假說。AI 主動產生下一個研究問題</p><p class="card-sub">Knowledge-to-Insight Engine — 新知識生產方法</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--purple)"></div><h3 style="color:var(--purple);">問卷：AI-native 研究設計</h3><p>RQ→抽 construct→自動對應理論→生成題項→預測 loading→根據 pilot data 重寫</p><p class="card-sub">AI-native psychometric methodology — 非常有發表潛力</p></div>
+  </div>
+</div>
+
+<!-- ═══════════ 39: 自我判斷公式 ═══════════ -->
+<div class="slide dataviz" data-act="AI 成熟度五層">
+  <h2>你在哪一層？— 一句話判斷</h2>
+  <div style="display:flex;flex-direction:column;gap:.5rem;padding:1rem 3rem;flex:1;justify-content:center;max-width:750px;margin:0 auto;">
+    <div class="fragment" style="display:flex;align-items:center;gap:1rem;background:rgba(15,157,138,.1);border:2px solid var(--teal);border-radius:10px;padding:.7rem 1.2rem;"><div style="font-size:1.4rem;font-weight:900;color:var(--teal);min-width:40px;">L1</div><div style="font-size:1.05rem;"><strong>AI 幫我做事</strong> <span style="opacity:.5;">→ 單點任務加速</span></div></div>
+    <div class="fragment" style="display:flex;align-items:center;gap:1rem;background:rgba(6,182,212,.1);border:2px solid var(--cyan);border-radius:10px;padding:.7rem 1.2rem;"><div style="font-size:1.4rem;font-weight:900;color:var(--cyan);min-width:40px;">L2</div><div style="font-size:1.05rem;"><strong>我會串工具流程</strong> <span style="opacity:.5;">→ 完整 Workflow</span></div></div>
+    <div class="fragment" style="display:flex;align-items:center;gap:1rem;background:rgba(224,122,58,.1);border:2px solid var(--orange);border-radius:10px;padding:.7rem 1.2rem;"><div style="font-size:1.4rem;font-weight:900;color:var(--orange);min-width:40px;">L3</div><div style="font-size:1.05rem;"><strong>我做 AI 工具</strong> <span style="opacity:.5;">→ 產品化可重複</span></div></div>
+    <div class="fragment" style="display:flex;align-items:center;gap:1rem;background:rgba(124,58,237,.1);border:2px solid var(--purple);border-radius:10px;padding:.7rem 1.2rem;"><div style="font-size:1.4rem;font-weight:900;color:var(--purple);min-width:40px;">L4</div><div style="font-size:1.05rem;"><strong>我用 AI 改 SOP</strong> <span style="opacity:.5;">→ 系統級效率</span></div></div>
+    <div class="fragment" style="display:flex;align-items:center;gap:1rem;background:rgba(220,38,38,.1);border:2px solid var(--red);border-radius:10px;padding:.7rem 1.2rem;"><div style="font-size:1.4rem;font-weight:900;color:var(--red);min-width:40px;">L5</div><div style="font-size:1.05rem;"><strong>AI 讓我創造新方法</strong> <span style="opacity:.5;">→ 新範式</span></div></div>
+  </div>
+</div>
+
+<!-- ═══════════ 40: SecondBrain 架構層 ═══════════ -->
+<div class="slide dataviz" data-act="AI 成熟度五層">
+  <h2>實戰案例 — SecondBrain 第二大腦：架構層</h2>
+  <div style="display:flex;align-items:center;justify-content:center;flex:1;gap:2rem;max-width:960px;width:100%;">
+    <div style="flex:1;text-align:center;">
+      <img src="secondbrain-arch.png" alt="SecondBrain Architecture" style="max-width:100%;max-height:55vh;border-radius:12px;border:2px solid rgba(255,255,255,.1);">
+    </div>
+    <div class="fragment" style="flex:0 0 280px;display:flex;flex-direction:column;gap:.6rem;">
+      <div style="background:rgba(15,157,138,.12);border:2px solid var(--teal);border-radius:10px;padding:.6rem 1rem;">
+        <div style="font-size:.85rem;font-weight:700;color:var(--teal);">Layer 1 · 輸入</div>
+        <div style="font-size:.8rem;color:rgba(255,255,255,.6);">PDF、網頁、語音、會議錄音</div>
+      </div>
+      <div style="background:rgba(255,200,87,.1);border:2px solid var(--gold);border-radius:10px;padding:.6rem 1rem;">
+        <div style="font-size:.85rem;font-weight:700;color:var(--gold);">Layer 2 · AI 處理</div>
+        <div style="font-size:.8rem;color:rgba(255,255,255,.6);">摘要、標記、連結、翻譯</div>
+      </div>
+      <div style="background:rgba(124,58,237,.1);border:2px solid var(--purple);border-radius:10px;padding:.6rem 1rem;">
+        <div style="font-size:.85rem;font-weight:700;color:var(--purple);">Layer 3 · 知識庫</div>
+        <div style="font-size:.8rem;color:rgba(255,255,255,.6);">Obsidian + Notion + Git</div>
+      </div>
+      <div style="background:rgba(232,113,10,.1);border:2px solid var(--orange);border-radius:10px;padding:.6rem 1rem;">
+        <div style="font-size:.85rem;font-weight:700;color:var(--orange);">Layer 4 · 產出</div>
+        <div style="font-size:.8rem;color:rgba(255,255,255,.6);">簡報、論文、教材、自動報表</div>
+      </div>
+    </div>
+  </div>
+  <div class="tip-box-dark">380 筆知識條目，4 個 Notion 資料庫整合，7 大類自動分類 — 這是 L4→L5 的真實案例。</div>
+</div>
+
+<!-- ═══════════ 41: SecondBrain 資訊流 ═══════════ -->
+<div class="slide dataviz" data-act="AI 成熟度五層">
+  <h2>實戰案例 — SecondBrain 第二大腦：資訊流</h2>
+  <div style="display:flex;flex-direction:column;align-items:center;flex:1;justify-content:center;max-width:960px;width:100%;">
+    <img src="secondbrain-flow.png" alt="SecondBrain Information Flow" style="max-width:100%;max-height:45vh;border-radius:12px;border:2px solid rgba(255,255,255,.1);">
+    <div class="fragment" style="display:flex;gap:.8rem;margin-top:1.2rem;flex-wrap:wrap;justify-content:center;">
+      <div style="background:rgba(15,157,138,.1);border:1px solid var(--teal);border-radius:8px;padding:.5rem 1rem;text-align:center;">
+        <div style="font-size:1.2rem;">📥</div>
+        <div style="font-size:.8rem;font-weight:700;color:var(--teal);">Capture</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.5);">多源擷取</div>
+      </div>
+      <div style="color:var(--gold);font-size:1.2rem;display:flex;align-items:center;">→</div>
+      <div style="background:rgba(255,200,87,.1);border:1px solid var(--gold);border-radius:8px;padding:.5rem 1rem;text-align:center;">
+        <div style="font-size:1.2rem;">🧠</div>
+        <div style="font-size:.8rem;font-weight:700;color:var(--gold);">AI Agent</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.5);">處理 + 增強</div>
+      </div>
+      <div style="color:var(--gold);font-size:1.2rem;display:flex;align-items:center;">→</div>
+      <div style="background:rgba(124,58,237,.1);border:1px solid var(--purple);border-radius:8px;padding:.5rem 1rem;text-align:center;">
+        <div style="font-size:1.2rem;">🔗</div>
+        <div style="font-size:.8rem;font-weight:700;color:var(--purple);">知識圖譜</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.5);">互連網路</div>
+      </div>
+      <div style="color:var(--gold);font-size:1.2rem;display:flex;align-items:center;">→</div>
+      <div style="background:rgba(6,182,212,.1);border:1px solid var(--cyan);border-radius:8px;padding:.5rem 1rem;text-align:center;">
+        <div style="font-size:1.2rem;">🔄</div>
+        <div style="font-size:.8rem;font-weight:700;color:var(--cyan);">Auto Sync</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.5);">Git→Notion</div>
+      </div>
+      <div style="color:var(--gold);font-size:1.2rem;display:flex;align-items:center;">→</div>
+      <div style="background:rgba(232,113,10,.1);border:1px solid var(--orange);border-radius:8px;padding:.5rem 1rem;text-align:center;">
+        <div style="font-size:1.2rem;">📤</div>
+        <div style="font-size:.8rem;font-weight:700;color:var(--orange);">Produce</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.5);">簡報·論文</div>
+      </div>
+    </div>
+  </div>
+  <div class="tip-box-dark">知識不再是「存起來偶爾翻」，而是自動流動、自動產出。這就是 L5 的實踐。</div>
+</div>
+
+<!-- ═══════════ 42: PART 5 DIVIDER ═══════════ -->
+<div class="slide poster overlay-heavy" style="background:linear-gradient(135deg,var(--primary) 0%,#0a0a14 100%);" data-act="實戰行動">
+  
+  <div style="position:relative;z-index:2;text-align:center;">
+    
+    <p style="color:var(--green);font-size:1rem;letter-spacing:.3rem;">Part 5</p>
+    <h1 style="color:#fff;font-size:2.8rem;font-weight:900;margin-top:.3rem;">實戰行動</h1>
+    <p style="color:var(--mint);font-size:1rem;margin-top:.5rem;">你的第一步</p>
+  </div>
+  
+</div>
+
+<!-- ═══════════ 41: GitHub 學生方案 ═══════════ -->
+<div class="slide clean" data-act="實戰行動">
+  <h2>GitHub 學生開發者方案 — 免費領超過 $2,000</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:960px;width:100%;margin-top:.8rem;" style="flex:1;align-content:center;">
+    <div class="card fragment"><div class="card-accent"></div><h3>🤖 GitHub Copilot</h3><p>$100/年 · AI 程式碼助手</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--gold-dark)"></div><h3 style="color:var(--gold-dark);">📦 GitHub Pro</h3><p>$84/年 · 無限私有倉庫</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--cyan)"></div><h3 style="color:var(--cyan);">☁️ Azure Credits</h3><p>$100 · 雲端運算額度</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--purple)"></div><h3 style="color:var(--purple);">🛠 JetBrains IDEs</h3><p>$649/年 · 專業開發工具</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--orange)"></div><h3 style="color:var(--orange);">🌐 Namecheap</h3><p>$100+ · 免費域名+SSL</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--red)"></div><h3 style="color:var(--red);">🎁 更多工具</h3><p>$500+ · 數十種開發者工具</p></div>
+  </div>
+  <div class="tip-box">education.github.com — 用學校 .edu.tw Email 驗證即可，審核通常 1-3 天。</div>
+</div>
+
+<!-- ═══════════ 42: AI 工具全景 ═══════════ -->
+<div class="slide clean" data-act="實戰行動">
+  <h2>AI 工具全景 — 免費就能開始</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:960px;width:100%;margin-top:.8rem;" style="flex:1;align-content:center;">
+    <div class="card fragment"><div class="card-accent"></div><h3>💬 ChatGPT</h3><p>聊天 / 寫作<br>免費：GPT-4o mini 無限<br>Pro：$20/月</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--purple)"></div><h3 style="color:var(--purple);">🔬 Claude</h3><p>分析 / 程式<br>免費：Sonnet 有限<br>Pro：$20/月</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--cyan)"></div><h3 style="color:var(--cyan);">🔍 Gemini</h3><p>搜尋 / 整合<br>免費：2.0 Flash 無限<br>Pro：$20/月</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--orange)"></div><h3 style="color:var(--orange);">⌨️ Copilot</h3><p>程式碼<br>免費：學生免費!<br>Pro：$10/月</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--red)"></div><h3 style="color:var(--red);">🔎 Perplexity</h3><p>研究 / 搜尋<br>免費：基本搜尋<br>Pro：$20/月</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--gold-dark)"></div><h3 style="color:var(--gold-dark);">📓 NotebookLM</h3><p>文件分析<br>50 個筆記，完全免費!</p></div>
+  </div>
+</div>
+
+<!-- ═══════════ 43: Prompt Engineering ═══════════ -->
+<div class="slide clean" data-act="實戰行動">
+  <h2>Prompt Engineering — 跟 AI 說話的藝術</h2>
+  <div class="comparison-grid" style="flex:1;align-content:center;">
+    <div class="comp-col">
+      <div class="comp-badge" style="background:var(--orange);">❌ 新手的 Prompt</div>
+      <div class="comp-card"><p style="font-size:1rem;line-height:2;">「幫我寫一篇報告」<br>「翻譯這段文字」<br>「寫一個程式」</p></div>
+    </div>
+    <div class="comp-arrow">→</div>
+    <div class="comp-col">
+      <div class="comp-badge" style="background:var(--teal);">✓ 駕馭者的 Prompt</div>
+      <div class="comp-card"><p style="font-size:.9rem;">「你是行銷策略專家。請為手搖飲品牌撰寫 ESG 行銷方案，目標客群 18-25 歲，包含社群媒體策略，預算 50 萬，請用表格呈現 3 個方案比較。」</p></div>
+    </div>
+  </div>
+  <div class="process-steps" style="padding:.5rem 2rem;">
+    <div class="step fragment" style="background:var(--teal);padding:.8rem;"><div style="font-size:1.5rem;font-weight:900;">R</div><p style="font-size:.8rem;">角色 Role</p></div>
+    <div class="step fragment" style="background:var(--gold-dark);padding:.8rem;"><div style="font-size:1.5rem;font-weight:900;">C</div><p style="font-size:.8rem;">背景 Context</p></div>
+    <div class="step fragment" style="background:var(--cyan);padding:.8rem;"><div style="font-size:1.5rem;font-weight:900;">T</div><p style="font-size:.8rem;">任務 Task</p></div>
+    <div class="step fragment" style="background:var(--purple);padding:.8rem;"><div style="font-size:1.5rem;font-weight:900;">F</div><p style="font-size:.8rem;">格式 Format</p></div>
+  </div>
+</div>
+
+<!-- ═══════════ 44: AI 學習心態 ═══════════ -->
+<div class="slide clean" data-act="實戰行動">
+  <h2>AI 輔助學習的正確心態</h2>
+  <div class="comparison-grid" style="flex:1;align-content:center;">
+    <div class="comp-col">
+      <div class="comp-badge" style="background:var(--red);">❌ 危險的使用方式</div>
+      <div class="comp-card"><p>• 直接複製 AI 答案交作業<br>• 完全不看就提交<br>• 用 AI 替代思考過程<br>• 「AI 會了所以我不用學」<br>• 不驗證 AI 的回答正確性<br>• 交出自己都看不懂的內容</p></div>
+    </div>
+    <div class="comp-arrow">→</div>
+    <div class="comp-col">
+      <div class="comp-badge" style="background:var(--teal);">✓ 正確的使用方式</div>
+      <div class="comp-card"><p>• AI 是研究助手，不是代筆<br>• 先自己思考，再用 AI 驗證<br>• 理解 AI 回答，再融入觀點<br>• 用 AI 學更快，但學更深<br>• 質疑 AI — 它也會犯錯<br>• 交出自己完全理解的成果</p></div>
+    </div>
+  </div>
+  <div class="tip-box">AI 不會取代你，但會用 AI 的人會取代不會用 AI 的人。關鍵：用 AI 放大你的能力，而不是取代你的思考。</div>
+</div>
+
+<!-- ═══════════ 45: AI + 專業 ═══════════ -->
+<div class="slide clean" data-act="實戰行動">
+  <h2>AI + 你的專業 = 無限可能</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:960px;width:100%;margin-top:.8rem;" style="flex:1;align-content:center;">
+    <div class="card fragment"><div class="card-accent"></div><h3>📈 商管 + AI</h3><p>AI 市場分析、自動化報告、客戶洞察</p><p class="card-sub">= 數據驅動的策略顧問</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--purple)"></div><h3 style="color:var(--purple);">🎨 設計 + AI</h3><p>AI 生圖、UI 原型、風格轉換</p><p class="card-sub">= 產能 10 倍的設計師</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--gold-dark)"></div><h3 style="color:var(--gold-dark);">⚖️ 法律 + AI</h3><p>AI 合約審查、判例搜尋、法規比對</p><p class="card-sub">= 效率型法律工作者</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--red)"></div><h3 style="color:var(--red);">🏥 醫護 + AI</h3><p>AI 文獻回顧、病歷分析、用藥建議</p><p class="card-sub">= 研究型臨床專家</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--cyan)"></div><h3 style="color:var(--cyan);">📚 教育 + AI</h3><p>AI 個人化教材、自動出題、學習分析</p><p class="card-sub">= 精準教育設計師</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--orange)"></div><h3 style="color:var(--orange);">🔧 工程 + AI</h3><p>AI 程式碼生成、模擬分析、CAD 自動化</p><p class="card-sub">= 10x 工程師</p></div>
+  </div>
+</div>
+
+<!-- ═══════════ 46: Vibe Coding ═══════════ -->
+<div class="slide clean" data-act="實戰行動">
+  <h2>Vibe Coding — 三家代表 × 三級用法</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:960px;width:100%;margin-top:.8rem;">
+    <div class="card fragment"><div class="card-accent" style="background:var(--purple)"></div><h3 style="color:var(--purple);">🟣 Claude</h3><p><strong>寫程式 + 渲染</strong><br>Artifacts 即時預覽網頁<br>Claude Code 終端機 AI 工程師<br>理解整個專案結構</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--teal)"></div><h3>🟢 ChatGPT Codex</h3><p><strong>寫代碼</strong><br>GPT-4o 程式碼生成<br>Codex Agent 自主修 bug<br>GitHub 整合、PR 自動產出</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--orange)"></div><h3 style="color:var(--orange);">🟠 Antigravity IDE</h3><p><strong>全端開發</strong><br>AI 原生 IDE 環境<br>描述需求即生成應用<br>從想法到部署一站完成</p></div>
+  </div>
+  <div class="tip-box">用自然語言描述你要什麼，AI 幫你寫程式。全球只有 0.04% 的人到達這個層級 — 你今天就可以開始。</div>
+</div>
+
+<!-- ═══════════ 47: 動手練習 ═══════════ -->
+<div class="slide clean" data-act="實戰行動">
+  <h2>🎯 動手練習 — 5 分鐘做出你的第一個網頁</h2>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;max-width:960px;width:100%;margin-top:.8rem;" style="flex:1;align-content:center;">
+    <div class="card fragment"><div class="card-accent" style="background:var(--cyan)"></div><h3 style="color:var(--cyan);">👤 個人介紹頁</h3><p>名字、學校科系<br>興趣專長、一句話自介<br>作品集或社群連結</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--teal)"></div><h3>🏫 社團招募頁</h3><p>社團名稱、活動亮點<br>加入理由、社員心得<br>報名方式與 QR Code</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--purple)"></div><h3 style="color:var(--purple);">🎓 專題展示頁</h3><p>研究主題、問題與方法<br>關鍵成果、團隊成員<br>技術架構說明</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--orange)"></div><h3 style="color:var(--orange);">🚀 創業 Landing</h3><p>產品名稱、痛點<br>目標客群、產品特色<br>CTA 按鈕與定價</p></div>
+  </div>
+  <div class="tip-box">推薦用 Claude App — Artifacts 會即時渲染你的網頁，做完直接分享連結！📱 掃描 QR Code → Padlet 看板 → 貼上你的作品</div>
+</div>
+
+<!-- ═══════════ 48: PART 6 DIVIDER ═══════════ -->
+<div class="slide poster overlay-heavy" style="background:linear-gradient(135deg,var(--primary) 0%,#0a0a14 100%);" data-act="未來展望">
+  
+  <div style="position:relative;z-index:2;text-align:center;">
+    
+    <p style="color:var(--green);font-size:1rem;letter-spacing:.3rem;">Part 6</p>
+    <h1 style="color:#fff;font-size:2.8rem;font-weight:900;margin-top:.3rem;">未來已來</h1>
+    <p style="color:var(--mint);font-size:1rem;margin-top:.5rem;">你準備好了嗎？</p>
+  </div>
+  
+</div>
+
+<!-- ═══════════ 49: Sundar Pichai ═══════════ -->
+<div class="slide poster" data-act="未來展望" style="background-color:#12121f;">
+  <div class="quote-wrap">
+    <div class="quote-bar"></div>
+    <div class="quote-text" style="font-size:1.6rem;">"I think no company is going to be immune, including us."</div>
+    <p style="margin-top:.8rem;font-size:1.1rem;color:rgba(255,255,255,.6);">「我認為沒有任何公司能夠免疫，包括我們 Google 自己。」</p>
+    <div class="quote-src">— BBC 專訪 Google CEO Sundar Pichai (2025.11.18)</div>
+    <p class="fragment" style="margin-top:1.5rem;font-size:1rem;color:rgba(255,255,255,.4);">連 Google 的 CEO 都這麼說了。你覺得你的產業、你的職位，能免疫嗎？</p>
+  </div>
+</div>
+
+<!-- ═══════════ 50: Jensen 語錄集 ═══════════ -->
+<div class="slide poster" data-act="未來展望" style="background-color:var(--primary);">
+  <div class="quote-wrap" style="gap:1rem;">
+    <div class="quote-bar"></div>
+    <p style="font-size:1.1rem;color:var(--gold);font-weight:700;">Jensen Huang 語錄</p>
+    <div class="fragment" style="font-size:1.2rem;text-align:center;line-height:1.8;max-width:650px;">「AI 不會取代你的工作，但會用 AI 的人會。」</div>
+    <div class="fragment" style="font-size:1.2rem;text-align:center;line-height:1.8;max-width:650px;">「每位工程師都將有年度 Token 預算。」</div>
+    <div class="fragment" style="font-size:1.2rem;text-align:center;line-height:1.8;max-width:650px;">「你的 Offer 包含多少 Token？這將成為最新的招募籌碼。」</div>
+    <div class="fragment" style="font-size:1.2rem;text-align:center;line-height:1.8;max-width:650px;">「AI 讓一個人能做到過去十個人的工作。」</div>
+  </div>
+</div>
+
+<!-- ═══════════ 51: 薪資結構 ═══════════ -->
+<div class="slide clean" data-act="未來展望">
+  <h2>薪資結構的未來 — Token 成為生產力貨幣</h2>
+  <div class="comparison-grid" style="flex:1;align-content:center;">
+    <div class="comp-col">
+      <div class="comp-badge" style="background:var(--gray-text);">現在的薪資結構</div>
+      <div class="comp-card"><p>底薪 + 獎金 + 股票<br>能力 = 個人產出<br>升遷 = 管更多人<br>年資 = 更高薪水</p><p style="margin-top:.5rem;color:var(--gray-text);font-size:.85rem;">天花板：你的時間有限</p></div>
+    </div>
+    <div class="comp-arrow">▶</div>
+    <div class="comp-col">
+      <div class="comp-badge" style="background:var(--gold-dark);">未來的薪資結構</div>
+      <div class="comp-card"><p>底薪 + <strong style="color:var(--gold-dark);">Token 預算</strong> + 股票<br>能力 = 個人 × AI 槓桿<br>升遷 = 駕馭更多 Token<br>效率 = 10x 生產力</p><p style="margin-top:.5rem;color:var(--teal);font-size:.85rem;font-weight:700;">天花板：你的想像力</p></div>
+    </div>
+  </div>
+  <div class="tip-box" style="background:var(--warm-bg);color:var(--gold-dark);">年薪 50 萬 + Token 預算 25 萬 = 10 人的產出。這不是科幻小說，這是矽谷 2026 年的標準 Offer 結構。</div>
+</div>
+
+<!-- ═══════════ 52: 學習路徑 ═══════════ -->
+<div class="slide clean" data-act="未來展望">
+  <h2>你的 AI 學習路徑 — 從今天開始</h2>
+  <div class="process-steps" style="flex-direction:column;align-items:stretch;padding:1rem 3rem;gap:.5rem;flex:1;justify-content:center;max-width:700px;margin:0 auto;">
+    <div class="step fragment" style="background:var(--teal);display:flex;align-items:center;gap:1rem;text-align:left;padding:.8rem 1.2rem;border-radius:10px;"><div class="step-num" style="color:var(--teal);width:36px;height:36px;font-size:1rem;margin:0;">1</div><div><h3 style="font-size:.95rem;">今天 — 30 分鐘</h3><p style="font-size:.85rem;">註冊 AI 工具帳號、練習寫 Prompt</p></div></div>
+    <div class="step fragment" style="background:var(--cyan);display:flex;align-items:center;gap:1rem;text-align:left;padding:.8rem 1.2rem;border-radius:10px;"><div class="step-num" style="color:var(--cyan);width:36px;height:36px;font-size:1rem;margin:0;">2</div><div><h3 style="font-size:.95rem;">本週 — 每天 15 分鐘</h3><p style="font-size:.85rem;">申請 GitHub 學生方案、每天用 AI 完成一件事</p></div></div>
+    <div class="step fragment" style="background:var(--gold-dark);display:flex;align-items:center;gap:1rem;text-align:left;padding:.8rem 1.2rem;border-radius:10px;"><div class="step-num" style="color:var(--gold-dark);width:36px;height:36px;font-size:1rem;margin:0;">3</div><div><h3 style="font-size:.95rem;">本月 — 每週 2 小時</h3><p style="font-size:.85rem;">建立 AI 工作流、用 AI 做一份完整作業</p></div></div>
+    <div class="step fragment" style="background:var(--purple);display:flex;align-items:center;gap:1rem;text-align:left;padding:.8rem 1.2rem;border-radius:10px;"><div class="step-num" style="color:var(--purple);width:36px;height:36px;font-size:1rem;margin:0;">4</div><div><h3 style="font-size:.95rem;">本學期 — 持續累積</h3><p style="font-size:.85rem;">完成一個 AI 輔助專案、建立 GitHub Portfolio</p></div></div>
+    <div class="step fragment" style="background:var(--red);display:flex;align-items:center;gap:1rem;text-align:left;padding:.8rem 1.2rem;border-radius:10px;"><div class="step-num" style="color:var(--red);width:36px;height:36px;font-size:1rem;margin:0;">5</div><div><h3 style="font-size:.95rem;">畢業前 — 融入日常</h3><p style="font-size:.85rem;">成為 AI 駕馭者 — 能用 AI 解決複雜問題</p></div></div>
+  </div>
+  <div class="tip-box">最重要的一步永遠是第一步。不需要完美，只需要開始。</div>
+</div>
+
+<!-- ═══════════ 53: Take Away ═══════════ -->
+<div class="slide clean" data-act="結語">
+  <h2>Take Away — 今天的關鍵收穫</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;max-width:900px;width:100%;margin-top:.8rem;" style="flex:1;align-content:center;">
+    <div class="card fragment"><div class="card-accent" style="background:var(--red)"></div><h3 style="color:var(--red);">🔥 駕馭力</h3><p>每次文明躍遷，都是人類學會「駕馭」新工具</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--gold-dark)"></div><h3 style="color:var(--gold-dark);">🎯 Token 價值</h3><p>一個人的價值 = 你能駕馭多少 Token</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--teal)"></div><h3>🛠 三階段</h3><p>用工具 → 選工具 → 造工具</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--purple)"></div><h3 style="color:var(--purple);">🧬 五層成熟度</h3><p>L1 做事 → L2 串工具 → L3 做工具 → L4 改 SOP → L5 創新方法</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--cyan)"></div><h3 style="color:var(--cyan);">📊 稀缺性</h3><p>全球 0.04% 的人在用 AI 創造專案 — 你現在就可以加入</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--orange)"></div><h3 style="color:var(--orange);">🚀 行動</h3><p>從今天開始：註冊、練習、建立你的 GitHub Portfolio</p></div>
+  </div>
+</div>
+
+<!-- ═══════════ 54: Q&A ═══════════ -->
+<div class="slide poster" data-act="結語" style="background-color:#12121f;">
+  <div class="quote-wrap">
+    <h1 style="font-size:3rem;font-weight:800;">Q & A</h1>
+    <p style="font-size:1.1rem;color:rgba(255,255,255,.5);margin-top:1rem;">我們來聊聊你心中的困惑</p>
+    <div style="display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1.5rem;justify-content:center;max-width:700px;">
+      <div class="fragment" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:.6rem 1.2rem;font-size:.9rem;">AI 會不會讓我找不到工作？</div>
+      <div class="fragment" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:.6rem 1.2rem;font-size:.9rem;">不是資工系也能學 AI 嗎？</div>
+      <div class="fragment" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:.6rem 1.2rem;font-size:.9rem;">從哪裡開始最好？</div>
+      <div class="fragment" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:.6rem 1.2rem;font-size:.9rem;">AI 生成的作業算抄襲嗎？</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 55: CLOSING ═══════════ -->
+<div class="slide poster overlay-heavy" data-act="結語" style="background-image:url('closing-bg.jpg');background-size:cover;background-position:center;">
+  <p style="font-size:1.1rem;color:rgba(255,255,255,.4);">當 AI 變得人人可用，能力的差距將不只在智慧</p>
+  <h1 style="color:#fff;font-size:2.8rem;font-weight:800;margin-top:.8rem;">你只管勇往直前</h1>
+  <p style="font-size:1.3rem;color:var(--gold);margin-top:.8rem;font-weight:700;">與 AI 協作的架構 我們來建</p>
+  <div style="width:60px;height:4px;background:var(--teal);margin:2rem auto 0;"></div>
+  <p style="color:rgba(255,255,255,.4);margin-top:1.5rem;font-size:1.5rem;font-weight:700;letter-spacing:.1rem;">cooperation.tw</p>
+</div>
+
+</div><!-- /slides-wrap -->
+
+<!-- Chapter Menu -->
+<div id="chapterMenu" class="chapter-menu">
+  <button id="chapterBtn" class="chapter-btn">
+    <span class="chapter-icon">&sect;</span>
+    <span id="chapterLabel">開場</span>
+    <span class="chapter-arrow">&#9660;</span>
+  </button>
+  <div id="chapterList" class="chapter-list"></div>
+</div>
+
+<!-- Counter & Controls -->
+<div class="slide-counter" id="counterBtn" title="按 G 開啟快速導覽">
+  <span id="current">1</span> / <span id="total"></span>
+</div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>&larr;</button><button id="next">&rarr;</button></div>
+
+<!-- Quick Nav Overlay -->
+<div id="navOverlay" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.92);backdrop-filter:blur(8px);overflow-y:auto;padding:2rem;">
+  <div style="max-width:960px;margin:0 auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <h2 style="color:#fff;font-size:1.3rem;font-weight:700;">快速導覽
+        <span style="color:rgba(255,255,255,.3);font-size:.85rem;font-weight:400;">（點擊跳頁 / ESC 關閉）</span>
+      </h2>
+      <button id="navClose" style="background:none;border:2px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;font-size:1rem;padding:.3rem .8rem;cursor:pointer;">&times;</button>
+    </div>
+    <div id="navGrid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:.8rem;"></div>
+  </div>
+</div>
+
+<script>
+// ── Core Engine ──
+const slides=Array.from(document.querySelectorAll('.slide'));
+const tot=slides.length;
+let idx=0;
+const prevBtn=document.getElementById('prev');
+const nextBtn=document.getElementById('next');
+const currentEl=document.getElementById('current');
+const totalEl=document.getElementById('total');
+const progressEl=document.getElementById('progress');
+totalEl.textContent=tot;
+
+function go(n){
+  slides[idx].classList.remove('active');
+  idx=Math.max(0,Math.min(n,tot-1));
+  slides[idx].classList.add('active');
+  currentEl.textContent=idx+1;
+  prevBtn.disabled=idx===0;
+  nextBtn.disabled=idx===tot-1;
+  progressEl.style.width=((idx+1)/tot*100)+'%';
+  updateChapterLabel();
+}
+
+// ── Fragments ──
+function getFragments(s){return Array.from(s.querySelectorAll('.fragment'));}
+function next(){
+  const frags=getFragments(slides[idx]);
+  const hidden=frags.filter(f=>!f.classList.contains('visible'));
+  if(hidden.length>0){hidden[0].classList.add('visible');return;}
+  if(idx<tot-1)go(idx+1);
+}
+function prev(){
+  const frags=getFragments(slides[idx]);
+  const vis=frags.filter(f=>f.classList.contains('visible'));
+  if(vis.length>0){vis[vis.length-1].classList.remove('visible');return;}
+  if(idx>0)go(idx-1);
+}
+nextBtn.onclick=next;
+prevBtn.onclick=prev;
+
+// ── Chapter Menu ──
+const chapterMenu=document.getElementById('chapterMenu');
+const chapterBtn=document.getElementById('chapterBtn');
+const chapterLabel=document.getElementById('chapterLabel');
+const chapterList=document.getElementById('chapterList');
+
+function getChapters(){const m=new Map();slides.forEach((s,i)=>{const a=s.dataset.act;if(a&&!m.has(a))m.set(a,i);});return m;}
+function buildChapterMenu(){
+  const ch=getChapters();chapterList.innerHTML='';
+  const cur=slides[idx]?.dataset.act||'';
+  ch.forEach((si,name)=>{
+    const d=document.createElement('div');
+    d.className='chapter-item'+(name===cur?' active':'');
+    d.innerHTML='<span class="chapter-dot"></span>'+name;
+    d.onclick=()=>{go(si);closeChapterMenu();};
+    chapterList.appendChild(d);
+  });
+  chapterLabel.textContent=cur||'導覽';
+}
+function toggleChapterMenu(){chapterMenu.classList.toggle('open');if(chapterMenu.classList.contains('open'))buildChapterMenu();}
+function closeChapterMenu(){chapterMenu.classList.remove('open');}
+function updateChapterLabel(){chapterLabel.textContent=slides[idx]?.dataset.act||'導覽';}
+chapterBtn.onclick=toggleChapterMenu;
+document.addEventListener('click',e=>{if(!chapterMenu.contains(e.target))closeChapterMenu();});
+
+// ── Quick Nav ──
+const navOverlay=document.getElementById('navOverlay');
+const navGrid=document.getElementById('navGrid');
+function buildNav(){
+  navGrid.innerHTML='';
+  slides.forEach((s,i)=>{
+    const act=s.dataset.act||'';
+    const isPoster=s.classList.contains('poster')||s.classList.contains('dark-slide')||s.classList.contains('dataviz');
+    const t=s.querySelector('h1,h2');
+    const label=t?t.textContent.replace(/\n/g,' ').substring(0,20):'Slide '+(i+1);
+    const card=document.createElement('div');
+    card.style.cssText='cursor:pointer;border-radius:10px;overflow:hidden;border:2px solid '+(i===idx?'var(--teal)':'rgba(255,255,255,.1)')+';transition:border-color .15s;';
+    card.innerHTML='<div style="height:60px;background:'+(isPoster?'var(--primary)':'var(--offwhite)')+';display:flex;align-items:center;justify-content:center;font-size:.7rem;color:'+(isPoster?'rgba(255,255,255,.3)':'rgba(0,0,0,.3)')+';">'+(i+1)+'</div><div style="padding:.5rem;background:rgba(255,255,255,.04);"><div style="font-size:.65rem;color:var(--teal);font-weight:700;margin-bottom:.15rem;">'+act+'</div><div style="font-size:.7rem;color:rgba(255,255,255,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+label+'</div></div>';
+    card.onmouseenter=()=>{card.style.borderColor='var(--gold)';};
+    card.onmouseleave=()=>{card.style.borderColor=i===idx?'var(--teal)':'rgba(255,255,255,.1)';};
+    card.onclick=()=>{go(i);closeNav();};
+    navGrid.appendChild(card);
+  });
+}
+function openNav(){buildNav();navOverlay.style.display='block';}
+function closeNav(){navOverlay.style.display='none';}
+document.getElementById('counterBtn').onclick=openNav;
+document.getElementById('navClose').onclick=closeNav;
+navOverlay.onclick=e=>{if(e.target===navOverlay)closeNav();};
+
+// ── Keyboard ──
+let numBuf='',numTimer=null;
+document.addEventListener('keydown',e=>{
+  if(navOverlay.style.display==='block'){if(e.key==='Escape'||e.key==='g'||e.key==='G'){e.preventDefault();closeNav();}return;}
+  if(chapterMenu.classList.contains('open')&&e.key==='Escape'){closeChapterMenu();return;}
+  if(e.key==='g'||e.key==='G'){e.preventDefault();openNav();return;}
+  if(e.key==='f'||e.key==='F'){e.preventDefault();if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();return;}
+  if(e.key>='0'&&e.key<='9'){numBuf+=e.key;clearTimeout(numTimer);numTimer=setTimeout(()=>{numBuf='';},1500);return;}
+  if(e.key==='Enter'&&numBuf){e.preventDefault();const n=parseInt(numBuf,10)-1;if(n>=0&&n<tot)go(n);numBuf='';return;}
+  if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();next();}
+  if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();prev();}
+  if(e.key==='Home'){e.preventDefault();go(0);}
+  if(e.key==='End'){e.preventDefault();go(tot-1);}
+});
+
+// ── Touch ──
+let touchX=0;
+document.addEventListener('touchstart',e=>{touchX=e.changedTouches[0].screenX;});
+document.addEventListener('touchend',e=>{const d=e.changedTouches[0].screenX-touchX;if(Math.abs(d)>50){if(d<0)next();else prev();}});
+
+// ── postMessage (for ClassClaw remote) ──
+window.addEventListener('message',function(e){if(!e.data||typeof e.data!=='object')return;if(e.data.type==='slide-control'){if(e.data.action==='next')next();else if(e.data.action==='prev')prev();else if(e.data.action==='goto'&&typeof e.data.index==='number')go(e.data.index);}});
+
+go(0);
+</script>
+</body>
+</html>
