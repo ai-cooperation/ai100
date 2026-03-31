@@ -22,6 +22,8 @@ var materials = [
   { title: 'S16 clasp \u958B\u767C\u5DE5\u5177', icon: '\uD83D\uDD29', url: '/slides/supplements/S16_clasp.html', desc: 'GAS\u958B\u767C\u00B710\u9801' },
   { title: 'S17 \u672A\u4F86\u8FAF\u8AD6\u5834', icon: '\u2694\uFE0F', url: '/slides/supplements/S17_Future_Debate_Arena.html', desc: 'AI\u5DE5\u4F5C\u574A\u00B724\u9801' },
   { title: 'S18 AI\u7C21\u58316\u7A2E\u8DEF\u7DDA', icon: '\uD83C\uDFAF', url: '/slides/supplements/S18_AI_Slide_Routes.html', desc: '6\u8DEF\u7DDA\u5168\u666F\u00B718\u9801' },
+  { title: 'S19 \u5927\u5B78\u6F14\u8B1B \u4EBA\u99D5\u99AD AI', icon: '\uD83C\uDF93', url: '/slides/supplements/S19_University_Talk.html', desc: '\u99D5\u99ADAI Token\u00B737\u9801' },
+  { title: 'S20 \u5F9E\u7B46\u8A18\u5230\u7B2C\u4E8C\u5927\u8166', icon: '\uD83E\uDDE0', url: '/slides/supplements/S20_Knowledge_Base_L1_L5.html', desc: 'AI\u80FD\u529B\u4E94\u7D1A\u00B755\u9801' },
   // --- Chantoban ---
   { title: '\u7522\u6295\u73ED \u8AB2\u7A0B\u4ECB\u7D39', icon: '\uD83C\uDFED', url: '/slides/chantoban/Course_Intro.html', desc: '\u62DB\u751F\u7248\u00B718\u9801' },
   // --- Learn system ---
@@ -54,7 +56,9 @@ var deckOptions = [
   { name: 'S15_gcloud', label: 'S15 Google Cloud SDK' },
   { name: 'S16_clasp', label: 'S16 clasp' },
   { name: 'S17_Future_Debate_Arena', label: 'S17 \u672A\u4F86\u8FAF\u8AD6\u5834' },
-  { name: 'S18_AI_Slide_Routes', label: 'S18 AI\u7C21\u58316\u7A2E\u8DEF\u7DDA' }
+  { name: 'S18_AI_Slide_Routes', label: 'S18 AI\u7C21\u58316\u7A2E\u8DEF\u7DDA' },
+  { name: 'S19_University_Talk', label: 'S19 \u5927\u5B78\u6F14\u8B1B' },
+  { name: 'S20_Knowledge_Base_L1_L5', label: 'S20 \u5F9E\u7B46\u8A18\u5230\u7B2C\u4E8C\u5927\u8166' }
 ];
 
 // ═══ Custom Materials ═══
