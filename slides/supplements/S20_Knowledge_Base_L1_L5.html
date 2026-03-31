@@ -29,11 +29,11 @@ body{width:100%;height:100vh;overflow:hidden;font-family:'Noto Sans TC',system-u
 
 /* ── Slide Container ── */
 .slides-wrap{position:relative;width:100vw;height:100vh;}
-.slide{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden;padding:0;}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;padding:2rem 4rem 1.5rem;}
 .slide.active{display:flex;}
 
 /* ── Clean (white bg) ── */
-.slide.clean{background:var(--white);color:var(--g900);justify-content:flex-start;}
+.slide.clean{background:var(--white);color:var(--g900);padding-top:3.5rem;overflow-y:auto;justify-content:flex-start;}
 .slide.clean::before,.slide.clean::after{content:'';flex:1 0 0px;}
 
 /* ── Poster Mode ── */
@@ -49,10 +49,13 @@ body{width:100%;height:100vh;overflow:hidden;font-family:'Noto Sans TC',system-u
 .fragment{opacity:0;transform:translateY(12px);transition:opacity .4s ease,transform .4s ease;}
 .fragment.visible{opacity:1;transform:translateY(0);}
 
+/* ── Typography ── */
+h2{font-size:2rem;font-weight:700;color:var(--g900);margin-bottom:1rem;line-height:1.4;}
+.slide.dataviz h2,.slide.poster h2{color:#fff;}
+
 /* ── Slide Header ── */
-.slide-header{padding:1.5rem 3rem .8rem;border-bottom:3px solid var(--teal);}
-.slide-header h2{font-size:1.8rem;font-weight:700;color:var(--dark-text);}
-.dataviz .slide-header{border-bottom-color:var(--teal);}
+.slide-header{padding:1.5rem 3rem .8rem;border-bottom:3px solid var(--teal);width:100%;}
+.slide-header h2{font-size:1.8rem;font-weight:700;color:var(--dark-text);margin-bottom:0;}
 .dataviz .slide-header h2{color:#fff;}
 
 /* ── Cards ── */
@@ -161,29 +164,30 @@ body{width:100%;height:100vh;overflow:hidden;font-family:'Noto Sans TC',system-u
 .level-badge{display:inline-block;padding:.25rem .7rem;border-radius:20px;font-size:.75rem;font-weight:700;color:#fff;margin-right:.3rem;}
 
 /* ── Module badge (top-right) ── */
-.module-badge{position:fixed;top:12px;right:16px;z-index:100;background:var(--teal);color:#fff;padding:4px 12px;border-radius:6px;font-size:.65rem;font-weight:700;letter-spacing:.05rem;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:rgba(15,157,138,.15);color:var(--teal);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;backdrop-filter:blur(8px);}
 
 /* ── Bottom Bar ── */
-.slide-counter{position:fixed;bottom:16px;right:20px;z-index:100;font-size:.75rem;color:var(--gray-text);cursor:pointer;background:rgba(255,255,255,.85);padding:4px 10px;border-radius:6px;backdrop-filter:blur(4px);border:1px solid #e0e0e0;box-shadow:0 1px 4px rgba(0,0,0,.08);}
-.dataviz .slide-counter,.poster .slide-counter{color:rgba(255,255,255,.5);background:rgba(0,0,0,.6);border-color:transparent;}
-.progress{position:fixed;bottom:0;left:0;height:3px;background:var(--teal);z-index:100;transition:width .3s;}
-.controls{position:fixed;bottom:14px;right:80px;z-index:100;display:flex;gap:6px;}
-.controls button{background:rgba(255,255,255,.85);border:1px solid #e0e0e0;color:var(--gray-text);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.8rem;backdrop-filter:blur(4px);box-shadow:0 1px 4px rgba(0,0,0,.08);}
-.controls button:hover{border-color:var(--teal);color:var(--teal);}
+.slide-counter{position:fixed;bottom:1.5rem;right:5rem;z-index:100;color:rgba(255,255,255,.35);font-size:.85rem;font-weight:500;cursor:pointer;}
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--teal);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid rgba(255,255,255,.15);border-radius:12px;background:rgba(0,0,0,.4);color:rgba(255,255,255,.8);font-size:1.2rem;cursor:pointer;transition:all .15s;backdrop-filter:blur(8px);}
+.controls button:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff;}
+.controls button:disabled{opacity:.2;cursor:default;}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:rgba(255,255,255,.35);font-size:.85rem;font-weight:700;}
 
 /* ── Chapter Menu ── */
 .chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;font-family:system-ui,-apple-system,sans-serif;}
-.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border:1px solid #e0e0e0;border-radius:8px;color:var(--dark-text);font-size:.8rem;cursor:pointer;transition:border-color .2s;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.9);font-size:.8rem;cursor:pointer;transition:border-color .2s;}
 .chapter-btn:hover{border-color:var(--teal);}
 .chapter-icon{color:var(--teal);font-weight:700;}
 .chapter-arrow{font-size:.6rem;opacity:.5;transition:transform .2s;}
 .chapter-menu.open .chapter-arrow{transform:rotate(180deg);}
-.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:220px;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border:1px solid #e0e0e0;border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.1);}
+.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:220px;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;}
 .chapter-menu.open .chapter-list{display:block;}
-.chapter-item{display:flex;align-items:center;gap:8px;padding:8px 14px;color:var(--gray-text);font-size:.78rem;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
-.chapter-item:hover{background:var(--light-tint);color:var(--dark-text);}
+.chapter-item{display:flex;align-items:center;gap:8px;padding:8px 14px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
+.chapter-item:hover{background:rgba(255,255,255,.08);color:#fff;}
 .chapter-item.active{color:var(--teal);font-weight:600;}
-.chapter-dot{width:6px;height:6px;border-radius:50%;background:#e0e0e0;flex-shrink:0;}
+.chapter-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;}
 .chapter-item.active .chapter-dot{background:var(--teal);box-shadow:0 0 6px var(--teal);}
 
 /* ── Iceberg ── */
@@ -234,6 +238,7 @@ body{width:100%;height:100vh;overflow:hidden;font-family:'Noto Sans TC',system-u
 </head>
 <body>
 
+<div class="module-title">從筆記到第二大腦</div>
 <div class="module-badge">S20 補充單元</div>
 
 <div class="slides-wrap">
