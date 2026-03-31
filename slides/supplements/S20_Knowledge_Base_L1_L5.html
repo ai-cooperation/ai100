@@ -734,78 +734,73 @@ body{width:100%;height:100vh;overflow:hidden;font-family:'Noto Sans TC',system-u
   <div class="info-box success fragment">角色再升級：搬運工 → 指揮官 → <strong>建造者</strong>。你設計一次，系統永遠替你跑。</div>
 </div>
 
-<!-- ═══════════ 25: SECONDBRAIN ARCHITECTURE ═══════════ -->
+<!-- ═══════════ 25: SECONDBRAIN ARCHITECTURE (from S19) ═══════════ -->
 <div class="slide dataviz" data-act="L3 創工具">
-  <div class="slide-header"><h2>🏗️ 實戰案例 — SecondBrain 架構層</h2></div>
-  <div style="padding:.5rem 2rem;">
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;text-align:center;">
-      <!-- Row 1: Nodes -->
-      <div class="card-dark fragment" style="padding:.8rem .5rem;">
-        <div style="font-size:1.5rem;">💻</div>
-        <h3 style="font-size:.8rem;">MacBook</h3>
-        <p style="font-size:.65rem;">~/SecondBrain/<br>本地撰寫 .md</p>
-      </div>
-      <div class="card-dark fragment" style="padding:.8rem .5rem;">
-        <div style="font-size:1.5rem;">🖥️</div>
-        <h3 style="font-size:.8rem;">ac-mac</h3>
-        <p style="font-size:.65rem;">~/knowledge-base/<br>Git 同步副本</p>
-      </div>
-      <div class="card-dark fragment" style="padding:.8rem .5rem;">
-        <div style="font-size:1.5rem;">🐙</div>
-        <h3 style="font-size:.8rem;">GitHub</h3>
-        <p style="font-size:.65rem;">AlanChen75/<br>knowledge-base</p>
-      </div>
-      <div class="card-dark fragment" style="padding:.8rem .5rem;">
-        <div style="font-size:1.5rem;">⚙️</div>
-        <h3 style="font-size:.8rem;">GitHub Actions</h3>
-        <p style="font-size:.65rem;">notion-sync.py<br>自動同步腳本</p>
-      </div>
-      <div class="card-dark fragment" style="padding:.8rem .5rem;">
-        <div style="font-size:1.5rem;">📊</div>
-        <h3 style="font-size:.8rem;">Notion DB</h3>
-        <p style="font-size:.65rem;">🧠 SecondBrain<br>統一檢索介面</p>
-      </div>
+  <h2>實戰案例 — SecondBrain 第二大腦：架構層</h2>
+  <div style="display:flex;align-items:center;justify-content:center;flex:1;gap:2rem;max-width:960px;width:100%;">
+    <div style="flex:1;text-align:center;">
+      <img src="secondbrain-arch.png" alt="SecondBrain Architecture" style="max-width:100%;max-height:55vh;border-radius:12px;border:2px solid rgba(255,255,255,.1);">
     </div>
-    <!-- Connection line -->
-    <div class="flow flow-dark" style="margin-top:.5rem;padding:.5rem 0;">
-      <div style="font-size:.7rem;color:var(--teal-light);">git sync</div>
-      <div class="flow-arrow" style="color:var(--teal);">⟷</div>
-      <div style="font-size:.7rem;color:var(--teal-light);">git push</div>
-      <div class="flow-arrow" style="color:var(--teal);">→</div>
-      <div style="font-size:.7rem;color:var(--teal-light);">webhook</div>
-      <div class="flow-arrow" style="color:var(--teal);">→</div>
-      <div style="font-size:.7rem;color:var(--teal-light);">Notion API</div>
-      <div class="flow-arrow" style="color:var(--teal);">→</div>
-      <div style="font-size:.7rem;color:var(--teal-light);">同步完成</div>
+    <div class="fragment" style="flex:0 0 280px;display:flex;flex-direction:column;gap:.6rem;">
+      <div style="background:rgba(15,157,138,.12);border:2px solid var(--teal);border-radius:10px;padding:.6rem 1rem;">
+        <div style="font-size:.85rem;font-weight:700;color:var(--teal);">Layer 1 · 輸入</div>
+        <div style="font-size:.8rem;color:rgba(255,255,255,.6);">PDF、網頁、語音、會議錄音</div>
+      </div>
+      <div style="background:rgba(255,200,87,.1);border:2px solid var(--gold);border-radius:10px;padding:.6rem 1rem;">
+        <div style="font-size:.85rem;font-weight:700;color:var(--gold);">Layer 2 · AI 處理</div>
+        <div style="font-size:.8rem;color:rgba(255,255,255,.6);">摘要、標記、連結、翻譯</div>
+      </div>
+      <div style="background:rgba(124,58,237,.1);border:2px solid var(--purple);border-radius:10px;padding:.6rem 1rem;">
+        <div style="font-size:.85rem;font-weight:700;color:var(--purple);">Layer 3 · 知識庫</div>
+        <div style="font-size:.8rem;color:rgba(255,255,255,.6);">Obsidian + Notion + Git</div>
+      </div>
+      <div style="background:rgba(232,113,10,.1);border:2px solid var(--orange);border-radius:10px;padding:.6rem 1rem;">
+        <div style="font-size:.85rem;font-weight:700;color:var(--orange);">Layer 4 · 產出</div>
+        <div style="font-size:.8rem;color:rgba(255,255,255,.6);">簡報、論文、教材、自動報表</div>
+      </div>
     </div>
   </div>
-  <div class="tip-box-dark fragment">5 個節點、3 層技術（Git + CI/CD + API）— 全部由 Claude Code 協助建造，你設計架構，AI 寫程式。</div>
-  <!-- TODO: GemGate image - prompt: "Technical system architecture diagram, 5 connected nodes (laptop, server, GitHub, Actions, Notion) with glowing data flows, dark blueprint style, teal and purple accents, 16:9" -->
+  <div class="tip-box-dark">380 筆知識條目，4 個 Notion 資料庫整合，7 大類自動分類 — 這是 L3 創工具的真實案例。</div>
 </div>
 
-<!-- ═══════════ 26: SECONDBRAIN INFO FLOW ═══════════ -->
+<!-- ═══════════ 26: SECONDBRAIN INFO FLOW (from S19) ═══════════ -->
 <div class="slide dataviz" data-act="L3 創工具">
-  <div class="slide-header"><h2>🔄 實戰案例 — SecondBrain 資訊流</h2></div>
-  <div class="flow flow-dark" style="margin-top:1rem;flex-wrap:wrap;justify-content:center;">
-    <div class="flow-box fragment" style="border-color:var(--purple);"><h4 style="color:var(--purple);">① 撰寫</h4><p>.md 檔案<br>加 frontmatter<br>標題+分類+標籤</p></div>
-    <div class="flow-arrow fragment">→</div>
-    <div class="flow-box fragment"><h4>② Git Commit</h4><p>git add .<br>git commit<br>本地版本控制</p></div>
-    <div class="flow-arrow fragment">→</div>
-    <div class="flow-box fragment"><h4>③ Git Push</h4><p>推送到 GitHub<br>觸發 webhook</p></div>
-    <div class="flow-arrow fragment">→</div>
-    <div class="flow-box fragment" style="border-color:var(--teal);"><h4 style="color:var(--teal);">④ Actions 觸發</h4><p>notion-sync.py<br>自動啟動</p></div>
-    <div class="flow-arrow fragment">→</div>
-    <div class="flow-box fragment"><h4>⑤ Hash 比對</h4><p>檢查內容是否<br>已存在（增量）</p></div>
-    <div class="flow-arrow fragment">→</div>
-    <div class="flow-box fragment" style="border-color:var(--gold);"><h4 style="color:var(--gold);">⑥ 同步 Notion</h4><p>新增或更新<br>Notion 頁面</p></div>
-  </div>
-  <div style="padding:.8rem 3rem;">
-    <div class="card-dark fragment" style="padding:.8rem 1rem;">
-      <h3 style="font-size:.85rem;">關鍵設計：Hash-based 增量同步</h3>
-      <p style="font-size:.75rem;">不是每次全部重寫 — 對每篇文章計算 hash，只同步「有變動」的。380 篇文章，同步只需幾秒。</p>
+  <h2>實戰案例 — SecondBrain 第二大腦：資訊流</h2>
+  <div style="display:flex;flex-direction:column;align-items:center;flex:1;justify-content:center;max-width:960px;width:100%;">
+    <img src="secondbrain-flow.png" alt="SecondBrain Information Flow" style="max-width:100%;max-height:45vh;border-radius:12px;border:2px solid rgba(255,255,255,.1);">
+    <div class="fragment" style="display:flex;gap:.8rem;margin-top:1.2rem;flex-wrap:wrap;justify-content:center;">
+      <div style="background:rgba(15,157,138,.1);border:1px solid var(--teal);border-radius:8px;padding:.5rem 1rem;text-align:center;">
+        <div style="font-size:1.2rem;">📥</div>
+        <div style="font-size:.8rem;font-weight:700;color:var(--teal);">Capture</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.5);">多源擷取</div>
+      </div>
+      <div style="color:var(--gold);font-size:1.2rem;display:flex;align-items:center;">→</div>
+      <div style="background:rgba(255,200,87,.1);border:1px solid var(--gold);border-radius:8px;padding:.5rem 1rem;text-align:center;">
+        <div style="font-size:1.2rem;">🧠</div>
+        <div style="font-size:.8rem;font-weight:700;color:var(--gold);">AI Agent</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.5);">處理 + 增強</div>
+      </div>
+      <div style="color:var(--gold);font-size:1.2rem;display:flex;align-items:center;">→</div>
+      <div style="background:rgba(124,58,237,.1);border:1px solid var(--purple);border-radius:8px;padding:.5rem 1rem;text-align:center;">
+        <div style="font-size:1.2rem;">🔗</div>
+        <div style="font-size:.8rem;font-weight:700;color:var(--purple);">知識圖譜</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.5);">互連網路</div>
+      </div>
+      <div style="color:var(--gold);font-size:1.2rem;display:flex;align-items:center;">→</div>
+      <div style="background:rgba(6,182,212,.1);border:1px solid var(--cyan);border-radius:8px;padding:.5rem 1rem;text-align:center;">
+        <div style="font-size:1.2rem;">🔄</div>
+        <div style="font-size:.8rem;font-weight:700;color:var(--cyan);">Auto Sync</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.5);">Git→Notion</div>
+      </div>
+      <div style="color:var(--gold);font-size:1.2rem;display:flex;align-items:center;">→</div>
+      <div style="background:rgba(232,113,10,.1);border:1px solid var(--orange);border-radius:8px;padding:.5rem 1rem;text-align:center;">
+        <div style="font-size:1.2rem;">📤</div>
+        <div style="font-size:.8rem;font-weight:700;color:var(--orange);">Produce</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.5);">簡報·論文</div>
+      </div>
     </div>
   </div>
-  <!-- TODO: GemGate image - prompt: "Data flow pipeline diagram, 6 sequential steps with arrows, from markdown file to Notion database, glowing neon connections on dark background, technical infographic style, 16:9" -->
+  <div class="tip-box-dark">知識不再是「存起來偶爾翻」，而是自動流動、自動產出。這就是 L3 創工具的實踐。</div>
 </div>
 
 <!-- ═══════════ 27: SECONDBRAIN STATS ═══════════ -->
