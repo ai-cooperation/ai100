@@ -130,9 +130,9 @@ function renderMaterialLibrary() {
   materials.forEach(function(m, idx) {
     var typeLabel = m.hasSlideControl ? '\u6295\u5F71\u7247' : '\u9023\u7D50';
     if (m.url === '/classroom/presenter') typeLabel = 'PPTX \u5716\u7247';
-    bHtml += '<div class="room-card" style="cursor:default">';
+    bHtml += '<div class="room-card" style="cursor:pointer" onclick="previewMaterial(' + idx + ',true)">';
     bHtml += '<span style="font-size:1.3rem;flex-shrink:0">' + m.icon + '</span>';
-    bHtml += '<div class="rc-info" style="cursor:default"><div class="rc-name">' + esc(m.title) + '</div><div class="rc-meta">' + (m.desc || '') + ' \u00B7 ' + typeLabel + '</div></div>';
+    bHtml += '<div class="rc-info"><div class="rc-name">' + esc(m.title) + '</div><div class="rc-meta">' + (m.desc || '') + ' \u00B7 ' + typeLabel + '</div></div>';
     bHtml += '</div>';
   });
   builtinEl.innerHTML = bHtml;
@@ -145,17 +145,44 @@ function renderMaterialLibrary() {
     return;
   }
   var cHtml = '';
-  customMaterials.forEach(function(m) {
+  customMaterials.forEach(function(m, idx) {
     var icon = m.type === 'pptx' ? '\uD83D\uDCFD' : m.type === 'external' ? '\uD83D\uDD17' : '\uD83D\uDCCA';
     var typeLabel = m.type === 'pptx' ? 'PPTX' : m.type === 'external' ? '\u5916\u90E8\u9023\u7D50' : 'HTML';
     var detail = m.type === 'pptx' ? 'deck: ' + esc(m.deck || '') : (m.url ? esc(m.url) : '');
-    cHtml += '<div class="room-card" style="cursor:default">';
+    cHtml += '<div class="room-card" style="cursor:pointer" onclick="previewMaterial(' + idx + ',false)">';
     cHtml += '<span style="font-size:1.3rem;flex-shrink:0">' + icon + '</span>';
-    cHtml += '<div class="rc-info" style="cursor:default"><div class="rc-name">' + esc(m.title) + ' <span style="font-size:0.7rem;color:var(--dim)">(' + typeLabel + ')</span></div><div class="rc-meta">' + (m.desc ? esc(m.desc) : '') + (detail ? ' \u00B7 ' + detail : '') + '</div></div>';
-    cHtml += '<button class="rc-del" onclick="deleteCustomMaterial(\'' + esc(m._key) + '\')">\u522A\u9664</button>';
+    cHtml += '<div class="rc-info"><div class="rc-name">' + esc(m.title) + ' <span style="font-size:0.7rem;color:var(--dim)">(' + typeLabel + ')</span></div><div class="rc-meta">' + (m.desc ? esc(m.desc) : '') + (detail ? ' \u00B7 ' + detail : '') + '</div></div>';
+    cHtml += '<button class="rc-del" onclick="event.stopPropagation();deleteCustomMaterial(\'' + esc(m._key) + '\')">\u522A\u9664</button>';
     cHtml += '</div>';
   });
   customEl.innerHTML = cHtml;
+}
+
+// ═══ Preview material from library (open in new window) ═══
+function previewMaterial(idx, isBuiltin) {
+  var m;
+  if (isBuiltin) {
+    m = materials[idx];
+  } else {
+    var cm = customMaterials[idx];
+    if (!cm) return;
+    // Build material object from custom material data
+    m = {};
+    if (cm.type === 'pptx') {
+      m.url = '/classroom/presenter';
+      m.queryExtra = '&deck=' + cm.deck;
+    } else {
+      m.url = cm.url;
+    }
+    m.title = cm.title;
+  }
+  if (!m || !m.url) return;
+  // Build preview URL (no room param — just open the content)
+  var url = m.url;
+  if (m.queryExtra) {
+    url += (url.indexOf('?') >= 0 ? '' : '?') + m.queryExtra.replace(/^&/, '');
+  }
+  window.open(url, '_blank');
 }
 
 function showAddMaterial() {
