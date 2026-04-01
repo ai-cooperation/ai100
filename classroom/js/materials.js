@@ -25,6 +25,8 @@ var materials = [
   { title: 'S19 \u5927\u5B78\u6F14\u8B1B \u4EBA\u99D5\u99AD AI', icon: '\uD83C\uDF93', url: '/slides/supplements/S19_University_Talk.html', desc: '\u99D5\u99ADAI Token\u00B737\u9801' },
   { title: 'S20 \u5F9E\u7B46\u8A18\u5230\u7B2C\u4E8C\u5927\u8166', icon: '\uD83E\uDDE0', url: '/slides/supplements/S20_Knowledge_Base_L1_L5.html', desc: 'AI\u80FD\u529B\u4E94\u7D1A\u00B755\u9801' },
   { title: 'S21 AI\u7684\u7522\u696D\u5316\u885D\u64CA', icon: '\uD83D\uDCA5', url: '/slides/supplements/S21_AI_Industry_Impact.html', desc: '\u7522\u696D\u885D\u64CA\u00B730\u9801' },
+  // --- Talks ---
+  { title: '\u8AD6\u6587\u65B9\u6CD5\u5B78\u5206\u4EAB', icon: '\uD83C\uDF93', url: '/slides/supplements/Talk_Paper_Methodology.html', desc: '\u6F14\u8B1B\u00B739\u9801' },
   // --- Chantoban ---
   { title: '\u7522\u6295\u73ED \u8AB2\u7A0B\u4ECB\u7D39', icon: '\uD83C\uDFED', url: '/slides/chantoban/Course_Intro.html', desc: '\u62DB\u751F\u7248\u00B718\u9801' },
   // --- Learn system ---
