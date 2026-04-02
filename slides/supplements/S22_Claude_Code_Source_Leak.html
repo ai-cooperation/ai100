@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 原始碼洩露 — 從 51 萬行程式碼學到的 AI 使用秘訣</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   S22 Claude Code Source Leak
+   Based on S09 v2 design system
+   Accent: --blue (#1A73E8)
+   Display:none mode (49 slides)
+   ═══════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+  --orange:#E8710A; --orange-lt:#FEF0E1;
+  --dark:#0a0a14; --dark2:#111122; --dark3:#16213e;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--dark);}
+
+/* ── Slides Core (display mode) ── */
+.slides-wrap{position:relative;width:100vw;height:100vh;}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;overflow:hidden;}
+.slide.active{display:flex;}
+
+/* ── Clean Mode ── */
+.slide.clean{background:var(--white);color:var(--g900);padding-top:3.5rem;overflow-y:auto;justify-content:flex-start;}
+.slide.clean::before,.slide.clean::after{content:'';flex:1 0 0px;}
+
+/* ── Poster Mode ── */
+.slide.poster{background-size:cover;background-position:center;color:#fff;text-align:center;}
+.slide.poster::before{content:'';position:absolute;inset:0;z-index:1;}
+.slide.poster>*{position:relative;z-index:2;}
+.slide.poster.overlay-heavy::before{background:linear-gradient(to bottom,rgba(10,10,20,.45) 0%,rgba(10,10,20,.88) 100%);}
+.slide.poster.overlay-center::before{background:radial-gradient(ellipse at center,rgba(10,10,20,.3) 0%,rgba(10,10,20,.85) 100%);}
+
+/* ── DataViz Mode ── */
+.slide.dataviz{background:var(--dark);color:#fff;padding-top:3.5rem;}
+
+/* ── Typography ── */
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:2rem;font-weight:700;color:var(--g900);margin-bottom:1rem;line-height:1.4;}
+.slide.dataviz h2,.slide.poster h2{color:#fff;}
+h3{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.1rem;line-height:1.8;}
+.subtitle{font-size:1.15rem;font-weight:500;}
+.dim{opacity:.6;}
+
+/* ── Fragment ── */
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* ── Stat Grid ── */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;max-width:860px;width:100%;margin-top:1rem;}
+.stat-grid.c2{grid-template-columns:repeat(2,1fr);}
+.stat-grid.c4{grid-template-columns:repeat(4,1fr);}
+.stat-box{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:16px;padding:1.3rem;text-align:center;}
+.stat-box .val{font-size:2.4rem;font-weight:900;line-height:1.1;}
+.stat-box .label{font-size:.9rem;color:rgba(255,255,255,.5);margin-top:.3rem;}
+
+/* ── Card Grid ── */
+.card-grid{display:flex;gap:1.2rem;flex-wrap:wrap;justify-content:center;margin-top:1rem;max-width:960px;}
+.card{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:16px;padding:1.5rem;min-width:200px;max-width:280px;flex:1;transition:border-color .2s;}
+.card:hover{border-color:var(--blue);}
+.card .icon{font-size:2.2rem;margin-bottom:.5rem;}
+.card h3{color:#fff;margin-bottom:.3rem;}
+.card p{font-size:.95rem;color:rgba(255,255,255,.55);line-height:1.6;}
+
+/* ── Clean Cards ── */
+.clean-card-grid{display:grid;gap:1.2rem;max-width:860px;width:100%;margin-top:1rem;}
+.clean-card-grid.c2{grid-template-columns:1fr 1fr;}
+.clean-card{background:var(--offwhite);border:2px solid var(--g100);border-radius:16px;padding:1.5rem;position:relative;overflow:hidden;}
+.clean-card .bar{position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:16px 0 0 16px;}
+.clean-card h3{font-size:1.15rem;margin-bottom:.4rem;}
+.clean-card p{font-size:1rem;color:var(--g600);line-height:1.7;}
+
+/* ── Compare Table ── */
+.compare-table{border-collapse:collapse;font-size:1rem;margin-top:.6rem;width:100%;max-width:860px;}
+.compare-table th{background:rgba(255,255,255,.08);color:rgba(255,255,255,.9);padding:.5rem 1rem;text-align:left;font-size:.95rem;}
+.compare-table td{padding:.5rem 1rem;border-bottom:1px solid rgba(255,255,255,.06);font-size:.95rem;color:rgba(255,255,255,.75);}
+.compare-table tr:hover td{background:rgba(255,255,255,.03);}
+.compare-table .highlight{color:var(--blue);font-weight:700;}
+.compare-table .warn{color:var(--orange);font-weight:700;}
+.compare-table .danger{color:var(--red);font-weight:700;}
+.compare-table .ok{color:var(--green);font-weight:700;}
+
+/* ── Flow ── */
+.flow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1.2rem 0;}
+.flow-box{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.12);border-radius:12px;padding:.7rem 1rem;font-size:1rem;font-weight:700;text-align:center;color:#fff;}
+.flow-arrow{color:var(--blue);font-size:1.5rem;font-weight:900;}
+
+/* ── Step List ── */
+.step-list{text-align:left;max-width:800px;width:100%;}
+.step{display:flex;gap:1.2rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:40px;height:40px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;}
+.step-content{flex:1;}.step-content strong{font-size:1.1rem;}.step-content p{font-size:1rem;color:var(--g600);margin-top:.15rem;}
+
+/* ── Code Block ── */
+.code-block{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:12px;padding:1.3rem 1.8rem;text-align:left;max-width:860px;width:100%;font-family:'Fira Code',monospace;font-size:.95rem;line-height:1.8;margin:.8rem 0;color:rgba(255,255,255,.85);}
+.code-block .comment{color:rgba(255,255,255,.35);}
+.code-block .cmd{color:var(--blue);}
+.code-block .str{color:var(--green);}
+.code-block .kw{color:var(--purple);}
+
+/* ── Quote Box ── */
+.quote-box{max-width:800px;width:100%;background:rgba(255,255,255,.04);border-left:5px solid var(--gold);border-radius:0 12px 12px 0;padding:1.5rem 2rem;margin:.8rem 0;text-align:left;}
+.quote-box .quote-text{font-size:1.3rem;font-weight:700;line-height:1.6;color:#fff;}
+.quote-box .quote-src{font-size:.9rem;color:rgba(255,255,255,.4);margin-top:.5rem;}
+
+/* ── Info Box ── */
+.info-box{border-radius:12px;padding:1.3rem 1.8rem;max-width:800px;width:100%;text-align:left;margin-top:.8rem;}
+.info-box.success{background:rgba(15,157,138,.1);border-left:4px solid var(--green);}
+.info-box.tip{background:rgba(249,171,0,.1);border-left:4px solid var(--gold);}
+.info-box.warning{background:rgba(217,48,37,.1);border-left:4px solid var(--red);}
+.info-box p{color:rgba(255,255,255,.75);}
+.slide.clean .info-box p{color:var(--g800);}
+.slide.clean .info-box.success{background:var(--green-lt);}
+.slide.clean .info-box.tip{background:var(--gold-lt);}
+.slide.clean .info-box.warning{background:var(--red-lt);}
+
+/* ── Bottom Line ── */
+.bottom-line{max-width:800px;width:100%;background:rgba(26,115,232,.08);border:2px solid rgba(26,115,232,.25);border-radius:16px;padding:2rem;text-align:center;margin-top:1rem;}
+.bottom-line h3{font-size:1.6rem;color:var(--blue);margin-bottom:.8rem;}
+.bottom-line p{font-size:1.05rem;color:rgba(255,255,255,.7);max-width:640px;margin:0 auto;line-height:1.7;}
+
+/* ── Poster helpers ── */
+.poster-subtitle{font-size:1.3rem;font-weight:500;color:rgba(255,255,255,.7);}
+.poster-badge{display:inline-block;padding:.3rem 1rem;border-radius:100px;font-size:.9rem;font-weight:700;margin-top:1rem;}
+
+/* ── Journey timeline ── */
+.journey{position:relative;max-width:800px;width:100%;text-align:left;margin-top:1rem;}
+.journey::before{content:"";position:absolute;left:18px;top:10px;bottom:10px;width:3px;background:rgba(255,255,255,.1);border-radius:2px;}
+.j-item{position:relative;padding-left:54px;margin-bottom:1.5rem;}
+.j-item:last-child{margin-bottom:0;}
+.j-item .dot{position:absolute;left:6px;top:4px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;}
+.j-item strong{font-size:1.05rem;color:#fff;}
+.j-item p{font-size:.95rem;color:rgba(255,255,255,.55);margin-top:.15rem;}
+
+/* ── Diagram: harness ── */
+.harness-diagram{max-width:860px;width:100%;margin-top:1rem;}
+.harness-row{display:flex;gap:.8rem;margin-bottom:.8rem;justify-content:center;flex-wrap:wrap;}
+.harness-block{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem 1.2rem;text-align:center;flex:1;min-width:150px;max-width:220px;}
+.harness-block.core{border-color:var(--blue);background:rgba(26,115,232,.08);}
+.harness-block h4{font-size:1rem;color:#fff;margin-bottom:.2rem;}
+.harness-block p{font-size:.85rem;color:rgba(255,255,255,.45);}
+.harness-block .size{font-size:.75rem;color:var(--blue);font-weight:700;margin-top:.3rem;}
+.harness-center{text-align:center;color:rgba(255,255,255,.3);font-size:1.5rem;margin:.3rem 0;}
+
+/* ── Gauge ── */
+.gauge-wrap{max-width:600px;width:100%;margin:1rem auto 0;text-align:center;}
+.gauge-bar{height:32px;border-radius:16px;background:rgba(255,255,255,.06);overflow:hidden;position:relative;}
+.gauge-fill{height:100%;border-radius:16px;transition:width 1s ease;}
+.gauge-labels{display:flex;justify-content:space-between;margin-top:.5rem;font-size:.85rem;color:rgba(255,255,255,.4);}
+
+/* ── Tier blocks ── */
+.tier-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;max-width:860px;width:100%;margin-top:1rem;}
+.tier{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:center;transition:border-color .2s;}
+.tier:hover{border-color:rgba(255,255,255,.15);}
+.tier .emoji{font-size:2rem;margin-bottom:.3rem;}
+.tier h4{font-size:.95rem;color:#fff;margin-bottom:.2rem;}
+.tier p{font-size:.8rem;color:rgba(255,255,255,.45);line-height:1.5;}
+
+/* ── Controls ── */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--blue);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid rgba(255,255,255,.15);border-radius:12px;background:rgba(0,0,0,.4);color:rgba(255,255,255,.8);font-size:1.2rem;cursor:pointer;transition:all .15s;backdrop-filter:blur(8px);}
+.controls button:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff;}
+.controls button:disabled{opacity:.2;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;right:5rem;z-index:100;color:rgba(255,255,255,.35);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:rgba(26,115,232,.15);color:var(--blue);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;backdrop-filter:blur(8px);}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:rgba(255,255,255,.35);font-size:.85rem;font-weight:700;}
+
+/* ── Chapter Menu ── */
+.chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;}
+.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.9);font-size:.8rem;cursor:pointer;transition:border-color .2s;}
+.chapter-btn:hover{border-color:var(--blue);}
+.chapter-icon{color:var(--blue);font-weight:700;}
+.chapter-arrow{font-size:.6rem;opacity:.5;transition:transform .2s;}
+.chapter-menu.open .chapter-arrow{transform:rotate(180deg);}
+.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:220px;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;}
+.chapter-menu.open .chapter-list{display:block;}
+.chapter-item{display:flex;align-items:center;gap:8px;padding:8px 14px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
+.chapter-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+.chapter-item.active{color:var(--blue);font-weight:600;}
+.chapter-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;}
+.chapter-item.active .chapter-dot{background:var(--blue);box-shadow:0 0 6px var(--blue);}
+
+@media(max-width:768px){
+  html,body{font-size:16px;}
+  .slide{padding:1rem 1.2rem 1rem;}
+  .slide.clean{padding-top:3rem;}
+  .slide.poster{justify-content:flex-end;padding-bottom:1.5rem;}
+  h1{font-size:1.8rem;}h2{font-size:1.4rem;margin-bottom:.6rem;}
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:.8rem;}
+  .stat-grid.c4{grid-template-columns:repeat(2,1fr);}
+  .stat-box .val{font-size:1.8rem;}
+  .card-grid{flex-direction:column;align-items:center;}
+  .card{max-width:100%;min-width:0;}
+  .compare-table th,.compare-table td{padding:.5rem .6rem;font-size:.85rem;}
+  .controls button{width:40px;height:40px;font-size:1rem;}
+  .module-title{font-size:.7rem;left:.8rem;top:.6rem;}
+  .module-badge{font-size:.65rem;top:.6rem;right:.6rem;padding:.2rem .6rem;}
+  .quote-box .quote-text{font-size:1.05rem;}
+  .harness-block{min-width:100px;max-width:160px;padding:.7rem;}
+  .tier-grid{grid-template-columns:repeat(2,1fr);}
+  .flow{gap:.4rem;}
+  .flow-box{padding:.5rem .7rem;font-size:.85rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="module-title">AI 100 講 — 補充單元</div>
+<div class="module-badge">S22 補充單元</div>
+
+<div class="slides-wrap">
+
+<!-- ============================================================
+     CHAPTER 1: 事件始末
+     ============================================================ -->
+
+<!-- 0: Cover -->
+<div class="slide poster overlay-heavy active" data-ch="事件始末" style="background:linear-gradient(135deg,#0a0a14 0%,#16213e 50%,#0B3C5D 100%);">
+  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:1rem;">AI 100 講 — 補充單元</p>
+  <h1 style="font-size:2.8rem;">Claude Code 原始碼洩露<br><span style="color:var(--blue);">從 51 萬行程式碼學到的 AI 使用秘訣</span></h1>
+  <p class="poster-subtitle" style="margin-top:1.5rem;">2026-03-31 — 全球最頂尖 AI 公司的一次「人為疏失」</p>
+  <p style="color:rgba(255,255,255,.3);margin-top:3rem;font-size:.85rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- 1: Agenda -->
+<div class="slide clean" data-ch="事件始末">
+  <h2>今天的旅程</h2>
+  <div class="step-list">
+    <div class="step fragment"><div class="step-num">1</div><div class="step-content"><strong>事件始末</strong><p>一個 .npmignore 漏加的故事</p></div></div>
+    <div class="step fragment"><div class="step-num">2</div><div class="step-content"><strong>引擎 vs 整台車</strong><p>51 萬行程式碼裡，AI 只佔 5%</p></div></div>
+    <div class="step fragment"><div class="step-num">3</div><div class="step-content"><strong>CLAUDE.md 的秘密</strong><p>每輪重載、40,000 字元、六條黃金規則</p></div></div>
+    <div class="step fragment"><div class="step-num">4</div><div class="step-content"><strong>多 Agent 與快取</strong><p>5 個 Agent 的成本 ≈ 1 個</p></div></div>
+    <div class="step fragment"><div class="step-num">5</div><div class="step-content"><strong>上下文就是命</strong><p>你的對話正在被壓縮，你知道嗎？</p></div></div>
+    <div class="step fragment"><div class="step-num">6</div><div class="step-content"><strong>隱藏功能預覽</strong><p>KAIROS、ULTRAPLAN、BUDDY 和更多</p></div></div>
+    <div class="step fragment"><div class="step-num">7</div><div class="step-content"><strong>你今天就能做的事</strong><p>四個立即可行的改善動作</p></div></div>
+  </div>
+</div>
+
+<!-- 2: Source Map -->
+<div class="slide dataviz" data-ch="事件始末">
+  <h2>什麼是 Source Map？</h2>
+  <p class="dim" style="max-width:700px;text-align:center;margin-bottom:1rem;">程式碼發布時會「壓縮混淆」，Source Map 是還原用的對照表</p>
+  <div class="flow fragment">
+    <div class="flow-box" style="border-color:var(--green);">原始碼<br><span style="font-size:.8rem;color:rgba(255,255,255,.5);">512K 行 TypeScript</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">壓縮混淆<br><span style="font-size:.8rem;color:rgba(255,255,255,.5);">一行看不懂的 JS</span></div>
+    <div class="flow-arrow">+</div>
+    <div class="flow-box" style="border-color:var(--red);">.map 檔案<br><span style="font-size:.8rem;color:rgba(255,255,255,.5);">59.8 MB 對照表</span></div>
+  </div>
+  <div class="quote-box fragment" style="margin-top:1.5rem;">
+    <p class="quote-text">就像買一台車，結果整台車的設計圖、引擎規格、安全系統文件全部放在手套箱裡</p>
+    <p class="quote-src">Anthropic 忘了把 .map 加入 .npmignore</p>
+  </div>
+</div>
+
+<!-- 3: Timeline -->
+<div class="slide dataviz" data-ch="事件始末">
+  <h2>事件時間軸</h2>
+  <div class="journey">
+    <div class="j-item fragment">
+      <div class="dot" style="background:var(--blue);">1</div>
+      <strong>npm 發布 v2.1.88</strong>
+      <p>Bun bundler 預設產生 source map，沒人注意到</p>
+    </div>
+    <div class="j-item fragment">
+      <div class="dot" style="background:var(--gold);">2</div>
+      <strong>安全研究員 Chaofan Shou 發現</strong>
+      <p>59.8 MB 的 .map 檔案就在 npm 套件裡</p>
+    </div>
+    <div class="j-item fragment">
+      <div class="dot" style="background:var(--red);">3</div>
+      <strong>4 小時內全球擴散</strong>
+      <p>GitHub 湧入 41,500+ forks，成為史上最快破紀錄的 repo</p>
+    </div>
+    <div class="j-item fragment">
+      <div class="dot" style="background:var(--orange);">4</div>
+      <strong>Anthropic 下架 + DMCA</strong>
+      <p>下架套件、發出 DMCA，封鎖 8,100+ repos</p>
+    </div>
+    <div class="j-item fragment">
+      <div class="dot" style="background:var(--purple);">!</div>
+      <strong>這是第二次犯同樣的錯</strong>
+      <p>2025 年第一次發布時就出過一模一樣的事故</p>
+    </div>
+  </div>
+</div>
+
+<!-- 4: Why it matters -->
+<div class="slide dataviz" data-ch="事件始末">
+  <h2>為什麼這件事值得關注？</h2>
+  <div class="card-grid" style="margin-top:1.5rem;">
+    <div class="card fragment">
+      <div class="icon">🔬</div>
+      <h3>不是洩密醜聞</h3>
+      <p>模型權重、訓練資料都沒有洩露。洩露的是 AI 工具的「操作系統」</p>
+    </div>
+    <div class="card fragment">
+      <div class="icon">📖</div>
+      <h3>是學習機會</h3>
+      <p>全球最好的 AI 工具是怎麼設計的？原始碼直接告訴你</p>
+    </div>
+    <div class="card fragment">
+      <div class="icon">⚠️</div>
+      <h3>也是提醒</h3>
+      <p>AI 時代最大的風險，不是 AI 太強，是人在基礎操作上的疏忽</p>
+    </div>
+  </div>
+  <div class="info-box tip fragment" style="margin-top:1.5rem;">
+    <p><strong>關鍵洞察：</strong>全球最頂尖的 AI 公司，在最基礎的 build pipeline 上翻車兩次</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     CHAPTER 2: 引擎 vs 整台車
+     ============================================================ -->
+
+<!-- 5: Chapter divider -->
+<div class="slide poster overlay-heavy" data-ch="引擎 vs 整台車" style="background:linear-gradient(135deg,#0B3C5D 0%,#16213e 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 2</p>
+  <h1>引擎 vs 整台車</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">51 萬行程式碼裡，AI 只佔 5%</p>
+</div>
+
+<!-- 6: Stats -->
+<div class="slide dataviz" data-ch="引擎 vs 整台車">
+  <h2>原始碼規模</h2>
+  <div class="stat-grid c4 fragment">
+    <div class="stat-box"><div class="val" style="color:var(--blue);">512K</div><div class="label">行程式碼</div></div>
+    <div class="stat-box"><div class="val" style="color:var(--green);">1,906</div><div class="label">檔案</div></div>
+    <div class="stat-box"><div class="val" style="color:var(--gold);">~5%</div><div class="label">呼叫 LLM API</div></div>
+    <div class="stat-box"><div class="val" style="color:var(--purple);">~95%</div><div class="label">Harness 控制系統</div></div>
+  </div>
+  <div class="quote-box fragment" style="margin-top:1.5rem;">
+    <p class="quote-text">模型是引擎，Harness 是整台車。<br>引擎再強，沒有煞車、方向盤和變速箱，你哪也去不了。</p>
+  </div>
+</div>
+
+<!-- 7: Harness Architecture -->
+<div class="slide dataviz" data-ch="引擎 vs 整台車">
+  <h2>Harness 架構圖</h2>
+  <div class="harness-diagram fragment">
+    <div class="harness-row">
+      <div class="harness-block"><h4>Terminal UI</h4><p>React + Ink 渲染</p><div class="size">遊戲引擎級效能</div></div>
+      <div class="harness-block"><h4>Permission</h4><p>權限控制系統</p><div class="size">使用者授權管理</div></div>
+      <div class="harness-block"><h4>Memory</h4><p>記憶持久化</p><div class="size">三層架構</div></div>
+    </div>
+    <div class="harness-center">↕</div>
+    <div class="harness-row">
+      <div class="harness-block" style="border-color:var(--green);background:rgba(15,157,138,.08);"><h4>Tool System</h4><p>40 工具 + 50 指令</p><div class="size" style="color:var(--green);">~29K 行</div></div>
+      <div class="harness-block core"><h4>Query Engine</h4><p>LLM 呼叫核心</p><div class="size">~46K 行</div></div>
+      <div class="harness-block" style="border-color:var(--red);background:rgba(217,48,37,.08);"><h4>Security</h4><p>23-25 項檢查</p><div class="size" style="color:var(--red);">每個指令</div></div>
+    </div>
+    <div class="harness-center">↕</div>
+    <div class="harness-row">
+      <div class="harness-block"><h4>Context 管理</h4><p>壓縮 / 快取 / 截斷</p><div class="size">四階段策略</div></div>
+      <div class="harness-block"><h4>Agent 編排</h4><p>Coordinator Mode</p><div class="size">多 Agent 協作</div></div>
+      <div class="harness-block"><h4>Feature Flags</h4><p>108+ 功能開關</p><div class="size">GrowthBook</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 8: Why different -->
+<div class="slide dataviz" data-ch="引擎 vs 整台車">
+  <h2>同樣的引擎，不同的車</h2>
+  <p class="dim" style="text-align:center;margin-bottom:1rem;">為什麼同樣呼叫 Claude API，產品體驗天差地別？</p>
+  <table class="compare-table fragment">
+    <tr><th>面向</th><th>只有引擎</th><th>完整的車</th></tr>
+    <tr><td>安全</td><td class="danger">使用者自己負責</td><td class="ok">23-25 項自動檢查</td></tr>
+    <tr><td>記憶</td><td class="danger">每次對話從零開始</td><td class="ok">三層持久化記憶</td></tr>
+    <tr><td>上下文</td><td class="warn">直到爆掉才知道</td><td class="ok">四階段智慧壓縮</td></tr>
+    <tr><td>工具</td><td class="warn">純文字來回</td><td class="ok">40 工具直接操作系統</td></tr>
+    <tr><td>並行</td><td class="danger">只能單線程</td><td class="ok">多 Agent + 快取共享</td></tr>
+  </table>
+</div>
+
+<!-- 9: Tool System -->
+<div class="slide dataviz" data-ch="引擎 vs 整台車">
+  <h2>Tool System — 你每天在用的</h2>
+  <div class="stat-grid fragment">
+    <div class="stat-box"><div class="val" style="color:var(--blue);">40+</div><div class="label">內建工具</div></div>
+    <div class="stat-box"><div class="val" style="color:var(--green);">50+</div><div class="label">Slash 指令</div></div>
+    <div class="stat-box"><div class="val" style="color:var(--gold);">29K</div><div class="label">行工具定義程式碼</div></div>
+  </div>
+  <div class="card-grid fragment" style="margin-top:1.5rem;">
+    <div class="card"><div class="icon">📂</div><h3>Read / Write / Edit</h3><p>讀寫檔案，比 cat 或 sed 更安全</p></div>
+    <div class="card"><div class="icon">🔍</div><h3>Grep / Glob</h3><p>搜尋檔案內容與名稱</p></div>
+    <div class="card"><div class="icon">💻</div><h3>Bash</h3><p>執行系統指令（經 23 項安全檢查）</p></div>
+    <div class="card"><div class="icon">🤖</div><h3>Agent</h3><p>啟動子 Agent 並行工作</p></div>
+  </div>
+</div>
+
+<!-- 10: Security -->
+<div class="slide dataviz" data-ch="引擎 vs 整台車">
+  <h2>安全系統 — 每個指令都要過關</h2>
+  <div class="flow fragment">
+    <div class="flow-box">你輸入指令</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--red);">bashSecurity.ts<br><span style="font-size:.75rem;color:rgba(255,255,255,.45);">23-25 項檢查</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--gold);">YOLO 分類器<br><span style="font-size:.75rem;color:rgba(255,255,255,.45);">毫秒級風險判斷</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--green);">執行 or 攔截</div>
+  </div>
+  <table class="compare-table fragment" style="margin-top:1.5rem;">
+    <tr><th>風險等級</th><th>行為</th><th>範例</th></tr>
+    <tr><td class="ok">LOW</td><td>自動執行</td><td>ls, git status, npm test</td></tr>
+    <tr><td class="warn">MEDIUM</td><td>詢問使用者</td><td>npm install, 建立檔案</td></tr>
+    <tr><td class="danger">HIGH</td><td>強制攔截</td><td>rm -rf, 修改 .bashrc, 讀 SSH key</td></tr>
+  </table>
+  <p class="dim fragment" style="margin-top:1rem;text-align:center;font-size:.95rem;">另外還封鎖了 18 個危險的 Zsh 內建指令</p>
+</div>
+
+<!-- 11: Your harness -->
+<div class="slide dataviz" data-ch="引擎 vs 整台車">
+  <h2>你的 CLAUDE.md 就是你的個人 Harness</h2>
+  <div class="flow fragment" style="margin-bottom:1.5rem;">
+    <div class="flow-box" style="border-color:var(--blue);">Anthropic 工程師<br><span style="font-size:.8rem;color:rgba(255,255,255,.45);">寫 512K 行 harness</span></div>
+    <div class="flow-arrow">≈</div>
+    <div class="flow-box" style="border-color:var(--green);">你<br><span style="font-size:.8rem;color:rgba(255,255,255,.45);">寫 CLAUDE.md</span></div>
+  </div>
+  <div class="quote-box fragment">
+    <p class="quote-text">差的不是模型，是 harness — 也就是你怎麼設計整套控制系統。</p>
+    <p class="quote-src">而 CLAUDE.md 就是你能掌控的那部分 harness</p>
+  </div>
+  <div class="bottom-line fragment" style="margin-top:1.5rem;">
+    <h3>核心觀念</h3>
+    <p>好的 AI 使用 = 好的 Harness 設計<br>你不需要會寫程式，但你需要會寫指令</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     CHAPTER 3: CLAUDE.md 的秘密
+     ============================================================ -->
+
+<!-- 12: Chapter divider -->
+<div class="slide poster overlay-heavy" data-ch="CLAUDE.md 的秘密" style="background:linear-gradient(135deg,#16213e 0%,#0a0a14 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 3</p>
+  <h1>CLAUDE.md 的秘密</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">原始碼揭露的六條黃金規則</p>
+</div>
+
+<!-- 13: Reloading -->
+<div class="slide dataviz" data-ch="CLAUDE.md 的秘密">
+  <h2>CLAUDE.md 每一輪都會重新載入</h2>
+  <p class="dim" style="text-align:center;margin-bottom:1rem;">大部分人以為只在啟動時讀一次。錯。</p>
+  <div class="flow fragment">
+    <div class="flow-box">你送出訊息</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--blue);">重新讀取 CLAUDE.md</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">注入到 System Prompt</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--green);">AI 處理你的訊息</div>
+  </div>
+  <div class="info-box success fragment" style="margin-top:1.5rem;">
+    <p><strong>這代表什麼？</strong> 即使在超長對話中，CLAUDE.md 的指令永遠不會被遺忘。它是你最穩定的控制手段。</p>
+  </div>
+  <div class="info-box tip fragment">
+    <p><strong>進階知識：</strong> 系統 prompt 分「靜態區段」（全用戶共用快取）和「動態區段」（你的 CLAUDE.md）。頻繁修改 CLAUDE.md 會破壞快取，增加成本。</p>
+  </div>
+</div>
+
+<!-- 14: 40K limit -->
+<div class="slide dataviz" data-ch="CLAUDE.md 的秘密">
+  <h2>40,000 字元 — 你用了多少？</h2>
+  <div class="gauge-wrap fragment">
+    <div class="gauge-bar">
+      <div class="gauge-fill" style="width:0.5%;background:var(--red);"></div>
+    </div>
+    <div class="gauge-labels"><span>大部分人：~200 字</span><span>上限：40,000 字元</span></div>
+  </div>
+  <p class="dim fragment" style="text-align:center;margin:1.5rem 0 .5rem;">你等於有一份「每次對話都會被讀取的操作手冊」</p>
+  <p class="dim fragment" style="text-align:center;">但你只寫了一句<span style="color:var(--gold);font-weight:700;">「請用繁體中文回答」</span></p>
+  <div class="stat-grid c2 fragment" style="margin-top:1.5rem;">
+    <div class="stat-box">
+      <div class="val" style="color:var(--blue);">~50</div>
+      <div class="label">系統已佔用的指令數</div>
+    </div>
+    <div class="stat-box">
+      <div class="val" style="color:var(--green);">150-200</div>
+      <div class="label">有效指令上限（之後遵從度下降）</div>
+    </div>
+  </div>
+</div>
+
+<!-- 15: Hierarchy -->
+<div class="slide dataviz" data-ch="CLAUDE.md 的秘密">
+  <h2>CLAUDE.md 的層級結構</h2>
+  <div class="journey fragment">
+    <div class="j-item">
+      <div class="dot" style="background:var(--purple);">1</div>
+      <strong style="color:var(--purple);">~/.claude/CLAUDE.md</strong>
+      <p>全域設定 — 你的 coding style、語言偏好、工作習慣</p>
+    </div>
+    <div class="j-item">
+      <div class="dot" style="background:var(--blue);">2</div>
+      <strong style="color:var(--blue);">./CLAUDE.md</strong>
+      <p>專案層級 — 架構決策、框架慣例、部署流程</p>
+    </div>
+    <div class="j-item">
+      <div class="dot" style="background:var(--green);">3</div>
+      <strong style="color:var(--green);">.claude/rules/*.md</strong>
+      <p>模組化規則 — 安全規範、測試要求、git 工作流</p>
+    </div>
+    <div class="j-item">
+      <div class="dot" style="background:var(--gold);">4</div>
+      <strong style="color:var(--gold);">CLAUDE.local.md</strong>
+      <p>私人筆記 — 不進 git，只在你的電腦上</p>
+    </div>
+  </div>
+  <div class="info-box tip fragment" style="margin-top:1rem;">
+    <p><strong>設計原則：</strong> 全域放偏好，專案放決策，rules 放規範，local 放私密。分層管理，互不干擾。</p>
+  </div>
+</div>
+
+<!-- 16: Rule 1-2 -->
+<div class="slide clean" data-ch="CLAUDE.md 的秘密">
+  <h2>從原始碼學到的黃金規則 (1/3)</h2>
+  <div class="step-list">
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--red);">1</div>
+      <div class="step-content">
+        <strong>強制驗證，不准說「Done」就跑</strong>
+        <p>AI 判斷檔案寫入成功的標準只有一個：bytes 有沒有寫進磁碟。不是「程式能不能編譯」。</p>
+        <div class="info-box tip" style="margin-top:.5rem;"><p style="color:var(--g800);">寫進 CLAUDE.md：「每次修改檔案後，必須跑 type check 和 lint，全部通過才能回報完成。」</p></div>
+      </div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--orange);">2</div>
+      <div class="step-content">
+        <strong>大檔案必須分段讀取</strong>
+        <p>每次讀檔有 <strong>2,000 行 / 25,000 tokens</strong> 的硬上限。超過的部分會被截斷 — AI 不會告訴你它沒看完。</p>
+        <div class="info-box warning" style="margin-top:.5rem;"><p style="color:var(--g800);">超過 500 行的檔案，強制用 offset + limit 分段讀取。</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 17: Rule 3-4 -->
+<div class="slide clean" data-ch="CLAUDE.md 的秘密">
+  <h2>從原始碼學到的黃金規則 (2/3)</h2>
+  <div class="step-list">
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--purple);">3</div>
+      <div class="step-content">
+        <strong>超過 10 輪對話，編輯前必須重讀檔案</strong>
+        <p>對話超過 ~167K tokens 時，系統會自動壓縮歷史。AI 不知道自己忘了什麼，它會用幻覺補上。</p>
+        <div class="info-box warning" style="margin-top:.5rem;"><p style="color:var(--g800);">寫進 CLAUDE.md：「編輯前一律重新讀取目標檔案，不准信任記憶。」</p></div>
+      </div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--blue);">4</div>
+      <div class="step-content">
+        <strong>搜尋結果永遠要懷疑</strong>
+        <p>工具結果超過 <strong>50,000 字元會被截斷</strong>成 2,000 byte 的預覽。你問 AI 搜了幾個結果，它說 3 個，但實際上可能有 47 個。</p>
+        <div class="info-box tip" style="margin-top:.5rem;"><p style="color:var(--g800);">結果看起來太少？縮小範圍重搜，不要信第一次結果。</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 18: Rule 5-6 -->
+<div class="slide clean" data-ch="CLAUDE.md 的秘密">
+  <h2>從原始碼學到的黃金規則 (3/3)</h2>
+  <div class="step-list">
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--green);">5</div>
+      <div class="step-content">
+        <strong>重構前先清垃圾</strong>
+        <p>Codebase 裡的 dead code、unused import、orphaned props，每一行都在吃 token。這些垃圾加速觸發上下文壓縮。</p>
+        <div class="info-box success" style="margin-top:.5rem;"><p style="color:var(--g800);">大型重構前，先開一個 commit 專門清理，再開始真正的工作。</p></div>
+      </div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--gold);">6</div>
+      <div class="step-content">
+        <strong>複雜任務要拆成子 Agent 並行</strong>
+        <p>一個 Agent ≈ 167K tokens 的工作記憶。5 個並行 = 835K。任何超過 5 個獨立檔案的任務，都應該拆分。</p>
+        <div class="info-box tip" style="margin-top:.5rem;"><p style="color:var(--g800);">不要讓一個 Agent 硬扛到上下文崩潰。拆開、並行、再整合。</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 19: Internal vs External -->
+<div class="slide dataviz" data-ch="CLAUDE.md 的秘密">
+  <h2>內部版 vs 外部版</h2>
+  <p class="dim" style="text-align:center;margin-bottom:1rem;">Anthropic 員工用的 Claude Code 跟你的不一樣</p>
+  <table class="compare-table fragment">
+    <tr><th>功能</th><th>內部版（員工）</th><th>外部版（你）</th></tr>
+    <tr><td>Undercover Mode</td><td class="ok">自動隱藏 Anthropic 身份</td><td>不存在</td></tr>
+    <tr><td>Anti-Distillation</td><td class="ok">注入假工具定義</td><td>不存在</td></tr>
+    <tr><td>測試失敗處理</td><td class="highlight">「失敗就說失敗」</td><td>可能粉飾太平</td></tr>
+    <tr><td>驗證要求</td><td class="highlight">「沒跑過就不能說通過」</td><td>有時會自行判斷</td></tr>
+  </table>
+  <div class="info-box success fragment" style="margin-top:1.5rem;">
+    <p><strong>好消息：</strong> 你可以自己把這些規則寫進 CLAUDE.md，達到跟內部版一樣的效果！</p>
+  </div>
+</div>
+
+<!-- 20: Practice -->
+<div class="slide clean" data-ch="CLAUDE.md 的秘密">
+  <h2>實作：寫出你的第一版 CLAUDE.md</h2>
+  <div class="clean-card-grid c2">
+    <div class="clean-card fragment">
+      <div class="bar" style="background:var(--purple);"></div>
+      <h3>全域 ~/.claude/CLAUDE.md</h3>
+      <p>• 語言偏好（繁體中文）<br>• 回答風格（簡潔/詳細）<br>• 程式語言偏好<br>• 「測試沒通過不准說完成」<br>• 「編輯前先重讀檔案」</p>
+    </div>
+    <div class="clean-card fragment">
+      <div class="bar" style="background:var(--blue);"></div>
+      <h3>專案 ./CLAUDE.md</h3>
+      <p>• 專案架構說明<br>• 技術棧版本<br>• 部署流程<br>• 命名慣例<br>• 測試要求</p>
+    </div>
+  </div>
+  <div class="info-box tip fragment" style="margin-top:1rem;">
+    <p style="color:var(--g800);"><strong>黃金問題：</strong> 對每一行指令問自己 — 「沒有這行，Claude 會犯錯嗎？」如果 Claude 已經正確執行的事，那行就是噪音。</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     CHAPTER 4: 多 Agent 與快取
+     ============================================================ -->
+
+<!-- 21: Chapter divider -->
+<div class="slide poster overlay-heavy" data-ch="多 Agent 與快取" style="background:linear-gradient(135deg,#0a0a14 0%,#0B3C5D 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 4</p>
+  <h1>多 Agent 與快取</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">5 個 Agent 的成本 ≈ 1 個</p>
+</div>
+
+<!-- 22: Coordinator Mode -->
+<div class="slide dataviz" data-ch="多 Agent 與快取">
+  <h2>Coordinator Mode — 一個老闆帶多個員工</h2>
+  <div class="flow fragment">
+    <div class="flow-box" style="border-color:var(--gold);min-width:200px;">Lead Agent<br><span style="font-size:.8rem;color:rgba(255,255,255,.45);">規劃 + 分配 + 驗收</span></div>
+    <div class="flow-arrow">→</div>
+    <div style="display:flex;flex-direction:column;gap:.6rem;">
+      <div class="flow-box" style="border-color:var(--blue);">Worker A<br><span style="font-size:.75rem;color:rgba(255,255,255,.4);">前端</span></div>
+      <div class="flow-box" style="border-color:var(--green);">Worker B<br><span style="font-size:.75rem;color:rgba(255,255,255,.4);">後端</span></div>
+      <div class="flow-box" style="border-color:var(--purple);">Worker C<br><span style="font-size:.75rem;color:rgba(255,255,255,.4);">測試</span></div>
+    </div>
+  </div>
+  <div class="card-grid fragment" style="margin-top:1.5rem;">
+    <div class="card"><div class="icon">📋</div><h3>做事的人 ≠ 驗收的人</h3><p>寫 code 的不做 QA，探索的不能改檔案</p></div>
+    <div class="card"><div class="icon">📨</div><h3>XML 訊息溝通</h3><p>Agent 之間用結構化訊息交換資訊</p></div>
+    <div class="card"><div class="icon">⚡</div><h3>並行是超能力</h3><p>Workers 同時工作，不用排隊等</p></div>
+  </div>
+</div>
+
+<!-- 23: Cache sharing -->
+<div class="slide dataviz" data-ch="多 Agent 與快取">
+  <h2>Sub-Agent 快取共享的秘密</h2>
+  <div class="stat-grid c2 fragment">
+    <div class="stat-box"><div class="val" style="color:var(--blue);">byte-identical</div><div class="label">子 Agent 的上下文副本</div></div>
+    <div class="stat-box"><div class="val" style="color:var(--green);">≈ 免費</div><div class="label">額外 Agent 的成本</div></div>
+  </div>
+  <div class="flow fragment" style="margin-top:1.5rem;">
+    <div class="flow-box" style="border-color:var(--gold);">主 Agent 上下文<br><span style="font-size:.75rem;color:rgba(255,255,255,.4);">付一次完整費用</span></div>
+    <div class="flow-arrow">fork</div>
+    <div style="display:flex;flex-direction:column;gap:.4rem;">
+      <div class="flow-box" style="font-size:.85rem;">副本 A <span style="color:var(--green);font-size:.75rem;">已快取</span></div>
+      <div class="flow-box" style="font-size:.85rem;">副本 B <span style="color:var(--green);font-size:.75rem;">已快取</span></div>
+      <div class="flow-box" style="font-size:.85rem;">副本 C <span style="color:var(--green);font-size:.75rem;">已快取</span></div>
+    </div>
+  </div>
+  <div class="quote-box fragment" style="margin-top:1rem;">
+    <p class="quote-text">就像影印一份文件，影印 5 份的成本遠低於重新打字 5 次</p>
+    <p class="quote-src">API 快取讀取：$0.30/M tokens vs 無快取 $5.00/M tokens — 節省 94%</p>
+  </div>
+</div>
+
+<!-- 24: Sequential vs Parallel -->
+<div class="slide dataviz" data-ch="多 Agent 與快取">
+  <h2>單線程 vs 並行</h2>
+  <table class="compare-table fragment">
+    <tr><th></th><th>單線程模式</th><th>並行模式</th></tr>
+    <tr><td>工作方式</td><td>做完一件 → 等 → 做下一件</td><td class="highlight">5 個同時做</td></tr>
+    <tr><td>上下文</td><td>全部擠在 167K tokens</td><td class="highlight">每個 Agent 167K = 共 835K</td></tr>
+    <tr><td>成本</td><td>一份完整費用</td><td class="ok">快取共享，幾乎不增加</td></tr>
+    <tr><td>速度</td><td>5x 時間</td><td class="highlight">≈ 1x 時間</td></tr>
+  </table>
+  <div class="quote-box fragment" style="margin-top:1.5rem;">
+    <p class="quote-text">買了法拉利只開一檔</p>
+    <p class="quote-src">— 大部分人使用 Claude Code 的方式</p>
+  </div>
+</div>
+
+<!-- 25: When to split -->
+<div class="slide clean" data-ch="多 Agent 與快取">
+  <h2>什麼時候該拆 Agent？</h2>
+  <div class="step-list">
+    <div class="step fragment"><div class="step-num">1</div><div class="step-content"><strong>修改 5+ 個獨立檔案</strong><p>每個檔案交給不同 Agent 處理</p></div></div>
+    <div class="step fragment"><div class="step-num">2</div><div class="step-content"><strong>需要同時搜尋多個方向</strong><p>一個搜前端、一個搜後端、一個搜文件</p></div></div>
+    <div class="step fragment"><div class="step-num">3</div><div class="step-content"><strong>對話已經很長了</strong><p>context 接近上限，拆出去避免壓縮</p></div></div>
+    <div class="step fragment"><div class="step-num">4</div><div class="step-content"><strong>不同任務互不相依</strong><p>能獨立完成的就不要排隊</p></div></div>
+  </div>
+  <div class="info-box success fragment" style="margin-top:1rem;">
+    <p style="color:var(--g800);"><strong>簡單判斷：</strong> 如果你能把任務交給兩個人分頭做，那就可以拆 Agent。</p>
+  </div>
+</div>
+
+<!-- 26: Memory architecture -->
+<div class="slide dataviz" data-ch="多 Agent 與快取">
+  <h2>記憶三層架構</h2>
+  <div class="journey fragment">
+    <div class="j-item">
+      <div class="dot" style="background:var(--blue);">1</div>
+      <strong>MEMORY.md — 隨身索引</strong>
+      <p>每行 ~150 字元的指標，永遠在 context 裡。告訴 AI「去哪裡找」而非「內容是什麼」</p>
+    </div>
+    <div class="j-item">
+      <div class="dot" style="background:var(--green);">2</div>
+      <strong>Topic Files — 按需載入</strong>
+      <p>詳細的專案筆記，只在需要時才讀取。節省 context 空間</p>
+    </div>
+    <div class="j-item">
+      <div class="dot" style="background:var(--purple);">3</div>
+      <strong>Session History — 搜尋式存取</strong>
+      <p>過去的對話紀錄，用 grep 搜尋，不會整份載入</p>
+    </div>
+  </div>
+  <div class="info-box tip fragment" style="margin-top:1rem;">
+    <p><strong>autoDream：</strong> AI 在閒置時會「整理記憶」— 把分散的筆記合併、過期的刪除，保持 MEMORY.md 在 200 行以下</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     CHAPTER 5: 上下文就是命
+     ============================================================ -->
+
+<!-- 27: Chapter divider -->
+<div class="slide poster overlay-heavy" data-ch="上下文就是命" style="background:linear-gradient(135deg,#0B3C5D 0%,#0a0a14 50%,#16213e 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 5</p>
+  <h1>上下文就是命</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">你的對話正在被壓縮，你知道嗎？</p>
+</div>
+
+<!-- 28: Context Window -->
+<div class="slide dataviz" data-ch="上下文就是命">
+  <h2>Context Window — 共同的工作記憶</h2>
+  <p class="dim" style="text-align:center;margin-bottom:1rem;">想像你跟 AI 在一張白板前工作，白板就是 context</p>
+  <div class="gauge-wrap fragment">
+    <p style="text-align:left;font-size:.9rem;color:rgba(255,255,255,.5);margin-bottom:.3rem;">200K tokens 的 Context Window</p>
+    <div class="gauge-bar">
+      <div class="gauge-fill" style="width:25%;background:var(--purple);border-radius:16px 0 0 16px;"></div>
+      <div class="gauge-fill" style="width:58.5%;background:var(--blue);position:absolute;left:25%;top:0;height:100%;"></div>
+      <div class="gauge-fill" style="width:16.5%;background:var(--green);position:absolute;left:83.5%;top:0;height:100%;border-radius:0 16px 16px 0;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:.5rem;font-size:.8rem;">
+      <span style="color:var(--purple);">系統 Prompt ~25%</span>
+      <span style="color:var(--blue);">你的對話 ~58.5%</span>
+      <span style="color:var(--green);">可用 Buffer ~16.5%</span>
+    </div>
+  </div>
+  <div class="stat-grid fragment" style="margin-top:1.5rem;">
+    <div class="stat-box"><div class="val" style="color:var(--purple);">~50K</div><div class="label">系統 Prompt 佔用</div></div>
+    <div class="stat-box"><div class="val" style="color:var(--blue);">~117K</div><div class="label">你的對話空間</div></div>
+    <div class="stat-box"><div class="val" style="color:var(--green);">~33K</div><div class="label">實際可用 Buffer</div></div>
+  </div>
+</div>
+
+<!-- 29: Four stages -->
+<div class="slide dataviz" data-ch="上下文就是命">
+  <h2>四階段壓縮 — 你的對話如何被處理</h2>
+  <div class="journey fragment">
+    <div class="j-item">
+      <div class="dot" style="background:var(--green);">1</div>
+      <strong>Tool Result Budgeting</strong>
+      <p>每個工具結果設預算上限，超過就截斷</p>
+    </div>
+    <div class="j-item">
+      <div class="dot" style="background:var(--blue);">2</div>
+      <strong>Microcompaction</strong>
+      <p>基於時間，清除舊的工具結果</p>
+    </div>
+    <div class="j-item">
+      <div class="dot" style="background:var(--orange);">3</div>
+      <strong>Context Collapse</strong>
+      <p>把對話區段摘要成簡短版本</p>
+    </div>
+    <div class="j-item">
+      <div class="dot" style="background:var(--red);">4</div>
+      <strong>Autocompact — 95% 容量觸發</strong>
+      <p>保留 13K buffer，產生 20K 摘要，你的推理鏈和讀過的檔案內容可能全部消失</p>
+    </div>
+  </div>
+  <div class="info-box warning fragment" style="margin-top:.8rem;">
+    <p><strong>最後手段 — PTL Truncation：</strong> 直接丟棄最舊的訊息群組。到這步就來不及了。</p>
+  </div>
+</div>
+
+<!-- 30: /compact -->
+<div class="slide dataviz" data-ch="上下文就是命">
+  <h2>/compact — 手動存檔</h2>
+  <p class="dim" style="text-align:center;margin-bottom:1rem;">就像打遊戲時手動存檔：保留重要的，清掉不需要的</p>
+  <div class="flow fragment">
+    <div class="flow-box" style="border-color:var(--red);">對話快爆了</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--blue);">輸入 /compact</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--green);">壓縮成 50K 摘要<br><span style="font-size:.75rem;color:rgba(255,255,255,.4);">+ 最近 5 個檔案</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--gold);">繼續工作</div>
+  </div>
+  <div class="card-grid fragment" style="margin-top:1.5rem;">
+    <div class="card"><div class="icon">✅</div><h3>主動比被動好</h3><p>你控制保留什麼，比讓系統自動砍好</p></div>
+    <div class="card"><div class="icon">📌</div><h3>關鍵時機</h3><p>完成一個大任務後、切換主題前、對話超過 20 輪時</p></div>
+    <div class="card"><div class="icon">💡</div><h3>搭配指令</h3><p>/compact 後可以加一句話，告訴 AI 哪些最重要</p></div>
+  </div>
+</div>
+
+<!-- 31: Truncation -->
+<div class="slide dataviz" data-ch="上下文就是命">
+  <h2>截斷 — AI 不會告訴你它沒看完</h2>
+  <div class="stat-grid c2 fragment">
+    <div class="stat-box"><div class="val" style="color:var(--red);">50,000</div><div class="label">字元截斷閾值（搜尋結果）</div></div>
+    <div class="stat-box"><div class="val" style="color:var(--orange);">2,000</div><div class="label">byte 預覽（截斷後）</div></div>
+  </div>
+  <div class="quote-box fragment" style="margin-top:1.5rem;">
+    <p class="quote-text">你問 AI 搜了幾個結果，它說 3 個。<br>但實際上可能有 47 個。</p>
+    <p class="quote-src">被截斷的結果 AI 連自己都不知道丟了什麼</p>
+  </div>
+  <div class="card-grid fragment" style="margin-top:1rem;">
+    <div class="card"><div class="icon">🔍</div><h3>結果太少？</h3><p>縮小搜尋範圍重搜</p></div>
+    <div class="card"><div class="icon">📄</div><h3>大檔案？</h3><p>用 offset + limit 分段讀</p></div>
+    <div class="card"><div class="icon">🗑️</div><h3>清理 codebase</h3><p>Dead code 在吃你的 token</p></div>
+  </div>
+</div>
+
+<!-- 32: Tips -->
+<div class="slide clean" data-ch="上下文就是命">
+  <h2>延長有效對話長度的技巧</h2>
+  <div class="step-list">
+    <div class="step fragment"><div class="step-num" style="background:var(--green);">1</div><div class="step-content"><strong>定期 /compact</strong><p>每完成一個里程碑就手動壓縮，別等到系統自動砍</p></div></div>
+    <div class="step fragment"><div class="step-num" style="background:var(--blue);">2</div><div class="step-content"><strong>清理 dead code</strong><p>unused imports、orphaned props 每一行都在吃 token。清理就是省錢</p></div></div>
+    <div class="step fragment"><div class="step-num" style="background:var(--purple);">3</div><div class="step-content"><strong>拆 Agent 分攤記憶</strong><p>複雜任務分到子 Agent，主線程保持乾淨</p></div></div>
+    <div class="step fragment"><div class="step-num" style="background:var(--gold);">4</div><div class="step-content"><strong>善用 CLAUDE.md</strong><p>重要的規則寫進 CLAUDE.md，不用在對話中反覆提醒</p></div></div>
+    <div class="step fragment"><div class="step-num" style="background:var(--orange);">5</div><div class="step-content"><strong>切換主題 = 新對話</strong><p>跨主題的對話只會讓 context 更混亂</p></div></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     CHAPTER 6: 隱藏功能預覽
+     ============================================================ -->
+
+<!-- 33: Chapter divider -->
+<div class="slide poster overlay-heavy" data-ch="隱藏功能" style="background:linear-gradient(135deg,#16213e 0%,#0B3C5D 50%,#0a0a14 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 6</p>
+  <h1>隱藏功能預覽</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">原始碼裡的未發布功能</p>
+</div>
+
+<!-- 34: KAIROS + ULTRAPLAN -->
+<div class="slide dataviz" data-ch="隱藏功能">
+  <h2>KAIROS & ULTRAPLAN</h2>
+  <table class="compare-table fragment">
+    <tr><th></th><th>KAIROS</th><th>ULTRAPLAN</th></tr>
+    <tr><td>定位</td><td class="highlight">常駐背景 Daemon</td><td class="highlight">雲端深度規劃</td></tr>
+    <tr><td>比喻</td><td>永遠在線的助理</td><td>請顧問研究一個月</td></tr>
+    <tr><td>運作方式</td><td>監聽 GitHub webhook、5 分鐘刷新</td><td>雲端 Opus 容器，最長 30 分鐘思考</td></tr>
+    <tr><td>用途</td><td>自動 review PR、回覆 issue</td><td>大規模重構、架構設計</td></tr>
+    <tr><td>狀態</td><td class="warn">未發布（150+ 引用）</td><td class="warn">未發布（feature flag）</td></tr>
+  </table>
+  <div class="info-box tip fragment" style="margin-top:1rem;">
+    <p><strong>ULTRAPLAN 的突破：</strong> 一般 API call 思考幾十秒，ULTRAPLAN 可以思考 30 分鐘 — 可能是數百萬 thinking tokens。想深一次，然後高效執行。</p>
+  </div>
+</div>
+
+<!-- 35: BUDDY -->
+<div class="slide dataviz" data-ch="隱藏功能">
+  <h2>BUDDY — AI 寵物系統</h2>
+  <p class="dim" style="text-align:center;margin-bottom:.5rem;">沒錯，Claude Code 裡藏了一個虛擬寵物遊戲</p>
+  <div class="tier-grid fragment">
+    <div class="tier"><div class="emoji">🦊</div><h4>18 物種</h4><p>5 個稀有度等級</p></div>
+    <div class="tier"><div class="emoji">✨</div><h4>1% 閃光率</h4><p>像寶可夢一樣</p></div>
+    <div class="tier"><div class="emoji">📊</div><h4>5 項能力值</h4><p>DEBUGGING<br>PATIENCE<br>CHAOS<br>WISDOM<br>SNARK</p></div>
+    <div class="tier"><div class="emoji">🎲</div><h4>程序化生成</h4><p>Mulberry32 PRNG<br>由你的 User ID 決定</p></div>
+  </div>
+  <div class="quote-box fragment" style="margin-top:1rem;">
+    <p class="quote-text">工程師們的浪漫：在最嚴肅的 AI 工具裡藏一個電子雞</p>
+  </div>
+</div>
+
+<!-- 36: Frustration + Anti-distillation -->
+<div class="slide dataviz" data-ch="隱藏功能">
+  <h2>挫折偵測 & 反蒸餾</h2>
+  <div class="card-grid fragment" style="margin-top:1rem;">
+    <div class="card" style="max-width:420px;">
+      <div class="icon">😤</div>
+      <h3>挫折偵測器</h3>
+      <p>21 個 regex 偵測使用者的不滿情緒。用 regex（5ms）而非 LLM 推論，省成本。</p>
+      <p style="margin-top:.5rem;color:rgba(255,255,255,.35);font-size:.85rem;">三個反應層級：<br>退一步 → 道歉承認 → 簡化回覆</p>
+    </div>
+    <div class="card" style="max-width:420px;">
+      <div class="icon">🛡️</div>
+      <h3>Anti-Distillation</h3>
+      <p>內部版會注入假工具定義到 prompt 裡，如果有人用 Claude Code 的輸出來訓練競爭者模型，會「中毒」。</p>
+      <p style="margin-top:.5rem;color:rgba(255,255,255,.35);font-size:.85rem;">只對 Anthropic 員工啟用<br>外部版不受影響</p>
+    </div>
+  </div>
+  <div class="info-box warning fragment" style="margin-top:1rem;">
+    <p><strong>Native Client 驗證：</strong> API 請求包含一個硬體指紋 hash (cch=ac1d8)，由 Bun 的 Zig HTTP stack 計算。山寨版 Claude Code 無法通過驗證。</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     CHAPTER 7: 你今天就能做的事
+     ============================================================ -->
+
+<!-- 37: Chapter divider -->
+<div class="slide poster overlay-heavy" data-ch="你今天就能做的事" style="background:linear-gradient(135deg,#0a0a14 0%,#16213e 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 7</p>
+  <h1>你今天就能做的事</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">四個立即可行的改善動作</p>
+</div>
+
+<!-- 38: Action 1-2 -->
+<div class="slide clean" data-ch="你今天就能做的事">
+  <h2>Action 1 & 2</h2>
+  <div class="step-list">
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--blue);">1</div>
+      <div class="step-content">
+        <strong>花 30 分鐘寫你的 CLAUDE.md</strong>
+        <p>不是寫小說，是寫「操作手冊」。從這三條開始：</p>
+        <div class="info-box tip" style="margin-top:.5rem;">
+          <p style="color:var(--g800);">① 「修改檔案後必須跑測試，通過才能回報完成」<br>② 「編輯前先重讀目標檔案」<br>③ 「搜尋結果少於預期時，縮小範圍重搜」</p>
+        </div>
+      </div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--green);">2</div>
+      <div class="step-content">
+        <strong>開始用 /compact 管理長對話</strong>
+        <p>每完成一個任務就打 /compact。就像遊戲存檔，養成習慣就好。</p>
+        <div class="info-box success" style="margin-top:.5rem;">
+          <p style="color:var(--g800);">在 /compact 後面加一句話：「保留 XXX 的相關脈絡」— 告訴 AI 什麼最重要。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 39: Action 3-4 -->
+<div class="slide clean" data-ch="你今天就能做的事">
+  <h2>Action 3 & 4</h2>
+  <div class="step-list">
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--purple);">3</div>
+      <div class="step-content">
+        <strong>複雜任務拆成並行 Agent</strong>
+        <p>5+ 個獨立檔案的任務，交給 AI 自己拆 Agent。只要說：「請用多個 Agent 並行處理」。</p>
+        <div class="info-box tip" style="margin-top:.5rem;">
+          <p style="color:var(--g800);">成本幾乎不增加（快取共享），但速度和品質都提升。</p>
+        </div>
+      </div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--gold);">4</div>
+      <div class="step-content">
+        <strong>搜尋結果太少時，不要信</strong>
+        <p>AI 說「只找到 3 個結果」→ 可能有 47 個被截斷了。縮小範圍，換關鍵字，多搜幾次。</p>
+        <div class="info-box warning" style="margin-top:.5rem;">
+          <p style="color:var(--g800);">同理：AI 說「我已經讀完這個檔案了」→ 如果檔案超過 2000 行，它可能只讀了前面。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 40: Summary -->
+<div class="slide dataviz" data-ch="你今天就能做的事">
+  <h2>總結</h2>
+  <div class="bottom-line fragment">
+    <h3>AI 的秘密不在模型</h3>
+    <p>在你怎麼駕馭它</p>
+  </div>
+  <div class="card-grid fragment" style="margin-top:1.5rem;">
+    <div class="card"><div class="icon">🚗</div><h3>模型是引擎</h3><p>Harness 是整台車<br>CLAUDE.md 是你的方向盤</p></div>
+    <div class="card"><div class="icon">🧠</div><h3>Context 是生命</h3><p>主動管理記憶<br>不要等到被壓縮</p></div>
+    <div class="card"><div class="icon">⚡</div><h3>並行是超能力</h3><p>拆 Agent、善用快取<br>一個人做五個人的事</p></div>
+  </div>
+  <div class="quote-box fragment" style="margin-top:1rem;">
+    <p class="quote-text">如果你今天只做一件事，就是認真寫你的 CLAUDE.md。</p>
+    <p class="quote-src">你給 AI 的指令框架，決定了 AI 給你的產出品質</p>
+  </div>
+</div>
+
+<!-- 41: Resources -->
+<div class="slide clean" data-ch="你今天就能做的事">
+  <h2>參考資源</h2>
+  <div class="step-list">
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--blue);">📋</div>
+      <div class="step-content"><strong>System Prompts 完整集</strong><p>Piebald-AI/claude-code-system-prompts（7,953 stars）— 所有 110+ 系統 prompt</p></div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--green);">📖</div>
+      <div class="step-content"><strong>Harness 工程技術書</strong><p>ZhangHanDong/harness-engineering-from-cc-to-ai-coding — 7 部分完整中文解析</p></div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--purple);">🔗</div>
+      <div class="step-content"><strong>分析文章精選</strong><p>nblintao/awesome-claude-code-postleak-insights — 高品質分析彙整</p></div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--gold);">🐍</div>
+      <div class="step-content"><strong>Prompt 工程模式</strong><p>miloudbelarebia/claude-code-prompt-engineering-patterns — 10 個 Python 實作</p></div>
+    </div>
+    <div class="step fragment">
+      <div class="step-num" style="background:var(--orange);">📰</div>
+      <div class="step-content"><strong>深度分析文章</strong><p>alex000kim.com — fake tools, frustration regexes, undercover mode 完整拆解</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- 42: Closing -->
+<div class="slide poster overlay-heavy" data-ch="結語" style="background:linear-gradient(135deg,#0a0a14 0%,#0B3C5D 50%,#16213e 100%);">
+  <p style="font-size:1rem;color:rgba(255,255,255,.4);margin-bottom:2rem;">AI 100 講 — S22 補充單元</p>
+  <h1 style="font-size:2.5rem;">AI 的秘密不在模型<br><span style="color:var(--blue);">在你怎麼駕馭它</span></h1>
+  <p class="poster-subtitle" style="margin-top:2rem;">今天回去，花 30 分鐘寫你的 CLAUDE.md</p>
+  <p style="color:rgba(255,255,255,.25);margin-top:3rem;font-size:.85rem;">感謝聆聽</p>
+</div>
+
+</div><!-- /slides-wrap -->
+
+<!-- Controls -->
+<div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>&#8592;</button><button id="next">&#8594;</button></div>
+
+<!-- Chapter Menu -->
+<div id="chapterMenu" class="chapter-menu">
+  <button class="chapter-btn" onclick="toggleChapterMenu()">
+    <span class="chapter-icon">&#9776;</span>
+    <span>章節</span>
+    <span class="chapter-arrow">&#9650;</span>
+  </button>
+  <div class="chapter-list" id="chapterList"></div>
+</div>
+
+<script>
+(function(){
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  let cur = 0;
+  document.getElementById('total').textContent = total;
+
+  // Build chapter menu
+  const chapters = [];
+  const seen = new Set();
+  slides.forEach((s, i) => {
+    const ch = s.dataset.ch;
+    if (ch && !seen.has(ch)) { seen.add(ch); chapters.push({ name: ch, index: i }); }
+  });
+  const list = document.getElementById('chapterList');
+  chapters.forEach(c => {
+    const item = document.createElement('div');
+    item.className = 'chapter-item';
+    item.innerHTML = '<span class="chapter-dot"></span>' + c.name;
+    item.onclick = () => { go(c.index); toggleChapterMenu(); };
+    list.appendChild(item);
+  });
+
+  function go(n) {
+    if (n < 0 || n >= total) return;
+    slides[cur].classList.remove('active');
+    cur = n;
+    slides[cur].classList.add('active');
+    update();
+  }
+
+  function update() {
+    document.getElementById('current').textContent = cur + 1;
+    document.getElementById('progress').style.width = ((cur + 1) / total * 100) + '%';
+    document.getElementById('prev').disabled = cur === 0;
+    document.getElementById('next').disabled = cur === total - 1;
+    // Show fragments up to this point on current slide
+    // Update chapter menu active
+    const chItems = list.querySelectorAll('.chapter-item');
+    let activeChIdx = 0;
+    chapters.forEach((c, i) => { if (cur >= c.index) activeChIdx = i; });
+    chItems.forEach((el, i) => el.classList.toggle('active', i === activeChIdx));
+  }
+
+  // Fragment management
+  function getFragments(slide) {
+    return Array.from(slide.querySelectorAll('.fragment'));
+  }
+  function getVisibleCount(slide) {
+    return getFragments(slide).filter(f => f.classList.contains('visible')).length;
+  }
+  function showNextFragment() {
+    const frags = getFragments(slides[cur]);
+    const next = frags.find(f => !f.classList.contains('visible'));
+    if (next) { next.classList.add('visible'); return true; }
+    return false;
+  }
+  function hideLastFragment() {
+    const frags = getFragments(slides[cur]);
+    const visible = frags.filter(f => f.classList.contains('visible'));
+    if (visible.length > 0) { visible[visible.length - 1].classList.remove('visible'); return true; }
+    return false;
+  }
+  function showAllFragments(slide) {
+    getFragments(slide).forEach(f => f.classList.add('visible'));
+  }
+  function hideAllFragments(slide) {
+    getFragments(slide).forEach(f => f.classList.remove('visible'));
+  }
+
+  function next() {
+    if (!showNextFragment()) {
+      if (cur < total - 1) {
+        go(cur + 1);
+        // Don't auto-show fragments on new slide
+      }
+    }
+  }
+  function prev() {
+    if (!hideLastFragment()) {
+      if (cur > 0) {
+        go(cur - 1);
+        showAllFragments(slides[cur]);
+      }
+    }
+  }
+
+  document.getElementById('next').onclick = next;
+  document.getElementById('prev').onclick = prev;
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'Backspace') { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') { e.preventDefault(); go(0); hideAllFragments(slides[0]); }
+    else if (e.key === 'End') { e.preventDefault(); go(total - 1); showAllFragments(slides[total - 1]); }
+    else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+
+  // Touch support
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) { diff > 0 ? next() : prev(); }
+  });
+
+  window.toggleChapterMenu = function() {
+    document.getElementById('chapterMenu').classList.toggle('open');
+  };
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.chapter-menu')) document.getElementById('chapterMenu').classList.remove('open');
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>
