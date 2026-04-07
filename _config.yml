@@ -24,6 +24,7 @@ defaults:
 
 include:
   - slides/pdf
+  - slides/supplements/img
 
 exclude:
   - scripts/
