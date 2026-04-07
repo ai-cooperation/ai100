@@ -43,6 +43,21 @@ html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;colo
 .slide.poster.overlay-heavy::before{background:linear-gradient(to bottom,rgba(0,0,0,.45) 0%,rgba(0,0,0,.85) 100%);}
 .slide.poster.overlay-center::before{background:radial-gradient(ellipse at center,rgba(0,0,0,.3) 0%,rgba(0,0,0,.8) 100%);}
 
+/* ── Cinematic Mode (full-bleed image, left gradient + left-aligned text) ── */
+.slide.cine{background-size:cover;background-position:center;color:#fff;text-align:left;padding:0;display:flex;align-items:stretch;}
+.slide.cine::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(12,12,20,.92) 0%,rgba(12,12,20,.75) 22%,rgba(12,12,20,.3) 42%,transparent 62%);}
+.slide.cine>*{position:relative;z-index:2;}
+.slide.cine .cine-text{width:45%;padding:3.5rem 3rem;display:flex;flex-direction:column;justify-content:center;}
+.slide.cine .cine-text h1{font-size:2.8rem;font-weight:900;line-height:1.3;margin-bottom:.8rem;}
+.slide.cine .cine-text .ct-tag{font-size:.85rem;color:rgba(255,255,255,.35);letter-spacing:.15em;margin-bottom:1.2rem;}
+.slide.cine .cine-text .ct-sub{font-size:1.15rem;color:rgba(255,255,255,.55);line-height:1.7;}
+.slide.cine .cine-text .ct-accent{color:var(--gold,#F9AB00);font-weight:700;}
+.slide.cine.cine-right::before{background:linear-gradient(270deg,rgba(12,12,20,.92) 0%,rgba(12,12,20,.75) 22%,rgba(12,12,20,.3) 42%,transparent 62%);}
+.slide.cine.cine-right .cine-text{margin-left:auto;}
+.slide.cine .ct-quote{font-size:1.2rem;line-height:1.9;color:rgba(255,255,255,.9);border-left:3px solid var(--gold,#F9AB00);padding-left:1.2rem;margin:.8rem 0;}
+.slide.cine .ct-quote-src{font-size:.9rem;color:rgba(255,255,255,.4);margin-top:.5rem;}
+.slide.cine .ct-insight{font-size:1.15rem;font-weight:700;margin-top:1.2rem;line-height:1.7;}
+
 /* Film grain */
 .grain::after{content:'';position:absolute;inset:0;z-index:3;opacity:.04;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
 
@@ -178,30 +193,29 @@ p,li{font-size:1.1rem;line-height:1.8;}
 <div class="slides">
 
 <!-- ===== 0: COVER ===== -->
-<div class="slide poster overlay-heavy grain active" data-index="0" data-act="Paper Lab" style="background-image:url('img/talk/cover.png');">
-  <p style="font-size:1rem;color:rgba(255,255,255,.4);margin-bottom:1.5rem;">Paper Lab · 論文方法學</p>
-  <h1 style="font-size:3.2rem;line-height:1.4;">
-    從<span style="color:var(--gold);">混亂</span>到<span style="color:var(--teal);">系統</span><br>
-    <span style="font-size:2rem;">一個工程師的論文寫作之路</span>
-  </h1>
-  <p style="color:rgba(255,255,255,.5);margin-top:2rem;font-size:1.1rem;">陳重光 Alan Chen</p>
-  <p style="color:rgba(255,255,255,.25);margin-top:3rem;font-size:.85rem;">按 → 或空白鍵開始 ｜ F 全螢幕</p>
+<div class="slide cine active" data-index="0" data-act="Paper Lab" style="background-image:url('img/talk/cover.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Paper Lab · 論文方法學</div>
+    <h1 style="font-size:3.2rem;line-height:1.4;">
+      從<span class="ct-accent">混亂</span>到<span style="color:var(--teal);">系統</span><br>
+      <span style="font-size:2rem;">工程師的論文寫作之路</span>
+    </h1>
+    <p class="ct-sub" style="margin-top:2rem;">陳重光 Alan Chen</p>
+    <p style="color:rgba(255,255,255,.25);margin-top:3rem;font-size:.85rem;">按 → 或空白鍵開始 ｜ F 全螢幕</p>
+  </div>
 </div>
 
-<!-- ===== 1: 我的故事 ===== -->
-<div class="slide poster overlay-center grain" data-index="1" data-act="我的故事" style="background-image:url('img/talk/act1_story.png');">
-  <h1>我的故事</h1>
-  <p style="color:var(--gold);margin-top:.5rem;font-size:1.2rem;">25 年數據工作，第一次寫論文</p>
-</div>
-
-<!-- ===== 2: 開場衝擊 ===== -->
-<div class="slide poster overlay-heavy grain" data-index="2" data-act="我的故事" style="background-image:url('img/talk/act1_story.png');">
-  <h1 style="font-size:2.8rem;line-height:1.5;">
-    IoT 感測器、大數據分析、AI 模型<br>
-    <span style="color:var(--g400);">——這些我都會</span><br><br>
-    但<span style="color:var(--gold);">寫一篇論文</span><br>
-    讓我卡了半年
-  </h1>
+<!-- ===== 1: 我的故事 + 開場衝擊 (merged) ===== -->
+<div class="slide cine" data-index="2" data-act="我的故事" style="background-image:url('img/talk/act1_story.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Part 1 · 我的故事</div>
+    <h1 style="font-size:2.4rem;line-height:1.5;">
+      IoT 感測器、大數據分析、AI 模型<br>
+      <span style="color:var(--g400);">——這些我都會</span>
+    </h1>
+    <p class="ct-sub" style="margin-top:1.5rem;font-size:1.3rem;">但<span class="ct-accent">寫一篇論文</span><br>讓我卡了半年</p>
+    <p class="ct-sub" style="margin-top:1rem;"><span class="ct-accent">25 年數據工作，第一次寫論文</span></p>
+  </div>
 </div>
 
 <!-- ===== 3: 背景鋪陳 ===== -->
@@ -213,15 +227,17 @@ p,li{font-size:1.1rem;line-height:1.8;}
     <div class="stat-box fragment" data-order="2"><div class="val" style="color:var(--orange);">0</div><div class="label">篇論文發表經驗</div></div>
   </div>
   <div class="quote-box fragment" data-order="3" style="margin-top:1.5rem;">
-    <div class="quote-text">「我在業界能寫百頁商業計畫書，<br>但一篇 20 頁的論文把我打趴。」</div>
+    <div class="quote-text">我在業界能寫百頁商業計畫書，<br>但一篇 20 頁的論文把我打趴。</div>
     <div class="quote-src">因為商業計畫書是說服投資人，論文是說服審稿人 — 完全不同的說服邏輯</div>
   </div>
 </div>
 
 <!-- ===== 4: 三面牆 ===== -->
-<div class="slide poster overlay-heavy grain" data-index="4" data-act="我的故事" style="background-image:url('img/talk/walls.png');">
-  <p class="subtitle" style="color:rgba(255,255,255,.4);">接下來的半年</p>
-  <h1>我撞上了<span style="color:var(--red);">三面牆</span></h1>
+<div class="slide cine" data-index="4" data-act="我的故事" style="background-image:url('img/talk/walls.png');">
+  <div class="cine-text">
+    <div class="ct-tag">接下來的半年</div>
+    <h1>我撞上了<span style="color:var(--red);">三面牆</span></h1>
+  </div>
 </div>
 
 <!-- ===== 5: 牆 1 ===== -->
@@ -294,28 +310,30 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 8: 轉折點 ===== -->
-<div class="slide poster overlay-heavy grain" data-index="8" data-act="我的故事" style="background-image:url('img/talk/turning.png');">
-  <p class="subtitle" style="color:rgba(255,255,255,.4);">轉折點</p>
-  <h1>如果我把<span style="color:var(--gold);">寫論文</span><br>當成<span style="color:var(--teal);">工程問題</span>來解呢？</h1>
+<div class="slide cine" data-index="8" data-act="我的故事" style="background-image:url('img/talk/turning.png');">
+  <div class="cine-text">
+    <div class="ct-tag">轉折點</div>
+    <h1>如果我把<span class="ct-accent">寫論文</span><br>當成<span style="color:var(--teal);">工程問題</span>來解呢？</h1>
+  </div>
 </div>
 
 <!-- ===== 9: 三個洞察 ===== -->
 <div class="slide dataviz" data-index="9" data-act="我的故事">
   <h2>工程師的三個問題</h2>
-  <div class="wall-grid" style="margin-top:1.5rem;">
+  <div class="wall-grid" style="margin-top:1.5rem;max-width:960px;">
     <div class="wall-card fragment" data-order="0" style="border-color:rgba(15,157,138,.3);">
       <div class="num" style="color:var(--teal);">Q1</div>
-      <div class="title">論文有固定結構嗎？</div>
+      <div class="title">論文有固定結構?</div>
       <div class="desc">有。IMRaD 是全球通用的學術架構。<br><br><strong style="color:var(--teal);">結構可拆解 = 可以建立流程</strong></div>
     </div>
     <div class="wall-card fragment" data-order="1" style="border-color:rgba(249,171,0,.3);">
       <div class="num" style="color:var(--gold);">Q2</div>
-      <div class="title">文獻驗證能自動化嗎？</div>
+      <div class="title" style="white-space:nowrap;">文獻驗證能自動化?</div>
       <div class="desc">能。CrossRef、Semantic Scholar、OpenAlex 都有公開 API。<br><br><strong style="color:var(--gold);">驗證可自動化 = 不需手動逐篇查</strong></div>
     </div>
     <div class="wall-card fragment" data-order="2" style="border-color:rgba(26,115,232,.3);">
       <div class="num" style="color:var(--blue);">Q3</div>
-      <div class="title">AI 的能力邊界在哪？</div>
+      <div class="title" style="white-space:nowrap;">AI 的能力邊界在哪？</div>
       <div class="desc">擅長草稿和整理，不擅長判斷和驗證。<br><br><strong style="color:var(--blue);">人機分工明確 = AI 做苦力，人做決策</strong></div>
     </div>
   </div>
@@ -346,25 +364,23 @@ p,li{font-size:1.1rem;line-height:1.8;}
       </ul>
     </div>
   </div>
-  <div class="bottom-line fragment" data-order="2" style="margin-top:1.2rem;">
+  <div class="bottom-line fragment" data-order="2" style="margin-top:.6rem;">
     <h3>你現在站的位置，就是我曾經站過的位置</h3>
     <p>這不是在教你「工具」—<br>是把我走過的這條路，變成你可以直接複製的系統</p>
   </div>
 </div>
 
-<!-- ===== 11: 問題全景 ===== -->
-<div class="slide poster overlay-heavy grain" data-index="11" data-act="問題全景" style="background-image:url('img/talk/act2_problems.png');">
-  <h1>問題全景</h1>
-  <p style="color:var(--gold);margin-top:.5rem;font-size:1.2rem;">這不是你的問題 — 是流程的問題</p>
-</div>
-
-<!-- ===== 12: 舉手調查 ===== -->
-<div class="slide poster overlay-heavy grain" data-index="12" data-act="問題全景" style="background-image:url('img/talk/act2_problems.png');">
-  <h1 style="font-size:2.4rem;line-height:1.8;">
-    <span class="fragment" data-order="0">用過 AI 寫論文但不太放心？ 🙋</span><br>
-    <span class="fragment" data-order="1">覺得文獻回顧最痛苦？ 🙋</span><br>
-    <span class="fragment" data-order="2">曾經被退稿的？ 🙋</span>
-  </h1>
+<!-- ===== 11: 問題全景 + 舉手調查 (merged) ===== -->
+<div class="slide cine" data-index="12" data-act="問題全景" style="background-image:url('img/talk/act2_problems.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Part 2 · 問題全景</div>
+    <h1 style="font-size:2.2rem;line-height:1.5;">這不是你的問題<br>是<span class="ct-accent">流程的問題</span></h1>
+  </div>
+  <div style="position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-left:30%;">
+    <p class="fragment" data-order="0" style="font-size:1.8rem;font-weight:700;line-height:2.2;color:var(--teal);white-space:nowrap;">用過 AI 寫論文但不太放心？</p>
+    <p class="fragment" data-order="1" style="font-size:1.8rem;font-weight:700;line-height:2.2;color:var(--gold);white-space:nowrap;">覺得文獻回顧最痛苦？</p>
+    <p class="fragment" data-order="2" style="font-size:1.8rem;font-weight:700;line-height:2.2;color:var(--red);white-space:nowrap;">曾經被退稿的？</p>
+  </div>
 </div>
 
 <!-- ===== 13: 四大結構性問題 ===== -->
@@ -402,16 +418,18 @@ p,li{font-size:1.1rem;line-height:1.8;}
     </div>
   </div>
   <div class="quote-box fragment" data-order="3" style="margin-top:1.2rem;">
-    <div class="quote-text">「AI 不會讓寫論文變簡單，但會讓有方法的人變快。」</div>
+    <div class="quote-text">AI 不會讓寫論文變簡單，但會讓<span style="color:var(--red);font-weight:900;">有方法</span>的人變快。</div>
   </div>
 </div>
 
 <!-- ===== 15: 中場休息 ===== -->
-<div class="slide poster overlay-center grain" data-index="15" data-act="中場休息" style="background-image:url('img/talk/break.png');">
-  <h1 style="font-size:2.6rem;">休息一下</h1>
-  <p style="color:rgba(255,255,255,.6);margin-top:1.5rem;font-size:1.1rem;">掃碼看案例，等等繼續</p>
-  <img src="img/talk/qr_paperlab.png" style="width:180px;height:180px;border-radius:12px;margin-top:1.5rem;border:3px solid rgba(255,255,255,.15);">
-  <p style="color:var(--teal);font-size:1rem;margin-top:.5rem;">paperlab.cooperation.tw</p>
+<div class="slide cine" data-index="15" data-act="中場休息" style="background-image:url('img/talk/break.png');">
+  <div class="cine-text">
+    <h1 style="font-size:2.6rem;">休息一下</h1>
+    <p class="ct-sub" style="margin-top:1.5rem;">掃碼看案例，等等繼續</p>
+    <img src="img/talk/qr_paperlab.png" style="width:180px;height:180px;border-radius:12px;margin-top:1.5rem;border:3px solid rgba(255,255,255,.15);">
+    <p style="color:var(--teal);font-size:1rem;margin-top:.5rem;">paperlab.cooperation.tw</p>
+  </div>
 </div>
 
 <!-- ===== 16: 最好的時代 ===== -->
@@ -448,7 +466,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
       <div style="font-size:2rem;font-weight:900;color:var(--teal);margin-bottom:.3rem;">時代</div>
       <div style="font-size:.9rem;color:rgba(255,255,255,.4);margin-bottom:.6rem;">長期趨勢</div>
       <div style="font-size:1.05rem;color:rgba(255,255,255,.8);line-height:1.7;">
-        AI <strong style="color:var(--teal);">會</strong>改變<br>學習與成長的發生方式
+        AI <strong style="color:var(--teal);">會</strong>改變<br>學習與成長的方式
       </div>
       <div style="font-size:.9rem;color:rgba(255,255,255,.45);line-height:1.7;margin-top:.5rem;">研究方法會進化<br>知識生產會加速<br>跨領域會成為常態</div>
     </div>
@@ -468,19 +486,24 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 18: 研究領域需要什麼 ===== -->
-<div class="slide poster overlay-center grain" data-index="18" data-act="時代觀察" style="background-image:url('img/talk/act3_method.png');">
-  <p class="subtitle" style="color:rgba(255,255,255,.4);">那麼</p>
-  <h1 style="font-size:2.6rem;line-height:1.6;">
-    讓我們來探討一下<br>
-    接下來的<span style="color:var(--gold);">研究領域</span><br>
-    會需要的是什麼？
-  </h1>
+<div class="slide cine" data-index="18" data-act="時代觀察" style="background-image:url('img/talk/act3_method.png');">
+  <div class="cine-text">
+    <div class="ct-tag">那麼</div>
+    <h1 style="font-size:2.6rem;line-height:1.6;">
+      讓我們來探討一下<br>
+      接下來的<span class="ct-accent">研究領域</span><br>
+      需要的是什麼？
+    </h1>
+  </div>
 </div>
 
 <!-- ===== 19: 12 Phase 方法論 ===== -->
-<div class="slide poster overlay-heavy grain" data-index="19" data-act="12 Phase 方法論" style="background-image:url('img/talk/act3_method.png');">
-  <h1>12 Phase<br><span style="color:var(--teal);">方法論</span></h1>
-  <p style="color:var(--gold);margin-top:.5rem;font-size:1.2rem;">每一步可驗證、可複製、可用 AI 加速</p>
+<div class="slide cine" data-index="19" data-act="12 Phase 方法論" style="background-image:url('img/talk/act3_method.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Part 3</div>
+    <h1>12 Phase<br><span style="color:var(--teal);">方法論</span></h1>
+    <p class="ct-sub"><span class="ct-accent">每一步可驗證、可複製、可用 AI 加速</span></p>
+  </div>
 </div>
 
 <!-- ===== 20: Phase 1-3 ===== -->
@@ -491,19 +514,19 @@ p,li{font-size:1.1rem;line-height:1.8;}
     <div class="phase-card fragment" data-order="0">
       <div class="phase-num" style="background:var(--teal);">1</div>
       <div class="phase-title">概念探索</div>
-      <div class="phase-pain">沒有這步 → 題目太大或太小</div>
+      <div class="phase-pain">沒有這步<br>→ 題目太大或太小</div>
       <div class="phase-tool">工具：Deep Research 多輪對話</div>
     </div>
     <div class="phase-card fragment" data-order="1">
       <div class="phase-num" style="background:var(--teal);">2</div>
       <div class="phase-title">方向聚焦</div>
-      <div class="phase-pain">沒有這步 → 做到一半發現沒貢獻</div>
+      <div class="phase-pain">沒有這步<br>→ 做到一半發現沒貢獻</div>
       <div class="phase-tool">工具：CARE 框架 + Gap 分析</div>
     </div>
     <div class="phase-card fragment" data-order="2">
       <div class="phase-num" style="background:var(--teal);">3</div>
       <div class="phase-title">文獻調研</div>
-      <div class="phase-pain">沒有這步 → 引用虛構、Gap 找不到</div>
+      <div class="phase-pain">沒有這步<br>→ 引用虛構、Gap 找不到</div>
       <div class="phase-tool">工具：CrossRef + S2 + OpenAlex 三重驗證</div>
     </div>
   </div>
@@ -534,19 +557,19 @@ p,li{font-size:1.1rem;line-height:1.8;}
     <div class="phase-card fragment" data-order="0">
       <div class="phase-num" style="background:var(--gold);">10</div>
       <div class="phase-title">品質審查</div>
-      <div class="phase-pain">沒有這步 → 被退稿才發現問題</div>
+      <div class="phase-pain">沒有這步<br>→ 被退稿才發現問題</div>
       <div class="phase-tool">工具：7 維度評分 + 12 維審計</div>
     </div>
     <div class="phase-card fragment" data-order="1">
       <div class="phase-num" style="background:var(--gold);">11</div>
       <div class="phase-title">投稿準備</div>
-      <div class="phase-pain">沒有這步 → desk reject</div>
+      <div class="phase-pain">沒有這步<br>→ desk reject</div>
       <div class="phase-tool">工具：期刊匹配 + 模板系統</div>
     </div>
     <div class="phase-card fragment" data-order="2">
       <div class="phase-num" style="background:var(--gold);">12</div>
       <div class="phase-title">審稿回覆</div>
-      <div class="phase-pain">沒有這步 → 慌張回覆品質差</div>
+      <div class="phase-pain">沒有這步<br>→ 慌張回覆品質差</div>
       <div class="phase-tool">工具：Rebuttal 框架</div>
     </div>
   </div>
@@ -556,9 +579,12 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 23: 案例實證 ===== -->
-<div class="slide poster overlay-heavy grain" data-index="23" data-act="案例實證" style="background-image:url('img/talk/act4_cases.png');">
-  <h1>案例實證</h1>
-  <p style="color:var(--teal);margin-top:.5rem;font-size:1.2rem;">不是投影片 — 直接打開真實成果</p>
+<div class="slide cine" data-index="23" data-act="案例實證" style="background-image:url('img/talk/act4_cases.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Part 4</div>
+    <h1>案例實證</h1>
+    <p class="ct-sub" style="color:var(--teal);">不講投影片 — 直接看案例</p>
+  </div>
 </div>
 
 <!-- ===== 24: Demo 1 — Paper Lab ===== -->
@@ -568,7 +594,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
   <div class="demo-steps">
     <div class="demo-step fragment" data-order="0">
       <div class="ds-num">1</div>
-      <div class="ds-content"><strong>首頁 Terminal 動畫</strong><span class="ds-tag" style="background:var(--teal);">展示</span>
+      <div class="ds-content"><strong>首頁 Terminal CLI</strong><span class="ds-tag" style="background:var(--teal);">展示</span>
         <p>AI Agent 即時生成演示 — Phase 1 到 Phase 12 的自動化流程</p></div>
     </div>
     <div class="demo-step fragment" data-order="1">
@@ -680,32 +706,35 @@ p,li{font-size:1.1rem;line-height:1.8;}
     </tbody>
   </table>
   <div class="quote-box fragment" data-order="6" style="margin-top:1rem;">
-    <div class="quote-text">「我不是每個領域的專家。但方法論不需要你是領域專家 — 它需要的是你有數據和研究問題。」</div>
+    <div class="quote-text">我不是每個領域的專家<br>方法學需要的是你有數據和研究問題</div>
   </div>
 </div>
 
 <!-- ===== 29: Live Demo ===== -->
-<div class="slide poster overlay-heavy grain" data-index="29" data-act="Live Demo" style="background-image:url('img/talk/act5_demo.png');">
-  <h1>Live Demo</h1>
-  <p style="color:var(--teal);margin-top:.5rem;font-size:1.2rem;">Citation Metadata Checker — 開源工具現場試玩</p>
-  <a href="https://ai-cooperation.github.io/metadata-quality-benchmark/" target="_blank" style="display:inline-flex;align-items:center;gap:.5rem;margin-top:1.5rem;padding:.6rem 1.8rem;border-radius:100px;background:var(--teal);color:#fff;font-size:1rem;font-weight:700;text-decoration:none;cursor:pointer;transition:all .2s;">🔗 開啟 Citation Checker</a>
+<div class="slide cine" data-index="29" data-act="Live Demo" style="background-image:url('img/talk/act5_demo.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Part 5</div>
+    <h1>Live Demo</h1>
+    <p class="ct-sub" style="color:var(--teal);">Citation Metadata Checker — 開源工具現場試玩</p>
+    <a href="https://paperlab.cooperation.tw/tools/citation-checker/" target="_blank" style="display:inline-flex;align-items:center;gap:.5rem;margin-top:1.5rem;padding:.6rem 1.8rem;border-radius:100px;background:var(--teal);color:#fff;font-size:1rem;font-weight:700;text-decoration:none;cursor:pointer;transition:all .2s;">開啟 Citation Checker</a>
+  </div>
 </div>
 
 <!-- ===== 30: Citation Checker 介紹 ===== -->
 <div class="slide dataviz" data-index="30" data-act="Live Demo">
   <h2>Citation Metadata Checker</h2>
   <p style="color:rgba(255,255,255,.5);font-size:1rem;margin-bottom:.5rem;">開源工具 — 三源比對，即時驗證引用真實性</p>
-  <a href="https://ai-cooperation.github.io/metadata-quality-benchmark/" target="_blank" style="display:inline-flex;align-items:center;gap:.4rem;margin-bottom:.8rem;padding:.4rem 1rem;border-radius:100px;background:var(--teal);color:#fff;font-size:.9rem;font-weight:700;text-decoration:none;cursor:pointer;">🔗 ai-cooperation.github.io/metadata-quality-benchmark</a>
+  <a href="https://paperlab.cooperation.tw/tools/citation-checker/" target="_blank" style="display:inline-flex;align-items:center;gap:.4rem;margin-bottom:.8rem;padding:.4rem 1rem;border-radius:100px;background:var(--teal);color:#fff;font-size:.9rem;font-weight:700;text-decoration:none;cursor:pointer;">🔗 paperlab.cooperation.tw/tools/citation-checker</a>
   <div class="stat-grid">
     <div class="stat-box fragment" data-order="0"><div class="val">3</div><div class="label">資料來源<br>CrossRef + OpenAlex + S2</div></div>
-    <div class="stat-box fragment" data-order="1"><div class="val">0</div><div class="label">需要 API Key<br>完全免費使用</div></div>
+    <div class="stat-box fragment" data-order="1"><div class="val">0</div><div class="label">不需要 API Key<br>完全免費使用</div></div>
     <div class="stat-box fragment" data-order="2"><div class="val" style="color:var(--gold);">.bib</div><div class="label">支援批量匯入<br>整個 references.bib 一次驗證</div></div>
   </div>
 </div>
 
 <!-- ===== 31: Demo 流程 ===== -->
 <div class="slide dataviz" data-index="31" data-act="Live Demo" style="padding-top:2.5rem;">
-  <h2>現場演示流程</h2>
+  <h2>使用流程</h2>
   <div style="display:flex;gap:2rem;max-width:960px;width:100%;">
     <div class="demo-steps" style="flex:1;">
       <div class="demo-step fragment" data-order="0">
@@ -742,63 +771,53 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 32: 學生試玩 ===== -->
-<div class="slide poster overlay-heavy grain" data-index="32" data-act="Live Demo" style="background-image:url('img/talk/act5_demo.png');">
-  <h1 style="font-size:2.6rem;line-height:1.4;">
-    打開手機<br>
-    掃 QR Code<br>
-    <span style="color:var(--teal);">驗證你自己的引用</span>
-  </h1>
-  <img src="img/talk/qr_checker.png" style="width:180px;height:180px;border-radius:12px;margin-top:1.5rem;border:3px solid rgba(255,255,255,.15);">
-  <p style="color:rgba(255,255,255,.5);margin-top:.8rem;font-size:1rem;">找一篇你正在寫的論文，貼 DOI 進去試試看</p>
+<div class="slide cine" data-index="32" data-act="Live Demo" style="background-image:url('img/talk/act5_demo.png');">
+  <div class="cine-text">
+    <h1 style="font-size:2.6rem;line-height:1.4;">
+      打開手機<br>
+      掃 QR Code<br>
+      <span style="color:var(--teal);">驗證你自己的引用</span>
+    </h1>
+    <img src="img/talk/qr_checker.png" style="width:180px;height:180px;border-radius:12px;margin-top:1.5rem;border:3px solid rgba(255,255,255,.15);">
+    <p class="ct-sub" style="margin-top:.8rem;">找一篇你正在寫的論文，貼 DOI 進去試試</p>
+  </div>
 </div>
 
 <!-- ===== 33: 結尾金句 ===== -->
-<div class="slide poster overlay-heavy grain" data-index="33" data-act="結語" style="background-image:url('img/talk/closing.png');">
-  <h1 style="font-size:2.2rem;line-height:1.8;max-width:800px;">
-    你現在站的位置<br>
-    就是我<span style="color:var(--gold);">三年前</span>站的位置<br><br>
-    <span style="font-size:1.6rem;color:rgba(255,255,255,.7);">差別只在於 —<br>我已經把路走過一遍了</span>
-  </h1>
+<div class="slide cine" data-index="33" data-act="結語" style="background-image:url('img/talk/closing.png');">
+  <div class="cine-text">
+    <div class="ct-quote">你現在站的位置<br>就是我<span class="ct-accent">三年前</span>站的位置</div>
+    <p class="ct-insight" style="color:rgba(255,255,255,.7);">差別只在於 —<br>我已經把路走過一遍了</p>
+  </div>
 </div>
 
-<!-- ===== 34: 方法宣言 ===== -->
-<div class="slide poster overlay-center grain" data-index="34" data-act="結語" style="background-image:url('img/talk/closing.png');">
-  <h1 style="font-size:2rem;line-height:1.8;max-width:800px;">
-    <span style="color:rgba(255,255,255,.5);">方法是通用的</span><br>
-    <span style="color:rgba(255,255,255,.5);">你不需要是天才研究者</span><br><br>
-    你只需要<span style="color:var(--teal);">一套系統</span><br>
-    加上你自己的<span style="color:var(--gold);">數據</span>和<span style="color:var(--gold);">問題</span>
-  </h1>
-</div>
-
-<!-- ===== 35: CTA — 兩格 ===== -->
-<div class="slide dataviz" data-index="35" data-act="結語">
-  <h2>想更深入了解？</h2>
-  <div class="cta-grid">
-    <div class="cta-card fragment" data-order="0" style="border:2px solid rgba(15,157,138,.3);">
-      <img class="qr" src="img/talk/qr_paperlab.png">
-      <div class="cta-title">Paper Lab 案例網站</div>
-      <div class="cta-desc">8 個跨領域案例<br>完整 PDF 免費下載</div>
-      <div class="cta-action" style="background:var(--teal);color:#fff;">paperlab.cooperation.tw</div>
-    </div>
-    <div class="cta-card fragment" data-order="1" style="border:2px solid rgba(249,171,0,.3);">
-      <img class="qr" src="img/talk/qr_paperlab.png">
-      <div class="cta-title">兩天完整工作坊</div>
-      <div class="cta-desc">手把手帶你跑完 12 Phase<br>從你自己的題目開始</div>
-      <div class="cta-action" style="background:var(--gold);color:var(--dark);">paperlab@cooperation.tw</div>
+<!-- ===== 34: 方法宣言 + CTA 合併 ===== -->
+<div class="slide cine cine-right" data-index="34" data-act="結語" style="background-image:url('img/talk/closing.png');">
+  <div class="cine-text">
+    <div class="ct-quote">方法是通用的<br>你不需要是天才研究者</div>
+    <p class="ct-insight">你只需要<span style="color:var(--teal);">一套系統</span><br>加上你自己的<span class="ct-accent">數據</span>和<span class="ct-accent">問題</span></p>
+    <div style="display:flex;gap:1.5rem;margin-top:2rem;align-items:flex-start;">
+      <div style="text-align:center;">
+        <img src="img/talk/qr_paperlab.png" style="width:120px;height:120px;border-radius:10px;border:2px solid rgba(255,255,255,.15);">
+        <p style="font-size:.8rem;color:var(--teal);margin-top:.4rem;">paperlab.cooperation.tw</p>
+      </div>
+      <div style="font-size:.95rem;color:rgba(255,255,255,.5);line-height:1.8;">
+        8 個跨領域案例<br>完整 PDF 免費下載<br><span style="color:var(--gold);">兩天完整工作坊</span>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ===== 36: 封底 ===== -->
-<div class="slide poster overlay-heavy grain" data-index="36" data-act="結語" style="background-image:url('img/talk/ending.png');">
-  <h1 style="font-size:2.4rem;line-height:1.5;">
-    論文不是寫出來的<br>
-    是<span style="color:var(--teal);">系統化</span>產出來的
-  </h1>
-  <p style="font-size:1rem;color:rgba(255,255,255,.3);margin-top:2.5rem;">一句話記住</p>
-  <p style="font-size:3.6rem;font-weight:900;color:#fff;margin-top:1rem;letter-spacing:.2em;">寫論文 <span style="color:var(--teal);">找方法</span></p>
-  <p style="color:rgba(255,255,255,.3);margin-top:2rem;font-size:.85rem;">paperlab.cooperation.tw</p>
+<!-- ===== 35: 封底 ===== -->
+<div class="slide cine" data-index="35" data-act="結語" style="background-image:url('img/talk/ending.png');">
+  <div class="cine-text">
+    <h1 style="font-size:2.4rem;line-height:1.5;">
+      論文不是寫出來的<br>
+      是<span style="color:var(--teal);">系統化</span>產出來的
+    </h1>
+    <div class="ct-tag" style="margin-top:2.5rem;">一句話記住</div>
+    <p style="font-size:3.6rem;font-weight:900;color:#fff;margin-top:1rem;letter-spacing:.2em;white-space:nowrap;text-align:center;">寫論文 <span style="color:var(--teal);">找方法</span></p>
+  </div>
   <a href="https://paperlab.cooperation.tw" target="_blank" style="position:absolute;bottom:2rem;right:2rem;z-index:5;text-align:center;text-decoration:none;">
     <img src="img/talk/qr_paperlab.png" style="width:200px;height:200px;border-radius:12px;border:2px solid rgba(255,255,255,.15);display:block;">
     <span style="font-size:.8rem;color:rgba(255,255,255,.3);margin-top:.4rem;display:block;">Paper Lab</span>

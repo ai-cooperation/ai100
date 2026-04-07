@@ -44,6 +44,21 @@ html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;colo
 .slide.poster.overlay-heavy::before{background:linear-gradient(to bottom,rgba(0,0,0,.45) 0%,rgba(0,0,0,.85) 100%);}
 .slide.poster.overlay-center::before{background:radial-gradient(ellipse at center,rgba(0,0,0,.3) 0%,rgba(0,0,0,.8) 100%);}
 
+/* ── Cinematic Mode ── */
+.slide.cine{background-size:cover;background-position:center;color:#fff;text-align:left;padding:0;display:flex;align-items:stretch;}
+.slide.cine::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(12,12,20,.92) 0%,rgba(12,12,20,.75) 22%,rgba(12,12,20,.3) 42%,transparent 62%);}
+.slide.cine>*{position:relative;z-index:2;}
+.slide.cine .cine-text{width:45%;padding:3.5rem 3rem;display:flex;flex-direction:column;justify-content:center;}
+.slide.cine .cine-text h1{font-size:2.8rem;font-weight:900;line-height:1.3;margin-bottom:.8rem;}
+.slide.cine .cine-text .ct-tag{font-size:.85rem;color:rgba(255,255,255,.35);letter-spacing:.15em;margin-bottom:1.2rem;}
+.slide.cine .cine-text .ct-sub{font-size:1.15rem;color:rgba(255,255,255,.55);line-height:1.7;}
+.slide.cine .cine-text .ct-accent{color:var(--gold,#F9AB00);font-weight:700;}
+.slide.cine.cine-right::before{background:linear-gradient(270deg,rgba(12,12,20,.92) 0%,rgba(12,12,20,.75) 22%,rgba(12,12,20,.3) 42%,transparent 62%);}
+.slide.cine.cine-right .cine-text{margin-left:auto;}
+.slide.cine .ct-quote{font-size:1.2rem;line-height:1.9;color:rgba(255,255,255,.9);border-left:3px solid var(--gold,#F9AB00);padding-left:1.2rem;margin:.8rem 0;}
+.slide.cine .ct-quote-src{font-size:.9rem;color:rgba(255,255,255,.4);margin-top:.5rem;}
+.slide.cine .ct-insight{font-size:1.15rem;font-weight:700;margin-top:1.2rem;line-height:1.7;}
+
 /* ── DataViz Mode (dark bg) ── */
 .slide.dataviz{background:var(--dark);color:#fff;padding-top:3.5rem;}
 
@@ -211,11 +226,13 @@ p,li{font-size:1.1rem;line-height:1.8;}
 <div class="slides">
 
 <!-- ===== 0: COVER — poster ===== -->
-<div class="slide poster overlay-bottom active" data-act="開場" data-index="0" style="background-image:url('img/s10/cover.png');background-color:var(--dark);">
-  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:1rem;">AI 100 講 — 補充單元</p>
-  <h1>AI 簡報工具<br><span style="color:var(--gold);">怎麼選？</span></h1>
-  <p class="poster-subtitle" style="margin-top:1.5rem;">Gamma × NotebookLM × Claude Code — 系統化決策分析</p>
-  <p style="color:rgba(255,255,255,.3);margin-top:3rem;font-size:.85rem;">按 → 或空白鍵開始</p>
+<div class="slide cine active" data-act="開場" data-index="0" style="background-image:url('img/s10/cover.png');">
+  <div class="cine-text">
+    <div class="ct-tag">AI 100 講 — 補充單元</div>
+    <h1>AI 簡報工具<br><span class="ct-accent">怎麼選？</span></h1>
+    <div class="ct-sub">Gamma × NotebookLM × Claude Code — 系統化決策分析</div>
+    <div class="ct-sub" style="margin-top:2rem;color:rgba(255,255,255,.3);font-size:.85rem;">按 → 或空白鍵開始</div>
+  </div>
 </div>
 
 <!-- ===== 1: 議程 — clean ===== -->
@@ -386,10 +403,12 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 10: Part 3 — poster ===== -->
-<div class="slide poster overlay-heavy" data-act="人的架構力" data-index="10" style="background-image:url('img/s10/fork.png');background-color:var(--dark);">
-  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 3</p>
-  <h1>人的架構與技術力</h1>
-  <p class="poster-subtitle" style="margin-top:.5rem;">工具再強，也需要人來駕馭</p>
+<div class="slide cine" data-act="人的架構力" data-index="10" style="background-image:url('img/s10/fork.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Part 3</div>
+    <h1>人的架構與技術力</h1>
+    <div class="ct-sub">工具再強，也需要人來駕馭</div>
+  </div>
 </div>
 
 <!-- ===== 11: 技術力光譜 — clean ===== -->
@@ -449,10 +468,10 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 14: Quote — poster ===== -->
-<div class="slide poster overlay-heavy" data-act="人的架構力" data-index="14" style="background-image:url('img/s10/craftsman.png');background-color:var(--dark);">
-  <div class="quote-box" style="background:rgba(0,0,0,.5);border-color:var(--gold);">
-    <div class="quote-text" style="font-size:1.8rem;">「差異不在工具，在人。」</div>
-    <div class="quote-src" style="margin-top:1rem;">同一份教材，有架構力的人用出來效果差 10 倍</div>
+<div class="slide cine" data-act="人的架構力" data-index="14" style="background-image:url('img/s10/craftsman.png');">
+  <div class="cine-text">
+    <div class="ct-quote">「差異不在工具，在人。」</div>
+    <div class="ct-quote-src">同一份教材，有架構力的人用出來效果差 10 倍</div>
   </div>
 </div>
 
@@ -507,10 +526,12 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 19: Crossover — poster ===== -->
-<div class="slide poster overlay-center" data-act="需求與預算" data-index="19" style="background-image:url('img/s10/tracks.png');background-color:var(--dark);">
-  <div class="big-num" style="color:#fff;">第 3-4 份</div>
-  <p class="poster-subtitle" style="margin-top:1rem;font-size:1.5rem;color:var(--gold);">Claude Code 的投資回報開始超越</p>
-  <p style="color:rgba(255,255,255,.4);margin-top:1rem;font-size:1rem;">前期投入高，但邊際成本趨近於零</p>
+<div class="slide cine cine-right" data-act="需求與預算" data-index="19" style="background-image:url('img/s10/tracks.png');">
+  <div class="cine-text">
+    <h1 style="font-size:3.5rem;">第 3-4 份</h1>
+    <div class="ct-sub" style="font-size:1.5rem;"><span class="ct-accent">Claude Code 的投資回報開始超越</span></div>
+    <div class="ct-sub" style="margin-top:1rem;">前期投入高，但邊際成本趨近於零</div>
+  </div>
 </div>
 
 <!-- ===== 20: Part 5 — poster ===== -->
@@ -619,15 +640,13 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 26: Closing — poster ===== -->
-<div class="slide poster overlay-bottom" data-act="決策框架" data-index="26" style="background-image:url('img/s10/triangle.png');background-color:var(--dark);">
-  <h1 style="font-size:2.4rem;">工具選擇三角模型</h1>
-  <p style="color:var(--gold);font-size:1.3rem;font-weight:700;margin-top:1.5rem;line-height:1.8;">
-    選擇工具的能力 &gt; 使用工具的能力 &gt; 擁有工具
-  </p>
-  <p style="color:rgba(255,255,255,.5);margin-top:2rem;font-size:1rem;">
-    不是「哪個工具最好」，而是「哪個組合最適合你」
-  </p>
-  <p style="color:rgba(255,255,255,.25);margin-top:2rem;font-size:.85rem;">AI 100 講 — 補充單元 S10</p>
+<div class="slide cine" data-act="決策框架" data-index="26" style="background-image:url('img/s10/triangle.png');">
+  <div class="cine-text">
+    <h1 style="font-size:2.4rem;">工具選擇三角模型</h1>
+    <div class="ct-quote" style="margin-top:1.5rem;">選擇工具的能力 &gt; 使用工具的能力 &gt; 擁有工具</div>
+    <div class="ct-sub" style="margin-top:1rem;">不是「哪個工具最好」，而是「哪個組合最適合你」</div>
+    <div class="ct-tag" style="margin-top:2rem;">AI 100 講 — 補充單元 S10</div>
+  </div>
 </div>
 
 </div><!-- /slides -->

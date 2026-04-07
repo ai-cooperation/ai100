@@ -43,6 +43,21 @@ html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;colo
 .slide.poster.overlay-heavy::before{background:linear-gradient(to bottom,rgba(0,0,0,.45) 0%,rgba(0,0,0,.85) 100%);}
 .slide.poster.overlay-center::before{background:radial-gradient(ellipse at center,rgba(0,0,0,.3) 0%,rgba(0,0,0,.8) 100%);}
 
+/* ── Cinematic Mode ── */
+.slide.cine{background-size:cover;background-position:center;color:#fff;text-align:left;padding:0;display:flex;align-items:stretch;}
+.slide.cine::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(12,12,20,.92) 0%,rgba(12,12,20,.75) 22%,rgba(12,12,20,.3) 42%,transparent 62%);}
+.slide.cine>*{position:relative;z-index:2;}
+.slide.cine .cine-text{width:45%;padding:3.5rem 3rem;display:flex;flex-direction:column;justify-content:center;}
+.slide.cine .cine-text h1{font-size:2.8rem;font-weight:900;line-height:1.3;margin-bottom:.8rem;}
+.slide.cine .cine-text .ct-tag{font-size:.85rem;color:rgba(255,255,255,.35);letter-spacing:.15em;margin-bottom:1.2rem;}
+.slide.cine .cine-text .ct-sub{font-size:1.15rem;color:rgba(255,255,255,.55);line-height:1.7;}
+.slide.cine .cine-text .ct-accent{color:var(--gold,#F9AB00);font-weight:700;}
+.slide.cine.cine-right::before{background:linear-gradient(270deg,rgba(12,12,20,.92) 0%,rgba(12,12,20,.75) 22%,rgba(12,12,20,.3) 42%,transparent 62%);}
+.slide.cine.cine-right .cine-text{margin-left:auto;}
+.slide.cine .ct-quote{font-size:1.2rem;line-height:1.9;color:rgba(255,255,255,.9);border-left:3px solid var(--gold,#F9AB00);padding-left:1.2rem;margin:.8rem 0;}
+.slide.cine .ct-quote-src{font-size:.9rem;color:rgba(255,255,255,.4);margin-top:.5rem;}
+.slide.cine .ct-insight{font-size:1.15rem;font-weight:700;margin-top:1.2rem;line-height:1.7;}
+
 /* ── DataViz Mode (dark bg) ── */
 .slide.dataviz{background:var(--dark);color:#fff;padding-top:3.5rem;}
 
@@ -162,6 +177,11 @@ p,li{font-size:1.1rem;line-height:1.8;}
   html,body{font-size:16px;}
   .slide{padding:1rem 1.2rem 1rem;}
   .slide.clean{padding-top:3rem;}
+  .slide.cine::before{background:linear-gradient(180deg,rgba(12,12,20,.92) 0%,rgba(12,12,20,.75) 40%,rgba(12,12,20,.3) 70%,transparent 100%);}
+  .slide.cine.cine-right::before{background:linear-gradient(180deg,rgba(12,12,20,.92) 0%,rgba(12,12,20,.75) 40%,rgba(12,12,20,.3) 70%,transparent 100%);}
+  .slide.cine .cine-text{width:100%;padding:2rem 1.2rem;}
+  .slide.cine .cine-text h1{font-size:1.8rem;}
+  .slide.cine.cine-right .cine-text{margin-left:0;}
   .slide.poster{justify-content:flex-end;padding-bottom:1.5rem;}
   h1{font-size:1.8rem;}h2{font-size:1.4rem;margin-bottom:.6rem;}
   .stat-grid{grid-template-columns:repeat(2,1fr);gap:.8rem;}
@@ -198,12 +218,14 @@ p,li{font-size:1.1rem;line-height:1.8;}
 <div class="module-badge">S09 補充單元</div>
 <div class="slides">
 
-<!-- ===== 0: COVER — poster ===== -->
-<div class="slide poster overlay-heavy active" data-act="開場" data-index="0" style="background-image:url('img/s09/cover.png');">
-  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:1rem;">AI 100 講 — 補充單元</p>
-  <h1>AI 17天寫<span style="color:var(--gold);">166篇論文</span><br><span style="font-size:2rem;">真相是什麼？</span></h1>
-  <p class="poster-subtitle" style="margin-top:1.5rem;">FARS 全自動科研系統 — 逐條驗證，還原脈絡</p>
-  <p style="color:rgba(255,255,255,.3);margin-top:3rem;font-size:.85rem;">按 → 或空白鍵開始</p>
+<!-- ===== 0: COVER — cine ===== -->
+<div class="slide cine active" data-act="開場" data-index="0" style="background-image:url('img/s09/cover.png');">
+  <div class="cine-text">
+    <div class="ct-tag">AI 100 講 — 補充單元</div>
+    <h1>AI 17天<br>寫<span class="ct-accent">166篇論文</span><br><span style="font-size:2rem;">真相是什麼？</span></h1>
+    <div class="ct-sub">FARS 全自動科研系統 — 逐條驗證，還原脈絡</div>
+    <div class="ct-sub" style="margin-top:2rem;color:rgba(255,255,255,.25);font-size:.85rem;">按 → 或空白鍵開始</div>
+  </div>
 </div>
 
 <!-- ===== 1: 議程 — clean ===== -->
@@ -218,11 +240,13 @@ p,li{font-size:1.1rem;line-height:1.8;}
   </div>
 </div>
 
-<!-- ===== 2: Part 1 — poster (wall) ===== -->
-<div class="slide poster overlay-heavy" data-act="關鍵數據" data-index="2" style="background-image:url('img/s09/wall.png');">
-  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 1</p>
-  <h1>關鍵數據一覽</h1>
-  <p class="poster-subtitle" style="margin-top:.5rem;">先看數字，再下判斷</p>
+<!-- ===== 2: Part 1 — cine (wall) ===== -->
+<div class="slide cine" data-act="關鍵數據" data-index="2" style="background-image:url('img/s09/wall.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Part 1</div>
+    <h1>關鍵數據一覽</h1>
+    <div class="ct-sub">先看數字，再下判斷</div>
+  </div>
 </div>
 
 <!-- ===== 3: 六大數字 — dataviz ===== -->
@@ -254,11 +278,13 @@ p,li{font-size:1.1rem;line-height:1.8;}
   </table>
 </div>
 
-<!-- ===== 5: Part 2 — poster (suspect) ===== -->
-<div class="slide poster overlay-center" data-act="背後推手" data-index="5" style="background-image:url('img/s09/suspect.png');">
-  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 2</p>
-  <h1>背後推手</h1>
-  <p class="poster-subtitle" style="margin-top:.5rem;">從 MOSS 到 Analemma</p>
+<!-- ===== 5: Part 2 — cine (suspect) ===== -->
+<div class="slide cine cine-right" data-act="背後推手" data-index="5" style="background-image:url('img/s09/suspect.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Part 2</div>
+    <h1>背後推手</h1>
+    <div class="ct-sub">從 MOSS 到 Analemma</div>
+  </div>
 </div>
 
 <!-- ===== 6: Timeline — clean ===== -->
@@ -284,11 +310,13 @@ p,li{font-size:1.1rem;line-height:1.8;}
   </div>
 </div>
 
-<!-- ===== 7: Part 3 — poster (magnifier) ===== -->
-<div class="slide poster overlay-heavy" data-act="事實查核" data-index="7" style="background-image:url('img/s09/magnifier.png');">
-  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 3</p>
-  <h1>逐條事實查核</h1>
-  <p class="poster-subtitle" style="margin-top:.5rem;">&#10003; 屬實 &nbsp; &#9651; 半真半假 &nbsp; &#10007; 誤導</p>
+<!-- ===== 7: Part 3 — cine (magnifier) ===== -->
+<div class="slide cine" data-act="事實查核" data-index="7" style="background-image:url('img/s09/magnifier.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Part 3</div>
+    <h1>逐條事實查核</h1>
+    <div class="ct-sub">&#10003; 屬實 &nbsp; &#9651; 半真半假 &nbsp; &#10007; 誤導</div>
+  </div>
 </div>
 
 <!-- ===== 8: 查核 — 屬實 — clean ===== -->
@@ -347,11 +375,13 @@ p,li{font-size:1.1rem;line-height:1.8;}
   </div>
 </div>
 
-<!-- ===== 10: Part 4 — poster (shredder) ===== -->
-<div class="slide poster overlay-heavy" data-act="論文品質" data-index="10" style="background-image:url('img/s09/shredder.png');">
-  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 4</p>
-  <h1>論文品質實況</h1>
-  <p class="poster-subtitle" style="margin-top:.5rem;">數字背後的真實水準</p>
+<!-- ===== 10: Part 4 — cine (shredder) ===== -->
+<div class="slide cine cine-right" data-act="論文品質" data-index="10" style="background-image:url('img/s09/shredder.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Part 4</div>
+    <h1>論文品質實況</h1>
+    <div class="ct-sub">數字背後的真實水準</div>
+  </div>
 </div>
 
 <!-- ===== 11: 評分光譜 — dataviz ===== -->
@@ -396,11 +426,13 @@ p,li{font-size:1.1rem;line-height:1.8;}
   </div>
 </div>
 
-<!-- ===== 13: Part 5 — poster (flood) ===== -->
-<div class="slide poster overlay-bottom" data-act="三大風險" data-index="13" style="background-image:url('img/s09/flood.png');">
-  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 5</p>
-  <h1>三大真實風險</h1>
-  <p class="poster-subtitle" style="margin-top:.5rem;">學術界的擔憂</p>
+<!-- ===== 13: Part 5 — cine (flood) ===== -->
+<div class="slide cine" data-act="三大風險" data-index="13" style="background-image:url('img/s09/flood.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Part 5</div>
+    <h1>三大真實風險</h1>
+    <div class="ct-sub">學術界的擔憂</div>
+  </div>
 </div>
 
 <!-- ===== 14: 三大風險 — dataviz ===== -->
@@ -425,12 +457,13 @@ p,li{font-size:1.1rem;line-height:1.8;}
   </div>
 </div>
 
-<!-- ===== 15: 結論 — poster (scales) ===== -->
-<div class="slide poster overlay-center" data-act="結論" data-index="15" style="background-image:url('img/s09/scales.png');">
-  <h2 style="margin-bottom:.5rem;">結論</h2>
-  <div class="bottom-line" style="background:rgba(0,0,0,.5);border-color:rgba(255,255,255,.15);">
-    <h3 style="color:var(--gold);">工程壯舉 ≠ 科學貢獻</h3>
-    <p style="color:rgba(255,255,255,.8);">FARS 是一個<strong>工程上令人印象深刻的 AI Agent 系統</strong>，展示了多代理協作的潛力。但其產出品質距離可發表的學術研究仍有明顯差距。新聞標題「博士還要活嗎」屬於典型的<strong style="color:var(--gold);">焦慮行銷</strong>。</p>
+<!-- ===== 15: 結論 — cine (scales) ===== -->
+<div class="slide cine cine-right" data-act="結論" data-index="15" style="background-image:url('img/s09/scales.png');">
+  <div class="cine-text">
+    <div class="ct-tag">結論</div>
+    <h1><span class="ct-accent">工程壯舉</span> ≠ 科學貢獻</h1>
+    <div class="ct-quote">FARS 是一個工程上令人印象深刻的 AI Agent 系統，展示了多代理協作的潛力。但其產出品質距離可發表的學術研究仍有明顯差距。</div>
+    <div class="ct-insight">新聞標題「博士還要活嗎」屬於典型的<span class="ct-accent">焦慮行銷</span>。</div>
   </div>
 </div>
 
@@ -450,16 +483,14 @@ p,li{font-size:1.1rem;line-height:1.8;}
   </ul>
 </div>
 
-<!-- ===== 17: 封底 — poster (typewriter) ===== -->
-<div class="slide poster overlay-heavy" data-act="完成" data-index="17" style="background-image:url('img/s09/typewriter.png');">
-  <p style="font-size:1rem;color:rgba(255,255,255,.4);margin-bottom:2rem;">一句話記住</p>
-  <h1 style="font-size:2.6rem;line-height:1.5;">
-    AI 能量產文件<br><br>
-    但離取代科學研究者<br>
-    <span style="color:var(--gold);">還差得遠</span>
-  </h1>
-  <p style="color:rgba(255,255,255,.5);margin-top:2rem;font-size:1.1rem;">決定研究價值的不是<strong style="color:var(--gold);">產出數量</strong>，而是<strong style="color:var(--gold);">科學洞見</strong></p>
-  <p style="color:rgba(255,255,255,.25);margin-top:2rem;font-size:.85rem;">事實查核 by Paper Lab · 2026-03-26<br>本頁內容基於公開資料整理，不代表任何立場</p>
+<!-- ===== 17: 封底 — centered (typewriter) ===== -->
+<div class="slide poster overlay-center" data-act="完成" data-index="17" style="background-image:url('img/s09/typewriter.png');">
+  <div style="flex:1;"></div>
+  <p style="font-size:.9rem;color:rgba(255,255,255,.35);letter-spacing:.15em;margin-bottom:1rem;">一句話記住</p>
+  <h1 style="font-size:2.4rem;line-height:1.6;text-align:center;white-space:nowrap;">AI 能量產文件<br>但離取代科學研究者<br><span style="color:var(--gold);font-weight:900;">還差得遠</span></h1>
+  <p style="font-size:1.2rem;font-weight:700;margin-top:1.5rem;text-align:center;white-space:nowrap;color:rgba(255,255,255,.7);">決定研究價值的不是<span style="color:var(--gold);">產出數量</span>，而是<span style="color:var(--gold);">科學洞見</span></p>
+  <p style="margin-top:2rem;font-size:.8rem;color:rgba(255,255,255,.2);">事實查核 by Paper Lab · 2026-03-26<br>本頁內容基於公開資料整理，不代表任何立場</p>
+  <div style="height:2rem;"></div>
 </div>
 
 </div><!-- /slides -->

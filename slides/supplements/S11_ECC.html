@@ -43,6 +43,21 @@ html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;colo
 .slide.poster.overlay-heavy::before{background:linear-gradient(to bottom,rgba(0,0,0,.45) 0%,rgba(0,0,0,.85) 100%);}
 .slide.poster.overlay-center::before{background:radial-gradient(ellipse at center,rgba(0,0,0,.3) 0%,rgba(0,0,0,.8) 100%);}
 
+/* ── Cinematic Mode ── */
+.slide.cine{background-size:cover;background-position:center;color:#fff;text-align:left;padding:0;display:flex;align-items:stretch;}
+.slide.cine::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(12,12,20,.92) 0%,rgba(12,12,20,.75) 22%,rgba(12,12,20,.3) 42%,transparent 62%);}
+.slide.cine>*{position:relative;z-index:2;}
+.slide.cine .cine-text{width:45%;padding:3.5rem 3rem;display:flex;flex-direction:column;justify-content:center;}
+.slide.cine .cine-text h1{font-size:2.8rem;font-weight:900;line-height:1.3;margin-bottom:.8rem;}
+.slide.cine .cine-text .ct-tag{font-size:.85rem;color:rgba(255,255,255,.35);letter-spacing:.15em;margin-bottom:1.2rem;}
+.slide.cine .cine-text .ct-sub{font-size:1.15rem;color:rgba(255,255,255,.55);line-height:1.7;}
+.slide.cine .cine-text .ct-accent{color:var(--gold,#F9AB00);font-weight:700;}
+.slide.cine.cine-right::before{background:linear-gradient(270deg,rgba(12,12,20,.92) 0%,rgba(12,12,20,.75) 22%,rgba(12,12,20,.3) 42%,transparent 62%);}
+.slide.cine.cine-right .cine-text{margin-left:auto;}
+.slide.cine .ct-quote{font-size:1.2rem;line-height:1.9;color:rgba(255,255,255,.9);border-left:3px solid var(--gold,#F9AB00);padding-left:1.2rem;margin:.8rem 0;}
+.slide.cine .ct-quote-src{font-size:.9rem;color:rgba(255,255,255,.4);margin-top:.5rem;}
+.slide.cine .ct-insight{font-size:1.15rem;font-weight:700;margin-top:1.2rem;line-height:1.7;}
+
 /* ── DataViz Mode (dark bg) ── */
 .slide.dataviz{background:var(--dark);color:#fff;padding-top:3.5rem;}
 
@@ -174,11 +189,13 @@ p,li{font-size:1.1rem;line-height:1.8;}
 <div class="slides">
 
 <!-- ===== 0: COVER — poster ===== -->
-<div class="slide poster overlay-heavy active" data-act="開場" data-index="0" style="background-image:url('img/s11/cover.png');">
-  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:1rem;">AI 100 講 — 補充單元</p>
-  <h1>Everything<br><span style="color:var(--green);">Claude Code</span></h1>
-  <p class="poster-subtitle" style="margin-top:1.5rem;">10 個月實戰打磨的 Skills + Agents + Memory + Security 框架</p>
-  <p style="color:rgba(255,255,255,.3);margin-top:3rem;font-size:.85rem;">按 → 或空白鍵開始</p>
+<div class="slide cine active" data-act="開場" data-index="0" style="background-image:url('img/s11/cover.png');">
+  <div class="cine-text">
+    <div class="ct-tag">AI 100 講 — 補充單元</div>
+    <h1>Everything<br><span style="color:var(--green);">Claude Code</span></h1>
+    <div class="ct-sub">10 個月實戰打磨的 Skills + Agents + Memory + Security 框架</div>
+    <div class="ct-sub" style="margin-top:2rem;color:rgba(255,255,255,.3);font-size:.85rem;">按 → 或空白鍵開始</div>
+  </div>
 </div>
 
 <!-- ===== 1: 議程 — clean ===== -->
@@ -193,10 +210,12 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 2: Part 1 — poster ===== -->
-<div class="slide poster overlay-heavy" data-act="ECC是什麼" data-index="2" style="background-image:url('img/s11/learning.png');">
-  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 1</p>
-  <h1>ECC 是什麼？</h1>
-  <p class="poster-subtitle" style="margin-top:.5rem;">不只是設定檔，是完整的 AI 開發效能系統</p>
+<div class="slide cine" data-act="ECC是什麼" data-index="2" style="background-image:url('img/s11/learning.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Part 1</div>
+    <h1>ECC 是什麼？</h1>
+    <div class="ct-sub">不只是設定檔，是完整的 AI 開發效能系統</div>
+  </div>
 </div>
 
 <!-- ===== 3: 定位 — dataviz ===== -->
@@ -216,10 +235,12 @@ p,li{font-size:1.1rem;line-height:1.8;}
 </div>
 
 <!-- ===== 4: Part 2 — poster ===== -->
-<div class="slide poster overlay-center" data-act="四大核心能力" data-index="4" style="background-image:url('img/s11/evolution.png');">
-  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 2</p>
-  <h1>四大核心能力</h1>
-  <p class="poster-subtitle" style="margin-top:.5rem;">學習、記憶、安全、協作</p>
+<div class="slide cine" data-act="四大核心能力" data-index="4" style="background-image:url('img/s11/evolution.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Part 2</div>
+    <h1>四大核心能力</h1>
+    <div class="ct-sub">學習、記憶、安全、協作</div>
+  </div>
 </div>
 
 <!-- ===== 5: 持續學習 — dataviz ===== -->
@@ -422,16 +443,14 @@ p,li{font-size:1.1rem;line-height:1.8;}
   </div>
 </div>
 
-<!-- ===== 16: 封底 — poster ===== -->
-<div class="slide poster overlay-heavy" data-act="總結" data-index="16" style="background-image:url('img/s11/cover.png');">
-  <p style="font-size:1rem;color:rgba(255,255,255,.4);margin-bottom:2rem;">一句話記住</p>
-  <h1 style="font-size:2.6rem;line-height:1.5;">
-    Claude Code 很強<br><br>
-    ECC 讓它<br>
-    <span style="color:var(--green);">越用越強</span>
-  </h1>
-  <p style="color:rgba(255,255,255,.5);margin-top:2rem;font-size:1.1rem;">Skills + Agents + Memory + Security = <strong style="color:var(--green);">完整開發效能系統</strong></p>
-  <p style="color:rgba(255,255,255,.25);margin-top:2rem;font-size:.85rem;">github.com/affaan-m/everything-claude-code</p>
+<!-- ===== 16: 封底 — centered ===== -->
+<div class="slide poster overlay-center" data-act="總結" data-index="16" style="background-image:url('img/s11/cover.png');">
+  <div style="flex:1;"></div>
+  <p style="font-size:.9rem;color:rgba(255,255,255,.35);letter-spacing:.15em;margin-bottom:1rem;">一句話記住</p>
+  <h1 style="font-size:2.6rem;line-height:1.5;text-align:center;">Claude Code 很強<br><br>ECC 讓它<br><span style="color:var(--green);">越用越強</span></h1>
+  <p style="margin-top:1.5rem;font-size:1.1rem;color:rgba(255,255,255,.6);text-align:center;">Skills + Agents + Memory + Security = <strong style="color:var(--green);">完整開發效能系統</strong></p>
+  <p style="margin-top:2rem;font-size:.85rem;color:rgba(255,255,255,.25);letter-spacing:.1em;">github.com/affaan-m/everything-claude-code</p>
+  <div style="height:2rem;"></div>
 </div>
 
 </div><!-- /slides -->
