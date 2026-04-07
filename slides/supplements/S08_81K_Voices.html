@@ -42,6 +42,25 @@ html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;colo
 .slide.poster.overlay-center::before{background:radial-gradient(ellipse at center,rgba(0,0,0,.3) 0%,rgba(0,0,0,.75) 100%);}
 .slide.poster.overlay-split::before{background:linear-gradient(90deg,rgba(0,0,0,.7) 0%,rgba(0,0,0,.3) 40%,rgba(0,0,0,.3) 60%,rgba(0,0,0,.7) 100%);}
 
+/* ── Cinematic-Poster Mode (full-bleed image, left gradient + left-aligned text) ── */
+.slide.cine{background-size:cover;background-position:center;color:#fff;text-align:left;padding:0;display:flex;align-items:stretch;}
+.slide.cine::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(12,12,20,.92) 0%,rgba(12,12,20,.75) 22%,rgba(12,12,20,.3) 42%,transparent 62%);}
+.slide.cine>*{position:relative;z-index:2;}
+.slide.cine .cine-text{width:45%;padding:3.5rem 3rem;display:flex;flex-direction:column;justify-content:center;}
+.slide.cine .cine-text h1{font-size:2.8rem;font-weight:900;line-height:1.3;margin-bottom:.8rem;}
+.slide.cine .cine-text .ct-tag{font-size:.85rem;color:rgba(255,255,255,.35);letter-spacing:.15em;margin-bottom:1.2rem;}
+.slide.cine .cine-text .ct-sub{font-size:1.15rem;color:rgba(255,255,255,.55);line-height:1.7;}
+.slide.cine .cine-text .ct-accent{color:var(--gold);font-weight:700;}
+
+/* Cinematic right variant (text on right half, gradient from right) */
+.slide.cine.cine-right::before{background:linear-gradient(270deg,rgba(12,12,20,.92) 0%,rgba(12,12,20,.75) 22%,rgba(12,12,20,.3) 42%,transparent 62%);}
+.slide.cine.cine-right .cine-text{margin-left:auto;}
+
+/* Cinematic quote */
+.slide.cine .ct-quote{font-size:1.2rem;line-height:1.9;color:rgba(255,255,255,.9);border-left:3px solid var(--gold);padding-left:1.2rem;margin:.8rem 0;}
+.slide.cine .ct-quote-src{font-size:.9rem;color:rgba(255,255,255,.4);margin-top:.5rem;}
+.slide.cine .ct-insight{font-size:1.15rem;font-weight:700;margin-top:1.2rem;line-height:1.7;}
+
 /* ── DataViz Mode (dark bg) ── */
 .slide.dataviz{background:var(--dark);color:#fff;text-align:center;padding-top:3.5rem;}
 .slide.dataviz h2{color:#fff;margin-bottom:1.2rem;}
@@ -306,13 +325,14 @@ p,li{font-size:1.1rem;line-height:1.8;}
 <div class="module-badge">S08 補充單元</div>
 <div class="slides">
 
-<!-- ===== 0: COVER (Poster) ===== -->
-<div class="slide poster overlay-bottom" data-act="開場" data-index="0" style="background-image:url('img/s08/cover.png');">
-  <div style="flex:1;"></div>
-  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:.5rem;letter-spacing:.15em;">AI 100 講 — 補充單元</p>
-  <h1 style="font-size:3.2rem;text-shadow:0 4px 20px rgba(0,0,0,.5);">AI 與人<br><span style="font-size:2.2rem;font-weight:700;">8 萬人的真心話</span></h1>
-  <p style="color:rgba(255,255,255,.6);margin-top:1.2rem;font-size:1.15rem;">Anthropic 史上最大規模質性研究</p>
-  <p style="color:rgba(255,255,255,.3);margin-top:2rem;font-size:.85rem;">按 → 或空白鍵開始</p>
+<!-- ===== 0: COVER (Cinematic) ===== -->
+<div class="slide cine" data-act="開場" data-index="0" style="background-image:url('img/s08/cover.png');">
+  <div class="cine-text">
+    <div class="ct-tag">AI 100 講 — 補充單元</div>
+    <h1>AI 與人<br><span style="font-size:2rem;font-weight:700;color:var(--gold);">8 萬人的真心話</span></h1>
+    <p class="ct-sub" style="margin-top:1rem;">Anthropic 史上最大規模質性研究<br>80,508 位用戶 · 159 國 · 70 種語言</p>
+    <p style="color:rgba(255,255,255,.25);margin-top:2.5rem;font-size:.85rem;">按 → 或空白鍵開始</p>
+  </div>
 </div>
 
 <!-- ===== 1: 議程 (Clean) — fix #1 ===== -->
@@ -372,15 +392,14 @@ p,li{font-size:1.1rem;line-height:1.8;}
   <p class="fragment" data-order="5" style="margin-top:1.5rem;font-size:1.1rem;color:rgba(255,255,255,.5);">但研究者追問了一句：「背後，你<span style="color:var(--gold);font-weight:700;">真正的渴望</span>是什麼？」</p>
 </div>
 
-<!-- ===== 4: 追問一層 (Poster) — fix #2: 改用 cooking.png ===== -->
-<div class="slide poster overlay-heavy" data-act="真心話" data-index="4" style="background-image:url('img/s08/cooking.png');">
-  <div style="flex:1;"></div>
-  <div class="poster-quote">
-    <div class="q-text fragment" data-order="0">「用 AI 我可以更有效率……<br>上週二，它讓我能和媽媽一起下廚，<br>而不是留下來加班。」</div>
-    <div class="q-src fragment" data-order="1">— 軟體工程師，哥倫比亞</div>
+<!-- ===== 4: 追問一層 (Cinematic) ===== -->
+<div class="slide cine" data-act="真心話" data-index="4" style="background-image:url('img/s08/cooking.png');">
+  <div class="cine-text">
+    <div class="ct-tag">真心話 · 追問一層</div>
+    <div class="ct-quote fragment" data-order="0">「用 AI 我可以更有效率……<br>上週二，它讓我能和媽媽一起下廚，<br>而不是留下來加班。」</div>
+    <div class="ct-quote-src fragment" data-order="1">— 軟體工程師，哥倫比亞</div>
+    <p class="ct-insight fragment" data-order="2">很多人說要提升效率<br>追問之後發現，核心動機根本不是工作<br><span class="ct-accent">而是想早點回家</span></p>
   </div>
-  <p class="fragment" data-order="2" style="margin-top:1.5rem;font-size:1.3rem;font-weight:700;text-shadow:0 2px 10px rgba(0,0,0,.5);">很多人說要提升效率<br>追問之後發現，核心動機根本不是工作<br><span style="color:var(--gold);">而是想早點回家</span></p>
-  <div style="height:2rem;"></div>
 </div>
 
 <!-- ===== 5: 81% 兌現 (DataViz) ===== -->
@@ -420,19 +439,18 @@ p,li{font-size:1.1rem;line-height:1.8;}
   <div style="display:flex;flex-direction:column;gap:.8rem;max-width:860px;width:100%;">
     <div class="dq-box fragment" data-order="0" style="background:rgba(0,0,0,.55);border:2px solid rgba(249,171,0,.4);border-radius:16px;">
       <div class="q-label" style="color:var(--gold);">烏克蘭·軍人</div>
-      <div class="q-text">「在死亡迎面而來的那些時刻，是 AI 把我拉回來。在砲火聲中，AI 對話度過最黑暗的夜晚。」</div>
+      <div class="q-text">「炮火跟死亡迎面而來的那些時刻，是 AI 對話幫我度過最黑暗的夜晚。」</div>
     </div>
     <div class="dq-box fragment" data-order="1" style="background:rgba(0,0,0,.55);border:2px solid rgba(15,157,138,.4);border-radius:16px;">
       <div class="q-label" style="color:var(--green);">智利·肉販老闆</div>
-      <div class="q-text">「做了二十年肉販，人生第一次碰電腦是為了用 AI 創業。現在最有動力的，是看見它真的在幫助別人。」</div>
+      <div class="q-text">「做了二十年肉販，第一次碰電腦是為了用 AI 創業。」</div>
     </div>
     <div class="dq-box fragment" data-order="2" style="background:rgba(0,0,0,.55);border:2px solid rgba(26,115,232,.4);border-radius:16px;">
       <div class="q-label" style="color:var(--blue);">美國·自由工作者</div>
-      <div class="q-text">「Claude 把歷史碎片拼在一起，讓我在被誤診九年後，終於得到正確的診斷。」</div>
+      <div class="q-text">「Claude 拼湊歷史碎片，讓我在被誤診九年後，終於得到正確的診斷。」</div>
     </div>
   </div>
-  <p class="fragment" data-order="3" style="margin-top:.8rem;font-size:1rem;color:rgba(255,255,255,.5);">他們不是矽谷工程師。在 AI 出現之前，那扇門對他們是關著的。</p>
-  <div style="height:1rem;"></div>
+  <p class="fragment" data-order="3" style="margin-top:.8rem;font-size:1.1rem;color:rgba(255,255,255,.6);font-weight:700;">他們不是矽谷工程師。在 AI 出現之前，那扇門對他們是關著的。</p>
 </div>
 
 <!-- ===== 7: 恐懼排行 (DataViz) — fix #4: 加寬 label ===== -->
@@ -486,10 +504,13 @@ p,li{font-size:1.1rem;line-height:1.8;}
   </div>
 </div>
 
-<!-- ===== 9: Section - 光與影 (Poster) ===== -->
-<div class="slide poster overlay-center" data-act="光與影" data-index="9" style="background-image:url('img/s08/light-shadow.png');">
-  <p class="subtitle" style="color:rgba(255,255,255,.5);letter-spacing:.2em;">Part 5</p>
-  <h1 style="font-size:2.8rem;text-shadow:0 4px 20px rgba(0,0,0,.5);margin-top:.5rem;">光與影<br><span style="font-size:1.8rem;font-weight:700;">同時住在每個人心裡</span></h1>
+<!-- ===== 9: Section - 光與影 (Cinematic) ===== -->
+<div class="slide cine" data-act="光與影" data-index="9" style="background-image:url('img/s08/light-shadow.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Part 5</div>
+    <h1>光與影</h1>
+    <p class="ct-sub" style="font-size:1.3rem;">同時住在<br>每個人心裡</p>
+  </div>
 </div>
 
 <!-- ===== 10: 配對矛盾 (DataViz) — fix #5: 用 bar 長短 ===== -->
@@ -554,30 +575,26 @@ p,li{font-size:1.1rem;line-height:1.8;}
       </div>
     </div>
   </div>
-  <p class="fragment" data-order="4" style="margin-top:1rem;font-size:1rem;color:var(--red);font-weight:700;">情感支援的共存比例是其他議題的 3 倍</p>
+  <p class="fragment" data-order="4" style="margin-top:1rem;font-size:1rem;color:var(--red);font-weight:700;">說「AI 給我情感支持」的人，同時也害怕情感依賴 — 這種矛盾是其他議題的 3 倍</p>
 </div>
 
-<!-- ===== 11: 情感·救贖 (Poster) — fix #6: 拆成兩頁 ===== -->
-<div class="slide poster overlay-heavy" data-act="光與影" data-index="11" style="background-image:url('img/s08/rescue.png');">
-  <div style="flex:1;"></div>
-  <div class="dq-box fragment" data-order="0" style="background:rgba(0,0,0,.5);border:2px solid rgba(249,171,0,.35);border-radius:16px;max-width:650px;">
-    <div class="q-label" style="color:var(--gold);font-size:1rem;">☀ 救贖</div>
-    <div class="q-text" style="font-size:1.2rem;line-height:1.8;">「凌晨三點，太太睡著了，心理師不在線。在藥效發作之前，AI 幫我撐過那個浪。<br><strong style="color:var(--gold);">它不能取代人，但能讓我多撐一下。</strong>」</div>
-    <div class="q-src">— 阿根廷用戶</div>
+<!-- ===== 11: 情感·救贖 (Cinematic) ===== -->
+<div class="slide cine" data-act="光與影" data-index="11" style="background-image:url('img/s08/rescue.png');">
+  <div class="cine-text">
+    <div class="ct-tag" style="color:var(--gold);">☀ 救贖</div>
+    <div class="ct-quote fragment" data-order="0" style="border-left-color:var(--gold);">「凌晨三點，太太睡著了，心理師不在線。在藥效發作之前，AI 幫我撐過那個浪。<strong style="color:var(--gold);">它不能取代人，但能讓我多撐一下。</strong>」</div>
+    <div class="ct-quote-src fragment" data-order="0">— 阿根廷用戶</div>
   </div>
-  <div style="height:3rem;"></div>
 </div>
 
-<!-- ===== 12: 情感·風險 (Poster) — fix #6: 各自配圖 ===== -->
-<div class="slide poster overlay-heavy" data-act="光與影" data-index="12" style="background-image:url('img/s08/risk.png');">
-  <div style="flex:1;"></div>
-  <div class="dq-box fragment" data-order="0" style="background:rgba(0,0,0,.5);border:2px solid rgba(124,58,237,.35);border-radius:16px;max-width:650px;">
-    <div class="q-label" style="color:var(--purple);font-size:1rem;">☾ 風險</div>
-    <div class="q-text" style="font-size:1.2rem;line-height:1.8;">「我開始把連伴侶都不說的事告訴 Claude。<br><strong style="color:var(--purple);">感覺像是在外面有了一段情感外遇。</strong>」</div>
-    <div class="q-src">— 匿名受訪者</div>
+<!-- ===== 12: 情感·風險 (Cinematic — text right, face on left) ===== -->
+<div class="slide cine cine-right" data-act="光與影" data-index="12" style="background-image:url('img/s08/risk.png');">
+  <div class="cine-text">
+    <div class="ct-tag" style="color:var(--purple);">☾ 風險</div>
+    <div class="ct-quote fragment" data-order="0" style="border-left-color:var(--purple);">「我開始把連伴侶都不說的事告訴 Claude。<strong style="color:var(--purple);">感覺像是在外面有了一段情感外遇。</strong>」</div>
+    <div class="ct-quote-src fragment" data-order="0">— 匿名受訪者</div>
+    <p class="ct-insight fragment" data-order="1">同樣的能力<br>帶來<span style="color:var(--gold);">救贖</span>，也帶來<span style="color:var(--purple);">風險</span></p>
   </div>
-  <p class="fragment" data-order="1" style="margin-top:1.5rem;font-size:1.3rem;font-weight:700;text-shadow:0 2px 10px rgba(0,0,0,.5);color:rgba(255,255,255,.7);">同樣的能力，帶來<span style="color:var(--gold);">救贖</span>，也帶來<span style="color:var(--purple);">風險</span></p>
-  <div style="height:2rem;"></div>
 </div>
 
 <!-- ===== 13: 自由工作者 (DataViz) — fix #7: 重新設計 ===== -->
@@ -596,7 +613,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
       <span style="color:var(--red);">被威脅壓力 →</span>
     </div>
   </div>
-  <div class="fragment" data-order="1" style="margin-top:1.5rem;max-width:600px;display:flex;gap:1.5rem;">
+  <div class="fragment" data-order="1" style="margin-top:1.5rem;max-width:750px;width:100%;display:flex;gap:1.5rem;">
     <div style="flex:1;background:rgba(15,157,138,.1);border-radius:12px;padding:1rem;text-align:center;">
       <p style="font-size:2rem;font-weight:900;color:var(--green);">🔧</p>
       <p style="font-size:1rem;color:var(--green);font-weight:700;">AI 是工具</p>
@@ -606,7 +623,7 @@ p,li{font-size:1.1rem;line-height:1.8;}
     <div style="flex:1;background:rgba(217,48,37,.1);border-radius:12px;padding:1rem;text-align:center;">
       <p style="font-size:2rem;font-weight:900;color:var(--red);">⚔</p>
       <p style="font-size:1rem;color:var(--red);font-weight:700;">AI 是競爭者</p>
-      <p style="font-size:.85rem;color:rgba(255,255,255,.5);">客戶直接用 AI 取代外包</p>
+      <p style="font-size:.85rem;color:rgba(255,255,255,.5);">直接被 AI 取代外包</p>
     </div>
   </div>
 </div>
@@ -634,11 +651,13 @@ p,li{font-size:1.1rem;line-height:1.8;}
   </div>
 </div>
 
-<!-- ===== 15: Section - 東亞 vs 西方 (Poster) ===== -->
-<div class="slide poster overlay-split" data-act="兩種凝視" data-index="15" style="background-image:url('img/s08/east-west.png');">
-  <p class="subtitle" style="color:rgba(255,255,255,.5);letter-spacing:.2em;">Part 6</p>
-  <h1 style="font-size:2.8rem;text-shadow:0 4px 20px rgba(0,0,0,.5);margin-top:.5rem;">兩種凝視</h1>
-  <p style="font-size:1.3rem;color:rgba(255,255,255,.7);margin-top:.5rem;text-shadow:0 2px 8px rgba(0,0,0,.5);">東亞往內看，西方往外看</p>
+<!-- ===== 15: Section - 東亞 vs 西方 (Cinematic) ===== -->
+<div class="slide cine" data-act="兩種凝視" data-index="15" style="background-image:url('img/s08/east-west.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Part 6</div>
+    <h1>兩種凝視</h1>
+    <p class="ct-sub" style="font-size:1.3rem;">東亞往內看<br>西方往外看</p>
+  </div>
 </div>
 
 <!-- ===== 16: 東亞核心焦慮 (DataViz) ===== -->
@@ -682,18 +701,18 @@ p,li{font-size:1.1rem;line-height:1.8;}
   <p class="fragment" data-order="2" style="margin-top:1rem;font-size:1rem;color:rgba(255,255,255,.5);">東亞談財務獨立時，常連結到<span style="color:var(--gold);font-weight:700;">家庭責任</span> — 照顧父母、讓家人幸福</p>
 </div>
 
-<!-- ===== 17: Ending (Poster) — fix #8: 調整重疊 ===== -->
-<div class="slide poster overlay-bottom" data-act="完成" data-index="17" style="background-image:url('img/s08/crossroads.png');">
-  <div style="flex:1;"></div>
-  <p style="font-size:1rem;color:rgba(255,255,255,.4);margin-bottom:1rem;">8 萬個人的答案，最後指向同一件事</p>
-  <h1 style="font-size:2.2rem;line-height:1.6;text-shadow:0 4px 20px rgba(0,0,0,.5);">
-    人類面對 AI<br>既渴望，又害怕<br>既受益，又受傷
-  </h1>
-  <p class="fragment" data-order="0" style="margin-top:2rem;font-size:1.5rem;font-weight:700;color:var(--gold);text-shadow:0 2px 10px rgba(0,0,0,.5);">你最希望 AI 為你做什麼？</p>
-  <p class="fragment" data-order="1" style="margin-top:.5rem;font-size:1.5rem;font-weight:700;color:var(--purple);text-shadow:0 2px 10px rgba(0,0,0,.5);">你最害怕它做什麼？</p>
-  <div style="height:4rem;"></div>
-  <p style="color:rgba(255,255,255,.25);font-size:.8rem;margin-bottom:.5rem;">ai100.cooperation.tw</p>
-  <span class="source-tag" style="bottom:2.5rem;">Data: Anthropic — What 81,000 People Want from AI (2026) · anthropic.com/81k-interviews</span>
+<!-- ===== 17: Ending (Cinematic) ===== -->
+<div class="slide cine" data-act="完成" data-index="17" style="background-image:url('img/s08/crossroads.png');">
+  <div class="cine-text">
+    <div class="ct-tag">8 萬個人的答案，最後指向同一件事</div>
+    <h1 style="font-size:2rem;line-height:1.7;">人類面對 AI<br>既渴望，又害怕<br>既受益，又受傷</h1>
+    <p class="fragment" data-order="0" style="margin-top:1.5rem;font-size:1.8rem;font-weight:900;color:var(--gold);">你最希望 AI 為你做什麼？</p>
+    <p class="fragment" data-order="1" style="margin-top:.5rem;font-size:1.8rem;font-weight:900;color:var(--purple);">你最害怕它做什麼？</p>
+    <span style="font-size:.7rem;color:rgba(255,255,255,.15);margin-top:2rem;display:block;">Data: Anthropic — What 81,000 People Want from AI (2026)</span>
+  </div>
+  <div style="position:absolute;bottom:2rem;right:2.5rem;z-index:3;text-align:right;">
+    <p style="font-size:1.4rem;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.05em;">cooperation.tw</p>
+  </div>
 </div>
 
 </div>
