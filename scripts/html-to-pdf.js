@@ -60,14 +60,18 @@ async function convertToPdf(browser, htmlFile) {
   await page.evaluate(() => document.fonts.ready);
   await new Promise(r => setTimeout(r, 1000));
 
-  // Find total slides by counting .slide elements
-  const totalSlides = await page.evaluate(() => {
-    return document.querySelectorAll('.slide').length;
+  // Find total slides — support both .slide and .s class naming
+  const { totalSlides, slideSelector, fragmentSelector, activeClass } = await page.evaluate(() => {
+    const dotSlide = document.querySelectorAll('.slide').length;
+    const dotS = document.querySelectorAll('.s').length;
+    if (dotSlide > 0) return { totalSlides: dotSlide, slideSelector: '.slide', fragmentSelector: '.fragment', activeClass: 'active' };
+    if (dotS > 0) return { totalSlides: dotS, slideSelector: '.s', fragmentSelector: '.f', activeClass: 'on' };
+    return { totalSlides: 0, slideSelector: null, fragmentSelector: null, activeClass: null };
   });
-  console.log(`  Found ${totalSlides} slides`);
+  console.log(`  Found ${totalSlides} slides (${slideSelector || 'none'})`);
 
   if (totalSlides === 0) {
-    console.log(`  Skipping: no .slide elements found`);
+    console.log(`  Skipping: no slide elements found`);
     await page.close();
     return false;
   }
@@ -77,25 +81,32 @@ async function convertToPdf(browser, htmlFile) {
   const screenshots = [];
 
   for (let i = 0; i < totalSlides; i++) {
-    await page.evaluate((idx) => {
+    await page.evaluate((idx, sel, fragSel, actCls) => {
       // Deactivate all slides
-      document.querySelectorAll('.slide').forEach(s => {
-        s.classList.remove('active');
+      document.querySelectorAll(sel).forEach(s => {
+        s.classList.remove(actCls);
         s.style.opacity = '0';
         s.style.transform = 'none';
         s.style.pointerEvents = 'none';
       });
       // Activate target slide
-      const target = document.querySelectorAll('.slide')[idx];
+      const target = document.querySelectorAll(sel)[idx];
       if (target) {
-        target.classList.add('active');
+        target.classList.add(actCls);
         target.style.opacity = '1';
         target.style.transform = 'none';
         target.style.pointerEvents = 'auto';
+        // Reveal ALL fragments so PDF captures full content
+        const visCls = fragSel === '.f' ? 'v' : 'visible';
+        target.querySelectorAll(fragSel).forEach(f => {
+          f.classList.add(visCls);
+          f.style.opacity = '1';
+          f.style.transform = 'none';
+        });
       }
-    }, i);
+    }, i, slideSelector, fragmentSelector, activeClass);
 
-    await new Promise(r => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 300));
 
     const screenshot = await page.screenshot({
       type: 'png',

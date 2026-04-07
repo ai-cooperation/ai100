@@ -4,15 +4,15 @@
 // Teaching materials
 var materials = [
   // --- Supplements S01-S18 ---
-  { title: 'S01 GAS \u81EA\u52D5\u5316', icon: '\u26A1', url: '/slides/supplements/S01_GAS_Automation.html', desc: '\u4E09\u5C0F\u6642\u00B751\u9801' },
-  { title: 'S02 Vibe Coding', icon: '\uD83C\uDFA8', url: '/slides/supplements/S02_Vibe_Coding.html', desc: '\u4E09\u5C0F\u6642\u00B758\u9801' },
-  { title: 'S03 CLI Agent', icon: '\u2328\uFE0F', url: '/slides/supplements/S03_CLI_Agent.html', desc: '\u4E09\u5C0F\u6642\u00B754\u9801' },
-  { title: 'S04 VS Code IDE', icon: '\uD83C\uDFD7\uFE0F', url: '/slides/supplements/S04_VSCode_IDE.html', desc: '\u4E09\u5C0F\u6642\u00B749\u9801' },
-  { title: 'S05 OpenClaw \u9F8D\u8766', icon: '\uD83E\uDD9E', url: '/slides/supplements/S05_OpenClaw.html', desc: '\u4E09\u5C0F\u6642\u00B762\u9801' },
+  { title: 'S01 GAS \u81EA\u52D5\u5316', icon: '\u26A1', url: '/slides/supplements/S01_GAS_Automation.html', desc: '\u4E09\u5C0F\u6642\u00B749\u9801' },
+  { title: 'S02 Vibe Coding', icon: '\uD83C\uDFA8', url: '/slides/supplements/S02_Vibe_Coding.html', desc: '\u4E09\u5C0F\u6642\u00B756\u9801' },
+  { title: 'S03 CLI Agent', icon: '\u2328\uFE0F', url: '/slides/supplements/S03_CLI_Agent.html', desc: '\u4E09\u5C0F\u6642\u00B753\u9801' },
+  { title: 'S04 VS Code IDE', icon: '\uD83C\uDFD7\uFE0F', url: '/slides/supplements/S04_VSCode_IDE.html', desc: '\u4E09\u5C0F\u6642\u00B747\u9801' },
+  { title: 'S05 OpenClaw \u9F8D\u8766', icon: '\uD83E\uDD9E', url: '/slides/supplements/S05_OpenClaw.html', desc: '\u4E09\u5C0F\u6642\u00B760\u9801' },
   { title: 'S06 Token \u7D93\u6FDF\u5B78', icon: '\uD83E\uDE99', url: '/slides/supplements/S06_Token_Economy.html', desc: '\u4E00\u5C0F\u6642\u00B724\u9801' },
   { title: 'S07 NotebookLM \u5B78\u7FD2\u8853', icon: '\uD83D\uDCD3', url: '/slides/supplements/S07_NotebookLM.html', desc: '\u4E00\u5C0F\u6642\u00B724\u9801' },
-  { title: 'S08 81K \u771F\u5FC3\u8A71', icon: '\uD83D\uDCAC', url: '/slides/supplements/S08_81K_Voices.html', desc: '30\u5206\u9418\u00B715\u9801' },
-  { title: 'S09 FARS \u4E8B\u5BE6\u67E5\u6838', icon: '\uD83D\uDD0D', url: '/slides/supplements/S09_FARS_FactCheck_v2.html', desc: '\u4E8B\u5BE6\u67E5\u6838\u00B720\u9801' },
+  { title: 'S08 81K \u771F\u5FC3\u8A71', icon: '\uD83D\uDCAC', url: '/slides/supplements/S08_81K_Voices.html', desc: '30\u5206\u9418\u00B718\u9801' },
+  { title: 'S09 FARS \u4E8B\u5BE6\u67E5\u6838', icon: '\uD83D\uDD0D', url: '/slides/supplements/S09_FARS_FactCheck_v2.html', desc: '\u4E8B\u5BE6\u67E5\u6838\u00B718\u9801' },
   { title: 'S10 \u5DE5\u5177\u9078\u64C7\u5206\u6790', icon: '\uD83D\uDD27', url: '/slides/supplements/S10_Tool_Selection.html', desc: '\u5DE5\u5177\u6C7A\u7B56\u00B727\u9801' },
   { title: 'S11 Everything Claude Code', icon: '\uD83E\uDDEC', url: '/slides/supplements/S11_ECC.html', desc: '\u9032\u968E\u00B717\u9801' },
   { title: 'S12 Personal AI \u57FA\u790E\u8A2D\u65BD', icon: '\uD83C\uDFDB\uFE0F', url: '/slides/supplements/S12_PAI.html', desc: '\u67B6\u69CB\u00B715\u9801' },
@@ -20,13 +20,14 @@ var materials = [
   { title: 'S14 Google Workspace CLI', icon: '\uD83D\uDDA5\uFE0F', url: '/slides/supplements/S14_GWS.html', desc: 'CLI\u5DE5\u5177\u00B712\u9801' },
   { title: 'S15 Google Cloud SDK', icon: '\u2601\uFE0F', url: '/slides/supplements/S15_gcloud.html', desc: '\u96F2\u7AEF\u00B712\u9801' },
   { title: 'S16 clasp \u958B\u767C\u5DE5\u5177', icon: '\uD83D\uDD29', url: '/slides/supplements/S16_clasp.html', desc: 'GAS\u958B\u767C\u00B710\u9801' },
-  { title: 'S17 \u672A\u4F86\u8FAF\u8AD6\u5834', icon: '\u2694\uFE0F', url: '/slides/supplements/S17_Future_Debate_Arena.html', desc: 'AI\u5DE5\u4F5C\u574A\u00B724\u9801' },
+  { title: 'S17 \u672A\u4F86\u8FAF\u8AD6\u5834', icon: '\u2694\uFE0F', url: '/slides/supplements/S17_Future_Debate_Arena.html', desc: '\u5DE5\u4F5C\u574A\u00B724\u9801' },
   { title: 'S18 AI\u7C21\u58316\u7A2E\u8DEF\u7DDA', icon: '\uD83C\uDFAF', url: '/slides/supplements/S18_AI_Slide_Routes.html', desc: '6\u8DEF\u7DDA\u5168\u666F\u00B718\u9801' },
-  { title: 'S19 \u5927\u5B78\u6F14\u8B1B \u4EBA\u99D5\u99AD AI', icon: '\uD83C\uDF93', url: '/slides/supplements/S19_University_Talk.html', desc: '\u99D5\u99ADAI Token\u00B737\u9801' },
-  { title: 'S20 \u5F9E\u7B46\u8A18\u5230\u7B2C\u4E8C\u5927\u8166', icon: '\uD83E\uDDE0', url: '/slides/supplements/S20_Knowledge_Base_L1_L5.html', desc: 'AI\u80FD\u529B\u4E94\u7D1A\u00B755\u9801' },
-  { title: 'S21 AI\u7684\u7522\u696D\u5316\u885D\u64CA', icon: '\uD83D\uDCA5', url: '/slides/supplements/S21_AI_Industry_Impact.html', desc: '\u7522\u696D\u885D\u64CA\u00B730\u9801' },
-  // --- Talks ---
-  { title: '\u8AD6\u6587\u65B9\u6CD5\u5B78\u5206\u4EAB', icon: '\uD83C\uDF93', url: '/slides/supplements/Talk_Paper_Methodology.html', desc: '\u6F14\u8B1B\u00B739\u9801' },
+  { title: 'S22 Claude Code \u539F\u59CB\u78BC\u6D29\u9732', icon: '\uD83D\uDD13', url: '/slides/supplements/S22_Claude_Code_Source_Leak.html', desc: '51\u842C\u884C\u7A0B\u5F0F\u78BC\u00B743\u9801' },
+  // --- Talks T01-T04 ---
+  { title: 'T01 \u5927\u5B78\u6F14\u8B1B \u4EBA\u99D5\u99AD AI', icon: '\uD83C\uDF93', url: '/slides/supplements/T01_University_Talk.html', desc: '\u6F14\u8B1B\u00B757\u9801' },
+  { title: 'T02 \u5F9E\u7B46\u8A18\u5230\u7B2C\u4E8C\u5927\u8166', icon: '\uD83E\uDDE0', url: '/slides/supplements/T02_Knowledge_Base_L1_L5.html', desc: '\u6F14\u8B1B\u00B755\u9801' },
+  { title: 'T03 AI\u7684\u7522\u696D\u5316\u885D\u64CA', icon: '\uD83D\uDCA5', url: '/slides/supplements/T03_AI_Industry_Impact.html', desc: '\u6F14\u8B1B\u00B732\u9801' },
+  { title: 'T04 \u8AD6\u6587\u65B9\u6CD5\u5B78\u5206\u4EAB', icon: '\uD83C\uDF93', url: '/slides/supplements/T04_Paper_Methodology.html', desc: '\u6F14\u8B1B\u00B739\u9801' },
   // --- Chantoban ---
   { title: '\u7522\u6295\u73ED \u8AB2\u7A0B\u4ECB\u7D39', icon: '\uD83C\uDFED', url: '/slides/chantoban/Course_Intro.html', desc: '\u62DB\u751F\u7248\u00B718\u9801' },
   // --- Learn system ---
@@ -60,9 +61,11 @@ var deckOptions = [
   { name: 'S16_clasp', label: 'S16 clasp' },
   { name: 'S17_Future_Debate_Arena', label: 'S17 \u672A\u4F86\u8FAF\u8AD6\u5834' },
   { name: 'S18_AI_Slide_Routes', label: 'S18 AI\u7C21\u58316\u7A2E\u8DEF\u7DDA' },
-  { name: 'S19_University_Talk', label: 'S19 \u5927\u5B78\u6F14\u8B1B' },
-  { name: 'S20_Knowledge_Base_L1_L5', label: 'S20 \u5F9E\u7B46\u8A18\u5230\u7B2C\u4E8C\u5927\u8166' },
-  { name: 'S21_AI_Industry_Impact', label: 'S21 AI\u7684\u7522\u696D\u5316\u885D\u64CA' }
+  { name: 'S22_Claude_Code_Source_Leak', label: 'S22 Claude Code \u539F\u59CB\u78BC\u6D29\u9732' },
+  { name: 'T01_University_Talk', label: 'T01 \u5927\u5B78\u6F14\u8B1B' },
+  { name: 'T02_Knowledge_Base_L1_L5', label: 'T02 \u5F9E\u7B46\u8A18\u5230\u7B2C\u4E8C\u5927\u8166' },
+  { name: 'T03_AI_Industry_Impact', label: 'T03 AI\u7684\u7522\u696D\u5316\u885D\u64CA' },
+  { name: 'T04_Paper_Methodology', label: 'T04 \u8AD6\u6587\u65B9\u6CD5\u5B78\u5206\u4EAB' }
 ];
 
 // ═══ Custom Materials ═══

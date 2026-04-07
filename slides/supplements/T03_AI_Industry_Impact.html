@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 的產業化衝擊</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+  --orange:#E8710A; --orange-lt:#FEF0E1;
+  --cyan:#06B6D4;
+  --dark:#0a0a14; --dark2:#111122; --dark3:#16213e;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--white);}
+
+/* === Slide Core (32 pages, opacity mode) === */
+.slides{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;opacity:0;transform:translateX(30px);pointer-events:none;transition:opacity .5s,transform .5s ease;overflow:hidden;}
+.slide.active{opacity:1;transform:none;pointer-events:auto;}
+.slide.prev{opacity:0;transform:translateX(-30px);}
+
+/* === Three Modes === */
+.slide.clean{background:var(--white);color:var(--g900);padding-top:3.5rem;overflow-y:auto;justify-content:flex-start;}
+.slide.poster{background-size:cover;background-position:center;color:#fff;text-align:center;}
+.slide.poster::before{content:'';position:absolute;inset:0;z-index:1;}
+.slide.poster>*{position:relative;z-index:2;}
+.slide.poster.overlay-bottom::before{background:linear-gradient(to bottom,rgba(0,0,0,.15) 0%,rgba(0,0,0,.78) 100%);}
+.slide.poster.overlay-heavy::before{background:linear-gradient(to bottom,rgba(0,0,0,.45) 0%,rgba(0,0,0,.85) 100%);}
+.slide.poster.overlay-center::before{background:radial-gradient(ellipse at center,rgba(0,0,0,.3) 0%,rgba(0,0,0,.8) 100%);}
+.slide.dataviz{background:var(--white);color:var(--g900);padding-top:3.5rem;}
+
+/* === Typography === */
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:2rem;font-weight:700;color:var(--g900);margin-bottom:1rem;line-height:1.4;}
+.slide.dataviz h2{color:var(--g900);}
+.slide.poster h2{color:#fff;}
+h3{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.1rem;line-height:1.8;}
+.subtitle{font-size:1.15rem;font-weight:500;}
+.dim{opacity:.6;}
+
+/* === Fragment === */
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* === Stat Grid === */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;max-width:860px;width:100%;margin-top:1rem;}
+.stat-grid.cols-2{grid-template-columns:repeat(2,1fr);}
+.stat-grid.cols-4{grid-template-columns:repeat(4,1fr);}
+.stat-grid.cols-5{grid-template-columns:repeat(5,1fr);}
+.stat-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:16px;padding:1.3rem;text-align:center;}
+.stat-box .val{font-size:2.4rem;font-weight:900;line-height:1.1;}
+.stat-box .label{font-size:.9rem;color:var(--g400);margin-top:.3rem;}
+
+/* === Card Grid === */
+.card-grid{display:flex;gap:1.2rem;flex-wrap:wrap;justify-content:center;margin-top:1rem;max-width:960px;width:100%;}
+.card{background:var(--offwhite);border:2px solid var(--g200);border-radius:16px;padding:1.5rem;min-width:200px;max-width:280px;flex:1;transition:border-color .2s;}
+.card:hover{border-color:var(--red);}
+.card .icon{font-size:2.2rem;margin-bottom:.5rem;}
+.card h3{color:var(--g900);margin-bottom:.3rem;}
+.card p{font-size:.95rem;color:var(--g600);line-height:1.6;}
+.card.accent-green:hover{border-color:var(--green);}
+.card.accent-gold:hover{border-color:var(--gold);}
+.card.accent-red:hover{border-color:var(--red);}
+.card.accent-orange:hover{border-color:var(--orange);}
+.card.accent-cyan:hover{border-color:var(--cyan);}
+.card.accent-purple:hover{border-color:var(--purple);}
+
+/* === Compare Table === */
+.compare-table{border-collapse:collapse;font-size:1rem;margin-top:.6rem;width:100%;max-width:860px;}
+.compare-table th{background:var(--g50);color:var(--g800);padding:.5rem 1rem;text-align:left;font-size:.95rem;}
+.compare-table td{padding:.5rem 1rem;border-bottom:1px solid var(--g100);font-size:.95rem;color:var(--g600);}
+.compare-table tr:hover td{background:var(--offwhite);}
+.compare-table .highlight{font-weight:700;color:var(--green);}
+.compare-table .warn{color:var(--orange);font-weight:700;}
+.compare-table .danger{color:var(--red);font-weight:700;}
+
+/* === Flow === */
+.flow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1.2rem 0;max-width:860px;width:100%;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.7rem 1rem;font-size:1rem;font-weight:700;text-align:center;color:var(--g900);}
+.flow-arrow{color:var(--red);font-size:1.5rem;font-weight:900;}
+
+/* === Info Box === */
+.info-box{border-radius:12px;padding:1.3rem 1.8rem;max-width:860px;width:100%;text-align:left;margin-top:.8rem;}
+.info-box.success{background:rgba(15,157,138,.08);border-left:4px solid var(--green);}
+.info-box.tip{background:rgba(249,171,0,.08);border-left:4px solid var(--gold);}
+.info-box.warning{background:rgba(217,48,37,.08);border-left:4px solid var(--red);}
+.info-box p{color:var(--g800);}
+
+/* === Quote Box === */
+.quote-box{max-width:800px;width:100%;background:var(--white);border-left:5px solid var(--gold);border-radius:0 12px 12px 0;padding:1.5rem 2rem;margin:.8rem 0;text-align:left;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.quote-box .quote-text{font-size:1.3rem;font-weight:700;line-height:1.6;color:var(--g900);}
+.quote-box .quote-src{font-size:.9rem;color:var(--g400);margin-top:.5rem;}
+
+/* === Bottom Line === */
+.bottom-line{max-width:800px;width:100%;background:rgba(217,48,37,.05);border:2px solid rgba(217,48,37,.2);border-radius:16px;padding:2rem;text-align:center;margin-top:1rem;}
+.bottom-line h3{font-size:1.6rem;color:var(--red);margin-bottom:.8rem;}
+.bottom-line p{font-size:1.05rem;color:var(--g600);max-width:640px;margin:0 auto;line-height:1.7;}
+
+/* === Poster Helpers === */
+.poster-subtitle{font-size:1.3rem;font-weight:500;color:rgba(255,255,255,.7);}
+.poster-badge{display:inline-block;padding:.3rem 1rem;border-radius:100px;font-size:.9rem;font-weight:700;margin-top:1rem;}
+
+/* === Compare Columns (for side-by-side dataviz) === */
+.compare-cols{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:960px;width:100%;margin-top:1rem;}
+.compare-col{background:var(--offwhite);border:2px solid var(--g200);border-radius:16px;padding:1.5rem;display:flex;flex-direction:column;gap:.8rem;}
+.compare-col h3{font-size:1.4rem;}
+.compare-col p{font-size:1rem;color:var(--g600);line-height:1.7;}
+
+/* === Funnel === */
+.funnel{display:flex;flex-direction:column;gap:.3rem;max-width:520px;width:100%;margin-top:.8rem;}
+.funnel-step{font-size:1rem;padding:.45rem 1rem;border-radius:0 8px 8px 0;text-align:center;font-weight:500;}
+
+/* === Dual Funnel === */
+.dual-funnel{display:grid;grid-template-columns:1fr 40px 1fr;gap:0;max-width:860px;width:100%;align-items:center;}
+.dual-funnel-arrow{display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--gold);}
+
+/* === List Items (for ranked items) === */
+.list-items{display:flex;flex-direction:column;gap:.5rem;max-width:860px;width:100%;}
+.list-item{display:flex;align-items:center;gap:1rem;padding:.8rem 1.2rem;background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;}
+.list-item .list-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;color:#fff;flex-shrink:0;}
+.list-item h4{font-size:1.1rem;font-weight:700;color:var(--g900);}
+.list-item p{font-size:.9rem;color:var(--g600);line-height:1.4;}
+.list-item .list-tag{font-size:.85rem;padding:4px 12px;border-radius:100px;border:1px solid;font-weight:600;margin-left:auto;white-space:nowrap;}
+
+/* === Bar Chart (simple) === */
+.bar-chart{display:flex;align-items:flex-end;gap:.4rem;max-width:400px;width:100%;height:220px;padding:0 .5rem;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:.3rem;}
+.bar-fill{width:100%;border-radius:4px 4px 0 0;}
+.bar-label{font-size:.7rem;color:var(--g400);}
+
+/* === Rank List (for token comparison) === */
+.rank-list{display:flex;flex-direction:column;gap:.5rem;max-width:460px;width:100%;}
+.rank-item{display:flex;justify-content:space-between;align-items:center;padding:.7rem 1.2rem;background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;}
+.rank-item span{font-size:1rem;color:var(--g600);}
+.rank-item .rank-val{font-size:1.2rem;font-weight:800;}
+
+/* === Progress bar (horizontal) === */
+.hbar-chart{display:flex;flex-direction:column;gap:.5rem;max-width:860px;width:100%;margin-top:.8rem;}
+.hbar-row{display:flex;align-items:center;gap:.8rem;}
+.hbar-label{min-width:80px;font-size:.9rem;color:var(--g600);text-align:right;}
+.hbar-track{flex:1;height:28px;background:var(--g100);border-radius:14px;overflow:hidden;}
+.hbar-fill{height:100%;border-radius:14px;display:flex;align-items:center;justify-content:flex-end;padding-right:.5rem;font-size:.75rem;font-weight:700;color:#fff;}
+.hbar-value{min-width:80px;font-size:1rem;font-weight:700;padding-left:.3rem;}
+
+/* === Controls === */
+.progress-bar{position:fixed;bottom:0;left:0;height:4px;background:var(--red);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:rgba(0,0,0,.03);color:var(--g600);font-size:1.2rem;cursor:pointer;transition:all .15s;backdrop-filter:blur(8px);}
+.controls button:hover{background:var(--g100);border-color:var(--g400);color:var(--g900);}
+.controls button:disabled{opacity:.2;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;right:5rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:rgba(217,48,37,.1);color:var(--red);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;backdrop-filter:blur(8px);}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
+
+/* === Chapter Menu === */
+.chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;}
+.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--white);backdrop-filter:blur(8px);border:1px solid var(--g200);border-radius:8px;color:var(--g800);font-size:.8rem;cursor:pointer;min-height:48px;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.chapter-btn:hover{border-color:var(--red);}
+.chapter-icon{color:var(--red);font-weight:700;}
+.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:200px;background:var(--white);backdrop-filter:blur(12px);border:1px solid var(--g200);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.1);}
+.chapter-menu.open .chapter-list{display:block;}
+.chapter-item{padding:8px 14px;color:var(--g600);font-size:.78rem;cursor:pointer;white-space:nowrap;min-height:44px;display:flex;align-items:center;gap:8px;}
+.chapter-item:hover{background:var(--offwhite);color:var(--g900);}
+.chapter-item.active{color:var(--red);font-weight:600;}
+.chapter-dot{width:8px;height:8px;border-radius:50%;background:var(--g200);flex-shrink:0;}
+.chapter-item.active .chapter-dot{background:var(--red);box-shadow:0 0 6px var(--red);}
+
+/* === Compact overrides for overflow slides === */
+.slide.compact h2{margin-bottom:.5rem;}
+.slide.compact .card{padding:1.1rem;}
+.slide.compact .card-grid{gap:.8rem;margin-top:.6rem;}
+.slide.compact .info-box{padding:.9rem 1.4rem;margin-top:.5rem;}
+.slide.compact .stat-grid{gap:.8rem;margin-top:.6rem;}
+.slide.compact .stat-box{padding:.9rem;}
+.slide.compact .compare-cols{gap:1rem;margin-top:.6rem;}
+.slide.compact .compare-col{padding:1.1rem;gap:.5rem;}
+.slide.compact .list-items{gap:.35rem;}
+.slide.compact .list-item{padding:.5rem 1rem;}
+.slide.compact .rank-list{gap:.35rem;}
+.slide.compact .rank-item{padding:.5rem 1rem;}
+
+/* === Responsive === */
+@media(max-width:768px){
+  html,body{font-size:16px;}
+  .slide{padding:1rem 1.2rem 1rem;}
+  .slide.clean{padding-top:3rem;}
+  .slide.poster{justify-content:flex-end;padding-bottom:1.5rem;}
+  h1{font-size:1.8rem;}h2{font-size:1.4rem;margin-bottom:.6rem;}
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:.8rem;}
+  .stat-grid.cols-4,.stat-grid.cols-5{grid-template-columns:repeat(2,1fr);}
+  .stat-box .val{font-size:1.8rem;}
+  .card-grid{flex-direction:column;align-items:center;}
+  .card{max-width:100%;min-width:0;}
+  .compare-table th,.compare-table td{padding:.5rem .6rem;font-size:.85rem;}
+  .compare-cols{grid-template-columns:1fr;}
+  .dual-funnel{grid-template-columns:1fr;gap:.5rem;}
+  .dual-funnel-arrow{transform:rotate(90deg);}
+  .controls button{width:40px;height:40px;font-size:1rem;}
+  .module-title{font-size:.7rem;left:.8rem;top:.6rem;}
+  .module-badge{font-size:.65rem;top:.6rem;right:.6rem;padding:.2rem .6rem;}
+  .quote-box .quote-text{font-size:1.05rem;}
+  /* Mobile: bar chart and grid fixes */
+  .bar-chart{max-width:100%!important;height:200px!important;}
+  .slide.compact .card-grid{gap:.5rem;}
+  .slide.compact .card{padding:.8rem;}
+  .slide.compact .stat-box{padding:.6rem;}
+  .slide.compact .compare-col{padding:.8rem;gap:.3rem;}
+  .slide.compact .list-item{padding:.4rem .8rem;gap:.5rem;}
+  .slide.compact .rank-item{padding:.3rem .6rem;}
+  .slide.compact .info-box{padding:.6rem 1rem;}
+  .funnel{gap:.1rem!important;}
+  .funnel-step{padding:.2rem .5rem!important;font-size:.8rem!important;}
+}
+</style>
+</head>
+<body>
+
+<div class="module-title">AI 100 講 — 補充單元</div>
+<div class="module-badge">S21 產業衝擊</div>
+
+<div class="slides">
+
+<!-- ====== S01: COVER ====== -->
+<div class="slide poster overlay-heavy active" data-act="開場" data-title="封面" data-index="0" style="background:linear-gradient(135deg,#0a0a14 0%,#16213e 50%,#0a3d35 100%);">
+  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:1.5rem;">AI 100 講 — 補充單元 S21</p>
+  <h1 style="font-size:3.5rem;">AI的<br><span style="color:var(--red);">產業化衝擊</span></h1>
+  <div style="width:80px;height:5px;background:var(--gold);border-radius:3px;margin:1.5rem 0;"></div>
+  <div style="display:flex;gap:2rem;margin-top:1rem;flex-wrap:wrap;justify-content:center;">
+    <div style="display:flex;align-items:center;gap:.8rem;">
+      <div style="width:48px;height:48px;background:var(--green);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;">&#x1F9E0;</div>
+      <div style="text-align:left;"><div style="font-size:.8rem;color:rgba(255,255,255,.4);">Multi-Agent</div><div style="font-size:1.1rem;font-weight:700;">多智體協同</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.8rem;">
+      <div style="width:48px;height:48px;background:var(--gold);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;">&#x1F916;</div>
+      <div style="text-align:left;"><div style="font-size:.8rem;color:rgba(255,255,255,.4);">Physical AI</div><div style="font-size:1.1rem;font-weight:700;">物理世界交互</div></div>
+    </div>
+  </div>
+  <p style="color:rgba(255,255,255,.3);margin-top:3rem;font-size:.85rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- ====== S02a: AI TIMELINE (text) ====== -->
+<div class="slide dataviz" data-act="AI演進" data-title="AI發展重要時期" data-index="1">
+  <h2>AI 發展重要時期</h2>
+  <p class="subtitle dim" style="margin-bottom:.8rem;">THREE STAGES OF EVOLUTION</p>
+  <div style="display:flex;flex-direction:column;gap:.6rem;max-width:800px;width:100%;">
+    <div style="display:flex;align-items:center;gap:.8rem;padding:.7rem 1.2rem;background:var(--offwhite);border-radius:12px;border-left:3px solid var(--green);">
+      <span style="font-size:1.3rem;font-weight:800;color:var(--gold);min-width:60px;">1956</span>
+      <span style="font-size:.95rem;color:var(--g600);">達特茅斯會議開啟AI紀元，專家系統繁榮後陷入寒冬</span>
+    </div>
+    <div class="fragment" style="display:flex;align-items:center;gap:.8rem;padding:.7rem 1.2rem;background:var(--offwhite);border-radius:12px;border-left:3px solid var(--green);">
+      <span style="font-size:1.3rem;font-weight:800;color:var(--gold);min-width:60px;">1997</span>
+      <span style="font-size:.95rem;color:var(--g600);">統計機器學習崛起，SVM、貝葉斯方法成為主流</span>
+    </div>
+    <div class="fragment" style="display:flex;align-items:center;gap:.8rem;padding:.7rem 1.2rem;background:var(--offwhite);border-radius:12px;border-left:3px solid var(--green);">
+      <span style="font-size:1.3rem;font-weight:800;color:var(--gold);min-width:60px;">2012</span>
+      <span style="font-size:.95rem;color:var(--g600);">AlexNet顛覆ImageNet，深度學習推動語音、視覺飛躍</span>
+    </div>
+    <div class="fragment" style="display:flex;align-items:center;gap:.8rem;padding:.7rem 1.2rem;background:var(--offwhite);border-radius:12px;border-left:3px solid var(--green);">
+      <span style="font-size:1.3rem;font-weight:800;color:var(--gold);min-width:60px;">2016</span>
+      <span style="font-size:.95rem;color:var(--g600);">AlphaGo擊敗李世石，強化學習結合深度學習</span>
+    </div>
+    <div class="fragment" style="display:flex;align-items:center;gap:.8rem;padding:.7rem 1.2rem;background:var(--offwhite);border-radius:12px;border-left:3px solid var(--gold);">
+      <span style="font-size:1.3rem;font-weight:800;color:var(--gold);min-width:60px;">2017</span>
+      <span style="font-size:.95rem;color:var(--g600);">Transformer架構橫空出世，為大模型爆發埋下伏筆</span>
+    </div>
+    <div class="fragment" style="display:flex;align-items:center;gap:.8rem;padding:.7rem 1.2rem;background:var(--offwhite);border-radius:12px;border-left:3px solid var(--red);">
+      <span style="font-size:1.3rem;font-weight:800;color:var(--red);min-width:60px;">2022</span>
+      <span style="font-size:.95rem;color:var(--g900);">ChatGPT引爆全球，AI從實驗室走向每個人</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S02b: AI TIMELINE (bar chart) ====== -->
+<div class="slide dataviz" data-act="AI演進" data-title="技術突破指數" data-index="2">
+  <h2>技術突破指數</h2>
+  <p class="subtitle dim" style="margin-bottom:1rem;">70年演進 &mdash; 從規則到智能的指數級躍遷</p>
+  <div class="bar-chart" style="max-width:600px;height:320px;">
+    <div class="bar-col"><div class="bar-fill" style="background:var(--green);height:40px;"></div><div class="bar-label">1956</div></div>
+    <div class="bar-col"><div class="bar-fill" style="background:var(--green);height:70px;"></div><div class="bar-label">1997</div></div>
+    <div class="bar-col"><div class="bar-fill" style="background:var(--green);height:115px;"></div><div class="bar-label">2012</div></div>
+    <div class="bar-col"><div class="bar-fill" style="background:var(--green);height:155px;"></div><div class="bar-label">2016</div></div>
+    <div class="bar-col"><div class="bar-fill" style="background:var(--gold);height:210px;"></div><div class="bar-label">2018</div></div>
+    <div class="bar-col"><div class="bar-fill" style="background:var(--gold);height:270px;"></div><div class="bar-label">2020</div></div>
+    <div class="bar-col"><div class="bar-fill" style="background:var(--red);height:320px;"></div><div class="bar-label" style="color:var(--gold);">2022</div></div>
+  </div>
+  <div class="info-box success" style="margin-top:1.5rem;">
+    <p>2017年Transformer架構問世後，AI技術突破進入<strong style="color:var(--gold);">超指數增長</strong>階段</p>
+  </div>
+</div>
+
+<!-- ====== S03: SECTION 寒武紀 ====== -->
+<div class="slide poster overlay-heavy" data-act="寒武紀爆發" data-title="AI的寒武紀爆發" data-index="3" style="background:linear-gradient(135deg,#0a0a14 0%,#1a1a3e 50%,#0a2d35 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Chapter 01</p>
+  <h1>AI的寒武紀爆發</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">從LLM到Physical AI的演進之路</p>
+  <div style="display:flex;gap:1.2rem;margin-top:2rem;flex-wrap:wrap;justify-content:center;">
+    <div class="fragment" style="padding:1rem 1.5rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;min-width:120px;">
+      <div style="font-size:1.8rem;font-weight:800;color:rgba(255,255,255,.4);">2023</div><div style="font-size:.9rem;color:rgba(255,255,255,.5);">LLM元年</div>
+    </div>
+    <div class="fragment" style="padding:1rem 1.5rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;min-width:120px;">
+      <div style="font-size:1.8rem;font-weight:800;color:var(--gold);">2024</div><div style="font-size:.9rem;color:rgba(255,255,255,.5);">Agent爆發</div>
+    </div>
+    <div class="fragment" style="padding:1rem 1.5rem;background:rgba(255,255,255,.06);border:1px solid var(--gold);border-radius:12px;min-width:120px;">
+      <div style="font-size:1.8rem;font-weight:800;color:var(--gold);">2025</div><div style="font-size:.9rem;color:rgba(255,255,255,.5);">Physical AI</div>
+    </div>
+    <div class="fragment" style="padding:1rem 1.5rem;background:rgba(255,255,255,.06);border:1px solid var(--red);border-radius:12px;min-width:120px;">
+      <div style="font-size:1.8rem;font-weight:800;color:var(--red);">2026</div><div style="font-size:.9rem;color:rgba(255,255,255,.5);">Clawdbot</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S04: 三次躍遷 ====== -->
+<div class="slide dataviz compact" data-act="寒武紀爆發" data-title="AI的三次躍遷" data-index="4">
+  <h2>AI的三次躍遷：從語言到物理世界</h2>
+  <div class="card-grid" style="max-width:960px;">
+    <div class="card fragment accent-green" style="min-width:190px;max-width:220px;border-top:3px solid var(--g200);">
+      <h3 style="color:var(--g400);">LLM</h3>
+      <p style="font-size:.85rem;color:var(--g400);margin-bottom:.4rem;">大語言模型</p>
+      <p style="font-size:.95rem;color:var(--g800);"><strong style="color:var(--green);">能力邊界：</strong>理解、生成、推理語言，處理文本、程式碼、影像等數位資訊</p>
+      <p style="font-size:.85rem;color:var(--g400);margin-top:.4rem;">局限：停留在數位世界</p>
+    </div>
+    <div class="card fragment accent-green" style="min-width:190px;max-width:220px;border-top:3px solid var(--green);">
+      <h3 style="color:var(--green);">AI Agent</h3>
+      <p style="font-size:.85rem;color:var(--g400);margin-bottom:.4rem;">智能體</p>
+      <p style="font-size:.95rem;color:var(--g800);"><strong style="color:var(--green);">能力邊界：</strong>自主規劃、工具調用、任務執行，具備數位世界的行動力</p>
+      <p style="font-size:.85rem;color:var(--g400);margin-top:.4rem;">局限：缺乏直接感知與操控能力</p>
+    </div>
+    <div class="card fragment accent-gold" style="min-width:190px;max-width:220px;border-top:3px solid var(--gold);">
+      <h3 style="color:var(--gold);">Physical AI</h3>
+      <p style="font-size:.85rem;color:var(--g400);margin-bottom:.4rem;">物理化AI</p>
+      <p style="font-size:.95rem;color:var(--g800);"><strong style="color:var(--gold);">能力邊界：</strong>直接感知物理世界，即時決策，操控機器人、車輛、設備</p>
+      <p style="font-size:.85rem;color:var(--g400);margin-top:.4rem;">突破：數位智能與物理世界深度融合</p>
+    </div>
+    <div class="card fragment accent-red" style="min-width:190px;max-width:220px;border-top:3px solid var(--red);">
+      <h3 style="color:var(--red);">Clawdbot</h3>
+      <p style="font-size:.85rem;color:var(--g400);margin-bottom:.4rem;">數位員工</p>
+      <p style="font-size:.95rem;color:var(--g800);"><strong style="color:var(--red);">能力邊界：</strong>直接感知物理世界，即時決策，操控機器人、車輛、設備</p>
+      <p style="font-size:.85rem;color:var(--g400);margin-top:.4rem;">突破：AI不再是工具，而是與人類共生的數位夥伴</p>
+    </div>
+  </div>
+  <div class="info-box success" style="margin-top:1rem;">
+    <p>Physical AI標誌著AI從<strong style="color:var(--gold);">觀察者</strong>轉變為<strong style="color:var(--gold);">行動者</strong> &mdash; <strong style="color:var(--g900);">2025 = Physical AI元年</strong></p>
+  </div>
+</div>
+
+<!-- ====== S05: Physical AI核心突破 ====== -->
+<div class="slide dataviz" data-act="寒武紀爆發" data-title="Physical AI核心突破" data-index="5">
+  <h2>OpenAI五級智能 &amp; Physical AI核心突破</h2>
+  <div style="display:flex;gap:.5rem;max-width:860px;width:100%;margin-bottom:1rem;flex-wrap:wrap;">
+    <div class="fragment" style="flex:1;min-width:140px;padding:.8rem;background:var(--offwhite);border-radius:12px;text-align:center;border-bottom:3px solid var(--g200);"><div style="font-size:.8rem;color:var(--g400);">Level 1</div><div style="font-size:1rem;font-weight:700;">聊天機器人</div></div>
+    <div class="fragment" style="flex:1;min-width:140px;padding:.8rem;background:var(--offwhite);border-radius:12px;text-align:center;border-bottom:3px solid var(--gold);"><div style="font-size:.8rem;color:var(--gold);">Level 2 ← 當前</div><div style="font-size:1rem;font-weight:700;">推理者</div></div>
+    <div class="fragment" style="flex:1;min-width:140px;padding:.8rem;background:rgba(15,157,138,.08);border-radius:12px;text-align:center;border:1.5px solid var(--green);border-bottom:3px solid var(--green);"><div style="font-size:.8rem;color:var(--green);">Level 3 → 目標</div><div style="font-size:1rem;font-weight:700;color:var(--green);">智能體</div></div>
+    <div class="fragment" style="flex:1;min-width:140px;padding:.8rem;background:var(--offwhite);border-radius:12px;text-align:center;border-bottom:3px solid var(--g200);"><div style="font-size:.8rem;color:var(--g400);">Level 4</div><div style="font-size:1rem;font-weight:700;">創新者</div></div>
+    <div class="fragment" style="flex:1;min-width:140px;padding:.8rem;background:var(--offwhite);border-radius:12px;text-align:center;border-bottom:3px solid var(--g200);"><div style="font-size:.8rem;color:var(--g400);">Level 5</div><div style="font-size:1rem;font-weight:700;">組織</div></div>
+  </div>
+  <div class="stat-grid cols-4" style="max-width:860px;">
+    <div class="stat-box fragment" style="text-align:center;">
+      <div style="font-size:1.8rem;margin-bottom:.3rem;">&#x1F441;</div>
+      <div class="val" style="font-size:1.3rem;color:var(--green);">即時感知</div>
+      <div class="label">直接感知物理環境的狀態、變化和風險</div>
+    </div>
+    <div class="stat-box fragment" style="text-align:center;">
+      <div style="font-size:1.8rem;margin-bottom:.3rem;">&#x26A1;</div>
+      <div class="val" style="font-size:1.3rem;color:var(--gold);">即時決策</div>
+      <div class="label">基於即時資料快速最優決策，無需干預</div>
+    </div>
+    <div class="stat-box fragment" style="text-align:center;">
+      <div style="font-size:1.8rem;margin-bottom:.3rem;">&#x1F91D;</div>
+      <div class="val" style="font-size:1.3rem;color:var(--cyan);">精準操控</div>
+      <div class="label">透過機器人、車輛等設備精確執行操作</div>
+    </div>
+    <div class="stat-box fragment" style="text-align:center;">
+      <div style="font-size:1.8rem;margin-bottom:.3rem;">&#x1F517;</div>
+      <div class="val" style="font-size:1.3rem;color:var(--orange);">多體協同</div>
+      <div class="label">多智能體協同完成複雜任務，形成智能網路</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S06: 智能群體爆發 ====== -->
+<div class="slide dataviz compact" data-act="寒武紀爆發" data-title="智能群體的爆發" data-index="6">
+  <h2>智能群體的爆發</h2>
+  <p class="subtitle dim" style="margin-bottom:.4rem;">資料來源：摩根士丹利2025年發布《機器人年鑑》</p>
+  <div class="stat-grid cols-2" style="margin-bottom:.6rem;gap:.6rem;">
+    <div class="stat-box fragment" style="padding:.8rem;">
+      <div class="val" style="color:var(--green);font-size:2rem;">25萬億美元</div>
+      <div class="label">人形機器人硬體市場（2050年）</div>
+    </div>
+    <div class="stat-box fragment" style="padding:.8rem;">
+      <div class="val" style="color:var(--gold);font-size:2rem;">65億台</div>
+      <div class="label">全球機器人（2050年）</div>
+    </div>
+  </div>
+  <div class="card-grid" style="max-width:860px;gap:.8rem;margin-top:.5rem;">
+    <div class="card fragment accent-green" style="min-width:230px;max-width:270px;padding:1rem;">
+      <h3 style="color:var(--g400);font-size:1.05rem;">01 傳統燃油設備</h3>
+      <p style="font-size:.9rem;">燃油動力系統 / 人工操作控制 / 機械維護成本高</p>
+      <div style="font-size:.8rem;color:var(--green);margin-top:.3rem;padding:.3rem .6rem;background:rgba(15,157,138,.08);border-radius:8px;">典型：柴油工程機械、燃油車輛</div>
+    </div>
+    <div class="card fragment accent-gold" style="min-width:230px;max-width:270px;padding:1rem;">
+      <h3 style="color:var(--gold);font-size:1.05rem;">02 單一設備智能化</h3>
+      <p style="font-size:.9rem;">新能源動力系統 / 單機AI決策 / 感測器感知環境</p>
+      <div style="font-size:.8rem;color:var(--green);margin-top:.3rem;padding:.3rem .6rem;background:rgba(15,157,138,.08);border-radius:8px;">典型：電動自動駕駛車輛、智能農機</div>
+    </div>
+    <div class="card fragment accent-green" style="min-width:230px;max-width:270px;border-color:var(--green);padding:1rem;">
+      <h3 style="color:var(--green);font-size:1.05rem;">03 群體設備智能</h3>
+      <p style="font-size:.9rem;">分布式協同網路 / 雲端大腦調度 / 群體智能湧現</p>
+      <div style="font-size:.8rem;color:var(--green);margin-top:.3rem;padding:.3rem .6rem;background:rgba(15,157,138,.08);border-radius:8px;">典型：智能工廠、機器人集群、無人農場</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S07: 25萬億市場 ====== -->
+<div class="slide dataviz" data-act="寒武紀爆發" data-title="25萬億機器人市場" data-index="7">
+  <h2>未來25萬億的機器人市場全景</h2>
+  <div class="card-grid" style="max-width:960px;">
+    <div class="card fragment" style="min-width:260px;max-width:300px;display:flex;justify-content:space-between;align-items:center;padding:1.2rem;">
+      <div><h3 style="font-size:1rem;">自動駕駛車輛</h3><p style="font-size:.8rem;">乘用車、卡車、公交、計程車</p></div>
+      <div style="font-size:1.5rem;font-weight:800;color:var(--green);">$5.5T</div>
+    </div>
+    <div class="card fragment" style="min-width:260px;max-width:300px;display:flex;justify-content:space-between;align-items:center;padding:1.2rem;">
+      <div><h3 style="font-size:1rem;">工業機器人</h3><p style="font-size:.8rem;">製造、裝配、質檢、倉儲</p></div>
+      <div style="font-size:1.5rem;font-weight:800;color:var(--green);">$6.1T</div>
+    </div>
+    <div class="card fragment" style="min-width:260px;max-width:300px;display:flex;justify-content:space-between;align-items:center;padding:1.2rem;">
+      <div><h3 style="font-size:1rem;">專業服務機器人</h3><p style="font-size:.8rem;">醫療、教育、金融、零售</p></div>
+      <div style="font-size:1.5rem;font-weight:800;color:var(--gold);">$4.8T</div>
+    </div>
+    <div class="card fragment" style="min-width:260px;max-width:300px;display:flex;justify-content:space-between;align-items:center;padding:1.2rem;">
+      <div><h3 style="font-size:1rem;">大型垂直起降飛行器</h3><p style="font-size:.8rem;">城市空中交通、物流運輸</p></div>
+      <div style="font-size:1.5rem;font-weight:800;color:var(--gold);">$3.2T</div>
+    </div>
+    <div class="card fragment" style="min-width:260px;max-width:300px;display:flex;justify-content:space-between;align-items:center;padding:1.2rem;">
+      <div><h3 style="font-size:1rem;">人形機器人</h3><p style="font-size:.8rem;">家庭服務、陪伴、通用勞動</p></div>
+      <div style="font-size:1.5rem;font-weight:800;color:var(--cyan);">$2.8T</div>
+    </div>
+    <div class="card fragment" style="min-width:260px;max-width:300px;display:flex;justify-content:space-between;align-items:center;padding:1.2rem;">
+      <div><h3 style="font-size:1rem;">家用 &amp; 小型無人機</h3><p style="font-size:.8rem;">清潔、烹飪、航拍、巡檢</p></div>
+      <div style="font-size:1.5rem;font-weight:800;color:var(--cyan);">$3.1T</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S08: 不同視角 ====== -->
+<div class="slide dataviz compact" data-act="寒武紀爆發" data-title="不同視角" data-index="8">
+  <h2>不同視角下的智能世界</h2>
+  <div class="compare-cols">
+    <div class="compare-col" style="border-left:4px solid var(--green);">
+      <h3 style="font-size:1.4rem;">&#x1F464; 人視角</h3>
+      <p>機器對智能世界的理解，是<strong style="color:var(--gold);">超越人類</strong>，在速度、精度、耐力、計算能力等維度實現指數級提升</p>
+      <div class="fragment" style="font-size:1rem;">&#x25CF; 更強壯</div>
+      <div class="fragment" style="font-size:1rem;">&#x25CF; 更聰明</div>
+      <div class="fragment" style="font-size:1rem;">&#x25CF; 網路化協同</div>
+      <div style="padding:.8rem 1rem;background:rgba(15,157,138,.08);border-radius:12px;margin-top:auto;">
+        <div style="font-size:.8rem;color:var(--g400);">核心理念</div>
+        <div style="font-size:1.2rem;font-weight:700;color:var(--green);">完成任務</div>
+      </div>
+    </div>
+    <div class="compare-col" style="border-left:4px solid var(--gold);">
+      <h3 style="font-size:1.4rem;">&#x1F916; 機器視角</h3>
+      <p>人類對智能世界的期待，是<strong style="color:var(--gold);">讓機器像人一樣</strong>，能夠理解人類的意圖、模仿人類的行為、與人類協同工作</p>
+      <div class="fragment" style="font-size:1rem;">&#x25CF; 具備智能</div>
+      <div class="fragment" style="font-size:1rem;">&#x25CF; 像人一樣運轉</div>
+      <div class="fragment" style="font-size:1rem;">&#x25CF; 人機協作</div>
+      <div style="padding:.8rem 1rem;background:rgba(249,171,0,.08);border-radius:12px;margin-top:auto;">
+        <div style="font-size:.8rem;color:var(--g400);">核心理念</div>
+        <div style="font-size:1.2rem;font-weight:700;color:var(--gold);">交付結果</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S09: 爆發數據 ====== -->
+<div class="slide dataviz" data-act="寒武紀爆發" data-title="AI爆發時代" data-index="9">
+  <h2>AI 的爆發時代：數據全景</h2>
+  <div class="stat-grid cols-2" style="max-width:860px;">
+    <div class="stat-box fragment" style="border-color:var(--green);">
+      <div class="val" style="color:var(--green);font-size:2.8rem;">$25<span style="font-size:1.5rem;">萬億</span></div>
+      <div style="font-size:1.1rem;font-weight:700;color:var(--g900);margin-top:.3rem;">預測總值</div>
+      <div class="label">全球AI機器人產值（2050年）</div>
+    </div>
+    <div class="stat-box fragment" style="border-color:var(--gold);">
+      <div class="val" style="color:var(--gold);font-size:2.8rem;">65<span style="font-size:1.5rem;">億台</span></div>
+      <div style="font-size:1.1rem;font-weight:700;color:var(--g900);margin-top:.3rem;">預測規模</div>
+      <div class="label">全球AI機器人設備數（2050年）</div>
+    </div>
+    <div class="stat-box fragment" style="border-color:var(--green);">
+      <div class="val" style="color:var(--green);font-size:2.8rem;">$500<span style="font-size:1.5rem;">萬億</span></div>
+      <div style="font-size:1.1rem;font-weight:700;color:var(--g900);margin-top:.3rem;">預測GDP</div>
+      <div class="label">AI將推動全球GDP超<strong style="color:var(--gold);">7%</strong>年度增長</div>
+    </div>
+    <div class="stat-box fragment" style="border-color:var(--gold);">
+      <div class="val" style="color:var(--gold);font-size:2.8rem;">450<span style="font-size:1.5rem;">億台</span></div>
+      <div style="font-size:1.1rem;font-weight:700;color:var(--g900);margin-top:.3rem;">預測規模</div>
+      <div class="label">全球物聯網連接數</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S10: SECTION Clawdbot ====== -->
+<div class="slide poster overlay-heavy" data-act="Clawdbot時代" data-title="Clawdbot時代" data-index="10" style="background:linear-gradient(135deg,#0a0a14 0%,#2d1a0e 50%,#1a1a3e 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Chapter 02</p>
+  <h1>Clawdbot時代</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">執行型AI的全民破圈 &mdash; 從「對話顧問」到「數位員工」</p>
+</div>
+
+<!-- ====== S11: Clawdbot概念 ====== -->
+<div class="slide dataviz" data-act="Clawdbot時代" data-title="執行型AI破圈" data-index="11">
+  <h2>Clawdbot &mdash; 執行型AI的全民破圈</h2>
+  <p class="subtitle dim" style="margin-bottom:.6rem;">從「對話顧問」到「數位員工」的範式躍遷</p>
+  <div class="card-grid" style="max-width:960px;">
+    <div class="card fragment accent-green" style="min-width:200px;max-width:220px;">
+      <h3 style="color:var(--green);font-size:1.1rem;">AI 自己迭代自己</h3>
+      <p style="font-size:.95rem;">從被動回應到主動服務<br>24小時「數位同事」<br>未來「一人公司」增多</p>
+    </div>
+    <div class="card fragment accent-gold" style="min-width:200px;max-width:220px;">
+      <h3 style="color:var(--gold);font-size:1.1rem;">Skills = 新時代的 Apps</h3>
+      <p style="font-size:.95rem;">未來的模式：不需要交互入口，僅需開發一個Skill，發布到Skill Store，等待被大量Agent發現、調用</p>
+    </div>
+    <div class="card fragment accent-cyan" style="min-width:200px;max-width:220px;">
+      <h3 style="color:var(--cyan);font-size:1.1rem;">Memory as a File System</h3>
+      <p style="font-size:.95rem;">Memory等同於self-evolving。沒有memory，Agent基本上就沒有進化的能力</p>
+    </div>
+    <div class="card fragment accent-orange" style="min-width:200px;max-width:220px;">
+      <h3 style="color:var(--orange);font-size:1.1rem;">終極形態 A2A 互動</h3>
+      <p style="font-size:.95rem;">不是人與AI的互動，而是它真正做到了AI與AI互動的可能</p>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S12: GTC 2026 ====== -->
+<div class="slide dataviz compact" data-act="Clawdbot時代" data-title="英偉達GTC 2026" data-index="12">
+  <h2>英偉達 GTC 2026 &mdash; 算力狂飆4000萬倍</h2>
+  <div class="card-grid" style="max-width:960px;">
+    <div class="card fragment accent-green" style="min-width:250px;max-width:300px;border-top:3px solid var(--green);">
+      <h3 style="color:var(--green);font-size:1.2rem;">V &mdash; Vera Rubin</h3>
+      <p style="color:var(--orange);font-weight:600;">算力怪獸 &mdash; 7種晶片5種架構</p>
+      <p style="margin-top:.5rem;">&#x2022; 推理性能提升 <strong style="color:var(--gold);">35倍</strong><br>&#x2022; 每瓦吞吐量提升 <strong style="color:var(--gold);">10倍</strong><br>&#x2022; Token生成率暴漲 <strong style="color:var(--gold);">350倍</strong></p>
+    </div>
+    <div class="card fragment accent-gold" style="min-width:250px;max-width:300px;border-top:3px solid var(--gold);">
+      <h3 style="color:var(--gold);font-size:1.2rem;">N &mdash; NemoClaw</h3>
+      <p style="color:var(--orange);font-weight:600;">企業級安全方案</p>
+      <p style="margin-top:.5rem;">為OpenClaw套上「安全殼」。被譽為「新時代的作業系統」。每家SaaS公司都將變成GaaS公司。</p>
+    </div>
+    <div class="card fragment accent-orange" style="min-width:250px;max-width:300px;border-top:3px solid var(--orange);">
+      <h3 style="color:var(--orange);font-size:1.2rem;">A &mdash; AI走進物理世界</h3>
+      <p style="color:var(--orange);font-weight:600;">機器人技術 &mdash; Jetson + Cosmos + Omniverse</p>
+      <p style="margin-top:.5rem;">新增比亞迪、吉利、五十鈴、日產等合作夥伴</p>
+    </div>
+  </div>
+  <div class="stat-grid" style="margin-top:.6rem;gap:.6rem;">
+    <div class="stat-box fragment" style="padding:.7rem;">
+      <div class="label">算力提升（10年）</div>
+      <div class="val" style="color:var(--green);font-size:1.8rem;">4000萬倍</div>
+    </div>
+    <div class="stat-box fragment" style="padding:.7rem;">
+      <div class="label">2027年訂單預測</div>
+      <div class="val" style="color:var(--gold);font-size:1.8rem;">1萬億美元</div>
+    </div>
+    <div class="stat-box fragment" style="padding:.7rem;">
+      <div class="label">2027年市值預測</div>
+      <div class="val" style="color:var(--orange);font-size:1.8rem;">10萬億美元</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S13: OpenClaw ====== -->
+<div class="slide dataviz compact" data-act="Clawdbot時代" data-title="什麼是OpenClaw" data-index="13">
+  <h2>什麼是Open Claw？</h2>
+  <p class="subtitle dim" style="margin-bottom:.5rem;">爆火的桌面AI Agent框架</p>
+  <div class="compare-cols" style="max-width:860px;">
+    <div class="compare-col fragment">
+      <h3 style="color:var(--green);">定義</h3>
+      <p style="font-size:1.05rem;">一款可部署在個人電腦上的<strong style="color:var(--green);">開源AI智能體框架</strong>（因「龍蝦」圖標得名，圈內稱「養龍蝦」）。</p>
+    </div>
+    <div class="compare-col fragment" style="border-color:var(--green);">
+      <h3 style="color:var(--green);">核心能力</h3>
+      <p style="font-size:1.05rem;">&#x2714; 高權限操作電腦<br>&#x2714; 調用帳號<br>&#x2714; 具備記憶能力<br>&#x2714; 替人完成複雜工作流</p>
+    </div>
+  </div>
+  <div style="background:var(--offwhite);border:2px solid var(--g200);border-radius:14px;padding:.9rem 1.4rem;max-width:860px;width:100%;margin-top:.6rem;" class="fragment">
+    <h3 style="color:var(--gold);margin-bottom:.2rem;">案例</h3>
+    <p style="font-size:1.05rem;color:var(--g800);">傅盛用其搭建<strong style="color:var(--gold);">8個Agent</strong>，完成拜年、寫稿、做影片，實現<strong style="color:var(--gold);">「一人公司」</strong>。</p>
+  </div>
+</div>
+
+<!-- ====== S14: OpenClaw適合誰 ====== -->
+<div class="slide dataviz" data-act="Clawdbot時代" data-title="OpenClaw適合誰" data-index="14">
+  <h2>Open Claw最適合誰？</h2>
+  <div class="card-grid" style="max-width:860px;">
+    <div class="card fragment" style="min-width:230px;max-width:270px;">
+      <h3 style="font-size:1.1rem;">技術極客與開發者</h3>
+      <p style="font-size:.95rem;">&#x2795; 可透過程式碼實現高度客製</p>
+      <p style="font-size:.95rem;color:var(--gold);">&#x26A0; 可能因技術術語面臨安裝障礙</p>
+    </div>
+    <div class="card fragment" style="min-width:230px;max-width:270px;border-color:var(--green);">
+      <h3 style="font-size:1.1rem;">追求極致效率的超級個體</h3>
+      <p style="font-size:.95rem;">&#x2795; 適合自由工作者和小企業主</p>
+      <p style="font-size:.95rem;">&#x2795; 專注自動化套利和客戶服務</p>
+    </div>
+    <div class="card fragment" style="min-width:230px;max-width:270px;">
+      <h3 style="font-size:1.1rem;">企業IT部門</h3>
+      <p style="font-size:.95rem;">&#x2795; 探索內部自動化可能性</p>
+      <p style="font-size:.95rem;color:var(--gold);">&#x26A0; 必須直接面對安全風險</p>
+    </div>
+  </div>
+  <div class="info-box warning" style="margin-top:1rem;">
+    <p><strong style="color:var(--orange);">重要提醒：</strong>將Open Claw視為<strong style="color:var(--orange);">沒有經驗但執行力強的實習生</strong>。潛在風險：意外刪除檔案、資料洩露。</p>
+  </div>
+</div>
+
+<!-- ====== S15: 國產替代 ====== -->
+<div class="slide dataviz compact" data-act="Clawdbot時代" data-title="國產替代方案" data-index="15">
+  <h2>Open Claw 的國產替代方案</h2>
+  <div class="list-items" style="margin-top:.5rem;">
+    <div class="list-item fragment">
+      <div class="list-icon" style="background:var(--green);">M</div>
+      <div style="flex:1;"><h4>MiniMax</h4><p>MaxClaw，雲端部署無需自備伺服器</p></div>
+      <span class="list-tag" style="color:var(--green);border-color:var(--green);">雲端</span>
+    </div>
+    <div class="list-item fragment">
+      <div class="list-icon" style="background:var(--navy);">K</div>
+      <div style="flex:1;"><h4>Kimi</h4><p>Kimi Claw，擴展AI助手能力邊界</p></div>
+      <span class="list-tag" style="color:var(--cyan);border-color:var(--cyan);">助手</span>
+    </div>
+    <div class="list-item fragment">
+      <div class="list-icon" style="background:var(--green);">A</div>
+      <div style="flex:1;"><h4>阿里巴巴</h4><p>開源CoPaw，支援本地/雲端及二次開發</p></div>
+      <span class="list-tag" style="color:var(--orange);border-color:var(--orange);">開源</span>
+    </div>
+    <div class="list-item fragment">
+      <div class="list-icon" style="background:var(--navy);">B</div>
+      <div style="flex:1;"><h4>百度智能雲</h4><p>移動版OpenClaw，雲端環境隔離更安全</p></div>
+      <span class="list-tag" style="color:var(--purple);border-color:var(--purple);">移動</span>
+    </div>
+    <div class="list-item fragment" style="border-color:var(--green);">
+      <div class="list-icon" style="background:var(--green);">L</div>
+      <div style="flex:1;"><h4>LongCat（龍貓）</h4><p>穩定合規的官方免費API，避免帳號安全風險</p></div>
+      <span class="list-tag" style="color:var(--green);border-color:var(--green);background:rgba(15,157,138,.08);">推薦</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S16: SECTION 效率恐慌 ====== -->
+<div class="slide poster overlay-heavy" data-act="效率恐慌" data-title="效率恐慌與安全" data-index="16" style="background:linear-gradient(135deg,#0a0a14 0%,#3d1a0a 50%,#1a0a14 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Chapter 03</p>
+  <h1>效率恐慌與安全風險</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">所謂效率革命的恐慌 &mdash; 當AI開始取代人類工作</p>
+</div>
+
+<!-- ====== S17: 效率革命 ====== -->
+<div class="slide dataviz" data-act="效率恐慌" data-title="效率革命的恐慌" data-index="17">
+  <h2>所謂效率革命的恐慌</h2>
+  <div class="card-grid" style="max-width:960px;">
+    <div class="card fragment accent-green" style="min-width:260px;max-width:300px;border-top:3px solid var(--green);">
+      <div style="font-size:2.2rem;font-weight:800;color:var(--g200);">01</div>
+      <h3 style="font-size:1.1rem;">Claude Code：150%產出躍升</h3>
+      <p style="margin-top:.5rem;font-size:.95rem;">Anthropic內部資料顯示，工程師使用Claude Code後人均產出提升150%，程式碼品質與交付速度同步改善。</p>
+    </div>
+    <div class="card fragment accent-gold" style="min-width:260px;max-width:300px;border-top:3px solid var(--gold);">
+      <div style="font-size:2.2rem;font-weight:800;color:var(--g200);">02</div>
+      <h3 style="font-size:1.1rem;">Cursor AI：30人撐起90億估值</h3>
+      <p style="margin-top:.5rem;font-size:.95rem;">AI原生開發工具Cursor僅憑30人團隊實現90億美元估值，人均價值創造達傳統軟體公司的數十倍。</p>
+    </div>
+    <div class="card fragment accent-orange" style="min-width:260px;max-width:300px;border-top:3px solid var(--orange);">
+      <div style="font-size:2.2rem;font-weight:800;color:var(--g200);">03</div>
+      <h3 style="font-size:1.1rem;">Seedance 2.0：兩行提示詞的好萊塢</h3>
+      <p style="margin-top:.5rem;font-size:.95rem;">字節視頻生成模型僅需兩行提示詞即可產出電影級畫面，製作週期從數月壓縮至分鐘級。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S18: 安全風險 ====== -->
+<div class="slide dataviz compact" data-act="效率恐慌" data-title="安全風險" data-index="18">
+  <h2>安全風險：隱憂與挑戰</h2>
+  <div class="compare-cols" style="max-width:860px;">
+    <div class="compare-col fragment" style="border-color:var(--red);">
+      <h3 style="color:var(--red);">高危漏洞</h3>
+      <p style="font-size:1.05rem;">安全團隊披露OpenClaw漏洞<strong style="color:var(--red);">&quot;ClawJacked&quot;</strong>，可遠端控制本地AI Agent。</p>
+    </div>
+    <div class="compare-col fragment" style="border-color:var(--orange);">
+      <h3 style="color:var(--orange);">資料洩露</h3>
+      <p style="font-size:1.05rem;">使用者暴露預設端口，無密碼防護，設備被入侵挖礦。</p>
+    </div>
+  </div>
+  <div style="background:var(--offwhite);border:2px solid var(--orange);border-radius:14px;padding:.9rem 1.4rem;max-width:860px;width:100%;margin-top:.6rem;" class="fragment">
+    <h3 style="color:var(--orange);margin-bottom:.2rem;">&quot;幻覺&quot;破壞</h3>
+    <p style="font-size:1rem;color:var(--g800);">模型理解偏差導致錯誤執行系統指令，<strong style="color:var(--red);">清空專案資料夾甚至導致系統崩潰</strong>。</p>
+  </div>
+  <div class="info-box warning" style="margin-top:.5rem;padding:.8rem 1.4rem;">
+    <p>從「工具火爆」到「應用爆發」，還需填平效率與安全的鴻溝。</p>
+  </div>
+</div>
+
+<!-- ====== S19: SECTION 產業衝擊 ====== -->
+<div class="slide poster overlay-heavy" data-act="產業衝擊" data-title="產業衝擊" data-index="19" style="background:linear-gradient(135deg,#1a0a0a 0%,#3d0a0a 50%,#0a0a14 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Chapter 04</p>
+  <h1>產業衝擊</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">Citrini Research鬼故事 &mdash; 裁員風暴與市場分化</p>
+</div>
+
+<!-- ====== S20: Citrini鬼故事 ====== -->
+<div class="slide dataviz" data-act="產業衝擊" data-title="Citrini鬼故事" data-index="20">
+  <h2 style="margin-bottom:.5rem;">Citrini Research報告 &mdash; 鬼故事</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;max-width:960px;width:100%;flex:1;min-height:0;">
+    <div style="display:flex;flex-direction:column;gap:.6rem;">
+      <div class="fragment" style="padding:.8rem 1rem;background:var(--offwhite);border:2px solid var(--g200);border-radius:16px;">
+        <h3 style="color:var(--orange);font-size:1.05rem;margin-bottom:.2rem;">報告來源</h3>
+        <p style="font-size:.95rem;color:var(--g600);">Citrini Research近期瘋傳的一份深度文章。</p>
+      </div>
+      <div class="fragment" style="padding:.8rem 1rem;background:var(--offwhite);border:2px solid var(--orange);border-radius:16px;">
+        <h3 style="color:var(--orange);font-size:1.05rem;margin-bottom:.3rem;">核心情景（2028年設想）</h3>
+        <div style="display:flex;gap:.6rem;margin-top:.4rem;">
+          <div style="flex:1;padding:.6rem;background:rgba(217,48,37,.06);border-radius:12px;border-bottom:3px solid var(--red);text-align:center;">
+            <div style="font-size:.8rem;color:var(--g400);">就業衝擊</div>
+            <div style="font-size:1.1rem;font-weight:800;color:var(--red);">失業率 10.2%</div>
+          </div>
+          <div style="flex:1;padding:.6rem;background:rgba(217,48,37,.06);border-radius:12px;border-bottom:3px solid var(--red);text-align:center;">
+            <div style="font-size:.8rem;color:var(--g400);">經濟衝擊</div>
+            <div style="font-size:1.1rem;font-weight:800;color:var(--red);">美股暴跌 38%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.4rem;">
+      <div class="fragment" style="padding:.6rem .8rem;background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;">
+        <div style="font-size:.9rem;font-weight:700;color:var(--gold);">階段一：技術突破（2025-2026）</div>
+        <p style="font-size:.9rem;line-height:1.5;color:var(--g600);">AI智能體能力躍升，白領核心工作被低成本替代。SaaS收費模式崩塌。</p>
+      </div>
+      <div class="fragment" style="padding:.6rem .8rem;background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;">
+        <div style="font-size:.9rem;font-weight:700;color:var(--orange);">階段二：就業崩塌（2026-2027）</div>
+        <p style="font-size:.9rem;line-height:1.5;color:var(--g600);">「AI提效→裁員降本→再投AI」閉環。高收入白領被迫進入零工經濟。</p>
+      </div>
+      <div class="fragment" style="padding:.6rem .8rem;background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;">
+        <div style="font-size:.9rem;font-weight:700;color:var(--red);">階段三：消費萎縮 &amp; 金融傳導（2027-2028）</div>
+        <p style="font-size:.9rem;line-height:1.5;color:var(--g600);">前20%收入群體停止消費→私募信貸違約→$13萬億房貸市場危機。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S21: 下行漏斗 ====== -->
+<div class="slide poster overlay-center" data-act="產業衝擊" data-title="資產快速奔潰" data-index="21" style="background-image:url('slides-img/funnel-down.png');padding:1.5rem 4rem 1rem;">
+  <div style="margin-bottom:.3rem;">
+    <span style="font-size:.8rem;font-weight:700;letter-spacing:2px;color:var(--red);padding:4px 14px;border:1px solid var(--red);border-radius:100px;">DYSTOPIAN SCENARIO</span>
+  </div>
+  <h2 style="font-size:1.6rem;font-weight:800;margin-bottom:.2rem;">鬼故事 &mdash; 優質資產的快速奔潰</h2>
+  <div style="width:60px;height:3px;background:var(--red);border-radius:2px;margin:.3rem auto .5rem;"></div>
+  <div class="funnel" style="max-width:480px;gap:.15rem;">
+    <div class="funnel-step fragment" style="background:rgba(167,139,250,.15);border-left:3px solid #a78bfa;padding:.3rem .8rem;font-size:.9rem;">AI快速應用，提升公司效率</div>
+    <div class="funnel-step fragment" style="background:rgba(147,197,253,.12);border-left:3px solid #93c5fd;padding:.3rem .8rem;font-size:.9rem;">所以公司開始裁員</div>
+    <div class="funnel-step fragment" style="background:rgba(103,232,249,.1);border-left:3px solid #67e8f9;padding:.3rem .8rem;font-size:.9rem;">個人消費降低</div>
+    <div class="funnel-step fragment" style="background:rgba(110,231,183,.1);border-left:3px solid #6ee7b7;color:var(--gold);padding:.3rem .8rem;font-size:.9rem;">車貸斷供</div>
+    <div class="funnel-step fragment" style="background:rgba(134,239,172,.08);border-left:3px solid #86efac;color:var(--gold);padding:.3rem .8rem;font-size:.9rem;">房貸斷供</div>
+    <div class="funnel-step fragment" style="background:rgba(253,224,71,.08);border-left:3px solid #fde047;color:var(--orange);padding:.3rem .8rem;font-size:.9rem;">消費地產貶值</div>
+    <div class="funnel-step fragment" style="background:rgba(251,191,36,.08);border-left:3px solid #fbbf24;color:var(--orange);padding:.3rem .8rem;font-size:.9rem;">住房地產貶值</div>
+    <div class="funnel-step fragment" style="background:rgba(248,113,113,.08);border-left:3px solid #f87171;color:var(--red);padding:.3rem .8rem;font-size:.9rem;">經濟下行</div>
+    <div class="funnel-step fragment" style="background:rgba(220,38,38,.08);border-left:3px solid #dc2626;color:var(--red);padding:.3rem .8rem;font-size:.9rem;">更加實用AI</div>
+    <div class="funnel-step fragment" style="background:rgba(185,28,28,.12);border-left:3px solid #b91c1c;color:var(--red);font-weight:700;padding:.3rem .8rem;font-size:.9rem;">加速裁員和上面過程 &#x21BB;</div>
+  </div>
+</div>
+
+<!-- ====== S22: 裁員風暴 ====== -->
+<div class="slide dataviz compact" data-act="產業衝擊" data-title="全球裁員風暴" data-index="22" style="padding-top:2.5rem;">
+  <h2 style="color:var(--red);margin-bottom:.4rem;">AI衝擊下的全球裁員風暴</h2>
+  <p class="subtitle dim" style="margin-bottom:.4rem;">2024-2025年各行業裁員數據與趨勢分析</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;max-width:960px;width:100%;flex:1;min-height:0;">
+    <div style="display:flex;flex-direction:column;gap:.35rem;">
+      <div style="font-size:.95rem;font-weight:700;color:var(--g800);margin-bottom:.2rem;">科技巨頭裁員規模</div>
+      <div class="fragment" style="padding:.45rem .8rem;display:flex;justify-content:space-between;align-items:center;background:var(--offwhite);border:2px solid var(--g200);border-radius:10px;">
+        <span style="font-size:.95rem;">亞馬遜</span><span style="font-size:1.1rem;font-weight:800;color:var(--red);">30,000</span>
+      </div>
+      <div class="fragment" style="padding:.45rem .8rem;display:flex;justify-content:space-between;align-items:center;background:var(--offwhite);border:2px solid var(--g200);border-radius:10px;">
+        <span style="font-size:.95rem;">英特爾</span><span style="font-size:1.1rem;font-weight:800;color:var(--orange);">21,000</span>
+      </div>
+      <div class="fragment" style="padding:.45rem .8rem;display:flex;justify-content:space-between;align-items:center;background:var(--offwhite);border:2px solid var(--g200);border-radius:10px;">
+        <span style="font-size:.95rem;">微軟</span><span style="font-size:1.1rem;font-weight:800;color:var(--orange);">15,000</span>
+      </div>
+      <div class="fragment" style="padding:.45rem .8rem;display:flex;justify-content:space-between;align-items:center;background:var(--offwhite);border:2px solid var(--g200);border-radius:10px;">
+        <span style="font-size:.95rem;">IBM</span><span style="font-size:1.1rem;font-weight:800;color:var(--gold);">5,000</span>
+      </div>
+      <div class="fragment" style="padding:.45rem .8rem;display:flex;justify-content:space-between;align-items:center;background:var(--offwhite);border:2px solid var(--g200);border-radius:10px;">
+        <span style="font-size:.95rem;">Meta</span><span style="font-size:1.1rem;font-weight:800;color:var(--gold);">4,200</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.35rem;">
+      <div style="font-size:.95rem;font-weight:700;color:var(--g800);margin-bottom:.2rem;">關鍵數據</div>
+      <div class="stat-box fragment" style="padding:.5rem .8rem;">
+        <div class="label">2024全球科技裁員</div>
+        <div class="val" style="color:var(--red);font-size:1.8rem;">15.2萬人</div>
+      </div>
+      <div class="stat-box fragment" style="padding:.5rem .8rem;">
+        <div class="label">微軟AI寫程式碼佔比</div>
+        <div class="val" style="color:var(--gold);font-size:1.8rem;">52%</div>
+      </div>
+      <div class="stat-box fragment" style="padding:.5rem .8rem;">
+        <div class="label">41%雇主計劃</div>
+        <div class="val" style="color:var(--orange);font-size:1.1rem;">因AI縮減規模</div>
+      </div>
+      <div class="stat-box fragment" style="padding:.5rem .8rem;">
+        <div class="label">AI導致裁員佔比</div>
+        <div class="val" style="color:var(--g600);font-size:1.1rem;">僅4-5%</div>
+      </div>
+    </div>
+  </div>
+  <div class="info-box warning" style="margin-top:.3rem;padding:.7rem 1.2rem;">
+    <p style="font-size:.9rem;">核心洞察：AI並非唯一推手，但已成為企業「戰略重組」的最佳藉口 | 60%高管因預期AI影響裁員，僅2%因實際應用</p>
+  </div>
+</div>
+
+<!-- ====== S23: 市場分化 ====== -->
+<div class="slide dataviz compact" data-act="產業衝擊" data-title="市場反應與分化" data-index="23" style="padding-top:2.5rem;">
+  <h2 style="margin-bottom:.4rem;">市場反應與分化</h2>
+  <p class="subtitle dim" style="margin-bottom:.4rem;">恐慌下的資金輪動與產業分化</p>
+  <div class="compare-cols" style="max-width:960px;gap:1rem;margin-top:.5rem;">
+    <div class="compare-col" style="border-left:4px solid var(--red);padding:1rem;gap:.4rem;">
+      <h3 style="font-size:1.3rem;color:var(--red);">&#x2B07; 輸家</h3>
+      <div style="padding:.5rem .8rem;background:rgba(217,48,37,.05);border-radius:10px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:.95rem;">美國軟體股指數</span>
+        <span style="font-size:1.6rem;font-weight:800;color:var(--red);">-24%</span>
+      </div>
+      <div class="fragment" style="font-size:.95rem;">&#x2716; 程式碼成本趨近於零</div>
+      <div class="fragment" style="font-size:.95rem;">&#x2716; 易受AI自動化影響</div>
+      <div class="fragment" style="font-size:.95rem;">&#x2716; 軟體與服務公司</div>
+    </div>
+    <div class="compare-col" style="border-left:4px solid var(--green);padding:1rem;gap:.4rem;">
+      <h3 style="font-size:1.3rem;color:var(--green);">&#x2B06; 贏家</h3>
+      <div style="padding:.5rem .8rem;background:var(--offwhite);border-radius:10px;">
+        <div style="display:flex;justify-content:space-between;padding:.2rem 0;font-size:.95rem;"><span>台積電 (TSMC)</span><span style="font-size:1.3rem;font-weight:800;color:var(--green);">翻倍</span></div>
+        <div style="display:flex;justify-content:space-between;padding:.2rem 0;font-size:.95rem;"><span>SK 海力士</span><span style="font-size:1.3rem;font-weight:800;color:var(--green);">翻倍</span></div>
+      </div>
+      <div class="fragment" style="font-size:.95rem;">&#x2714; AI算力需求激增</div>
+      <div class="fragment" style="font-size:.95rem;">&#x2714; 晶片、資料中心</div>
+      <div class="fragment" style="font-size:.95rem;">&#x2714; 穩定能源供應鏈</div>
+    </div>
+  </div>
+  <div class="info-box success" style="margin-top:.5rem;padding:.7rem 1.2rem;">
+    <p style="font-size:.95rem;">投資者拋售易受自動化衝擊的股票，資金向AI基礎設施集中</p>
+  </div>
+</div>
+
+<!-- ====== S24: Taalas vs NVIDIA ====== -->
+<div class="slide dataviz compact" data-act="產業衝擊" data-title="反轉：老師傅被錘" data-index="24" style="padding-top:2.5rem;">
+  <h2 style="margin-bottom:.3rem;">反轉之再反轉：老師傅被錘</h2>
+  <p class="subtitle dim" style="margin-bottom:.3rem;">3月3日，英偉達被一家加拿大創業公司錘了，跌了 <strong style="color:var(--red);">-8%</strong></p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;max-width:960px;width:100%;flex:1;min-height:0;">
+    <div style="display:flex;flex-direction:column;gap:.6rem;">
+      <div class="fragment" style="background:var(--offwhite);border:2px solid var(--g200);border-radius:14px;padding:.8rem 1rem;">
+        <p style="font-size:.95rem;color:var(--g800);line-height:1.6;">Taalas成立於2023年，由前AMD、英偉達的資深架構師創立。核心技術<strong style="color:var(--gold);">「模型即晶片」</strong>，將AI大模型的權重和邏輯透過「硬連線」直接固化在晶片的物理電路上。</p>
+      </div>
+      <div class="fragment" style="background:var(--offwhite);border:2px solid var(--gold);border-radius:14px;padding:.8rem 1rem;">
+        <h3 style="color:var(--gold);margin-bottom:.2rem;">顛覆性的性能提升</h3>
+        <p style="font-size:.95rem;color:var(--g800);line-height:1.6;">HC1晶片推理速度可達英偉達B200的約<strong style="color:var(--gold);">48倍</strong>，硬體成本僅為傳統方案的<strong style="color:var(--gold);">1/20</strong>，功耗大幅降低。</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.3rem;">
+      <div style="font-size:.9rem;font-weight:700;color:var(--g800);margin-bottom:.2rem;">Tokens/s Per User (Llama 3.1 8B)</div>
+      <div class="rank-list" style="max-width:100%;gap:.25rem;">
+        <div class="rank-item fragment" style="padding:.4rem .8rem;"><span style="font-size:.9rem;">Nvidia H200</span><span class="rank-val" style="color:var(--cyan);font-size:1.05rem;">230</span></div>
+        <div class="rank-item fragment" style="padding:.4rem .8rem;"><span style="font-size:.9rem;">Nvidia B200</span><span class="rank-val" style="color:var(--cyan);font-size:1.05rem;">353</span></div>
+        <div class="rank-item fragment" style="padding:.4rem .8rem;"><span style="font-size:.9rem;">Groq</span><span class="rank-val" style="color:var(--green);font-size:1.05rem;">594</span></div>
+        <div class="rank-item fragment" style="padding:.4rem .8rem;"><span style="font-size:.9rem;">Sambanova</span><span class="rank-val" style="color:var(--green);font-size:1.05rem;">932</span></div>
+        <div class="rank-item fragment" style="padding:.4rem .8rem;"><span style="font-size:.9rem;">Cerebras</span><span class="rank-val" style="color:var(--red);font-size:1.05rem;">1,981</span></div>
+        <div class="rank-item fragment" style="padding:.4rem .8rem;border-color:var(--gold);"><span style="font-weight:700;font-size:.9rem;">Taalas HC1</span><span class="rank-val" style="color:var(--gold);font-size:1.2rem;">16,960</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:.3rem;padding:.6rem 1.2rem;">
+    <p style="font-size:.9rem;">目標市場邊緣計算，專用晶片（ASIC）可能會逐步蠶食英偉達通用GPU的市場份額</p>
+  </div>
+</div>
+
+<!-- ====== S25: Block裁員 ====== -->
+<div class="slide dataviz compact" data-act="產業衝擊" data-title="Block裁員40%" data-index="25" style="padding-top:2.5rem;">
+  <h2 style="margin-bottom:.4rem;">Block裁員40% &mdash; 華爾街的狂歡</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:960px;width:100%;flex:1;min-height:0;">
+    <div style="display:flex;flex-direction:column;gap:.8rem;">
+      <div class="fragment" style="background:var(--offwhite);border:2px solid var(--red);border-radius:14px;padding:1.2rem;">
+        <div style="font-size:2rem;font-weight:900;color:var(--g900);">Block裁員40%</div>
+        <p style="font-size:1rem;margin-top:.4rem;color:var(--g800);">將員工總數從萬餘人直接砍至<strong style="color:var(--gold);">6000人</strong>以下。裁員支出4.5至5億美元。</p>
+      </div>
+      <div class="fragment" style="background:var(--offwhite);border:2px solid var(--g200);border-radius:14px;padding:1.2rem;">
+        <div style="font-size:1.6rem;font-weight:900;color:var(--green);">股價卻暴漲24%：330億美金</div>
+        <div style="font-size:1.2rem;font-weight:800;color:var(--gold);margin-top:.4rem;">每裁一人，市值增加1500萬美元</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;gap:1.2rem;text-align:center;">
+      <div class="fragment">
+        <div style="font-size:.85rem;color:var(--g400);">消失的</div>
+        <div style="font-size:2.2rem;font-weight:900;color:var(--g900);">4000 人</div>
+        <div style="font-size:.95rem;color:var(--g600);margin-top:.2rem;">執行層、初級分析師、冗餘的中層管理</div>
+      </div>
+      <div style="font-size:1.3rem;color:var(--g200);">&#x2193;</div>
+      <div class="fragment">
+        <div style="font-size:.85rem;color:var(--g400);">留下的</div>
+        <div style="font-size:2.2rem;font-weight:900;color:var(--green);">6000 人</div>
+        <div style="font-size:1rem;color:var(--gold);margin-top:.2rem;">&quot;利用AI進行自動化的超級個體&quot;</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S26: SECTION 理性反思 ====== -->
+<div class="slide poster overlay-heavy" data-act="理性反思" data-title="理性反思" data-index="26" style="background:linear-gradient(135deg,#0a0a14 0%,#0a2d3d 50%,#0a1a2d 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Chapter 05</p>
+  <h1>理性反思</h1>
+  <p class="poster-subtitle" style="margin-top:.5rem;">不要全盤接受 &mdash; 批判與反思</p>
+</div>
+
+<!-- ====== S27: 雙面漏斗 ====== -->
+<div class="slide poster overlay-center" data-act="理性反思" data-title="新型資產蓬勃發展" data-index="27" style="background-image:url('slides-img/funnel-down.png');">
+  <div style="margin-bottom:.4rem;">
+    <span style="font-size:.85rem;font-weight:700;letter-spacing:2px;color:var(--green);padding:6px 16px;border:1px solid var(--green);border-radius:100px;">POSITIVE SCENARIO</span>
+  </div>
+  <h2 style="font-size:1.6rem;font-weight:800;margin-bottom:.3rem;">鬼故事的另一面 &mdash; 新型優質資產的蓬勃發展</h2>
+  <div style="width:60px;height:4px;background:var(--gold);border-radius:2px;margin:0 auto .6rem;"></div>
+  <div class="dual-funnel" style="flex:1;min-height:0;align-items:center;">
+    <!-- Left: Pessimistic -->
+    <div style="display:flex;flex-direction:column;gap:.2rem;">
+      <div style="font-size:.85rem;font-weight:700;color:var(--red);margin-bottom:.2rem;text-align:center;">&#x25BC; 悲觀螺旋</div>
+      <div style="font-size:.85rem;padding:.3rem .6rem;border-left:3px solid #a78bfa;border-radius:0 4px 4px 0;background:rgba(167,139,250,.12);text-align:center;">AI提升效率</div>
+      <div style="font-size:.85rem;padding:.3rem .6rem;border-left:3px solid #93c5fd;border-radius:0 4px 4px 0;background:rgba(147,197,253,.08);text-align:center;">公司開始裁員</div>
+      <div style="font-size:.85rem;padding:.3rem .6rem;border-left:3px solid #67e8f9;border-radius:0 4px 4px 0;background:rgba(103,232,249,.07);text-align:center;">個人消費降低</div>
+      <div style="font-size:.85rem;padding:.3rem .6rem;border-left:3px solid #6ee7b7;border-radius:0 4px 4px 0;background:rgba(110,231,183,.06);color:var(--gold);text-align:center;">車貸斷供</div>
+      <div style="font-size:.85rem;padding:.3rem .6rem;border-left:3px solid #86efac;border-radius:0 4px 4px 0;background:rgba(134,239,172,.05);color:var(--gold);text-align:center;">房貸斷供</div>
+      <div style="font-size:.85rem;padding:.3rem .6rem;border-left:3px solid #fde047;border-radius:0 4px 4px 0;background:rgba(253,224,71,.05);color:var(--orange);text-align:center;">地產貶值</div>
+      <div style="font-size:.85rem;padding:.3rem .6rem;border-left:3px solid #fb923c;border-radius:0 4px 4px 0;background:rgba(251,146,60,.05);color:var(--orange);text-align:center;">經濟下行</div>
+      <div style="font-size:.85rem;padding:.3rem .6rem;border-left:3px solid #f87171;border-radius:0 4px 4px 0;background:rgba(248,113,113,.06);color:var(--red);text-align:center;">更加實用AI</div>
+      <div style="font-size:.85rem;padding:.3rem .6rem;border-left:3px solid #dc2626;border-radius:0 4px 4px 0;background:rgba(220,38,38,.08);color:var(--red);font-weight:700;text-align:center;">加速裁員 &#x21BB;</div>
+    </div>
+    <!-- Center: Arrow -->
+    <div class="dual-funnel-arrow">&#x27A1;</div>
+    <!-- Right: Optimistic (fragment, column-reverse) -->
+    <div style="display:flex;flex-direction:column-reverse;gap:.2rem;">
+      <div class="fragment" style="font-size:.85rem;padding:.3rem .6rem;border-right:3px solid var(--green);border-radius:4px 0 0 4px;background:rgba(15,157,138,.12);color:var(--green);font-weight:700;text-align:center;">AI提升公司效率 &#x21BB;</div>
+      <div class="fragment" style="font-size:.85rem;padding:.3rem .6rem;border-right:3px solid var(--green);border-radius:4px 0 0 4px;background:rgba(15,157,138,.08);color:var(--green);text-align:center;">傳統設備效率快速提升</div>
+      <div class="fragment" style="font-size:.85rem;padding:.3rem .6rem;border-right:3px solid var(--cyan);border-radius:4px 0 0 4px;background:rgba(6,182,212,.07);color:var(--cyan);text-align:center;">加速電動化轉型</div>
+      <div class="fragment" style="font-size:.85rem;padding:.3rem .6rem;border-right:3px solid var(--cyan);border-radius:4px 0 0 4px;background:rgba(6,182,212,.06);color:var(--cyan);text-align:center;">加速無人化應用</div>
+      <div class="fragment" style="font-size:.85rem;padding:.3rem .6rem;border-right:3px solid var(--gold);border-radius:4px 0 0 4px;background:rgba(249,171,0,.06);color:var(--gold);text-align:center;">降低人力損傷</div>
+      <div class="fragment" style="font-size:.85rem;padding:.3rem .6rem;border-right:3px solid var(--gold);border-radius:4px 0 0 4px;background:rgba(249,171,0,.07);color:var(--gold);text-align:center;">加速24小時持續作業</div>
+      <div class="fragment" style="font-size:.85rem;padding:.3rem .6rem;border-right:3px solid var(--green);border-radius:4px 0 0 4px;background:rgba(15,157,138,.07);color:var(--green);text-align:center;">加速單體基礎工業生產</div>
+      <div class="fragment" style="font-size:.85rem;padding:.3rem .6rem;border-right:3px solid var(--green);border-radius:4px 0 0 4px;background:rgba(15,157,138,.08);color:var(--green);text-align:center;">加速群體社會工業生產</div>
+      <div class="fragment" style="font-size:.85rem;padding:.3rem .6rem;border-right:3px solid var(--green);border-radius:4px 0 0 4px;background:rgba(15,157,138,.1);color:var(--green);text-align:center;">達成7%全社會GDP增長</div>
+      <div style="font-size:.85rem;font-weight:700;color:var(--green);margin-bottom:.2rem;text-align:center;">&#x25B2; 樂觀轉化</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S28a: 理性視角（經濟適應+AI生產力+早期行動） ====== -->
+<div class="slide dataviz" data-act="理性反思" data-title="批判與反思" data-index="28">
+  <h2>理性視角：批判與反思</h2>
+  <p class="subtitle dim" style="margin-bottom:.8rem;">專家呼籲：不要全盤接受</p>
+  <div class="compare-cols" style="max-width:860px;margin-bottom:1rem;">
+    <div class="compare-col fragment">
+      <h3 style="color:var(--green);">經濟適應能力</h3>
+      <p style="font-size:1.05rem;">報告可能<strong style="color:var(--gold);">低估</strong>了經濟的適應能力。歷史表明，技術革命往往創造新的就業機會。</p>
+    </div>
+    <div class="compare-col fragment">
+      <h3 style="color:var(--green);">AI的生產力作用</h3>
+      <p style="font-size:1.05rem;">AI根本上<strong style="color:var(--gold);">提升工人生產力</strong>，而非僅消除工作。它是增強工具而非替代工具。</p>
+    </div>
+  </div>
+  <div style="background:var(--offwhite);border:2px solid var(--green);border-radius:16px;padding:1.3rem 1.8rem;max-width:860px;width:100%;" class="fragment">
+    <h3 style="color:var(--orange);">早期行動的優勢</h3>
+    <p style="font-size:1.05rem;color:var(--g800);">最大優勢在於<strong style="color:var(--gold);">早期理解和適應AI</strong>。那些能夠快速學習並將AI整合到工作流程中的人和企業將獲得競爭優勢。</p>
+  </div>
+</div>
+
+<!-- ====== S28b: 核心衝突 ====== -->
+<div class="slide dataviz" data-act="理性反思" data-title="核心衝突" data-index="29" style="justify-content:center;">
+  <h2 style="margin-bottom:1rem;">核心衝突：替代還是協作？</h2>
+  <div style="background:var(--offwhite);border:2px solid var(--red);border-radius:16px;padding:2rem 2.5rem;max-width:860px;width:100%;">
+    <p style="font-size:1.2rem;color:var(--g800);text-align:center;margin-bottom:1.5rem;">AI的真正影響是<strong style="color:var(--red);">「大規模替代」</strong>還是<strong style="color:var(--green);">「人機協作新範式」</strong>？</p>
+    <div style="display:flex;gap:1.5rem;">
+      <div class="fragment" style="flex:1;padding:1.2rem;background:rgba(217,48,37,.05);border-radius:16px;text-align:center;">
+        <div style="font-size:.9rem;color:var(--g400);margin-bottom:.3rem;">悲觀視角</div>
+        <div style="font-size:1.6rem;font-weight:700;color:var(--g900);">大規模失業</div>
+        <p style="font-size:.95rem;color:var(--g600);margin-top:.5rem;">白領工作被AI自動化取代，經濟衰退螺旋</p>
+      </div>
+      <div class="fragment" style="flex:1;padding:1.2rem;background:rgba(15,157,138,.06);border:2px solid var(--green);border-radius:16px;text-align:center;">
+        <div style="font-size:.9rem;color:var(--green);margin-bottom:.3rem;">樂觀視角</div>
+        <div style="font-size:1.6rem;font-weight:700;color:var(--green);">人機協作</div>
+        <p style="font-size:.95rem;color:var(--g600);margin-top:.5rem;">AI增強人類能力，創造全新職業與產業</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== S29: Quote ====== -->
+<div class="slide dataviz" data-act="理性反思" data-title="結語" data-index="30" style="justify-content:center;">
+  <div style="max-width:800px;width:100%;text-align:center;">
+    <div style="width:80px;height:5px;background:var(--gold);border-radius:3px;margin:0 auto 2rem;"></div>
+    <h2 class="fragment" style="font-size:2.2rem;font-weight:700;line-height:1.4;margin-bottom:.5rem;">技術不會消滅工作，</h2>
+    <h2 class="fragment" style="font-size:2.2rem;font-weight:700;line-height:1.4;color:var(--gold);">但會徹底重塑工作的性質與分布</h2>
+    <div style="width:80px;height:5px;background:var(--gold);border-radius:3px;margin:2rem auto 0;"></div>
+  </div>
+</div>
+
+<!-- ====== S30: Closing ====== -->
+<div class="slide poster overlay-heavy" data-act="結尾" data-title="結尾" data-index="31" style="background:linear-gradient(135deg,#0a0a14 0%,#16213e 40%,#0a3d35 100%);">
+  <div style="width:80px;height:5px;background:var(--gold);border-radius:3px;margin-bottom:2rem;"></div>
+  <h1 class="fragment" style="font-size:2.8rem;">謝謝聆聽</h1>
+  <div style="width:80px;height:5px;background:var(--green);border-radius:3px;margin-top:2rem;"></div>
+</div>
+
+</div><!-- /slides -->
+
+<!-- Controls -->
+<div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
+<div class="progress-bar" id="progress"></div>
+<div class="controls"><button id="prev" disabled>&larr;</button><button id="next">&rarr;</button></div>
+
+<!-- Chapter Menu -->
+<div id="chapterMenu" class="chapter-menu">
+  <button class="chapter-btn" id="chapterBtn">
+    <span class="chapter-icon">&sect;</span>
+    <span id="chapterLabel">開場</span>
+    <span style="font-size:.6rem;opacity:.5;">&#9660;</span>
+  </button>
+  <div class="chapter-list" id="chapterList"></div>
+</div>
+
+<script>
+(function() {
+  "use strict";
+
+  var slides = document.querySelectorAll('.slide');
+  var total = slides.length;
+  var currentIndex = 0;
+
+  var currentEl = document.getElementById('current');
+  var totalEl = document.getElementById('total');
+  var progressEl = document.getElementById('progress');
+  var prevBtn = document.getElementById('prev');
+  var nextBtn = document.getElementById('next');
+
+  totalEl.textContent = total;
+
+  function goToSlide(index) {
+    if (index < 0 || index >= total) return;
+
+    // Remove active/prev from current
+    slides[currentIndex].classList.remove('active');
+    slides[currentIndex].classList.add('prev');
+
+    currentIndex = index;
+
+    // Remove prev from all, set active on target
+    for (var i = 0; i < total; i++) {
+      slides[i].classList.remove('prev');
+      if (i !== currentIndex) {
+        slides[i].classList.remove('active');
+      }
+    }
+    slides[currentIndex].classList.add('active');
+
+    // Update UI
+    currentEl.textContent = currentIndex + 1;
+    prevBtn.disabled = currentIndex === 0;
+    nextBtn.disabled = currentIndex === total - 1;
+    progressEl.style.width = ((currentIndex + 1) / total * 100) + '%';
+    updateChapterLabel();
+  }
+
+  function getFragments(slide) {
+    return Array.prototype.slice.call(slide.querySelectorAll('.fragment'));
+  }
+
+  function advance() {
+    var frags = getFragments(slides[currentIndex]);
+    for (var i = 0; i < frags.length; i++) {
+      if (!frags[i].classList.contains('visible')) {
+        frags[i].classList.add('visible');
+        return;
+      }
+    }
+    if (currentIndex < total - 1) goToSlide(currentIndex + 1);
+  }
+
+  function retreat() {
+    var frags = getFragments(slides[currentIndex]);
+    for (var i = frags.length - 1; i >= 0; i--) {
+      if (frags[i].classList.contains('visible')) {
+        frags[i].classList.remove('visible');
+        return;
+      }
+    }
+    if (currentIndex > 0) goToSlide(currentIndex - 1);
+  }
+
+  // Button clicks
+  nextBtn.addEventListener('click', advance);
+  prevBtn.addEventListener('click', retreat);
+
+  // Click on slide area to advance
+  document.querySelector('.slides').addEventListener('click', function(e) {
+    if (e.target.closest('button, a, .chapter-menu, .controls, .slide-counter')) return;
+    advance();
+  });
+
+  // Keyboard navigation
+  document.addEventListener('keydown', function(e) {
+    var key = e.key;
+    if (key === 'ArrowRight' || key === ' ' || key === 'PageDown') {
+      e.preventDefault(); advance();
+    } else if (key === 'ArrowLeft' || key === 'PageUp') {
+      e.preventDefault(); retreat();
+    } else if (key === 'Home') {
+      e.preventDefault(); goToSlide(0);
+    } else if (key === 'End') {
+      e.preventDefault(); goToSlide(total - 1);
+    } else if (key === 'f' || key === 'F') {
+      e.preventDefault();
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+  });
+
+  // Touch navigation
+  var touchStartX = 0;
+  var touchStartY = 0;
+  document.addEventListener('touchstart', function(e) {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  });
+  document.addEventListener('touchend', function(e) {
+    var dx = e.changedTouches[0].screenX - touchStartX;
+    var dy = e.changedTouches[0].screenY - touchStartY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+      if (dx < 0) advance(); else retreat();
+    }
+  });
+
+  // Chapter menu
+  var chapterMenu = document.getElementById('chapterMenu');
+  var chapterBtn = document.getElementById('chapterBtn');
+  var chapterLabel = document.getElementById('chapterLabel');
+  var chapterList = document.getElementById('chapterList');
+
+  function updateChapterLabel() {
+    chapterLabel.textContent = slides[currentIndex].dataset.act || '';
+  }
+
+  function buildChapterList() {
+    chapterList.innerHTML = '';
+    var seen = {};
+    for (var i = 0; i < total; i++) {
+      var act = slides[i].dataset.act;
+      if (act && !seen[act]) {
+        seen[act] = true;
+        (function(idx, name) {
+          var item = document.createElement('div');
+          item.className = 'chapter-item' + (name === slides[currentIndex].dataset.act ? ' active' : '');
+          item.innerHTML = '<span class="chapter-dot"></span>' + name;
+          item.addEventListener('click', function() {
+            goToSlide(idx);
+            chapterMenu.classList.remove('open');
+          });
+          chapterList.appendChild(item);
+        })(i, act);
+      }
+    }
+  }
+
+  chapterBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    chapterMenu.classList.toggle('open');
+    if (chapterMenu.classList.contains('open')) buildChapterList();
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!chapterMenu.contains(e.target)) chapterMenu.classList.remove('open');
+  });
+
+  // Initialize
+  goToSlide(0);
+
+  // Toast notification
+  var toast = document.createElement('div');
+  toast.textContent = '\u2713 \u7C21\u5831\u5DF2\u8F09\u5165 ' + total + ' \u9801 \u2014 \u9EDE\u64CA\u6216\u6309\u2192\u63DB\u9801';
+  toast.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--white);color:var(--g900);padding:12px 24px;border-radius:12px;font-size:18px;font-weight:600;transition:opacity 1s;pointer-events:none;border:1px solid var(--g200);box-shadow:0 4px 12px rgba(0,0,0,.1);';
+  document.body.appendChild(toast);
+  setTimeout(function() { toast.style.opacity = '0'; }, 3000);
+  setTimeout(function() { toast.remove(); }, 4000);
+})();
+</script>
+</body>
+</html>
