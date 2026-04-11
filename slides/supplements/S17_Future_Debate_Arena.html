@@ -27,9 +27,21 @@ html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;colo
 
 /* ── Slides Core ── */
 .slides{width:100%;height:100%;position:relative;}
-.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;opacity:0;transform:translateX(30px);pointer-events:none;transition:opacity .5s,transform .5s ease;overflow:hidden;}
-.slide.active{opacity:1;transform:none;pointer-events:auto;}
-.slide.prev{opacity:0;transform:translateX(-30px);}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;overflow:hidden;}
+.slide.active{display:flex;pointer-events:auto;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ── Cinematic Poster (.cine / .cine-right) ── */
+.slide.cine,.slide.cine-right{background-size:cover;background-position:center;color:#fff;padding:3rem 4rem 2rem;justify-content:flex-end;}
+.slide.cine::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,10,20,.92) 0%,rgba(10,10,20,.7) 35%,transparent 62%);z-index:1;}
+.slide.cine-right::before{content:'';position:absolute;inset:0;background:linear-gradient(270deg,rgba(10,10,20,.92) 0%,rgba(10,10,20,.7) 35%,transparent 62%);z-index:1;}
+.slide.cine>*,.slide.cine-right>*{position:relative;z-index:2;}
+.slide.cine .cine-content{max-width:42%;text-align:left;align-self:flex-start;}
+.slide.cine-right .cine-content{max-width:42%;text-align:left;align-self:flex-end;}
+.cine-tag{font-size:.85rem;color:var(--gold);letter-spacing:.2rem;font-weight:700;margin-bottom:.3rem;}
+.cine-title{font-size:2.4rem;font-weight:900;line-height:1.25;margin-bottom:.5rem;}
+.cine-sub{font-size:1rem;line-height:1.7;color:rgba(255,255,255,.75);}
+.cine-insight{margin-top:.8rem;padding:.8rem 1rem;background:rgba(15,157,138,.15);border-left:3px solid var(--teal);border-radius:0 8px 8px 0;font-size:.9rem;color:rgba(255,255,255,.85);line-height:1.6;}
 
 /* ── Clean Mode (white bg) ── */
 .slide.clean{background:var(--white);color:var(--g900);padding-top:3.5rem;overflow-y:auto;justify-content:flex-start;}
@@ -210,13 +222,87 @@ p,li{font-size:1.1rem;line-height:1.8;}
   </div>
 </div>
 
-<!-- 2: PAIN POINTS -->
+<!-- ═══════════ ACT 1: 人類面對問題 — 歷史縱深 ═══════════ -->
+
+<!-- H-1: Section — 214 年的循環 -->
+<div class="slide cine" data-act="歷史" style="background-image:url('img/t01-stories/divider_timeline.png');">
+  <div class="cine-content" style="max-width:48%;">
+    <div class="cine-tag">HISTORICAL CONTEXT</div>
+    <div class="cine-title" style="font-size:2.6rem;">技術革命 × 社會抗爭<br><span style="font-size:1.6rem;color:var(--gold);">214 年的循環</span></div>
+    <div class="cine-sub">每次技術跑太快、制度追不上，就會以衝突爆發。<br>辯論之前，先看看歷史怎麼說。</div>
+  </div>
+</div>
+
+<!-- H-2: 三個故事精選（濃縮一頁） -->
+<div class="slide dataviz" data-act="歷史">
+  <h2>三個時代，三個故事</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;max-width:960px;width:100%;flex:1;align-content:center;">
+    <div class="dark-card fragment">
+      <div style="font-size:.8rem;color:var(--teal);letter-spacing:.1rem;margin-bottom:.2rem;">工業革命 · 1812 · 英格蘭約克郡</div>
+      <h3 style="font-size:1.1rem;">羅福茲磨坊之戰</h3>
+      <p>150 名工人持斧深夜攻擊磨坊。一台剪切機取代五人，省下的錢沒有一分流向被取代者。</p>
+      <p style="color:var(--gold);font-size:.85rem;margin-top:.5rem;font-weight:600;">17 人被絞刑</p>
+    </div>
+    <div class="dark-card fragment">
+      <div style="font-size:.8rem;color:var(--cyan);letter-spacing:.1rem;margin-bottom:.2rem;">數位革命 · 2012</div>
+      <h3 style="font-size:1.1rem;">14 萬人 vs 13 人</h3>
+      <p>柯達 1975 年發明數位相機，<br>然後決定把它藏起來。<br>2012 年破產。<br>同年 Instagram（13 人）以 10 億美元被收購。</p>
+      <p style="color:var(--gold);font-size:.85rem;margin-top:.5rem;font-weight:600;">整座城市崩塌</p>
+    </div>
+    <div class="dark-card fragment">
+      <div style="font-size:.8rem;color:var(--gold);letter-spacing:.1rem;margin-bottom:.2rem;">AI 革命 · 2026.4.10</div>
+      <h3 style="font-size:1.1rem;">Altman 家的汽油彈</h3>
+      <p>20 歲青年向 OpenAI CEO 住宅投擲汽油彈。Z 世代對 AI 的憤怒從 22% 攀升到 31%。</p>
+      <p style="color:var(--gold);font-size:.85rem;margin-top:.5rem;font-weight:600;">214 年，同一模式</p>
+    </div>
+  </div>
+</div>
+
+<!-- H-3: 模式提取 -->
+<div class="slide dataviz" data-act="歷史">
+  <h2>每次都是同一個模式</h2>
+  <div style="display:flex;flex-direction:column;gap:.8rem;max-width:700px;width:100%;flex:1;justify-content:center;">
+    <div class="fragment" style="display:flex;align-items:center;gap:1rem;padding:.8rem 1.2rem;border:2px solid rgba(255,255,255,.08);border-radius:10px;">
+      <div style="font-size:1.5rem;min-width:40px;text-align:center;">1️⃣</div>
+      <div style="font-size:1rem;">新技術出現 → 利潤流向資本家，代價留給工人</div>
+    </div>
+    <div class="fragment" style="display:flex;align-items:center;gap:1rem;padding:.8rem 1.2rem;border:2px solid rgba(255,255,255,.08);border-radius:10px;">
+      <div style="font-size:1.5rem;min-width:40px;text-align:center;">2️⃣</div>
+      <div style="font-size:1rem;">制度回應太慢 → 不滿以暴力或社會運動爆發</div>
+    </div>
+    <div class="fragment" style="display:flex;align-items:center;gap:1rem;padding:.8rem 1.2rem;border:2px solid rgba(255,255,255,.08);border-radius:10px;">
+      <div style="font-size:1.5rem;min-width:40px;text-align:center;">3️⃣</div>
+      <div style="font-size:1rem;">社會運動迫使制度改革 → 新均衡出現</div>
+    </div>
+    <div class="fragment" style="text-align:center;margin-top:.8rem;">
+      <p style="font-size:1.3rem;font-weight:700;color:var(--gold);">但速度越來越快：50 年 → 10 年 → 3+ 年（仍無進展）</p>
+    </div>
+  </div>
+</div>
+
+<!-- H-4: 剪刀差 + 三巨頭加速（壓縮一頁） -->
+<div class="slide cine" data-act="歷史" style="background-image:url('img/t01-stories/giants_speed.png');justify-content:flex-start;padding-top:3.5rem;">
+  <div class="cine-content" style="max-width:46%;">
+    <div class="cine-tag">WHY THIS TIME IS DIFFERENT</div>
+    <div class="cine-title" style="font-size:2rem;">三巨頭同時加速</div>
+    <div class="cine-sub">
+      <div style="margin-bottom:.3rem;">🟠 <strong>Anthropic</strong> — 52 天 73 次發布，每天改變工作流</div>
+      <div style="margin-bottom:.3rem;">🔴 <strong>OpenAI</strong> — 每次發布都是市場級震動</div>
+      <div style="margin-bottom:.3rem;">🔵 <strong>Google</strong> — 10 億用戶 × 多入口，無所不在</div>
+    </div>
+    <div class="cine-insight fragment">
+      歷史上技術革命是一波一波的。這次是三波同時灌進來，<br>制度連第一波都還沒回應完。<strong style="color:var(--gold);">這就是今天要辯論的背景。</strong>
+    </div>
+  </div>
+</div>
+
+<!-- 2: PAIN POINTS (原有) -->
 <div class="slide clean" data-act="為什麼" data-index="2">
   <h2>企業決策的三個痛點</h2>
   <div class="card-grid c3">
     <div class="card fragment" data-order="0"><div class="bar" style="background:var(--ember)"></div><h3 style="color:var(--ember)">單一視角的陷阱</h3><p>支持者聽支持者的演講，反對者在同溫層取暖。每個人都覺得自己是對的。</p></div>
     <div class="card fragment" data-order="1"><div class="bar" style="background:var(--violet)"></div><h3 style="color:var(--violet)">趨勢報告的無力感</h3><p>不缺報告，缺的是連結感。讀完「嗯，知道了」，然後什麼都不做。</p></div>
-    <div class="card fragment" data-order="2"><div class="bar" style="background:var(--rose)"></div><h3 style="color:var(--rose)">缺乏安全練習場</h3><p>不能真的跟 IKEA 辯論漲價，不能在董事會測試極端立場。真實決策不能重來。</p></div>
+    <div class="card fragment" data-order="2"><div class="bar" style="background:var(--rose)"></div><h3 style="color:var(--rose)">缺乏安全練習場</h3><p>不能真的跟客戶辯論漲價，不能在董事會測試極端立場。真實決策不能重來。</p></div>
   </div>
 </div>
 
@@ -365,7 +451,122 @@ p,li{font-size:1.1rem;line-height:1.8;}
   <div class="chart-wrap" style="flex:.8;width:100%;max-width:960px;padding:.8rem 1.2rem;display:flex;align-items:stretch;"><canvas id="stanceChart"></canvas></div>
 </div>
 
-<!-- 17: DISCOVERIES -->
+<!-- ═══════════ ACT 5: 尋找解法 ═══════════ -->
+
+<!-- S-1: 歷史的解法 -->
+<div class="slide dataviz" data-act="解法">
+  <h2>歷史告訴我們 — 每次都靠什麼解決？</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;max-width:960px;width:100%;flex:1;align-content:center;">
+    <div class="dark-card fragment" style="border-top:3px solid var(--teal);">
+      <div style="font-size:.8rem;color:var(--teal);letter-spacing:.1rem;margin-bottom:.3rem;">工業革命</div>
+      <h3>工會 + 立法 + 義務教育</h3>
+      <p>工廠法（1833）、工會合法化（1871）、義務教育讓工人子女有出路。<br><span style="color:rgba(255,255,255,.4);">耗時 50-60 年</span></p>
+    </div>
+    <div class="dark-card fragment" style="border-top:3px solid var(--cyan);">
+      <div style="font-size:.8rem;color:var(--cyan);letter-spacing:.1rem;margin-bottom:.3rem;">數位革命</div>
+      <h3>新產業 + 社會安全網</h3>
+      <p>網路創造新職業、失業保險擴大、職訓補貼。<br><span style="color:rgba(255,255,255,.4);">耗時 10-15 年</span></p>
+    </div>
+    <div class="dark-card fragment" style="border-top:3px solid var(--gold);">
+      <div style="font-size:.8rem;color:var(--gold);letter-spacing:.1rem;margin-bottom:.3rem;">AI 革命</div>
+      <h3>？</h3>
+      <p>尚無實質進展。UBI、AI 稅、教育轉型都在「討論」。<br><span style="color:var(--gold);font-weight:600;">這就是你們要辯的。</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- S-2: OpenAI 白皮書 — 具體提案 -->
+<div class="slide cine" data-act="解法" style="background-image:url('img/t01-stories/future_split.png');">
+  <div class="cine-content" style="max-width:45%;">
+    <div class="cine-tag">OPENAI POLICY WHITE PAPER · 2026.04</div>
+    <div class="cine-title" style="font-size:1.8rem;">AI 公司自己的提案</div>
+    <div class="cine-sub">
+      <div class="fragment" style="margin-bottom:.4rem;">📋 <strong>四天工作制</strong>，不減薪 — 人類轉向高效產出</div>
+      <div class="fragment" style="margin-bottom:.4rem;">🏦 <strong>主權財富基金</strong> — 用 AI 收益直接回饋全民</div>
+      <div class="fragment" style="margin-bottom:.4rem;">🔑 <strong>AI 存取權 = 基本經濟權利</strong></div>
+    </div>
+    <div class="cine-insight fragment">
+      這是企業自律，還是真正的制度改革？<br>
+      <strong style="color:var(--gold);">歷史告訴我們 — 沒有壓力的自律從未持久。</strong>
+    </div>
+  </div>
+</div>
+
+<!-- S-3: 工業 5.0 的回應 -->
+<div class="slide dataviz" data-act="解法">
+  <h2>工業 5.0 — 從效率導向到人本導向</h2>
+  <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;max-width:800px;width:100%;flex:1;align-content:center;">
+    <div class="dark-card fragment" style="text-align:center;">
+      <h3 style="color:var(--ember);">工業 4.0</h3>
+      <p style="font-size:1.5rem;font-weight:900;margin:.5rem 0;">效率優先</p>
+      <p>IoT / AI / 數據導向<br>人 = 可替換的生產要素</p>
+    </div>
+    <div style="display:flex;align-items:center;font-size:2rem;color:var(--gold);font-weight:900;">→</div>
+    <div class="dark-card fragment" style="text-align:center;border:2px solid var(--teal);">
+      <h3 style="color:var(--teal);">工業 5.0</h3>
+      <p style="font-size:1.5rem;font-weight:900;margin:.5rem 0;">人本 + 永續</p>
+      <p>數位力 × 系統力 × 永續力<br>人 = 不可取代的判斷核心</p>
+    </div>
+  </div>
+  <div class="fragment" style="text-align:center;margin-top:.8rem;">
+    <p style="font-size:1.05rem;color:rgba(255,255,255,.6);">但「人本導向」不是口號 — 需要具體的制度設計。<br><span style="color:var(--gold);font-weight:600;">什麼樣的設計？這就是辯論的核心。</span></p>
+  </div>
+</div>
+
+<!-- ═══════════ ACT 6: 推估未來 ═══════════ -->
+
+<!-- F-1: 三種未來情境 -->
+<div class="slide dataviz" data-act="推估未來">
+  <h2>三種未來 — 你的辯論結果指向哪一個？</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;max-width:960px;width:100%;flex:1;align-content:center;">
+    <div class="dark-card fragment" style="border-top:3px solid var(--rose);">
+      <div style="font-size:2rem;text-align:center;margin-bottom:.3rem;">🔴</div>
+      <h3 style="color:var(--rose);text-align:center;">悲觀情境</h3>
+      <p style="text-align:center;">制度持續落後<br>暴力和社會撕裂升級<br>AI 成為少數人的工具</p>
+      <p style="color:rgba(255,255,255,.35);font-size:.85rem;margin-top:.5rem;text-align:center;">歷史重演：盧德派 2.0</p>
+    </div>
+    <div class="dark-card fragment" style="border-top:3px solid var(--gold);">
+      <div style="font-size:2rem;text-align:center;margin-bottom:.3rem;">🟡</div>
+      <h3 style="color:var(--gold);text-align:center;">基準情境</h3>
+      <p style="text-align:center;">5-10 年後出現新均衡<br>像數位革命一樣痛苦但最終適應<br>新職業取代舊職業</p>
+      <p style="color:rgba(255,255,255,.35);font-size:.85rem;margin-top:.5rem;text-align:center;">歷史借鏡：<br>柯達→Instagram</p>
+    </div>
+    <div class="dark-card fragment" style="border-top:3px solid var(--teal);">
+      <div style="font-size:2rem;text-align:center;margin-bottom:.3rem;">🟢</div>
+      <h3 style="color:var(--teal);text-align:center;">樂觀情境</h3>
+      <p style="text-align:center;">AI 加速制度回應本身<br>AI 輔助立法、<br>模擬政策效果<br>四天工作制真正落地</p>
+      <p style="color:rgba(255,255,255,.35);font-size:.85rem;margin-top:.5rem;text-align:center;">歷史突破：<br>制度首次追上技術</p>
+    </div>
+  </div>
+</div>
+
+<!-- F-2: 回扣辯論 -->
+<div class="slide dataviz" data-act="推估未來">
+  <h2>你剛才的辯論結果，對應哪個情境？</h2>
+  <div style="max-width:700px;width:100%;flex:1;display:flex;flex-direction:column;justify-content:center;gap:1rem;">
+    <div class="fragment" style="padding:1rem 1.5rem;background:rgba(201,79,79,.1);border:2px solid var(--rose);border-radius:12px;">
+      <p style="font-size:1.05rem;"><strong style="color:var(--rose);">如果你的立場偏向「AI 無法被有效規管」</strong><br>→ 你預期的是悲觀情境。歷史支持你 — 每次制度都慢半拍。</p>
+    </div>
+    <div class="fragment" style="padding:1rem 1.5rem;background:rgba(240,192,80,.1);border:2px solid var(--gold);border-radius:12px;">
+      <p style="font-size:1.05rem;"><strong style="color:var(--gold);">如果你的立場是「陣痛之後會適應」</strong><br>→ 你預期基準情境。柯達倒了，但攝影師變多了。</p>
+    </div>
+    <div class="fragment" style="padding:1rem 1.5rem;background:rgba(15,157,138,.1);border:2px solid var(--teal);border-radius:12px;">
+      <p style="font-size:1.05rem;"><strong style="color:var(--teal);">如果你的立場是「AI 可以加速解決自己造成的問題」</strong><br>→ 你預期樂觀情境。但歷史上從未發生過 — 你的論據夠強嗎？</p>
+    </div>
+  </div>
+</div>
+
+<!-- F-3: 核心問題 -->
+<div class="slide dataviz" data-act="推估未來">
+  <div style="max-width:700px;text-align:center;flex:1;display:flex;flex-direction:column;justify-content:center;">
+    <p style="font-size:1rem;color:var(--gold);letter-spacing:.2rem;margin-bottom:1rem;">THE REAL QUESTION</p>
+    <p class="fragment" style="font-size:1.8rem;font-weight:700;color:#fff;line-height:1.5;margin-bottom:1.5rem;">問題不是「AI 會不會造成衝擊」<br>而是「<span style="color:var(--teal);">制度回應的速度<br>能不能追上技術變化的速度</span>」</p>
+    <div style="width:60px;height:3px;background:var(--teal);margin:0 auto;"></div>
+    <p class="fragment" style="font-size:1.1rem;color:rgba(255,255,255,.5);margin-top:1.5rem;">從砸織布機到扔汽油彈，214 年。<br>人類對不公平的憤怒從未改變。<br><span style="color:var(--gold);font-weight:600;">改變的只有速度。</span></p>
+  </div>
+</div>
+
+<!-- 17: DISCOVERIES (原有) -->
 <div class="slide clean" data-act="預期發現" data-index="17">
   <h2>學員會發現的五件事</h2>
   <div class="disc-list">
@@ -484,24 +685,9 @@ tot.textContent=T;
 
 function go(n){
   if(n===I)return;
-  const old=I;
-  const fwd=n>old;
-  // Remove old slide with direction
-  SS[old].classList.remove('active');
-  SS[old].style.transform=fwd?'translateX(-30px)':'translateX(30px)';
-  SS[old].style.opacity='0';
-  setTimeout(()=>{SS[old].style.transform='';SS[old].style.opacity='';},500);
-  // Prep new slide entry direction
+  SS[I].classList.remove('active');
   I=Math.max(0,Math.min(n,T-1));
-  SS[I].style.transition='none';
-  SS[I].style.transform=fwd?'translateX(30px)':'translateX(-30px)';
-  SS[I].style.opacity='0';
   SS[I].classList.add('active');
-  // Force reflow then animate in
-  SS[I].offsetHeight;
-  SS[I].style.transition='opacity .5s,transform .5s ease';
-  SS[I].style.transform='none';
-  SS[I].style.opacity='1';
   cur.textContent=I+1;
   pb.disabled=I===0;nb.disabled=I===T-1;
   prog.style.width=((I+1)/T*100)+'%';

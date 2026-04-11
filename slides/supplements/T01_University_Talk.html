@@ -36,8 +36,22 @@ small,.caption,.label{font-size:max(16px,0.75rem)!important;}
 
 /* ── Slides Core ── */
 .slides{width:100%;height:100%;position:relative;}
-.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3.5rem 4rem 4.5rem;pointer-events:none;overflow-y:auto;opacity:0;pointer-events:none;}
-.slide.active{opacity:1;pointer-events:auto;}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:3.5rem 4rem 4.5rem;pointer-events:none;overflow-y:auto;}
+.slide.active{display:flex;pointer-events:auto;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ── Cinematic Poster (.cine / .cine-right) ── */
+.slide.cine,.slide.cine-right{background-size:cover;background-position:center;color:#fff;padding:3.5rem 4rem 4.5rem;justify-content:flex-end;}
+.slide.cine::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,10,20,.92) 0%,rgba(10,10,20,.7) 35%,transparent 62%);z-index:1;}
+.slide.cine-right::before{content:'';position:absolute;inset:0;background:linear-gradient(270deg,rgba(10,10,20,.92) 0%,rgba(10,10,20,.7) 35%,transparent 62%);z-index:1;}
+.slide.cine>*,.slide.cine-right>*{position:relative;z-index:2;}
+.slide.cine .cine-content{max-width:42%;text-align:left;align-self:flex-start;}
+.slide.cine-right .cine-content{max-width:42%;text-align:left;align-self:flex-end;}
+.cine-tag{font-size:.85rem;color:var(--gold);letter-spacing:.2rem;font-weight:700;margin-bottom:.3rem;}
+.cine-title{font-size:2.4rem;font-weight:900;line-height:1.25;margin-bottom:.5rem;}
+.cine-sub{font-size:1rem;line-height:1.7;color:rgba(255,255,255,.75);}
+.cine-caption{position:absolute;bottom:1.5rem;right:2rem;font-size:.75rem;color:rgba(255,255,255,.3);z-index:2;}
+.cine-insight{margin-top:.8rem;padding:.8rem 1rem;background:rgba(15,157,138,.15);border-left:3px solid var(--teal);border-radius:0 8px 8px 0;font-size:.9rem;color:rgba(255,255,255,.85);line-height:1.6;}
 
 /* ── Clean Mode ── */
 .slide.clean{background:var(--white);color:var(--g900);justify-content:flex-start;}
@@ -193,16 +207,150 @@ p,li{font-size:1.05rem;line-height:1.8;}
 <div class="slide clean" data-act="開場">
   <h2>今天的旅程</h2>
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:960px;width:100%;margin-top:.8rem;" style="flex:1;align-content:center;">
-    <div class="card fragment"><div class="card-accent"></div><h3>01 人類駕馭力的演進</h3><p>火 → 獸力 → 科技 → AI Token</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--red)"></div><h3>01 代價與駕馭力演進</h3><p>三次技術革命的社會抗爭<br>三巨頭競速</p></div>
     <div class="card fragment"><div class="card-accent" style="background:var(--gold-dark)"></div><h3>02 你在哪裡？</h3><p>81億人口中的 AI 使用分布與 Token 經濟</p></div>
     <div class="card fragment"><div class="card-accent" style="background:var(--purple)"></div><h3>03 三個核心能力</h3><p>用工具 → 選工具 → 造工具</p></div>
     <div class="card fragment"><div class="card-accent" style="background:var(--orange)"></div><h3>04 AI 成熟度五層</h3><p>從使用工具到方法創新（L1→L5）</p></div>
     <div class="card fragment"><div class="card-accent" style="background:var(--cyan)"></div><h3>05 實戰行動</h3><p>GitHub 學生方案、AI 工具、第一步</p></div>
-    <div class="card fragment"><div class="card-accent" style="background:var(--red)"></div><h3>06 未來展望</h3><p>老黃語錄、Token 預算、學習路徑</p></div>
+    <div class="card fragment"><div class="card-accent" style="background:var(--gold-dark)"></div><h3>06 未來展望</h3><p>OpenAI 社會契約、Token 預算、學習路徑</p></div>
   </div>
 </div>
 
-<!-- ═══════════ 3: PART 1 DIVIDER ═══════════ -->
+<!-- ═══════════ ACT 0: 代價 — 從砸機器到扔汽油彈 ═══════════ -->
+
+<!-- A0-1: Section Divider -->
+<div class="slide cine" data-act="代價" style="background-image:url('img/t01-stories/divider_timeline.png');">
+  <div class="cine-content" style="max-width:50%;justify-content:center;align-self:flex-start;display:flex;flex-direction:column;height:100%;">
+    <div class="cine-tag">BEFORE WE BEGIN</div>
+    <div class="cine-title" style="font-size:2.8rem;">從砸機器<br>到扔汽油彈</div>
+    <div class="cine-sub">每次技術革命，都有人付出代價。<br>三個時代，三個故事，一個相同的模式。</div>
+  </div>
+</div>
+
+<!-- A0-2: Story #1 — Rawfolds Mill 1812 -->
+<div class="slide cine" data-act="代價" style="background-image:url('img/t01-stories/story1_mill.png');">
+  <div class="cine-content">
+    <div class="cine-tag">工業革命 · 1812 · 英格蘭約克郡</div>
+    <div class="cine-title">羅福茲磨坊之戰</div>
+    <div class="cine-sub">150 名蒙面工人，手持鐵鎚和斧頭，深夜攻擊一座紡織磨坊。<br>一台剪切機取代五名熟練工人。省下的錢，沒有一分流向被取代者。</div>
+    <div class="cine-insight fragment">
+      <strong>結局：</strong>17 人被絞刑。政府派出 12,000 士兵鎮壓 — 比對付拿破崙的還多。<br>
+      <strong>剪刀差：</strong>剪切機數月擴散，工人保護法等了 <span style="color:var(--gold);font-weight:700;">21 年</span>
+    </div>
+  </div>
+</div>
+
+<!-- A0-3: Story #5 — Kodak 2012 -->
+<div class="slide cine-right" data-act="代價" style="background-image:url('img/t01-stories/story5_kodak.png');">
+  <div class="cine-content">
+    <div class="cine-tag">數位革命 · 2012</div>
+    <div class="cine-title">14 萬人 vs 13 人</div>
+    <div class="cine-sub">柯達 1975 年發明了數位相機 —<br>然後決定把它藏起來。<br>2012 年柯達破產。<br>同年 Instagram（13 名員工）以 10 億美元被收購。</div>
+    <div class="cine-insight fragment">
+      <strong>啟示：</strong>柯達不是沒看到趨勢 — 他們發明了那個趨勢。<br>
+      <strong>剪刀差：</strong>數位相機從發明到全面普及花了 25 年，但柯達所在城市的就業<span style="color:var(--gold);font-weight:700;">至今未恢復</span>
+    </div>
+  </div>
+</div>
+
+<!-- A0-4: Story #9 — Altman Firebomb 2026 -->
+<div class="slide cine" data-act="代價" style="background-image:url('img/t01-stories/story9_firebomb.png');">
+  <div class="cine-content">
+    <div class="cine-tag">AI 革命 · 2026.4.10</div>
+    <div class="cine-title">Altman 家的汽油彈</div>
+    <div class="cine-sub">凌晨 3:40，一名 20 歲青年向 OpenAI CEO 住宅投擲汽油彈。<br>Z 世代對 AI 的憤怒從 22% 攀升到 31%，希望從 27% 降到 18%。</div>
+    <div class="cine-insight fragment">
+      <strong>214 年：</strong>從砸織布機到扔汽油彈，驚人相似的模式。<br>
+      <strong>剪刀差：</strong>AI 數月改變就業市場，制度回應 <span style="color:var(--gold);font-weight:700;">3+ 年仍無實質進展</span>
+    </div>
+  </div>
+</div>
+
+<!-- A0-5: 剪刀差加速 -->
+<div class="slide dataviz" data-act="代價">
+  <h2>制度追不上技術的速度 — 而且越來越快</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;max-width:960px;width:100%;flex:1;align-content:center;">
+    <div class="fragment" style="text-align:center;padding:1.5rem;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:16px;">
+      <div style="font-size:.9rem;color:var(--teal);letter-spacing:.15rem;margin-bottom:.3rem;">工業革命</div>
+      <div style="font-size:3.5rem;font-weight:900;color:var(--teal);">50<span style="font-size:1.2rem;">年</span></div>
+      <div style="font-size:.9rem;color:rgba(255,255,255,.5);margin-top:.3rem;">技術擴散 → 制度回應</div>
+      <div style="font-size:.8rem;color:rgba(255,255,255,.35);margin-top:.5rem;">剪切機 → 工廠法（1833）<br>工會合法化等了 59 年</div>
+    </div>
+    <div class="fragment" style="text-align:center;padding:1.5rem;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:16px;">
+      <div style="font-size:.9rem;color:var(--cyan);letter-spacing:.15rem;margin-bottom:.3rem;">數位革命</div>
+      <div style="font-size:3.5rem;font-weight:900;color:var(--cyan);">10<span style="font-size:1.2rem;">年</span></div>
+      <div style="font-size:.9rem;color:rgba(255,255,255,.5);margin-top:.3rem;">技術擴散 → 制度回應</div>
+      <div style="font-size:.8rem;color:rgba(255,255,255,.35);margin-top:.5rem;">數位相機 → 產業轉型<br>柯達城至今未復原</div>
+    </div>
+    <div class="fragment" style="text-align:center;padding:1.5rem;background:rgba(249,171,0,.08);border:2px solid var(--gold);border-radius:16px;">
+      <div style="font-size:.9rem;color:var(--gold);letter-spacing:.15rem;margin-bottom:.3rem;">AI 革命</div>
+      <div style="font-size:3.5rem;font-weight:900;color:var(--gold);">3+<span style="font-size:1.2rem;">年</span></div>
+      <div style="font-size:.9rem;color:rgba(255,255,255,.5);margin-top:.3rem;">技術擴散 → 制度回應</div>
+      <div style="font-size:.8rem;color:var(--gold);margin-top:.5rem;font-weight:600;">尚無實質進展<br>UBI、AI 稅仍在「討論」</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ACT 0.5: 到底有多快？ — 三巨頭發布節奏 ═══════════ -->
+
+<!-- A05-1: 三巨頭 Section -->
+<div class="slide cine" data-act="加速度" style="background-image:url('img/t01-stories/giants_speed.png');justify-content:flex-start;padding-top:3.5rem;">
+  <div class="cine-content" style="max-width:48%;">
+    <div class="cine-tag">2026 AI RACE</div>
+    <div class="cine-title">到底有多快？</div>
+    <div class="cine-sub">三家巨頭用三種不同策略同時加速。<br>這不是一波一波的 — 是三波同時灌進來。</div>
+  </div>
+</div>
+
+<!-- A05-2: 三種護城河 -->
+<div class="slide dataviz" data-act="加速度">
+  <h2>三種護城河 — 三種追不上的方式</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;max-width:960px;width:100%;flex:1;align-content:center;">
+    <div class="card-dark fragment" style="border-top:3px solid var(--orange);padding:1.5rem;">
+      <h3 style="color:var(--orange);">Anthropic</h3>
+      <div style="font-size:2rem;font-weight:900;color:var(--orange);margin:.3rem 0;">52天73次</div>
+      <p style="font-size:.9rem;">想法→上線→Dogfooding→再發布<br>平均每天都在改變使用者工作流</p>
+      <p style="font-size:.8rem;color:rgba(255,255,255,.4);margin-top:.5rem;">護城河：<strong style="color:var(--orange);">執行力</strong></p>
+    </div>
+    <div class="card-dark fragment" style="border-top:3px solid var(--red);padding:1.5rem;">
+      <h3 style="color:var(--red);">OpenAI</h3>
+      <div style="font-size:2.5rem;font-weight:900;color:var(--red);margin:.3rem 0;">單次衝擊</div>
+      <p style="font-size:.9rem;">每次發布都是市場級震動<br>改變整個產業的使用習慣</p>
+      <p style="font-size:.8rem;color:rgba(255,255,255,.4);margin-top:.5rem;">護城河：<strong style="color:var(--red);">品牌心智</strong></p>
+    </div>
+    <div class="card-dark fragment" style="border-top:3px solid var(--cyan);padding:1.5rem;">
+      <h3 style="color:var(--cyan);">Google</h3>
+      <div style="font-size:2.5rem;font-weight:900;color:var(--cyan);margin:.3rem 0;">無所不在</div>
+      <p style="font-size:.9rem;">10 億用戶 × 多入口<br>Workspace、Android、Cloud 全滲透</p>
+      <p style="font-size:.8rem;color:rgba(255,255,255,.4);margin-top:.5rem;">護城河：<strong style="color:var(--cyan);">生態分發</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- A05-3: 三重印證過渡 -->
+<div class="slide dataviz" data-act="加速度">
+  <h2>三組數據，同一個結論</h2>
+  <div style="display:flex;flex-direction:column;gap:.8rem;max-width:750px;width:100%;flex:1;justify-content:center;margin:0 auto;">
+    <div class="fragment" style="display:flex;align-items:center;gap:1rem;background:rgba(217,48,37,.1);border:2px solid var(--red);border-radius:10px;padding:.8rem 1.5rem;">
+      <div style="font-size:1rem;font-weight:900;color:var(--red);min-width:120px;text-align:right;">社會代價</div>
+      <div style="font-size:1rem;">制度回應時間：50 年 → 10 年 → <strong style="color:var(--gold);">3 年（仍無進展）</strong></div>
+    </div>
+    <div class="fragment" style="display:flex;align-items:center;gap:1rem;background:rgba(232,113,10,.1);border:2px solid var(--orange);border-radius:10px;padding:.8rem 1.5rem;">
+      <div style="font-size:1rem;font-weight:900;color:var(--orange);min-width:120px;text-align:right;">企業競爭</div>
+      <div style="font-size:1rem;">三巨頭同時加速：速度 × 衝擊 × 滲透 = <strong style="color:var(--gold);">無處可逃</strong></div>
+    </div>
+    <div class="fragment" style="display:flex;align-items:center;gap:1rem;background:rgba(15,157,138,.1);border:2px solid var(--teal);border-radius:10px;padding:.8rem 1.5rem;">
+      <div style="font-size:1rem;font-weight:900;color:var(--teal);min-width:120px;text-align:right;">產業迭代</div>
+      <div style="font-size:1rem;">工業革命週期：100 年 → 10 年 → <strong style="color:var(--gold);">1 年</strong></div>
+    </div>
+  </div>
+  <div class="fragment" style="text-align:center;margin-top:1rem;">
+    <p style="font-size:1.4rem;font-weight:900;color:var(--gold);">速度，是這次革命的本質差異</p>
+    <p style="font-size:.95rem;color:rgba(255,255,255,.5);margin-top:.3rem;">所以真正的問題是：人類怎麼辦？</p>
+  </div>
+</div>
+
+<!-- ═══════════ 3: PART 1 DIVIDER (原有) ═══════════ -->
 <div class="slide poster overlay-heavy" style="background:linear-gradient(135deg,var(--primary) 0%,#0a0a14 100%);" data-act="駕馭力演進">
   
   <div style="position:relative;z-index:2;text-align:center;">
@@ -216,26 +364,26 @@ p,li{font-size:1.05rem;line-height:1.8;}
 <!-- ═══════════ 4: 四階段演進 ═══════════ -->
 <div class="slide clean" data-act="駕馭力演進">
   <h2>從火到 AI — 人類駕馭力的演進</h2>
-  <div class="process-steps" style="padding:1rem 0;gap:0;">
-    <div class="step fragment" style="background:var(--red);padding:1.2rem 1.2rem;">
+  <div class="process-steps" style="padding:1rem 0;gap:0;max-width:1100px;width:100%;">
+    <div class="step fragment" style="background:var(--red);padding:1.2rem 1.5rem;flex:1;min-width:0;">
       <div class="step-num" style="color:var(--red);">🔥</div>
       <h3>火</h3>
       <p>駕馭火 = 出現文明<br>烹飪、取暖<br>夜間活動<br>人類脫離動物界</p>
     </div>
     <div class="step-arrow" style="font-size:1rem;padding:0 .2rem;">▶</div>
-    <div class="step fragment" style="background:var(--orange);padding:1.2rem 1.2rem;">
+    <div class="step fragment" style="background:var(--orange);padding:1.2rem 1.5rem;flex:1;min-width:0;">
       <div class="step-num" style="color:var(--orange);">🐎</div>
       <h3>獸力·機械</h3>
       <p>駕馭獸力 = 效率<br>農耕、運輸<br>工業革命<br>一人抵百人</p>
     </div>
     <div class="step-arrow" style="font-size:1rem;padding:0 .2rem;">▶</div>
-    <div class="step fragment" style="background:var(--teal);padding:1.2rem 1.2rem;">
+    <div class="step fragment" style="background:var(--teal);padding:1.2rem 1.5rem;flex:1;min-width:0;">
       <div class="step-num" style="color:var(--teal);">💻</div>
       <h3>科技</h3>
       <p>駕馭科技 = 創新<br>網路、軟體<br>平台經濟<br>改變商業模式</p>
     </div>
     <div class="step-arrow" style="font-size:1rem;padding:0 .2rem;">▶</div>
-    <div class="step fragment" style="background:var(--primary);padding:1.2rem 1.2rem;">
+    <div class="step fragment" style="background:var(--primary);padding:1.2rem 1.5rem;flex:1;min-width:0;">
       <div class="step-num" style="color:var(--primary);">🤖</div>
       <h3>AI Token</h3>
       <p>駕馭 AI = 無限可能<br>生成式 AI、Agent<br>超級個體<br>一人 = 一間公司</p>
@@ -869,7 +1017,7 @@ p,li{font-size:1.05rem;line-height:1.8;}
 <div class="slide poster overlay-heavy" data-act="AI 成熟度五層" style="background-color:#1a0a1e;">
   <div class="quote-wrap">
     <div class="quote-bar" style="background:var(--red);"></div>
-    <p style="font-size:1.3rem;color:var(--red);font-weight:700;letter-spacing:.2rem;">L5 — 最高層</p>
+    <p style="font-size:1.8rem;color:var(--red);font-weight:900;letter-spacing:.2rem;">L5 — 最高層</p>
     <div class="quote-text" style="margin-top:.8rem;font-size:2rem;">不是用 AI 做更快，<br>而是因為 AI 的存在，<br><span style="color:var(--red);">工作方法本身被重新定義</span></div>
     <div style="display:flex;gap:.8rem;margin-top:1.5rem;flex-wrap:wrap;justify-content:center;max-width:800px;" class="fragment">
       <div class="card card-dark" style="padding:1rem 1.2rem;text-align:center;flex:1;min-width:160px;"><p style="color:var(--red);font-weight:700;font-size:1rem;">論文</p><p style="font-size:.9rem;">Multi-Agent Scientific Research</p></div>
@@ -1128,6 +1276,23 @@ p,li{font-size:1.05rem;line-height:1.8;}
     <div class="fragment" style="font-size:1.2rem;text-align:center;line-height:1.8;max-width:650px;">「每位工程師都將有年度 Token 預算。」</div>
     <div class="fragment" style="font-size:1.2rem;text-align:center;line-height:1.8;max-width:650px;">「你的 Offer 包含多少 Token？」</div>
     <div class="fragment" style="font-size:1.2rem;text-align:center;line-height:1.8;max-width:650px;">「AI 讓一個人能做到過去十個人的工作。」</div>
+  </div>
+</div>
+
+<!-- ═══════════ 50.5: OpenAI 白皮書 — 四天工作制 ═══════════ -->
+<div class="slide cine" data-act="未來展望" style="background-image:url('img/t01-stories/future_split.png');">
+  <div class="cine-content" style="max-width:45%;">
+    <div class="cine-tag">OPENAI POLICY WHITE PAPER · 2026.04</div>
+    <div class="cine-title" style="font-size:2rem;">超級智慧時代<br>的社會契約</div>
+    <div class="cine-sub" style="margin-top:.5rem;">
+      <div class="fragment" style="margin-bottom:.4rem;">📋 <strong>四天工作制</strong>，不減薪 — 人類工作型態轉向高效產出</div>
+      <div class="fragment" style="margin-bottom:.4rem;">🏦 <strong>主權財富基金</strong> — 用 AI 收益直接回饋全民</div>
+      <div class="fragment" style="margin-bottom:.4rem;">🔑 <strong>AI 存取權 = 基本經濟權利</strong> — 不是奢侈品</div>
+    </div>
+    <div class="cine-insight fragment" style="margin-top:.8rem;">
+      歷史告訴我們：每次技術革命最終都靠制度改革解決。<br>
+      這次的差別是 — <strong style="color:var(--gold);">連 AI 公司自己都在催促制度跟上</strong>。
+    </div>
   </div>
 </div>
 
