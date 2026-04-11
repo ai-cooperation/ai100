@@ -30,6 +30,7 @@ var materials = [
   { title: 'T04 \u8AD6\u6587\u65B9\u6CD5\u5B78\u5206\u4EAB', icon: '\uD83C\uDF93', url: '/slides/supplements/T04_Paper_Methodology.html', desc: '\u6F14\u8B1B\u00B739\u9801' },
   // --- Chantoban ---
   { title: '\u7522\u6295\u73ED \u8AB2\u7A0B\u4ECB\u7D39', icon: '\uD83C\uDFED', url: '/slides/chantoban/Course_Intro.html', desc: '\u62DB\u751F\u7248\u00B718\u9801' },
+  { title: '\u7522\u6295\u73ED Logo\u731C\u731C\u770B', icon: '\uD83D\uDD0D', url: '/slides/chantoban/Logo_Quiz_Opening.html', desc: '\u958B\u5834\u6D3B\u52D5\u00B712\u984C' },
   // --- Learn system ---
   { title: '\u4E09\u554F\u6CD5\u5B78\u7FD2\u7CFB\u7D71', icon: '\uD83E\uDDE0', url: '/classroom/learn', desc: '\u81EA\u5B78\u00B7M01 AI \u601D\u7DAD\u8207\u6CBB\u7406' },
   // --- Original materials ---
