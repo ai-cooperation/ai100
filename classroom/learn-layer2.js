@@ -683,6 +683,15 @@ function saveBlindSpot(question, chosen, isCorrect){
       return data;
     });
 
+    // Per-user answer log (for registered users)
+    if(state.uid){
+      firebase.database().ref(`learn/users_auth/${state.uid}/answers/${state.moduleId}/${question.id}`).set({
+        chosen: chosen,
+        correct: isCorrect,
+        ts: firebase.database.ServerValue.TIMESTAMP
+      });
+    }
+
   } catch(e){ /* silent */ }
 }
 

@@ -188,6 +188,15 @@ a{color:var(--blue);text-decoration:none;}
   <div class="entry">
     <h1>三問法智慧學習系統</h1>
     <p class="tagline">用框架 × 爭議 × 鑑別題，建立真正的理解</p>
+    <!-- Google Login (optional for beginners, required for intermediate) -->
+    <div id="authSection" style="margin-bottom:1.5rem;width:100%;max-width:320px;">
+      <button class="btn" id="btnGoogleLogin" onclick="googleLogin()" style="width:100%;padding:.6rem 1rem;background:#fff;border:2px solid var(--g200);border-radius:12px;font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Google 登入
+      </button>
+      <div id="authStatus" style="font-size:.85rem;margin-top:.4rem;color:var(--g400);">登入可追蹤學習歷程，初級模組可匿名使用</div>
+    </div>
+
     <input type="text" id="inputName" placeholder="輸入暱稱（隨意填）" maxlength="20" autocomplete="off">
     <p class="hint">暱稱只用於畫面顯示，不作辨識</p>
     <div style="margin-top:.8rem;width:100%;max-width:320px;">
@@ -198,6 +207,8 @@ a{color:var(--blue);text-decoration:none;}
     <!-- Returning user panel -->
     <div id="returnPanel" style="display:none;margin-top:1.5rem;width:100%;max-width:480px;text-align:left;"></div>
     <button class="btn btn-primary btn-block" style="max-width:320px;margin-top:1.5rem;" onclick="startLearning()" id="btnStart" disabled>選擇模組開始學習</button>
+    <!-- Teacher analytics link (hidden by default) -->
+    <a id="teacherAnalyticsLink" href="analytics.html" style="display:none;margin-top:1rem;font-size:.9rem;color:var(--purple);font-weight:700;">📊 教師分析後台 →</a>
     <div id="moduleList" style="margin-top:2rem;width:100%;max-width:480px;text-align:left;display:none;">
       <!-- filled by JS -->
     </div>
@@ -480,7 +491,7 @@ const MODULES = {
          C:{gap:'歸咎於人而非結構性問題',followup:'如果 IT 很強，但資料還是紙本且格式混亂，結果會不同嗎？'},
          D:{gap:'認為錢能解決一切',followup:'如果預算 500 萬，但資料品質沒改善，結果會更好嗎？回想 GIGO 原則。'}
        }},
-      {id:'Q4',stem:'銀行用 AI 決定是否核准個人信貸。金管會來查，問了三個問題：(1) 模型拒絕某位客戶的理由是什麼？(2) 有沒有因為居住地區而歧視？(3) 客戶有沒有申訴管道？銀行全部答不出來。這反映了什麼問題？',
+      {id:'Q4',stem:'銀行用 AI 決定是否核准個人信貸。金管會來查，問了三個問題：（1）模型拒絕某位客戶的理由是什麼？（2）有沒有因為居住地區而歧視？（3）客戶有沒有申訴管道？銀行全部答不出來。這反映了什麼問題？',
        model:'F4',
        options:[
          {key:'A',text:'模型準確率不夠高，應該繼續調參把準確率提升到 99% 以上',depth:1},
@@ -537,7 +548,7 @@ const MODULES = {
        options:[
          {key:'A',text:'Human-in-the-loop：每件產品都由人工逐一確認，確保零誤判',depth:1},
          {key:'B',text:'Human-on-the-loop：AI 自動判斷，但人工監控異常並可隨時介入',depth:4},
-         {key:'C',text:'Human-over-the-loop：設定好規則後完全自動化，人只管策略',depth:2},
+         {key:'C',text:'Human-over-the-loop：設定好品質規則後完全自動化，人只負責策略層級的決策',depth:2},
          {key:'D',text:'不需要人工參與，現在 AI 準確率夠高，全自動最有效率',depth:1}
        ],correct:'B',
        diagnosis:{
@@ -561,7 +572,7 @@ const MODULES = {
       {id:'Q10',stem:'公司導入 AI 之後，法務說「我們需要 AI 治理」，但 CEO 回：「那是法務的事，你們自己處理。」這個回應的核心問題是？',
        model:'F5',
        options:[
-         {key:'A',text:'CEO 說得對，AI 治理本來就是法務和合規的職責，跟其他部門無關',depth:1},
+         {key:'A',text:'CEO 說得對，AI 治理本來就是法務和合規部門的專業職責，因為治理的核心是確保合法合規，其他部門不具備這方面的專業能力',depth:1},
          {key:'B',text:'CEO 應該多撥預算給法務部門，讓他們有資源建立完整的治理規範',depth:2},
          {key:'C',text:'AI 治理是跨部門的事 — 資料工程師管偏見、PM 管揭露、業務管解釋、IT 管資安，不是只有法務寫政策就夠了',depth:4},
          {key:'D',text:'小公司不需要 AI 治理，等公司規模大了或出事了再建立也來得及',depth:1}
@@ -590,7 +601,7 @@ const MODULES = {
          {key:'A',text:'AI 是新一代的程式設計，只要會寫 prompt 就能做任何事，不需要寫程式了',depth:1},
          {key:'B',text:'AI 是資料驅動的模式比對，擅長找規律做預測，但不具備真正的理解和推理能力',depth:4},
          {key:'C',text:'AI 很快就會達到通用人工智慧（AGI），大部分工作在五到十年內會被取代',depth:1},
-         {key:'D',text:'AI 就是機器學習，所有 AI 都需要大量訓練資料才能運作，沒資料就沒 AI，這也是為什麼擁有大量數據的企業在 AI 時代佔有絕對優勢，數據就是新時代的石油',depth:2}
+         {key:'D',text:'AI 就是機器學習，所有 AI 都需要大量訓練資料才能運作，沒資料就沒 AI，因此擁有大量數據的企業才佔有優勢',depth:2}
        ],correct:'B',
        diagnosis:{
          A:{gap:'過度樂觀，把能力邊界模糊化',followup:'如果「會寫 prompt 就能做任何事」，為什麼 AI 在某些任務上表現很差？'},
@@ -631,7 +642,7 @@ const MODULES = {
        model:'F6',
        options:[
          {key:'A',text:'禁止金融業使用 AI，因為金融風險太高不適合交給演算法處理',depth:1},
-         {key:'B',text:'AI 系統必須達到 100% 準確率才能上線，低於此標準一律不得使用',depth:1},
+         {key:'B',text:'AI 系統必須達到 100% 準確率才能上線，因為金融業涉及客戶資產安全，容錯空間為零，低於此標準一律不得使用',depth:1},
          {key:'C',text:'AI 決策必須具備可解釋性（能說明為何做出特定決定），且重大決策需保留人工覆核機制',depth:4},
          {key:'D',text:'只要使用國內開發的 AI 模型就符合規定，因為國產模型受本地法規約束',depth:1}
        ],correct:'C',
@@ -644,10 +655,10 @@ const MODULES = {
       {id:'Q16',stem:'公司要為一個新的 AI 招募系統做風險評估。風險地圖（F4）顯示偏誤和公平性風險為「高」。現在 AI 基本法也生效了。你應該如何整合這兩個框架？',
        model:'F4',
        options:[
-         {key:'A',text:'風險地圖和 AI 基本法是兩個不同框架，各有各的用途，分開處理互不干涉就好',depth:1},
-         {key:'B',text:'只要符合 AI 基本法的七大原則就不需要另外做風險地圖了，法規已涵蓋所有面向',depth:1},
-         {key:'C',text:'用風險地圖做「技術面盤點」（偏誤來源、測試方法、監控機制），再對照 AI 基本法的七大原則做「合規面檢查」（公平原則 → 偏誤修正、透明原則 → 可解釋性、問責原則 → 責任歸屬），兩者互補形成完整治理',depth:4},
-         {key:'D',text:'請法務部門負責 AI 基本法的合規，技術團隊負責風險地圖的盤點，各司其職發揮專業分工的效率，這樣每個團隊都能專注在自己最擅長的領域，產出品質最高',depth:2}
+         {key:'A',text:'風險地圖和 AI 基本法是兩個不同框架，各有各的適用情境和評估角度，分開處理互不干涉才能避免混淆',depth:1},
+         {key:'B',text:'只要符合 AI 基本法的七大原則就不需要另外做風險地圖了，因為法規本身已經涵蓋了所有技術和業務面向的風險評估',depth:1},
+         {key:'C',text:'用風險地圖做技術面盤點（偏誤來源、監控機制），再對照 AI 基本法做合規面檢查（公平→偏誤修正、透明→可解釋性），兩者互補形成完整治理',depth:4},
+         {key:'D',text:'請法務部門負責 AI 基本法的合規，技術團隊負責風險地圖的盤點，因為專業分工才能確保每個環節的品質，讓各團隊專注在最擅長的領域發揮最大效率',depth:2}
        ],correct:'C',
        diagnosis:{
          A:{gap:'兩者高度關聯，不該割裂',followup:'風險地圖的「偏誤風險」和 AI 基本法的「公平原則」說的是同一件事。分開處理會遺漏什麼？'},
@@ -661,13 +672,13 @@ const MODULES = {
          options:[
            {key:'A',text:'沒問題，ChatGPT 確實已經具備情感理解能力，可以直接用在諮商場景',depth:1},
            {key:'B',text:'ChatGPT 能辨識情緒關鍵詞，但不等於「理解」情感，它是模式比對不是真正的同理心',depth:4},
-           {key:'C',text:'只要加上更多心理學訓練資料，AI 就能真正理解並回應人類的情感，因為深度學習的本質就是從資料中學習，資料越豐富模型的理解能力就越強，這已經被多項研究證實',depth:2},
+           {key:'C',text:'只要加上更多心理學訓練資料，AI 就能真正理解並回應人類的情感，因為深度學習的本質就是從資料中學習模式',depth:2},
            {key:'D',text:'AI 不能用在任何跟人有關的服務，因為機器永遠無法處理人際互動',depth:1}
          ],correct:'B',
          diagnosis:{A:{gap:'混淆了「模擬理解」和「真正理解」',followup:'如果 AI 回答得很像在理解你，但它完全不知道痛苦是什麼感覺，這算理解嗎？'},C:{gap:'認為資料量能解決本質問題',followup:'一個從未體驗過悲傷的系統，看再多描述悲傷的文字，會真的「理解」悲傷嗎？'},D:{gap:'因噎廢食',followup:'AI 不能理解情感，但能不能「輔助」人類諮商師？邊界在哪？'}}},
         {id:'R-F1-2',stem:'新聞標題寫「AI 法官準確率達 95%，未來可取代法官審案」。運用你對 AI 本質的理解，這個標題的核心問題是？',
          options:[
-           {key:'A',text:'95% 不夠高，至少要達到 99% 以上的準確率才有資格談取代法官',depth:2},
+           {key:'A',text:'95% 不夠高，至少要達到 99% 以上的準確率才有資格談取代法官，因為司法判決攸關人民權益，容錯率必須極低',depth:2},
            {key:'B',text:'AI 是資料驅動的模式比對，它比對的是過去案例的規律，無法處理沒有先例的新型案件或涉及價值判斷的情境',depth:4},
            {key:'C',text:'法官工會和司法體系會強烈反對，社會也不會接受讓機器來審案',depth:1},
            {key:'D',text:'技術還沒成熟，但照目前 AI 進步速度再等幾年應該就可以了',depth:1}
@@ -680,7 +691,7 @@ const MODULES = {
            {key:'A',text:'導入深度學習模型分析銷售模式，用歷史數據預測每日各品項需求量',depth:1},
            {key:'B',text:'用 ChatGPT 每天問「明天哪些麵包會賣比較好」，讓 AI 幫忙做銷售預測',depth:1},
            {key:'C',text:'不需要 AI — 老闆看天氣預報 + 每天記錄銷量用 Excel 就能做出有效預測',depth:4},
-           {key:'D',text:'先買一套 ERP 系統做好數位化基礎，再整合 AI 做進階的銷量預測',depth:2}
+           {key:'D',text:'先買一套 ERP 系統做好數位化基礎建設，因為沒有完整的數位化流程就無法有效整合 AI 進行銷量預測',depth:2}
          ],correct:'C',
          diagnosis:{A:{gap:'殺雞用牛刀',followup:'3 人麵包店的資料量和問題複雜度，值得用深度學習嗎？維護成本呢？'},B:{gap:'工具選擇不匹配問題',followup:'ChatGPT 沒有你店裡的銷售資料，它的「預測」根據什麼？'},D:{gap:'過度工程化',followup:'3 人的店需要 ERP 嗎？最簡單有效的方案是什麼？'}}}
       ],
@@ -698,7 +709,7 @@ const MODULES = {
            {key:'A',text:'同意，10 萬筆的資料量足夠大，大數據本身就能彌補品質上的不足',depth:1},
            {key:'B',text:'先清理重複登記和地址格式問題就好，電話空欄位佔比不大可以忽略',depth:2},
            {key:'C',text:'必須先做完整的資料品質盤點和清理，否則 GIGO — 量再多品質差也是垃圾進垃圾出',depth:4},
-           {key:'D',text:'把空欄位全部填 0 或預設值就好，這樣模型至少不會因為缺值而報錯',depth:1}
+           {key:'D',text:'把空欄位全部填 0 或預設值就好，因為模型訓練時遇到缺值會報錯中斷，先填補才能順利完成訓練流程',depth:1}
          ],correct:'C',
          diagnosis:{A:{gap:'量 > 質的迷思',followup:'10 萬筆裡 4 萬筆缺電話、格式混亂 — AI 從這些「雜訊」裡能學到什麼有意義的規律？'},B:{gap:'部分正確但不夠全面',followup:'40% 空欄位不只是「忽略」的問題。缺失是否集中在某類客戶？這會造成什麼偏誤？'},D:{gap:'粗暴填補破壞資料意義',followup:'把空的電話填 0，AI 會學到什麼？「電話是 0 的客戶」會被歸為什麼類型？'}}}
       ],
@@ -708,7 +719,7 @@ const MODULES = {
            {key:'A',text:'準確性風險 — 機器人回答了錯誤的退款資訊，因為知識庫沒有更新',depth:1},
            {key:'B',text:'偏誤風險 — 機器人對特定用戶有偏見，所以才會透露不同的資訊',depth:1},
            {key:'C',text:'資安風險 — 提示注入攻擊（prompt injection）讓 AI 繞過限制洩露資訊',depth:4},
-           {key:'D',text:'合規風險 — 違反個資法，因為洩露了不該公開的客戶相關政策資訊',depth:2}
+           {key:'D',text:'合規風險 — 違反個資法相關規範，因為洩露了不該對外公開的客戶退款政策與折扣規則屬於營業秘密',depth:2}
          ],correct:'C',
          diagnosis:{A:{gap:'機器人的回答可能是「正確的」，但不該說出來',followup:'如果 AI 回答的退款政策「完全正確」，但不該告訴一般用戶，問題是在準確性還是安全性？'},B:{gap:'問題不在偏見而在安全漏洞',followup:'這跟特定用戶群體無關，而是任何人都能用特殊提問繞過限制。這是什麼攻擊？'},D:{gap:'方向接近但不精確',followup:'洩露的是商業資訊不是個人資料。五維度風險中，「被騙去說不該說的話」屬於哪一個？'}}}
       ],
@@ -717,7 +728,7 @@ const MODULES = {
          options:[
            {key:'A',text:'同意改成 Over-the-loop，運行一年已夠穩定，可以放手讓 AI 全自動',depth:1},
            {key:'B',text:'改成 On-the-loop — AI 自動處理但醫生監控異常案例並可隨時介入',depth:4},
-           {key:'C',text:'維持 In-the-loop 不能改，醫療風險太高不能放鬆人工審查標準，因為醫療誤診可能導致生命危險，任何自動化都不應該犧牲病患安全，這是醫療倫理的最高原則',depth:2},
+           {key:'C',text:'維持 In-the-loop 不能改，因為醫療誤診可能導致生命危險，任何自動化都不應該犧牲病患安全',depth:2},
            {key:'D',text:'由 AI 自己決定哪些案例需要醫生確認，哪些可以直接出報告',depth:2}
          ],correct:'B',
          diagnosis:{A:{gap:'從最嚴跳到最鬆，忽略了中間選項',followup:'醫療誤診的後果是什麼等級？Over-the-loop 適合「錯了也不嚴重」的場景，醫療符合嗎？'},C:{gap:'忽略了效率問題的真實性',followup:'如果醫生因為審查疲勞開始「沒在看就按確認」，in-the-loop 還有效嗎？'},D:{gap:'把判斷權交給 AI',followup:'讓 AI 自己決定「這個案例要不要給醫生看」— 如果 AI 判斷錯誤，沒送給醫生的案例誰負責？'}}}
@@ -725,10 +736,10 @@ const MODULES = {
       F6: [
         {id:'R-F6-1',stem:'新創公司開發了一個 AI 面試評分系統，想申請 Regulatory Sandbox（監理沙盒）來測試。老闆問：「進了沙盒是不是就不用管 AI 基本法了？」你的回答是？',
          options:[
-           {key:'A',text:'對，沙盒就是暫時免除法規限制，讓新創可以自由測試不受法規約束',depth:1},
+           {key:'A',text:'對，沙盒的設計目的就是暫時免除法規限制，讓新創可以在不受法規約束的環境中自由測試產品，因此進了沙盒就不需要遵守 AI 基本法',depth:1},
            {key:'B',text:'不對——監理沙盒允許在受控環境中測試創新應用，但七大原則（尤其公平、透明、問責）仍是底線，沙盒只是放寬部分行政程序，不是放寬基本原則',depth:4},
-           {key:'C',text:'新創公司規模小影響範圍有限，不需要管 AI 基本法這種大框架',depth:1},
-           {key:'D',text:'測試階段不用擔心合規問題，等產品正式上線再來考慮法規要求就好',depth:1}
+           {key:'C',text:'新創公司規模小影響範圍有限，不需要管 AI 基本法這種大框架，因為法規主要是針對大型企業和高風險應用場景，新創的試驗階段不在規範核心範圍內',depth:1},
+           {key:'D',text:'測試階段不用擔心合規問題，等產品正式上線再來考慮法規要求就好，因為沙盒期間的測試數據不算正式運營',depth:1}
          ],correct:'B',
          diagnosis:{A:{gap:'沙盒 ≠ 法外之地',followup:'如果沙盒內的 AI 系統歧視了特定族群，「在沙盒裡」能免除責任嗎？基本原則和行政程序的差異是什麼？'},C:{gap:'法規不看公司大小',followup:'AI 基本法適用於所有使用 AI 的組織。新創的面試 AI 如果偏見嚴重，受害的求職者不會因為你是新創就不追究。'},D:{gap:'合規要從設計階段開始',followup:'如果測試階段就沒考慮公平性，等上線時才發現模型有偏見，修改成本是測試階段的多少倍？'}}},
         {id:'R-F6-2',stem:'公司的 AI 系統出了問題，自動拒絕了一批符合條件的貸款申請者。根據 AI 基本法的問責原則，誰應該負責？',
@@ -758,10 +769,27 @@ const MODULES = {
 const LEARN_API_PROXY = 'https://api.cooperation.tw';
 
 // ═══════════════════════════════════════════════════════
+//  FRAMEWORK → LECTURE MAPPING (答錯引導到對應講座)
+// ═══════════════════════════════════════════════════════
+const FRAMEWORK_LECTURES = {
+  M01:{F1:[{id:'M01-01',t:'什麼是 AI：定義、能力邊界'},{id:'M01-02',t:'AI 的分類：規則式、ML、DL、生成式'}],F2:[{id:'M01-02',t:'AI 的分類'},{id:'M01-07',t:'用例選擇：哪些問題適合用 AI'}],F3:[{id:'M01-05',t:'AI 專案成功三要素'},{id:'M02-03',t:'資料品質：GIGO'}],F4:[{id:'M01-06',t:'AI 風險地圖：五維度盤點'},{id:'M01-03',t:'AI 治理'}],F5:[{id:'M01-04',t:'人機協作：HITL/HOTL/OOTL'},{id:'M01-09',t:'AI 專案角色'}],F6:[{id:'M01-11',t:'AI 基本法七大原則'},{id:'M01-12',t:'AI 治理實務'}]},
+  M02:{F1:[{id:'M02-01',t:'資料的本質'},{id:'M02-02',t:'資料類型全覽'}],F2:[{id:'M02-03',t:'資料品質：GIGO'},{id:'M02-10',t:'資料治理'}],F3:[{id:'M02-05',t:'資料清理與前處理'},{id:'M02-04',t:'資料蒐集'}],F4:[{id:'M02-06',t:'特徵工程'},{id:'M02-07',t:'資料標註'}],F5:[{id:'M02-10',t:'資料治理'},{id:'M02-08',t:'資料隱私與個資保護'}],F6:[{id:'M08-02',t:'描述性統計'},{id:'M08-05',t:'A/B 測試'}]},
+  M03:{F1:[{id:'M03-01',t:'機器學習是什麼'},{id:'M03-02',t:'監督式學習'},{id:'M03-03',t:'非監督式學習'}],F2:[{id:'M03-06',t:'模型訓練流程'},{id:'M03-07',t:'過擬合與欠擬合'}],F3:[{id:'M03-07',t:'過擬合與欠擬合（含 L1/L2）'},{id:'M03-10',t:'模型選擇與調參'}],F4:[{id:'M03-04',t:'分類 vs 迴歸'}],F5:[{id:'M03-08',t:'模型評估指標'},{id:'M03-09',t:'混淆矩陣'}],F6:[{id:'M03-05',t:'常見演算法：決策樹、隨機森林'},{id:'M03-10',t:'模型選擇與調參'}],F7:[{id:'M03-08',t:'模型評估指標'},{id:'M03-09',t:'混淆矩陣'}]},
+  M04:{F1:[{id:'M04-01',t:'神經網路基礎'},{id:'M04-06',t:'反向傳播與梯度下降'}],F2:[{id:'M04-01',t:'神經網路基礎'},{id:'M04-07',t:'遷移學習'}],F3:[{id:'M04-03',t:'CNN 卷積神經網路'}],F4:[{id:'M04-06',t:'反向傳播與梯度下降'}],F5:[{id:'M04-02',t:'深度學習 vs 傳統 ML'},{id:'M04-10',t:'深度學習的局限與未來'}],F6:[{id:'M04-04',t:'RNN 與序列模型'}],F7:[{id:'M04-05',t:'Transformer 架構'}],F8:[{id:'M05-06',t:'圖像生成：Diffusion'},{id:'M05-01',t:'生成式 AI 概論'}]},
+  M05:{F1:[{id:'M05-02',t:'大型語言模型 LLM'},{id:'M05-08',t:'AI 幻覺與事實查核'}],F2:[{id:'M05-02',t:'大型語言模型 LLM'},{id:'M05-01',t:'生成式 AI 概論'}],F3:[{id:'M05-03',t:'Prompt Engineering'},{id:'M05-13',t:'Prompt 進階：CoT、ToT'}],F4:[{id:'M05-04',t:'RAG 檢索增強生成'},{id:'M05-14',t:'RAG 進階'}],F5:[{id:'M05-10',t:'企業導入生成式 AI'},{id:'M05-09',t:'生成式 AI 倫理爭議'}],F6:[{id:'M05-11',t:'Agentic AI'},{id:'M05-12',t:'MCP 與 A2A 協議'}]},
+  M06:{F1:[{id:'M06-01',t:'No/Low Code AI 概論'}],F2:[{id:'M06-02',t:'AutoML 平台'}],F3:[{id:'M06-03',t:'視覺化工作流程工具'},{id:'M06-09',t:'No-Code AI 的限制'}],F4:[{id:'M06-07',t:'AI 導入評估框架'},{id:'M06-10',t:'No-Code 實戰案例'}],F5:[{id:'M06-10',t:'No-Code 實戰案例'}],F6:[{id:'M06-11',t:'2026 AI 工具生態'}]},
+  M07:{F1:[{id:'M07-01',t:'NLP 概覽'},{id:'M07-03',t:'電腦視覺 CV 概覽'}],F2:[{id:'M02-09',t:'資料偏誤'}],F3:[{id:'M07-06',t:'多模態 AI'},{id:'M07-05',t:'語音辨識與合成'}],F4:[{id:'M07-08',t:'推薦系統'}],F5:[{id:'M07-09',t:'知識圖譜'}]},
+  M08:{F1:[{id:'M08-01',t:'大數據的 5V'}],F2:[{id:'M08-03',t:'相關性 vs 因果性'},{id:'M08-05',t:'A/B 測試'}],F3:[{id:'M08-02',t:'描述性統計'},{id:'M08-04',t:'資料視覺化'}],F4:[{id:'M08-07',t:'時間序列分析'},{id:'M08-08',t:'異常偵測'}],F5:[{id:'M08-10',t:'資料分析專案管理'},{id:'M08-06',t:'ML 管線資料處理'}],F6:[{id:'M08-06',t:'ML 管線資料處理'}]},
+  M09:{F1:[{id:'M09-01',t:'MLOps 概覽'},{id:'M09-02',t:'模型版本管理'}],F2:[{id:'M09-06',t:'模型監控與觀測'},{id:'M09-07',t:'模型重訓練策略'}],F3:[{id:'M09-04',t:'模型服務化'},{id:'M09-05',t:'容器化與雲端部署'}],F4:[{id:'M09-03',t:'CI/CD for ML'}],F5:[{id:'M09-10',t:'MLOps 成熟度模型'}]},
+  M10:{F1:[{id:'M10-02',t:'AI 專案規劃方法論'}],F2:[{id:'M01-05',t:'AI 專案成功三要素'}],F3:[{id:'M10-05',t:'AI 導入組織變革'}],F4:[{id:'M10-07',t:'AI 成本效益分析'}],F5:[{id:'M10-04',t:'AI 風險管理'},{id:'M10-03',t:'AI 倫理與法規'}]}
+};
+
+// ═══════════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════════
 let state = {
   name:'', email:'', key:'', moduleId:'',
+  uid: null,  // Google Auth UID (null = anonymous)
   phase1: {ratings:{}},         // F1:3, F2:5 ...
   phase2: {choices:{}},         // D1:'A', D2:'B' ...
   phase3: {answers:{},scores:{}}, // Q1:'C', scores: Q1:4
@@ -770,6 +798,43 @@ let state = {
   currentQ: 0,
   startTime: null
 };
+
+// Teacher email — only this account sees analytics link
+const TEACHER_EMAIL = 'alan.chen75@gmail.com';
+
+// ═══════════════════════════════════════════════════════
+//  iPAS 考科對照分級
+//  初級（免登入）：M01-M05
+//    M01 AI思維與治理 → 初級科一
+//    M02 資料素養     → 初級科一（ETL、特徵工程、資料品質）
+//    M03 ML入門       → 初級科一（偏差變異、正則化、評估指標）
+//    M04 深度學習     → 初級科一（CNN概念、遷移學習）
+//    M05 生成式AI     → 初級科二
+//  中級（需登入）：M06-M10
+//    M06 No/Low Code  → 初級科二補充 + 中級應用
+//    M07 NLP/CV/多模態 → 中級科一
+//    M08 大數據分析    → 中級科二
+//    M09 MLOps與部署   → 中級科三
+//    M10 iPAS實戰      → 跨科整合
+// ═══════════════════════════════════════════════════════
+const BEGINNER_MODULES  = ['M01','M02','M03','M04','M05'];        // 初級：免登入
+const INTERMEDIATE_MODULES = ['M06','M07','M08','M09','M10'];     // 中級：需登入
+
+// Module → iPAS exam subject mapping
+const MODULE_EXAM_MAP = {
+  M01: {level:'初級', subject:'科一：人工智慧基礎概論',     code:'L11'},
+  M02: {level:'初級', subject:'科一：人工智慧基礎概論',     code:'L11'},
+  M03: {level:'初級', subject:'科一：人工智慧基礎概論',     code:'L11'},
+  M04: {level:'初級', subject:'科一：人工智慧基礎概論',     code:'L11'},
+  M05: {level:'初級', subject:'科二：生成式AI應用與規劃',   code:'L12'},
+  M06: {level:'中級', subject:'科二：生成式AI應用與規劃',   code:'L12'},
+  M07: {level:'中級', subject:'科一：人工智慧技術應用與規劃', code:'M11'},
+  M08: {level:'中級', subject:'科二：大數據處理分析與應用',  code:'M12'},
+  M09: {level:'中級', subject:'科三：機器學習技術與應用',    code:'M13'},
+  M10: {level:'整合', subject:'跨科整合',                   code:'ALL'}
+};
+
+let _authUser = null; // Firebase Auth user object
 
 // ═══════════════════════════════════════════════════════
 //  SESSION PERSISTENCE
@@ -1028,18 +1093,60 @@ function checkEntryReady(){
 function renderModuleList(){
   const wrap = document.getElementById('moduleList');
   wrap.style.display = 'block';
-  wrap.innerHTML = '<h3 style="margin-bottom:.8rem;">選擇學習模組</h3>' +
-    Object.values(MODULES).map(m => {
-      const dim = m.available ? '' : 'opacity:.4;pointer-events:none;';
-      const badge = m.available ? '' : '<span style="float:right;font-size:.8rem;color:var(--g400);">即將推出</span>';
-      return `<div class="card" style="${dim}cursor:pointer;" onclick="selectModule('${m.id}')">
-        <h3>${m.id} — ${m.name} ${badge}</h3>
-        <p>${m.lectures} 堂課 | ${m.available ? '可學習' : '準備中'}</p>
-      </div>`;
-    }).join('');
+
+  function renderModuleCard(m){
+    const dim = m.available ? '' : 'opacity:.4;pointer-events:none;';
+    const isIntermediate = INTERMEDIATE_MODULES.includes(m.id);
+    const examInfo = MODULE_EXAM_MAP[m.id];
+    const examLabel = examInfo ? examInfo.subject : '';
+    const levelBadge = isIntermediate
+      ? '<span style="float:right;font-size:.75rem;padding:.15rem .5rem;border-radius:6px;background:var(--purple-lt);color:var(--purple);">' + (examInfo?.level === '整合' ? '整合' : '中級') + '</span>'
+      : '<span style="float:right;font-size:.75rem;padding:.15rem .5rem;border-radius:6px;background:var(--blue-lt);color:var(--blue);">初級</span>';
+    const notAvail = m.available ? '' : '<span style="float:right;font-size:.8rem;color:var(--g400);">即將推出</span>';
+    const lockHint = isIntermediate && !_authUser ? ' | 🔒 需登入' : '';
+    return `<div class="card" style="${dim}cursor:pointer;" onclick="selectModule('${m.id}')">
+      <h3>${m.id} — ${m.name} ${m.available ? levelBadge : notAvail}</h3>
+      <p>${m.lectures} 堂課 | ${m.available ? '可學習' : '準備中'}${lockHint}</p>
+      ${examLabel ? '<p style="font-size:.8rem;color:var(--g400);margin-top:.2rem;">對應考科：' + escHtml(examLabel) + '</p>' : ''}
+    </div>`;
+  }
+
+  // Group: beginner first, then intermediate
+  const beginnerMods = BEGINNER_MODULES.map(id => MODULES[id]).filter(Boolean);
+  const intermediateMods = INTERMEDIATE_MODULES.map(id => MODULES[id]).filter(Boolean);
+
+  let html = '<h3 style="margin-bottom:.8rem;">選擇學習模組</h3>';
+
+  // Beginner section
+  html += '<div style="margin-bottom:.5rem;">';
+  html += '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem;">';
+  html += '<span style="padding:.3rem .8rem;border-radius:8px;font-size:.85rem;font-weight:700;background:var(--blue-lt);color:var(--blue);">初級 AI 應用規劃師</span>';
+  html += '<span style="font-size:.8rem;color:var(--g400);">免登入即可使用</span>';
+  html += '</div>';
+  html += beginnerMods.map(renderModuleCard).join('');
+  html += '</div>';
+
+  // Intermediate section
+  html += '<div style="margin-top:1.5rem;">';
+  html += '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem;">';
+  html += '<span style="padding:.3rem .8rem;border-radius:8px;font-size:.85rem;font-weight:700;background:var(--purple-lt);color:var(--purple);">中級 AI 應用規劃師</span>';
+  html += '<span style="font-size:.8rem;color:var(--g400);">需 Google 登入追蹤學習歷程</span>';
+  html += '</div>';
+  html += intermediateMods.map(renderModuleCard).join('');
+  html += '</div>';
+
+  wrap.innerHTML = html;
 }
 
 function selectModule(id){
+  // Intermediate modules require Google login
+  if(INTERMEDIATE_MODULES.includes(id) && !_authUser){
+    document.getElementById('authStatus').innerHTML =
+      '<span style="color:var(--gold);font-weight:700;">中級模組需要 Google 登入才能使用</span>';
+    document.getElementById('btnGoogleLogin').style.border = '2px solid var(--gold)';
+    setTimeout(function(){ document.getElementById('btnGoogleLogin').style.border = ''; }, 2000);
+    return;
+  }
   state.moduleId = id;
   document.querySelectorAll('#moduleList .card').forEach(c => c.style.borderColor='');
   event.currentTarget.style.borderColor = 'var(--blue)';
@@ -1215,6 +1322,11 @@ async function answerQ(qid, chosen){
   state.phase3.answers[qid] = chosen;
   state.phase3.scores[qid] = q.options.find(o=>o.key===chosen).depth;
 
+  // Save to analytics (blind spot collection)
+  if(typeof saveBlindSpot === 'function'){
+    saveBlindSpot(q, chosen, isCorrect);
+  }
+
   const fb = document.getElementById(`feedback-${qid}`);
 
   if(isCorrect){
@@ -1227,10 +1339,15 @@ async function answerQ(qid, chosen){
     `;
   } else {
     const diag = q.diagnosis[chosen];
+    // Build lecture link for the framework this question tests
+    const lectureLinks = getLectureLinks(state.moduleId, q.model);
     fb.innerHTML = `
       <div class="info red">
         <strong>你的思路：</strong>${diag.gap}
       </div>
+      ${lectureLinks ? `<div class="info blue" style="margin-top:.5rem;">
+        <strong>📖 去這裡補強：</strong>${lectureLinks}
+      </div>` : ''}
       <div class="ai-chat" id="chat-${qid}">
         <div class="ai-chat-header">AI 追問引擎</div>
         <div class="ai-chat-body" id="chatBody-${qid}">
@@ -1362,6 +1479,17 @@ function nextQ(){
 }
 
 function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
+
+// Get lecture links for a framework (used when student answers wrong)
+function getLectureLinks(moduleId, frameworkId){
+  const modMap = FRAMEWORK_LECTURES[moduleId];
+  if(!modMap) return '';
+  const lectures = modMap[frameworkId];
+  if(!lectures || lectures.length === 0) return '';
+  return lectures.map(function(l){
+    return '<a href="/lectures/' + l.id + '/" target="_blank" style="display:inline-block;margin:.2rem .3rem .2rem 0;padding:.2rem .6rem;background:var(--white);border:1px solid var(--blue);border-radius:6px;font-size:.85rem;color:var(--blue);text-decoration:none;">' + escHtml(l.t) + ' →</a>';
+  }).join('');
+}
 
 // Cooldown: disable chat inputs for N ms after send
 let _chatCooldown = false;
@@ -1868,7 +1996,12 @@ function renderFinalReport(){
   s.onload = () => {
     const s2 = document.createElement('script');
     s2.src = 'https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js';
-    s2.onload = initFirebase;
+    s2.onload = () => {
+      const s3 = document.createElement('script');
+      s3.src = 'https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js';
+      s3.onload = initFirebase;
+      document.head.appendChild(s3);
+    };
     document.head.appendChild(s2);
   };
   document.head.appendChild(s);
@@ -1878,10 +2011,43 @@ function initFirebase(){
   try {
     firebase.initializeApp({
       apiKey: 'AIzaSyDgszkIcRMPVWZWrkQcVONy4-Xol0kpFZk',
+      authDomain: 'ai-learn-system.firebaseapp.com',
       databaseURL: 'https://ai-learn-system-default-rtdb.firebaseio.com',
       projectId: 'ai-learn-system'
     });
     console.log('Firebase connected for learn system');
+
+    // Listen for auth state
+    firebase.auth().onAuthStateChanged(function(user){
+      _authUser = user;
+      if(user){
+        state.uid = user.uid;
+        state.email = user.email;
+        state.name = state.name || user.displayName || '';
+        document.getElementById('inputName').value = state.name;
+        document.getElementById('loginEmail').value = user.email;
+        document.getElementById('loginEmail').disabled = true;
+        document.getElementById('authStatus').innerHTML =
+          '<span style="color:var(--green);">已登入：' + escHtml(user.displayName || user.email) + '</span>' +
+          ' <a href="#" onclick="googleLogout();return false;" style="color:var(--g400);font-size:.8rem;">登出</a>';
+        document.getElementById('btnGoogleLogin').style.display = 'none';
+
+        // Teacher detection
+        if(user.email === TEACHER_EMAIL){
+          document.getElementById('teacherAnalyticsLink').style.display = 'inline-block';
+        }
+
+        // Load user history from Firebase
+        loadUserHistory(user.uid);
+      } else {
+        _authUser = null;
+        state.uid = null;
+        document.getElementById('loginEmail').disabled = false;
+        document.getElementById('authStatus').textContent = '登入可追蹤學習歷程，初級模組可匿名使用';
+        document.getElementById('btnGoogleLogin').style.display = 'flex';
+        document.getElementById('teacherAnalyticsLink').style.display = 'none';
+      }
+    });
 
     // Save progress on phase transitions
     const origGoP2 = window.goPhase2;
@@ -1904,12 +2070,67 @@ function initFirebase(){
   }
 }
 
+// Google Login
+function googleLogin(){
+  if(typeof firebase === 'undefined') return;
+  const provider = new firebase.auth.GoogleAuthProvider();
+  if(/iPhone|iPad|Android/i.test(navigator.userAgent)){
+    firebase.auth().signInWithRedirect(provider);
+  } else {
+    firebase.auth().signInWithPopup(provider).catch(function(e){
+      document.getElementById('authStatus').innerHTML =
+        '<span style="color:var(--red);">登入失敗：' + escHtml(e.message) + '</span>';
+    });
+  }
+}
+
+function googleLogout(){
+  if(typeof firebase === 'undefined') return;
+  firebase.auth().signOut();
+  state.uid = null;
+  state.email = '';
+  clearSession();
+}
+
+// Load registered user's learning history
+function loadUserHistory(uid){
+  if(typeof firebase === 'undefined') return;
+  firebase.database().ref('learn/users_auth/' + uid).once('value', function(snap){
+    const data = snap.val();
+    if(!data || !data.modules) return;
+
+    // Show history in return panel
+    const panel = document.getElementById('returnPanel');
+    const modules = data.modules;
+    const moduleIds = Object.keys(modules).sort();
+    if(moduleIds.length === 0) return;
+
+    let html = '<div class="card" style="border-color:var(--green);background:var(--green-lt);">';
+    html += '<h3>你的學習紀錄</h3>';
+    html += '<div style="margin-top:.5rem;">';
+    moduleIds.forEach(function(mid){
+      const rec = modules[mid];
+      const mod = MODULES[mid];
+      const name = mod ? mod.name : mid;
+      const pct = rec.accuracy != null ? Math.round(rec.accuracy * 100) + '%' : '進行中';
+      const color = rec.accuracy >= 0.7 ? 'var(--green)' : rec.accuracy >= 0.4 ? 'var(--gold)' : 'var(--red)';
+      html += '<div style="display:flex;justify-content:space-between;padding:.3rem 0;border-bottom:1px solid var(--g100);">';
+      html += '<span>' + escHtml(mid + ' ' + name) + '</span>';
+      html += '<span style="font-weight:700;color:' + color + ';">' + pct + '</span>';
+      html += '</div>';
+    });
+    html += '</div></div>';
+    panel.style.display = 'block';
+    panel.innerHTML = html;
+  });
+}
+
 function saveProgress(milestone){
   try {
     if(typeof firebase === 'undefined') return;
     const odID = localStorage.getItem('_learn_odid') || crypto.randomUUID();
     localStorage.setItem('_learn_odid', odID);
-    const ref = firebase.database().ref(`learn/${odID}`);
+
     const payload = {
       name: state.name,
       module: state.moduleId,
@@ -1925,7 +2146,36 @@ function saveProgress(milestone){
       payload.phase5_scores = state.phase5.scores || {};
       payload.weakFws = state.weakFws || [];
     }
-    ref.update(payload);
+
+    // Save to anonymous path (backward compat)
+    firebase.database().ref('learn/' + odID).update(payload);
+
+    // If logged in, also save to authenticated user path
+    if(state.uid){
+      const mod = state.moduleId;
+      const questions = MODULES[mod]?.questions || [];
+      const correct = questions.filter(function(q){ return state.phase3.answers[q.id] === q.correct; }).length;
+      const total = Object.keys(state.phase3.answers).length;
+      const accuracy = total > 0 ? correct / total : null;
+
+      const userPayload = {
+        email: state.email,
+        name: state.name,
+        lastActive: firebase.database.ServerValue.TIMESTAMP
+      };
+      userPayload['modules/' + mod] = {
+        milestone: milestone,
+        accuracy: accuracy,
+        correct: correct,
+        total: total,
+        weakFws: state.weakFws || [],
+        phase1_ratings: state.phase1.ratings,
+        phase3_answers: state.phase3.answers,
+        phase3_scores: state.phase3.scores,
+        ts: firebase.database.ServerValue.TIMESTAMP
+      };
+      firebase.database().ref('learn/users_auth/' + state.uid).update(userPayload);
+    }
   } catch(e){ /* silent */ }
 }
 </script>
