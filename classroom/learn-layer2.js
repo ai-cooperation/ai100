@@ -146,7 +146,7 @@ async function generateL2Questions(silent){
   const mod = MODULES[state.moduleId];
 
   // Step 1: Try loading cached questions from Firebase first
-  const cached = await loadCachedQuestions(state.moduleId, l2.targetFws, l2.level, 3);
+  const cached = await loadCachedQuestions(state.moduleId, l2.targetFws, l2.level, 5);
   if(cached.length > 0){
     cached.forEach(q => {
       q.diagnosis = q.diagnosis || Object.fromEntries(
@@ -156,8 +156,8 @@ async function generateL2Questions(silent){
     l2.questions.push(...cached);
   }
 
-  // Step 2: Generate new questions via Groq (fast) to fill the rest
-  const needed = 5 - cached.length;
+  // Step 2: Generate new questions via Groq to reach 10 total buffer
+  const needed = Math.max(0, 10 - cached.length);
   if(needed <= 0){
     if(!silent) renderL2Question();
     return;
@@ -190,7 +190,7 @@ ${fwInfo}
 - AI 基本法七大原則是新考點
 - Agentic AI / MCP / RAG 是科二重點
 
-請生成 ${needed} 題繁體中文選擇題。每題需要有企業實務場景。
+請生成 ${Math.min(needed, 10)} 題繁體中文選擇題。每題需要有企業實務場景。
 
 【選項撰寫規則 — 嚴格遵守】
 1. 每個選項固定 35-50 字，四個選項字數必須幾乎相同
@@ -233,9 +233,9 @@ let _l2Generating = false; // prevent concurrent generation
 function renderL2Question(){
   const area = document.getElementById('l2QuizArea');
 
-  // Prefetch: when 2 questions left in buffer, generate more in background
+  // Prefetch: when 4 questions left in buffer, generate more in background
   const remaining = l2.questions.length - l2.currentQ;
-  if(remaining <= 2 && !_l2Generating && Object.keys(l2.answers).length < 30){
+  if(remaining <= 4 && !_l2Generating && Object.keys(l2.answers).length < 50){
     _l2Generating = true;
     generateL2Questions(true).finally(()=>{ _l2Generating = false; });
   }
@@ -243,7 +243,8 @@ function renderL2Question(){
   const answered = Object.keys(l2.answers).length;
 
   // Every 10 questions → show interim report with progress analysis
-  if(answered > 0 && answered % 10 === 0 && l2.currentQ >= l2.questions.length){
+  if(answered > 0 && answered % 10 === 0 && !l2._reportShown){
+    l2._reportShown = true; // prevent showing twice for same milestone
     const correct = l2.questions.filter(q => l2.answers[q.id] === q.correct).length;
     const pct = Math.round(correct / answered * 100);
     const color = pct >= 70 ? 'var(--green)' : pct >= 40 ? 'var(--gold)' : 'var(--red)';
@@ -354,6 +355,7 @@ function answerL2(qid, chosen){
 
 function nextL2(){
   l2.currentQ++;
+  l2._reportShown = false;
   renderL2Question();
   window.scrollTo(0, document.getElementById('l2QuizArea').offsetTop - 60);
 }
