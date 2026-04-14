@@ -123,7 +123,7 @@ function goLayer2(){
   document.getElementById('l2subtitle').textContent = `聚焦：${fwNames.join('、')}`;
   document.getElementById('l2Info').innerHTML = `
     <strong>Level ${l2.level} — ${['基礎概念','雙概念混合','企業情境','陷阱題'][l2.level-1]}</strong><br>
-    AI 會根據你的弱項動態出題。連續答對 3 題升級難度，累計 10 題後可進入模擬考。
+    AI 根據你的弱項動態出題。連續答對 3 題升級難度。每 10 題會出階段報告。
   `;
   renderL2Level();
   generateL2Questions();
@@ -240,26 +240,37 @@ function renderL2Question(){
     generateL2Questions(true).finally(()=>{ _l2Generating = false; });
   }
 
+  const answered = Object.keys(l2.answers).length;
+
+  // Every 10 questions → show interim report with progress analysis
+  if(answered > 0 && answered % 10 === 0 && l2.currentQ >= l2.questions.length){
+    const correct = l2.questions.filter(q => l2.answers[q.id] === q.correct).length;
+    const pct = Math.round(correct / answered * 100);
+    const color = pct >= 70 ? 'var(--green)' : pct >= 40 ? 'var(--gold)' : 'var(--red)';
+    const emoji = pct >= 70 ? '🎯' : pct >= 40 ? '📈' : '💪';
+    const msg = pct >= 70 ? '表現不錯！可以挑戰模擬考了。' : pct >= 40 ? '有進步空間，建議再練 10 題鞏固。' : '建議回去看對應講座，再來練習。';
+    area.innerHTML = `
+      <div class="info blue" style="text-align:center;">
+        <strong>${emoji} ${answered} 題階段報告</strong><br>
+        <div style="font-size:2rem;font-weight:900;color:${color};margin:.5rem 0;">${pct}%</div>
+        <div>答對 ${correct}/${answered} 題 | 目前 Level ${l2.level}</div>
+        <div style="margin-top:.5rem;color:var(--g600);">${msg}</div>
+        <div style="margin-top:1rem;display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="generateL2Questions()">繼續練習 10 題 →</button>
+          <button class="btn btn-gold" onclick="goExam()">進入模擬考（50 題）</button>
+        </div>
+      </div>`;
+    return;
+  }
+
   if(l2.currentQ >= l2.questions.length){
-    // Need more questions
-    if(Object.keys(l2.answers).length >= 10){
-      area.innerHTML = `
-        <div class="info green" style="text-align:center;">
-          <strong>Layer 2 練習完成！</strong><br>
-          已答 ${Object.keys(l2.answers).length} 題，最高達到 Level ${l2.level}<br>
-          <button class="btn btn-primary" style="margin-top:1rem;" onclick="goExam()">進入模擬考 →</button>
-          <button class="btn btn-secondary" style="margin-top:.5rem;" onclick="generateL2Questions()">繼續練習</button>
-        </div>`;
-    } else {
-      generateL2Questions();
-    }
+    generateL2Questions();
     return;
   }
 
   const q = l2.questions[l2.currentQ];
   const mod = MODULES[state.moduleId];
   const fw = mod?.frameworks?.find(f=>f.id===q.model);
-  const answered = Object.keys(l2.answers).length;
 
   area.innerHTML = `
     <div class="fade-in">
@@ -281,7 +292,7 @@ function renderL2Question(){
 
   // Update progress
   document.getElementById('l2Progress').innerHTML = `
-    <span class="dim" style="font-size:.85rem;">答對率：${calcL2Accuracy()}% | 目標：10 題以上可進入模擬考</span>
+    <span class="dim" style="font-size:.85rem;">答對率：${calcL2Accuracy()}% | ${10 - (Object.keys(l2.answers).length % 10 || 10)} 題後出階段報告</span>
   `;
 }
 
