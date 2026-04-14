@@ -181,30 +181,36 @@ async function generateL2Questions(silent){
     '陷阱題，選項差異微妙。測試概念精確度。可用「下列何者錯誤」格式。'
   ][l2.level-1];
 
-  const prompt = `你是 iPAS AI 應用規劃師考試出題引擎。
+  // Randomize answer distribution — shuffle ABCD×N to ensure even spread
+  const _base = ['A','B','C','D','A','B','C','D','A','B'];
+  for(let i=_base.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[_base[i],_base[j]]=[_base[j],_base[i]];}
+  const answerSeq = _base.slice(0, Math.min(needed, 10));
 
-學生資料：
+  const prompt = `你是 iPAS AI 應用規劃師考試的專業出題委員。你必須嚴格遵守以下所有規則，違反任何一條都是不合格的考題。
+
+【學生弱項】
 ${fwInfo}
 
-難度等級：Level ${l2.level} — ${levelDesc}
+【難度】Level ${l2.level} — ${levelDesc}
 
-考試方向（2026 iPAS 趨勢）：
-- 情境判斷題為主，不考純記憶
-- 跨領域混合（技術 + 法規 + 導入）
-- AI 基本法七大原則是新考點
-- Agentic AI / MCP / RAG 是科二重點
+【硬性規則 — 違反即不合格】
 
-請生成 ${Math.min(needed, 10)} 題繁體中文選擇題。每題需要有企業實務場景。
+1. 題幹：每題必須以「某企業/某公司/某團隊/某醫院」開頭的實務情境，題幹至少 60 字，描述具體的業務問題或決策困境。禁止出「下列何者正確」「關於 X 的敘述」這種無情境的題。
 
-【選項撰寫規則 — 嚴格遵守】
-1. 每個選項固定 35-50 字，四個選項字數必須幾乎相同
-2. 四個選項都必須包含「理由」，格式統一為「做法＋因為/因此＋理由」
-3. 錯誤選項的理由要寫得有說服力，是常見的合理誤解，不能一看就知道是錯的
-4. 正確答案不可以是唯一有解釋的選項
-5. 先寫好四個等長選項，最後才決定哪個是正確答案
+2. 選項格式：每個選項 35-50 字，格式固定為「具體做法，因為/因此＋理由」。四個選項字數差距不超過 5 字。禁止出現少於 30 字的選項。
 
-回傳格式（純 JSON，不要 markdown code block）：
-[{"stem":"題目","options":[{"key":"A","text":"選項"},{"key":"B","text":"選項"},{"key":"C","text":"選項"},{"key":"D","text":"選項"}],"correct":"C","explanation":"30字解析"}]`;
+3. 選項品質：四個選項都要看起來合理。錯誤選項的理由必須是業界常見的合理誤解，不能一看就是廢話。
+
+4. 答案分布：${needed} 題的正確答案依序為 ${answerSeq.join(',')}。嚴格按此順序，不可全部用同一個字母。
+
+5. 不可洩題：正確選項不可以是最長的、最詳細的、或唯一有解釋的。四個選項的說服力要接近。
+
+生成 ${Math.min(needed, 10)} 題繁體中文選擇題。
+
+【範例 — 嚴格模仿此格式和長度】
+[{"stem":"某零售企業導入 AI 推薦系統後發現，系統對高消費客群的推薦準確率達 92%，但對新客戶的推薦幾乎隨機。資料團隊發現訓練資料中新客戶行為紀錄不足 5%。下列哪種做法最能有效改善此問題？","options":[{"key":"A","text":"蒐集更多新客戶的瀏覽與購買行為資料再重新訓練，因為資料不平衡是推薦失準的根本原因"},{"key":"B","text":"對新客戶使用基於規則的冷啟動策略搭配協同過濾，因為在資料不足時混合方法比純 ML 穩健"},{"key":"C","text":"將高消費客群的模型直接套用到新客戶，因為消費行為的底層模式具有跨客群的通用遷移性"},{"key":"D","text":"增加推薦系統的模型複雜度與隱藏層數量，因為更深的網路能從有限資料中擠出更多特徵資訊"}],"correct":"B","explanation":"新客戶冷啟動問題需要混合策略，純 ML 在資料不足時不可靠"}]
+
+回傳純 JSON（不要 markdown，不要前綴文字，直接以 [ 開頭）：`;
 
   let retries = 2;
   while(retries > 0){
@@ -230,6 +236,21 @@ ${fwInfo}
         )
       }));
       if(newQs.length === 0) throw new Error('no valid questions');
+      // Post-process: fix correct=longest bias by swapping option text
+      newQs.forEach(q => {
+        const lens = q.options.map(o => ({key:o.key, len:o.text.length}));
+        const longest = lens.reduce((a,b) => a.len > b.len ? a : b);
+        if(longest.key === q.correct && lens.length === 4){
+          // Swap text between correct (longest) and a random wrong option
+          const wrongs = q.options.filter(o => o.key !== q.correct);
+          const swap = wrongs[Math.floor(Math.random() * wrongs.length)];
+          const correctOpt = q.options.find(o => o.key === q.correct);
+          const tmpText = correctOpt.text;
+          correctOpt.text = swap.text;
+          swap.text = tmpText;
+          q.correct = swap.key;
+        }
+      });
       l2.totalGenerated += newQs.length;
       l2.questions.push(...newQs);
       cacheQuestions(state.moduleId, l2.level, newQs);
@@ -464,47 +485,70 @@ async function generateExamQuestions(){
     const count = Math.min(batchSize, needed - b * batchSize);
     const fws = mod.frameworks.map(f=>`${f.name}：${f.desc}`).join('\n');
 
-    const prompt = `你是 iPAS AI 應用規劃師初級模擬考出題引擎。
+    // Randomize answer keys per batch — shuffle to ensure even ABCD spread
+    const _examBase = ['A','B','C','D','A','B','C','D','A','B'].slice(0,count);
+    for(let i=_examBase.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[_examBase[i],_examBase[j]]=[_examBase[j],_examBase[i]];}
+    const answerSeq = _examBase;
 
-考試資訊：科目一+科目二混合，75 分鐘 50 題，70 分及格。
-2026 年考試趨勢：情境判斷題為主，跨領域混合，AI 基本法+Agentic AI 是新考點。
+    const prompt = `你是 iPAS AI 應用規劃師初級模擬考的專業出題委員。嚴格遵守以下所有規則。
 
-本模組「${mod.name}」的心智模型：
+【考試資訊】科目一+科目二混合，75 分鐘 50 題，70 分及格。
+【模組】${mod.name}
+【心智模型】
 ${fws}
 
-請生成 ${count} 題選擇題，混合以下題型：
-- 40% 情境判斷題（企業場景）
-- 30% 概念應用題（不是純背誦）
-- 20% 跨概念混合題
-- 10% 陷阱題（「下列何者錯誤」）
+【硬性規則 — 違反即不合格】
 
-【選項撰寫規則 — 嚴格遵守】
-1. 每個選項固定 35-50 字，四個選項字數必須幾乎相同
-2. 四個選項都必須包含「理由」，格式統一為「做法＋因為/因此＋理由」
-3. 錯誤選項的理由要寫得有說服力，是常見的合理誤解，不能一看就知道是錯的
-4. 正確答案不可以是唯一有解釋的選項
-5. 先寫好四個等長選項，最後才決定哪個是正確答案
+1. 題幹：每題必須有實務情境（「某企業/某公司/某團隊」開頭），題幹至少 60 字，描述具體業務問題。禁止「下列何者正確」「關於 X」這種無場景的題。
 
-回傳純 JSON（不要 markdown code block）：
-[{"stem":"題目","options":[{"key":"A","text":"..."},{"key":"B","text":"..."},{"key":"C","text":"..."},{"key":"D","text":"..."}],"correct":"C","explanation":"30字解析"}]`;
+2. 選項格式：每個選項 35-50 字，格式「具體做法，因為/因此＋理由」。四選項字數差距 ≤ 5 字。禁止少於 30 字的選項。
+
+3. 選項品質：錯誤選項必須是業界常見誤解，不能一看就錯。正確選項不可以是最長或最詳細的。
+
+4. 答案分布：${count} 題的正確答案依序為 ${answerSeq.join(',')}。嚴格按此順序。
+
+5. 題型分配：情境判斷 40%、概念應用 30%、跨概念混合 20%、陷阱題 10%。
+
+生成 ${count} 題繁體中文選擇題。
+
+【範例 — 嚴格模仿此格式和長度】
+[{"stem":"某零售企業導入 AI 推薦系統後發現，系統對高消費客群的推薦準確率達 92%，但對新客戶的推薦幾乎隨機。資料團隊發現訓練資料中新客戶行為紀錄不足 5%。下列哪種做法最能有效改善此問題？","options":[{"key":"A","text":"蒐集更多新客戶的瀏覽與購買行為資料再重新訓練，因為資料不平衡是推薦失準的根本原因"},{"key":"B","text":"對新客戶使用基於規則的冷啟動策略搭配協同過濾，因為在資料不足時混合方法比純 ML 穩健"},{"key":"C","text":"將高消費客群的模型直接套用到新客戶，因為消費行為的底層模式具有跨客群的通用遷移性"},{"key":"D","text":"增加推薦系統的模型複雜度與隱藏層數量，因為更深的網路能從有限資料中擠出更多特徵資訊"}],"correct":"B","explanation":"新客戶冷啟動問題需要混合策略，純 ML 在資料不足時不可靠"}]
+
+回傳純 JSON（不要 markdown，不要前綴文字，直接以 [ 開頭）：`;
 
     try {
       const text = await callGroq(prompt, 8192);
+      if(!text || text.trim().length < 10) throw new Error('empty');
       const cleaned = text.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
-      const aiQs = JSON.parse(cleaned);
-      const mapped = aiQs.map((q,i)=>({
+      const jsonMatch = cleaned.match(/\[[\s\S]*\]/);
+      if(!jsonMatch) throw new Error('no JSON');
+      const aiQs = JSON.parse(jsonMatch[0]);
+      const mapped = aiQs.filter(q => q.stem && q.options && q.correct).map((q,i)=>({
         ...q,
         id: `EX-AI-${b*batchSize+i+1}`,
         model: mod.frameworks[Math.floor(Math.random()*mod.frameworks.length)]?.id || 'F1',
         source: 'groq',
         diagnosis: {}
       }));
+      // Post-process: fix correct=longest bias
+      mapped.forEach(q => {
+        const lens = q.options.map(o => ({key:o.key, len:o.text.length}));
+        const longest = lens.reduce((a,b) => a.len > b.len ? a : b);
+        if(longest.key === q.correct && lens.length === 4){
+          const wrongs = q.options.filter(o => o.key !== q.correct);
+          const swap = wrongs[Math.floor(Math.random() * wrongs.length)];
+          const correctOpt = q.options.find(o => o.key === q.correct);
+          const tmpText = correctOpt.text;
+          correctOpt.text = swap.text;
+          swap.text = tmpText;
+          q.correct = swap.key;
+        }
+      });
       exam.questions.push(...mapped);
-      // Cache for reuse
       cacheQuestions(state.moduleId, 3, mapped);
       if(progressEl) progressEl.textContent = `已生成 ${exam.questions.length} / 50 題...`;
     } catch(e){
-      console.warn('Exam generation batch failed');
+      console.warn('Exam generation batch failed:', e.message);
     }
     // Small delay between batches
     if(b < batches - 1) await new Promise(r=>setTimeout(r, 2000));
