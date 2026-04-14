@@ -202,29 +202,40 @@ ${fwInfo}
 回傳格式（純 JSON，不要 markdown code block）：
 [{"stem":"題目","options":[{"key":"A","text":"選項"},{"key":"B","text":"選項"},{"key":"C","text":"選項"},{"key":"D","text":"選項"}],"correct":"C","explanation":"30字解析"}]`;
 
-  try {
-    const text = await callGroq(prompt);
-    const cleaned = text.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
-    const aiQs = JSON.parse(cleaned);
-    const newQs = aiQs.map((q,i) => ({
-      ...q,
-      id: `L2-${l2.totalGenerated + i + 1}`,
-      model: l2.targetFws[i % l2.targetFws.length] || l2.targetFws[0],
-      source: 'groq',
-      diagnosis: Object.fromEntries(
-        q.options.filter(o=>o.key!==q.correct).map(o=>[o.key,{
-          gap: q.explanation || '思考這個選項的局限性',
-          followup: '想想看，正確答案考慮了什麼你沒注意到的維度？'
-        }])
-      )
-    }));
-    l2.totalGenerated += newQs.length;
-    l2.questions.push(...newQs);
-    // Cache new questions to Firebase for reuse
-    cacheQuestions(state.moduleId, l2.level, newQs);
-    if(!silent) renderL2Question();
-  } catch(e){
-    if(!silent) area.innerHTML = `<div class="info red">出題失敗，請稍後重試。<br><button class="btn btn-secondary" style="margin-top:.5rem;" onclick="generateL2Questions()">重試</button></div>`;
+  let retries = 2;
+  while(retries > 0){
+    try {
+      const text = await callGroq(prompt);
+      if(!text || text.trim().length < 10) throw new Error('empty response');
+      const cleaned = text.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+      // Try to extract JSON array even if wrapped in extra text
+      const jsonMatch = cleaned.match(/\[[\s\S]*\]/);
+      if(!jsonMatch) throw new Error('no JSON array found');
+      const aiQs = JSON.parse(jsonMatch[0]);
+      if(!Array.isArray(aiQs) || aiQs.length === 0) throw new Error('empty array');
+      const newQs = aiQs.filter(q => q.stem && q.options && q.correct).map((q,i) => ({
+        ...q,
+        id: `L2-${l2.totalGenerated + i + 1}`,
+        model: l2.targetFws[i % l2.targetFws.length] || l2.targetFws[0],
+        source: 'groq',
+        diagnosis: Object.fromEntries(
+          (q.options||[]).filter(o=>o.key!==q.correct).map(o=>[o.key,{
+            gap: q.explanation || '思考這個選項的局限性',
+            followup: '想想看，正確答案考慮了什麼你沒注意到的維度？'
+          }])
+        )
+      }));
+      if(newQs.length === 0) throw new Error('no valid questions');
+      l2.totalGenerated += newQs.length;
+      l2.questions.push(...newQs);
+      cacheQuestions(state.moduleId, l2.level, newQs);
+      if(!silent) renderL2Question();
+      return; // success
+    } catch(e){
+      retries--;
+      if(retries > 0) continue; // retry once
+      if(!silent) area.innerHTML = `<div class="info red">出題失敗（${e.message}），請稍後重試。<br><button class="btn btn-secondary" style="margin-top:.5rem;" onclick="generateL2Questions()">重試</button></div>`;
+    }
   }
 }
 
@@ -265,7 +276,11 @@ function renderL2Question(){
   }
 
   if(l2.currentQ >= l2.questions.length){
-    generateL2Questions();
+    // Buffer exhausted — show loading and generate more
+    area.innerHTML = `<div class="info purple" style="text-align:center;"><strong>AI 正在出題...</strong><br><span style="font-size:.85rem;color:var(--g400);">約需 3-5 秒</span></div>`;
+    if(!_l2Generating){
+      generateL2Questions();
+    }
     return;
   }
 
