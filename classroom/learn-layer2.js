@@ -146,7 +146,10 @@ async function generateL2Questions(silent){
   const mod = MODULES[state.moduleId];
 
   // Step 1: Try loading cached questions from Firebase first
-  const cached = await loadCachedQuestions(state.moduleId, l2.targetFws, l2.level, 5);
+  // Deduplicate: skip questions already in l2.questions
+  const existingIds = new Set(l2.questions.map(q => q.id || q.stem));
+  const rawCached = await loadCachedQuestions(state.moduleId, l2.targetFws, l2.level, 10);
+  const cached = rawCached.filter(q => !existingIds.has(q.id) && !existingIds.has(q.stem));
   if(cached.length > 0){
     cached.forEach(q => {
       q.diagnosis = q.diagnosis || Object.fromEntries(
@@ -156,8 +159,9 @@ async function generateL2Questions(silent){
     l2.questions.push(...cached);
   }
 
-  // Step 2: Generate new questions via Groq to reach 10 total buffer
-  const needed = Math.max(0, 10 - cached.length);
+  // Step 2: Generate new questions via Groq to fill buffer
+  const unanswered = l2.questions.length - l2.currentQ;
+  const needed = Math.max(0, 10 - unanswered);
   if(needed <= 0){
     if(!silent) renderL2Question();
     return;
@@ -273,6 +277,11 @@ function renderL2Question(){
         </div>
       </div>`;
     return;
+  }
+
+  // Skip already-answered questions (duplicates from cache reload)
+  while(l2.currentQ < l2.questions.length && l2.answers[l2.questions[l2.currentQ].id]){
+    l2.currentQ++;
   }
 
   if(l2.currentQ >= l2.questions.length){
