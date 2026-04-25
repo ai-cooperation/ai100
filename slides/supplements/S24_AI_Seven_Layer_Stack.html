@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 七層架構 — 從模型到應用，一次看懂技術堆疊</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+  --orange:#E8710A; --orange-lt:#FEF0E1;
+  --dark:#0a0a14;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--white);}
+
+.slides-wrap{position:relative;width:100vw;height:100vh;}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;overflow:hidden;background:var(--white);}
+.slide.active{display:flex;}
+
+/* Poster — 封面/章節用深色 */
+.slide.poster{background-size:cover;background-position:center;color:#fff;text-align:center;}
+.slide.poster::before{content:'';position:absolute;inset:0;z-index:1;}
+.slide.poster>*{position:relative;z-index:2;}
+.slide.poster.overlay-heavy::before{background:linear-gradient(to bottom,rgba(0,0,0,.45) 0%,rgba(0,0,0,.85) 100%);}
+
+/* Content — 白底內容頁 */
+.slide.content{background:var(--white);color:var(--g900);padding-top:3rem;}
+
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:1.8rem;font-weight:700;color:var(--g900);margin-bottom:.6rem;line-height:1.4;}
+.slide.poster h2{color:#fff;}
+h3{font-size:1.2rem;font-weight:700;margin-bottom:.3rem;}
+p,li{font-size:1.05rem;line-height:1.8;}
+.subtitle{font-size:1.15rem;font-weight:500;}
+
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* Step List */
+.step-list{text-align:left;max-width:800px;width:100%;}
+.step{display:flex;gap:1rem;align-items:flex-start;padding:.5rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:38px;height:38px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;}
+.step-content{flex:1;}
+.step-content strong{font-size:1.05rem;}
+.step-content p{font-size:.95rem;color:var(--g600);margin-top:.1rem;}
+
+/* Stat Grid */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;max-width:860px;width:100%;margin-top:1rem;}
+.stat-box{background:var(--offwhite);border:2px solid var(--g100);border-radius:16px;padding:1.2rem;text-align:center;}
+.stat-box .val{font-size:2.2rem;font-weight:900;line-height:1.1;}
+.stat-box .label{font-size:.85rem;color:var(--g600);margin-top:.3rem;}
+
+/* Card Grid */
+.card-grid{display:flex;gap:1.2rem;flex-wrap:wrap;justify-content:center;margin-top:.8rem;max-width:960px;}
+.card{background:var(--white);border:2px solid var(--g100);border-radius:16px;padding:1.2rem;min-width:200px;max-width:280px;flex:1;transition:border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.04);}
+.card:hover{border-color:var(--green);}
+.card .icon{font-size:1.8rem;margin-bottom:.3rem;}
+.card h3{color:var(--g900);margin-bottom:.2rem;}
+.card p{font-size:.85rem;color:var(--g600);line-height:1.5;}
+
+/* Compare Table */
+.compare-table{border-collapse:collapse;font-size:.95rem;margin-top:.6rem;width:100%;max-width:860px;}
+.compare-table th{background:var(--g50);color:var(--g800);padding:.5rem 1rem;text-align:left;font-size:.9rem;font-weight:700;}
+.compare-table td{padding:.4rem .8rem;border-bottom:1px solid var(--g100);font-size:.9rem;color:var(--g800);}
+.compare-table tr:hover td{background:var(--g50);}
+.compare-table .highlight{font-weight:700;color:var(--green);}
+
+/* Flow */
+.flow{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:center;margin:.6rem 0;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.6rem 1rem;font-size:.95rem;font-weight:700;text-align:center;color:var(--g900);}
+.flow-arrow{color:var(--green);font-size:1.5rem;font-weight:900;}
+
+/* Info Box */
+.info-box{border-radius:12px;padding:1rem 1.5rem;max-width:800px;width:100%;text-align:left;margin-top:.6rem;}
+.info-box.success{background:var(--green-lt);border-left:4px solid var(--green);}
+.info-box.tip{background:var(--gold-lt);border-left:4px solid var(--gold);}
+.info-box p{color:var(--g800);font-size:.95rem;}
+
+/* Quote Box */
+.quote-box{max-width:800px;width:100%;background:var(--offwhite);border-left:5px solid var(--gold);border-radius:0 12px 12px 0;padding:1.5rem 2rem;margin:.8rem 0;text-align:left;}
+.quote-box .quote-text{font-size:1.2rem;font-weight:700;line-height:1.6;color:var(--g900);}
+.quote-box .quote-src{font-size:.85rem;color:var(--g400);margin-top:.5rem;}
+
+/* Bottom Line */
+.bottom-line{max-width:800px;width:100%;background:var(--green-lt);border:2px solid rgba(15,157,138,.25);border-radius:16px;padding:1.3rem;text-align:center;margin-top:.8rem;}
+.bottom-line h3{font-size:1.3rem;color:var(--green);margin-bottom:.4rem;}
+.bottom-line p{font-size:1rem;color:var(--g800);max-width:640px;margin:0 auto;line-height:1.7;}
+
+/* Stack Diagram */
+.stack{max-width:800px;width:100%;display:flex;flex-direction:column;gap:0;margin-top:.5rem;}
+.stack-layer{display:flex;align-items:center;gap:.8rem;padding:.5rem 1.2rem;border:2px solid var(--g100);border-bottom:none;background:var(--white);transition:all .3s;}
+.stack-layer:first-child{border-radius:16px 16px 0 0;}
+.stack-layer:last-child{border-radius:0 0 16px 16px;border-bottom:2px solid var(--g100);}
+.stack-layer:hover{background:var(--g50);}
+.stack-layer .layer-tag{flex-shrink:0;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.75rem;color:#fff;}
+.stack-layer .layer-icon{font-size:1.3rem;flex-shrink:0;width:32px;text-align:center;}
+.stack-layer .layer-name{font-weight:700;font-size:.95rem;color:var(--g900);min-width:120px;}
+.stack-layer .layer-desc{font-size:.8rem;color:var(--g600);flex:1;}
+.stack-layer.active-layer{background:var(--green-lt);border-color:var(--green);}
+.stack-layer.active-layer .layer-name{color:var(--green);}
+.stack-layer.active-layer+.stack-layer{border-top-color:var(--green);}
+.stack-layer.dim-layer{opacity:.4;}
+
+/* Timeline */
+.timeline{max-width:800px;width:100%;text-align:left;}
+.tl-item{display:flex;gap:1rem;padding:.5rem 0;border-left:3px solid var(--g200);margin-left:1rem;padding-left:1.2rem;position:relative;}
+.tl-item::before{content:'';position:absolute;left:-6px;top:1rem;width:10px;height:10px;border-radius:50%;background:var(--green);border:2px solid var(--white);}
+.tl-item .tl-date{flex-shrink:0;font-weight:700;color:var(--green);min-width:80px;font-size:.85rem;}
+.tl-item .tl-content{flex:1;}
+.tl-item .tl-content strong{font-size:.95rem;}
+.tl-item .tl-content p{font-size:.8rem;color:var(--g600);margin-top:.05rem;line-height:1.5;}
+
+/* Analogy */
+.analogy-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;max-width:860px;width:100%;margin-top:.5rem;}
+.analogy-col{text-align:left;}
+.analogy-col h3{font-size:1rem;margin-bottom:.3rem;color:var(--green);}
+.analogy-item{display:flex;gap:.6rem;align-items:flex-start;padding:.2rem 0;}
+.analogy-item .a-tag{flex-shrink:0;background:var(--green-lt);color:var(--green);padding:.1rem .6rem;border-radius:8px;font-size:.8rem;font-weight:700;}
+.analogy-item .a-text{font-size:.9rem;color:var(--g800);}
+
+/* Controls — 白底版 */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:var(--white);color:var(--g800);font-size:1.2rem;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.controls button:hover{background:var(--g50);border-color:var(--green);color:var(--green);}
+.controls button:disabled{opacity:.2;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;right:5rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:var(--green-lt);color:var(--green);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
+
+/* Chapter Menu */
+.chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;}
+.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--white);border:1px solid var(--g200);border-radius:8px;color:var(--g800);font-size:.8rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.chapter-btn:hover{border-color:var(--green);}
+.chapter-icon{color:var(--green);font-weight:700;}
+.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:220px;background:var(--white);border:1px solid var(--g200);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.1);}
+.chapter-menu.open .chapter-list{display:block;}
+.chapter-item{padding:8px 14px;color:var(--g600);font-size:.78rem;cursor:pointer;}
+.chapter-item:hover{background:var(--g50);color:var(--g900);}
+.chapter-item.active{color:var(--green);font-weight:600;}
+
+@media(max-width:768px){
+  html,body{font-size:16px;}
+  .slide{padding:1rem 1.2rem 1rem;}
+  .slide.poster{justify-content:flex-end;padding-bottom:1.5rem;}
+  h1{font-size:1.8rem;}h2{font-size:1.4rem;margin-bottom:.6rem;}
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:.8rem;}
+  .stat-box .val{font-size:1.8rem;}
+  .card-grid{flex-direction:column;align-items:center;}
+  .card{max-width:100%;min-width:0;}
+  .compare-table th,.compare-table td{padding:.5rem .6rem;font-size:.85rem;}
+  .controls button{width:40px;height:40px;font-size:1rem;}
+  .module-title{font-size:.7rem;left:.8rem;top:.6rem;}
+  .module-badge{font-size:.65rem;top:.6rem;right:.6rem;padding:.2rem .6rem;}
+  .quote-box .quote-text{font-size:1.05rem;}
+  .stack-layer{padding:.5rem .8rem;gap:.5rem;}
+  .stack-layer .layer-name{min-width:90px;font-size:.85rem;}
+  .stack-layer .layer-desc{font-size:.75rem;}
+  .analogy-grid{grid-template-columns:1fr;}
+  .flow{gap:.3rem;}
+  .flow-box{font-size:.85rem;padding:.5rem .7rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="module-title">AI 100 講 — 通用導論</div>
+<div class="module-badge">AI 七層架構</div>
+<div class="slides-wrap">
+
+<!-- ====== 0. Cover ====== -->
+<div class="slide poster overlay-heavy active" data-act="開場" data-index="0" style="background:linear-gradient(135deg, #0a0a14 0%, #16213e 50%, #0a2647 100%);">
+  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:1rem;">AI 100 講 — 通用導論</p>
+  <h1>AI 七層架構<br><span style="color:var(--green);">從模型到應用</span></h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.6);margin-top:1.5rem;">看懂 2026 年 AI 技術堆疊<br>誰在定義這個時代的標準</p>
+  <p style="color:rgba(255,255,255,.3);margin-top:3rem;font-size:.85rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- ====== 1. Agenda ====== -->
+<div class="slide content" data-act="開場" data-index="1">
+  <h2>今天的旅程</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>全景圖 — 七層架構一張圖看完</strong><p>先建立全貌，知道每一層在做什麼</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num">2</div><div class="step-content"><strong>地基層 — L1 模型 & L2 協議</strong><p>AI 的大腦，和大腦溝通外界的語言</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num">3</div><div class="step-content"><strong>能力層 — L3 框架、L4 技能、L5 身份</strong><p>讓 AI 從「會聊天」變成「會做事」</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num">4</div><div class="step-content"><strong>應用層 — L6 平台 & L7 產品</strong><p>拆開一個真實案例，驗證七層關係</p></div></div>
+    <div class="step fragment" data-order="4"><div class="step-num" style="background:var(--gold);">5</div><div class="step-content"><strong>趨勢觀察 — 關鍵事件與時間線</strong><p>看完就懂，誰正在定義這個時代的標準</p></div></div>
+  </div>
+</div>
+
+<!-- ====== 2. Chapter: 全景圖 ====== -->
+<div class="slide poster" data-act="全景圖" data-index="2" style="background-image:url('compare-flow.png');background-size:cover;background-repeat:no-repeat;background-position:center;background-color:#0a0a14;text-align:left;justify-content:center;align-items:flex-start;padding-left:5rem;">
+  <div style="position:absolute;inset:0;background:linear-gradient(to right, rgba(10,10,20,.92) 0%, rgba(10,10,20,.7) 30%, rgba(10,10,20,.15) 55%, transparent 100%);z-index:1;"></div>
+  <div style="position:relative;z-index:2;max-width:440px;">
+    <p class="subtitle" style="color:rgba(255,255,255,.4);font-size:.9rem;">Part 1</p>
+    <h1 style="font-size:2.8rem;margin-top:.5rem;">全景圖</h1>
+    <p style="color:rgba(255,255,255,.6);margin-top:1rem;font-size:1.05rem;line-height:1.8;">七層架構，從底層的 AI 大腦<br>到每天使用的產品<br><br>每一層各司其職<br>上層依賴下層<br>像蓋房子從地基往上蓋</p>
+    <p style="color:var(--green);margin-top:1.5rem;font-size:.9rem;font-weight:700;">→ 接下來逐層拆解</p>
+  </div>
+</div>
+
+<!-- ====== 3. 七層架構圖 ====== -->
+<div class="slide content" data-act="全景圖" data-index="3">
+  <h2>AI 七層架構 — 全景</h2>
+  <div class="stack">
+    <div class="stack-layer"><div class="layer-tag" style="background:var(--purple);">L7</div><div class="layer-icon">🏠</div><div class="layer-name">應用產品</div><div class="layer-desc">解決具體問題的 AI 產品 — Hermes、知識庫助手</div></div>
+    <div class="stack-layer"><div class="layer-tag" style="background:var(--navy);">L6</div><div class="layer-icon">🏗️</div><div class="layer-name">工作平台</div><div class="layer-desc">整合 L1–L5 的開發環境 — Claude Code、Cursor</div></div>
+    <div class="stack-layer"><div class="layer-tag" style="background:var(--blue);">L5</div><div class="layer-icon">🪪</div><div class="layer-name">Agent 身份</div><div class="layer-desc">AI 的角色設定 — 「你是誰、負責什麼、怎麼做事」</div></div>
+    <div class="stack-layer"><div class="layer-tag" style="background:var(--green);">L4</div><div class="layer-icon">🧰</div><div class="layer-name">技能模組</div><div class="layer-desc">AI 會的技能 — 寫報告、查資料、做簡報</div></div>
+    <div class="stack-layer"><div class="layer-tag" style="background:var(--gold);">L3</div><div class="layer-icon">🎯</div><div class="layer-name">編排框架</div><div class="layer-desc">Sub-agent 編排 — 拆任務、分派子 Agent、決定執行順序</div></div>
+    <div class="stack-layer"><div class="layer-tag" style="background:var(--orange);">L2</div><div class="layer-icon">🔌</div><div class="layer-name">協議層</div><div class="layer-desc">溝通標準 — AI 跟外部工具怎麼對話</div></div>
+    <div class="stack-layer"><div class="layer-tag" style="background:var(--red);">L1</div><div class="layer-icon">🧠</div><div class="layer-name">基礎模型</div><div class="layer-desc">AI 的大腦 — Claude、GPT、Gemini</div></div>
+  </div>
+  <p style="color:var(--g400);font-size:.85rem;margin-top:.6rem;">↑ 上層依賴下層，像蓋房子從地基往上蓋</p>
+</div>
+
+<!-- ====== 4. 生活類比 ====== -->
+<div class="slide content" data-act="全景圖" data-index="4">
+  <h2>用「蓋房子」來理解七層</h2>
+  <div class="analogy-grid">
+    <div class="analogy-col">
+      <h3>🏠 蓋房子</h3>
+      <div class="analogy-item"><div class="a-tag">L1</div><div class="a-text"><strong>地基</strong> — 鋼筋水泥</div></div>
+      <div class="analogy-item"><div class="a-tag">L2</div><div class="a-text"><strong>管線</strong> — 水管、電線、網路線</div></div>
+      <div class="analogy-item"><div class="a-tag">L3</div><div class="a-text"><strong>分包管理</strong> — 拆工項、分派工班、排施工序</div></div>
+      <div class="analogy-item"><div class="a-tag">L4</div><div class="a-text"><strong>專業工法</strong> — 防水、隔音、電路配置</div></div>
+      <div class="analogy-item"><div class="a-tag">L5</div><div class="a-text"><strong>建築師</strong> — 統籌設計、決定風格規範</div></div>
+      <div class="analogy-item"><div class="a-tag">L6</div><div class="a-text"><strong>營造公司</strong> — 統包管理一切</div></div>
+      <div class="analogy-item"><div class="a-tag">L7</div><div class="a-text"><strong>成品</strong> — 住進去的房子</div></div>
+    </div>
+    <div class="analogy-col">
+      <h3>🤖 AI 系統</h3>
+      <div class="analogy-item"><div class="a-tag" style="background:var(--blue-lt);color:var(--blue);">L1</div><div class="a-text"><strong>大腦</strong> — Claude、GPT</div></div>
+      <div class="analogy-item"><div class="a-tag" style="background:var(--blue-lt);color:var(--blue);">L2</div><div class="a-text"><strong>接口</strong> — MCP 協議</div></div>
+      <div class="analogy-item"><div class="a-tag" style="background:var(--blue-lt);color:var(--blue);">L3</div><div class="a-text"><strong>Sub-agent</strong> — 拆任務分派執行</div></div>
+      <div class="analogy-item"><div class="a-tag" style="background:var(--blue-lt);color:var(--blue);">L4</div><div class="a-text"><strong>技能</strong> — SKILL.md 模組</div></div>
+      <div class="analogy-item"><div class="a-tag" style="background:var(--blue-lt);color:var(--blue);">L5</div><div class="a-text"><strong>Agent</strong> — CLAUDE.md 身份設定</div></div>
+      <div class="analogy-item"><div class="a-tag" style="background:var(--blue-lt);color:var(--blue);">L6</div><div class="a-text"><strong>平台</strong> — Claude Code</div></div>
+      <div class="analogy-item"><div class="a-tag" style="background:var(--blue-lt);color:var(--blue);">L7</div><div class="a-text"><strong>產品</strong> — Hermes、知識庫</div></div>
+    </div>
+  </div>
+  <div class="info-box success" style="margin-top:.8rem;">
+    <p><strong>重點：</strong>不需要懂每一層的技術細節，但知道「它們存在」就能理解 AI 產品為什麼有不同的能力和限制。</p>
+  </div>
+</div>
+
+<!-- ====== 5. 為什麼要分層 ====== -->
+<div class="slide content" data-act="全景圖" data-index="5">
+  <h2>為什麼要分成七層？</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0"><div class="icon">🔄</div><h3>可替換</h3><p>不滿意 GPT？換成 Claude。大腦換了，其他六層不用重做。就像換燈泡不用重拉電線。</p></div>
+    <div class="card fragment" data-order="1"><div class="icon">♻️</div><h3>可重用</h3><p>寫好一個「分析財報」的技能，可以用在不同的 AI 產品上。一次寫，到處用。</p></div>
+    <div class="card fragment" data-order="2"><div class="icon">👥</div><h3>可分工</h3><p>做模型的專心做模型，做應用的專心做應用。不是每個人都要從零開始。</p></div>
+  </div>
+  <div class="info-box success" style="margin-top:1rem;">
+    <p>💡 這跟網際網路一樣 — HTTP、瀏覽器、網站各管各的，所以才能有今天的網路生態。</p>
+  </div>
+</div>
+
+<!-- ====== 6. Chapter: 地基層 ====== -->
+<div class="slide poster overlay-heavy" data-act="地基層" data-index="6" style="background:linear-gradient(135deg, #1a0a0a 0%, #0a0a14 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 2</p>
+  <h1>地基層<br><span style="color:var(--red);">L1</span> 模型 & <span style="color:var(--orange);">L2</span> 協議</h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.6);margin-top:.5rem;">AI 的大腦，和它溝通世界的方式</p>
+</div>
+
+<!-- ====== 7. L1 ====== -->
+<div class="slide content" data-act="地基層" data-index="7">
+  <h2><span style="color:var(--red);">L1</span> 基礎模型 — AI 的大腦</h2>
+  <p style="color:var(--g600);max-width:700px;text-align:center;margin-bottom:1rem;">大型語言模型（LLM）就是 AI 的大腦。<br>跟 ChatGPT 聊天，背後就是一顆模型在運算。</p>
+  <div class="stat-grid">
+    <div class="stat-box fragment" data-order="0"><div class="val" style="color:var(--orange);">Claude</div><div class="label">Anthropic 出品<br>推理最強</div></div>
+    <div class="stat-box fragment" data-order="1"><div class="val" style="color:var(--green);">GPT</div><div class="label">OpenAI 出品<br>最多人用</div></div>
+    <div class="stat-box fragment" data-order="2"><div class="val" style="color:var(--blue);">Gemini</div><div class="label">Google 出品<br>多模態強</div></div>
+  </div>
+  <div class="info-box tip" style="margin-top:1rem;">
+    <p>🔑 白話：模型就像不同廠牌的引擎。<br>Toyota、BMW、Benz 都能開，但馬力和油耗不同。</p>
+  </div>
+</div>
+
+<!-- ====== 8. L2 ====== -->
+<div class="slide content" data-act="地基層" data-index="8">
+  <h2><span style="color:var(--orange);">L2</span> 協議層 — AI 的 USB 接口</h2>
+  <p style="color:var(--g600);max-width:700px;text-align:center;margin-bottom:.8rem;">AI 大腦很聰明，但它不能直接查行事曆、讀文件。<br>需要一個「接口」讓它連接外面的世界。</p>
+  <div class="flow fragment" data-order="0">
+    <div class="flow-box">🧠 AI 大腦</div><div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--orange);color:var(--orange);">🔌 MCP</div><div class="flow-arrow">→</div>
+    <div class="flow-box">📅 行事曆</div>
+  </div>
+  <div class="flow fragment" data-order="1">
+    <div class="flow-box">🧠 AI 大腦</div><div class="flow-arrow">→</div>
+    <div class="flow-box" style="border-color:var(--orange);color:var(--orange);">🔌 MCP</div><div class="flow-arrow">→</div>
+    <div class="flow-box">📁 GitHub</div>
+  </div>
+  <div class="info-box success" style="margin-top:.8rem;">
+    <p>🔑 白話：MCP 就像 USB — 統一規格，插什麼設備都能用。<br>以前每個 AI 要自己寫介接程式，現在用 MCP 一插就通。</p>
+  </div>
+</div>
+
+<!-- ====== 9. L2 範例 ====== -->
+<div class="slide content" data-act="地基層" data-index="9">
+  <h2>MCP 實際在做什麼？</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--orange);">1</div><div class="step-content"><strong>「幫我查下週二有什麼會議」</strong><p>AI 透過 MCP 連接 Google Calendar，讀取行程</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--orange);">2</div><div class="step-content"><strong>「把這段筆記存到知識庫」</strong><p>AI 透過 MCP 連接 GitHub，自動建立檔案並推送</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--orange);">3</div><div class="step-content"><strong>「查一下這篇論文的引用數」</strong><p>AI 透過 MCP 連接學術資料庫，即時查詢回傳</p></div></div>
+  </div>
+  <div class="info-box tip">
+    <p><strong>重點：</strong>沒有 MCP 之前，每個 AI 工具要自己開發連接器。<br>有了 MCP，一個連接器所有 AI 都能用。這就是「標準」的力量。</p>
+  </div>
+</div>
+
+<!-- ====== 10. Chapter: 能力層 ====== -->
+<div class="slide poster overlay-heavy" data-act="能力層" data-index="10" style="background:linear-gradient(135deg, #0a140a 0%, #0a0a14 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 3</p>
+  <h1>能力層<br><span style="color:var(--gold);">L3</span> <span style="color:var(--green);">L4</span> <span style="color:var(--blue);">L5</span></h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.6);margin-top:.5rem;">讓 AI 從「會聊天」變成「會做事」</p>
+</div>
+
+<!-- ====== 11. L3 ====== -->
+<div class="slide content" data-act="能力層" data-index="11">
+  <h2><span style="color:var(--gold);">L3</span> 編排框架 — Sub-agent 分工</h2>
+  <p style="color:var(--g600);max-width:700px;text-align:center;margin-bottom:.8rem;">「幫我寫一份市場分析報告」，AI 不是一口氣寫完，<br>而是拆成步驟、分派 sub-agent 自動執行：</p>
+  <div class="flow fragment" data-order="0">
+    <div class="flow-box">📊 蒐集資料</div><div class="flow-arrow">→</div>
+    <div class="flow-box">📝 整理重點</div><div class="flow-arrow">→</div>
+    <div class="flow-box">✍️ 撰寫報告</div><div class="flow-arrow">→</div>
+    <div class="flow-box">🔍 自我檢查</div>
+  </div>
+  <p style="color:var(--g400);margin-top:1rem;font-size:.95rem;" class="fragment" data-order="1">↑ 這個「拆任務、分派 sub-agent、決定執行順序」的邏輯，就是 L3 編排框架</p>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <p>🔑 白話：L3 就是分包管理 — 把大工程拆成小工項，<br>分派給不同的工班（sub-agent）去做，最後彙整結果。</p>
+  </div>
+</div>
+
+<!-- ====== 12. L4 ====== -->
+<div class="slide content" data-act="能力層" data-index="12">
+  <h2><span style="color:var(--green);">L4</span> 技能模組 — AI 的 App Store</h2>
+  <p style="color:var(--g600);max-width:700px;text-align:center;margin-bottom:.5rem;">手機出廠只有基本功能，裝了 App 才能做更多事。AI 也一樣。</p>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0"><div class="icon">📊</div><h3>財報分析 Skill</h3><p>教 AI 怎麼讀財務報表、算比率、產出分析</p></div>
+    <div class="card fragment" data-order="1"><div class="icon">📝</div><h3>論文寫作 Skill</h3><p>教 AI 學術寫作格式、引用規範、審查標準</p></div>
+    <div class="card fragment" data-order="2"><div class="icon">🎨</div><h3>簡報設計 Skill</h3><p>教 AI 配色、排版、視覺層次、品牌風格</p></div>
+  </div>
+  <div class="info-box success" style="margin-top:.8rem;">
+    <p>🔑 Skill 就是「教 AI 做某件事的說明書」。寫好一次，到處都能用。<br>這就是 know-how 的數位資產化。</p>
+  </div>
+</div>
+
+<!-- ====== 13. L5 ====== -->
+<div class="slide content" data-act="能力層" data-index="13">
+  <h2><span style="color:var(--blue);">L5</span> Agent 身份 — AI 員工的職位說明書</h2>
+  <p style="color:var(--g600);max-width:700px;text-align:center;margin-bottom:.8rem;">同一顆大腦（L1），裝上不同技能（L4），再給不同的身份設定（L5），就變成不同的 AI 助手。</p>
+  <div class="stat-grid" style="grid-template-columns:1fr 1fr;">
+    <div class="stat-box fragment" data-order="0"><div class="val" style="font-size:1.6rem;color:var(--blue);">研究助理</div><div class="label" style="margin-top:.4rem;">身份：學術研究員<br>技能：論文搜尋、統計分析<br>規範：引用格式 APA、繁體中文</div></div>
+    <div class="stat-box fragment" data-order="1"><div class="val" style="font-size:1.6rem;color:var(--green);">永續顧問</div><div class="label" style="margin-top:.4rem;">身份：ESG 分析師<br>技能：碳盤查、GRI 報告<br>規範：ISO 14064、TCFD 框架</div></div>
+  </div>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <p>🔑 L5 就是 AI 員工的職位說明書（JD）+ 工作守則。<br>同一個大腦，給不同的 JD，就能勝任不同的工作。</p>
+  </div>
+</div>
+
+<!-- ====== 14. 三層搭配 ====== -->
+<div class="slide content" data-act="能力層" data-index="14">
+  <h2>三層怎麼搭配？</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--blue);">L5</div><div class="step-content"><strong>Agent 身份：「你是財務分析師」</strong><p>決定 AI 的角色、說話風格、工作範圍</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--green);">L4</div><div class="step-content"><strong>載入技能：財報分析、比率計算、產業研究</strong><p>賦予 AI 完成任務所需的專業能力</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--gold);">L3</div><div class="step-content"><strong>編排執行：蒐集數據 → 計算比率 → 撰寫報告 → 校對</strong><p>拆成 sub-agent 分頭執行，自動彙整結果</p></div></div>
+  </div>
+  <div class="info-box success">
+    <p><strong>組合起來：</strong>一個有身份（L5）、有技能（L4）、有排程（L3）的 AI，就不只是聊天機器人，而是一個能獨立完成任務的 AI 員工。</p>
+  </div>
+</div>
+
+<!-- ====== 15. Chapter: 應用層 ====== -->
+<div class="slide poster overlay-heavy" data-act="應用層" data-index="15" style="background:linear-gradient(135deg, #140a1e 0%, #0a0a14 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 4</p>
+  <h1>應用層<br><span style="color:var(--navy);">L6</span> 平台 & <span style="color:var(--purple);">L7</span> 產品</h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.6);margin-top:.5rem;">拆開一個真實案例，驗證七層關係</p>
+</div>
+
+<!-- ====== 16. L6 ====== -->
+<div class="slide content" data-act="應用層" data-index="16">
+  <h2><span style="color:var(--navy);">L6</span> 工作平台 — 營造公司</h2>
+  <p style="color:var(--g600);max-width:700px;text-align:center;margin-bottom:.8rem;">L6 把 L1–L5 全部打包，提供一個「拿來就用」的工作環境。</p>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0"><div class="icon">⚡</div><h3>Claude Code</h3><p>Anthropic 的 AI 開發平台。模型 + MCP + 框架 + Skills + 身份，一站搞定。</p></div>
+    <div class="card fragment" data-order="1"><div class="icon">🔧</div><h3>Cursor</h3><p>AI 程式編輯器。把 AI 能力包進 IDE 裡，寫程式不用切換工具。</p></div>
+    <div class="card fragment" data-order="2"><div class="icon">🦞</div><h3>OpenClaw</h3><p>開源 AI Agent 執行環境。自行部署，完整掌控 L1–L5 的組合方式。</p></div>
+  </div>
+  <div class="info-box tip" style="margin-top:.8rem;">
+    <p>🔑 L6 就像 iPhone — 不需要自己組裝螢幕、CPU、電池，拿來就能用。</p>
+  </div>
+</div>
+
+<!-- ====== 17. L7 ====== -->
+<div class="slide content" data-act="應用層" data-index="17">
+  <h2><span style="color:var(--purple);">L7</span> 應用產品 — 解決問題的成品</h2>
+  <p style="color:var(--g600);max-width:700px;text-align:center;margin-bottom:.8rem;">L7 是使用者真正接觸到的東西 — 針對某個具體問題設計的 AI 產品。</p>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0"><div class="icon">📋</div><h3>Hermes Agent</h3><p>AI 補助案助手。自動分析補助計畫、整理申請文件、追蹤進度。</p></div>
+    <div class="card fragment" data-order="1"><div class="icon">🏠</div><h3>DesignClaw</h3><p>AI 室內設計師。上傳平面圖，自動辨識格局、生成 3D 渲染圖。</p></div>
+    <div class="card fragment" data-order="2"><div class="icon">📚</div><h3>SecondBrain<br>知識庫</h3><p>個人知識管理助手。<br>手機上就能存筆記、搜資料、跨 repo 閱讀。</p></div>
+  </div>
+</div>
+
+<!-- ====== 18. 案例拆解 ====== -->
+<div class="slide content" data-act="應用層" data-index="18">
+  <h2>案例拆解：SecondBrain 知識庫</h2>
+  <div class="stack">
+    <div class="stack-layer active-layer"><div class="layer-tag" style="background:var(--purple);">L7</div><div class="layer-icon">📚</div><div class="layer-name">知識庫助手</div><div class="layer-desc">在 Claude Chat 上查筆記、存筆記</div></div>
+    <div class="stack-layer active-layer"><div class="layer-tag" style="background:var(--navy);">L6</div><div class="layer-icon">☁️</div><div class="layer-name">Cloudflare Worker</div><div class="layer-desc">託管 MCP Server，處理 OAuth 認證</div></div>
+    <div class="stack-layer active-layer"><div class="layer-tag" style="background:var(--blue);">L5</div><div class="layer-icon">🪪</div><div class="layer-name">知識庫助手 Agent</div><div class="layer-desc">instructions:「你是 SecondBrain 知識庫助手...」</div></div>
+    <div class="stack-layer active-layer"><div class="layer-tag" style="background:var(--green);">L4</div><div class="layer-icon">🧰</div><div class="layer-name">11 個 Tools</div><div class="layer-desc">create_note, search_notes, fetch_url...</div></div>
+    <div class="stack-layer active-layer"><div class="layer-tag" style="background:var(--gold);">L3</div><div class="layer-icon">🎯</div><div class="layer-name">Claude 內建編排</div><div class="layer-desc">自動決定先搜尋還是先建檔</div></div>
+    <div class="stack-layer active-layer"><div class="layer-tag" style="background:var(--orange);">L2</div><div class="layer-icon">🔌</div><div class="layer-name">MCP 協議</div><div class="layer-desc">Claude Chat ↔ Worker 的溝通標準</div></div>
+    <div class="stack-layer active-layer"><div class="layer-tag" style="background:var(--red);">L1</div><div class="layer-icon">🧠</div><div class="layer-name">Claude Sonnet</div><div class="layer-desc">Claude Chat 背後的大腦</div></div>
+  </div>
+</div>
+
+<!-- ====== 19. 驗證 ====== -->
+<div class="slide content" data-act="應用層" data-index="19">
+  <h2>回頭看 — 架構關係驗證</h2>
+  <p style="color:var(--g600);max-width:700px;text-align:center;margin-bottom:.5rem;font-size:1rem;">替換任何一層，其他層不受影響：</p>
+  <table class="compare-table fragment" data-order="0">
+    <tr><th>如果替換...</th><th>影響範圍</th><th>舉例</th></tr>
+    <tr><td>L1 模型</td><td>換大腦，其他不變</td><td class="highlight">Claude → GPT，tools 照用</td></tr>
+    <tr><td>L2 協議</td><td>換連接標準</td><td>MCP → 其他協議（需重寫連接器）</td></tr>
+    <tr><td>L4 技能</td><td>增減 AI 能力</td><td class="highlight">新增一個 fetch_url tool</td></tr>
+    <tr><td>L6 平台</td><td>換部署方式</td><td>Cloudflare → AWS Lambda</td></tr>
+  </table>
+  <div class="bottom-line fragment" data-order="1">
+    <h3>分層 = 自由</h3>
+    <p>標準化的層與層之間，可以自由替換、自由組合。<br>這就是為什麼「用誰的標準」比「用誰的產品」更重要。</p>
+  </div>
+</div>
+
+<!-- ====== 20. Chapter: 趨勢觀察 ====== -->
+<div class="slide poster overlay-heavy" data-act="趨勢觀察" data-index="20" style="background:linear-gradient(135deg, #0a0a14 0%, #1a0a2e 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 5</p>
+  <h1>趨勢觀察</h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.6);margin-top:.5rem;">我們來看關鍵事件跟趨勢發展</p>
+</div>
+
+<!-- ====== 21. 專有名詞對照 ====== -->
+<div class="slide content" data-act="趨勢觀察" data-index="21">
+  <h2>常見專有名詞 — 對應哪一層？</h2>
+  <div class="stack">
+    <div class="stack-layer"><div class="layer-tag" style="background:var(--purple);">L7</div><div class="layer-icon">🏠</div><div class="layer-name">應用產品</div><div class="layer-desc">Hermes Agent · DesignClaw · SecondBrain 知識庫</div></div>
+    <div class="stack-layer"><div class="layer-tag" style="background:var(--navy);">L6</div><div class="layer-icon">🏗️</div><div class="layer-name">工作平台</div><div class="layer-desc">OpenClaw · Claude Code · Cursor</div></div>
+    <div class="stack-layer"><div class="layer-tag" style="background:var(--blue);">L5</div><div class="layer-icon">🪪</div><div class="layer-name">Agent 身份</div><div class="layer-desc">CLAUDE.md · AGENTS.md</div></div>
+    <div class="stack-layer"><div class="layer-tag" style="background:var(--green);">L4</div><div class="layer-icon">🧰</div><div class="layer-name">技能模組</div><div class="layer-desc">SKILL.md · Memory · Prompt · RAG</div></div>
+    <div class="stack-layer"><div class="layer-tag" style="background:var(--gold);">L3</div><div class="layer-icon">🎯</div><div class="layer-name">編排框架</div><div class="layer-desc">Sub-agent · Tasks · Worktree · Hooks</div></div>
+    <div class="stack-layer"><div class="layer-tag" style="background:var(--orange);">L2</div><div class="layer-icon">🔌</div><div class="layer-name">協議層</div><div class="layer-desc">MCP · A2A · API · OAuth</div></div>
+    <div class="stack-layer"><div class="layer-tag" style="background:var(--red);">L1</div><div class="layer-icon">🧠</div><div class="layer-name">基礎模型</div><div class="layer-desc">GPT 5.5 · Opus 4.7 · Gemini 3 Pro</div></div>
+  </div>
+  <p style="color:var(--green);font-size:.85rem;font-weight:700;margin-top:.4rem;">💡 新名詞出現時，先問「它在哪一層？」就能快速理解它的角色和定位</p>
+</div>
+
+<!-- ====== 22. 方法論演進 ====== -->
+<div class="slide content" data-act="趨勢觀察" data-index="22">
+  <h2>方法論演進 — 三個 Engineering</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0">
+      <div class="step-num" style="background:var(--orange);">1</div>
+      <div class="step-content">
+        <strong>Prompt Engineering <span style="color:var(--g400);font-weight:400;">2023–2024</span></strong>
+        <p>怎麼跟模型「說話」— 一句好的提示，就能讓回答品質翻倍<br>
+        涵蓋 L1 · 格式：<strong>純文字</strong></p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--green);">2</div>
+      <div class="step-content">
+        <strong>Context Engineering <span style="color:var(--g400);font-weight:400;">2025</span></strong>
+        <p>怎麼「組織資訊」— 記憶、技能、工具結果，打包成最佳上下文<br>
+        涵蓋 L1–L4 · 格式：<strong>YAML</strong>（CLAUDE.md、SKILL.md 的結構化 frontmatter）</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="background:var(--blue);">3</div>
+      <div class="step-content">
+        <strong>Harness Engineering <span style="color:var(--g400);font-weight:400;">2026</span></strong>
+        <p>怎麼「設計系統」— Agent 編排架構，模型變強時編排自動變薄<br>
+        涵蓋 L3–L6 · 格式：<strong>YAML + JSON</strong>（系統配置、workflow 定義）</p>
+      </div>
+    </div>
+  </div>
+  <div class="info-box success" style="margin-top:.6rem;">
+    <p>💡 演進邏輯：從「寫好一句話」→「組織好整包資訊」→「設計好整套系統」</p>
+  </div>
+</div>
+
+<!-- ====== 23. Anthropic 主導 ====== -->
+<div class="slide content" data-act="趨勢觀察" data-index="21">
+  <h2>Anthropic 定義了哪些標準？</h2>
+  <div class="stack">
+    <div class="stack-layer dim-layer"><div class="layer-tag" style="background:var(--purple);">L7</div><div class="layer-icon">🏠</div><div class="layer-name">應用產品</div><div class="layer-desc">各家自行開發</div></div>
+    <div class="stack-layer dim-layer"><div class="layer-tag" style="background:var(--navy);">L6</div><div class="layer-icon">🏗️</div><div class="layer-name">工作平台</div><div class="layer-desc">各家自行開發</div></div>
+    <div class="stack-layer active-layer"><div class="layer-tag" style="background:var(--blue);">L5</div><div class="layer-icon">🪪</div><div class="layer-name" style="color:var(--green);">CLAUDE.md / AGENTS.md</div><div class="layer-desc" style="color:var(--green);">✅ Anthropic 開源標準</div></div>
+    <div class="stack-layer active-layer"><div class="layer-tag" style="background:var(--green);">L4</div><div class="layer-icon">🧰</div><div class="layer-name" style="color:var(--green);">SKILL.md</div><div class="layer-desc" style="color:var(--green);">✅ Anthropic 開源 → Google 跟進採用</div></div>
+    <div class="stack-layer active-layer"><div class="layer-tag" style="background:var(--gold);">L3</div><div class="layer-icon">🎯</div><div class="layer-name" style="color:var(--green);">Claude Agent SDK</div><div class="layer-desc" style="color:var(--green);">✅ Anthropic 設計的五大編排模式</div></div>
+    <div class="stack-layer active-layer"><div class="layer-tag" style="background:var(--orange);">L2</div><div class="layer-icon">🔌</div><div class="layer-name" style="color:var(--green);">MCP</div><div class="layer-desc" style="color:var(--green);">✅ Anthropic 創立 → 捐給 Linux Foundation</div></div>
+    <div class="stack-layer active-layer"><div class="layer-tag" style="background:var(--red);">L1</div><div class="layer-icon">🧠</div><div class="layer-name" style="color:var(--green);">Claude 模型</div><div class="layer-desc" style="color:var(--green);">✅ Anthropic 自研</div></div>
+  </div>
+  <p style="color:var(--green);font-size:.9rem;font-weight:700;margin-top:.4rem;">L1–L5 五層的核心標準，幾乎都是 Anthropic 定義的</p>
+</div>
+
+<!-- ====== 22. 時間線 ====== -->
+<div class="slide content" data-act="趨勢觀察" data-index="22">
+  <h2>關鍵時間線</h2>
+  <div class="timeline">
+    <div class="tl-item fragment" data-order="0"><div class="tl-date">2024.11</div><div class="tl-content"><strong>Anthropic 發布 MCP</strong><p>Model Context Protocol 開源，定義 AI 與外部工具的連接標準</p></div></div>
+    <div class="tl-item fragment" data-order="1"><div class="tl-date">2025.03</div><div class="tl-content"><strong>Claude Code 發布</strong><p>帶動 CLAUDE.md、SKILL.md 格式成為社群共識</p></div></div>
+    <div class="tl-item fragment" data-order="2"><div class="tl-date">2025.12</div><div class="tl-content"><strong>MCP 捐給 Linux Foundation</strong><p>從公司標準升級為中立的業界標準</p></div></div>
+    <div class="tl-item fragment" data-order="3"><div class="tl-date">2026.03</div><div class="tl-content"><strong>ECC 達 100K stars</strong><p>Everything Claude Code — 38 agents + 156 skills，生態系成形</p></div></div>
+    <div class="tl-item fragment" data-order="4"><div class="tl-date" style="color:var(--gold);">2026.04</div><div class="tl-content"><strong>Google Cloud Next 公開採用 SKILL.md</strong><p>Google 官方 Agent Skills repo 採用 Anthropic 的格式</p></div></div>
+  </div>
+</div>
+
+<!-- ====== 23. 標準演進 ====== -->
+<div class="slide content" data-act="趨勢觀察" data-index="23">
+  <h2>技術標準的演進模式</h2>
+  <p style="color:var(--g600);max-width:700px;text-align:center;margin-bottom:.6rem;">每一代技術基礎建設，都經歷相似的標準化過程：</p>
+  <table class="compare-table">
+    <tr><th>時代</th><th>標準發起者</th><th>關鍵標準</th><th>標準化路徑</th></tr>
+    <tr class="fragment" data-order="0"><td>網際網路</td><td class="highlight">W3C / IETF</td><td>HTTP、HTML、CSS</td><td>學術界 → 產業聯盟 → 全球標準</td></tr>
+    <tr class="fragment" data-order="1"><td>智慧手機</td><td class="highlight">Apple</td><td>App Store 上架規範、UI 設計準則</td><td>市場領先 → Android 跟進 → 業界共識</td></tr>
+    <tr class="fragment" data-order="2"><td>充電接口</td><td class="highlight">EU + USB-IF</td><td>USB-C 統一規格</td><td>產業聯盟制定 → 立法強制 → Apple 跟進</td></tr>
+    <tr class="fragment" data-order="3"><td style="color:var(--green);font-weight:700;">AI Agent</td><td class="highlight">Anthropic</td><td>MCP → Linux Foundation<br>SKILL.md → Google 採用</td><td style="color:var(--gold);">開源 → 捐贈基金會 → 進行中</td></tr>
+  </table>
+</div>
+
+<!-- ====== 24. Google 跟進 ====== -->
+<div class="slide content" data-act="趨勢觀察" data-index="24">
+  <h2>Google Cloud Next 2026 的訊號</h2>
+  <div class="quote-box fragment" data-order="0">
+    <div class="quote-text">Google Cloud Next 2026（4/22-23）<br>發布官方 Agent Skills repo，<br>公開採用 Anthropic 開源的 SKILL.md 格式。</div>
+    <div class="quote-src">— Google Cloud Blog, "Level Up Your Agents", 2026-04-22</div>
+  </div>
+  <p style="color:var(--g400);margin-top:1.2rem;font-size:1rem;" class="fragment" data-order="1">在科技業，大廠公開採用競爭對手的標準格式，是罕見的事。</p>
+  <div class="info-box tip" style="margin-top:.8rem;" class="fragment" data-order="2">
+    <p>🔑 就像 Apple 手機改用 USB-C 充電接口。<br>不是因為誰比較好，而是因為<strong>標準已經贏了</strong>。</p>
+  </div>
+</div>
+
+<!-- ====== 25. 不言而喻 ====== -->
+<div class="slide content" data-act="趨勢觀察" data-index="25">
+  <h2>趨勢觀察</h2>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-color:rgba(15,157,138,.3);border-top:4px solid var(--green);">
+      <div class="icon">🏗️</div><h3>標準比產品持久</h3>
+      <p>定義標準的人，決定了整個生態系怎麼長。產品會迭代，標準會留下。</p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-color:rgba(15,157,138,.3);border-top:4px solid var(--green);">
+      <div class="icon">🌐</div><h3>開源建立信任</h3>
+      <p>MCP 捐給 Linux Foundation。不是鎖住使用者，而是讓所有人都能用。這才贏得業界採用。</p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-color:rgba(15,157,138,.3);border-top:4px solid var(--green);">
+      <div class="icon">🎯</div><h3>選標準就是選未來</h3>
+      <p>用開放標準封裝自己的 know-how，不管未來用哪個 AI，技能包都能沿用。</p>
+    </div>
+  </div>
+  <div class="bottom-line fragment" data-order="3" style="margin-top:.8rem;">
+    <h3>選的不是工具，是基礎建設</h3>
+    <p>就像當年選 HTTP 而不是私有協議。<br>選對標準的人，數位資產長期有效。</p>
+  </div>
+</div>
+
+<!-- ====== 27. 重點回顧 ====== -->
+<div class="slide content" data-act="結語" data-index="27">
+  <h2>今天的重點</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num" style="background:var(--green);">1</div><div class="step-content"><strong>AI 正在分層化</strong><p>七層架構 L1–L7，從大腦到產品，每層各司其職</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num" style="background:var(--green);">2</div><div class="step-content"><strong>分層帶來自由</strong><p>可替換、可重用、可分工 — 不被任何單一產品鎖定</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num" style="background:var(--green);">3</div><div class="step-content"><strong>Anthropic 正在定義 L1–L5 的標準</strong><p>MCP、SKILL.md、AGENTS.md — Google 已跟進採用</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--gold);">4</div><div class="step-content"><strong>個人 know-how 可以資產化</strong><p>用開放標準封裝專業知識，一次寫好，跨平台使用</p></div></div>
+  </div>
+</div>
+
+<!-- ====== 27. 封底 ====== -->
+<div class="slide poster overlay-heavy" data-act="結語" data-index="28" style="background:linear-gradient(135deg, #0a0a14 0%, #16213e 50%, #0a2647 100%);">
+  <h1 style="font-size:2.5rem;">每個時代的贏家<br>都是<span style="color:var(--green);">選對標準</span>的人</h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.5);margin-top:2rem;">AI 100 講 — 通用導論</p>
+  <p style="color:rgba(255,255,255,.25);margin-top:1rem;font-size:.85rem;">2026.04</p>
+</div>
+
+</div>
+
+<div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>&larr;</button><button id="next">&rarr;</button></div>
+<div id="chapterMenu" class="chapter-menu">
+  <button class="chapter-btn" onclick="toggleChapterMenu()"><span class="chapter-icon">☰</span> 章節</button>
+  <div class="chapter-list" id="chapterList"></div>
+</div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),total=slides.length;let current=0;
+document.getElementById('total').textContent=total;
+function showSlide(n){if(n<0||n>=total)return;slides[current].classList.remove('active');current=n;slides[current].classList.add('active');document.getElementById('current').textContent=current+1;document.getElementById('progress').style.width=((current+1)/total*100)+'%';document.getElementById('prev').disabled=current===0;document.getElementById('next').disabled=current===total-1;slides[current].querySelectorAll('.fragment').forEach((f,i)=>{setTimeout(()=>f.classList.add('visible'),150+i*200)});updateChapterHighlight();}
+document.getElementById('prev').onclick=()=>showSlide(current-1);
+document.getElementById('next').onclick=()=>showSlide(current+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();showSlide(current+1)}if(e.key==='ArrowLeft'){e.preventDefault();showSlide(current-1)}});
+let touchStartX=0;document.addEventListener('touchstart',e=>{touchStartX=e.touches[0].clientX});document.addEventListener('touchend',e=>{const diff=touchStartX-e.changedTouches[0].clientX;if(Math.abs(diff)>50){diff>0?showSlide(current+1):showSlide(current-1)}});
+function buildChapterMenu(){const list=document.getElementById('chapterList'),acts=[];slides.forEach((s,i)=>{const act=s.dataset.act;if(act&&!acts.includes(act)){acts.push(act);const item=document.createElement('div');item.className='chapter-item';item.textContent=act;item.dataset.index=i;item.onclick=()=>{showSlide(i);toggleChapterMenu()};list.appendChild(item)}})}
+function toggleChapterMenu(){document.getElementById('chapterMenu').classList.toggle('open')}
+function updateChapterHighlight(){const act=slides[current].dataset.act;document.querySelectorAll('.chapter-item').forEach(item=>{item.classList.toggle('active',item.textContent===act)})}
+document.addEventListener('click',e=>{const menu=document.getElementById('chapterMenu');if(!menu.contains(e.target))menu.classList.remove('open')});
+buildChapterMenu();showSlide(0);
+</script>
+</body>
+</html>
