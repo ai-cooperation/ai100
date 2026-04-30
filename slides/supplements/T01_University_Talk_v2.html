@@ -1,0 +1,2399 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人駕馭 AI Token — 大學演講 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   S19: University Talk — S09 Style
+   ═══════════════════════════════════════ */
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+  --orange:#E8710A; --orange-lt:#FEF0E1;
+  --cyan:#06B6D4; --cyan-lt:#E0F7FA;
+  --dark:#0a0a14; --dark2:#111122; --dark3:#16213e;
+  --teal:#0F9D8A; --teal-light:#12B89F; --teal-dark:#0A7A6B;
+  --primary:#0B3C5D;
+  --warm-bg:#FEF3C7; --purple-bg:#EDE9FE; --red-bg:#FEE2E2;
+  --dark-text:#1A1A1A; --gray-text:#5A6B7A; --light-tint:#E8F4F2;
+  --gold-dark:#E6A820;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--dark);}
+/* ── Reading Glasses: 老花眼友善 ── */
+/* 正文 22px, 最小字 16px, CJK 行高 1.7, 字重 ≥ 400, 按鈕 ≥ 48px */
+small,.caption,.label{font-size:max(16px,0.75rem)!important;}
+
+/* ── Slides Core ── */
+.slides{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2.5rem 3rem 3.5rem;pointer-events:none;overflow-y:auto;gap:1rem;}
+.slide.active{display:flex;pointer-events:auto;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* v2: 移除 @media (max-height) 壓字 — 改走「重寫文字」+「拆頁」修復路線 */
+
+/* ── Cinematic Poster (.cine / .cine-right) ── */
+.slide.cine,.slide.cine-right{background-size:cover;background-position:center;color:#fff;padding:3.5rem 4rem 4.5rem;justify-content:flex-end;}
+.slide.cine::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,10,20,.92) 0%,rgba(10,10,20,.7) 35%,transparent 62%);z-index:1;}
+.slide.cine-right::before{content:'';position:absolute;inset:0;background:linear-gradient(270deg,rgba(10,10,20,.92) 0%,rgba(10,10,20,.7) 35%,transparent 62%);z-index:1;}
+.slide.cine>*,.slide.cine-right>*{position:relative;z-index:2;}
+.slide.cine .cine-content{max-width:42%;text-align:left;align-self:flex-start;}
+.slide.cine-right .cine-content{max-width:42%;text-align:left;align-self:flex-end;}
+.cine-tag{font-size:.85rem;color:var(--gold);letter-spacing:.2rem;font-weight:700;margin-bottom:.3rem;}
+.cine-title{font-size:2.4rem;font-weight:900;line-height:1.25;margin-bottom:.5rem;word-break:keep-all;overflow-wrap:break-word;}
+.cine-sub{font-size:1rem;line-height:1.7;color:rgba(255,255,255,.75);word-break:keep-all;overflow-wrap:break-word;}
+.cine-caption{position:absolute;bottom:1.5rem;right:2rem;font-size:.75rem;color:rgba(255,255,255,.3);z-index:2;}
+.cine-insight{margin-top:.8rem;padding:.8rem 1rem;background:rgba(15,157,138,.15);border-left:3px solid var(--teal);border-radius:0 8px 8px 0;font-size:.9rem;color:rgba(255,255,255,.85);line-height:1.6;}
+
+/* ── Clean Mode ── */
+.slide.clean{background:var(--white);color:var(--g900);justify-content:flex-start;}
+.slide.clean::before,.slide.clean::after{content:'';flex:1 0 0px;}
+
+/* ── Poster Mode ── */
+.slide.poster{background-size:cover;background-position:center;color:#fff;text-align:center;}
+.slide.poster::before{content:'';position:absolute;inset:0;z-index:1;}
+.slide.poster>*{position:relative;z-index:2;}
+.slide.poster.overlay-bottom::before{background:linear-gradient(to bottom,rgba(0,0,0,.15) 0%,rgba(0,0,0,.78) 100%);}
+.slide.poster.overlay-heavy::before{background:linear-gradient(to bottom,rgba(0,0,0,.45) 0%,rgba(0,0,0,.85) 100%);}
+.slide.poster.overlay-center::before{background:radial-gradient(ellipse at center,rgba(0,0,0,.3) 0%,rgba(0,0,0,.8) 100%);}
+
+/* ── DataViz Mode ── */
+.slide.dataviz{background:var(--dark);color:#fff;padding-top:3.5rem;}
+
+/* ── Typography (reading-glasses: 正文≥22px, h1≥36px, h2≥28px, h3≥24px, 最小16px) ── */
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:2.4rem;font-weight:800;color:var(--g900);margin-bottom:1rem;line-height:1.3;word-break:keep-all;overflow-wrap:break-word;letter-spacing:-.01em;}
+.slide.dataviz h2,.slide.poster h2{color:#fff;}
+h3{font-size:1.25rem;font-weight:700;margin-bottom:.4rem;word-break:keep-all;overflow-wrap:break-word;}
+.tip-box,.tip-box-dark{word-break:keep-all;overflow-wrap:break-word;}
+.cine-insight{word-break:keep-all;overflow-wrap:break-word;}
+p,li{font-size:1.05rem;line-height:1.8;}
+.dim{opacity:.6;}
+.card p{font-size:.95rem;line-height:1.7;}
+.card .card-sub{font-size:.85rem;}
+.tip-box,.tip-box-dark{font-size:.95rem;}
+.controls button{min-height:48px;min-width:48px;padding:8px 14px;font-size:.9rem;}
+
+/* ── Fragment ── */
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* ── Cards ── */
+.card-grid{display:grid;gap:1rem;padding:1.5rem 3rem;}
+.card-grid.cols-2{grid-template-columns:1fr 1fr;}
+.card-grid.cols-3{grid-template-columns:1fr 1fr 1fr;}
+.card-grid.cols-4{grid-template-columns:1fr 1fr 1fr 1fr;}
+.card{background:var(--white);border-radius:10px;padding:1.5rem 1.6rem;box-shadow:0 2px 12px rgba(0,0,0,.08);position:relative;overflow:hidden;}
+.card-accent{position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--teal);}
+.card h3{font-size:1.4rem;font-weight:700;color:var(--teal);margin-bottom:.6rem;line-height:1.3;}
+.card p{font-size:1.1rem;color:var(--dark-text);line-height:1.65;word-break:keep-all;}
+.card .card-icon{font-size:1.8rem;margin-bottom:.3rem;}
+.card .card-sub{font-size:.8rem;color:var(--gray-text);margin-top:.3rem;}
+.card-dark{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);box-shadow:none;color:#fff;}
+.card-dark h3{color:var(--teal-light);}
+.card-dark p{color:rgba(255,255,255,.7);}
+.card-dark .card-sub{color:rgba(255,255,255,.4);}
+
+/* ── Tip Box ── */
+.tip-box{margin:1rem 0;padding:1rem 1.5rem;background:var(--light-tint);border-radius:10px;font-size:1.15rem;color:var(--teal-dark);max-width:1200px;width:100%;line-height:1.6;}
+.tip-box-dark{margin:1rem 0;padding:1rem 1.5rem;background:rgba(15,157,138,.1);border:1px solid rgba(15,157,138,.3);border-radius:10px;font-size:1.15rem;color:var(--teal-light);max-width:1200px;width:100%;line-height:1.6;}
+
+/* ── Section Divider ── */
+.section-accent-top,.section-accent-bottom{height:4px;background:var(--teal);}
+.section-bar{width:4px;height:120px;background:var(--teal);margin-bottom:1rem;}
+.section-subtitle{color:var(--mint);font-size:1.2rem;margin-bottom:.5rem;}
+.section-title{color:#fff;font-size:2.8rem;font-weight:700;line-height:1.2;}
+.section-content{padding:0 4rem;flex:1;display:flex;flex-direction:column;justify-content:center;}
+
+/* ── Process Steps ── */
+.process-steps{display:flex;align-items:stretch;justify-content:center;gap:.5rem;padding:1.5rem 2rem;}
+.step{flex:1;border-radius:12px;padding:1.2rem .8rem;text-align:center;color:#fff;}
+.step-num{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.9);font-size:1.2rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto .6rem;}
+.step h3{font-size:.95rem;font-weight:600;margin-bottom:.3rem;}
+.step p{font-size:.8rem;opacity:.85;line-height:1.4;}
+.step-arrow{font-size:1.5rem;color:var(--gray-text);flex-shrink:0;display:flex;align-items:center;}
+
+/* ── Comparison ── */
+.comparison-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;padding:1.5rem 3rem;align-items:start;}
+.comp-col{display:flex;flex-direction:column;gap:.8rem;}
+.comp-badge{display:inline-block;padding:.3rem .8rem;border-radius:20px;color:#fff;font-size:.8rem;font-weight:700;margin-bottom:.3rem;}
+.comp-card{background:var(--white);border-radius:8px;padding:1.2rem;box-shadow:0 1px 6px rgba(0,0,0,.06);}
+.comp-arrow{font-size:2rem;color:var(--gray-text);display:flex;align-items:center;padding-top:2rem;}
+
+/* ── Quiz ── */
+.quiz-question{margin:1.5rem 3rem;padding:1.2rem 1.5rem;background:var(--warm-bg);border-radius:10px;font-size:1.1rem;line-height:1.6;color:var(--dark-text);}
+.quiz-choices{padding:.5rem 3rem;display:flex;flex-direction:column;gap:.8rem;}
+.quiz-choice{display:flex;align-items:center;gap:1rem;padding:.8rem 1.2rem;background:var(--white);border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer;transition:transform .2s;}
+.quiz-choice:hover{transform:translateX(4px);}
+.choice-label{width:36px;height:36px;border-radius:50%;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* ── Pyramid (for dataviz) ── */
+.pyramid{display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:1rem 3rem;max-width:800px;width:100%;}
+.pyramid-row{display:flex;align-items:center;gap:1rem;border-radius:12px;padding:.8rem 1.5rem;margin:0 auto;}
+.pyramid-level{font-size:1.6rem;font-weight:900;min-width:50px;text-align:center;flex-shrink:0;}
+.pyramid-name{font-size:1.05rem;font-weight:700;}
+.pyramid-desc{font-size:.85rem;opacity:.6;}
+
+/* ── Stat Grid ── */
+.stat-grid{display:grid;gap:1rem;padding:1rem 3rem;}
+.stat-box{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:center;}
+.stat-box .val{font-size:2.4rem;font-weight:900;line-height:1.1;}
+.stat-box .label{font-size:.8rem;color:rgba(255,255,255,.5);margin-top:.2rem;}
+
+/* ── Quote ── */
+.quote-wrap{padding:2rem 4rem;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;position:relative;z-index:2;}
+.quote-text{font-size:1.8rem;font-weight:700;line-height:1.6;max-width:700px;text-align:center;}
+.quote-src{font-size:.9rem;color:rgba(255,255,255,.45);margin-top:1rem;}
+.quote-bar{width:60px;height:4px;background:var(--gold);margin-bottom:1rem;}
+
+/* ── Bottom Bar ── */
+.slide-counter{position:fixed;bottom:16px;right:20px;z-index:100;font-size:.75rem;color:rgba(255,255,255,.5);cursor:pointer;background:rgba(0,0,0,.6);padding:4px 10px;border-radius:6px;backdrop-filter:blur(4px);}
+.brand-footer{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:99;font-size:.7rem;color:rgba(255,255,255,.5);letter-spacing:.12em;font-weight:500;pointer-events:none;background:rgba(0,0,0,.5);padding:4px 12px;border-radius:6px;backdrop-filter:blur(4px);}
+.brand-footer .dot{margin:0 .5rem;color:var(--gold);}
+.progress{position:fixed;bottom:0;left:0;height:3px;background:var(--teal);z-index:100;transition:width .3s;}
+.controls{position:fixed;bottom:14px;right:80px;z-index:100;display:flex;gap:6px;}
+.controls button{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.8rem;backdrop-filter:blur(4px);}
+.controls button:hover{border-color:var(--teal);color:#fff;}
+
+/* ── Chapter Menu ── */
+.chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;font-family:system-ui,-apple-system,sans-serif;}
+.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.9);font-size:.8rem;cursor:pointer;transition:border-color .2s;}
+.chapter-btn:hover{border-color:var(--teal);}
+.chapter-icon{color:var(--teal);font-weight:700;}
+.chapter-arrow{font-size:.6rem;opacity:.5;transition:transform .2s;}
+.chapter-menu.open .chapter-arrow{transform:rotate(180deg);}
+.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:200px;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;}
+.chapter-menu.open .chapter-list{display:block;}
+.chapter-item{display:flex;align-items:center;gap:8px;padding:8px 14px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;}
+.chapter-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+.chapter-item.active{color:var(--teal);font-weight:600;}
+.chapter-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;}
+.chapter-item.active .chapter-dot{background:var(--teal);box-shadow:0 0 6px var(--teal);}
+
+/* ═══════════════════════════════════════
+   CD: Claude Design tokens (from talk.zip slides.jsx)
+   px-based, fixed, viewport 1920×1080
+   ═══════════════════════════════════════ */
+:root{
+  --cd-hero:140px; --cd-display:96px; --cd-title:64px;
+  --cd-subtitle:44px; --cd-body:30px; --cd-small:24px; --cd-micro:20px;
+  --cd-pad-top:100px; --cd-pad-bottom:90px; --cd-pad-x:110px;
+  --cd-title-gap:56px; --cd-item-gap:32px;
+  --cd-ink:#0F172A; --cd-text2:#475569; --cd-text3:#64748B; --cd-mute:#94A3B8;
+  --cd-line:#E2E8F0; --cd-bg-soft:#F8FAFC; --cd-bg-soft2:#F1F5F9;
+  --cd-accent:#1A73E8;     /* blue.accent */
+  --cd-primary:#0B3C5D;    /* navy/dark */
+  --cd-soft:#DBEAFE;
+  --cd-warm:#F59E0B;
+  --cd-danger:#DC2626;
+}
+
+/* CD slide frame: paint white over .clean defaults */
+.slide.cd{padding:var(--cd-pad-top) var(--cd-pad-x) var(--cd-pad-bottom);background:#fff;color:var(--cd-ink);justify-content:flex-start;align-items:stretch;gap:0;}
+.slide.cd::before,.slide.cd::after{display:none;}
+.cd-header{margin-bottom:var(--cd-title-gap);}
+.cd-kicker{font-size:var(--cd-micro);letter-spacing:.18em;color:var(--cd-accent);font-weight:600;margin-bottom:16px;}
+.cd-title{font-size:var(--cd-title);font-weight:800;line-height:1.15;letter-spacing:-.01em;color:var(--cd-ink);}
+.cd-title .accent{color:var(--cd-accent);}
+.cd-stage{flex:1;min-height:0;display:flex;flex-direction:column;}
+
+/* CD roadmap (學習路徑) */
+.cd-roadmap{flex:1;display:flex;flex-direction:column;gap:16px;justify-content:center;}
+.cd-row{display:grid;grid-template-columns:80px 200px 240px 1fr;align-items:center;gap:32px;padding:20px 32px;background:var(--cd-bg-soft);color:var(--cd-ink);border-left:8px solid var(--cd-accent);}
+.cd-row .num{font-size:var(--cd-subtitle);font-weight:900;color:var(--cd-accent);font-feature-settings:'tnum';line-height:1;}
+.cd-row .when{font-size:var(--cd-body);font-weight:800;}
+.cd-row .dur{font-size:var(--cd-small);color:var(--cd-text3);letter-spacing:.04em;}
+.cd-row .todo{font-size:var(--cd-body);line-height:1.4;font-weight:500;}
+.cd-row.last{background:var(--cd-primary);color:#fff;border-left-color:var(--cd-warm);}
+.cd-row.last .num{color:var(--cd-warm);}
+.cd-row.last .dur{color:#CBD5E1;}
+.cd-tail{margin-top:24px;font-size:var(--cd-body);color:var(--cd-text2);text-align:center;font-style:italic;}
+.cd-tail b{color:var(--cd-accent);font-weight:800;font-style:normal;}
+
+/* CD three abilities (用→選→造) */
+.cd-three{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+.cd-ability{display:flex;flex-direction:column;border:1px solid var(--cd-line);padding:36px 32px;background:#fff;color:var(--cd-ink);}
+.cd-ability.dark{background:var(--cd-ink);color:#fff;border:none;}
+.cd-ability .step{font-size:var(--cd-display);font-weight:900;color:var(--cd-accent);line-height:1;font-feature-settings:'tnum';margin-bottom:20px;letter-spacing:-.03em;}
+.cd-ability .name{font-size:var(--cd-subtitle);font-weight:800;margin-bottom:6px;}
+.cd-ability .en{font-size:var(--cd-small);color:var(--cd-text3);letter-spacing:.12em;font-weight:600;margin-bottom:28px;}
+.cd-ability.dark .en{color:var(--cd-warm);}
+.cd-ability ul{list-style:none;display:flex;flex-direction:column;gap:12px;flex:1;}
+.cd-ability li{font-size:var(--cd-small);color:#334155;line-height:1.5;}
+.cd-ability.dark li{color:#CBD5E1;}
+.cd-ability .pct-row{margin-top:28px;padding-top:18px;border-top:1px solid var(--cd-line);display:flex;justify-content:space-between;align-items:baseline;}
+.cd-ability.dark .pct-row{border-top-color:#334155;}
+.cd-ability .pct-label{font-size:var(--cd-micro);color:var(--cd-text3);letter-spacing:.12em;}
+.cd-ability .pct-val{font-size:var(--cd-body);font-weight:800;color:var(--cd-accent);}
+.cd-ability.dark .pct-val{color:var(--cd-warm);}
+
+/* CD maturity (L1-L5) — sparse content, bumped sizes */
+.cd-mat{flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:16px;align-items:stretch;}
+.cd-mat-card{display:flex;flex-direction:column;background:#fff;color:var(--cd-ink);border:1px solid var(--cd-line);padding:40px 28px;}
+.cd-mat-card.last{background:var(--cd-danger);color:#fff;border:none;}
+.cd-mat-card .lv{font-size:128px;font-weight:900;color:var(--cd-accent);line-height:1;letter-spacing:-.04em;margin-bottom:24px;font-feature-settings:'tnum';}
+.cd-mat-card.l1 .lv{opacity:.36;} .cd-mat-card.l2 .lv{opacity:.52;} .cd-mat-card.l3 .lv{opacity:.68;} .cd-mat-card.l4 .lv{opacity:.84;}
+.cd-mat-card.last .lv{color:#fff;opacity:1;}
+.cd-mat-card .name{font-size:40px;font-weight:800;margin-bottom:14px;line-height:1.2;}
+.cd-mat-card .ko{font-size:28px;color:var(--cd-text2);line-height:1.45;flex:1;}
+.cd-mat-card.last .ko{color:#FECACA;}
+.cd-mat-card .out{margin-top:28px;padding-top:18px;border-top:1px solid var(--cd-line);font-size:24px;color:var(--cd-text3);letter-spacing:.04em;font-weight:600;}
+.cd-mat-card.last .out{border-top-color:rgba(255,255,255,.3);color:#FECACA;}
+.cd-mat-card .force{margin-top:18px;padding:14px 18px;background:rgba(5,150,105,.15);border-left:5px solid #059669;font-size:28px;font-weight:800;color:#047857;letter-spacing:.04em;line-height:1.4;}
+.cd-mat-card .force .accent{color:var(--cd-warm);}
+.cd-mat-card .force .ult{color:var(--cd-danger);}
+.cd-mat-card.last .force{color:#fff;}
+
+/* CD evolution (4-card era) — sparse content, bumped sizes */
+.cd-evo{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;}
+.cd-era{display:flex;flex-direction:column;background:#fff;color:var(--cd-ink);border:1px solid var(--cd-line);padding:40px 36px;}
+.cd-era.now{background:var(--cd-ink);color:#fff;border:none;}
+.cd-era .time{font-size:var(--cd-small);color:var(--cd-mute);font-weight:700;letter-spacing:.16em;margin-bottom:20px;}
+.cd-era.now .time{color:var(--cd-warm);}
+.cd-era .icon{font-size:120px;line-height:1;margin-bottom:24px;}
+.cd-era .label{font-size:56px;font-weight:800;margin-bottom:8px;line-height:1.1;}
+.cd-era .result{font-size:32px;color:var(--cd-accent);font-weight:700;margin-bottom:32px;letter-spacing:.02em;}
+.cd-era.now .result{color:var(--cd-warm);}
+.cd-era ul{list-style:none;display:flex;flex-direction:column;gap:14px;flex:1;}
+.cd-era li{font-size:28px;color:var(--cd-text2);line-height:1.45;}
+.cd-era.now li{color:#CBD5E1;}
+
+/* CD dark variant — same layout system, dark bg */
+.slide.cd.dark{background:var(--cd-ink);color:#fff;}
+.slide.cd.dark .cd-title{color:#fff;}
+.slide.cd.dark .cd-kicker{color:var(--cd-warm);}
+.slide.cd.dark .cd-tail{color:#CBD5E1;}
+.slide.cd.dark .cd-tail b{color:var(--cd-warm);}
+/* dark variants of cards */
+.slide.cd.dark .cd-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);color:#fff;}
+.slide.cd.dark .cd-card .head{color:#fff;}
+.slide.cd.dark .cd-card .sub{color:var(--cd-warm);}
+.slide.cd.dark .cd-card .body{color:#CBD5E1;}
+.slide.cd.dark .cd-card.dark{background:#fff;color:var(--cd-ink);border:none;}
+.slide.cd.dark .cd-card.dark .head{color:var(--cd-ink);}
+.slide.cd.dark .cd-card.dark .body{color:var(--cd-text2);}
+.slide.cd.dark .cd-take{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-top:6px solid var(--cd-warm);color:#fff;}
+.slide.cd.dark .cd-take .num{color:#94A3B8;}
+.slide.cd.dark .cd-take .head{color:#fff;}
+.slide.cd.dark .cd-take .body{color:#CBD5E1;}
+.slide.cd.dark .cd-mat-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);color:#fff;}
+.slide.cd.dark .cd-mat-card .lv{color:var(--cd-warm);}
+.slide.cd.dark .cd-mat-card .ko{color:#CBD5E1;}
+.slide.cd.dark .cd-mat-card .out{border-top-color:rgba(255,255,255,.15);color:#94A3B8;}
+
+/* CD stat (3 big numerals — 制度追不上 / 三種護城河 / 三組數據) */
+.cd-stat-3{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:32px;align-items:stretch;}
+.cd-stat-card{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:48px 32px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);}
+.cd-stat-card.highlight{background:rgba(245,158,11,.1);border-color:var(--cd-warm);}
+.cd-stat-card .label{font-size:24px;letter-spacing:.16em;color:var(--cd-warm);font-weight:700;margin-bottom:16px;text-transform:uppercase;}
+.cd-stat-card .big{font-size:160px;font-weight:900;color:#fff;line-height:1;letter-spacing:-.04em;font-feature-settings:'tnum';margin-bottom:8px;}
+.cd-stat-card .big .unit{font-size:48px;font-weight:700;margin-left:6px;}
+.cd-stat-card .desc{font-size:24px;color:#CBD5E1;margin-top:18px;line-height:1.5;}
+.cd-stat-card .note{font-size:22px;color:#94A3B8;margin-top:14px;line-height:1.5;}
+.cd-stat-card.highlight .big{color:var(--cd-warm);}
+.cd-stat-card.highlight .note{color:var(--cd-warm);font-weight:600;}
+
+/* CD pyramid (Token 消費金字塔) */
+.cd-pyramid{flex:1;display:flex;flex-direction:column-reverse;align-items:center;justify-content:center;gap:12px;padding:0 60px;}
+.cd-pyramid-row{display:grid;grid-template-columns:140px 1fr;align-items:center;gap:24px;padding:16px 32px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04);}
+.cd-pyramid-row .lv{font-size:44px;font-weight:900;color:#fff;text-align:right;font-feature-settings:'tnum';line-height:1;}
+.cd-pyramid-row .lbl{font-size:30px;color:#fff;font-weight:700;}
+.cd-pyramid-row .lbl .sub{font-size:22px;color:#94A3B8;font-weight:400;margin-left:14px;}
+
+/* CD compare (2-col comparison) */
+.cd-compare{flex:1;display:grid;grid-template-columns:1fr 80px 1fr;gap:32px;align-items:stretch;}
+.cd-compare-col{display:flex;flex-direction:column;background:#fff;color:var(--cd-ink);border:1px solid var(--cd-line);border-top:6px solid var(--cd-mute);padding:36px 36px;}
+.cd-compare-col.bad{border-top-color:var(--cd-warm);}
+.cd-compare-col.good{border-top-color:var(--cd-accent);}
+.cd-compare-col.danger{border-top-color:var(--cd-danger);}
+.cd-compare-col .badge{display:inline-block;align-self:flex-start;font-size:42px;font-weight:800;letter-spacing:0;color:var(--cd-ink);margin-bottom:28px;line-height:1.2;}
+.cd-compare-col.bad .badge{color:var(--cd-warm);}
+.cd-compare-col.good .badge{color:var(--cd-accent);}
+.cd-compare-col.danger .badge{color:var(--cd-danger);}
+.cd-compare-col .body{font-size:28px;color:var(--cd-text2);line-height:1.6;flex:1;}
+.cd-compare-col .body ul{list-style:none;display:flex;flex-direction:column;gap:16px;}
+.cd-compare-col .body li{font-size:28px;color:var(--cd-text2);line-height:1.45;}
+.cd-compare-arrow{display:flex;align-items:center;justify-content:center;font-size:80px;color:var(--cd-mute);font-weight:300;line-height:1;}
+
+/* CD cards 3-col (lightweight — no big numbers) */
+.cd-cards-3{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.cd-cards-4{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+.cd-cards-2x2{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:24px;}
+.cd-card{display:flex;flex-direction:column;background:#fff;color:var(--cd-ink);border:1px solid var(--cd-line);border-top:5px solid var(--cd-accent);padding:40px 36px;}
+.cd-card.warm{border-top-color:var(--cd-warm);}
+.cd-card.danger{border-top-color:var(--cd-danger);}
+.cd-card.dark{background:var(--cd-ink);color:#fff;border:none;}
+.cd-card .head{font-size:54px;font-weight:800;line-height:1.2;margin-bottom:18px;color:var(--cd-ink);}
+.cd-card.dark .head{color:#fff;}
+.cd-card .sub{font-size:32px;color:var(--cd-text3);letter-spacing:.04em;font-weight:700;margin-bottom:24px;line-height:1.3;}
+.cd-card .body{font-size:26px;color:var(--cd-text2);line-height:1.55;flex:1;}
+.cd-card.dark .body{color:#CBD5E1;}
+.cd-card .body ul{list-style:none;display:flex;flex-direction:column;gap:12px;}
+.cd-card .body li{font-size:26px;line-height:1.5;}
+.cd-cards-4 .cd-card{padding:44px 32px;}
+.cd-cards-4 .cd-card .head{font-size:48px;margin-bottom:18px;line-height:1.15;}
+.cd-cards-4 .cd-card .sub{font-size:32px;font-weight:700;margin-bottom:22px;letter-spacing:.04em;}
+.cd-cards-4 .cd-card .body,.cd-cards-4 .cd-card .body li{font-size:26px;line-height:1.55;word-break:keep-all;}
+
+/* CD quote (Jensen / Sundar single + multi quotes) */
+.slide.cd-quote{background:var(--cd-primary);color:#fff;align-items:flex-start;justify-content:flex-start;padding:80px var(--cd-pad-x) 80px;gap:0;}
+.slide.cd-quote::before,.slide.cd-quote::after{display:none;}
+.slide.cd-quote .cd-quote-rule{width:120px;height:6px;background:var(--cd-warm);flex:0 0 auto;}
+.slide.cd-quote .cd-quote-tag{font-size:var(--cd-small);letter-spacing:.28em;color:var(--cd-warm);font-weight:700;margin-top:24px;flex:0 0 auto;}
+.slide.cd-quote .cd-quote-list{display:flex;flex-direction:column;gap:36px;width:100%;text-align:left;flex:1;justify-content:center;}
+.slide.cd-quote .cd-quote-item{font-size:60px;font-weight:300;line-height:1.3;color:#fff;letter-spacing:-.01em;}
+.slide.cd-quote .cd-quote-item b{font-weight:700;color:var(--cd-warm);}
+.slide.cd-quote .cd-quote-src{font-size:var(--cd-small);color:#94A3B8;letter-spacing:.12em;flex:0 0 auto;}
+
+/* CD table (rows of label / use / free / pro) */
+.cd-table{flex:1;display:flex;flex-direction:column;gap:0;background:#fff;border:1px solid var(--cd-line);}
+.cd-trow{display:grid;align-items:center;padding:18px 28px;border-bottom:1px solid var(--cd-line);font-size:24px;}
+.cd-trow:last-child{border-bottom:none;}
+.cd-trow.head{background:var(--cd-bg-soft);font-size:var(--cd-micro);letter-spacing:.16em;color:var(--cd-text3);font-weight:700;text-transform:uppercase;}
+.cd-trow .name{font-size:28px;font-weight:800;color:var(--cd-ink);}
+.cd-trow .accent{color:var(--cd-accent);font-weight:700;}
+.cd-trow .warm{color:var(--cd-warm);font-weight:700;}
+
+/* CD process steps (RCTF etc) */
+.cd-process{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:24px;max-width:1500px;width:100%;margin-left:auto;margin-right:auto;}
+.cd-pstep{display:flex;flex-direction:row;align-items:center;gap:24px;background:var(--cd-bg-soft);padding:24px 28px;border-left:6px solid var(--cd-accent);}
+.cd-pstep .key{font-size:80px;font-weight:900;color:var(--cd-accent);line-height:1;font-feature-settings:'tnum';flex-shrink:0;}
+.cd-pstep .lbl{font-size:36px;font-weight:800;color:var(--cd-ink);line-height:1.2;}
+.cd-pstep .en{display:block;font-size:18px;color:var(--cd-text3);letter-spacing:.18em;font-weight:600;margin-top:6px;}
+
+/* CD takeaway (3×2 = 6 cards) */
+.cd-takeaway{flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:24px;}
+.cd-take{display:flex;flex-direction:column;background:#fff;color:var(--cd-ink);border:1px solid var(--cd-line);border-top:6px solid var(--cd-accent);padding:32px 32px;}
+.cd-take .num{font-size:var(--cd-micro);color:var(--cd-text3);letter-spacing:.16em;font-weight:700;margin-bottom:14px;}
+.cd-take .head{font-size:40px;font-weight:800;margin-bottom:16px;line-height:1.15;color:var(--cd-ink);}
+.cd-take .body{font-size:26px;color:var(--cd-text2);line-height:1.5;flex:1;}
+
+/* CD part divider (PART 1 大編號) */
+.slide.cd-part{background:var(--cd-bg-soft);justify-content:center;align-items:flex-start;padding:var(--cd-pad-top) var(--cd-pad-x) var(--cd-pad-bottom);}
+.slide.cd-part::before,.slide.cd-part::after{display:none;}
+.slide.cd-part>*{width:100%;text-align:left;}
+.cd-part-rule{position:absolute;top:var(--cd-pad-top);left:var(--cd-pad-x);right:var(--cd-pad-x);height:1px;background:#CBD5E1;}
+.cd-part-tag{position:absolute;top:calc(var(--cd-pad-top) - 14px);left:var(--cd-pad-x);font-size:var(--cd-micro);color:var(--cd-accent);letter-spacing:.32em;font-weight:700;background:var(--cd-bg-soft);padding-right:16px;}
+.cd-part-folio{font-size:240px;font-weight:900;color:var(--cd-soft);line-height:1;letter-spacing:-.04em;margin-bottom:-40px;opacity:.7;}
+.cd-part-title{font-size:var(--cd-hero);font-weight:900;line-height:1.05;color:var(--cd-ink);letter-spacing:-.02em;position:relative;z-index:2;}
+.cd-part-sub{font-size:var(--cd-subtitle);color:var(--cd-text2);margin-top:32px;font-weight:300;letter-spacing:.04em;}
+
+@media(max-width:768px){
+  .slide-header{padding:1rem 1.5rem .6rem;}
+  .card-grid{padding:1rem 1.5rem;}
+  .card-grid.cols-2,.card-grid.cols-3,.card-grid.cols-4{grid-template-columns:1fr;}
+  .process-steps{flex-direction:column;padding:1rem 1.5rem;}
+  .step-arrow{transform:rotate(90deg);}
+  .comparison-grid{grid-template-columns:1fr;padding:1rem 1.5rem;}
+  .comp-arrow{transform:rotate(90deg);justify-content:center;}
+  .stat-grid{padding:1rem 1.5rem;}
+  .tip-box,.tip-box-dark{margin:.8rem 1.5rem;}
+  .quote-wrap{padding:2rem 1.5rem;}
+  .pyramid{padding:1rem 1.5rem;}
+  .section-content{padding:0 2rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="slides" >
+
+<!-- ═══════════ 1: COVER ═══════════ -->
+<div class="slide poster overlay-heavy active" data-act="開場" style="background:linear-gradient(135deg,var(--navy) 0%,var(--dark3) 40%,var(--dark) 100%);align-items:center;justify-content:center;padding:0;text-align:left;overflow:hidden;">
+  <!-- decorative grid -->
+  <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.07;pointer-events:none;" aria-hidden="true">
+    <defs>
+      <pattern id="cover-grid" width="80" height="80" patternUnits="userSpaceOnUse">
+        <path d="M 80 0 L 0 0 0 80" fill="none" stroke="#fff" stroke-width="1"/>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#cover-grid)"/>
+  </svg>
+  <!-- accent triangle 右上 -->
+  <div style="position:absolute;top:0;right:0;width:520px;height:520px;background:var(--gold);opacity:.15;clip-path:polygon(100% 0,100% 100%,0 0);pointer-events:none;"></div>
+
+  <!-- 內容區（左對齊但整塊水平置中） -->
+  <div style="position:relative;z-index:2;width:100%;max-width:1100px;display:flex;flex-direction:column;">
+    <!-- accent line -->
+    <div style="width:120px;height:6px;background:var(--gold);margin-bottom:2rem;"></div>
+
+    <p style="font-size:1rem;color:var(--gold);letter-spacing:.32em;margin-bottom:2.8rem;font-weight:700;">UNIVERSITY TALK · 2026</p>
+
+    <p style="font-size:1.8rem;color:rgba(255,255,255,.7);font-weight:400;letter-spacing:.05em;margin-bottom:.8rem;">我們來聊聊 AI 世代的</p>
+
+    <h1 style="font-size:9rem;font-weight:900;letter-spacing:-.04em;line-height:1;color:#fff;margin-bottom:2.5rem;">
+      <span style="color:var(--gold);">演</span>進
+    </h1>
+
+    <div style="display:flex;align-items:baseline;gap:1.5rem;flex-wrap:wrap;">
+      <p style="font-size:1.7rem;color:var(--gold);font-weight:700;letter-spacing:.04em;margin:0;">人駕馭 AI Token</p>
+      <span style="color:rgba(255,255,255,.3);font-size:1.5rem;">·</span>
+      <p style="font-size:1.7rem;color:#fff;font-weight:300;letter-spacing:.04em;margin:0;">產生無限可能</p>
+    </div>
+
+    <p style="font-size:1.1rem;color:rgba(255,255,255,.5);margin-top:1.2rem;letter-spacing:.08em;font-weight:400;">一場關於人類潛能的分享</p>
+  </div>
+
+  <!-- 底部 brand line（也置中對齊） -->
+  <div style="position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);width:100%;max-width:1100px;display:flex;justify-content:space-between;align-items:flex-end;font-size:.85rem;color:rgba(255,255,255,.4);letter-spacing:.16em;font-weight:500;z-index:2;">
+    <span>SPEAKER · 陳重光 ALAN CHEN</span>
+    <span style="color:var(--gold);">cooperation.tw</span>
+  </div>
+</div>
+
+<!-- ═══════════ 1.5a: 講師介紹 — 截圖 1 全版 ═══════════ -->
+<div class="slide" data-act="開場" style="padding:0;background:#fff;align-items:center;justify-content:center;">
+  <img src="img/t01/alan-intro-1.png" alt="陳重光 講師介紹" style="max-width:100%;max-height:100%;object-fit:contain;">
+</div>
+
+<!-- ═══════════ 1.5b: 講師介紹 — 截圖 2 全版（個人經歷與專長）═══════════ -->
+<div class="slide" data-act="開場" style="padding:0;background:#fff;align-items:center;justify-content:center;">
+  <img src="img/t01/alan-intro-2.png" alt="陳重光 個人經歷與專長" style="max-width:100%;max-height:100%;object-fit:contain;">
+</div>
+
+<!-- ═══════════ 2: AGENDA (CD Takeaway 6) ═══════════ -->
+<div class="slide cd" data-act="開場">
+  <div class="cd-header">
+    <div class="cd-kicker">AGENDA · 今天的旅程</div>
+    <h1 class="cd-title">六個段落 <span class="accent">—</span> 從文明史到你的下一步</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-takeaway">
+      <div class="cd-take fragment"><div class="num">01</div><div class="head">代價與駕馭力演進</div><div class="body">三次技術革命的社會抗爭、三巨頭競速。</div></div>
+      <div class="cd-take fragment"><div class="num">02</div><div class="head">你在哪裡？</div><div class="body">81 億人口中的 AI 使用分布與 Token 經濟。</div></div>
+      <div class="cd-take fragment"><div class="num">03</div><div class="head">三個核心能力</div><div class="body">用工具 → 選工具 → 造工具。</div></div>
+      <div class="cd-take fragment"><div class="num">04</div><div class="head">AI 成熟度分級</div><div class="body">從使用工具到方法創新（L1→L5）。</div></div>
+      <div class="cd-take fragment"><div class="num">05</div><div class="head">實戰行動</div><div class="body">免費 AI API、AI 工具、第一步。</div></div>
+      <div class="cd-take fragment"><div class="num">06</div><div class="head">未來展望</div><div class="body">OpenAI 社會契約、Token 預算、學習路徑。</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ACT 0: 代價 — 從砸機器到扔汽油彈 ═══════════ -->
+
+<!-- A0-1: Section Divider -->
+<div class="slide cine" data-act="代價" style="background-image:url('img/t01-stories/divider_timeline.png') !important;background-size:contain !important;background-repeat:no-repeat !important;background-position:center center !important;background-color:#0a0a14;">
+  <div class="cine-content" style="max-width:50%;justify-content:center;align-self:flex-start;display:flex;flex-direction:column;height:100%;">
+    <div class="cine-tag">BEFORE WE BEGIN</div>
+    <div class="cine-title" style="font-size:2.8rem;">從砸機器<br>到扔汽油彈</div>
+    <div class="cine-sub">每次技術革命，都有人付出代價。<br>三個時代，三個故事，一個相同的模式。</div>
+  </div>
+</div>
+
+<!-- A0-2: Story #1 — Rawfolds Mill 1812 -->
+<div class="slide cine" data-act="代價" style="background-image:url('img/t01-stories/story1_mill.png');">
+  <div class="cine-content">
+    <div class="cine-tag">工業革命 · 1812 · 英格蘭約克郡</div>
+    <div class="cine-title">羅福茲磨坊之戰</div>
+    <div class="cine-sub">150 名蒙面工人，手持鐵鎚和斧頭，深夜攻擊一座紡織磨坊。<br>一台剪切機取代五名熟練工人。省下的錢，沒有一分流向被取代者。</div>
+    <div class="cine-insight fragment">
+      <strong>結局：</strong>17 人被絞刑。政府派出 12,000 士兵鎮壓 — 比對付拿破崙的還多。<br>
+      <strong>剪刀差：</strong>剪切機數月擴散，工人保護法等了 <span style="color:var(--gold);font-weight:700;">21 年</span>
+    </div>
+  </div>
+</div>
+
+<!-- A0-3: Story #5 — Kodak 2012 -->
+<div class="slide cine-right" data-act="代價" style="background-image:url('img/t01-stories/story5_kodak.png');">
+  <div class="cine-content">
+    <div class="cine-tag">數位革命 · 2012</div>
+    <div class="cine-title">14 萬人 vs 13 人</div>
+    <div class="cine-sub">柯達 1975 年發明了數位相機 —<br>然後決定把它藏起來。<br>2012 年柯達破產。<br>同年 Instagram（13 名員工）以 10 億美元被收購。</div>
+    <div class="cine-insight fragment">
+      <strong>啟示：</strong>柯達不是沒看到趨勢 — 他們發明了那個趨勢。<br>
+      <strong>剪刀差：</strong>數位相機從發明到全面普及花了 25 年，但柯達所在城市的就業<span style="color:var(--gold);font-weight:700;">至今未恢復</span>
+    </div>
+  </div>
+</div>
+
+<!-- A0-4: Story #9 — Altman Firebomb 2026 -->
+<div class="slide cine" data-act="代價" style="background-image:url('img/t01-stories/story9_firebomb.png');">
+  <div class="cine-content">
+    <div class="cine-tag">AI 革命 · 2026.4.10</div>
+    <div class="cine-title">Altman 家的汽油彈</div>
+    <div class="cine-sub">凌晨 3:40，一名 20 歲青年向 OpenAI CEO 住宅投擲汽油彈。<br>Z 世代對 AI 的憤怒從 22% 攀升到 31%，希望從 27% 降到 18%。</div>
+    <div class="cine-insight fragment">
+      <strong>214 年：</strong>從砸織布機到扔汽油彈，驚人相似的模式。<br>
+      <strong>剪刀差：</strong>AI 數月改變就業市場，制度回應 <span style="color:var(--gold);font-weight:700;">3+ 年仍無實質進展</span>
+    </div>
+  </div>
+</div>
+
+<!-- A0-5: 剪刀差加速 -->
+<!-- A0-5: 剪刀差加速 (CD Dark Stat) -->
+<div class="slide cd dark" data-act="代價">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 1 · 制度追不上技術</div>
+    <h1 class="cd-title">技術擴散 <span style="color:var(--cd-warm);">→</span> 制度回應 — 越來越快</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-stat-3">
+      <div class="cd-stat-card fragment">
+        <div class="label">工業革命</div>
+        <div class="big">50<span class="unit">年</span></div>
+        <div class="desc">技術擴散 → 制度回應</div>
+        <div class="note">剪切機 → 工廠法（1833）<br>工會合法化等了 59 年</div>
+      </div>
+      <div class="cd-stat-card fragment">
+        <div class="label">數位革命</div>
+        <div class="big">10<span class="unit">年</span></div>
+        <div class="desc">技術擴散 → 制度回應</div>
+        <div class="note">數位相機 → 產業轉型<br>柯達城至今未復原</div>
+      </div>
+      <div class="cd-stat-card highlight fragment">
+        <div class="label" style="color:var(--cd-warm);">AI 革命</div>
+        <div class="big">3+<span class="unit">年</span></div>
+        <div class="desc">技術擴散 → 制度回應</div>
+        <div class="note">尚無實質進展<br>UBI、AI 稅仍在「討論」</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ACT 0.5: 到底有多快？ — 三巨頭發布節奏 ═══════════ -->
+
+<!-- A05-1: 三巨頭 Section -->
+<div class="slide cine" data-act="加速度" style="background-image:url('img/t01-stories/giants_speed.png');justify-content:flex-start;padding-top:3.5rem;">
+  <div class="cine-content" style="max-width:48%;">
+    <div class="cine-tag">2026 AI RACE</div>
+    <div class="cine-title">到底有多快？</div>
+    <div class="cine-sub">三家巨頭用三種不同策略同時加速。<br>這不是一波一波的 — 是三波同時灌進來。</div>
+  </div>
+</div>
+
+<!-- A05-2: 三種護城河 (CD Dark Cards 3) -->
+<div class="slide cd dark" data-act="加速度">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 1 · 三種護城河</div>
+    <h1 class="cd-title">三種護城河 <span style="color:var(--cd-warm);">—</span> 三種追不上的方式</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-3">
+      <div class="cd-card warm fragment">
+        <div class="head" style="font-size:48px;color:var(--cd-warm);">52 天 73 次</div>
+        <div class="sub">ANTHROPIC</div>
+        <div class="body">想法 → 上線 → Dogfooding → 再發布<br><br>平均每天都在改變使用者工作流。<br><br><b style="color:var(--cd-warm);">護城河：執行力</b></div>
+      </div>
+      <div class="cd-card danger fragment">
+        <div class="head" style="font-size:48px;color:var(--cd-danger);">單次衝擊</div>
+        <div class="sub">OPENAI</div>
+        <div class="body">每次發布都是市場級震動<br><br>改變整個產業的使用習慣。<br><br><b style="color:var(--cd-danger);">護城河：品牌心智</b></div>
+      </div>
+      <div class="cd-card fragment">
+        <div class="head" style="font-size:48px;color:var(--cd-accent);">無所不在</div>
+        <div class="sub">GOOGLE</div>
+        <div class="body">10 億用戶 × 多入口<br><br>Workspace、Android、Cloud 全滲透。<br><br><b style="color:var(--cd-accent);">護城河：生態分發</b></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- A05-3: 三重印證過渡 (CD Dark) -->
+<div class="slide cd dark" data-act="加速度">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 1 · 三重印證</div>
+    <h1 class="cd-title">三組數據，<span style="color:var(--cd-warm);">同一個結論</span></h1>
+  </div>
+  <div class="cd-stage">
+    <div style="display:flex;flex-direction:column;gap:24px;flex:1;justify-content:center;">
+      <div class="fragment" style="display:grid;grid-template-columns:200px 1fr;align-items:center;gap:32px;padding:28px 36px;background:rgba(255,255,255,.04);border-left:8px solid var(--cd-danger);">
+        <div style="font-size:36px;font-weight:900;color:var(--cd-danger);text-align:right;">社會代價</div>
+        <div style="font-size:30px;color:#fff;line-height:1.5;">制度回應時間：50 年 → 10 年 → <b style="color:var(--cd-warm);">3 年（仍無進展）</b></div>
+      </div>
+      <div class="fragment" style="display:grid;grid-template-columns:200px 1fr;align-items:center;gap:32px;padding:28px 36px;background:rgba(255,255,255,.04);border-left:8px solid var(--cd-warm);">
+        <div style="font-size:36px;font-weight:900;color:var(--cd-warm);text-align:right;">企業競爭</div>
+        <div style="font-size:30px;color:#fff;line-height:1.5;">三巨頭同時加速：速度 × 衝擊 × 滲透 = <b style="color:var(--cd-warm);">無處可逃</b></div>
+      </div>
+      <div class="fragment" style="display:grid;grid-template-columns:200px 1fr;align-items:center;gap:32px;padding:28px 36px;background:rgba(255,255,255,.04);border-left:8px solid var(--cd-accent);">
+        <div style="font-size:36px;font-weight:900;color:var(--cd-accent);text-align:right;">產業迭代</div>
+        <div style="font-size:30px;color:#fff;line-height:1.5;">工業革命週期：100 年 → 10 年 → <b style="color:var(--cd-warm);">1 年</b></div>
+      </div>
+    </div>
+    <div class="cd-tail fragment">速度，是這次革命的<b>本質差異</b>。所以真正的問題是：人類怎麼辦？</div>
+  </div>
+</div>
+
+<!-- ═══════════ 3: PART 1 DIVIDER (CD Part) ═══════════ -->
+<div class="slide cd-part" data-act="駕馭力演進">
+  <div class="cd-part-rule"></div>
+  <div class="cd-part-tag">PART 01</div>
+  <div class="cd-part-folio">01</div>
+  <h1 class="cd-part-title">人類駕馭力的演進</h1>
+  <div class="cd-part-sub">從火到 AI — 一條 40 萬年的曲線</div>
+</div>
+
+<!-- ═══════════ 4: 四階段演進 (CD Evolution) ═══════════ -->
+<div class="slide cd" data-act="駕馭力演進">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 1 · 人類駕馭力的演進</div>
+    <h1 class="cd-title">從火到 AI — 一條 40 萬年的駕馭曲線</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-evo">
+      <div class="cd-era fragment">
+        <div class="time">40 萬年前</div>
+        <div class="icon">🔥</div>
+        <div class="label">火</div>
+        <div class="result">= 出現文明</div>
+        <ul><li>· 烹飪、取暖</li><li>· 夜間活動</li><li>· 人類脫離動物界</li></ul>
+      </div>
+      <div class="cd-era fragment">
+        <div class="time">~10000 BC</div>
+        <div class="icon">🐎</div>
+        <div class="label">獸力·機械</div>
+        <div class="result">= 效率</div>
+        <ul><li>· 農耕、運輸</li><li>· 工業革命</li><li>· 一人抵百人</li></ul>
+      </div>
+      <div class="cd-era fragment">
+        <div class="time">1990s</div>
+        <div class="icon">💻</div>
+        <div class="label">科技</div>
+        <div class="result">= 創新</div>
+        <ul><li>· 網路、軟體</li><li>· 平台經濟</li><li>· 改變商業模式</li></ul>
+      </div>
+      <div class="cd-era now fragment">
+        <div class="time">NOW</div>
+        <div class="icon">🤖</div>
+        <div class="label">AI Token</div>
+        <div class="result">= 無限可能</div>
+        <ul><li>· 生成式 AI、Agent</li><li>· 超級個體</li><li>· 一人 = 一間公司</li></ul>
+      </div>
+    </div>
+    <div class="cd-tail fragment">每個時代的贏家，都是<b>最早學會駕馭新技術的人</b>。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 5: 駕馭火 (CD Compare) ═══════════ -->
+<div class="slide cd" data-act="駕馭力演進">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 1 · 駕馭火</div>
+    <h1 class="cd-title">駕馭火 <span class="accent">—</span> 文明的起點</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-3" style="grid-template-columns:1fr 1fr;">
+      <div class="cd-card danger fragment">
+        <div class="head">40 萬年前，人類學會控制火</div>
+        <div class="body">
+          <ul>
+            <li>· 烹飪 → 大腦發展</li>
+            <li>· 夜間活動 → 社交文化</li>
+            <li>· 冶煉金屬 → 工具進化</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cd-card warm fragment">
+        <div class="head">核心邏輯</div>
+        <div class="body">
+          火不是人類發明的，但人類學會「駕馭」。<br><br>
+          <b>驅動力是人對工具的掌控能力</b>。
+        </div>
+      </div>
+    </div>
+    <div class="cd-tail fragment">火是第一個「通用技術」 — AI 是最新的，<b>你正站在駕馭它的起點</b>。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 6: 獸力與機械 (CD Cards 4) ═══════════ -->
+<div class="slide cd" data-act="駕馭力演進">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 1 · 獸力與機械</div>
+    <h1 class="cd-title">駕馭獸力與機械 <span class="accent">—</span> 效率的爆發</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-4">
+      <div class="cd-card fragment"><div class="head">農業時代</div><div class="sub">~10000 BC</div><div class="body">牛耕田、馬運輸<br>一頭牛 = 5 個人力</div></div>
+      <div class="cd-card warm fragment"><div class="head">工業革命</div><div class="sub">1760s</div><div class="body">蒸汽機、紡織機<br>一台 = 100 個工人</div></div>
+      <div class="cd-card fragment"><div class="head">電力時代</div><div class="sub">1880s</div><div class="body">電動機、生產線<br>汽車的流水線</div></div>
+      <div class="cd-card dark fragment"><div class="head">自動化</div><div class="sub">1970s</div><div class="body">CNC、機器人<br>精準度超越人手</div></div>
+    </div>
+    <div class="cd-tail fragment">關鍵不是誰擁有工具，<b>而是誰能駕馭工具</b>。AI 也是同樣邏輯。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 7: 駕馭科技 (CD Cards 4) ═══════════ -->
+<div class="slide cd" data-act="駕馭力演進">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 1 · 駕馭科技</div>
+    <h1 class="cd-title">駕馭科技 <span class="accent">—</span> 數位創新</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-4">
+      <div class="cd-card fragment"><div class="head">網路</div><div class="sub">1990s</div><div class="body">撥接到寬頻<br>資訊傳播從天變秒<br>電子商務誕生</div></div>
+      <div class="cd-card fragment"><div class="head">軟體</div><div class="sub">2000s</div><div class="body">SaaS 雲端服務<br>Google、Facebook<br>軟體服務世界</div></div>
+      <div class="cd-card warm fragment"><div class="head">平台</div><div class="sub">2010s</div><div class="body">Uber、Airbnb<br>App Store、共享經濟<br>人人都是創業家</div></div>
+      <div class="cd-card dark fragment"><div class="head">AI</div><div class="sub">2020s</div><div class="body">ChatGPT、Claude<br>生成式 AI 革命<br>人人都是開發者</div></div>
+    </div>
+    <div class="cd-tail fragment">每個時代的贏家，都是<b>最早學會駕馭新技術的人</b>。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 8: 人比AI凶 (CD Quote) ═══════════ -->
+<div class="slide cd-quote" data-act="駕馭力演進" style="background:#1a0a0a;">
+  <div class="cd-quote-rule"></div>
+  <div class="cd-quote-tag" style="color:#FCA5A5;">PART 1 · 駕馭力的本質</div>
+  <div class="cd-quote-list" style="gap:48px;">
+    <div style="font-size:30px;color:#94A3B8;letter-spacing:.04em;line-height:1.5;">「人要比車兇」「看到我尾燈算你贏」<span style="font-size:24px;color:#64748B;margin-left:14px;">— 鄭伊健《烈火戰車 2：極速傳說》1999</span></div>
+    <div class="cd-quote-item fragment" style="font-size:96px;font-weight:900;color:#fff;line-height:1.1;">「人比 <b style="color:#FCA5A5;font-weight:900;">AI</b> 凶」</div>
+    <div class="cd-quote-item fragment" style="font-size:44px;font-weight:300;color:#CBD5E1;">不是 AI 有多強，<b style="color:#FCA5A5;font-weight:700;">是你用 AI 有多狠</b></div>
+    <div style="font-size:24px;color:#94A3B8;letter-spacing:.12em;margin-top:8px;">— 萬維鋼《精英日課》</div>
+    <div class="cd-quote-item fragment" style="font-size:30px;color:#CBD5E1;line-height:1.6;font-weight:400;margin-top:20px;">車子再好，不會開也沒用。AI 再強，不會用也是零。<br><b style="color:#fff;font-weight:700;">決定勝負的，永遠是駕馭者。</b></div>
+  </div>
+</div>
+
+<!-- ═══════════ 9: 工業革命 1.0-5.0 (CD Maturity-style 5卡) ═══════════ -->
+<div class="slide cd" data-act="駕馭力演進">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 1 · 工業革命</div>
+    <h1 class="cd-title">工業革命的演進 <span class="accent">—</span> 從 1.0 到 5.0</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-mat">
+      <div class="cd-mat-card l1 fragment"><div class="lv">1.0</div><div class="name">動力與機械化</div><div class="ko">1784 蒸汽機</div><div class="force">系統力</div><div class="out">→ 操作導向</div></div>
+      <div class="cd-mat-card l2 fragment"><div class="lv">2.0</div><div class="name">電力與規模化</div><div class="ko">1870 電力驅動</div><div class="force">系統力</div><div class="out">→ 流程導向</div></div>
+      <div class="cd-mat-card l3 fragment"><div class="lv">3.0</div><div class="name">資訊與自動化</div><div class="ko">1969 PLC / IT</div><div class="force" style="background:rgba(26,115,232,.15);border-left-color:var(--cd-accent);color:var(--cd-accent);">數位力</div><div class="out">→ IT 導向</div></div>
+      <div class="cd-mat-card l4 fragment"><div class="lv">4.0</div><div class="name">數據與智慧化</div><div class="ko">2011 IoT / AI</div><div class="force" style="background:rgba(26,115,232,.15);border-left-color:var(--cd-accent);color:var(--cd-accent);">數位力<br>系統力</div><div class="out">→ 數據導向</div></div>
+      <div class="cd-mat-card last fragment"><div class="lv">5.0</div><div class="name">人機與永續化</div><div class="ko">NOW 人本 / ESG</div><div class="force" style="background:rgba(245,158,11,.22);border-left-color:var(--cd-warm);color:var(--cd-warm);">數位力<br>系統力<br>永續力</div><div class="out">→ 價值導向</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 10: 工業5.0三力 (CD Three) ═══════════ -->
+<div class="slide cd" data-act="駕馭力演進">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 1 · 工業 5.0</div>
+    <h1 class="cd-title">工業 5.0 帶出現代人的<span class="accent">三個能力</span></h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-three">
+      <div class="cd-ability fragment">
+        <div class="step">數</div>
+        <div class="name">數位力</div>
+        <div class="en">DIGITAL</div>
+        <ul>
+          <li>· 理解工具、運用科技</li>
+          <li>· 提升決策與效率</li>
+          <li>· AI 工具與數據處理能力</li>
+          <li>· 已列入企業職能地圖</li>
+        </ul>
+      </div>
+      <div class="cd-ability fragment">
+        <div class="step">系</div>
+        <div class="name">系統力</div>
+        <div class="en">SYSTEM</div>
+        <ul>
+          <li>· 看見因果、跨域影響</li>
+          <li>· 理解整體架構與連動關係</li>
+          <li>· ESG 跨部門影響分析</li>
+          <li>· 供應鏈風險管理核心能力</li>
+        </ul>
+      </div>
+      <div class="cd-ability dark fragment">
+        <div class="step">永</div>
+        <div class="name">永續力</div>
+        <div class="en">SUSTAINABILITY</div>
+        <ul>
+          <li>· 掌握風險、經營未來</li>
+          <li>· 長期價值與利害關係人</li>
+          <li>· 從合規揭露到戰略 ESG</li>
+          <li>· 永續 = 競爭力</li>
+        </ul>
+      </div>
+    </div>
+    <div class="cd-tail fragment">底層共通：<b>迭代的適應力</b>。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 10.5: 迭代週期 (CD Dark) ═══════════ -->
+<div class="slide cd dark" data-act="駕馭力演進">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 1 · 迭代週期</div>
+    <h1 class="cd-title">迭代週期 <span style="color:var(--cd-warm);">—</span> 加速度在哪裡？</h1>
+  </div>
+  <div class="cd-stage">
+    <div style="display:flex;flex-direction:column;gap:18px;flex:1;justify-content:center;max-width:1100px;width:100%;margin:0 auto;">
+      <div class="fragment" style="display:grid;grid-template-columns:180px 1fr;align-items:center;gap:32px;padding:24px 32px;background:rgba(255,255,255,.04);border-left:8px solid #5EEAD4;">
+        <div style="font-size:48px;font-weight:900;color:#5EEAD4;text-align:right;">100 年</div>
+        <div><div style="font-size:30px;font-weight:700;color:#fff;">駕馭獸力 → 機械動力</div><div style="font-size:22px;color:#94A3B8;margin-top:6px;">蒸汽機、電力、工業革命</div></div>
+      </div>
+      <div class="fragment" style="display:grid;grid-template-columns:180px 1fr;align-items:center;gap:32px;padding:24px 32px;background:rgba(255,255,255,.04);border-left:8px solid var(--cd-accent);">
+        <div style="font-size:48px;font-weight:900;color:var(--cd-accent);text-align:right;">10 年</div>
+        <div><div style="font-size:30px;font-weight:700;color:#fff;">科技、數位轉型</div><div style="font-size:22px;color:#94A3B8;margin-top:6px;">網路、SaaS、平台經濟</div></div>
+      </div>
+      <div class="fragment" style="display:grid;grid-template-columns:180px 1fr;align-items:center;gap:32px;padding:24px 32px;background:rgba(255,255,255,.04);border-left:8px solid var(--cd-warm);">
+        <div style="font-size:48px;font-weight:900;color:var(--cd-warm);text-align:right;">1 年</div>
+        <div><div style="font-size:30px;font-weight:700;color:#fff;">AI 的企業、職能轉型</div><div style="font-size:22px;color:#94A3B8;margin-top:6px;">生成式 AI 重塑工作流程</div></div>
+      </div>
+      <div class="fragment" style="display:grid;grid-template-columns:180px 1fr;align-items:center;gap:32px;padding:24px 32px;background:rgba(220,38,38,.15);border-left:8px solid var(--cd-danger);">
+        <div style="font-size:48px;font-weight:900;color:var(--cd-danger);text-align:right;">1 個月</div>
+        <div><div style="font-size:30px;font-weight:700;color:#fff;">AI 三巨頭<span style="font-size:22px;color:#FECACA;margin-left:14px;">持續加速中</span></div><div style="font-size:22px;color:#FECACA;margin-top:6px;">OpenAI · Anthropic · Google</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 10.6: AlphaGo 重擊 ═══════════ -->
+<div class="slide dataviz" data-act="衝擊與提升">
+  <h2>AlphaGo 重擊圍棋圈 — AI 第一次擊敗人類</h2>
+  <div style="display:flex;align-items:center;gap:2rem;flex:1;max-width:1100px;width:100%;">
+    <div style="flex:1;text-align:center;">
+      <img src="alphago_leesedol.png" alt="Lee Sedol vs AlphaGo 2016" style="max-width:100%;max-height:55vh;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.4);">
+      <p style="font-size:.75rem;color:rgba(255,255,255,.3);margin-top:.5rem;">李世石（韓國九段）vs AlphaGo · Seoul · 2016 / 03</p>
+    </div>
+    <div style="flex:1.1;display:flex;flex-direction:column;gap:.8rem;">
+      <div class="fragment" style="background:rgba(220,38,38,.12);border:2px solid var(--red);border-radius:10px;padding:1rem 1.3rem;">
+        <div style="font-size:1.4rem;font-weight:900;color:var(--red);">2016 / 03</div>
+        <div style="font-size:1rem;margin-top:.3rem;"><strong>AlphaGo 4 : 1 擊敗李世石</strong><br><span style="opacity:.6;font-size:.9rem;">人類世界最會下圍棋的男人 — 學習人類棋譜後反超</span></div>
+      </div>
+      <div class="fragment" style="background:rgba(124,58,237,.12);border:2px solid var(--purple);border-radius:10px;padding:1rem 1.3rem;">
+        <div style="font-size:1.4rem;font-weight:900;color:var(--purple);">2017 / 10</div>
+        <div style="font-size:1rem;margin-top:.3rem;"><strong>AlphaGo Zero 100 : 0 擊敗 AlphaGo</strong><br><span style="opacity:.6;font-size:.9rem;">完全不看人類棋譜 — 自己跟自己下，反而更強</span></div>
+      </div>
+      <div class="fragment" style="background:rgba(249,171,0,.12);border:2px solid var(--gold);border-radius:10px;padding:.8rem 1.3rem;">
+        <div style="font-size:.95rem;color:var(--gold);"><strong>意義</strong>：AI 不只「複製人」，還能「超越人」 — 圍棋圈原本的秩序被打破</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 10.7: DQI 上升 — 人類重建 ═══════════ -->
+<div class="slide dataviz" data-act="衝擊與提升">
+  <h2>但人類也在進化 — AI 推著棋手變得更有創造力</h2>
+  <div style="display:flex;align-items:center;gap:2rem;flex:1;max-width:1100px;width:100%;">
+    <div style="flex:1.2;text-align:center;background:#fff;border-radius:8px;padding:.5rem;">
+      <img src="dqi_chart.png" alt="DQI Decision Quality Index 上升趨勢" style="max-width:100%;max-height:55vh;border-radius:4px;">
+      <p style="font-size:.7rem;color:rgba(0,0,0,.5);margin-top:.3rem;">Source: Shin et al., PNAS 2023 · doi:10.1073/pnas.2214840120</p>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:.7rem;">
+      <div class="fragment" style="background:rgba(15,157,138,.12);border:2px solid var(--teal);border-radius:10px;padding:.9rem 1.2rem;">
+        <div style="font-size:1rem;color:var(--teal);"><strong>DQI（Decision Quality Index）</strong></div>
+        <div style="font-size:.9rem;opacity:.75;margin-top:.2rem;">衡量每一手棋是否為「新招」 — 評估創造性與決策品質</div>
+      </div>
+      <div class="fragment" style="background:rgba(6,182,212,.1);border-radius:10px;padding:.7rem 1.2rem;">
+        <div style="font-size:.95rem;"><strong style="color:var(--cyan);">2016 之前</strong>：年均上升幅度 ≤ 0.2</div>
+      </div>
+      <div class="fragment" style="background:rgba(249,171,0,.15);border:2px solid var(--gold);border-radius:10px;padding:.7rem 1.2rem;">
+        <div style="font-size:.95rem;"><strong style="color:var(--gold);">2018 之後</strong>：年均上升 &gt; 0.7（4 倍速躍升）</div>
+      </div>
+      <div class="fragment" style="margin-top:.3rem;font-size:1rem;font-weight:700;color:var(--mint);text-align:center;">
+        「人類需要適應，並在這基礎上發揮潛力」
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 10.8: MIT NotebookLM 48 小時 ═══════════ -->
+<div class="slide dataviz" data-act="衝擊與提升">
+  <h2>MIT 學生用 48 小時通過資格考 — 學習效率躍升</h2>
+  <div style="display:flex;align-items:center;gap:1.5rem;flex:1;max-width:1180px;width:100%;">
+    <div style="flex:.85;text-align:center;background:#fff;border-radius:8px;padding:.4rem;">
+      <img src="mit_notebooklm_tweet.png" alt="MIT NotebookLM tweet by @ihtesham2005" style="max-width:100%;max-height:58vh;border-radius:4px;">
+      <p style="font-size:.7rem;color:rgba(0,0,0,.5);margin-top:.3rem;">@ihtesham2005 on X · 14K 讚 · 27K 收藏 · 3M 瀏覽</p>
+    </div>
+    <div style="flex:1.15;display:flex;flex-direction:column;gap:.6rem;">
+      <div class="fragment" style="background:rgba(15,157,138,.15);border:2px solid var(--teal);border-radius:10px;padding:.8rem 1.1rem;">
+        <div style="font-size:.95rem;"><strong style="color:var(--teal);">事件</strong>：MIT 研究生用 NotebookLM，48 小時內通過從沒讀過的科目資格考</div>
+        <div style="font-size:.85rem;opacity:.7;margin-top:.2rem;">素材：6 本教科書 + 15 篇論文 + 課堂逐字稿</div>
+      </div>
+      <div class="fragment" style="background:rgba(124,58,237,.1);border-left:3px solid var(--purple);border-radius:6px;padding:.5rem .9rem;">
+        <div style="font-size:.85rem;color:var(--purple);font-weight:700;">Prompt 1 — 找核心心智模型</div>
+        <div style="font-size:.8rem;opacity:.85;">「列出這個領域所有專家共有的 5 個核心心智模型」</div>
+      </div>
+      <div class="fragment" style="background:rgba(124,58,237,.1);border-left:3px solid var(--purple);border-radius:6px;padding:.5rem .9rem;">
+        <div style="font-size:.85rem;color:var(--purple);font-weight:700;">Prompt 2 — 找根本歧異</div>
+        <div style="font-size:.8rem;opacity:.85;">「指出 3 個專家之間意見根本對立的地方，雙方最強的論點是什麼」</div>
+      </div>
+      <div class="fragment" style="background:rgba(124,58,237,.1);border-left:3px solid var(--purple);border-radius:6px;padding:.5rem .9rem;">
+        <div style="font-size:.85rem;color:var(--purple);font-weight:700;">Prompt 3 — 鑑別深度理解</div>
+        <div style="font-size:.8rem;opacity:.85;">「設計 10 個能識破誰只是背書 vs 真正懂的問題」</div>
+      </div>
+      <div class="fragment" style="margin-top:.2rem;font-size:.95rem;font-weight:700;color:var(--gold);text-align:center;">把 NotebookLM 當「讀完一切的家教」，不是「螢光筆」
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 11: PART 2 DIVIDER (CD Part) ═══════════ -->
+<div class="slide cd-part" data-act="你在哪裡">
+  <div class="cd-part-rule"></div>
+  <div class="cd-part-tag">PART 02</div>
+  <div class="cd-part-folio">02</div>
+  <h1 class="cd-part-title">你在哪裡？</h1>
+  <div class="cd-part-sub">AI 使用現狀與 Token 經濟</div>
+</div>
+
+<!-- ═══════════ 12: 81億人口 ═══════════ -->
+<div class="slide dataviz" data-act="你在哪裡">
+  <h2>世界總人口 81 億 — 你在哪個方塊？</h2>
+  <div style="display:flex;align-items:center;gap:2rem;flex:1;max-width:960px;width:100%;">
+    <div style="flex:1;text-align:center;">
+      <img src="81billion.png" alt="81 Billion AI Usage" style="max-width:100%;max-height:60vh;border-radius:8px;">
+      <p style="font-size:.75rem;color:rgba(255,255,255,.3);margin-top:.3rem;">Source: r/vibecoding (Reddit, Feb 2026)</p>
+    </div>
+    <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:.6rem;">
+      <div class="stat-box fragment" style="padding:1rem;">
+        <div class="val" style="color:var(--gray-text);font-size:2rem;">84%</div>
+        <div style="font-size:1rem;font-weight:900;color:var(--gray-text);">68.8 億</div>
+        <div class="label" style="font-size:.85rem;">沒用過 AI</div>
+      </div>
+      <div class="stat-box fragment" style="border-color:var(--teal);padding:1rem;">
+        <div class="val" style="color:var(--teal);font-size:2rem;">16%</div>
+        <div style="font-size:1rem;font-weight:900;color:var(--teal);">13.8 億</div>
+        <div class="label" style="font-size:.85rem;">對話過</div>
+      </div>
+      <div class="stat-box fragment" style="border-color:var(--gold);padding:1rem;">
+        <div class="val" style="color:var(--gold);font-size:2rem;">0.3%</div>
+        <div style="font-size:1rem;font-weight:900;color:var(--gold);">2,500 萬</div>
+        <div class="label" style="font-size:.85rem;">付費訂閱</div>
+      </div>
+      <div class="stat-box fragment" style="border-color:var(--red);padding:1rem;">
+        <div class="val" style="color:var(--red);font-size:2rem;">0.04%</div>
+        <div style="font-size:1rem;font-weight:900;color:var(--red);">500 萬</div>
+        <div class="label" style="font-size:.85rem;">AI 產出專案</div>
+      </div>
+    </div>
+  </div>
+  <div class="tip-box-dark">每個方塊代表 320 萬人。你現在在哪一格？今天結束後，你至少會在綠色方塊。</div>
+</div>
+
+<!-- ═══════════ 13: 84% 沒用過 (CD Compare) ═══════════ -->
+<div class="slide cd" data-act="你在哪裡">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 2 · 84% 沒用過</div>
+    <h1 class="cd-title"><span class="accent">84%</span> 的人 — 從來沒用過 AI</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-compare">
+      <div class="cd-compare-col bad">
+        <div class="badge">為什麼這麼多人沒用過</div>
+        <div class="body">
+          <ul>
+            <li>· 基礎設施不足（網路、設備）</li>
+            <li>· 語言障礙（英語為主）</li>
+            <li>· 年齡與數位落差</li>
+            <li>· 不知道 AI 能做什麼</li>
+            <li>· 沒有動機</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cd-compare-arrow">→</div>
+      <div class="cd-compare-col good fragment">
+        <div class="badge">這代表什麼機會</div>
+        <div class="body">
+          你是大學生，你有：
+          <ul style="margin-top:14px;">
+            <li>· 網路 ✓ &nbsp;&nbsp; 設備 ✓</li>
+            <li>· 英文能力 ✓ &nbsp;&nbsp; 學習動機 ✓</li>
+          </ul>
+          <div style="margin-top:24px;font-size:24px;color:var(--cd-accent);font-weight:700;">你已比 84% 的人更有條件 — 問題只剩：要不要開始？</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 14: 16% 對話過 (CD Compare) ═══════════ -->
+<div class="slide cd" data-act="你在哪裡">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 2 · 16% 對話過</div>
+    <h1 class="cd-title"><span class="accent">16%</span> 的人 — 跟 AI 對話過</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-compare">
+      <div class="cd-compare-col good">
+        <div class="badge">這群人怎麼用 AI</div>
+        <div class="body">
+          <ul>
+            <li>· 問問題、查資料（取代 Google）</li>
+            <li>· 翻譯、摘要、改文法</li>
+            <li>· 聊天、好奇試玩</li>
+            <li>· 偶爾寫寫文案</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cd-compare-arrow">→</div>
+      <div class="cd-compare-col bad fragment">
+        <div class="badge">停留在這層的問題</div>
+        <div class="body">
+          <ul>
+            <li>· 不會 Prompt Engineering</li>
+            <li>· 沒有系統性的使用場景</li>
+            <li>· 不知道 AI 的極限在哪</li>
+            <li>· 「AI 好像也沒那麼厲害」</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="cd-tail fragment">從「用過」到「會用」的距離 — 就像<b>會開車 ≠ 會賽車</b>。今天的目標：讓你坐上駕駛座。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 15: 0.3% + 0.04% (CD Compare) ═══════════ -->
+<div class="slide cd" data-act="你在哪裡">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 2 · 頂端 0.3% / 0.04%</div>
+    <h1 class="cd-title">頂端的 <span class="accent">0.3%</span> 和 <span style="color:var(--cd-danger);">0.04%</span></h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-compare">
+      <div class="cd-compare-col good">
+        <div class="badge">0.3% · 2,500 萬人</div>
+        <div class="body">
+          <div style="font-size:32px;font-weight:800;margin-bottom:14px;">付費訂閱 AI 服務</div>
+          <ul>
+            <li>· ChatGPT Plus（$20/月）</li>
+            <li>· Claude Pro（$20/月）</li>
+            <li>· Gemini Advanced（$20/月）</li>
+            <li>· Copilot Pro（$10/月）</li>
+            <li>· Cursor Pro（$20/月）</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cd-compare-arrow">→</div>
+      <div class="cd-compare-col danger fragment">
+        <div class="badge">0.04% · 200-500 萬人</div>
+        <div class="body">
+          <div style="font-size:32px;font-weight:800;margin-bottom:14px;">用 AI 產出程式專案</div>
+          <ul>
+            <li>· Vibe Coding（氛圍編程）</li>
+            <li>· AI 輔助全棧開發</li>
+            <li>· 自動化腳本與工具</li>
+            <li>· AI Agent 應用</li>
+            <li>· 開源專案貢獻</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="cd-tail fragment">這些人 = <b>新時代的駕馭者</b>。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 16: 舉手互動 (CD Cards 4 — 大 emoji) ═══════════ -->
+<div class="slide cd" data-act="你在哪裡">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 2 · 舉手互動</div>
+    <h1 class="cd-title">你現在在哪個方塊？</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-4" style="align-items:stretch;">
+      <div class="cd-card fragment" style="border-top-color:var(--cd-mute);align-items:center;justify-content:center;text-align:center;">
+        <div style="font-size:240px;line-height:1;">⬜</div>
+        <div style="font-size:36px;font-weight:800;color:var(--cd-text2);margin-top:24px;">從沒用過 AI</div>
+      </div>
+      <div class="cd-card fragment" style="border-top-color:var(--cd-accent);align-items:center;justify-content:center;text-align:center;">
+        <div style="font-size:240px;line-height:1;">🟩</div>
+        <div style="font-size:36px;font-weight:800;color:var(--cd-accent);margin-top:24px;">用過、聊過</div>
+      </div>
+      <div class="cd-card warm fragment" style="align-items:center;justify-content:center;text-align:center;">
+        <div style="font-size:240px;line-height:1;">🟨</div>
+        <div style="font-size:36px;font-weight:800;color:var(--cd-warm);margin-top:24px;">付費訂閱中</div>
+      </div>
+      <div class="cd-card danger fragment" style="align-items:center;justify-content:center;text-align:center;">
+        <div style="font-size:240px;line-height:1;">🟥</div>
+        <div style="font-size:36px;font-weight:800;color:var(--cd-danger);margin-top:24px;">已產出 AI 專案</div>
+      </div>
+    </div>
+    <div class="cd-tail fragment">舉手看看 — <b>你在哪一格？</b></div>
+  </div>
+</div>
+
+<!-- ═══════════ 17: Token 金字塔 (CD Dark Pyramid) ═══════════ -->
+<div class="slide cd dark" data-act="你在哪裡">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 2 · Token 消費金字塔</div>
+    <h1 class="cd-title">Token 消費金字塔 <span style="color:var(--cd-warm);">—</span> 你在哪一層？</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-pyramid">
+      <div class="cd-pyramid-row fragment" style="width:95%;"><div class="lv" style="color:#94A3B8;">⬜</div><div class="lbl" style="color:#94A3B8;">沒用過 AI<span class="sub">68.8 億人</span></div></div>
+      <div class="cd-pyramid-row fragment" style="width:85%;border-color:#5EEAD4;background:rgba(20,184,166,.1);"><div class="lv" style="color:#5EEAD4;">免費</div><div class="lbl">免費額度<span class="sub">偶爾用用 ChatGPT 免費版</span></div></div>
+      <div class="cd-pyramid-row fragment" style="width:72%;border-color:var(--cd-accent);background:rgba(26,115,232,.12);"><div class="lv" style="color:var(--cd-accent);">$20</div><div class="lbl">基本訂閱<span class="sub">ChatGPT Plus / Claude Pro</span></div></div>
+      <div class="cd-pyramid-row fragment" style="width:58%;border-color:var(--cd-warm);background:rgba(245,158,11,.12);"><div class="lv" style="color:var(--cd-warm);">$200</div><div class="lbl">重度使用<span class="sub">Claude Max / Teams</span></div></div>
+      <div class="cd-pyramid-row fragment" style="width:45%;border-color:var(--cd-danger);background:rgba(220,38,38,.15);"><div class="lv" style="color:var(--cd-danger);">API</div><div class="lbl">信用卡額度<span class="sub">Token 消費 = 生產力投資</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 18: 一個人的價值 (CD Quote) ═══════════ -->
+<div class="slide cd-quote" data-act="你在哪裡">
+  <div class="cd-quote-rule"></div>
+  <div class="cd-quote-tag">PART 2 · 一個人的價值</div>
+  <div class="cd-quote-list">
+    <div class="cd-quote-item">一個人的價值<br><b style="color:var(--cd-warm);">決定在你能駕馭多少 Token</b></div>
+    <div class="cd-quote-item fragment" style="font-size:36px;color:#CBD5E1;">薪資 = 2× · Token 預算 = <b>10 人的產出</b></div>
+    <div class="cd-quote-item fragment" style="font-size:30px;color:#94A3B8;">年薪百萬工程師 + Token 預算 = 過去 10 人才能完成的工作量。<br><b style="color:var(--cd-warm);">這不是未來，是矽谷正在發生的事。</b></div>
+  </div>
+</div>
+
+<!-- ═══════════ 19: Jensen Huang (CD Quote) ═══════════ -->
+<div class="slide cd-quote" data-act="你在哪裡">
+  <div class="cd-quote-rule"></div>
+  <div class="cd-quote-tag">JENSEN HUANG · NVIDIA</div>
+  <div class="cd-quote-list">
+    <div class="cd-quote-item">「我完全可以想像，在未來，我們公司每一位工程師都將有一筆<b>年度 Token 預算</b>。」</div>
+    <div class="cd-quote-item fragment" style="font-size:36px;color:#CBD5E1;">「年薪可能是幾十萬，我會在薪水之上再給他們一半作為 Token，讓他們的生產力<b>放大十倍</b>。」</div>
+  </div>
+  <div class="cd-quote-src">矽谷最新招募籌碼 — 你的 Offer 包含多少 Token？</div>
+</div>
+
+<!-- ═══════════ 20: 衡量能力 (CD Compare) ═══════════ -->
+<div class="slide cd" data-act="你在哪裡">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 2 · 衡量能力</div>
+    <h1 class="cd-title">衡量能力的辦法 <span class="accent">—</span> 指標多元化</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-compare">
+      <div class="cd-compare-col bad">
+        <div class="badge">傳統衡量方式</div>
+        <div class="body">
+          <ul>
+            <li>· GPA / 成績排名</li>
+            <li>· 學歷（哪個學校畢業）</li>
+            <li>· 證照數量</li>
+            <li>· 工作年資</li>
+            <li>· 職位頭銜</li>
+          </ul>
+          <div style="margin-top:24px;font-size:22px;color:var(--cd-text3);">單一維度、線性累積</div>
+        </div>
+      </div>
+      <div class="cd-compare-arrow">→</div>
+      <div class="cd-compare-col good fragment">
+        <div class="badge">AI 時代衡量方式</div>
+        <div class="body">
+          <ul>
+            <li>· GitHub Stars / 專案數量</li>
+            <li>· 追蹤人數 / 影響力</li>
+            <li>· AI 工具的使用深度</li>
+            <li>· 能解決問題的複雜度</li>
+            <li>· 作品集（Portfolio）</li>
+          </ul>
+          <div style="margin-top:24px;font-size:22px;color:var(--cd-accent);font-weight:700;">多元維度、指數成長</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 21: PART 3 DIVIDER (CD Part) ═══════════ -->
+<div class="slide cd-part" data-act="三個核心能力">
+  <div class="cd-part-rule"></div>
+  <div class="cd-part-tag">PART 03</div>
+  <div class="cd-part-folio">03</div>
+  <h1 class="cd-part-title">三個核心能力</h1>
+  <div class="cd-part-sub">用工具 → 選工具 → 造工具</div>
+</div>
+
+<!-- ═══════════ 22: 學習三階段 (CD Three) ═══════════ -->
+<div class="slide cd" data-act="三個核心能力">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 3 · 學習階段</div>
+    <h1 class="cd-title">學習的三個階段</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-three">
+      <div class="cd-ability fragment">
+        <div class="step">大</div>
+        <div class="name">大學生</div>
+        <div class="en">UNDERGRAD</div>
+        <ul>
+          <li>· 給你問題 ✓</li>
+          <li>· 給你工具 ✓</li>
+          <li>· 給你方法 ✓</li>
+        </ul>
+      </div>
+      <div class="cd-ability fragment">
+        <div class="step">碩</div>
+        <div class="name">碩士</div>
+        <div class="en">MASTER</div>
+        <ul>
+          <li>· 給你問題 ✓</li>
+          <li>· 自己找工具</li>
+          <li>· 自己找方法</li>
+        </ul>
+      </div>
+      <div class="cd-ability dark fragment">
+        <div class="step">博</div>
+        <div class="name">博士</div>
+        <div class="en">PHD</div>
+        <ul>
+          <li>· 自己找問題</li>
+          <li>· 自己找工具</li>
+          <li>· 自己找方法</li>
+        </ul>
+      </div>
+    </div>
+    <div class="cd-tail fragment">AI 時代模糊了這三個階段 — <b>大學生也可以「自己找問題、自己解決」</b>。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 23: 用→選→造 (CD ThreeAbilities) ═══════════ -->
+<div class="slide cd" data-act="三個核心能力">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 3 · 三個核心能力</div>
+    <h1 class="cd-title">用工具 <span class="accent">→</span> 選工具 <span class="accent">→</span> 造工具</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-three">
+      <div class="cd-ability fragment">
+        <div class="step">1</div>
+        <div class="name">學會用工具</div>
+        <div class="en">TOOL USER</div>
+        <ul>
+          <li>· 會用 ChatGPT / Claude</li>
+          <li>· 會寫基本 Prompt</li>
+          <li>· 能完成作業報告</li>
+          <li>· 理解 AI 能力邊界</li>
+        </ul>
+        <div class="pct-row"><span class="pct-label">佔人口</span><span class="pct-val">16%</span></div>
+      </div>
+      <div class="cd-ability fragment">
+        <div class="step">2</div>
+        <div class="name">學會選工具</div>
+        <div class="en">TOOL SELECTOR</div>
+        <ul>
+          <li>· 知道不同 AI 的強項</li>
+          <li>· 能為特定任務選工具</li>
+          <li>· 會評估 AI 輸出品質</li>
+          <li>· 建立自己的 AI 工作流</li>
+        </ul>
+        <div class="pct-row"><span class="pct-label">佔人口</span><span class="pct-val">0.3%</span></div>
+      </div>
+      <div class="cd-ability dark fragment">
+        <div class="step">3</div>
+        <div class="name">學會創建工具</div>
+        <div class="en">TOOL CREATOR</div>
+        <ul>
+          <li>· 用 AI 寫程式、建系統</li>
+          <li>· 設計 AI Agent 流程</li>
+          <li>· 整合 API 與自動化</li>
+          <li>· 從消費者變成創造者</li>
+        </ul>
+        <div class="pct-row"><span class="pct-label">佔人口</span><span class="pct-val">0.04%</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 24: 企業要什麼 (CD Compare) ═══════════ -->
+<div class="slide cd" data-act="三個核心能力">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 3 · 市場現實</div>
+    <h1 class="cd-title">企業要的是什麼？</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-compare">
+      <div class="cd-compare-col bad">
+        <div class="badge">企業不缺的 ✕</div>
+        <div class="body">
+          <ul>
+            <li>· 會用 ChatGPT 聊天的人</li>
+            <li>· 把 AI 當搜尋引擎用的人</li>
+            <li>· 只會 copy-paste 的人</li>
+            <li>· 自稱會 Prompt Engineering，但只會基本對話</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cd-compare-arrow">→</div>
+      <div class="cd-compare-col good fragment">
+        <div class="badge">企業真正要的 ✓</div>
+        <div class="body">
+          <ul>
+            <li>· 能用 AI 改造工作流程</li>
+            <li>· 能識別哪些流程可 AI 化</li>
+            <li>· 能評估 AI 方案 ROI</li>
+            <li>· 能設計 AI + 人的協作模式</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="cd-tail fragment">「會用 AI」是門檻，<b>「能用 AI 改造流程」才是價值</b>。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 25: 診斷流程 (CD 5 步) ═══════════ -->
+<div class="slide cd" data-act="三個核心能力">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 3 · 診斷流程</div>
+    <h1 class="cd-title">企業 AI 服務診斷流程</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-mat">
+      <div class="cd-mat-card l1 fragment"><div class="lv">1</div><div class="name">識別痛點</div><div class="ko">哪些流程耗時、重複性高、容易出錯？</div><div class="out">→ Pain Points</div></div>
+      <div class="cd-mat-card l2 fragment"><div class="lv">2</div><div class="name">評估可行性</div><div class="ko">適合 AI 處理嗎？資料是否足夠？</div><div class="out">→ Feasibility</div></div>
+      <div class="cd-mat-card l3 fragment"><div class="lv">3</div><div class="name">選擇工具</div><div class="ko">ChatGPT API？自建模型？現成 SaaS？</div><div class="out">→ Tooling</div></div>
+      <div class="cd-mat-card l4 fragment"><div class="lv">4</div><div class="name">設計流程</div><div class="ko">AI + 人怎麼協作？誰做最後決策？</div><div class="out">→ Workflow</div></div>
+      <div class="cd-mat-card last fragment"><div class="lv">5</div><div class="name">驗證優化</div><div class="ko">實際效果？成本合理？持續迭代</div><div class="out">→ Iterate</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 26: 終點vs過程 (CD Compare) ═══════════ -->
+<div class="slide cd" data-act="三個核心能力">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 3 · 思維陷阱</div>
+    <h1 class="cd-title">想看的是終點，卻忽略了過程</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-compare">
+      <div class="cd-compare-col bad">
+        <div class="badge">大多數人看到的</div>
+        <div class="body">
+          <ul>
+            <li>· 別人的完成品、成功案例</li>
+            <li>· AI 工具的酷炫 Demo</li>
+            <li>· 一夜之間成功的故事</li>
+            <li>· 「AI 好厲害」的新聞標題</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cd-compare-arrow">→</div>
+      <div class="cd-compare-col good fragment">
+        <div class="badge">他們沒看到的</div>
+        <div class="body">
+          <ul>
+            <li>· 無數次失敗的 Prompt 嘗試</li>
+            <li>· 學習工具的時間投入</li>
+            <li>· 建立工作流的反覆迭代</li>
+            <li>· 從 0 到 1 的痛苦過程</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 27: 學位新定義 (CD Cards 3) ═══════════ -->
+<div class="slide cd" data-act="三個核心能力">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 3 · 學習新定義</div>
+    <h1 class="cd-title">AI 時代 <span class="accent">—</span> 學習方法的新定義</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-3">
+      <div class="cd-card fragment">
+        <div class="head">大學 + AI</div>
+        <div class="sub">SUPER TOOLKIT</div>
+        <div class="body">AI 就是你的超級工具箱，每個科目都能用 AI 加速學習。<br><br><span style="color:var(--cd-text3);font-size:22px;">每堂課試著用 AI 協作完成</span></div>
+      </div>
+      <div class="cd-card warm fragment">
+        <div class="head">碩士 + AI</div>
+        <div class="sub">RESEARCH PARTNER</div>
+        <div class="body">AI 幫你搜文獻、做實驗，你負責問對問題和驗證結果。<br><br><span style="color:var(--cd-text3);font-size:22px;">用 AI 做文獻回顧，自己判斷 research gap</span></div>
+      </div>
+      <div class="cd-card dark fragment">
+        <div class="head">博士 + AI</div>
+        <div class="sub">FRONTIER EXPLORER</div>
+        <div class="body">AI 幫你探索未知領域，你定義什麼問題值得解決。<br><br><span style="color:#94A3B8;font-size:22px;">用 AI 做創新性分析，原創洞察來自你</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 28: 消費者→創造者 (CD Compare) ═══════════ -->
+<div class="slide cd" data-act="三個核心能力">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 3 · 身分轉換</div>
+    <h1 class="cd-title">從消費者到創造者</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-compare">
+      <div class="cd-compare-col bad">
+        <div class="badge">AI 消費者</div>
+        <div class="body">
+          <ul>
+            <li>· 用別人做好的 AI 產品</li>
+            <li>· 在現成介面裡打字</li>
+            <li>· AI 給什麼就接受什麼</li>
+            <li>· 被動等待新功能</li>
+            <li>· 「AI 好厲害但跟我無關」</li>
+          </ul>
+          <div style="margin-top:24px;font-size:22px;color:var(--cd-text3);">使用者，不是駕馭者</div>
+        </div>
+      </div>
+      <div class="cd-compare-arrow">→</div>
+      <div class="cd-compare-col good fragment">
+        <div class="badge">AI 創造者</div>
+        <div class="body">
+          <ul>
+            <li>· 用 AI 建造自己的工具</li>
+            <li>· 設計自己的 AI 工作流</li>
+            <li>· 能判斷 AI 的輸出品質</li>
+            <li>· 主動探索 AI 的邊界</li>
+            <li>· 「我能用 AI 做什麼？」</li>
+          </ul>
+          <div style="margin-top:24px;font-size:22px;color:var(--cd-accent);font-weight:700;">駕馭者 — 而且比 AI 凶</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 29: WEF 2025 (CD Three) ═══════════ -->
+<div class="slide cd" data-act="三個核心能力">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 3 · 關鍵技能</div>
+    <h1 class="cd-title">WEF 2025 關鍵技能 <span class="accent">×</span> 三力模型</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-three">
+      <div class="cd-ability fragment">
+        <div class="step">數</div>
+        <div class="name">數位力</div>
+        <div class="en">DIGITAL</div>
+        <ul>
+          <li>· 04 創意思維</li>
+          <li>· 06 科技素養</li>
+          <li>· 07 好奇心與終身學習</li>
+        </ul>
+      </div>
+      <div class="cd-ability fragment">
+        <div class="step">系</div>
+        <div class="name">系統力</div>
+        <div class="en">SYSTEM</div>
+        <ul>
+          <li>· 01 批判性思維</li>
+          <li>· 02 韌性與彈性</li>
+        </ul>
+      </div>
+      <div class="cd-ability dark fragment">
+        <div class="step">永</div>
+        <div class="name">永續力</div>
+        <div class="en">SUSTAINABILITY</div>
+        <ul>
+          <li>· 03 領導力與社會影響力</li>
+          <li>· 05 自我激勵與自我覺察</li>
+        </ul>
+      </div>
+    </div>
+    <div class="cd-tail fragment">Source: WEF Future of Jobs Report 2025 — 三力覆蓋所有關鍵技能。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 31: PART 4 DIVIDER (CD Part) ═══════════ -->
+<div class="slide cd-part" data-act="AI 成熟度分級">
+  <div class="cd-part-rule"></div>
+  <div class="cd-part-tag">PART 04</div>
+  <div class="cd-part-folio">04</div>
+  <h1 class="cd-part-title">AI 應用成熟度五分級</h1>
+  <div class="cd-part-sub">從使用工具到方法創新</div>
+</div>
+
+<!-- ═══════════ 32: 五層成熟度 (CD Maturity) ═══════════ -->
+<div class="slide cd" data-act="AI 成熟度分級">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 4 · AI 成熟度模型</div>
+    <h1 class="cd-title">從使用工具到方法創新 — 你在哪一層？</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-mat">
+      <div class="cd-mat-card l1 fragment">
+        <div class="lv">L1</div>
+        <div class="name">使用工具</div>
+        <div class="ko">AI 幫我做事</div>
+        <div class="out">→ 單次結果</div>
+      </div>
+      <div class="cd-mat-card l2 fragment">
+        <div class="lv">L2</div>
+        <div class="name">工具組合</div>
+        <div class="ko">我會串工具</div>
+        <div class="out">→ 標準流程</div>
+      </div>
+      <div class="cd-mat-card l3 fragment">
+        <div class="lv">L3</div>
+        <div class="name">創建工具</div>
+        <div class="ko">我做 AI 工具</div>
+        <div class="out">→ 重複資產</div>
+      </div>
+      <div class="cd-mat-card l4 fragment">
+        <div class="lv">L4</div>
+        <div class="name">改造流程</div>
+        <div class="ko">用 AI 改流程</div>
+        <div class="out">→ 系統效率</div>
+      </div>
+      <div class="cd-mat-card last fragment">
+        <div class="lv">L5</div>
+        <div class="name">方法創新</div>
+        <div class="ko">用 AI 創新</div>
+        <div class="out">→ 新範式</div>
+      </div>
+    </div>
+    <div class="cd-tail fragment">大多數人在 <b>L1</b>，今天帶你看到 <b style="color:var(--cd-danger);">L5</b> 的可能。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 33: L1 使用工具 (CD Cards 4) ═══════════ -->
+<div class="slide cd" data-act="AI 成熟度分級">
+  <div class="cd-header">
+    <div class="cd-kicker">L1 · 使用工具</div>
+    <h1 class="cd-title">L1 使用特定工具 <span class="accent">—</span> 單點加速</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-4">
+      <div class="cd-card fragment"><div class="head">論文寫作</div><div class="body">ChatGPT 改 abstract<br>Claude 摘要文獻<br>AI Studio 潤英文</div></div>
+      <div class="cd-card warm fragment"><div class="head">做簡報</div><div class="body">ChatGPT 生大綱<br>Canva AI 排版</div></div>
+      <div class="cd-card fragment"><div class="head">知識管理</div><div class="body">NBLM 問 PDF<br>Obsidian AI 分類</div></div>
+      <div class="cd-card fragment"><div class="head">問卷設計</div><div class="body">AI 幫寫題目<br>自動產生選項</div></div>
+    </div>
+    <div class="cd-tail fragment">判斷指標：還是「<b>人做主流程</b>」，AI 只是單點助手。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 34: L2 工具組合 (CD Cards 2x2) ═══════════ -->
+<div class="slide cd" data-act="AI 成熟度分級">
+  <div class="cd-header">
+    <div class="cd-kicker">L2 · 工具組合</div>
+    <h1 class="cd-title">L2 不同工具組合 <span class="accent">—</span> Workflow</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-2x2">
+      <div class="cd-card fragment"><div class="head">論文寫作</div><div class="body">PDF → NotebookLM → ChatGPT → R code → Word<br><br><span style="color:var(--cd-text3);font-size:22px;">從片段生成進入「可完成一輪初稿」</span></div></div>
+      <div class="cd-card warm fragment"><div class="head">做簡報</div><div class="body">會議錄音 → AI 摘要 → 自動投影片 → 圖像生成 → 講稿<br><br><span style="color:var(--cd-text3);font-size:22px;">可上台簡報版本 + speaker note</span></div></div>
+      <div class="cd-card fragment"><div class="head">知識管理</div><div class="body">Google Drive → Obsidian → Notion Dashboard → 每日摘要<br><br><span style="color:var(--cd-text3);font-size:22px;">專案知識地圖、文件對應關係</span></div></div>
+      <div class="cd-card fragment"><div class="head">問卷設計</div><div class="body">研究目的 → 題項生成 → 專家效度 → GAS<br><br><span style="color:var(--cd-text3);font-size:22px;">可發放問卷 + 題項維度 mapping</span></div></div>
+    </div>
+    <div class="cd-tail fragment">AI 開始參與<b>完整流程</b>，而非單點。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 35: L3 創建工具 (CD Cards 2x2) ═══════════ -->
+<div class="slide cd" data-act="AI 成熟度分級">
+  <div class="cd-header">
+    <div class="cd-kicker">L3 · 創建工具</div>
+    <h1 class="cd-title">L3 創建工具 <span class="accent">—</span> Builder</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-2x2" style="gap:18px;">
+      <div class="cd-card warm fragment" style="padding:24px 28px;"><div class="head" style="font-size:42px;margin-bottom:12px;">論文自動化工具</div><div class="body" style="font-size:24px;line-height:1.5;"><ul style="gap:8px;"><li>· 文獻矩陣生成器</li><li>· 統計表自動產生器</li><li>· Reference formatter</li></ul><div style="color:var(--cd-text3);font-size:20px;margin-top:10px;">一鍵生成 appendix、regression table</div></div></div>
+      <div class="cd-card warm fragment" style="padding:24px 28px;"><div class="head" style="font-size:42px;margin-bottom:12px;">簡報模板產生器</div><div class="body" style="font-size:24px;line-height:1.5;"><ul style="gap:8px;"><li>· 課程簡報模板產生器</li><li>· 自動案例填充系統</li></ul><div style="color:var(--cd-text3);font-size:20px;margin-top:10px;">同主題快速客製不同客戶版</div></div></div>
+      <div class="cd-card warm fragment" style="padding:24px 28px;"><div class="head" style="font-size:42px;margin-bottom:12px;">知識庫引擎</div><div class="body" style="font-size:24px;line-height:1.5;"><ul style="gap:8px;"><li>· CLI 自動分類器</li><li>· Google Sheet RAG 索引器</li></ul><div style="color:var(--cd-text3);font-size:20px;margin-top:10px;">可搜尋知識庫</div></div></div>
+      <div class="cd-card warm fragment" style="padding:24px 28px;"><div class="head" style="font-size:42px;margin-bottom:12px;">題庫系統</div><div class="body" style="font-size:24px;line-height:1.5;"><ul style="gap:8px;"><li>· 題庫生成器</li><li>· 反向題自動化</li></ul><div style="color:var(--cd-text3);font-size:20px;margin-top:10px;">快速生成多版本問卷</div></div></div>
+    </div>
+    <div class="cd-tail fragment">開始把高頻工作<b>產品化</b> — 做出來的工具可以重複使用。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 36: L4 改造流程 (CD Cards 2x2) ═══════════ -->
+<div class="slide cd" data-act="AI 成熟度分級">
+  <div class="cd-header">
+    <div class="cd-kicker">L4 · 改造流程</div>
+    <h1 class="cd-title">L4 改造流程 <span class="accent">—</span> Process Re-engineering</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-2x2">
+      <div class="cd-card fragment" style="border-top-color:var(--cd-mute);"><div class="head" style="color:var(--cd-text3);">傳統論文流程</div><div class="body">RQ → 文獻 → 理論 → 方法 → 寫作</div></div>
+      <div class="cd-card danger fragment"><div class="head">L4 論文流程</div><div class="body">RQ → Agent 文獻地圖 → 自動假說候選 → 模型實驗 → Reviewer Critic → 成稿</div></div>
+      <div class="cd-card fragment" style="border-top-color:var(--cd-mute);"><div class="head" style="color:var(--cd-text3);">傳統簡報流程</div><div class="body">自己做 → 改版 → 排版</div></div>
+      <div class="cd-card danger fragment"><div class="head">L4 簡報流程</div><div class="body">知識庫 → Audience Persona → 自動故事線 → 版型 → 練講稿</div></div>
+    </div>
+    <div class="cd-tail fragment">不只是快，而是<b>改變事情本來怎麼做</b>。從「存檔」變成「問題驅動知識生產系統」。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 37: L5 方法創新 (CD Cards 4) ═══════════ -->
+<div class="slide cd" data-act="AI 成熟度分級">
+  <div class="cd-header">
+    <div class="cd-kicker">L5 · 方法創新</div>
+    <h1 class="cd-title" style="color:var(--cd-danger);">L5 不是用 AI 做更快 <span style="color:var(--cd-ink);">— 而是工作方法本身被重新定義</span></h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-4">
+      <div class="cd-card danger fragment"><div class="head">論文</div><div class="sub">MULTI-AGENT</div><div class="body">用 Agent 重新定義科學發現 — 文獻、假說、實驗驗證全自動。</div></div>
+      <div class="cd-card warm fragment"><div class="head">簡報</div><div class="sub">AI PERSUASION</div><div class="body">針對受眾生成不同說服路徑 — CFO 看 ROI、董事會看風險。</div></div>
+      <div class="cd-card fragment"><div class="head">知識管理</div><div class="sub">INSIGHT ENGINE</div><div class="body">從「儲存知識」變「生產洞察」— 論文資料庫主動產出新研究問題。</div></div>
+      <div class="cd-card dark fragment"><div class="head">問卷</div><div class="sub">AI-NATIVE</div><div class="body">RQ → construct → 題項 → 預測 loading → 重寫，AI 全程參與。</div></div>
+    </div>
+    <div class="cd-tail fragment">L5 不是用 AI 做更快，而是<b>讓工作方法本身被重新定義</b>。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 38: L5 深入 (CD Cards 2x2) ═══════════ -->
+<div class="slide cd" data-act="AI 成熟度分級">
+  <div class="cd-header">
+    <div class="cd-kicker">L5 · 四場景深入</div>
+    <h1 class="cd-title">L5 方法創新 <span class="accent">—</span> 四場景深入</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-2x2">
+      <div class="cd-card danger fragment"><div class="head">論文：AI 成為研究方法</div><div class="body">Multi-Agent Scientific Research Framework：Literature + Theory + Experiment + Reviewer Agent。<br><br><span style="color:var(--cd-text3);font-size:22px;">研究貢獻不只是結果，而是如何用 Agent 改造 scientific discovery</span></div></div>
+      <div class="cd-card warm fragment"><div class="head">簡報：從投影片變決策系統</div><div class="body">AI 根據受眾自動生成不同說服路徑：對 CFO 講 ROI、對工務講節能、對董事會講風險。<br><br><span style="color:var(--cd-text3);font-size:22px;">AI-driven persuasion methodology</span></div></div>
+      <div class="cd-card fragment"><div class="head">知識：從儲存變知識生產</div><div class="body">論文 → 教案、案例 → 模板、問卷結果 → 新假說。AI 主動產生下一個研究問題。<br><br><span style="color:var(--cd-text3);font-size:22px;">Knowledge-to-Insight Engine</span></div></div>
+      <div class="cd-card dark fragment"><div class="head">問卷：AI-native 研究設計</div><div class="body">RQ → 抽 construct → 對應理論 → 生成題項 → 預測 loading → 根據 pilot data 重寫。<br><br><span style="color:#94A3B8;font-size:22px;">AI-native psychometric methodology — 非常有發表潛力</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 39: 自我判斷公式 (CD Dark) ═══════════ -->
+<div class="slide cd dark" data-act="AI 成熟度分級">
+  <div class="cd-header" style="margin-bottom:32px;">
+    <div class="cd-kicker">PART 4 · 一句話判斷</div>
+    <h1 class="cd-title">你在哪一層？<span style="color:var(--cd-warm);">— 一句話判斷</span></h1>
+  </div>
+  <div class="cd-stage">
+    <div style="display:flex;flex-direction:column;gap:14px;flex:1;justify-content:center;max-width:1400px;width:100%;margin:0 auto;">
+      <div class="fragment" style="display:grid;grid-template-columns:90px 1fr 1fr;align-items:center;gap:36px;padding:22px 36px;background:rgba(255,255,255,.04);border-left:8px solid var(--cd-accent);">
+        <div style="font-size:60px;font-weight:900;color:var(--cd-accent);text-align:right;line-height:1;">L1</div>
+        <div style="font-size:40px;font-weight:700;color:#fff;">AI 幫我做事</div>
+        <div style="font-size:30px;color:#94A3B8;">→ 單點任務加速</div>
+      </div>
+      <div class="fragment" style="display:grid;grid-template-columns:90px 1fr 1fr;align-items:center;gap:36px;padding:22px 36px;background:rgba(255,255,255,.04);border-left:8px solid #5EEAD4;">
+        <div style="font-size:60px;font-weight:900;color:#5EEAD4;text-align:right;line-height:1;">L2</div>
+        <div style="font-size:40px;font-weight:700;color:#fff;">我會串工具</div>
+        <div style="font-size:30px;color:#94A3B8;">→ 標準流程</div>
+      </div>
+      <div class="fragment" style="display:grid;grid-template-columns:90px 1fr 1fr;align-items:center;gap:36px;padding:22px 36px;background:rgba(255,255,255,.04);border-left:8px solid var(--cd-warm);">
+        <div style="font-size:60px;font-weight:900;color:var(--cd-warm);text-align:right;line-height:1;">L3</div>
+        <div style="font-size:40px;font-weight:700;color:#fff;">我做 AI 工具</div>
+        <div style="font-size:30px;color:#94A3B8;">→ 重複資產</div>
+      </div>
+      <div class="fragment" style="display:grid;grid-template-columns:90px 1fr 1fr;align-items:center;gap:36px;padding:22px 36px;background:rgba(255,255,255,.04);border-left:8px solid #A78BFA;">
+        <div style="font-size:60px;font-weight:900;color:#A78BFA;text-align:right;line-height:1;">L4</div>
+        <div style="font-size:40px;font-weight:700;color:#fff;">用 AI 改流程</div>
+        <div style="font-size:30px;color:#94A3B8;">→ 系統效率</div>
+      </div>
+      <div class="fragment" style="display:grid;grid-template-columns:90px 1fr 1fr;align-items:center;gap:36px;padding:22px 36px;background:rgba(220,38,38,.15);border-left:8px solid var(--cd-danger);">
+        <div style="font-size:60px;font-weight:900;color:var(--cd-danger);text-align:right;line-height:1;">L5</div>
+        <div style="font-size:40px;font-weight:700;color:#fff;">用 AI 創新</div>
+        <div style="font-size:30px;color:#FECACA;">→ 新範式</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 40: SecondBrain 架構層 ═══════════ -->
+<div class="slide dataviz" data-act="AI 成熟度分級">
+  <h2>實戰案例 — SecondBrain 第二大腦：架構層</h2>
+  <div style="display:flex;align-items:center;justify-content:center;flex:1;gap:2rem;max-width:960px;width:100%;">
+    <div style="flex:1;text-align:center;">
+      <img src="secondbrain-arch.png" alt="SecondBrain Architecture" style="max-width:100%;max-height:55vh;border-radius:12px;border:2px solid rgba(255,255,255,.1);">
+    </div>
+    <div class="fragment" style="flex:0 0 280px;display:flex;flex-direction:column;gap:.6rem;">
+      <div style="background:rgba(15,157,138,.12);border:2px solid var(--teal);border-radius:10px;padding:.6rem 1rem;">
+        <div style="font-size:.85rem;font-weight:700;color:var(--teal);">Layer 1 · 輸入</div>
+        <div style="font-size:.8rem;color:rgba(255,255,255,.6);">PDF、網頁、語音、會議錄音</div>
+      </div>
+      <div style="background:rgba(255,200,87,.1);border:2px solid var(--gold);border-radius:10px;padding:.6rem 1rem;">
+        <div style="font-size:.85rem;font-weight:700;color:var(--gold);">Layer 2 · AI 處理</div>
+        <div style="font-size:.8rem;color:rgba(255,255,255,.6);">摘要、標記、連結、翻譯</div>
+      </div>
+      <div style="background:rgba(124,58,237,.1);border:2px solid var(--purple);border-radius:10px;padding:.6rem 1rem;">
+        <div style="font-size:.85rem;font-weight:700;color:var(--purple);">Layer 3 · 知識庫</div>
+        <div style="font-size:.8rem;color:rgba(255,255,255,.6);">Obsidian + Notion + Git</div>
+      </div>
+      <div style="background:rgba(232,113,10,.1);border:2px solid var(--orange);border-radius:10px;padding:.6rem 1rem;">
+        <div style="font-size:.85rem;font-weight:700;color:var(--orange);">Layer 4 · 產出</div>
+        <div style="font-size:.8rem;color:rgba(255,255,255,.6);">簡報、論文、教材、自動報表</div>
+      </div>
+    </div>
+  </div>
+  <div class="tip-box-dark">380 筆知識條目，4 個 Notion 資料庫整合，7 大類自動分類 — 這是 L4→L5 的真實案例。</div>
+</div>
+
+<!-- ═══════════ 41: SecondBrain 資訊流 ═══════════ -->
+<div class="slide dataviz" data-act="AI 成熟度分級">
+  <h2>實戰案例 — SecondBrain 第二大腦：資訊流</h2>
+  <div style="display:flex;flex-direction:column;align-items:center;flex:1;justify-content:center;max-width:960px;width:100%;">
+    <img src="secondbrain-flow.png" alt="SecondBrain Information Flow" style="max-width:100%;max-height:45vh;border-radius:12px;border:2px solid rgba(255,255,255,.1);">
+    <div class="fragment" style="display:flex;gap:.8rem;margin-top:1.2rem;flex-wrap:wrap;justify-content:center;">
+      <div style="background:rgba(15,157,138,.1);border:1px solid var(--teal);border-radius:8px;padding:.5rem 1rem;text-align:center;">
+        <div style="font-size:.8rem;font-weight:700;color:var(--teal);">Capture</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.5);">多源擷取</div>
+      </div>
+      <div style="color:var(--gold);font-size:1.2rem;display:flex;align-items:center;">→</div>
+      <div style="background:rgba(255,200,87,.1);border:1px solid var(--gold);border-radius:8px;padding:.5rem 1rem;text-align:center;">
+        <div style="font-size:.8rem;font-weight:700;color:var(--gold);">AI Agent</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.5);">處理 + 增強</div>
+      </div>
+      <div style="color:var(--gold);font-size:1.2rem;display:flex;align-items:center;">→</div>
+      <div style="background:rgba(124,58,237,.1);border:1px solid var(--purple);border-radius:8px;padding:.5rem 1rem;text-align:center;">
+        <div style="font-size:.8rem;font-weight:700;color:var(--purple);">知識圖譜</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.5);">互連網路</div>
+      </div>
+      <div style="color:var(--gold);font-size:1.2rem;display:flex;align-items:center;">→</div>
+      <div style="background:rgba(6,182,212,.1);border:1px solid var(--cyan);border-radius:8px;padding:.5rem 1rem;text-align:center;">
+        <div style="font-size:.8rem;font-weight:700;color:var(--cyan);">Auto Sync</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.5);">Git→Notion</div>
+      </div>
+      <div style="color:var(--gold);font-size:1.2rem;display:flex;align-items:center;">→</div>
+      <div style="background:rgba(232,113,10,.1);border:1px solid var(--orange);border-radius:8px;padding:.5rem 1rem;text-align:center;">
+        <div style="font-size:.8rem;font-weight:700;color:var(--orange);">Produce</div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,.5);">簡報·論文</div>
+      </div>
+    </div>
+  </div>
+  <div class="tip-box-dark">知識不再是「存起來偶爾翻」，而是自動流動、自動產出。這就是 L5 的實踐。</div>
+</div>
+
+<!-- ═══════════ 42: PART 5 DIVIDER (CD Part) ═══════════ -->
+<div class="slide cd-part" data-act="實戰行動">
+  <div class="cd-part-rule"></div>
+  <div class="cd-part-tag">PART 05</div>
+  <div class="cd-part-folio">05</div>
+  <h1 class="cd-part-title">實戰行動</h1>
+  <div class="cd-part-sub">你的第一步</div>
+</div>
+
+<!-- ═══════════ 41: 免費 AI API (CD Cards 3) ═══════════ -->
+<div class="slide cd" data-act="實戰行動">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 5 · 免費 AI API</div>
+    <h1 class="cd-title">三大平台不用綁卡 <span class="accent">—</span> 打造你的 AI</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-3">
+      <div class="cd-card fragment">
+        <div class="head">Groq</div>
+        <div class="sub">LPU 極速推論 · 14,400/天</div>
+        <div class="body">
+          <ul>
+            <li>· llama-3.3-70b</li>
+            <li>· qwen3-32b</li>
+            <li>· kimi-k2（1T 參數）</li>
+            <li>· Whisper STT 全免費</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cd-card warm fragment">
+        <div class="head">Google AI Studio</div>
+        <div class="sub">Gemini 2.5 Flash · 250/天</div>
+        <div class="body">
+          <ul>
+            <li>· 1M context 超長上下文</li>
+            <li>· 一次丟整篇論文</li>
+            <li>· 多語言 TTS</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cd-card dark fragment">
+        <div class="head">OpenRouter</div>
+        <div class="sub">28 個免費模型 · 50/天</div>
+        <div class="body">
+          <ul>
+            <li>· step-3.5-flash · GLM-4.5</li>
+            <li>· Llama 3.3 · Qwen3-Coder</li>
+            <li>· OpenAI 兼容格式</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="cd-tail fragment"><b>Groq 主力</b>（最快最多）· <b>Gemini 長文本</b>（1M context）· <b>OpenRouter 備援</b>（多模型 A/B）</div>
+  </div>
+</div>
+
+<!-- ═══════════ 42: AI 工具全景 (CD Table) ═══════════ -->
+<div class="slide cd" data-act="實戰行動">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 5 · 工具全景</div>
+    <h1 class="cd-title">AI 工具全景 <span class="accent">—</span> 免費就能開始</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-table">
+      <div class="cd-trow head" style="grid-template-columns:200px 1fr 1.4fr 160px;"><div>工具</div><div>用途</div><div>免費版</div><div>Pro</div></div>
+      <div class="cd-trow fragment" style="grid-template-columns:200px 1fr 1.4fr 160px;"><div class="name">ChatGPT</div><div>聊天 / 寫作</div><div class="accent">GPT-5.5 mini 無限</div><div class="warm">$20/月</div></div>
+      <div class="cd-trow fragment" style="grid-template-columns:200px 1fr 1.4fr 160px;"><div class="name">Claude</div><div>分析 / 程式</div><div class="accent">Sonnet 有限</div><div class="warm">$20/月</div></div>
+      <div class="cd-trow fragment" style="grid-template-columns:200px 1fr 1.4fr 160px;"><div class="name">Gemini</div><div>搜尋 / 整合</div><div class="accent">2.0 Flash 無限</div><div class="warm">$20/月</div></div>
+      <div class="cd-trow fragment" style="grid-template-columns:200px 1fr 1.4fr 160px;"><div class="name">Copilot</div><div>程式碼</div><div class="accent">學生免費</div><div class="warm">$10/月</div></div>
+      <div class="cd-trow fragment" style="grid-template-columns:200px 1fr 1.4fr 160px;"><div class="name">Perplexity</div><div>研究 / 搜尋</div><div class="accent">基本搜尋</div><div class="warm">$20/月</div></div>
+      <div class="cd-trow fragment" style="grid-template-columns:200px 1fr 1.4fr 160px;"><div class="name">NotebookLM</div><div>文件分析</div><div class="accent">50 個筆記免費</div><div class="warm">—</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 43: Prompt Engineering (CD Compare + Process) ═══════════ -->
+<div class="slide cd" data-act="實戰行動">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 5 · 實戰技巧</div>
+    <h1 class="cd-title">Prompt Engineering <span class="accent">—</span> 跟 AI 說話的藝術</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-compare">
+      <div class="cd-compare-col bad">
+        <div class="badge">✕ 新手的 Prompt</div>
+        <div class="body">
+          <ul>
+            <li>· 「幫我寫一篇報告」</li>
+            <li>· 「翻譯這段文字」</li>
+            <li>· 「寫一個程式」</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cd-compare-arrow">→</div>
+      <div class="cd-compare-col good fragment">
+        <div class="badge">✓ 駕馭者的 Prompt</div>
+        <div class="body" style="font-size:24px;">「你是行銷策略專家。請為手搖飲品牌撰寫 ESG 行銷方案，目標客群 18-25 歲，包含社群媒體策略，預算 50 萬，請用表格呈現 3 個方案比較。」</div>
+      </div>
+    </div>
+    <div class="cd-process">
+      <div class="cd-pstep fragment"><div class="key">R</div><div><div class="lbl">角色</div><div class="en">ROLE</div></div></div>
+      <div class="cd-pstep fragment"><div class="key">C</div><div><div class="lbl">背景</div><div class="en">CONTEXT</div></div></div>
+      <div class="cd-pstep fragment"><div class="key">T</div><div><div class="lbl">任務</div><div class="en">TASK</div></div></div>
+      <div class="cd-pstep fragment"><div class="key">F</div><div><div class="lbl">格式</div><div class="en">FORMAT</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 44: AI 學習心態 (CD Compare) ═══════════ -->
+<div class="slide cd" data-act="實戰行動">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 5 · 學習心態</div>
+    <h1 class="cd-title">AI 輔助學習的正確心態</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-compare">
+      <div class="cd-compare-col danger">
+        <div class="badge">✕ 危險的使用方式</div>
+        <div class="body">
+          <ul>
+            <li>· 直接複製 AI 答案交作業</li>
+            <li>· 完全不看就提交</li>
+            <li>· 用 AI 替代思考過程</li>
+            <li>· 「AI 會了所以我不用學」</li>
+            <li>· 不驗證 AI 的回答正確性</li>
+            <li>· 交出自己都看不懂的內容</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cd-compare-arrow">→</div>
+      <div class="cd-compare-col good fragment">
+        <div class="badge">✓ 正確的使用方式</div>
+        <div class="body">
+          <ul>
+            <li>· AI 是研究助手，不是代筆</li>
+            <li>· 先自己思考，再用 AI 驗證</li>
+            <li>· 理解 AI 回答，再融入觀點</li>
+            <li>· 用 AI 學更快，但學更深</li>
+            <li>· 質疑 AI — 它也會犯錯</li>
+            <li>· 交出自己完全理解的成果</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="cd-tail fragment">用 AI <b>放大你的能力</b>，而不是取代你的思考。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 45: AI + 專業 (CD Takeaway 6) ═══════════ -->
+<div class="slide cd" data-act="實戰行動">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 5 · 無限可能</div>
+    <h1 class="cd-title">AI <span class="accent">+</span> 你的專業 <span class="accent">=</span> 無限可能</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-takeaway">
+      <div class="cd-take fragment"><div class="num">商 管</div><div class="head">商管 + AI</div><div class="body">市場分析、自動化報告、客戶洞察 — <b>數據驅動的策略顧問</b>。</div></div>
+      <div class="cd-take fragment"><div class="num">設 計</div><div class="head">設計 + AI</div><div class="body">生圖、UI 原型、風格轉換 — <b>產能 10 倍的設計師</b>。</div></div>
+      <div class="cd-take fragment"><div class="num">法 律</div><div class="head">法律 + AI</div><div class="body">合約審查、判例搜尋、法規比對 — <b>效率型法律工作者</b>。</div></div>
+      <div class="cd-take fragment"><div class="num">醫 護</div><div class="head">醫護 + AI</div><div class="body">文獻回顧、病歷分析、用藥建議 — <b>研究型臨床專家</b>。</div></div>
+      <div class="cd-take fragment"><div class="num">教 育</div><div class="head">教育 + AI</div><div class="body">個人化教材、自動出題、學習分析 — <b>精準教育設計師</b>。</div></div>
+      <div class="cd-take fragment"><div class="num">工 程</div><div class="head">工程 + AI</div><div class="body">程式碼生成、模擬分析、CAD 自動化 — <b>10x 工程師</b>。</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 46: Vibe Coding (CD Cards 3) ═══════════ -->
+<div class="slide cd" data-act="實戰行動">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 5 · Vibe Coding</div>
+    <h1 class="cd-title">三家代表 <span class="accent">×</span> 三級用法</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-3">
+      <div class="cd-card fragment">
+        <div class="head">Claude</div>
+        <div class="sub">寫程式 + 渲染</div>
+        <div class="body">
+          <ul>
+            <li>· Artifacts 即時預覽網頁</li>
+            <li>· Claude Code AI 工程師</li>
+            <li>· 理解整個專案結構</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cd-card warm fragment">
+        <div class="head">ChatGPT Codex</div>
+        <div class="sub">寫代碼</div>
+        <div class="body">
+          <ul>
+            <li>· GPT-5.5 程式碼生成</li>
+            <li>· Codex Agent 自主修 bug</li>
+            <li>· GitHub 整合、PR 自動產出</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cd-card dark fragment">
+        <div class="head">Antigravity IDE</div>
+        <div class="sub">全端開發</div>
+        <div class="body">
+          <ul>
+            <li>· AI 原生 IDE 環境</li>
+            <li>· 描述需求即生成應用</li>
+            <li>· 從想法到部署一站完成</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="cd-tail fragment">用自然語言描述你要什麼，AI 幫你寫程式。<b>全球只有 0.04% 的人到達這個層級</b>。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 47: 動手練習 (CD Cards 4) ═══════════ -->
+<div class="slide cd" data-act="實戰行動">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 5 · 動手練習 ①</div>
+    <h1 class="cd-title">5 分鐘做出你的<span class="accent">第一個網頁</span></h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-4">
+      <div class="cd-card fragment"><div class="head">個人介紹頁</div><div class="body">名字、學校科系<br>興趣專長、自介<br>作品集或社群連結</div></div>
+      <div class="cd-card fragment"><div class="head">社團招募頁</div><div class="body">社團名稱、活動亮點<br>加入理由、社員心得<br>報名方式與 QR Code</div></div>
+      <div class="cd-card warm fragment"><div class="head">專題展示頁</div><div class="body">研究主題、問題與方法<br>關鍵成果、團隊成員<br>技術架構說明</div></div>
+      <div class="cd-card dark fragment"><div class="head">創業 Landing</div><div class="body">產品名稱、痛點<br>目標客群、產品特色<br>CTA 按鈕與定價</div></div>
+    </div>
+    <div class="cd-tail fragment">推薦 <b>Claude App</b> — Artifacts 即時渲染，做完直接分享連結。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 47A: 第二個任務 — 設計小遊戲 (CD Cards 2x2) ═══════════ -->
+<div class="slide cd" data-act="實戰行動">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 5 · 動手練習 ②</div>
+    <h1 class="cd-title">一句話做出你的<span class="accent">小遊戲</span></h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-2x2">
+      <div class="cd-card fragment"><div class="head">貪吃蛇</div><div class="sub">CLASSIC</div><div class="body">經典觸控遊戲<br>滑動操控、撞牆即結束</div></div>
+      <div class="cd-card warm fragment"><div class="head">彈跳球</div><div class="sub">PHYSICS</div><div class="body">物理碰撞、重力反彈<br>體驗動態互動</div></div>
+      <div class="cd-card fragment"><div class="head">猜數字</div><div class="sub">LOGIC</div><div class="body">輸入數字、提示大小<br>邏輯推理小品</div></div>
+      <div class="cd-card dark fragment"><div class="head">心理測驗</div><div class="sub">QUIZ</div><div class="body">多題分支、結果判定<br>人格分析趣味題</div></div>
+    </div>
+    <div class="cd-tail fragment">規則：<b>一句話 ≤ 30 字</b> · <b>15 分鐘</b>做出可玩版本 · <b>手機就能完成</b></div>
+  </div>
+</div>
+
+<!-- ═══════════ 47B: 三家 AI 工具比較 (CD Cards 3) ═══════════ -->
+<div class="slide cd" data-act="實戰行動">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 5 · 同題三家做</div>
+    <h1 class="cd-title">Claude <span class="accent">×</span> ChatGPT <span class="accent">×</span> Gemini</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-3">
+      <div class="cd-card fragment">
+        <div class="head">Claude</div>
+        <div class="sub">ARTIFACTS 即時渲染</div>
+        <div class="body">App / 網頁皆可<br>做完直接玩、分享連結<br><br><b style="color:var(--cd-accent);">→ 想立刻看到成果</b></div>
+      </div>
+      <div class="cd-card warm fragment">
+        <div class="head">ChatGPT</div>
+        <div class="sub">CANVAS + CODE INTERPRETER</div>
+        <div class="body">App / 網頁皆可<br>程式碼完整、邏輯清楚<br><br><b style="color:var(--cd-warm);">→ 想理解怎麼做的</b></div>
+      </div>
+      <div class="cd-card dark fragment">
+        <div class="head">Gemini</div>
+        <div class="sub">CANVAS + GOOGLE 整合</div>
+        <div class="body">App / 網頁皆可<br>對話順暢、回應快<br><br><b style="color:var(--cd-warm);">→ 想體驗免費模型</b></div>
+      </div>
+    </div>
+    <div class="cd-tail fragment">挑戰：同一句話 → 餵給<b>其中 2 家</b> → 比<b>速度 / 可玩度 / UI 美感</b></div>
+  </div>
+</div>
+
+<!-- ═══════════ 47C: 分享 + 投票 (CD Cards 3) ═══════════ -->
+<div class="slide cd" data-act="實戰行動">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 5 · 五分鐘分享</div>
+    <h1 class="cd-title">你的遊戲長什麼樣？<span class="accent">— 分組互玩、互投票</span></h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-3">
+      <div class="cd-card warm fragment"><div class="head">最好玩獎</div><div class="sub">FUN</div><div class="body">玩得停不下來<br>遊戲性最強</div></div>
+      <div class="cd-card fragment"><div class="head">最有設計感獎</div><div class="sub">DESIGN</div><div class="body">UI / UX 最舒服<br>視覺最有質感</div></div>
+      <div class="cd-card danger fragment"><div class="head">最有創意獎</div><div class="sub">CREATIVE</div><div class="body">想法最跳 tone<br>意想不到的點子</div></div>
+    </div>
+    <div class="cd-tail fragment">一句話心得：<b>「同一句話，三家 AI 給的結果有什麼不一樣？」</b></div>
+  </div>
+</div>
+
+<!-- ═══════════ 48: PART 6 DIVIDER (CD Part) ═══════════ -->
+<div class="slide cd-part" data-act="未來展望">
+  <div class="cd-part-rule"></div>
+  <div class="cd-part-tag">PART 06</div>
+  <div class="cd-part-folio">06</div>
+  <h1 class="cd-part-title">未來已來</h1>
+  <div class="cd-part-sub">你準備好了嗎？</div>
+</div>
+
+<!-- ═══════════ 49: Sundar Pichai ═══════════ -->
+<div class="slide poster" data-act="未來展望" style="background-image:url('img/t01/sundar-pichai-bbc.jpg');background-size:cover;background-position:center;padding:0;">
+  <div style="position:absolute;inset:0;z-index:1;background:linear-gradient(to bottom,rgba(0,0,0,.25) 0%,rgba(0,0,0,.15) 50%,rgba(0,0,0,.7) 85%);"></div>
+  <!-- 左：問題 -->
+  <div style="position:absolute;top:12%;left:5%;z-index:2;text-align:left;">
+    <p style="font-size:.85rem;color:rgba(255,255,255,.4);letter-spacing:.15em;margin-bottom:.5rem;">BBC NEWS · 2025.11.18</p>
+    <h1 style="font-size:2.8rem;font-weight:900;color:#fff;line-height:1.3;text-shadow:0 2px 20px rgba(0,0,0,.6);">假如<br>AI 泡沫來臨</h1>
+  </div>
+  <!-- 右：回答 -->
+  <div class="fragment" style="position:absolute;top:15%;right:5%;z-index:2;text-align:right;max-width:48%;">
+    <p style="font-size:1.5rem;font-weight:700;color:#fff;line-height:1.6;text-shadow:0 2px 20px rgba(0,0,0,.6);">"No company is going to be immune,<br>including us."</p>
+    <p style="font-size:1.1rem;color:rgba(255,255,255,.7);margin-top:.6rem;text-shadow:0 2px 20px rgba(0,0,0,.6);">「沒有任何公司能夠免疫，<br>包括我們。」</p>
+    <p style="font-size:.95rem;color:var(--gold);margin-top:.6rem;font-weight:700;text-shadow:0 2px 20px rgba(0,0,0,.6);">— Google CEO Sundar Pichai</p>
+  </div>
+  <!-- 底部置中 -->
+  <div class="fragment" style="position:absolute;bottom:8%;left:0;right:0;z-index:2;text-align:center;">
+    <p style="font-size:1.6rem;font-weight:900;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.6);">連 Google 的 CEO 都這麼說了。</p>
+    <p style="font-size:1.6rem;font-weight:900;color:var(--gold);margin-top:.3rem;text-shadow:0 2px 20px rgba(0,0,0,.6);">你覺得你的產業、你的職位，能免疫嗎？</p>
+  </div>
+</div>
+
+<!-- ═══════════ 50: Jensen 語錄集 (CD Quote) ═══════════ -->
+<div class="slide cd-quote" data-act="未來展望">
+  <div class="cd-quote-rule"></div>
+  <div class="cd-quote-tag">JENSEN HUANG · 語錄集</div>
+  <div class="cd-quote-list">
+    <div class="cd-quote-item fragment">「<b>AI 不會取代你的工作</b>，但會用 AI 的人會。」</div>
+    <div class="cd-quote-item fragment">「每位工程師都將有<b>年度 Token 預算</b>。」</div>
+    <div class="cd-quote-item fragment">「你的 Offer 包含<b>多少 Token</b>？」</div>
+    <div class="cd-quote-item fragment">「AI 讓一個人能做到<b>過去十個人</b>的工作。」</div>
+  </div>
+</div>
+
+<!-- ═══════════ 50.5: OpenAI 白皮書 — 四天工作制 ═══════════ -->
+<div class="slide cine" data-act="未來展望" style="background-image:url('img/t01-stories/future_split.png');">
+  <div class="cine-content" style="max-width:55%;">
+    <div class="cine-tag">OPENAI POLICY WHITE PAPER · 2026.04</div>
+    <div class="cine-title" style="font-size:2rem;">超級智慧時代的社會契約</div>
+    <div class="cine-sub" style="margin-top:.5rem;">
+      <div class="fragment" style="margin-bottom:.4rem;"><strong>四天工作制不減薪</strong>&nbsp;— 人類工作型態轉向高效產出</div>
+      <div class="fragment" style="margin-bottom:.4rem;"><strong>主權財富基金</strong>&nbsp;— 用 AI 收益直接回饋全民</div>
+      <div class="fragment" style="margin-bottom:.4rem;"><strong>AI 存取權 = 基本經濟權利</strong>&nbsp;— 不是奢侈品</div>
+    </div>
+    <div class="cine-insight fragment" style="margin-top:.8rem;">
+      歷史告訴我們：每次技術革命最終都靠制度改革解決。這次的差別是 — <strong style="color:var(--gold);">連 AI 公司自己都在催促制度跟上</strong>。
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 51: 薪資結構 (CD Compare) ═══════════ -->
+<div class="slide cd" data-act="未來展望">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 6 · 未來薪資</div>
+    <h1 class="cd-title">薪資結構的未來 <span class="accent">—</span> Token 成為生產力貨幣</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-compare">
+      <div class="cd-compare-col bad">
+        <div class="badge">現在的薪資結構</div>
+        <div class="body">
+          <ul>
+            <li>· 底薪 + 獎金 + 股票</li>
+            <li>· 能力 = 個人產出</li>
+            <li>· 升遷 = 管更多人</li>
+            <li>· 年資 = 更高薪水</li>
+          </ul>
+          <div style="margin-top:24px;font-size:22px;color:var(--cd-text3);">天花板：你的時間有限</div>
+        </div>
+      </div>
+      <div class="cd-compare-arrow">→</div>
+      <div class="cd-compare-col good fragment">
+        <div class="badge">未來的薪資結構</div>
+        <div class="body">
+          <ul>
+            <li>· 底薪 + <b style="color:var(--cd-warm);">Token 預算</b> + 股票</li>
+            <li>· 能力 = 個人 × AI 槓桿</li>
+            <li>· 升遷 = 駕馭更多 Token</li>
+            <li>· 效率 = 10x 生產力</li>
+          </ul>
+          <div style="margin-top:24px;font-size:22px;color:var(--cd-accent);font-weight:700;">天花板：你的想像力</div>
+        </div>
+      </div>
+    </div>
+    <div class="cd-tail fragment">年薪 50 萬 + Token 預算 25 萬 = <b>10 人的產出</b>。矽谷 2026 標準 Offer。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 52: 學習路徑 (CD Roadmap) ═══════════ -->
+<div class="slide cd" data-act="未來展望">
+  <div class="cd-header">
+    <div class="cd-kicker">PART 6 · 未來已來</div>
+    <h1 class="cd-title">你的 AI 學習路徑 — 從今天開始</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-roadmap">
+      <div class="cd-row fragment"><div class="num">1</div><div class="when">今天</div><div class="dur">30 分鐘</div><div class="todo">註冊 AI 工具帳號、練習寫 Prompt</div></div>
+      <div class="cd-row fragment"><div class="num">2</div><div class="when">本週</div><div class="dur">每天 15 分鐘</div><div class="todo">註冊 Groq / AI Studio 免費 API、每天用 AI 完成一件事</div></div>
+      <div class="cd-row fragment"><div class="num">3</div><div class="when">本月</div><div class="dur">每週 2 小時</div><div class="todo">建立 AI 工作流、用 AI 做一份完整作業</div></div>
+      <div class="cd-row fragment"><div class="num">4</div><div class="when">本學期</div><div class="dur">持續累積</div><div class="todo">完成一個 AI 輔助專案、建立 GitHub Portfolio</div></div>
+      <div class="cd-row last fragment"><div class="num">5</div><div class="when">畢業前</div><div class="dur">融入日常</div><div class="todo">成為 AI 駕馭者 — 能用 AI 解決複雜問題</div></div>
+    </div>
+    <div class="cd-tail fragment">最重要的一步永遠是<b>第一步</b>。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 53: Take Away (CD Takeaway) ═══════════ -->
+<div class="slide cd" data-act="結語">
+  <div class="cd-header">
+    <div class="cd-kicker">CLOSING · 今天的關鍵收穫</div>
+    <h1 class="cd-title">Take Away</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-takeaway">
+      <div class="cd-take fragment"><div class="num">01</div><div class="head">駕馭力</div><div class="body">文明躍遷，都是人類學會「駕馭」新工具。</div></div>
+      <div class="cd-take fragment"><div class="num">02</div><div class="head">Token 價值</div><div class="body">一個人的價值 = 你能駕馭多少 Token。</div></div>
+      <div class="cd-take fragment"><div class="num">03</div><div class="head">三階段</div><div class="body">用工具 → 選工具 → 造工具。</div></div>
+      <div class="cd-take fragment"><div class="num">04</div><div class="head">五層分級</div><div class="body">L1 做事 → L2 串工具 → L3 做工具 → L4 改 SOP → L5 創新方法。</div></div>
+      <div class="cd-take fragment"><div class="num">05</div><div class="head">稀缺性</div><div class="body">全球 0.04% 的人在用 AI 創造專案 — 你現在就可以加入。</div></div>
+      <div class="cd-take fragment"><div class="num">06</div><div class="head">行動</div><div class="body">從今天開始：註冊免費 AI API、練習、累積你的作品。</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 54a: 最好的時代 (CD Dark Compare) ═══════════ -->
+<div class="slide cd dark" data-act="結語">
+  <div class="cd-header">
+    <div class="cd-kicker">CLOSING · 雙面性</div>
+    <h1 class="cd-title">這是一個<span style="color:#5EEAD4;">最好的時代</span> — 也是一個<span style="color:var(--cd-danger);">最糟的年代</span></h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-3" style="grid-template-columns:1fr 1fr;">
+      <div class="cd-card fragment" style="border-top-color:#5EEAD4;">
+        <div class="head" style="color:#5EEAD4;">最好的時代</div>
+        <div class="body">
+          <ul>
+            <li>· NotebookLM 讓人深度學習一個領域</li>
+            <li>· 上傳論文 → AI 生成 Podcast → 一天聽懂</li>
+            <li>· AI 輔助讓門檻大幅降低</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cd-card danger fragment">
+        <div class="head" style="color:var(--cd-danger);">最糟的年代</div>
+        <div class="body">
+          <ul>
+            <li>· 博士論文造假 — AI 完美生成「DOI 造假」</li>
+            <li>· 學術誠信底線正被挑戰</li>
+            <li>· 當 AI 能產出「看起來像論文」<br>&nbsp;&nbsp;真正的研究貢獻反而稀缺</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 54b: 時代 vs 年代 (CD Dark Compare) ═══════════ -->
+<div class="slide cd dark" data-act="結語">
+  <div class="cd-header">
+    <div class="cd-kicker">CLOSING · 時代 vs 年代</div>
+    <h1 class="cd-title">時代 <span style="color:var(--cd-warm);">vs</span> 年代</h1>
+  </div>
+  <div class="cd-stage">
+    <div class="cd-cards-3" style="grid-template-columns:1fr 1fr;">
+      <div class="cd-card fragment" style="border-top-color:#5EEAD4;">
+        <div class="head" style="color:#5EEAD4;font-size:64px;">時代</div>
+        <div class="sub">長期趨勢</div>
+        <div class="body">
+          AI <b style="color:#5EEAD4;">會</b>改變學習與成長的方式。
+          <ul style="margin-top:14px;">
+            <li>· 研究方法會進化</li>
+            <li>· 知識生產會加速</li>
+            <li>· 跨領域會成為常態</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cd-card danger fragment">
+        <div class="head" style="font-size:64px;color:var(--cd-danger);">年代</div>
+        <div class="sub">過渡時期</div>
+        <div class="body">
+          <b style="color:var(--cd-danger);">沒有</b>規則跟方法可以遵守。
+          <ul style="margin-top:14px;">
+            <li>· 學校還沒教</li>
+            <li>· 期刊還在摸索</li>
+            <li>· 每個人各憑本事</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="cd-tail fragment">過渡期 — 有方法的人<b style="color:#5EEAD4;">走得快</b>，沒方法的人<b style="color:var(--cd-danger);">走得險</b>。</div>
+  </div>
+</div>
+
+<!-- ═══════════ 55: Q&A (CD Dark — 還原 chip 設計) ═══════════ -->
+<div class="slide cd dark" data-act="結語" style="justify-content:center;align-items:center;text-align:center;">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:36px;">
+    <div style="font-size:var(--cd-micro);letter-spacing:.32em;color:var(--cd-warm);font-weight:700;">CLOSING · Q & A</div>
+    <h1 style="font-size:var(--cd-hero);font-weight:900;color:#fff;letter-spacing:-.02em;line-height:1;">Q <span style="color:var(--cd-warm);">&amp;</span> A</h1>
+    <div style="font-size:var(--cd-subtitle);color:#CBD5E1;font-weight:300;">我們來聊聊你心中的困惑</div>
+    <div style="display:flex;flex-wrap:wrap;gap:18px;justify-content:center;max-width:1400px;margin-top:24px;">
+      <div class="fragment" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);padding:20px 32px;font-size:28px;color:#fff;">AI 會不會讓我找不到工作？</div>
+      <div class="fragment" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);padding:20px 32px;font-size:28px;color:#fff;">不是資工系也能學 AI 嗎？</div>
+      <div class="fragment" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);padding:20px 32px;font-size:28px;color:#fff;">從哪裡開始最好？</div>
+      <div class="fragment" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);padding:20px 32px;font-size:28px;color:#fff;">AI 生成的作業算抄襲嗎？</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 55: CLOSING ═══════════ -->
+<div class="slide poster overlay-center" data-act="結語" style="background-image:url('closing-bg.jpg');background-size:cover;background-position:center;">
+  <p style="font-size:1.7rem;color:rgba(255,255,255,.55);">當 AI 變得人人可用，能力的差距將不只在智慧</p>
+  <h1 style="color:#fff;font-size:5rem;font-weight:900;margin-top:1.4rem;letter-spacing:-.02em;">你只管勇往直前</h1>
+  <p style="font-size:2rem;color:var(--gold);margin-top:1.4rem;font-weight:700;">與 AI 協作的架構 我們來建</p>
+  <div style="width:80px;height:6px;background:var(--teal);margin:2.6rem auto 0;"></div>
+  <p style="color:rgba(255,255,255,.55);margin-top:2rem;font-size:2.2rem;font-weight:700;letter-spacing:.16em;">cooperation.tw</p>
+</div>
+
+</div><!-- /slides-wrap -->
+
+<!-- Chapter Menu -->
+<div id="chapterMenu" class="chapter-menu">
+  <button id="chapterBtn" class="chapter-btn">
+    <span class="chapter-icon">&sect;</span>
+    <span id="chapterLabel">開場</span>
+    <span class="chapter-arrow">&#9660;</span>
+  </button>
+  <div id="chapterList" class="chapter-list"></div>
+</div>
+
+<!-- Counter & Controls -->
+<div class="slide-counter" id="counterBtn" title="按 G 開啟快速導覽">
+  <span id="current">1</span> / <span id="total"></span>
+</div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>&larr;</button><button id="next">&rarr;</button></div>
+
+<!-- Quick Nav Overlay -->
+<div id="navOverlay" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.92);backdrop-filter:blur(8px);overflow-y:auto;padding:2rem;">
+  <div style="max-width:960px;margin:0 auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <h2 style="color:#fff;font-size:1.3rem;font-weight:700;">快速導覽
+        <span style="color:rgba(255,255,255,.3);font-size:.85rem;font-weight:400;">（點擊跳頁 / ESC 關閉）</span>
+      </h2>
+      <button id="navClose" style="background:none;border:2px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;font-size:1rem;padding:.3rem .8rem;cursor:pointer;">&times;</button>
+    </div>
+    <div id="navGrid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:.8rem;"></div>
+  </div>
+</div>
+
+<script>
+// ── Core Engine ──
+const slides=Array.from(document.querySelectorAll('.slide'));
+const tot=slides.length;
+let idx=0;
+const prevBtn=document.getElementById('prev');
+const nextBtn=document.getElementById('next');
+const currentEl=document.getElementById('current');
+const totalEl=document.getElementById('total');
+const progressEl=document.getElementById('progress');
+totalEl.textContent=tot;
+
+function go(n){
+  slides[idx].classList.remove('active');
+  idx=Math.max(0,Math.min(n,tot-1));
+  slides[idx].classList.add('active');
+  currentEl.textContent=idx+1;
+  prevBtn.disabled=idx===0;
+  nextBtn.disabled=idx===tot-1;
+  progressEl.style.width=((idx+1)/tot*100)+'%';
+  updateChapterLabel();
+}
+
+// ── Fragments ──
+function getFragments(s){return Array.from(s.querySelectorAll('.fragment'));}
+function next(){
+  const frags=getFragments(slides[idx]);
+  const hidden=frags.filter(f=>!f.classList.contains('visible'));
+  if(hidden.length>0){hidden[0].classList.add('visible');return;}
+  if(idx<tot-1)go(idx+1);
+}
+function prev(){
+  const frags=getFragments(slides[idx]);
+  const vis=frags.filter(f=>f.classList.contains('visible'));
+  if(vis.length>0){vis[vis.length-1].classList.remove('visible');return;}
+  if(idx>0)go(idx-1);
+}
+nextBtn.onclick=next;
+prevBtn.onclick=prev;
+
+// ── Chapter Menu ──
+const chapterMenu=document.getElementById('chapterMenu');
+const chapterBtn=document.getElementById('chapterBtn');
+const chapterLabel=document.getElementById('chapterLabel');
+const chapterList=document.getElementById('chapterList');
+
+function getChapters(){const m=new Map();slides.forEach((s,i)=>{const a=s.dataset.act;if(a&&!m.has(a))m.set(a,i);});return m;}
+function buildChapterMenu(){
+  const ch=getChapters();chapterList.innerHTML='';
+  const cur=slides[idx]?.dataset.act||'';
+  ch.forEach((si,name)=>{
+    const d=document.createElement('div');
+    d.className='chapter-item'+(name===cur?' active':'');
+    d.innerHTML='<span class="chapter-dot"></span>'+name;
+    d.onclick=()=>{go(si);closeChapterMenu();};
+    chapterList.appendChild(d);
+  });
+  chapterLabel.textContent=cur||'導覽';
+}
+function toggleChapterMenu(){chapterMenu.classList.toggle('open');if(chapterMenu.classList.contains('open'))buildChapterMenu();}
+function closeChapterMenu(){chapterMenu.classList.remove('open');}
+function updateChapterLabel(){chapterLabel.textContent=slides[idx]?.dataset.act||'導覽';}
+chapterBtn.onclick=toggleChapterMenu;
+document.addEventListener('click',e=>{if(!chapterMenu.contains(e.target))closeChapterMenu();});
+
+// ── Quick Nav ──
+const navOverlay=document.getElementById('navOverlay');
+const navGrid=document.getElementById('navGrid');
+function buildNav(){
+  navGrid.innerHTML='';
+  slides.forEach((s,i)=>{
+    const act=s.dataset.act||'';
+    const isPoster=s.classList.contains('poster')||s.classList.contains('dark-slide')||s.classList.contains('dataviz');
+    const t=s.querySelector('h1,h2');
+    const label=t?t.textContent.replace(/\n/g,' ').substring(0,20):'Slide '+(i+1);
+    const card=document.createElement('div');
+    card.style.cssText='cursor:pointer;border-radius:10px;overflow:hidden;border:2px solid '+(i===idx?'var(--teal)':'rgba(255,255,255,.1)')+';transition:border-color .15s;';
+    card.innerHTML='<div style="height:60px;background:'+(isPoster?'var(--primary)':'var(--offwhite)')+';display:flex;align-items:center;justify-content:center;font-size:.7rem;color:'+(isPoster?'rgba(255,255,255,.3)':'rgba(0,0,0,.3)')+';">'+(i+1)+'</div><div style="padding:.5rem;background:rgba(255,255,255,.04);"><div style="font-size:.65rem;color:var(--teal);font-weight:700;margin-bottom:.15rem;">'+act+'</div><div style="font-size:.7rem;color:rgba(255,255,255,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+label+'</div></div>';
+    card.onmouseenter=()=>{card.style.borderColor='var(--gold)';};
+    card.onmouseleave=()=>{card.style.borderColor=i===idx?'var(--teal)':'rgba(255,255,255,.1)';};
+    card.onclick=()=>{go(i);closeNav();};
+    navGrid.appendChild(card);
+  });
+}
+function openNav(){buildNav();navOverlay.style.display='block';}
+function closeNav(){navOverlay.style.display='none';}
+document.getElementById('counterBtn').onclick=openNav;
+document.getElementById('navClose').onclick=closeNav;
+navOverlay.onclick=e=>{if(e.target===navOverlay)closeNav();};
+
+// ── Keyboard ──
+let numBuf='',numTimer=null;
+document.addEventListener('keydown',e=>{
+  if(navOverlay.style.display==='block'){if(e.key==='Escape'||e.key==='g'||e.key==='G'){e.preventDefault();closeNav();}return;}
+  if(chapterMenu.classList.contains('open')&&e.key==='Escape'){closeChapterMenu();return;}
+  if(e.key==='g'||e.key==='G'){e.preventDefault();openNav();return;}
+  if(e.key==='f'||e.key==='F'){e.preventDefault();if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();return;}
+  if(e.key>='0'&&e.key<='9'){numBuf+=e.key;clearTimeout(numTimer);numTimer=setTimeout(()=>{numBuf='';},1500);return;}
+  if(e.key==='Enter'&&numBuf){e.preventDefault();const n=parseInt(numBuf,10)-1;if(n>=0&&n<tot)go(n);numBuf='';return;}
+  if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();next();}
+  if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();prev();}
+  if(e.key==='Home'){e.preventDefault();go(0);}
+  if(e.key==='End'){e.preventDefault();go(tot-1);}
+});
+
+// ── Touch ──
+let touchX=0;
+document.addEventListener('touchstart',e=>{touchX=e.changedTouches[0].screenX;});
+document.addEventListener('touchend',e=>{const d=e.changedTouches[0].screenX-touchX;if(Math.abs(d)>50){if(d<0)next();else prev();}});
+
+// ── postMessage (for ClassClaw remote) ──
+window.addEventListener('message',function(e){if(!e.data||typeof e.data!=='object')return;if(e.data.type==='slide-control'){if(e.data.action==='next')next();else if(e.data.action==='prev')prev();else if(e.data.action==='goto'&&typeof e.data.index==='number')go(e.data.index);}});
+
+go(0);
+</script>
+</body>
+</html>

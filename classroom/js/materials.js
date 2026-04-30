@@ -26,7 +26,7 @@ var materials = [
   { title: 'S23 NotebookLM YAML \u7C21\u5831\u5BE6\u9A57', icon: '\uD83E\uDDEA', url: '/slides/supplements/S23_NotebookLM_YAML_Lab.html', desc: 'YAML\u98A8\u683C\u63A7\u5236\u00B714\u7D44\u6E2C\u8A66' },
   { title: 'S24 AI \u4E03\u5C64\u67B6\u69CB', icon: '\uD83C\uDFD7\uFE0F', url: '/slides/supplements/S24_AI_Seven_Layer_Stack.html', desc: '\u5F9E\u6A21\u578B\u5230\u61C9\u7528\u00B730\u9801' },
   // --- Talks T01-T04 ---
-  { title: 'T01 \u5927\u5B78\u6F14\u8B1B \u4EBA\u99D5\u99AD AI', icon: '\uD83C\uDF93', url: '/slides/supplements/T01_University_Talk.html', desc: '\u6F14\u8B1B\u00B769\u9801' },
+  { title: 'T01 \u5927\u5B78\u6F14\u8B1B \u4EBA\u99D5\u99AD AI', icon: '\uD83C\uDF93', url: '/slides/supplements/T01_University_Talk_v2.html', desc: '\u6F14\u8B1B\u00B776\u9801\u00B7CD\u98A8\u683C v2' },
   { title: 'T02 \u5F9E\u7B46\u8A18\u5230\u7B2C\u4E8C\u5927\u8166', icon: '\uD83E\uDDE0', url: '/slides/supplements/T02_Knowledge_Base_L1_L5.html', desc: '\u6F14\u8B1B\u00B755\u9801' },
   { title: 'T03 AI\u7684\u7522\u696D\u5316\u885D\u64CA', icon: '\uD83D\uDCA5', url: '/slides/supplements/T03_AI_Industry_Impact.html', desc: '\u6F14\u8B1B\u00B732\u9801' },
   { title: 'T04 \u8AD6\u6587\u65B9\u6CD5\u5B78\u5206\u4EAB', icon: '\uD83C\uDF93', url: '/slides/supplements/T04_Paper_Methodology.html', desc: '\u6F14\u8B1B\u00B739\u9801' },
