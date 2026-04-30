@@ -50,7 +50,14 @@ async function convertToPdf(browser, htmlFile) {
   console.log(`  Converting: ${htmlFile}`);
 
   const page = await browser.newPage();
-  await page.setViewport({ width: 1280, height: 720 });
+  await page.setViewport({ width: 1920, height: 1080 });
+  // Hide UI overlays (chapter menu, page indicator, controls) so they don't appear in PDF
+  await page.evaluateOnNewDocument(() => {
+    const style = document.createElement('style');
+    style.textContent = '.chapter-menu,.slide-counter,.controls,.brand-footer,.progress{display:none !important;}';
+    if (document.head) document.head.appendChild(style);
+    else document.addEventListener('DOMContentLoaded', () => document.head.appendChild(style));
+  });
 
   // Load the HTML slide
   const fileUrl = 'file://' + path.resolve(htmlPath);
@@ -111,7 +118,7 @@ async function convertToPdf(browser, htmlFile) {
     const screenshot = await page.screenshot({
       type: 'png',
       fullPage: false,
-      clip: { x: 0, y: 0, width: 1280, height: 720 }
+      clip: { x: 0, y: 0, width: 1920, height: 1080 }
     });
     screenshots.push(screenshot);
   }
@@ -127,9 +134,9 @@ async function convertToPdf(browser, htmlFile) {
 
   const pdfHtml = `<!DOCTYPE html>
 <html><head><style>
-  @page { size: 1280px 720px; margin: 0; }
+  @page { size: 1920px 1080px; margin: 0; }
   * { margin: 0; padding: 0; }
-  .page { width: 1280px; height: 720px; page-break-after: always; overflow: hidden; }
+  .page { width: 1920px; height: 1080px; page-break-after: always; overflow: hidden; }
   .page:last-child { page-break-after: avoid; }
   img { width: 100%; height: 100%; object-fit: contain; }
 </style></head><body>${imgTags}</body></html>`;
@@ -137,8 +144,8 @@ async function convertToPdf(browser, htmlFile) {
   await pdfPage.setContent(pdfHtml, { waitUntil: 'load' });
   await pdfPage.pdf({
     path: pdfPath,
-    width: '1280px',
-    height: '720px',
+    width: '1920px',
+    height: '1080px',
     printBackground: true,
     margin: { top: 0, right: 0, bottom: 0, left: 0 }
   });
