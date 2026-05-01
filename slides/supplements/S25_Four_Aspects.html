@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 應用核心能力四面向 — 超級個體的能力分佈</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+  --orange:#E8710A; --orange-lt:#FEF0E1;
+  --dark:#0a0a14;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--white);}
+
+.slides-wrap{position:relative;width:100vw;height:100vh;}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;overflow:hidden;background:var(--white);}
+.slide.active{display:flex;}
+
+.slide.poster{background-size:cover;background-position:center;color:#fff;text-align:center;}
+.slide.poster::before{content:'';position:absolute;inset:0;z-index:1;}
+.slide.poster>*{position:relative;z-index:2;}
+.slide.poster.overlay-heavy::before{background:linear-gradient(to bottom,rgba(0,0,0,.45) 0%,rgba(0,0,0,.85) 100%);}
+
+.slide.content{background:var(--white);color:var(--g900);padding-top:3rem;}
+
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:1.8rem;font-weight:700;color:var(--g900);margin-bottom:.6rem;line-height:1.4;}
+.slide.poster h2{color:#fff;}
+h3{font-size:1.2rem;font-weight:700;margin-bottom:.3rem;}
+p,li{font-size:1.05rem;line-height:1.8;}
+.subtitle{font-size:1.15rem;font-weight:500;}
+
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* Step List */
+.step-list{text-align:left;max-width:860px;width:100%;}
+.step{display:flex;gap:1rem;align-items:flex-start;padding:.5rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:38px;height:38px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;}
+.step-content{flex:1;}
+.step-content strong{font-size:1.05rem;}
+.step-content p{font-size:.95rem;color:var(--g600);margin-top:.1rem;}
+
+/* Stat Grid */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;max-width:920px;width:100%;margin-top:.6rem;}
+.stat-box{background:var(--offwhite);border:2px solid var(--g100);border-radius:16px;padding:1rem;text-align:center;}
+.stat-box .val{font-size:1.4rem;font-weight:900;line-height:1.2;}
+.stat-box .label{font-size:.78rem;color:var(--g600);margin-top:.3rem;line-height:1.5;}
+
+/* Card Grid */
+.card-grid{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-top:.8rem;width:100%;max-width:1140px;}
+.card{background:var(--white);border:2px solid var(--g100);border-radius:16px;padding:1.1rem;min-width:200px;max-width:380px;flex:1 1 280px;transition:border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.04);}
+.card:hover{border-color:var(--green);}
+.card .icon{font-size:1.6rem;margin-bottom:.3rem;}
+.card h3{color:var(--g900);margin-bottom:.4rem;}
+.card p{font-size:.85rem;color:var(--g600);line-height:1.6;}
+
+/* Compare Table */
+.compare-table{border-collapse:collapse;font-size:.95rem;margin-top:.6rem;width:100%;max-width:920px;}
+.compare-table th{background:var(--g50);color:var(--g800);padding:.5rem 1rem;text-align:left;font-size:.9rem;font-weight:700;}
+.compare-table td{padding:.5rem .8rem;border-bottom:1px solid var(--g100);font-size:.88rem;color:var(--g800);vertical-align:top;}
+.compare-table tr:hover td{background:var(--g50);}
+.compare-table .highlight{font-weight:700;color:var(--green);}
+
+/* Flow */
+.flow{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:center;margin:.6rem 0;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.6rem 1rem;font-size:.95rem;font-weight:700;text-align:center;color:var(--g900);}
+.flow-arrow{color:var(--green);font-size:1.5rem;font-weight:900;}
+
+/* Info Box */
+.info-box{border-radius:12px;padding:1rem 1.5rem;max-width:860px;width:100%;text-align:left;margin-top:.6rem;}
+.info-box.success{background:var(--green-lt);border-left:4px solid var(--green);}
+.info-box.tip{background:var(--gold-lt);border-left:4px solid var(--gold);}
+.info-box.warn{background:var(--red-lt);border-left:4px solid var(--red);}
+.info-box p{color:var(--g800);font-size:.95rem;}
+
+/* Quote Box */
+.quote-box{max-width:860px;width:100%;background:var(--offwhite);border-left:5px solid var(--gold);border-radius:0 12px 12px 0;padding:1.4rem 1.8rem;margin:.8rem 0;text-align:left;}
+.quote-box .quote-text{font-size:1.15rem;font-weight:700;line-height:1.6;color:var(--g900);}
+.quote-box .quote-src{font-size:.85rem;color:var(--g400);margin-top:.5rem;}
+
+/* Bottom Line */
+.bottom-line{max-width:860px;width:100%;background:var(--green-lt);border:2px solid rgba(15,157,138,.25);border-radius:16px;padding:1.3rem;text-align:center;margin-top:.8rem;}
+.bottom-line h3{font-size:1.3rem;color:var(--green);margin-bottom:.4rem;}
+.bottom-line p{font-size:1rem;color:var(--g800);max-width:680px;margin:0 auto;line-height:1.7;}
+
+/* Checklist */
+.checklist{max-width:920px;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:.8rem;text-align:left;margin-top:.5rem;}
+.checklist .ck{display:flex;gap:.7rem;align-items:flex-start;padding:.7rem .8rem;border-radius:10px;background:var(--offwhite);}
+.checklist .ck .dot{flex-shrink:0;width:32px;height:32px;border-radius:8px;color:#fff;font-weight:700;font-size:1rem;display:flex;align-items:center;justify-content:center;margin-top:.1rem;}
+.checklist .ck .txt{flex:1;font-size:.85rem;color:var(--g800);line-height:1.65;}
+.checklist .ck .txt strong{color:var(--g900);font-size:.92rem;display:block;margin-bottom:.2rem;}
+
+/* Link Cards */
+.link-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;max-width:920px;width:100%;margin-top:.6rem;}
+.link-card{display:block;text-decoration:none;background:var(--white);border:2px solid var(--g200);border-radius:18px;padding:1.4rem 1.6rem;transition:all .2s;color:inherit;text-align:left;box-shadow:0 2px 10px rgba(0,0,0,.04);}
+.link-card:hover{border-color:var(--green);transform:translateY(-2px);box-shadow:0 6px 18px rgba(15,157,138,.15);}
+.link-card .lc-tag{display:inline-block;background:var(--green-lt);color:var(--green);padding:.2rem .7rem;border-radius:100px;font-size:.72rem;font-weight:700;letter-spacing:.05em;}
+.link-card .lc-title{font-size:1.15rem;font-weight:900;color:var(--g900);margin-top:.5rem;line-height:1.4;}
+.link-card .lc-sub{font-size:.85rem;color:var(--g600);margin-top:.4rem;line-height:1.6;}
+.link-card .lc-cta{font-size:.85rem;color:var(--green);font-weight:700;margin-top:.7rem;}
+.link-card.current{background:var(--green-lt);border-color:var(--green);cursor:default;}
+.link-card.current:hover{transform:none;}
+
+/* Triangle Diagram for 框架串接 */
+.triangle-wrap{max-width:920px;width:100%;display:flex;flex-direction:column;gap:1rem;margin-top:.4rem;}
+.triangle-row{display:grid;grid-template-columns:140px 1fr;gap:1rem;align-items:center;padding:1rem 1.2rem;background:var(--offwhite);border-radius:14px;border-left:5px solid var(--g200);}
+.triangle-row .tri-tag{font-size:.95rem;font-weight:900;color:var(--g900);}
+.triangle-row .tri-tag .sub{display:block;font-size:.75rem;color:var(--g400);font-weight:500;margin-top:.2rem;}
+.triangle-row .tri-body{font-size:.9rem;color:var(--g800);line-height:1.65;}
+.triangle-row.l-green{border-left-color:var(--green);}
+.triangle-row.l-blue{border-left-color:var(--blue);}
+.triangle-row.l-purple{border-left-color:var(--purple);}
+a.triangle-row:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.08);background:#fff;}
+a.triangle-row.l-purple:hover{border-left-color:var(--purple);box-shadow:0 4px 14px rgba(124,58,237,.18);}
+a.triangle-row.l-blue:hover{border-left-color:var(--blue);box-shadow:0 4px 14px rgba(26,115,232,.18);}
+
+/* Controls */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:var(--white);color:var(--g800);font-size:1.2rem;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.controls button:hover{background:var(--g50);border-color:var(--green);color:var(--green);}
+.controls button:disabled{opacity:.2;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;right:5rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:var(--green-lt);color:var(--green);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
+
+.chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;}
+.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--white);border:1px solid var(--g200);border-radius:8px;color:var(--g800);font-size:.8rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.chapter-btn:hover{border-color:var(--green);}
+.chapter-icon{color:var(--green);font-weight:700;}
+.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:240px;background:var(--white);border:1px solid var(--g200);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.1);}
+.chapter-menu.open .chapter-list{display:block;}
+.chapter-item{padding:8px 14px;color:var(--g600);font-size:.78rem;cursor:pointer;}
+.chapter-item:hover{background:var(--g50);color:var(--g900);}
+.chapter-item.active{color:var(--green);font-weight:600;}
+
+@media(max-width:768px){
+  html,body{font-size:16px;}
+  .slide{padding:1rem 1.2rem 1rem;}
+  .slide.poster{justify-content:flex-end;padding-bottom:1.5rem;}
+  h1{font-size:1.8rem;}h2{font-size:1.4rem;margin-bottom:.6rem;}
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:.8rem;}
+  .stat-box .val{font-size:1.1rem;}
+  .card-grid{flex-direction:column;align-items:center;}
+  .card{max-width:100%;min-width:0;}
+  .compare-table th,.compare-table td{padding:.5rem .6rem;font-size:.8rem;}
+  .controls button{width:40px;height:40px;font-size:1rem;}
+  .module-title{font-size:.7rem;left:.8rem;top:.6rem;}
+  .module-badge{font-size:.65rem;top:.6rem;right:.6rem;padding:.2rem .6rem;}
+  .quote-box .quote-text{font-size:1rem;}
+  .checklist{grid-template-columns:1fr;}
+  .link-grid{grid-template-columns:1fr;}
+  .triangle-row{grid-template-columns:1fr;gap:.4rem;}
+  .flow{gap:.3rem;}
+  .flow-box{font-size:.85rem;padding:.5rem .7rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="module-title">AI 100 講 — 通用導論</div>
+<div class="module-badge">AI 四面向能力</div>
+<div class="slides-wrap">
+
+<!-- ====== 1. 封面 ====== -->
+<div class="slide poster overlay-heavy active" data-act="開場" data-index="0" style="background:linear-gradient(135deg, #0a140a 0%, #16213e 50%, #0a2647 100%);">
+  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:1rem;">AI 100 講 — 通用導論</p>
+  <h1>超級個體<br><span style="color:var(--green);">全面向能力分佈</span></h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.6);margin-top:1.5rem;">看懂四個面向<br>找到自己的能力分佈與學習路徑</p>
+  <p style="color:rgba(255,255,255,.3);margin-top:3rem;font-size:.85rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- ====== 2. Agenda ====== -->
+<div class="slide content" data-act="開場" data-index="1">
+  <h2>今天的旅程</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>時代命題：超級個體的崛起</strong><p>Vibe coding 讓單一強項不再是進場門檻，能力分佈才是</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num">2</div><div class="step-content"><strong>拆解四派各自的論點</strong><p>演算法派、軟體工程派、領域應用派、風險合規派 — 看穿銷售話術</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num">3</div><div class="step-content"><strong>解法：先站上交集點</strong><p>不是四派精通，是四派都「夠用就好」</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num">4</div><div class="step-content"><strong>站上之後：取得平衡</strong><p>依想成為什麼樣的超級個體，選方向深化</p></div></div>
+    <div class="step fragment" data-order="4"><div class="step-num" style="background:var(--gold);">5</div><div class="step-content"><strong>三份簡報的串接關係</strong><p>四面向 → L1-L4 階段 → 七層架構，從自己到細節</p></div></div>
+  </div>
+</div>
+
+<!-- ====== 3. 時代變了 ====== -->
+<div class="slide content" data-act="時代命題" data-index="2">
+  <h2>時代變了 — 單一強項不再是護城河</h2>
+  <p style="color:var(--g600);max-width:780px;text-align:center;margin-bottom:.6rem;">過去比技能深度，現在比能力分佈。<br><strong>能落地的人，不是技能最深的人，是補位最全的人。</strong></p>
+  <div class="card-grid">
+    <div class="card fragment" data-order="0" style="border-top:4px solid var(--g400);">
+      <div class="icon">🏛️</div>
+      <h3>過去</h3>
+      <p>單一深度技能 = 護城河<br>會寫程式、懂資料、懂行業<br>各自分工，互不重疊</p>
+    </div>
+    <div class="card fragment" data-order="1" style="border-top:4px solid var(--gold);">
+      <div class="icon">⚡</div>
+      <h3>現在</h3>
+      <p>AI 把單一技能變廉價<br>不會寫的可以 vibe 出能跑的東西<br>不懂模型的也能用上模型</p>
+    </div>
+    <div class="card fragment" data-order="2" style="border-top:4px solid var(--green);">
+      <div class="icon">🌐</div>
+      <h3>未來</h3>
+      <p>能力分佈決定你能走多遠<br>覆蓋面廣的「超級個體」<br>一個人就是一支隊伍</p>
+    </div>
+  </div>
+  <div class="info-box success" style="margin-top:.6rem;">
+    <p>💡 重點不是「我是不是這派的人」，是「我有沒有四派都夠用」。</p>
+  </div>
+</div>
+
+<!-- ====== 4. 但你會聽到（金句頁） ====== -->
+<div class="slide content" data-act="時代命題" data-index="3">
+  <h2>但你會聽到很多聲音說...</h2>
+  <div class="quote-box" style="border-left-color:var(--red);background:var(--red-lt);">
+    <div class="quote-text" style="font-size:1.5rem;text-align:center;line-height:1.7;">「你不懂 ___，<br>vibe coding 就是在裸奔。」</div>
+    <div class="quote-src" style="text-align:center;margin-top:.8rem;">每個派別都用這個句型，差別只在填什麼字</div>
+  </div>
+  <p style="color:var(--g600);max-width:780px;text-align:center;margin-top:.6rem;">演算法派、軟體工程派、領域應用派、風險合規派<br>每派都告訴你「沒我這派你不行」。</p>
+  <div class="info-box tip" style="margin-top:.6rem;">
+    <p>🔑 接下來把這個套路拆開來看 — <strong>每派強在哪、在賣什麼、看不到什麼</strong>。<br>看穿論述，你才不會被任一派綁架。</p>
+  </div>
+</div>
+
+<!-- ====== 5. Chapter Part 2：拆解四派 ====== -->
+<div class="slide poster overlay-heavy" data-act="拆解四派" data-index="4" style="background:linear-gradient(135deg, #1a0a0a 0%, #0a0a14 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 2</p>
+  <h1>拆解<br><span style="color:var(--gold);">四派的論點</span></h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.6);margin-top:.5rem;">每派強在哪、在賣什麼、看不到什麼</p>
+</div>
+
+<!-- ====== 6. 🟩 演算法派 ====== -->
+<div class="slide content" data-act="拆解四派" data-index="5">
+  <h2><span style="color:var(--green);">🟩 演算法派</span> — 「不懂模型內部，你只是在亂試」</h2>
+  <div class="card-grid">
+    <div class="card" style="border-top:4px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>強項是真的</h3>
+      <p>對「為什麼模型失敗」最有解釋力<br>能設計新模型<br>研究 / 高風險場景無可替代</p>
+    </div>
+    <div class="card" style="border-top:4px solid var(--gold);">
+      <div class="icon">💰</div>
+      <h3>在賣什麼</h3>
+      <p>底層原理、微積分、論文導讀<br>「沒這個你只是工具人」<br>CS 學位 / ML 訓練營</p>
+    </div>
+    <div class="card" style="border-top:4px solid var(--red);">
+      <div class="icon">⚠️</div>
+      <h3>看不到的事</h3>
+      <p>CS 4 年訓練，70% 畢業後在呼叫 API<br>過度工程：很多場景用不到這深度<br>對 LLM 時代失準（傳統 ML ≠ prompt）</p>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:.6rem;">
+    <p>🔍 <strong>怎麼辨識：</strong>講課愛畫公式、推導、講論文，會說「不懂底層你就只是工具人」。</p>
+  </div>
+</div>
+
+<!-- ====== 7. 🟦 軟體工程派 ====== -->
+<div class="slide content" data-act="拆解四派" data-index="6">
+  <h2><span style="color:var(--blue);">🟦 軟體工程派</span> — 「沒架構紀律，過不了 production」</h2>
+  <div class="card-grid">
+    <div class="card" style="border-top:4px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>強項是真的</h3>
+      <p>企業 production 場景無可替代<br>有完整工具鏈<br>design doc / CI-CD / 版控<br>對「為什麼長期會壞」解釋力最強</p>
+    </div>
+    <div class="card" style="border-top:4px solid var(--gold);">
+      <div class="icon">💰</div>
+      <h3>在賣什麼</h3>
+      <p>工程紀律、TDD<br>specification engineering<br>「vibe coding 是垃圾」<br>「你寫的不是程式」<br>架構師訓練 / 開源社群名聲</p>
+    </div>
+    <div class="card" style="border-top:4px solid var(--red);">
+      <div class="icon">⚠️</div>
+      <h3>看不到的事</h3>
+      <p>把所有任務都當 production 做<br>GitHub stars 同溫層績效競賽<br>對非軟體背景的領域專家排斥</p>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:.6rem;">
+    <p>🔍 <strong>怎麼辨識：</strong>愛秀 GitHub repo、講架構圖、強調 best practices、批評「vibe coding 不認真」。</p>
+  </div>
+</div>
+
+<!-- ====== 8. 🟧 領域應用派 ====== -->
+<div class="slide content" data-act="拆解四派" data-index="7">
+  <h2><span style="color:var(--orange);">🟧 領域應用派</span> — 「不懂行業，AI 都是空談」</h2>
+  <div class="card-grid">
+    <div class="card" style="border-top:4px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>強項是真的</h3>
+      <p>速度極快、能直接交付<br>規模最大（4:1 超過專業開發者）<br>跟商業變現最直接</p>
+    </div>
+    <div class="card" style="border-top:4px solid var(--gold);">
+      <div class="icon">💰</div>
+      <h3>在賣什麼</h3>
+      <p>「我用 AI 賺到多少」<br>行業 × AI 案例集<br>速度至上、變現速成</p>
+    </div>
+    <div class="card" style="border-top:4px solid var(--red);">
+      <div class="icon">⚠️</div>
+      <h3>看不到的事</h3>
+      <p>不知道自己不知道什麼（最危險）<br>3 個月後變自己也維護不了的黑盒<br>低估資料品質、安全、合規成本</p>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:.6rem;">
+    <p>🔍 <strong>怎麼辨識：</strong>講案例、講商業模式、強調速度與變現、「我用 AI 一週做了 X」。</p>
+  </div>
+</div>
+
+<!-- ====== 9. 🟪 風險合規派 ====== -->
+<div class="slide content" data-act="拆解四派" data-index="8">
+  <h2><span style="color:var(--purple);">🟪 風險合規派</span> — 「不會判讀，你早晚會出事」</h2>
+  <div class="card-grid">
+    <div class="card" style="border-top:4px solid var(--green);">
+      <div class="icon">✅</div>
+      <h3>強項是真的</h3>
+      <p>最接近跨領域共通能力<br>法規驅動（EU AI Act 強制要求）<br>對非技術背景者最友善</p>
+    </div>
+    <div class="card" style="border-top:4px solid var(--gold);">
+      <div class="icon">💰</div>
+      <h3>在賣什麼</h3>
+      <p>AI 治理、合規培訓、ESG 顧問<br>「不是會用就好」<br>「責任歸屬不能跑」<br>用法規與恐懼拉抬重要性</p>
+    </div>
+    <div class="card" style="border-top:4px solid var(--red);">
+      <div class="icon">⚠️</div>
+      <h3>看不到的事</h3>
+      <p>容易變空泛說教（落地很弱）<br>跟具體技術 stack 銜接弱<br>圈內人有時自己不懂技術</p>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:.6rem;">
+    <p>🔍 <strong>怎麼辨識：</strong>講案例分析、講風險、強調法規與責任、「不是會用就好」。</p>
+  </div>
+</div>
+
+<!-- ====== 10. 真相 ====== -->
+<div class="slide content" data-act="拆解四派" data-index="9">
+  <h2>真相 — 各派都有道理，也都有偏見</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0">
+      <div class="step-num" style="background:var(--green);">✓</div>
+      <div class="step-content">
+        <strong>每派講的都不是錯的</strong>
+        <p>強項都是真的、賣的東西都有價值、盲點也都真實存在</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="1">
+      <div class="step-num" style="background:var(--gold);">$</div>
+      <div class="step-content">
+        <strong>但每派都在保護自己領域的價值</strong>
+        <p>同一個「你不懂 ___，vibe coding 就是在裸奔」句型 = 同一個推銷模式</p>
+      </div>
+    </div>
+    <div class="step fragment" data-order="2">
+      <div class="step-num" style="background:var(--red);">!</div>
+      <div class="step-content">
+        <strong>選邊站不是答案</strong>
+        <p>選哪派都會錯過另外三派看到的事 — 而那剛好是你會踩坑的地方</p>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-line">
+    <h3>你的任務不是選邊站，是看穿論述</h3>
+    <p>找到自己的位置，補上看不到的地方</p>
+  </div>
+</div>
+
+<!-- ====== 11. Chapter Part 3：先站上交集點 ====== -->
+<div class="slide poster overlay-heavy" data-act="先站上交集點" data-index="10" style="background:linear-gradient(135deg, #0a140a 0%, #1a1a0a 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 3</p>
+  <h1>先站上<br><span style="color:var(--gold);">交集點</span></h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.6);margin-top:.5rem;">不是四派精通，是四派都「夠用就好」</p>
+</div>
+
+<!-- ====== 12. 你心中真正的問題 ====== -->
+<div class="slide content" data-act="先站上交集點" data-index="11">
+  <h2>你心中真正的問題</h2>
+  <div class="quote-box" style="border-left-color:var(--green);">
+    <div class="quote-text" style="font-size:1.4rem;text-align:center;line-height:1.7;">「我對演算法不熟，<br>我就不能 vibe 出產品嗎？」</div>
+    <div class="quote-src" style="text-align:center;margin-top:.8rem;">每個學員都有的疑惑</div>
+  </div>
+  <p style="color:var(--g600);max-width:780px;text-align:center;margin-top:.8rem;font-size:1.05rem;">答案不是 yes / no，<br><strong>真正的問題是：你的能力分佈長什麼樣？</strong></p>
+  <div class="info-box success" style="margin-top:.6rem;">
+    <p>💡 你不需要四派精通。<strong>但你需要四派都「夠用就好」</strong> — 這就叫站上交集點。</p>
+  </div>
+</div>
+
+<!-- ====== 13. 解法：每派夠用就好 ====== -->
+<div class="slide content" data-act="先站上交集點" data-index="12">
+  <h2>解法 — 每派都到「夠用就好」</h2>
+  <p style="color:var(--g600);max-width:780px;text-align:center;margin-bottom:.6rem;">不需要四派精通（不可能），<strong>四派都「夠用就好」就辦得到</strong>。</p>
+  <div class="stat-grid">
+    <div class="stat-box" style="border-color:var(--green);">
+      <div class="val" style="color:var(--green);font-size:1.2rem;">夠用就好</div>
+      <div class="label">🟩 演算法派<br>不被 LLM 表象迷惑</div>
+    </div>
+    <div class="stat-box" style="border-color:var(--blue);">
+      <div class="val" style="color:var(--blue);font-size:1.2rem;">夠用就好</div>
+      <div class="label">🟦 軟體工程派<br>知道何時要嚴肅工程</div>
+    </div>
+    <div class="stat-box" style="border-color:var(--orange);">
+      <div class="val" style="color:var(--orange);font-size:1.2rem;">夠用就好</div>
+      <div class="label">🟧 領域應用派<br>能拆解真實需求</div>
+    </div>
+    <div class="stat-box" style="border-color:var(--purple);">
+      <div class="val" style="color:var(--purple);font-size:1.2rem;">夠用就好</div>
+      <div class="label">🟪 風險合規派<br>會驗證、會劃紅線</div>
+    </div>
+  </div>
+  <div class="bottom-line">
+    <h3>站到交集點 = 你已經能 vibe 出能交付的產品</h3>
+    <p>這時你是個能落地的<strong>超級個體</strong>，<br>不被任一派綁架，也不會在另外三派踩坑。</p>
+  </div>
+</div>
+
+<!-- ====== 14. 四面向能力分佈雷達圖 ====== -->
+<div class="slide content" data-act="先站上交集點" data-index="13">
+  <h2>四面向能力分佈 — 雷達圖</h2>
+  <p style="color:var(--g600);max-width:780px;text-align:center;margin-bottom:.4rem;"><strong>縱軸</strong>：現實場景 ↔ 抽象底層　·　<strong>橫軸</strong>：評估 AI ↔ 建造 AI</p>
+  <svg viewBox="0 0 900 520" style="max-width:880px;width:100%;height:auto;margin-top:.2rem;font-family:'Noto Sans TC',sans-serif;">
+    <!-- 兩層雷達等級線（同心菱形） -->
+    <!-- 外層（虛線淡灰） -->
+    <polygon points="450,70 650,260 450,450 250,260" fill="none" stroke="#DADCE0" stroke-width="1.5" stroke-dasharray="6 4"/>
+    <!-- 內層（虛線） -->
+    <polygon points="450,212.5 500,260 450,307.5 400,260" fill="none" stroke="#DADCE0" stroke-width="1" stroke-dasharray="4 4"/>
+
+    <!-- 軸線（十字） -->
+    <line x1="450" y1="70" x2="450" y2="450" stroke="#9AA0A6" stroke-width="1.5"/>
+    <line x1="250" y1="260" x2="650" y2="260" stroke="#9AA0A6" stroke-width="1.5"/>
+
+    <!-- 中心交集點 -->
+    <circle cx="450" cy="260" r="36" fill="#FEF7E0" stroke="#F9AB00" stroke-width="3"/>
+    <text x="450" y="266" text-anchor="middle" font-size="14" font-weight="900" fill="#F9AB00">交集點</text>
+
+    <!-- 派別名（軸端，44px 放大版） -->
+    <text x="450" y="56" text-anchor="middle" font-size="44" font-weight="900" fill="#E8710A">領域應用派</text>
+    <text x="450" y="488" text-anchor="middle" font-size="44" font-weight="900" fill="#0F9D8A">演算法派</text>
+    <text x="240" y="274" text-anchor="end" font-size="44" font-weight="900" fill="#7C3AED">風險合規派</text>
+    <text x="660" y="274" text-anchor="start" font-size="44" font-weight="900" fill="#1A73E8">軟體工程派</text>
+
+    <!-- 軸方向（小字輔助） -->
+    <text x="450" y="14" text-anchor="middle" font-size="13" fill="#9AA0A6">▲ 現實場景</text>
+    <text x="450" y="510" text-anchor="middle" font-size="13" fill="#9AA0A6">▼ 抽象底層</text>
+    <text x="240" y="298" text-anchor="end" font-size="13" fill="#9AA0A6">◀ 評估 AI</text>
+    <text x="660" y="298" text-anchor="start" font-size="13" fill="#9AA0A6">建造 AI ▶</text>
+  </svg>
+  <p style="color:var(--g400);font-size:.9rem;margin-top:.3rem;text-align:center;">中心 = 四派都「夠用就好」的位置</p>
+</div>
+
+<!-- ====== 15. 工地比方輔助 ====== -->
+<div class="slide content" data-act="先站上交集點" data-index="13">
+  <h2>用蓋房子來想 — 四工種缺一不可</h2>
+  <table class="compare-table">
+    <tr><th style="width:18%;">工地角色</th><th style="width:22%;">對應的 AI 派別</th><th>負責的事</th></tr>
+    <tr><td><span style="color:var(--green);font-weight:700;">🟩 結構技師</span></td><td><strong>演算法派</strong></td><td>算結構、算載重 — 看不見但決定整棟樓的安全</td></tr>
+    <tr><td><span style="color:var(--blue);font-weight:700;">🟦 建築師</span></td><td><strong>軟體工程派</strong></td><td>把需求變成可施工的設計圖</td></tr>
+    <tr><td><span style="color:var(--orange);font-weight:700;">🟧 工班師傅</span></td><td><strong>領域應用派</strong></td><td>水電、泥作各工種 — 把圖變成實體</td></tr>
+    <tr><td><span style="color:var(--purple);font-weight:700;">🟪 監造</span></td><td><strong>風險合規派</strong></td><td>對照規範，逐階段驗收</td></tr>
+  </table>
+  <div class="info-box tip" style="margin-top:.6rem;">
+    <p>🔑 四工種<strong>平行協作、缺一不可</strong>，但 <strong>沒有人是四工種同時頂尖</strong> — 各自夠用、互補完成一棟房子。<br>AI 應用一樣 — 不需要四派精通，需要四派都能補位。</p>
+  </div>
+</div>
+
+<!-- ====== 15. Chapter Part 4：取得平衡 ====== -->
+<div class="slide poster overlay-heavy" data-act="取得平衡" data-index="14" style="background:linear-gradient(135deg, #0a140a 0%, #0a141e 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 4</p>
+  <h1>站上之後<br><span style="color:var(--green);">取得平衡</span></h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.6);margin-top:.5rem;">依想成為什麼樣的超級個體，選方向深化</p>
+</div>
+
+<!-- ====== 16. 四派「夠用就好」一張圖 ====== -->
+<div class="slide content" data-act="取得平衡" data-index="15">
+  <h2>四派「夠用就好」長什麼樣</h2>
+  <p style="color:var(--g600);max-width:780px;text-align:center;margin-bottom:.5rem;">每派列 3 條 — 不是教科書清單，是辨識題：<strong>你有沒有這個夠用？</strong></p>
+  <div class="checklist">
+    <div class="ck"><div class="dot" style="background:var(--green);">🟩</div><div class="txt"><strong>演算法派</strong>知道 LLM 是預測引擎不是真理引擎<br>知道幻覺常出現在引用 / 人名 / 數字<br>知道 cutoff 之後的東西要自己查</div></div>
+    <div class="ck"><div class="dot" style="background:var(--blue);">🟦</div><div class="txt"><strong>軟體工程派</strong>知道 prototype 跟 production 怎麼分線<br>不 commit 自己看不懂的程式<br>API key 不寫在程式碼裡</div></div>
+    <div class="ck"><div class="dot" style="background:var(--orange);">🟧</div><div class="txt"><strong>領域應用派</strong>能把模糊需求拆成輸入→處理→輸出→驗證<br>驗收標準事先定義，不是做完再看<br>MVP 先驗證再加功能</div></div>
+    <div class="ck"><div class="dot" style="background:var(--purple);">🟪</div><div class="txt"><strong>風險合規派</strong>AI 給的引用 / 人名 / 數字會去查<br>客戶資料 / 個資不丟雲端 AI<br>知道什麼時候該說「這不該用 AI」</div></div>
+  </div>
+</div>
+
+<!-- ====== 17. T 型 / π 型 ====== -->
+<div class="slide content" data-act="取得平衡" data-index="16">
+  <h2>取得平衡 — 你想成為什麼樣的超級個體？</h2>
+  <table class="compare-table">
+    <tr><th style="width:18%;">路徑</th><th style="width:30%;">適合的人</th><th>策略</th></tr>
+    <tr class="fragment" data-order="0">
+      <td><span class="highlight">T 型</span><br><span style="color:var(--g400);font-size:.78rem;">一深三淺</span></td>
+      <td>要做專業變現的人</td>
+      <td>站到交集點 + 把最強的一派深化到專家級</td>
+    </tr>
+    <tr class="fragment" data-order="1">
+      <td><span class="highlight">π 型</span><br><span style="color:var(--g400);font-size:.78rem;">兩深兩淺</span></td>
+      <td>要做高價定位的人</td>
+      <td>同時深化兩派（如演算法 + 風險，或軟體 + 領域）<br><span style="color:var(--gold);">⚠️ 成本是 T 型 2.5 倍，稀缺度 10 倍</span></td>
+    </tr>
+    <tr class="fragment" data-order="2" style="background:var(--red-lt);">
+      <td><span style="color:var(--red);font-weight:700;">滿格型</span><br><span style="color:var(--g400);font-size:.78rem;">四派精通</span></td>
+      <td><strong style="color:var(--red);">不必走的路</strong></td>
+      <td>不可能且沒必要 — 想做這個的人最後一派都不通</td>
+    </tr>
+  </table>
+  <div class="info-box success" style="margin-top:.6rem;">
+    <p>💡 <strong>四派都到「夠用」的人 = 0.01%</strong>（0.1×0.1×0.1×0.1）。<br>乘法稀缺，不是加法 40%。<br>站上交集點本身就是稀缺定位。</p>
+  </div>
+</div>
+
+<!-- ====== 18. 自我盤點 ====== -->
+<div class="slide content" data-act="取得平衡" data-index="17">
+  <h2>你現在在哪？下一步補什麼？</h2>
+  <table class="compare-table">
+    <tr><th style="width:32%;">你最常做的事</th><th style="width:22%;">你大概偏哪派</th><th>下一步該補</th></tr>
+    <tr><td>讀論文、跑實驗、調模型</td><td><span style="color:var(--green);font-weight:700;">🟩 演算法派</span></td><td>軟體工程 + 領域應用 + 風險合規</td></tr>
+    <tr><td>寫 code、做架構、上 GitHub</td><td><span style="color:var(--blue);font-weight:700;">🟦 軟體工程派</span></td><td>演算法 + 領域應用 + 風險合規</td></tr>
+    <tr><td>跟客戶聊、做提案、找需求</td><td><span style="color:var(--orange);font-weight:700;">🟧 領域應用派</span></td><td>演算法 + 軟體工程 + 風險合規</td></tr>
+    <tr><td>寫評論、做培訓、講風險</td><td><span style="color:var(--purple);font-weight:700;">🟪 風險合規派</span></td><td>演算法 + 軟體工程 + 領域應用</td></tr>
+  </table>
+  <div class="bottom-line">
+    <h3>看完應該能說出三件事</h3>
+    <p>1. 我偏 <strong>X 派</strong>　　2. 我看不到 <strong>Y 派</strong>　　3. 下一步先補 <strong>Y 派的「夠用就好」</strong></p>
+  </div>
+</div>
+
+<!-- ====== 19. Chapter Part 5：三份串接 ====== -->
+<div class="slide poster overlay-heavy" data-act="三份串接" data-index="18" style="background:linear-gradient(135deg, #0a0a14 0%, #16213e 50%, #1a0a2e 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 5</p>
+  <h1>學習路徑<br><span style="color:var(--green);">串接</span></h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.6);margin-top:.5rem;">四面向 → L1-L4 階段 → 七層架構，從自己到細節</p>
+</div>
+
+<!-- ====== 20. 框架串接（連結內嵌） ====== -->
+<div class="slide content" data-act="三份串接" data-index="19">
+  <h2>三份是一條路 — 從自己看到細節</h2>
+  <div class="triangle-wrap">
+    <div class="triangle-row l-green" style="background:var(--green-lt);">
+      <div class="tri-tag">🟩 四面向<br><span class="sub" style="color:var(--green);">本份 · 看自己</span></div>
+      <div class="tri-body"><strong>看自己的能力分佈</strong> — 用四派找到自己偏哪派、看不到哪派、下一步補什麼。<br><span style="color:var(--g400);">回答的問題：「我現在在哪？」</span></div>
+    </div>
+    <a class="triangle-row l-purple" href="https://aipath.cooperation.tw/" target="_blank" style="text-decoration:none;color:inherit;cursor:pointer;transition:transform .15s,box-shadow .15s;">
+      <div class="tri-tag">🟪 L1-L4 階段<br><span class="sub" style="color:var(--purple);">點擊開啟 →</span></div>
+      <div class="tri-body"><strong>看自己的學習路徑</strong> — L1 用工具 → L2 選工具 → L3 創工具 → L4 流程改造，每階段對應不同的能力分佈。<br><span style="color:var(--g400);">回答的問題：「下一步該往哪走？」</span></div>
+    </a>
+    <a class="triangle-row l-blue" href="https://ai-cooperation.github.io/ai100/slides/supplements/S24_AI_Seven_Layer_Stack.html" target="_blank" style="text-decoration:none;color:inherit;cursor:pointer;transition:transform .15s,box-shadow .15s;">
+      <div class="tri-tag">🟦 七層架構<br><span class="sub" style="color:var(--blue);">點擊開啟 →</span></div>
+      <div class="tri-body"><strong>看 AI 技術全景</strong> — L1 模型 → L7 應用，所有專有名詞都在這張圖找得到位置。<br><span style="color:var(--g400);">回答的問題：「這些工具、這些名詞，是在做什麼？」</span></div>
+    </a>
+  </div>
+  <div class="info-box success" style="margin-top:.4rem;">
+    <p>💡 <strong>四面向看自己，L1-L4 看路徑，七層看細節</strong> — 三份合起來才是完整的超級個體成長地圖。</p>
+  </div>
+</div>
+
+<!-- ====== 22. 重點回顧 ====== -->
+<div class="slide content" data-act="結語" data-index="21">
+  <h2>今天的重點</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>時代要的是超級個體，不是單派專家</strong><p>vibe coding 讓單一強項不再是進場門檻，能力分佈才是</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num">2</div><div class="step-content"><strong>四派各有論點，也各有偏見</strong><p>每派都用「你不懂 ___，vibe coding 就是在裸奔」這個句型推銷</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num">3</div><div class="step-content"><strong>解法不是選邊站，是先站上交集點</strong><p>四派都「夠用就好」，這時你已經能 vibe 出產品</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--gold);">4</div><div class="step-content"><strong>站上之後再選方向深化</strong><p>四面向看自己 → L1-L4 看路徑 → 七層看細節</p></div></div>
+  </div>
+</div>
+
+<!-- ====== 23. 封底 ====== -->
+<div class="slide poster overlay-heavy" data-act="結語" data-index="22" style="background:linear-gradient(135deg, #0a0a14 0%, #16213e 50%, #0a2647 100%);">
+  <h1 style="font-size:2.5rem;">先站上交集點<br>再<span style="color:var(--green);">選方向深化</span></h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.5);margin-top:2rem;">AI 100 講 — 通用導論</p>
+  <p style="color:rgba(255,255,255,.25);margin-top:1rem;font-size:.85rem;">2026.04</p>
+</div>
+
+</div>
+
+<div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>&larr;</button><button id="next">&rarr;</button></div>
+<div id="chapterMenu" class="chapter-menu">
+  <button class="chapter-btn" onclick="toggleChapterMenu()"><span class="chapter-icon">☰</span> 章節</button>
+  <div class="chapter-list" id="chapterList"></div>
+</div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),total=slides.length;let current=0;
+document.getElementById('total').textContent=total;
+function showSlide(n){if(n<0||n>=total)return;slides[current].classList.remove('active');current=n;slides[current].classList.add('active');document.getElementById('current').textContent=current+1;document.getElementById('progress').style.width=((current+1)/total*100)+'%';document.getElementById('prev').disabled=current===0;document.getElementById('next').disabled=current===total-1;slides[current].querySelectorAll('.fragment').forEach((f,i)=>{setTimeout(()=>f.classList.add('visible'),150+i*200)});updateChapterHighlight();}
+document.getElementById('prev').onclick=()=>showSlide(current-1);
+document.getElementById('next').onclick=()=>showSlide(current+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();showSlide(current+1)}if(e.key==='ArrowLeft'){e.preventDefault();showSlide(current-1)}});
+let touchStartX=0;document.addEventListener('touchstart',e=>{touchStartX=e.touches[0].clientX});document.addEventListener('touchend',e=>{const diff=touchStartX-e.changedTouches[0].clientX;if(Math.abs(diff)>50){diff>0?showSlide(current+1):showSlide(current-1)}});
+function buildChapterMenu(){const list=document.getElementById('chapterList'),acts=[];slides.forEach((s,i)=>{const act=s.dataset.act;if(act&&!acts.includes(act)){acts.push(act);const item=document.createElement('div');item.className='chapter-item';item.textContent=act;item.dataset.index=i;item.onclick=()=>{showSlide(i);toggleChapterMenu()};list.appendChild(item)}})}
+function toggleChapterMenu(){document.getElementById('chapterMenu').classList.toggle('open')}
+function updateChapterHighlight(){const act=slides[current].dataset.act;document.querySelectorAll('.chapter-item').forEach(item=>{item.classList.toggle('active',item.textContent===act)})}
+document.addEventListener('click',e=>{const menu=document.getElementById('chapterMenu');if(!menu.contains(e.target))menu.classList.remove('open')});
+buildChapterMenu();showSlide(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 學習路徑 L1-L4 — 從使用者到改革者</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --white:#FFF; --offwhite:#F8F9FA; --g50:#F1F3F4; --g100:#E8EAED;
+  --g200:#DADCE0; --g400:#9AA0A6; --g600:#5F6368; --g800:#3C4043; --g900:#202124;
+  --blue:#1A73E8; --blue-lt:#E8F0FE;
+  --green:#0F9D8A; --green-lt:#E6F4F1;
+  --gold:#F9AB00; --gold-lt:#FEF7E0;
+  --red:#D93025; --red-lt:#FCE8E6;
+  --purple:#7C3AED; --purple-lt:#F3E8FF;
+  --navy:#0B3C5D;
+  --orange:#E8710A; --orange-lt:#FEF0E1;
+  --dark:#0a0a14;
+
+  /* L1-L4 配色（取自 React prototype 的識別色） */
+  --l1:#6B8E6F;  /* 沙綠 sage — 用工具 */
+  --l2:#C8842A;  /* 琥珀 amber — 選工具 */
+  --l3:#C8542A;  /* 朱紅 vermilion — 創工具 */
+  --l4:#2A3F5E;  /* 深墨藍 — 流程改造 */
+  --l1-lt:#E8F1E9; --l2-lt:#FBF1E1; --l3-lt:#F9E5DC; --l4-lt:#E1E5EC;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--white);}
+
+.slides-wrap{position:relative;width:100vw;height:100vh;}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;overflow:hidden;background:var(--white);}
+.slide.active{display:flex;}
+
+.slide.poster{background-size:cover;background-position:center;color:#fff;text-align:center;}
+.slide.poster::before{content:'';position:absolute;inset:0;z-index:1;}
+.slide.poster>*{position:relative;z-index:2;}
+.slide.poster.overlay-heavy::before{background:linear-gradient(to bottom,rgba(0,0,0,.45) 0%,rgba(0,0,0,.85) 100%);}
+
+.slide.content{background:var(--white);color:var(--g900);padding-top:3rem;}
+
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:1.8rem;font-weight:700;color:var(--g900);margin-bottom:.6rem;line-height:1.4;}
+.slide.poster h2{color:#fff;}
+h3{font-size:1.2rem;font-weight:700;margin-bottom:.3rem;}
+p,li{font-size:1.05rem;line-height:1.8;}
+.subtitle{font-size:1.15rem;font-weight:500;}
+
+.fragment{opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;}
+.fragment.visible{opacity:1;transform:none;}
+
+/* Step List */
+.step-list{text-align:left;max-width:860px;width:100%;}
+.step{display:flex;gap:1rem;align-items:flex-start;padding:.5rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:38px;height:38px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;}
+.step-content{flex:1;}
+.step-content strong{font-size:1.05rem;}
+.step-content p{font-size:.95rem;color:var(--g600);margin-top:.1rem;}
+
+/* Stat Grid */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;max-width:920px;width:100%;margin-top:.6rem;}
+.stat-box{background:var(--offwhite);border:2px solid var(--g100);border-radius:16px;padding:1rem;text-align:center;}
+.stat-box .val{font-size:1.4rem;font-weight:900;line-height:1.2;}
+.stat-box .label{font-size:.78rem;color:var(--g600);margin-top:.3rem;line-height:1.5;}
+
+/* Card Grid */
+.card-grid{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-top:.8rem;width:100%;max-width:1140px;}
+.card{background:var(--white);border:2px solid var(--g100);border-radius:16px;padding:1.1rem;min-width:200px;max-width:380px;flex:1 1 280px;transition:border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.04);}
+.card:hover{border-color:var(--green);}
+.card .icon{font-size:1.6rem;margin-bottom:.3rem;}
+.card h3{color:var(--g900);margin-bottom:.4rem;}
+.card p{font-size:.85rem;color:var(--g600);line-height:1.6;}
+
+/* Compare Table */
+.compare-table{border-collapse:collapse;font-size:.95rem;margin-top:.6rem;width:100%;max-width:1100px;}
+.compare-table th{background:var(--g50);color:var(--g800);padding:.5rem 1rem;text-align:left;font-size:.9rem;font-weight:700;}
+.compare-table td{padding:.5rem .8rem;border-bottom:1px solid var(--g100);font-size:.85rem;color:var(--g800);vertical-align:top;}
+.compare-table tr:hover td{background:var(--g50);}
+.compare-table .highlight{font-weight:700;color:var(--green);}
+
+/* Flow */
+.flow{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:center;margin:.6rem 0;}
+.flow-box{background:var(--offwhite);border:2px solid var(--g200);border-radius:12px;padding:.6rem 1rem;font-size:.95rem;font-weight:700;text-align:center;color:var(--g900);}
+.flow-arrow{color:var(--green);font-size:1.5rem;font-weight:900;}
+
+/* Info Box */
+.info-box{border-radius:12px;padding:1rem 1.5rem;max-width:860px;width:100%;text-align:left;margin-top:.6rem;}
+.info-box.success{background:var(--green-lt);border-left:4px solid var(--green);}
+.info-box.tip{background:var(--gold-lt);border-left:4px solid var(--gold);}
+.info-box.warn{background:var(--red-lt);border-left:4px solid var(--red);}
+.info-box p{color:var(--g800);font-size:.95rem;}
+
+/* Quote Box */
+.quote-box{max-width:860px;width:100%;background:var(--offwhite);border-left:5px solid var(--gold);border-radius:0 12px 12px 0;padding:1.4rem 1.8rem;margin:.8rem 0;text-align:left;}
+.quote-box .quote-text{font-size:1.15rem;font-weight:700;line-height:1.6;color:var(--g900);}
+.quote-box .quote-src{font-size:.85rem;color:var(--g400);margin-top:.5rem;}
+
+/* Bottom Line */
+.bottom-line{max-width:860px;width:100%;background:var(--green-lt);border:2px solid rgba(15,157,138,.25);border-radius:16px;padding:1.3rem;text-align:center;margin-top:.8rem;}
+.bottom-line h3{font-size:1.3rem;color:var(--green);margin-bottom:.4rem;}
+.bottom-line p{font-size:1rem;color:var(--g800);max-width:680px;margin:0 auto;line-height:1.7;}
+
+/* Triangle Diagram */
+.triangle-wrap{max-width:920px;width:100%;display:flex;flex-direction:column;gap:1rem;margin-top:.4rem;}
+.triangle-row{display:grid;grid-template-columns:140px 1fr;gap:1rem;align-items:center;padding:1rem 1.2rem;background:var(--offwhite);border-radius:14px;border-left:5px solid var(--g200);}
+.triangle-row .tri-tag{font-size:.95rem;font-weight:900;color:var(--g900);}
+.triangle-row .tri-tag .sub{display:block;font-size:.75rem;color:var(--g400);font-weight:500;margin-top:.2rem;}
+.triangle-row .tri-body{font-size:.9rem;color:var(--g800);line-height:1.65;}
+.triangle-row.l-green{border-left-color:var(--green);}
+.triangle-row.l-blue{border-left-color:var(--blue);}
+.triangle-row.l-purple{border-left-color:var(--purple);}
+a.triangle-row:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.08);background:#fff;}
+a.triangle-row.l-purple:hover{border-left-color:var(--purple);box-shadow:0 4px 14px rgba(124,58,237,.18);}
+a.triangle-row.l-blue:hover{border-left-color:var(--blue);box-shadow:0 4px 14px rgba(26,115,232,.18);}
+a.triangle-row.l-green:hover{border-left-color:var(--green);box-shadow:0 4px 14px rgba(15,157,138,.18);}
+
+/* Identity Hero — L 階段專屬 hero 版面 */
+.id-hero{display:grid;grid-template-columns:1fr 2fr;gap:2rem;max-width:1000px;width:100%;align-items:start;margin-top:.6rem;}
+.id-badge{flex-shrink:0;border-radius:18px;padding:1.6rem 1.4rem;text-align:center;color:#fff;}
+.id-badge .id-tier{font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;opacity:.85;}
+.id-badge .id-num{font-size:3.6rem;font-weight:900;line-height:1;margin:.3rem 0 .1rem;}
+.id-badge .id-action{font-size:1.3rem;font-weight:900;letter-spacing:.05em;}
+.id-badge .id-duration{font-size:.78rem;font-weight:500;opacity:.85;margin-top:.5rem;}
+.id-body{text-align:left;}
+.id-body .id-eyebrow{font-size:.8rem;letter-spacing:.1em;color:var(--g400);font-weight:700;margin-bottom:.3rem;}
+.id-body .id-identity{font-size:2.3rem;font-weight:900;margin-bottom:.4rem;line-height:1.2;}
+.id-body .id-identity-en{font-size:.9rem;font-weight:500;color:var(--g400);letter-spacing:.08em;margin-left:.5rem;}
+.id-body .id-promise{font-size:1.2rem;font-weight:500;color:var(--g800);line-height:1.6;margin-bottom:1rem;}
+.id-shift{background:var(--offwhite);padding:.9rem 1.2rem;border-left:3px solid;border-radius:0 8px 8px 0;}
+.id-shift .id-shift-label{font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;color:var(--g400);font-weight:700;margin-bottom:.3rem;}
+.id-shift .id-shift-text{font-size:1rem;color:var(--g900);line-height:1.5;font-weight:500;}
+
+/* Day Curriculum */
+.curriculum{max-width:1000px;width:100%;display:grid;grid-template-columns:1.5fr 1fr;gap:2rem;margin-top:.4rem;}
+.curr-col{}
+.curr-col h3{font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--g400);font-weight:700;padding-bottom:.5rem;border-bottom:1px solid var(--g100);margin-bottom:.8rem;}
+.day-block{margin-bottom:.7rem;}
+.day-block .day-head{display:flex;align-items:center;gap:.7rem;margin-bottom:.4rem;}
+.day-block .day-tag{font-size:.7rem;letter-spacing:.08em;font-weight:700;color:#fff;padding:.2rem .5rem;border-radius:4px;}
+.day-block .day-title{font-size:1.05rem;font-weight:700;color:var(--g900);}
+.day-block ul{list-style:none;padding-left:1rem;}
+.day-block li{font-size:.85rem;color:var(--g800);line-height:1.6;padding:.15rem 0;position:relative;padding-left:.8rem;}
+.day-block li::before{content:'·';position:absolute;left:0;color:var(--g400);font-weight:700;}
+.take-list{list-style:none;padding:0;margin:0;}
+.take-list li{font-size:.9rem;color:var(--g900);padding:.4rem 0;display:flex;gap:.5rem;align-items:flex-start;}
+.take-icon{flex-shrink:0;font-size:.7rem;margin-top:.4rem;}
+.audience-box{background:var(--offwhite);padding:.8rem 1rem;border-radius:8px;margin-top:.8rem;}
+.audience-box .a-label{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--g400);font-weight:700;margin-bottom:.3rem;}
+.audience-box .a-text{font-size:.9rem;color:var(--g800);line-height:1.5;}
+
+/* Decision Helper */
+.decision{max-width:1000px;width:100%;display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-top:.5rem;}
+.dec-card{background:var(--offwhite);border-radius:14px;padding:.9rem 1rem;}
+.dec-card .dec-num{font-size:.7rem;letter-spacing:.18em;color:var(--g400);font-weight:700;text-transform:uppercase;}
+.dec-card .dec-q{font-size:1.05rem;font-weight:900;color:var(--g900);margin:.3rem 0 .8rem;line-height:1.4;}
+.dec-card .dec-opts{display:flex;flex-direction:column;gap:.4rem;}
+.dec-card .dec-opt{font-size:.8rem;color:var(--g800);padding:.4rem .6rem;background:var(--white);border:1px solid var(--g200);border-radius:6px;line-height:1.4;}
+.dec-card .dec-opt strong{color:var(--g900);}
+
+/* Controls */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--green);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid var(--g200);border-radius:12px;background:var(--white);color:var(--g800);font-size:1.2rem;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.controls button:hover{background:var(--g50);border-color:var(--green);color:var(--green);}
+.controls button:disabled{opacity:.2;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;right:5rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:500;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:var(--green-lt);color:var(--green);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:var(--g400);font-size:.85rem;font-weight:700;}
+
+.chapter-menu{position:fixed;bottom:16px;left:16px;z-index:150;}
+.chapter-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--white);border:1px solid var(--g200);border-radius:8px;color:var(--g800);font-size:.8rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.chapter-btn:hover{border-color:var(--green);}
+.chapter-icon{color:var(--green);font-weight:700;}
+.chapter-list{display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:240px;background:var(--white);border:1px solid var(--g200);border-radius:10px;padding:6px 0;max-height:60vh;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.1);}
+.chapter-menu.open .chapter-list{display:block;}
+.chapter-item{padding:8px 14px;color:var(--g600);font-size:.78rem;cursor:pointer;}
+.chapter-item:hover{background:var(--g50);color:var(--g900);}
+.chapter-item.active{color:var(--green);font-weight:600;}
+
+@media(max-width:768px){
+  html,body{font-size:16px;}
+  .slide{padding:1rem 1.2rem 1rem;}
+  .slide.poster{justify-content:flex-end;padding-bottom:1.5rem;}
+  h1{font-size:1.8rem;}h2{font-size:1.4rem;margin-bottom:.6rem;}
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:.8rem;}
+  .stat-box .val{font-size:1.1rem;}
+  .card-grid{flex-direction:column;align-items:center;}
+  .card{max-width:100%;min-width:0;}
+  .compare-table th,.compare-table td{padding:.5rem .6rem;font-size:.78rem;}
+  .controls button{width:40px;height:40px;font-size:1rem;}
+  .module-title{font-size:.7rem;left:.8rem;top:.6rem;}
+  .module-badge{font-size:.65rem;top:.6rem;right:.6rem;padding:.2rem .6rem;}
+  .quote-box .quote-text{font-size:1rem;}
+  .triangle-row{grid-template-columns:1fr;gap:.4rem;}
+  .id-hero{grid-template-columns:1fr;}
+  .id-badge{padding:1rem;}
+  .id-badge .id-num{font-size:2.6rem;}
+  .id-body .id-identity{font-size:1.6rem;}
+  .curriculum{grid-template-columns:1fr;gap:1rem;}
+  .decision{grid-template-columns:1fr;}
+  .flow{gap:.3rem;}
+  .flow-box{font-size:.85rem;padding:.5rem .7rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="module-title">AI 100 講 — 通用導論</div>
+<div class="module-badge">AI 學習路徑 L1-L4</div>
+<div class="slides-wrap">
+
+<!-- ====== 1. 封面 ====== -->
+<div class="slide poster overlay-heavy active" data-act="開場" data-index="0" style="background:linear-gradient(135deg, #0a0a14 0%, #2A3F5E 50%, #0a0a14 100%);">
+  <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:1rem;">AI 100 講 — 通用導論</p>
+  <h1>從使用者<br><span style="color:#C8542A;">到改革者</span></h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.6);margin-top:1.5rem;">AI 學習路徑 L1-L4<br>身份遞變的成長地圖</p>
+  <p style="color:rgba(255,255,255,.3);margin-top:3rem;font-size:.85rem;">按 → 或空白鍵開始</p>
+</div>
+
+<!-- ====== 2. Agenda ====== -->
+<div class="slide content" data-act="開場" data-index="1">
+  <h2>今天的旅程</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>時代命題：大家瘋終點，缺的是路徑</strong><p>不是學更多工具，是建立不會過時的 AI 判斷力</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num">2</div><div class="step-content"><strong>核心觀點：四個身份的遞變</strong><p>使用者 → 評估者 → 創造者 → 改革者</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num">3</div><div class="step-content"><strong>四階段逐個詳解</strong><p>L1-L4 各自的角色、關鍵轉變、課綱、帶得走的產出</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num">4</div><div class="step-content"><strong>四階段橫向比對 + 決定起點</strong><p>七維度比對 + 三題定位測驗</p></div></div>
+    <div class="step fragment" data-order="4"><div class="step-num" style="background:var(--gold);">5</div><div class="step-content"><strong>三份簡報的串接關係</strong><p>四面向 → L1-L4 → 七層架構，從自己到細節</p></div></div>
+  </div>
+</div>
+
+<!-- ====== 3. 終點畫面 vs 抵達路徑 ====== -->
+<div class="slide content" data-act="時代命題" data-index="2">
+  <h2>大家瘋的是終點畫面</h2>
+  <div class="quote-box" style="border-left-color:var(--l3);background:var(--l3-lt);">
+    <div class="quote-text" style="font-size:1.5rem;text-align:center;line-height:1.7;">大家瘋的是<span style="color:var(--g400);">終點畫面</span><br>缺的是<span style="color:var(--l3);">抵達終點的路徑</span></div>
+    <div class="quote-src" style="text-align:center;margin-top:.8rem;">不教你追工具，教你建立不會過時的 AI 判斷力</div>
+  </div>
+  <div class="stat-grid">
+    <div class="stat-box" style="border-color:var(--g200);">
+      <div class="val" style="color:var(--g900);">40%</div>
+      <div class="label">Agentic AI 專案因架構差、成本失控被放棄<br><span style="color:var(--g400);">Deloitte 2026</span></div>
+    </div>
+    <div class="stat-box" style="border-color:var(--g200);">
+      <div class="val" style="color:var(--g900);">9%</div>
+      <div class="label">企業 90% 用 AI<br>僅 9% 真正達到 AI 成熟<br><span style="color:var(--g400);">Gloat 2026</span></div>
+    </div>
+    <div class="stat-box" style="border-color:var(--g200);">
+      <div class="val" style="color:var(--g900);">42%</div>
+      <div class="label">員工預期角色因 AI 改變<br>卻被要求「自己學」<br><span style="color:var(--g400);">Bright Horizons 2026</span></div>
+    </div>
+    <div class="stat-box" style="border-color:var(--l3);background:var(--l3-lt);">
+      <div class="val" style="color:var(--l3);font-size:1.05rem;">差距不在工具</div>
+      <div class="label">團隊需要的不是更多 demo<br>是一條走得通的路</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== 4. Chapter Part 2：核心觀點 ====== -->
+<div class="slide poster overlay-heavy" data-act="核心觀點" data-index="3" style="background:linear-gradient(135deg, #0a140a 0%, #C8542A 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 2</p>
+  <h1>核心觀點<br><span style="color:#FFD79A;">身份的遞變</span></h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.7);margin-top:.5rem;">不是學更多工具，是角色的轉變</p>
+</div>
+
+<!-- ====== 5. 不是學更多工具 ====== -->
+<div class="slide content" data-act="核心觀點" data-index="4">
+  <h2>每一層的差異不在「學更多工具」</h2>
+  <div class="quote-box" style="border-left-color:var(--l3);">
+    <div class="quote-text" style="text-align:center;font-size:1.4rem;">而是 <span style="color:var(--l3);">角色的轉變</span><br>從使用者 → 評估者 → 創造者 → 改革者</div>
+  </div>
+  <p style="color:var(--g600);max-width:780px;text-align:center;margin-top:.6rem;">每一層課綱的差異不只是「會的工具更多」，<br>是<strong>你看待 AI 的角度</strong>整個改變了。</p>
+  <div class="info-box success" style="margin-top:.6rem;">
+    <p>💡 學完 L1 你不再「重寫 prompt」，而是「設定一次、長期使用」。<br>學完 L2 你不再「只會用一個」，而是「看得懂全景、選得出最適解」。<br>學完 L3 你不再「用別人的工具」，而是「AI 當你的開發夥伴」。<br>學完 L4 你不再「個人生產力」，而是「組織級流程再造」。</p>
+  </div>
+</div>
+
+<!-- ====== 6. 四個身份一覽 ====== -->
+<div class="slide content" data-act="核心觀點" data-index="5">
+  <h2>四個身份 — 從使用者到改革者</h2>
+  <div class="flow">
+    <div class="flow-box" style="border-color:var(--l1);color:var(--l1);background:var(--l1-lt);">L1<br><span style="font-size:1rem;">AI 使用者</span><br><span style="font-size:.7rem;font-weight:400;letter-spacing:.05em;">User</span></div>
+    <div class="flow-arrow" style="color:var(--g400);">→</div>
+    <div class="flow-box" style="border-color:var(--l2);color:var(--l2);background:var(--l2-lt);">L2<br><span style="font-size:1rem;">AI 評估者</span><br><span style="font-size:.7rem;font-weight:400;letter-spacing:.05em;">Evaluator</span></div>
+    <div class="flow-arrow" style="color:var(--g400);">→</div>
+    <div class="flow-box" style="border-color:var(--l3);color:var(--l3);background:var(--l3-lt);">L3<br><span style="font-size:1rem;">AI 創造者</span><br><span style="font-size:.7rem;font-weight:400;letter-spacing:.05em;">Creator</span></div>
+    <div class="flow-arrow" style="color:var(--g400);">→</div>
+    <div class="flow-box" style="border-color:var(--l4);color:var(--l4);background:var(--l4-lt);">L4<br><span style="font-size:1rem;">流程改革者</span><br><span style="font-size:.7rem;font-weight:400;letter-spacing:.05em;">Transformer</span></div>
+  </div>
+  <table class="compare-table" style="margin-top:1rem;">
+    <tr><th style="width:18%;">身份</th><th style="width:30%;">承諾</th><th>關鍵轉變</th></tr>
+    <tr><td><span style="color:var(--l1);font-weight:700;">L1 AI 使用者</span></td><td>把重複工作打包成 AI 助手</td><td>從每次重寫 prompt → 一次設定、長期使用</td></tr>
+    <tr><td><span style="color:var(--l2);font-weight:700;">L2 AI 評估者</span></td><td>選對工具比用力寫 Prompt 更重要</td><td>從只會用一個 → 看得懂全景、選得出最適解</td></tr>
+    <tr><td><span style="color:var(--l3);font-weight:700;">L3 AI 創造者</span></td><td>從一句話到可交付的 App</td><td>從用別人的工具 → AI 當你的開發夥伴</td></tr>
+    <tr><td><span style="color:var(--l4);font-weight:700;">L4 流程改革者</span></td><td>用系統思維解決真實流程問題</td><td>從個人生產力 → 組織級流程再造</td></tr>
+  </table>
+</div>
+
+<!-- ====== 7. Chapter Part 3：四階段詳解 ====== -->
+<div class="slide poster overlay-heavy" data-act="四階段詳解" data-index="6" style="background:linear-gradient(135deg, #2A3F5E 0%, #6B8E6F 50%, #C8542A 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 3</p>
+  <h1>四階段<br><span style="color:#FFD79A;">逐個詳解</span></h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.7);margin-top:.5rem;">每階段的角色、承諾、關鍵轉變、課綱、產出</p>
+</div>
+
+<!-- ====== 8. L1 用工具 — 身份 ====== -->
+<div class="slide content" data-act="四階段詳解" data-index="7">
+  <h2 style="color:var(--l1);">L1 用工具</h2>
+  <div class="id-hero">
+    <div class="id-badge" style="background:var(--l1);">
+      <div class="id-tier">入門 · 2 天</div>
+      <div class="id-num">L1</div>
+      <div class="id-action">用工具</div>
+      <div class="id-duration">🧰 入門</div>
+    </div>
+    <div class="id-body">
+      <div class="id-eyebrow">你成為</div>
+      <div class="id-identity" style="color:var(--l1);">AI 使用者<span class="id-identity-en">· User</span></div>
+      <div class="id-promise">把重複工作打包成 AI 助手，不再每次重寫 prompt。</div>
+      <div class="id-shift" style="border-left-color:var(--l1);">
+        <div class="id-shift-label">關鍵轉變</div>
+        <div class="id-shift-text">從每次重寫 prompt → <strong>一次設定、長期使用</strong></div>
+      </div>
+    </div>
+  </div>
+  <div class="info-box success" style="margin-top:.8rem;">
+    <p>💡 建立正確的 AI 使用觀念，理解工具邊界，打造個人化 AI 助手（Custom GPTs / Gemini Gems），將工作流打包成可重用的「任務包」。</p>
+  </div>
+</div>
+
+<!-- ====== 9. L1 課綱與產出 ====== -->
+<div class="slide content" data-act="四階段詳解" data-index="8">
+  <h2><span style="color:var(--l1);">L1</span> 課綱與帶走的產出</h2>
+  <div class="curriculum">
+    <div class="curr-col">
+      <h3>課綱</h3>
+      <div class="day-block">
+        <div class="day-head">
+          <span class="day-tag" style="background:var(--l1);">Day 1</span>
+          <span class="day-title">AI 應用素養</span>
+        </div>
+        <ul>
+          <li>AI 的三大能力邊界：能做什麼、不能做什麼</li>
+          <li>任務包思維：把重複工作變成可複用 AI 流程</li>
+          <li>動手打包：建立你的第一個任務包</li>
+        </ul>
+      </div>
+      <div class="day-block">
+        <div class="day-head">
+          <span class="day-tag" style="background:var(--l1);">Day 2</span>
+          <span class="day-title">AI 個人助手與自動化</span>
+        </div>
+        <ul>
+          <li>Custom GPTs / Gemini Gems：有記憶、有角色的個人 AI 助手</li>
+          <li>GAS 自動化：讓 AI 處理試算表與重複流程</li>
+          <li>產出：AI 助手設定檔 + 第一條自動化工作流</li>
+        </ul>
+      </div>
+    </div>
+    <div class="curr-col">
+      <h3>帶得走的產出</h3>
+      <ul class="take-list">
+        <li><span class="take-icon" style="color:var(--l1);">◆</span> 個人任務包（5 個可立即使用）</li>
+        <li><span class="take-icon" style="color:var(--l1);">◆</span> Custom GPT 設定檔</li>
+        <li><span class="take-icon" style="color:var(--l1);">◆</span> AI 助手使用清單</li>
+      </ul>
+      <div class="audience-box">
+        <div class="a-label">適合對象</div>
+        <div class="a-text">所有職場人員、想入門 AI 的同事</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== 10. L2 選工具 — 身份 ====== -->
+<div class="slide content" data-act="四階段詳解" data-index="9">
+  <h2 style="color:var(--l2);">L2 選工具</h2>
+  <div class="id-hero">
+    <div class="id-badge" style="background:var(--l2);">
+      <div class="id-tier">進階 · 2 天</div>
+      <div class="id-num">L2</div>
+      <div class="id-action">選工具</div>
+      <div class="id-duration">⚖️ 進階</div>
+    </div>
+    <div class="id-body">
+      <div class="id-eyebrow">你成為</div>
+      <div class="id-identity" style="color:var(--l2);">AI 評估者<span class="id-identity-en">· Evaluator</span></div>
+      <div class="id-promise">選對工具比用力寫 Prompt 更重要 — 從工具判斷到讓 AI 直接幫你寫程式。</div>
+      <div class="id-shift" style="border-left-color:var(--l2);">
+        <div class="id-shift-label">關鍵轉變</div>
+        <div class="id-shift-text">從只會用一個 → <strong>看得懂全景、選得出最適解</strong></div>
+      </div>
+    </div>
+  </div>
+  <div class="info-box success" style="margin-top:.8rem;">
+    <p>💡 建立四大 AI 工具判斷力，深入 Claude 工作空間與 Agent 工作流設計。Day 2 進入 Coding AI：Codex 寫程式、Claude Code 操作檔案、GAS 串接 AI API。</p>
+  </div>
+</div>
+
+<!-- ====== 11. L2 課綱與產出 ====== -->
+<div class="slide content" data-act="四階段詳解" data-index="10">
+  <h2><span style="color:var(--l2);">L2</span> 課綱與帶走的產出</h2>
+  <div class="curriculum">
+    <div class="curr-col">
+      <h3>課綱</h3>
+      <div class="day-block">
+        <div class="day-head">
+          <span class="day-tag" style="background:var(--l2);">Day 1</span>
+          <span class="day-title">工具判斷 × Claude 深度 × Agent 工作流</span>
+        </div>
+        <ul>
+          <li>AI 工具全景：ChatGPT / Claude / Gemini / Copilot 各有擅長</li>
+          <li>Claude 深度：Projects + Artifacts + Custom Instructions</li>
+          <li>Agent 工作流：任務分解 + 工具指派</li>
+        </ul>
+      </div>
+      <div class="day-block">
+        <div class="day-head">
+          <span class="day-tag" style="background:var(--l2);">Day 2</span>
+          <span class="day-title">Coding AI 與 API 串接</span>
+        </div>
+        <ul>
+          <li>Codex 實戰：用中文描述需求，AI 直接產出程式碼</li>
+          <li>Claude Code：AI 直接操作檔案（15 分鐘 → 30 秒）</li>
+          <li>GAS 串接 AI API：在儲存格裡呼叫 AI（=ASK_AI() 函式）</li>
+        </ul>
+      </div>
+    </div>
+    <div class="curr-col">
+      <h3>帶得走的產出</h3>
+      <ul class="take-list">
+        <li><span class="take-icon" style="color:var(--l2);">◆</span> 工具選擇決策框架</li>
+        <li><span class="take-icon" style="color:var(--l2);">◆</span> Claude 專案工作空間</li>
+        <li><span class="take-icon" style="color:var(--l2);">◆</span> Agent 工作流設計稿</li>
+        <li><span class="take-icon" style="color:var(--l2);">◆</span> AI 生成的自動化程式 + GAS AI 函式</li>
+      </ul>
+      <div class="audience-box">
+        <div class="a-label">適合對象</div>
+        <div class="a-text">已使用過 AI 工具、想提升應用深度的職場人員</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== 12. L3 創工具 — 身份 ====== -->
+<div class="slide content" data-act="四階段詳解" data-index="11">
+  <h2 style="color:var(--l3);">L3 創工具</h2>
+  <div class="id-hero">
+    <div class="id-badge" style="background:var(--l3);">
+      <div class="id-tier">高階 · 3 天</div>
+      <div class="id-num">L3</div>
+      <div class="id-action">創工具</div>
+      <div class="id-duration">🔨 高階</div>
+    </div>
+    <div class="id-body">
+      <div class="id-eyebrow">你成為</div>
+      <div class="id-identity" style="color:var(--l3);">AI 創造者<span class="id-identity-en">· Creator</span></div>
+      <div class="id-promise">從一句話需求到可交付的 App，讓 AI 當你的開發夥伴。</div>
+      <div class="id-shift" style="border-left-color:var(--l3);">
+        <div class="id-shift-label">關鍵轉變</div>
+        <div class="id-shift-text">從用別人的工具 → <strong>AI 當你的開發夥伴</strong></div>
+      </div>
+    </div>
+  </div>
+  <div class="info-box success" style="margin-top:.8rem;">
+    <p>💡 掌握 Code Agent 開發流程，用 Happy Code 方法從 idea 到可運作原型，透過 Agent 框架加速，站在巨人的肩膀上開發。</p>
+  </div>
+</div>
+
+<!-- ====== 13. L3 課綱與產出 ====== -->
+<div class="slide content" data-act="四階段詳解" data-index="12">
+  <h2><span style="color:var(--l3);">L3</span> 課綱與帶走的產出</h2>
+  <div class="curriculum">
+    <div class="curr-col">
+      <h3>課綱</h3>
+      <div class="day-block">
+        <div class="day-head">
+          <span class="day-tag" style="background:var(--l3);">Day 1</span>
+          <span class="day-title">Code Agent 與 MCP</span>
+        </div>
+        <ul>
+          <li>Code Agent vs Copilot：從補全到自主執行</li>
+          <li>CLAUDE.md：給 Agent 的指令手冊</li>
+          <li>ITTO 框架：輸入 → 任務 → 工具 → 輸出</li>
+        </ul>
+      </div>
+      <div class="day-block">
+        <div class="day-head">
+          <span class="day-tag" style="background:var(--l3);">Day 2</span>
+          <span class="day-title">Happy Code 創作</span>
+        </div>
+        <ul>
+          <li>一句話變 App：30 字以內描述，10 分鐘出原型</li>
+          <li>快速迭代四心法：先跑再優化</li>
+          <li>從原型到正式開發的里程碑設計</li>
+        </ul>
+      </div>
+      <div class="day-block">
+        <div class="day-head">
+          <span class="day-tag" style="background:var(--l3);">Day 3</span>
+          <span class="day-title">Agent 框架深度實戰</span>
+        </div>
+        <ul>
+          <li>快速驗證：20 分鐘從概念到可運行 Agent</li>
+          <li>正式部署：Agent 生產環境架構</li>
+          <li>框架 Trade-off：什麼情況用框架？</li>
+        </ul>
+      </div>
+    </div>
+    <div class="curr-col">
+      <h3>帶得走的產出</h3>
+      <ul class="take-list">
+        <li><span class="take-icon" style="color:var(--l3);">◆</span> CLAUDE.md 指令手冊</li>
+        <li><span class="take-icon" style="color:var(--l3);">◆</span> Happy Code 原型 + 正式版</li>
+        <li><span class="take-icon" style="color:var(--l3);">◆</span> Agent 快速驗證 Demo</li>
+      </ul>
+      <div class="audience-box">
+        <div class="a-label">適合對象</div>
+        <div class="a-text">技術主管、想開發內部工具的工程師、產品開發人員</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== 14. L4 流程改造 — 身份 ====== -->
+<div class="slide content" data-act="四階段詳解" data-index="13">
+  <h2 style="color:var(--l4);">L4 流程改造</h2>
+  <div class="id-hero">
+    <div class="id-badge" style="background:var(--l4);">
+      <div class="id-tier">企業級 · 6 週 PBL</div>
+      <div class="id-num">L4</div>
+      <div class="id-action">流程改造</div>
+      <div class="id-duration">🏗️ 企業級</div>
+    </div>
+    <div class="id-body">
+      <div class="id-eyebrow">你成為</div>
+      <div class="id-identity" style="color:var(--l4);">流程改革者<span class="id-identity-en">· Transformer</span></div>
+      <div class="id-promise">用系統思維解決真實流程問題，產出可交付文件。</div>
+      <div class="id-shift" style="border-left-color:var(--l4);">
+        <div class="id-shift-label">關鍵轉變</div>
+        <div class="id-shift-text">從個人生產力 → <strong>組織級流程再造</strong></div>
+      </div>
+    </div>
+  </div>
+  <div class="info-box success" style="margin-top:.8rem;">
+    <p>💡 以問題導向學習（PBL），用冰山模型挖掘企業流程根因，設計 AI 能力矩陣，完成 AS-IS → TO-BE 流程再造，產出完整 AI 系統設計文件。</p>
+  </div>
+</div>
+
+<!-- ====== 15. L4 課綱與產出 ====== -->
+<div class="slide content" data-act="四階段詳解" data-index="14">
+  <h2><span style="color:var(--l4);">L4</span> 課綱與帶走的產出</h2>
+  <div class="curriculum">
+    <div class="curr-col">
+      <h3>課綱</h3>
+      <div class="day-block">
+        <div class="day-head">
+          <span class="day-tag" style="background:var(--l4);">Week 1</span>
+          <span class="day-title">系統思維與問題定義</span>
+        </div>
+        <ul>
+          <li>冰山模型：四層問題分析法</li>
+          <li>AS-IS 流程繪製：現狀地圖</li>
+          <li>利害關係人訪談 + 問題定義文件</li>
+        </ul>
+      </div>
+      <div class="day-block">
+        <div class="day-head">
+          <span class="day-tag" style="background:var(--l4);">Week 2</span>
+          <span class="day-title">AI 系統設計</span>
+        </div>
+        <ul>
+          <li>AI 能力矩陣：哪些步驟最值得 AI 介入？</li>
+          <li>80/20 原則：找出最高 ROI 的 AI 插入點</li>
+          <li>TO-BE 流程設計 + AI 整合規格書</li>
+        </ul>
+      </div>
+      <div class="day-block">
+        <div class="day-head">
+          <span class="day-tag" style="background:var(--l4);">Week 3-6</span>
+          <span class="day-title">實作、測試、交付</span>
+        </div>
+        <ul>
+          <li>系統原型實作 + 壓力測試</li>
+          <li>使用者培訓 + 變革管理</li>
+          <li>完整交付文件 + 維運計畫</li>
+        </ul>
+      </div>
+    </div>
+    <div class="curr-col">
+      <h3>帶得走的產出</h3>
+      <ul class="take-list">
+        <li><span class="take-icon" style="color:var(--l4);">◆</span> 問題定義文件</li>
+        <li><span class="take-icon" style="color:var(--l4);">◆</span> AS-IS + TO-BE 流程圖</li>
+        <li><span class="take-icon" style="color:var(--l4);">◆</span> AI 系統設計規格書</li>
+        <li><span class="take-icon" style="color:var(--l4);">◆</span> 完整交付文件</li>
+      </ul>
+      <div class="audience-box">
+        <div class="a-label">適合對象</div>
+        <div class="a-text">部門主管、流程改善負責人、企業內部 AI 推動者</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== 16. Chapter Part 4：橫向比對 ====== -->
+<div class="slide poster overlay-heavy" data-act="橫向比對" data-index="15" style="background:linear-gradient(135deg, #0a0a14 0%, #2A3F5E 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 4</p>
+  <h1>四階段<br><span style="color:#FFD79A;">橫向比對</span></h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.7);margin-top:.5rem;">七維度找出最適合你的起點</p>
+</div>
+
+<!-- ====== 17. Comparison 七維度 ====== -->
+<div class="slide content" data-act="橫向比對" data-index="16">
+  <h2>四層一覽 — 七維度橫向比對</h2>
+  <table class="compare-table" style="font-size:.78rem;table-layout:fixed;">
+    <colgroup>
+      <col style="width:11%;">
+      <col style="width:22.25%;">
+      <col style="width:22.25%;">
+      <col style="width:22.25%;">
+      <col style="width:22.25%;">
+    </colgroup>
+    <tr>
+      <th></th>
+      <th style="color:var(--l1);">L1 用工具</th>
+      <th style="color:var(--l2);">L2 選工具</th>
+      <th style="color:var(--l3);">L3 創工具</th>
+      <th style="color:var(--l4);">L4 流程改造</th>
+    </tr>
+    <tr><td style="font-weight:700;color:var(--g600);">你的角色</td><td>AI 使用者</td><td>AI 評估者</td><td>AI 創造者</td><td>流程改革者</td></tr>
+    <tr><td style="font-weight:700;color:var(--g600);">一句話</td><td>重複工作打包成 AI 助手</td><td>選對工具比 Prompt 重要</td><td>從一句話到可交付的 App</td><td>用系統思維解決流程問題</td></tr>
+    <tr><td style="font-weight:700;color:var(--g600);">關鍵轉變</td><td>每次重寫 → 一次設定</td><td>只會用一個 → 看懂全景</td><td>用別人工具 → AI 當夥伴</td><td>個人生產力 → 組織流程</td></tr>
+    <tr><td style="font-weight:700;color:var(--g600);">時長</td><td>入門 · 2 天</td><td>進階 · 2 天</td><td>高階 · 3 天</td><td>企業級 · 6 週 PBL</td></tr>
+    <tr><td style="font-weight:700;color:var(--g600);">先備條件</td><td>無</td><td>用過 AI 工具</td><td>完成 L2 或有開發背景</td><td>主管 / 完成 L3</td></tr>
+    <tr><td style="font-weight:700;color:var(--g600);">主要產出</td><td>個人任務包<br>+ Custom GPT</td><td>工具決策框架<br>+ GAS 函式</td><td>可運作 App<br>+ Agent Demo</td><td>AS-IS / TO-BE<br>+ 規格</td></tr>
+  </table>
+</div>
+
+<!-- ====== 18. Chapter Part 5：決定起點 ====== -->
+<div class="slide poster overlay-heavy" data-act="決定起點" data-index="17" style="background:linear-gradient(135deg, #6B8E6F 0%, #C8542A 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 5</p>
+  <h1>你該從<br><span style="color:#FFE6B3;">哪裡起跳</span></h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.8);margin-top:.5rem;">三題定位測驗</p>
+</div>
+
+<!-- ====== 19. 三題定位 ====== -->
+<div class="slide content" data-act="決定起點" data-index="18">
+  <h2>三題決定你的起點</h2>
+  <p style="color:var(--g600);max-width:780px;text-align:center;margin-bottom:.5rem;">建議依序學習，但可依你的角色 / 經驗 / 目標從 L2 / L3 起跳。</p>
+  <div class="decision">
+    <div class="dec-card">
+      <div class="dec-num">Q1</div>
+      <div class="dec-q">你目前的角色是？</div>
+      <div class="dec-opts">
+        <div class="dec-opt"><strong>一般職場使用者</strong> → L1</div>
+        <div class="dec-opt"><strong>團隊主管 / PM</strong> → L2 / L4</div>
+        <div class="dec-opt"><strong>工程師 / 技術背景</strong> → L2 / L3</div>
+        <div class="dec-opt"><strong>部門主管 / 流程負責</strong> → L4</div>
+      </div>
+    </div>
+    <div class="dec-card">
+      <div class="dec-num">Q2</div>
+      <div class="dec-q">你目前用 AI 的程度？</div>
+      <div class="dec-opts">
+        <div class="dec-opt"><strong>偶爾用，多半重寫 prompt</strong> → L1</div>
+        <div class="dec-opt"><strong>天天用，但只用一兩個工具</strong> → L2</div>
+        <div class="dec-opt"><strong>已經串 API、寫過小工具</strong> → L3</div>
+        <div class="dec-opt"><strong>想推進整個部門 AI 化</strong> → L4</div>
+      </div>
+    </div>
+    <div class="dec-card">
+      <div class="dec-num">Q3</div>
+      <div class="dec-q">你最想解決的事？</div>
+      <div class="dec-opts">
+        <div class="dec-opt"><strong>把重複工作自動化</strong> → L1</div>
+        <div class="dec-opt"><strong>搞懂工具差異、選對工具</strong> → L2</div>
+        <div class="dec-opt"><strong>做出可交付的 AI 工具</strong> → L3</div>
+        <div class="dec-opt"><strong>改造團隊流程</strong> → L4</div>
+      </div>
+    </div>
+  </div>
+  <div class="info-box tip" style="margin-top:.6rem;">
+    <p>🔑 三題的答案多半會落在同一層 — 那就是你的起點。<br>線上互動版（含完整推薦邏輯）：<a href="https://aipath.cooperation.tw/" target="_blank" style="color:var(--l3);font-weight:700;">aipath.cooperation.tw →</a></p>
+  </div>
+</div>
+
+<!-- ====== 20. Chapter Part 6：三份串接 ====== -->
+<div class="slide poster overlay-heavy" data-act="三份串接" data-index="19" style="background:linear-gradient(135deg, #0a0a14 0%, #16213e 50%, #1a0a2e 100%);">
+  <p class="subtitle" style="color:rgba(255,255,255,.5);">Part 6</p>
+  <h1>三份簡報的<br><span style="color:var(--green);">串接關係</span></h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.6);margin-top:.5rem;">從自己 → 看路徑 → 鑽細節</p>
+</div>
+
+<!-- ====== 21. 三份連結（嵌入） ====== -->
+<div class="slide content" data-act="三份串接" data-index="20">
+  <h2>三份是一條路 — 從自己看到細節</h2>
+  <div class="triangle-wrap">
+    <a class="triangle-row l-green" href="https://ai-cooperation.github.io/ai100/slides/supplements/S25_Four_Aspects.html" target="_blank" style="text-decoration:none;color:inherit;cursor:pointer;transition:transform .15s,box-shadow .15s;">
+      <div class="tri-tag">🟩 四面向<br><span class="sub" style="color:var(--green);">點擊開啟 →</span></div>
+      <div class="tri-body"><strong>看自己的能力分佈</strong> — 演算法、軟體工程、領域應用、風險合規四派定位。<br><span style="color:var(--g400);">回答的問題：「我現在在哪？」</span></div>
+    </a>
+    <div class="triangle-row l-purple" style="background:var(--l3-lt);">
+      <div class="tri-tag">🟪 L1-L4 階段<br><span class="sub" style="color:var(--l3);">本份 · 看路徑</span></div>
+      <div class="tri-body"><strong>看自己的學習路徑</strong> — 從 AI 使用者到流程改革者的身份遞變。<br><span style="color:var(--g400);">回答的問題：「下一步該往哪走？」</span></div>
+    </div>
+    <a class="triangle-row l-blue" href="https://ai-cooperation.github.io/ai100/slides/supplements/S24_AI_Seven_Layer_Stack.html" target="_blank" style="text-decoration:none;color:inherit;cursor:pointer;transition:transform .15s,box-shadow .15s;">
+      <div class="tri-tag">🟦 七層架構<br><span class="sub" style="color:var(--blue);">點擊開啟 →</span></div>
+      <div class="tri-body"><strong>看 AI 技術全景</strong> — L1 模型 → L7 應用，所有專有名詞都在這張圖找得到位置。<br><span style="color:var(--g400);">回答的問題：「這些工具、名詞，是在做什麼？」</span></div>
+    </a>
+  </div>
+  <div class="info-box success" style="margin-top:.4rem;">
+    <p>💡 <strong>四面向看自己，L1-L4 看路徑，七層看細節</strong> — 三份合起來才是完整的 AI 學習地圖。</p>
+  </div>
+</div>
+
+<!-- ====== 22. 重點回顧 ====== -->
+<div class="slide content" data-act="結語" data-index="21">
+  <h2>今天的重點</h2>
+  <div class="step-list">
+    <div class="step fragment" data-order="0"><div class="step-num">1</div><div class="step-content"><strong>大家瘋的是終點畫面，缺的是抵達路徑</strong><p>不教你追工具，教你建立不會過時的 AI 判斷力</p></div></div>
+    <div class="step fragment" data-order="1"><div class="step-num">2</div><div class="step-content"><strong>四階段差異不在工具多寡，是身份的遞變</strong><p>使用者 → 評估者 → 創造者 → 改革者</p></div></div>
+    <div class="step fragment" data-order="2"><div class="step-num">3</div><div class="step-content"><strong>每一層之間有「關鍵轉變」</strong><p>學完不只多會幾個工具，而是看待 AI 的角度整個改變</p></div></div>
+    <div class="step fragment" data-order="3"><div class="step-num" style="background:var(--gold);">4</div><div class="step-content"><strong>四面向看自己 → L1-L4 看路徑 → 七層看細節</strong><p>三份合起來才是完整地圖</p></div></div>
+  </div>
+</div>
+
+<!-- ====== 23. 封底 ====== -->
+<div class="slide poster overlay-heavy" data-act="結語" data-index="22" style="background:linear-gradient(135deg, #0a0a14 0%, #2A3F5E 50%, #C8542A 100%);">
+  <h1 style="font-size:2.5rem;">從使用者<br>到<span style="color:#FFD79A;">改革者</span></h1>
+  <p class="subtitle" style="color:rgba(255,255,255,.7);margin-top:2rem;">AI 100 講 — 通用導論</p>
+  <p style="color:rgba(255,255,255,.4);margin-top:1rem;font-size:.85rem;">企業內訓諮詢：<a href="https://aipath.cooperation.tw/" target="_blank" style="color:#FFD79A;">aipath.cooperation.tw</a></p>
+  <p style="color:rgba(255,255,255,.25);margin-top:.5rem;font-size:.8rem;">2026.04</p>
+</div>
+
+</div>
+
+<div class="slide-counter"><span id="current">1</span> / <span id="total"></span></div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>&larr;</button><button id="next">&rarr;</button></div>
+<div id="chapterMenu" class="chapter-menu">
+  <button class="chapter-btn" onclick="toggleChapterMenu()"><span class="chapter-icon">☰</span> 章節</button>
+  <div class="chapter-list" id="chapterList"></div>
+</div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),total=slides.length;let current=0;
+document.getElementById('total').textContent=total;
+function showSlide(n){if(n<0||n>=total)return;slides[current].classList.remove('active');current=n;slides[current].classList.add('active');document.getElementById('current').textContent=current+1;document.getElementById('progress').style.width=((current+1)/total*100)+'%';document.getElementById('prev').disabled=current===0;document.getElementById('next').disabled=current===total-1;slides[current].querySelectorAll('.fragment').forEach((f,i)=>{setTimeout(()=>f.classList.add('visible'),150+i*200)});updateChapterHighlight();}
+document.getElementById('prev').onclick=()=>showSlide(current-1);
+document.getElementById('next').onclick=()=>showSlide(current+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();showSlide(current+1)}if(e.key==='ArrowLeft'){e.preventDefault();showSlide(current-1)}});
+let touchStartX=0;document.addEventListener('touchstart',e=>{touchStartX=e.touches[0].clientX});document.addEventListener('touchend',e=>{const diff=touchStartX-e.changedTouches[0].clientX;if(Math.abs(diff)>50){diff>0?showSlide(current+1):showSlide(current-1)}});
+function buildChapterMenu(){const list=document.getElementById('chapterList'),acts=[];slides.forEach((s,i)=>{const act=s.dataset.act;if(act&&!acts.includes(act)){acts.push(act);const item=document.createElement('div');item.className='chapter-item';item.textContent=act;item.dataset.index=i;item.onclick=()=>{showSlide(i);toggleChapterMenu()};list.appendChild(item)}})}
+function toggleChapterMenu(){document.getElementById('chapterMenu').classList.toggle('open')}
+function updateChapterHighlight(){const act=slides[current].dataset.act;document.querySelectorAll('.chapter-item').forEach(item=>{item.classList.toggle('active',item.textContent===act)})}
+document.addEventListener('click',e=>{const menu=document.getElementById('chapterMenu');if(!menu.contains(e.target))menu.classList.remove('open')});
+buildChapterMenu();showSlide(0);
+</script>
+</body>
+</html>

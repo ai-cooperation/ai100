@@ -25,6 +25,8 @@ var materials = [
   { title: 'S22 Claude Code \u539F\u59CB\u78BC\u6D29\u9732', icon: '\uD83D\uDD13', url: '/slides/supplements/S22_Claude_Code_Source_Leak.html', desc: '51\u842C\u884C\u7A0B\u5F0F\u78BC\u00B743\u9801' },
   { title: 'S23 NotebookLM YAML \u7C21\u5831\u5BE6\u9A57', icon: '\uD83E\uDDEA', url: '/slides/supplements/S23_NotebookLM_YAML_Lab.html', desc: 'YAML\u98A8\u683C\u63A7\u5236\u00B714\u7D44\u6E2C\u8A66' },
   { title: 'S24 AI \u4E03\u5C64\u67B6\u69CB', icon: '\uD83C\uDFD7\uFE0F', url: '/slides/supplements/S24_AI_Seven_Layer_Stack.html', desc: '\u5F9E\u6A21\u578B\u5230\u61C9\u7528\u00B730\u9801' },
+  { title: 'S25 AI \u56DB\u9762\u5411\u80FD\u529B', icon: '\uD83C\uDFAF', url: '/slides/supplements/S25_Four_Aspects.html', desc: '\u8D85\u7D1A\u500B\u9AD4\u00D7\u8EAB\u4EFD\u905E\u8B8A\u00B723\u9801' },
+  { title: 'S26 AI \u5B78\u7FD2\u8DEF\u5F91 L1-L4', icon: '\uD83E\uDDED', url: '/slides/supplements/S26_AI_Learning_Path.html', desc: '\u5F9E\u4F7F\u7528\u8005\u5230\u6539\u9769\u8005\u00B723\u9801' },
   // --- Talks T01-T04 ---
   { title: 'T01 \u5927\u5B78\u6F14\u8B1B \u4EBA\u99D5\u99AD AI', icon: '\uD83C\uDF93', url: '/slides/supplements/T01_University_Talk_v2.html', desc: '\u6F14\u8B1B\u00B776\u9801\u00B7CD\u98A8\u683C v2' },
   { title: 'T02 \u5F9E\u7B46\u8A18\u5230\u7B2C\u4E8C\u5927\u8166', icon: '\uD83E\uDDE0', url: '/slides/supplements/T02_Knowledge_Base_L1_L5.html', desc: '\u6F14\u8B1B\u00B755\u9801' },
@@ -67,6 +69,8 @@ var deckOptions = [
   { name: 'S22_Claude_Code_Source_Leak', label: 'S22 Claude Code \u539F\u59CB\u78BC\u6D29\u9732' },
   { name: 'S23_NotebookLM_YAML_Lab', label: 'S23 NotebookLM YAML \u7C21\u5831\u5BE6\u9A57' },
   { name: 'S24_AI_Seven_Layer_Stack', label: 'S24 AI \u4E03\u5C64\u67B6\u69CB' },
+  { name: 'S25_Four_Aspects', label: 'S25 AI \u56DB\u9762\u5411\u80FD\u529B' },
+  { name: 'S26_AI_Learning_Path', label: 'S26 AI \u5B78\u7FD2\u8DEF\u5F91 L1-L4' },
   { name: 'T01_University_Talk', label: 'T01 \u5927\u5B78\u6F14\u8B1B' },
   { name: 'T02_Knowledge_Base_L1_L5', label: 'T02 \u5F9E\u7B46\u8A18\u5230\u7B2C\u4E8C\u5927\u8166' },
   { name: 'T03_AI_Industry_Impact', label: 'T03 AI\u7684\u7522\u696D\u5316\u885D\u64CA' },
