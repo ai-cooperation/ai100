@@ -386,11 +386,19 @@ function selectCoursePhase(phase) {
   }
 }
 
+function copyCVPresenterLink(roomId) {
+  var url = location.origin + '/classroom/presenter?room=' + encodeURIComponent(roomId);
+  navigator.clipboard.writeText(url).then(function() {
+    showNotification('success', '已複製簡報連結');
+  });
+}
+
 function renderCVPrepare(sess) {
   var body = document.getElementById('cvMainBody');
   document.getElementById('cvMainTitle').textContent = '\uD83D\uDCCB \u8AB2\u524D\u6E96\u5099 \u2014 ' + esc(sess.title || '');
 
   var studentUrl = sess.roomId ? location.origin + '/classroom/?room=' + encodeURIComponent(sess.roomId) : '(\u5EFA\u7ACB\u5802\u6B21\u5F8C\u751F\u6210)';
+  var presenterUrl = sess.roomId ? location.origin + '/classroom/presenter?room=' + encodeURIComponent(sess.roomId) : '';
   var deckLabel = sess.deckId || '\u672A\u9078\u64C7';
 
   var html = '';
@@ -404,8 +412,12 @@ function renderCVPrepare(sess) {
 
   html += '<div class="step-card"><div class="step-title"><span class="step-num">2</span>\u6559\u5BA4\u5165\u53E3</div>';
   if (sess.roomId) {
+    html += '<div style="font-size:0.72rem;color:var(--dim);margin-bottom:1px">\u5B78\u54E1\u9023\u7D50</div>';
     html += '<div style="font-size:0.8rem;color:var(--dim);margin-bottom:0.5rem;word-break:break-all">' + esc(studentUrl) + '</div>';
     html += '<div style="display:flex;gap:0.5rem"><div class="qr-small" id="cvQrStudent" style="max-width:120px"></div><div class="qr-small" id="cvQrRemote" style="max-width:120px"></div></div>';
+    html += '<div style="font-size:0.72rem;color:var(--dim);margin:0.7rem 0 1px">\u7C21\u5831\u756B\u9762\uFF08\u7DDA\u4E0A / \u96FB\u8166\u5B78\u54E1\u770B\u7C21\u5831\u7528\uFF09</div>';
+    html += '<div style="font-size:0.8rem;color:var(--text);word-break:break-all">' + esc(presenterUrl) + '</div>';
+    html += '<button onclick="copyCVPresenterLink(\'' + esc(sess.roomId) + '\')" style="margin-top:0.4rem;padding:0.35rem 0.8rem;background:var(--pri);color:#fff;border:none;border-radius:6px;font-size:0.8rem;cursor:pointer">\uD83D\uDCCB \u8907\u88FD\u7C21\u5831\u9023\u7D50</button>';
   } else {
     html += '<div style="font-size:0.85rem;color:var(--dim)">\u6559\u5BA4\u5C07\u5728\u5EFA\u7ACB\u5802\u6B21\u6642\u81EA\u52D5\u751F\u6210</div>';
   }
