@@ -46,7 +46,8 @@
   .btn-join{width:100%;padding:0.9rem;background:var(--pri);color:#fff;font-size:1.05rem;font-weight:700;border-radius:10px}
   .btn-join:disabled{opacity:0.5}
 
-  .app{display:none;flex-direction:column;height:100vh}
+  /* mobile-first：手機全寬；桌面 max-width 收成可讀欄寬並置中（訊息牆原本桌面會撐滿全螢幕） */
+  .app{display:none;flex-direction:column;height:100vh;max-width:680px;margin:0 auto;box-shadow:0 0 40px rgba(0,0,0,0.06)}
   .app.active{display:flex}
   .topbar{background:var(--navy);color:#fff;padding:0.6rem 1rem;display:flex;align-items:center;gap:0.5rem;flex-shrink:0}
   .topbar .room-name{font-size:0.8rem;color:var(--gold);font-weight:700}

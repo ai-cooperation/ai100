@@ -176,9 +176,12 @@ function renderPreparingPhase() {
   var studentUrl = location.origin + '/classroom/?room=' + encodeURIComponent(roomId);
   var hostUrl = location.origin + '/classroom/host';
   var remoteUrl = location.origin + '/classroom/remote?room=' + encodeURIComponent(roomId);
+  var presenterUrl = location.origin + '/classroom/presenter?room=' + encodeURIComponent(roomId);
   document.getElementById('prepareHostUrl').textContent = hostUrl;
   document.getElementById('prepareStudentUrl').textContent = studentUrl;
   document.getElementById('prepareRemoteUrl').textContent = remoteUrl;
+  var _presEl = document.getElementById('preparePresenterUrl');
+  if (_presEl) _presEl.textContent = presenterUrl;
   setTimeout(function() {
     makeQR('qrHostPrepare', studentUrl);
   }, 50);
@@ -228,6 +231,13 @@ function copyStudentLink() {
   var url = location.origin + '/classroom/?room=' + encodeURIComponent(roomId);
   navigator.clipboard.writeText(url).then(function() {
     showNotification('success', '\u5DF2\u8907\u88FD\u5B78\u54E1\u9023\u7D50');
+  });
+}
+
+function copyPresenterLink() {
+  var url = location.origin + '/classroom/presenter?room=' + encodeURIComponent(roomId);
+  navigator.clipboard.writeText(url).then(function() {
+    showNotification('success', '\u5DF2\u8907\u88FD\u7C21\u5831\u9023\u7D50');
   });
 }
 
