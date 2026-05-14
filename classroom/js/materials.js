@@ -106,6 +106,33 @@ function getAllMaterials() {
   return all;
 }
 
+// Build a synthetic "this session's material" from room config (deck + deckType,
+// set when the session was created). Lets the preparing phase recognise a deck
+// the teacher already chose — external link / PPTX / built-in / self-projection —
+// instead of forcing a re-pick from the library. Returns null when the session
+// has no configured deck. _session:true marks it as the sentinel entry.
+function getSessionMaterial() {
+  var dt = roomDeckType || '';
+  if (dt === 'external') {
+    if (!roomDeck) return null;
+    return { title: '本堂課教材（外部連結）', icon: '🔗', desc: roomDeck, url: roomDeck, hasSlideControl: false, _session: true };
+  }
+  if (dt === 'pptx-slides' || dt === 'pptx') {
+    if (!roomDeck) return null;
+    return { title: '本堂課教材（PPTX）', icon: '📽', desc: 'deck: ' + roomDeck, url: '/classroom/presenter', queryExtra: '&deck=' + roomDeck, hasSlideControl: true, _session: true };
+  }
+  if (dt === 'slides' || dt === 'html-slides') {
+    if (!roomDeck) return null;
+    var label = roomDeck.replace(/_/g, ' ');
+    deckOptions.forEach(function(d) { if (d.name === roomDeck) label = d.label; });
+    return { title: '本堂課教材', icon: '📊', desc: label, url: '/slides/supplements/' + roomDeck + '.html', hasSlideControl: true, _session: true };
+  }
+  if (dt === 'none') {
+    return { title: '自行投影', icon: '🖥️', desc: '不需遙控簡報', hasSlideControl: false, _noDeck: true, _session: true };
+  }
+  return null;
+}
+
 function loadCustomMaterials() {
   if (!currentUser) return;
   db.ref('users/' + currentUser.uid + '/customMaterials').on('value', function(snap) {

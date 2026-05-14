@@ -14,7 +14,7 @@ function loadCourseList() {
       var sessions = c.val().sessions || {};
       var sessionArr = Object.keys(sessions).map(function(sk) {
         var s = sessions[sk];
-        return { id: sk, title: s.title || '', date: s.date || '', deckId: s.deckId || '', roomId: s.roomId || '', status: s.status || 'preparing', shareLink: s.shareLink || '', duration: s.duration || 3 };
+        return { id: sk, title: s.title || '', date: s.date || '', deckId: s.deckId || '', deckType: s.deckType || '', roomId: s.roomId || '', status: s.status || 'preparing', shareLink: s.shareLink || '', duration: s.duration || 3 };
       });
       sessionArr.sort(function(a, b) { return (a.date || '').localeCompare(b.date || ''); });
 
@@ -189,7 +189,7 @@ function loadCourseSessions() {
     cvSessions = [];
     snap.forEach(function(c) {
       var s = c.val();
-      cvSessions.push({ id: c.key, title: s.title || '', date: s.date || '', deckId: s.deckId || '', duration: s.duration || 3, roomId: s.roomId || '', status: s.status || 'preparing', shareLink: s.shareLink || '' });
+      cvSessions.push({ id: c.key, title: s.title || '', date: s.date || '', deckId: s.deckId || '', deckType: s.deckType || '', duration: s.duration || 3, roomId: s.roomId || '', status: s.status || 'preparing', shareLink: s.shareLink || '' });
     });
     cvSessions.sort(function(a, b) { return (a.date || '').localeCompare(b.date || ''); });
     document.getElementById('cvSessionCount').textContent = cvSessions.length + ' \u5802\u6B21';
@@ -235,14 +235,10 @@ function selectSession(idx) {
   setPhaseCardsEnabled(true);
   renderSessionList();
 
-  var sess = cvSessions[idx];
-  if (sess.status === 'live') {
-    selectCoursePhase('live');
-  } else if (sess.status === 'post-class' || sess.status === 'completed') {
-    selectCoursePhase('post');
-  } else {
-    selectCoursePhase('prepare');
-  }
+  // Unified entry: always land on the prepare phase regardless of session
+  // status, so the teacher can always see the material and start / restart
+  // the class. (live / post are still reachable via the phase cards.)
+  selectCoursePhase('prepare');
 }
 
 function editSession(idx) {
@@ -251,16 +247,48 @@ function editSession(idx) {
   var body = document.getElementById('cvMainBody');
   document.getElementById('cvMainTitle').textContent = '\u7DE8\u8F2F\u5802\u6B21 \u2014 ' + esc(sess.title || '');
   var dateVal = sess.date ? (sess.date.length === 8 ? sess.date.substring(0, 4) + '-' + sess.date.substring(4, 6) + '-' + sess.date.substring(6, 8) : sess.date) : '';
+
+  // Work out the current material type so the picker opens on the right tab.
+  var dt = sess.deckType || '';
+  var matType;
+  if (dt === 'external') matType = 'external';
+  else if (dt === 'pptx-slides' || dt === 'pptx') matType = 'pptx';
+  else if (dt === 'none') matType = 'none';
+  else if (dt === 'slides') matType = 'builtin';
+  else matType = /^https?:\/\//.test(sess.deckId || '') ? 'external' : 'builtin'; // legacy sessions without deckType
+
+  // Material picker \u2014 same element IDs as showNewSessionForm() so selectNsMaterial() works as-is.
+  function mkRadio(type, label, sub) {
+    var on = matType === type;
+    return '<div class="nsf-radio' + (on ? ' selected' : '') + '" onclick="selectNsMaterial(this,\'' + type + '\')">'
+      + '<input type="radio" name="nsMat" value="' + type + '"' + (on ? ' checked' : '') + '>'
+      + '<div><div class="nr-label">' + label + '</div><div class="nr-sub">' + sub + '</div></div></div>';
+  }
+
   var h = '<div class="new-session-form">';
   h += '<h3>\u7DE8\u8F2F\u5802\u6B21</h3>';
   h += '<div class="nsf-field"><label>\u65E5\u671F</label><input type="date" id="editSessDate" value="' + esc(dateVal) + '"></div>';
   h += '<div class="nsf-field"><label>\u4E3B\u984C</label><input type="text" id="editSessTitle" value="' + esc(sess.title || '') + '"></div>';
   h += '<div class="nsf-field"><label>\u6642\u9577\uFF08\u5C0F\u6642\uFF09</label><input type="number" id="editSessDuration" value="' + (sess.duration || 3) + '" min="1" max="8"></div>';
   h += '<div class="nsf-field"><label>\u6559\u6750</label>';
-  h += '<select id="editSessDeck" style="width:100%;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;">';
-  h += '<option value="">\uFF08\u4E0D\u6307\u5B9A\uFF09</option>';
-  deckOptions.forEach(function(d) { h += '<option value="' + d.name + '"' + (d.name === sess.deckId ? ' selected' : '') + '>' + d.label + '</option>'; });
+  h += '<div class="nsf-radio-group" id="nsMaterialRadios">';
+  h += mkRadio('builtin', '\u5167\u5EFA\u6559\u6750', '\u5F9E\u88DC\u5145\u55AE\u5143\u9078\u64C7');
+  h += mkRadio('pptx', '\u5DF2\u8F49\u6A94 PPTX', '\u5F9E\u5DF2\u4E0A\u50B3\u7684\u7C21\u5831\u9078\u64C7');
+  h += mkRadio('external', '\u5916\u90E8\u9023\u7D50', '\u8CBC\u4E0A\u5916\u90E8\u7C21\u5831\u9023\u7D50');
+  h += mkRadio('none', '\u81EA\u884C\u6295\u5F71', '\u4E0D\u9700\u9059\u63A7\u7C21\u5831');
+  h += '</div></div>';
+  // Builtin deck select
+  h += '<div class="nsf-field" id="nsBuiltinField"' + (matType === 'builtin' ? '' : ' style="display:none"') + '><label>\u9078\u64C7\u5167\u5EFA\u6559\u6750</label><select id="nsBuiltinDeck">';
+  deckOptions.forEach(function(d) { h += '<option value="' + d.name + '"' + (matType === 'builtin' && d.name === sess.deckId ? ' selected' : '') + '>' + d.label + '</option>'; });
   h += '</select></div>';
+  // PPTX select (built-in + custom)
+  h += '<div class="nsf-field" id="nsPptxField"' + (matType === 'pptx' ? '' : ' style="display:none"') + '><label>\u9078\u64C7\u5DF2\u8F49\u6A94\u7C21\u5831</label><select id="nsPptxDeck">';
+  h += '<option value="university-talk"' + (matType === 'pptx' && sess.deckId === 'university-talk' ? ' selected' : '') + '>\u5927\u5B78\u6F14\u8B1B</option>';
+  h += '<option value="demo"' + (matType === 'pptx' && sess.deckId === 'demo' ? ' selected' : '') + '>Demo</option>';
+  customMaterials.forEach(function(cm) { if (cm.type === 'pptx' && cm.deck) { h += '<option value="' + esc(cm.deck) + '"' + (matType === 'pptx' && sess.deckId === cm.deck ? ' selected' : '') + '>' + esc(cm.title) + '</option>'; } });
+  h += '</select></div>';
+  // External link
+  h += '<div class="nsf-field" id="nsExternalField"' + (matType === 'external' ? '' : ' style="display:none"') + '><label>\u5916\u90E8\u9023\u7D50</label><input type="url" id="nsExternalUrl" placeholder="https://..." value="' + esc(matType === 'external' ? (sess.deckId || '') : '') + '"></div>';
   h += '<button class="nsf-submit" onclick="saveSessionEdit(' + idx + ')">\u5132\u5B58</button>';
   h += '<button class="nsf-cancel" onclick="renderSessionList()">\u53D6\u6D88</button>';
   h += '</div>';
@@ -273,23 +301,44 @@ function saveSessionEdit(idx) {
   var date = (document.getElementById('editSessDate').value || '').replace(/-/g, '');
   var title = document.getElementById('editSessTitle').value.trim();
   var duration = parseInt(document.getElementById('editSessDuration').value) || 3;
-  var deckId = document.getElementById('editSessDeck').value;
   if (!title) { showNotification('error', '\u8ACB\u586B\u5BEB\u4E3B\u984C'); return; }
+
+  // Read the material the same way submitNewSession() does, so deckId and
+  // deckType stay consistent \u2014 never overwrite an external URL with a deck name.
+  var matRadio = document.querySelector('input[name="nsMat"]:checked');
+  var matType = matRadio ? matRadio.value : 'builtin';
+  var deckId = '', deckType = '';
+  if (matType === 'builtin') {
+    deckId = document.getElementById('nsBuiltinDeck').value;
+    deckType = 'slides';
+  } else if (matType === 'pptx') {
+    deckId = document.getElementById('nsPptxDeck').value;
+    deckType = 'pptx-slides';
+  } else if (matType === 'external') {
+    deckId = document.getElementById('nsExternalUrl').value.trim();
+    deckType = 'external';
+  } else if (matType === 'none') {
+    deckType = 'none';
+  }
+
   var updates = {};
   updates['courses/' + cvCourseId + '/sessions/' + sess.id + '/date'] = date;
   updates['courses/' + cvCourseId + '/sessions/' + sess.id + '/title'] = title;
   updates['courses/' + cvCourseId + '/sessions/' + sess.id + '/duration'] = duration;
   updates['courses/' + cvCourseId + '/sessions/' + sess.id + '/deckId'] = deckId;
+  updates['courses/' + cvCourseId + '/sessions/' + sess.id + '/deckType'] = deckType;
   if (sess.roomId) {
     updates['rooms/' + sess.roomId + '/config/title'] = title;
     updates['rooms/' + sess.roomId + '/config/deck'] = deckId || null;
-    updates['rooms/' + sess.roomId + '/config/deckType'] = deckId ? 'slides' : null;
-    if (deckId) {
+    updates['rooms/' + sess.roomId + '/config/deckType'] = deckType || null;
+    // Only pre-write presentation for deck-style materials; external/none get
+    // their presentation set at startClass() time (or not at all).
+    if (deckId && (deckType === 'slides' || deckType === 'pptx-slides')) {
       var deckTitle = deckId.replace(/_/g, ' ');
       deckOptions.forEach(function(d) { if (d.name === deckId) deckTitle = d.label; });
       updates['rooms/' + sess.roomId + '/presentation/deck'] = deckId;
       updates['rooms/' + sess.roomId + '/presentation/title'] = deckTitle;
-      updates['rooms/' + sess.roomId + '/presentation/mode'] = 'slides';
+      updates['rooms/' + sess.roomId + '/presentation/mode'] = deckType === 'pptx-slides' ? 'pptx-slides' : 'slides';
     }
   }
   db.ref().update(updates).then(function() {
@@ -322,7 +371,14 @@ function selectCoursePhase(phase) {
   if (phase === 'prepare') {
     renderCVPrepare(sess);
   } else if (phase === 'live') {
-    enterSessionRoom(sess, 'live');
+    // Only drop straight into the live dashboard if the class is actually
+    // live; otherwise route through prepare (the unified entry) so the
+    // teacher never lands on an empty live dashboard.
+    if (sess.status === 'live') {
+      enterSessionRoom(sess, 'live');
+    } else {
+      selectCoursePhase('prepare');
+    }
   } else if (phase === 'post') {
     renderCVPost(sess);
   } else if (phase === 'report') {
@@ -375,10 +431,14 @@ function renderCVPrepare(sess) {
   }
   html += '</div>';
 
-  if (sess.roomId && (sess.status === 'preparing' || !sess.status)) {
-    html += '<button class="btn-start-class" onclick="enterSessionRoom(cvSessions[' + cvSelectedSessionIdx + '],\'preparing\')">\u25B6 \u9032\u5165\u6559\u5BA4\u6E96\u5099\u4E0A\u8AB2</button>';
-  } else if (sess.roomId) {
-    html += '<button class="btn-start-class" style="background:var(--gold);color:var(--navy)" onclick="enterSessionRoom(cvSessions[' + cvSelectedSessionIdx + '],\'' + sess.status + '\')">\u9032\u5165\u6559\u5BA4</button>';
+  if (sess.roomId) {
+    // Unified entry \u2014 always open the room on the prepare phase, whatever the
+    // session status. From there the teacher can start (or restart) the class.
+    var enterLabel = (sess.status === 'live') ? '\u25B6 \u9032\u5165\u6559\u5BA4\uFF08\u4E0A\u8AB2\u4E2D \u00B7 \u53EF\u91CD\u65B0\u6574\u7406\uFF09'
+                   : (sess.status === 'post-class' || sess.status === 'completed') ? '\u25B6 \u9032\u5165\u6559\u5BA4\uFF08\u5DF2\u7D50\u675F \u00B7 \u53EF\u91CD\u65B0\u4E0A\u8AB2\uFF09'
+                   : '\u25B6 \u9032\u5165\u6559\u5BA4\u6E96\u5099\u4E0A\u8AB2';
+    var enterStyle = (sess.status === 'preparing' || !sess.status) ? '' : ' style="background:var(--gold);color:var(--navy)"';
+    html += '<button class="btn-start-class"' + enterStyle + ' onclick="enterSessionRoom(cvSessions[' + cvSelectedSessionIdx + '],\'preparing\')">' + enterLabel + '</button>';
   }
 
   body.innerHTML = html;

@@ -34,8 +34,10 @@ function enterRoom(rid, title, phaseOverride) {
       });
     }
 
-    // Determine phase from status
-    var status = phaseOverride || cfg.status || '';
+    // Unified entry: default to the prepare phase. live / post-class are only
+    // shown when an explicit phaseOverride asks for them (the course-view phase
+    // cards), so no entry door can strand the teacher on a dead-end phase.
+    var status = phaseOverride || 'preparing';
     if (status === 'live') {
       showPhase('live');
     } else if (status === 'post-class' || status === 'completed') {
@@ -140,10 +142,24 @@ function showPhase(phase) {
 function renderPreparingPhase() {
   var list = document.getElementById('prepareMaterialList');
   var all = getAllMaterials();
+  var sessionMat = getSessionMaterial();
   var html = '';
+  // The session may already have a deck chosen at creation time \u2014 show it first,
+  // pre-selected, so the teacher isn't forced to re-pick from the library.
+  if (sessionMat) {
+    if (selectedMaterialIdx === null) selectedMaterialIdx = 'session';
+    var ssel = selectedMaterialIdx === 'session';
+    html += '<div class="mat-cat-header">\u2500\u2500 \u672C\u5802\u8AB2\u6559\u6750 \u2500\u2500</div>';
+    html += '<label class="mat-radio' + (ssel ? ' selected' : '') + '" onclick="selectPrepareMaterial(\'session\')">';
+    html += '<input type="radio" name="prepareMat" ' + (ssel ? 'checked' : '') + ' value="session">';
+    html += '<span class="mat-icon">' + sessionMat.icon + '</span>';
+    html += '<div class="mat-info"><div class="mat-title">' + esc(sessionMat.title) + '</div><div class="mat-desc">' + esc(sessionMat.desc || '') + '</div></div>';
+    html += '</label>';
+    html += '<div class="mat-cat-header">\u2500\u2500 \u66F4\u63DB\u70BA\u5176\u4ED6\u6559\u6750 \u2500\u2500</div>';
+  }
   var hasBuiltin = all.some(function(m) { return m._builtin; });
   var hasCustom = all.some(function(m) { return m._custom; });
-  if (hasBuiltin && hasCustom) { html += '<div class="mat-cat-header">\u2500\u2500 \u5167\u5EFA\u6559\u6750 \u2500\u2500</div>'; }
+  if (hasBuiltin && hasCustom && !sessionMat) { html += '<div class="mat-cat-header">\u2500\u2500 \u5167\u5EFA\u6559\u6750 \u2500\u2500</div>'; }
   all.forEach(function(m, idx) {
     if (hasBuiltin && hasCustom && m._custom && idx > 0 && all[idx - 1]._builtin) {
       html += '<div class="mat-cat-header">\u2500\u2500 \u6211\u7684\u6559\u6750 \u2500\u2500</div>';
@@ -173,11 +189,13 @@ function renderPreparingPhase() {
 
 function selectPrepareMaterial(idx) {
   selectedMaterialIdx = idx;
+  // Match by the input's value (string compare) so the 'session' sentinel works.
   var radios = document.querySelectorAll('#prepareMaterialList .mat-radio');
-  radios.forEach(function(r, i) {
-    r.classList.toggle('selected', i === idx);
+  radios.forEach(function(r) {
     var inp = r.querySelector('input[type="radio"]');
-    if (inp) inp.checked = (i === idx);
+    var on = inp ? String(idx) === inp.value : false;
+    r.classList.toggle('selected', on);
+    if (inp) inp.checked = on;
   });
   updateStartButton();
 }
@@ -185,6 +203,13 @@ function selectPrepareMaterial(idx) {
 function updateStartButton() {
   var btn = document.getElementById('btnStartClassPrepare');
   var hint = document.getElementById('startClassHint');
+  if (selectedMaterialIdx === 'session') {
+    var sm = getSessionMaterial();
+    btn.disabled = false;
+    hint.textContent = sm ? ('教材：' + sm.title) : '本堂課教材';
+    hint.style.color = 'var(--pri)';
+    return;
+  }
   if (selectedMaterialIdx !== null) {
     var all = getAllMaterials();
     var m = all[selectedMaterialIdx];
@@ -211,6 +236,9 @@ function updateLiveStatusBar() {
   var deckEl = document.getElementById('liveStatusDeck');
   if (window._currentDeckName) {
     deckEl.textContent = '\uD83D\uDCDA ' + (window._currentDeckTitle || window._currentDeckName);
+  } else if (selectedMaterialIdx === 'session') {
+    var _sm = getSessionMaterial();
+    deckEl.textContent = '\uD83D\uDCDA ' + (_sm ? _sm.title : '\u672C\u5802\u8AB2\u6559\u6750');
   } else if (selectedMaterialIdx !== null) {
     var _allMats = getAllMaterials();
     deckEl.textContent = '\uD83D\uDCDA ' + (_allMats[selectedMaterialIdx] ? _allMats[selectedMaterialIdx].title : '\u672A\u9078\u64C7\u6559\u6750');
@@ -231,7 +259,7 @@ function startClass() {
   var matIdx = selectedMaterialIdx;
   var openUrl = null;
 
-  if (matIdx !== null) {
+  if (matIdx !== null && matIdx !== 'session') {
     var allMats = getAllMaterials();
     var m = allMats[matIdx];
     var deckId = null;
@@ -260,19 +288,38 @@ function startClass() {
     } else {
       openUrl = '/classroom/presenter?room=' + encodeURIComponent(roomId);
     }
-  } else if (roomDeck) {
-    var _deckMode = roomDeckType || 'slides';
-    updates['rooms/' + roomId + '/presentation'] = {
-      mode: _deckMode,
-      deck: roomDeck,
-      current: 0,
-      title: roomDeck.replace(/_/g, ' '),
-      ts: firebase.database.ServerValue.TIMESTAMP
-    };
-    if (_deckMode === 'slides' || _deckMode === 'html-slides') {
-      openUrl = '/slides/supplements/' + roomDeck + '.html?room=' + encodeURIComponent(roomId);
-    } else {
-      openUrl = '/classroom/presenter?room=' + encodeURIComponent(roomId) + '&deck=' + encodeURIComponent(roomDeck);
+  } else {
+    // Session-configured material (chosen at session creation, or the 'session'
+    // sentinel selected in the preparing phase): external link / PPTX / built-in
+    // slides / self-projection.
+    if (roomDeckType === 'external') {
+      if (roomDeck) {
+        updates['rooms/' + roomId + '/presentation'] = {
+          mode: 'external',
+          deck: roomDeck,
+          current: 0,
+          title: roomTitle,
+          ts: firebase.database.ServerValue.TIMESTAMP
+        };
+        openUrl = roomDeck;
+      }
+    } else if (roomDeckType === 'none') {
+      // Self-projection — no remote-controlled slides, nothing to open.
+      openUrl = null;
+    } else if (roomDeck) {
+      var _deckMode = roomDeckType || 'slides';
+      updates['rooms/' + roomId + '/presentation'] = {
+        mode: _deckMode,
+        deck: roomDeck,
+        current: 0,
+        title: roomDeck.replace(/_/g, ' '),
+        ts: firebase.database.ServerValue.TIMESTAMP
+      };
+      if (_deckMode === 'slides' || _deckMode === 'html-slides') {
+        openUrl = '/slides/supplements/' + roomDeck + '.html?room=' + encodeURIComponent(roomId);
+      } else {
+        openUrl = '/classroom/presenter?room=' + encodeURIComponent(roomId) + '&deck=' + encodeURIComponent(roomDeck);
+      }
     }
   }
 
