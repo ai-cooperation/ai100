@@ -17,19 +17,31 @@ function enterRoom(rid, title, phaseOverride) {
     roomDeck = cfg.deck || null;
     roomDeckType = cfg.deckType || null;
 
-    // Sync presentation with config deck
+    // Sync presentation with config deck. deck-type-aware：external 要寫
+    // mode:'webpage' + url（presenter 才認得）；不能寫 mode:roomDeckType（external
+    // 會變成 presenter 不認的 mode:'external' → 空白 iframe，且污染 presentation）。
     if (roomDeck) {
       db.ref('rooms/' + roomId + '/presentation').once('value', function(presSnap) {
         var pres = presSnap.val() || {};
         if (pres.deck !== roomDeck) {
-          var deckTitle = roomDeck.replace(/_/g, ' ');
-          deckOptions.forEach(function(d) { if (d.name === roomDeck) deckTitle = d.label; });
-          db.ref('rooms/' + roomId + '/presentation').update({
-            deck: roomDeck,
-            title: deckTitle,
-            mode: roomDeckType || 'slides',
-            ts: firebase.database.ServerValue.TIMESTAMP
-          });
+          if (roomDeckType === 'external') {
+            db.ref('rooms/' + roomId + '/presentation').update({
+              mode: 'webpage',
+              url: roomDeck,
+              deck: roomDeck,
+              title: roomTitle,
+              ts: firebase.database.ServerValue.TIMESTAMP
+            });
+          } else {
+            var deckTitle = roomDeck.replace(/_/g, ' ');
+            deckOptions.forEach(function(d) { if (d.name === roomDeck) deckTitle = d.label; });
+            db.ref('rooms/' + roomId + '/presentation').update({
+              deck: roomDeck,
+              title: deckTitle,
+              mode: roomDeckType || 'slides',
+              ts: firebase.database.ServerValue.TIMESTAMP
+            });
+          }
         }
       });
     }

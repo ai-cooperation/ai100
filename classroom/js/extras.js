@@ -70,8 +70,15 @@ function initAgentPanel() {
 
 // ═══ New Page Links ═══
 function openPresenter() {
-  var deckId = localStorage.getItem('_deck_' + roomId) || 'university-talk';
-  window.open('/classroom/presenter?room=' + roomId + '&deck=' + deckId, '_blank');
+  // deck-type-aware：external / none / 無 deck → 開 presenter 不帶 &deck=，
+  // 讓 presenter 從 Firebase presentation/ 讀（webpage 模式等）。只有 builtin/pptx
+  // deck 才帶 &deck=。原本一律 fallback 'university-talk' 會污染 external 堂次的
+  // presentation（presenter 帶 deck 會 writePresentationMeta 覆寫成 PPTX 資料）。
+  if (roomDeckType === 'external' || roomDeckType === 'none' || !roomDeck) {
+    window.open('/classroom/presenter?room=' + roomId, '_blank');
+  } else {
+    window.open('/classroom/presenter?room=' + roomId + '&deck=' + encodeURIComponent(roomDeck), '_blank');
+  }
 }
 
 function openSurvey() { window.open('/classroom/survey?room=' + roomId, '_blank'); }
