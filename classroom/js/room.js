@@ -294,14 +294,19 @@ function startClass() {
     // slides / self-projection.
     if (roomDeckType === 'external') {
       if (roomDeck) {
+        // External link → load through presenter's webpage iframe mode so the
+        // room shares one synced view. (Raw new-tab open isn't room-aware and
+        // students can't follow it; presenter reads presentation/ from Firebase
+        // and renders p.url in its iframe when mode === 'webpage'.)
         updates['rooms/' + roomId + '/presentation'] = {
-          mode: 'external',
+          mode: 'webpage',
+          url: roomDeck,
           deck: roomDeck,
           current: 0,
           title: roomTitle,
           ts: firebase.database.ServerValue.TIMESTAMP
         };
-        openUrl = roomDeck;
+        openUrl = '/classroom/presenter?room=' + encodeURIComponent(roomId);
       }
     } else if (roomDeckType === 'none') {
       // Self-projection — no remote-controlled slides, nothing to open.
