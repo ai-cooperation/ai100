@@ -43,8 +43,13 @@ SITES = {
 DEFAULT_SITE = "ai100"
 AI_HUB = os.environ.get("AI_HUB_URL", "http://127.0.0.1:8760")
 IMAGE_API_BASE = os.environ.get("IMAGE_API_BASE", AI_HUB)
-IMAGE_API_MODEL = os.environ.get("IMAGE_API_MODEL", "pro")
+IMAGE_API_MODEL = os.environ.get("IMAGE_API_MODEL", "fast")
 FONT_PATH = "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"
+TITLE_IMAGE_SIZE = (1376, 768)
+TITLE_BAR_HEIGHT = 160
+TITLE_FONT_SIZE = 58
+TITLE_LINE_SPACING = 72
+TITLE_HORIZONTAL_PADDING = 120
 
 # 用於從文章內容推斷圖片 prompt 的 LLM
 LLM_SYSTEM = (
@@ -126,8 +131,9 @@ def generate_background(prompt: str) -> bytes | None:
     """生成背景圖 (不含中文字)。"""
     clean_prompt = (
         f"{prompt} "
+        f"1376x768 widescreen 16:9 landscape aspect ratio, cinematic, "
         f"Professional tech editorial illustration style, cinematic lighting, "
-        f"dark navy gradient background. No text, no watermarks, no logos."
+        f"dark navy gradient background. no text, no chinese characters, no watermarks, no logos."
     )
     try:
         resp = httpx.post(
@@ -149,36 +155,53 @@ def add_title_overlay(img_data: bytes, title: str) -> Image.Image:
     """PIL 疊加中文標題到圖片底部。"""
     from io import BytesIO
     img = Image.open(BytesIO(img_data)).convert("RGBA")
-    if img.size != (1024, 1024):
-        img = img.resize((1024, 1024), Image.LANCZOS)
+    img = _fit_widescreen(img)
 
     overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
 
     # 底部漸層暗色條
-    bar_h = 200
+    bar_h = TITLE_BAR_HEIGHT
     for i in range(bar_h):
         alpha = int(220 * (i / bar_h))
         y = img.height - bar_h + i
         draw.rectangle([(0, y), (img.width, y)], fill=(0, 0, 0, alpha))
 
-    font = ImageFont.truetype(FONT_PATH, 42)
+    font = ImageFont.truetype(FONT_PATH, TITLE_FONT_SIZE)
 
     # 自動換行
-    lines = _wrap_title(title, font, img.width - 80)
+    lines = _wrap_title(title, font, img.width - TITLE_HORIZONTAL_PADDING)
 
-    y_start = img.height - 50 - len(lines) * 55
+    block_h = TITLE_FONT_SIZE + (len(lines) - 1) * TITLE_LINE_SPACING
+    y_start = img.height - bar_h + (bar_h - block_h) // 2
     for i, line in enumerate(lines):
         bbox = draw.textbbox((0, 0), line, font=font)
         tw = bbox[2] - bbox[0]
         x = (img.width - tw) // 2
-        y = y_start + i * 55
+        y = y_start + i * TITLE_LINE_SPACING
         # 陰影
-        draw.text((x + 2, y + 2), line, fill=(0, 0, 0, 200), font=font)
+        draw.text((x + 4, y + 4), line, fill=(0, 0, 0, 200), font=font)
         # 主文字
         draw.text((x, y), line, fill=(255, 255, 255, 240), font=font)
 
     return Image.alpha_composite(img, overlay).convert("RGB")
+
+
+def _fit_widescreen(img: Image.Image) -> Image.Image:
+    """Resize/crop to 1376x768 without forcing a square image."""
+    target_w, target_h = TITLE_IMAGE_SIZE
+    if img.size == TITLE_IMAGE_SIZE:
+        return img
+
+    src_w, src_h = img.size
+    scale = max(target_w / src_w, target_h / src_h)
+    new_w = int(src_w * scale + 0.5)
+    new_h = int(src_h * scale + 0.5)
+    resized = img.resize((new_w, new_h), Image.LANCZOS)
+
+    left = max(0, (new_w - target_w) // 2)
+    top = max(0, (new_h - target_h) // 2)
+    return resized.crop((left, top, left + target_w, top + target_h))
 
 
 def _wrap_title(title: str, font, max_width: int) -> list[str]:
