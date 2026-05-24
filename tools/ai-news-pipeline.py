@@ -38,6 +38,8 @@ except ImportError:
 
 # AI Hub API (ac-mac)
 AI_HUB_BASE = os.environ.get("AI_HUB_URL", "http://127.0.0.1:8760")
+IMAGE_API_BASE = os.environ.get("IMAGE_API_BASE", AI_HUB_BASE)
+IMAGE_API_MODEL = os.environ.get("IMAGE_API_MODEL", "pro")
 
 # Telegram 通知
 TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "")
@@ -318,8 +320,8 @@ def generate_image(prompt: str, title_zh: str, filename: str) -> bool:
     for attempt in range(1, max_attempts + 1):
         try:
             resp = httpx.post(
-                f"{AI_HUB_BASE}/api/image/generate",
-                json={"prompt": full_prompt, "timeout": 180, "model": "pro"},
+                f"{IMAGE_API_BASE}/api/image/generate",
+                json={"prompt": full_prompt, "timeout": 180, "model": IMAGE_API_MODEL},
                 timeout=200,
             )
             # 503: distinguish quota exhaustion vs transient errors
@@ -457,7 +459,7 @@ def warmup_ai_hub() -> bool:
     log.info("Warmup: 暖機 Chrome/Gemini (fast image)...")
     try:
         resp = httpx.post(
-            f"{AI_HUB_BASE}/api/image/generate",
+            f"{IMAGE_API_BASE}/api/image/generate",
             json={
                 "prompt": "A simple blue gradient background with subtle grid lines",
                 "model": "fast",

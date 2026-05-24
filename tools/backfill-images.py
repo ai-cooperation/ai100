@@ -42,6 +42,8 @@ SITES = {
 }
 DEFAULT_SITE = "ai100"
 AI_HUB = os.environ.get("AI_HUB_URL", "http://127.0.0.1:8760")
+IMAGE_API_BASE = os.environ.get("IMAGE_API_BASE", AI_HUB)
+IMAGE_API_MODEL = os.environ.get("IMAGE_API_MODEL", "pro")
 FONT_PATH = "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"
 
 # 用於從文章內容推斷圖片 prompt 的 LLM
@@ -129,8 +131,8 @@ def generate_background(prompt: str) -> bytes | None:
     )
     try:
         resp = httpx.post(
-            f"{AI_HUB}/api/image/generate",
-            json={"prompt": clean_prompt, "timeout": 180, "model": "pro"},
+            f"{IMAGE_API_BASE}/api/image/generate",
+            json={"prompt": clean_prompt, "timeout": 180, "model": IMAGE_API_MODEL},
             timeout=200,
         )
         data = resp.json()
