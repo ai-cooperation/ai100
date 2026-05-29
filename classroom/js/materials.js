@@ -28,6 +28,7 @@ var materials = [
   { title: 'S25 AI \u56DB\u9762\u5411\u80FD\u529B', icon: '\uD83C\uDFAF', url: '/slides/supplements/S25_Four_Aspects.html', desc: '\u8D85\u7D1A\u500B\u9AD4\u00D7\u8EAB\u4EFD\u905E\u8B8A\u00B723\u9801' },
   { title: 'S26 AI \u5B78\u7FD2\u8DEF\u5F91 L1-L4', icon: '\uD83E\uDDED', url: '/slides/supplements/S26_AI_Learning_Path.html', desc: '\u5F9E\u4F7F\u7528\u8005\u5230\u6539\u9769\u8005\u00B723\u9801' },
   { title: 'S27 Reflective Hub', icon: '\uD83D\uDEF0\uFE0F', url: '/slides/supplements/S27_Reflective_Hub.html', desc: '14\u9801\u00B724\u5C0F\u6642\u53CD\u601D\u4E2D\u6A1E\u00B7\u8DE8\u5DE5\u5177\u4E00\u81F4' },
+  { title: 'S28 \u6C23\u5019\u81E8\u754C\u9EDE\u96D9\u5411\u6846\u67B6', icon: '\uD83C\uDF0A', url: '/slides/supplements/S28_Climate_Tipping_Points.html', desc: '27\u9801\u00B7\u5D29\u6F70\u8207\u7FFB\u8F49\u540C\u4E00\u5957\u6578\u5B78' },
   // --- Talks T01-T04 ---
   { title: 'T01 \u5927\u5B78\u6F14\u8B1B \u4EBA\u99D5\u99AD AI', icon: '\uD83C\uDF93', url: '/slides/supplements/T01_University_Talk_v2.html', desc: '\u6F14\u8B1B\u00B776\u9801\u00B7CD\u98A8\u683C v2' },
   { title: 'T02 \u5F9E\u7B46\u8A18\u5230\u7B2C\u4E8C\u5927\u8166', icon: '\uD83E\uDDE0', url: '/slides/supplements/T02_Knowledge_Base_L1_L5.html', desc: '\u6F14\u8B1B\u00B755\u9801' },

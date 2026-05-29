@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>氣候臨界點：崩潰與翻轉的同一套數學</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --white:#FFF;--offwhite:#F8F9FA;--g50:#F1F3F4;--g100:#E8EAED;--g200:#DADCE0;
+  --g400:#9AA0A6;--g600:#5F6368;--g800:#3C4043;--g900:#202124;
+  --blue:#1A73E8;--blue-lt:#E8F0FE;
+  --green:#0F9D8A;--green-lt:#E6F4F1;
+  --gold:#F9AB00;--gold-lt:#FEF7E0;
+  --red:#D93025;--red-lt:#FCE8E6;
+  --purple:#7C3AED;--orange:#E8710A;--navy:#0B3C5D;
+  --dark:#0a0a14;--dark2:#111122;--dark3:#16213e;
+  --acc:var(--green); /* per-slide accent, override with .acc-red / .acc-green */
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans TC',sans-serif;color:var(--g900);font-size:22px;line-height:1.7;font-weight:400;background:var(--dark);}
+
+.slides-wrap{position:relative;width:100vw;height:100vh;}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem 4rem 1.5rem;overflow:hidden;}
+.slide.active{display:flex;}
+
+/* per-slide accent helpers */
+.acc-red{--acc:var(--red);}
+.acc-green{--acc:var(--green);}
+
+/* ── Clean ── */
+.slide.clean{background:var(--white);color:var(--g900);padding-top:3.5rem;overflow-y:auto;justify-content:flex-start;}
+.slide.clean::before,.slide.clean::after{content:'';flex:1 0 0px;}
+
+/* ── Cinematic (full-bleed bg + side gradient) ── */
+.slide.cine{background-color:var(--dark2);background-size:cover;background-position:center;color:#fff;text-align:left;padding:0;display:none;align-items:stretch;}
+.slide.cine.active{display:flex;}
+.slide.cine::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(8,8,16,.94) 0%,rgba(8,8,16,.78) 24%,rgba(8,8,16,.32) 46%,transparent 64%);}
+.slide.cine>*{position:relative;z-index:2;}
+.slide.cine .cine-text{width:48%;padding:3.5rem 3.5rem;display:flex;flex-direction:column;justify-content:center;}
+.slide.cine.cine-right::before{background:linear-gradient(270deg,rgba(8,8,16,.94) 0%,rgba(8,8,16,.78) 24%,rgba(8,8,16,.32) 46%,transparent 64%);}
+.slide.cine.cine-right .cine-text{margin-left:auto;}
+.ct-tag{display:inline-block;align-self:flex-start;padding:.3rem 1rem;border-radius:100px;font-size:.85rem;font-weight:700;letter-spacing:.05em;background:rgba(255,255,255,.1);color:var(--acc);border:1px solid var(--acc);margin-bottom:1.2rem;}
+.cine h1{font-size:2.9rem;font-weight:900;line-height:1.25;}
+.ct-sub{font-size:1.2rem;font-weight:500;color:rgba(255,255,255,.72);margin-top:1.3rem;line-height:1.7;}
+.ct-quote{font-size:1.7rem;font-weight:700;line-height:1.55;color:#fff;}
+.ct-quote-src{font-size:1rem;color:rgba(255,255,255,.45);margin-top:1rem;}
+.ct-foot{color:rgba(255,255,255,.32);margin-top:2.5rem;font-size:.85rem;}
+
+/* ── Poster (centered, heavy overlay) ── */
+.slide.poster{background-size:cover;background-position:center;color:#fff;text-align:center;background-color:var(--dark2);}
+.slide.poster::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(to bottom,rgba(0,0,0,.45) 0%,rgba(0,0,0,.85) 100%);}
+.slide.poster>*{position:relative;z-index:2;}
+
+/* ── DataViz ── */
+.slide.dataviz{background:var(--dark);color:#fff;padding-top:3.5rem;}
+
+/* Typography */
+h1{font-size:3rem;font-weight:900;line-height:1.3;}
+h2{font-size:2rem;font-weight:700;color:var(--g900);margin-bottom:1rem;line-height:1.4;}
+.slide.dataviz h2,.slide.poster h2{color:#fff;}
+h3{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;}
+p,li{font-size:1.1rem;line-height:1.8;}
+.subtitle{font-size:1.15rem;font-weight:500;}
+.dim{opacity:.6;}
+.lead{max-width:840px;text-align:center;font-size:1.25rem;line-height:1.8;}
+
+/* Components */
+.step-list{text-align:left;max-width:860px;width:100%;}
+.step{display:flex;gap:1.2rem;align-items:flex-start;padding:.85rem 0;border-bottom:1px solid var(--g100);}
+.step:last-child{border:none;}
+.step-num{flex-shrink:0;width:42px;height:42px;border-radius:50%;background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;}
+.step-content{flex:1;}
+.step-content strong{font-size:1.12rem;}
+.step-content p{font-size:1rem;color:var(--g600);margin-top:.15rem;}
+
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;max-width:900px;width:100%;margin-top:1rem;}
+.stat-box{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:16px;padding:1.3rem;text-align:center;}
+.stat-box .val{font-size:2.4rem;font-weight:900;line-height:1.1;color:var(--acc);}
+.stat-box .label{font-size:.9rem;color:rgba(255,255,255,.55);margin-top:.4rem;line-height:1.5;}
+
+.card-grid{display:flex;gap:1.2rem;flex-wrap:wrap;justify-content:center;margin-top:1rem;max-width:980px;}
+.card{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:16px;padding:1.5rem;min-width:210px;max-width:290px;flex:1;transition:border-color .2s;}
+.card:hover{border-color:var(--acc);}
+.card .icon{font-size:1.6rem;font-weight:900;color:var(--acc);margin-bottom:.5rem;}
+.card h3{color:#fff;margin-bottom:.3rem;}
+.card p{font-size:.95rem;color:rgba(255,255,255,.6);line-height:1.6;}
+
+.compare-table{border-collapse:collapse;font-size:1rem;margin-top:.6rem;width:100%;max-width:900px;}
+.compare-table th{background:rgba(255,255,255,.08);color:rgba(255,255,255,.9);padding:.6rem 1rem;text-align:left;font-size:.95rem;}
+.compare-table td{padding:.6rem 1rem;border-bottom:1px solid rgba(255,255,255,.06);font-size:.95rem;color:rgba(255,255,255,.78);vertical-align:top;}
+.compare-table tr:hover td{background:rgba(255,255,255,.03);}
+.compare-table .ok{color:var(--green);font-weight:700;}
+.compare-table .warn{color:var(--gold);font-weight:700;}
+.compare-table .danger{color:var(--red);font-weight:700;}
+
+.flow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1.2rem 0;max-width:980px;}
+.flow-box{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.14);border-radius:12px;padding:.7rem 1.1rem;font-size:1rem;font-weight:700;text-align:center;color:#fff;}
+.flow-box.red{border-color:rgba(217,48,37,.5);}
+.flow-box.green{border-color:rgba(15,157,138,.5);}
+.flow-arrow{color:var(--acc);font-size:1.4rem;font-weight:900;}
+
+.info-box{border-radius:12px;padding:1.3rem 1.8rem;max-width:840px;width:100%;text-align:left;margin-top:.9rem;}
+.info-box.success{background:rgba(15,157,138,.1);border-left:4px solid var(--green);}
+.info-box.tip{background:rgba(249,171,0,.1);border-left:4px solid var(--gold);}
+.info-box.warning{background:rgba(217,48,37,.1);border-left:4px solid var(--red);}
+.slide.dataviz .info-box p,.slide.dataviz .info-box li{color:rgba(255,255,255,.78);}
+.info-box h3{margin-bottom:.4rem;}
+.info-box.success h3{color:var(--green);}.info-box.tip h3{color:var(--gold);}.info-box.warning h3{color:var(--red);}
+
+.quote-box{max-width:860px;width:100%;background:rgba(255,255,255,.04);border-left:5px solid var(--acc);border-radius:0 12px 12px 0;padding:1.4rem 2rem;margin:.7rem 0;text-align:left;}
+.quote-box .quote-text{font-size:1.25rem;font-weight:700;line-height:1.6;color:#fff;}
+.quote-box .quote-src{font-size:.9rem;color:rgba(255,255,255,.45);margin-top:.5rem;}
+
+.bottom-line{max-width:820px;width:100%;background:rgba(15,157,138,.08);border:2px solid rgba(15,157,138,.28);border-radius:16px;padding:1.8rem 2rem;text-align:center;margin-top:1rem;}
+.bottom-line h3{font-size:1.5rem;color:var(--acc);margin-bottom:.7rem;}
+.bottom-line p{font-size:1.05rem;color:rgba(255,255,255,.72);max-width:680px;margin:0 auto;line-height:1.7;}
+
+.verdict-list{max-width:900px;width:100%;display:flex;flex-direction:column;gap:.7rem;margin-top:.6rem;}
+.verdict{display:flex;gap:1rem;align-items:flex-start;background:var(--offwhite);border:2px solid var(--g100);border-radius:14px;padding:.9rem 1.2rem;}
+.verdict .badge{flex-shrink:0;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;}
+.verdict.true .badge{background:var(--green-lt);color:var(--green);}
+.verdict.half .badge{background:var(--gold-lt);color:var(--gold);}
+.verdict .vtext{flex:1;font-size:.98rem;line-height:1.55;}
+.verdict .vtext b{color:var(--g900);}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:920px;width:100%;margin-top:.8rem;}
+.col-panel{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:16px;padding:1.5rem;}
+.col-panel.red{border-color:rgba(217,48,37,.3);}
+.col-panel.green{border-color:rgba(15,157,138,.3);}
+.col-panel h3{color:#fff;margin-bottom:.6rem;}
+.col-panel.red h3{color:#ff6b5e;}
+.col-panel.green h3{color:#27c4ad;}
+.col-panel p,.col-panel li{font-size:1rem;color:rgba(255,255,255,.72);}
+.col-panel ul{padding-left:1.1rem;margin-top:.3rem;}
+
+.poster-badge{display:inline-block;padding:.3rem 1rem;border-radius:100px;font-size:.9rem;font-weight:700;margin-top:1rem;background:rgba(255,255,255,.12);}
+.tag-line{font-size:.92rem;color:var(--acc);font-weight:700;letter-spacing:.04em;margin-bottom:.6rem;}
+
+.src-note{font-size:.78rem;color:var(--g400);max-width:880px;margin-top:1rem;text-align:left;}
+.slide.dataviz .src-note{color:rgba(255,255,255,.32);}
+
+/* compact modifier for dense slides (QA viewport 1280x720) */
+.slide.tight{padding-top:2.6rem;}
+.slide.tight h2{font-size:1.7rem;margin-bottom:.6rem;}
+.slide.tight .step{padding:.42rem 0;}
+.slide.tight .step-num{width:34px;height:34px;font-size:.85rem;}
+.slide.tight .step-content strong{font-size:1rem;}
+.slide.tight .step-content p{font-size:.88rem;margin-top:.1rem;line-height:1.5;}
+.slide.tight .compare-table th,.slide.tight .compare-table td{padding:.4rem .8rem;font-size:.86rem;}
+.slide.tight .info-box{padding:.85rem 1.4rem;margin-top:.55rem;}
+.slide.tight .info-box p{font-size:.95rem;line-height:1.55;}
+.slide.tight .two-col{gap:.9rem;margin-top:.5rem;}
+.slide.tight .col-panel{padding:1rem 1.1rem;}
+.slide.tight .col-panel p,.slide.tight .col-panel li{font-size:.92rem;line-height:1.5;}
+.slide.tight .flow{margin:.6rem 0;gap:.45rem;}
+.slide.tight .flow-box{padding:.5rem .85rem;font-size:.9rem;}
+.slide.tight .flow-arrow{font-size:1.1rem;}
+.slide.tight .tag-line{margin-bottom:.4rem;}
+.slide.tight .src-note{margin-top:.5rem;}
+
+/* Controls */
+.progress{position:fixed;bottom:0;left:0;height:4px;background:var(--acc);transition:width .4s;z-index:100;}
+.controls{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;display:flex;gap:.5rem;}
+.controls button{width:48px;height:48px;border:2px solid rgba(255,255,255,.15);border-radius:12px;background:rgba(0,0,0,.4);color:rgba(255,255,255,.8);font-size:1.2rem;cursor:pointer;transition:all .15s;backdrop-filter:blur(8px);}
+.controls button:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff;}
+.controls button:disabled{opacity:.2;cursor:default;}
+.slide-counter{position:fixed;bottom:1.5rem;right:5rem;z-index:100;color:rgba(255,255,255,.4);font-size:.85rem;font-weight:500;cursor:pointer;}
+.module-badge{position:fixed;top:1rem;right:1rem;z-index:100;background:rgba(15,157,138,.18);color:var(--green);padding:.25rem .8rem;border-radius:100px;font-size:.8rem;font-weight:700;backdrop-filter:blur(8px);}
+.module-title{position:fixed;top:1rem;left:1.2rem;z-index:100;color:rgba(255,255,255,.4);font-size:.85rem;font-weight:700;}
+
+@media(max-width:768px){
+  html,body{font-size:16px;}
+  .slide{padding:1rem 1.2rem 1rem;}
+  .slide.clean{padding-top:3rem;}
+  .slide.cine .cine-text{width:100%;padding:1.5rem 1.5rem;justify-content:flex-end;}
+  .slide.cine::before{background:linear-gradient(to top,rgba(8,8,16,.95) 0%,rgba(8,8,16,.6) 45%,rgba(8,8,16,.25) 100%);}
+  .slide.cine.cine-right::before{background:linear-gradient(to top,rgba(8,8,16,.95) 0%,rgba(8,8,16,.6) 45%,rgba(8,8,16,.25) 100%);}
+  .cine h1{font-size:1.9rem;}.ct-quote{font-size:1.3rem;}
+  h1{font-size:1.8rem;}h2{font-size:1.4rem;margin-bottom:.6rem;}
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:.8rem;}
+  .stat-box .val{font-size:1.7rem;}
+  .card-grid{flex-direction:column;align-items:center;}
+  .card{max-width:100%;min-width:0;}
+  .two-col{grid-template-columns:1fr;}
+  .compare-table th,.compare-table td{padding:.5rem .6rem;font-size:.82rem;}
+  .controls button{width:40px;height:40px;font-size:1rem;}
+  .module-title{font-size:.7rem;left:.8rem;top:.6rem;}
+  .module-badge{font-size:.65rem;top:.6rem;right:.6rem;padding:.2rem .6rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="module-title">氣候臨界點雙向框架</div>
+<div class="module-badge">S28 補充單元</div>
+
+<div class="slides-wrap">
+
+<!-- 0 封面 cine -->
+<div class="slide cine active" data-act="開場" style="background-image:url('img/s28/cover.png');">
+  <div class="cine-text">
+    <div class="ct-tag">永續課程 · 雙向框架</div>
+    <h1>氣候臨界點<br><span style="color:var(--green);">崩潰</span>與<span style="color:#ff6b5e;">翻轉</span><br>是同一套數學</h1>
+    <p class="ct-sub">同一個「自我強化迴路」，既能讓系統崩潰，也能讓系統翻轉向好。看懂機制，恐慌就能變成施力點。</p>
+    <p class="ct-foot">按 → 或空白鍵開始 · 按 G 開啟導覽</p>
+  </div>
+</div>
+
+<!-- 1 鉤子 dataviz -->
+<div class="slide dataviz acc-red" data-act="開場">
+  <div class="tag-line">2025 · 一個已經發生的事實</div>
+  <h2>地球，剛剛跨過了第一個臨界點</h2>
+  <div class="stat-grid">
+    <div class="stat-box"><div class="val">1 個</div><div class="label">人類史上首個被確認<br>跨越的氣候臨界點：<br>珊瑚礁</div></div>
+    <div class="stat-box"><div class="val">84%</div><div class="label">全球珊瑚礁受<br>第四次大規模白化影響</div></div>
+    <div class="stat-box"><div class="val">~10 億</div><div class="label">生計直接依賴<br>珊瑚礁生態系的人口</div></div>
+  </div>
+  <div class="info-box warning" style="margin-top:1.4rem;">
+    <p>這不是模型預測，是 2025 年 10 月《Global Tipping Points Report 2025》確認的現況。它證明一件事：<b style="color:#fff;">地球系統真的會「翻」，而且已經開始翻了。</b></p>
+  </div>
+  <div class="src-note">來源：Global Tipping Points Report 2025（University of Exeter + Stockholm Resilience Centre）</div>
+</div>
+
+<!-- 2 議程 clean -->
+<div class="slide clean tight" data-act="開場">
+  <h2>今天的旅程：七層架構</h2>
+  <div class="step-list">
+    <div class="step"><div class="step-num">1</div><div class="step-content"><strong>框架支點</strong><p>臨界點是中性的——石頭可以往兩邊滾</p></div></div>
+    <div class="step"><div class="step-num" style="background:var(--red);">2</div><div class="step-content"><strong>負面：三種崩潰邏輯</strong><p>物理迴路 / 冰蓋失衡 / 生態級聯，本質完全不同</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><strong>分析維度</strong><p>觸發機制 ≠ 衝擊輸出，拆開才看得清</p></div></div>
+    <div class="step"><div class="step-num" style="background:var(--green);">4</div><div class="step-content"><strong>正面：同一套機制反向運作</strong><p>學習曲線降價迴路，太陽能與風電已全球翻轉</p></div></div>
+    <div class="step"><div class="step-num" style="background:var(--green);">5</div><div class="step-content"><strong>施力點與四條戰線</strong><p>為什麼「全世界一起動」是系統科學，不是口號</p></div></div>
+    <div class="step"><div class="step-num" style="background:var(--gold);">6</div><div class="step-content"><strong>完整弧線 + 引用防錯</strong><p>兩份報告分開引用，把恐慌轉成機制分析</p></div></div>
+  </div>
+</div>
+
+<!-- 3 Part 1 cine -->
+<div class="slide cine" data-act="Part 1 · 支點" style="background-image:url('img/s28/p1-tipping.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Part 1</div>
+    <h1>臨界點，<br>到底是什麼？</h1>
+    <p class="ct-sub">先把這個被濫用的詞講清楚——它不等於「很嚴重」，而是一種特定的物理性質。</p>
+  </div>
+</div>
+
+<!-- 4 臨界點定義 clean -->
+<div class="slide clean" data-act="Part 1 · 支點">
+  <h2>臨界點 = 兩個條件同時成立</h2>
+  <div class="step-list" style="max-width:780px;">
+    <div class="step"><div class="step-num">①</div><div class="step-content"><strong>大變化</strong><p>系統狀態發生劇烈、整體性的轉變，不是緩慢線性的變動</p></div></div>
+    <div class="step"><div class="step-num">②</div><div class="step-content"><strong>難逆轉</strong><p>越過之後，就算把外力拿掉，系統也回不去原狀</p></div></div>
+  </div>
+  <div class="info-box tip" style="max-width:780px;">
+    <h3>推石過山頂的比喻</h3>
+    <p>把石頭推上山頂很費力（接近臨界點）；一旦越過頂點，它會<b>自己往下滾</b>，你再也拉不住——這就是「自我強化」與「難逆轉」。</p>
+  </div>
+</div>
+
+<!-- 5 核心洞見 雙向 dataviz -->
+<div class="slide dataviz" data-act="Part 1 · 支點">
+  <h2>關鍵洞見：石頭可以往兩邊滾</h2>
+  <p class="lead dim" style="margin-bottom:.3rem;">同一套「自我強化迴路」的數學，方向相反就是兩種命運。</p>
+  <div class="two-col">
+    <div class="col-panel red">
+      <h3>↓ 負面臨界點</h3>
+      <p>系統滑向崩潰，且難以挽回。</p>
+      <ul><li>北極海冰、永凍土</li><li>冰蓋與洋流（AMOC）</li><li>珊瑚礁（已跨越）</li></ul>
+    </div>
+    <div class="col-panel green">
+      <h3>↑ 正面臨界點</h3>
+      <p>系統翻轉向好，且難以回頭。</p>
+      <ul><li>太陽能、風電（已全球翻轉）</li><li>電池、電動車、熱泵</li><li>社會態度與政策</li></ul>
+    </div>
+  </div>
+  <div class="info-box success"><p>分出「負面 vs 正面」不是道德分類，是<b style="color:#fff;">同一個回饋機制的兩個方向</b>。這正是整套框架的支點。</p></div>
+</div>
+
+<!-- 6 Part 2 cine red -->
+<div class="slide cine acc-red" data-act="Part 2 · 崩潰" style="background-image:url('img/s28/p2-collapse.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Part 2</div>
+    <h1>崩潰，<br>有三種不同的邏輯</h1>
+    <p class="ct-sub">把「臨界點」當成單一機制是最大的誤解。底下至少有三種本質不同的崩潰方式。</p>
+  </div>
+</div>
+
+<!-- 7 三機制總覽 dataviz -->
+<div class="slide dataviz acc-red tight" data-act="Part 2 · 崩潰">
+  <h2>三種崩潰邏輯：機制完全不同</h2>
+  <table class="compare-table">
+    <tr><th style="width:18%;">代表系統</th><th style="width:30%;">機制本質</th><th>崩潰邏輯</th></tr>
+    <tr><td><b style="color:#fff;">北極海冰<br>永凍土</b></td><td class="danger">機制 A<br>物理自我強化迴路</td><td>白冰融→深色海面吸熱→更暖→融更多；永凍土融→釋甲烷（≈CO₂ 25 倍）→更暖。<b style="color:#fff;">溫度自己推高自己。</b></td></tr>
+    <tr><td><b style="color:#fff;">AMOC<br>格陵蘭/南極冰蓋</b></td><td class="warn">機制 B<br>冰蓋失衡型</td><td>淡水稀釋海水鹽度、陸地冰質量入海，擾動洋流與海平面（雙下游）。</td></tr>
+    <tr><td><b style="color:#fff;">珊瑚礁<br>（已跨越）</b></td><td style="color:#27c4ad;font-weight:700;">機制 C<br>生物共生破裂→生態級聯</td><td>高溫破壞共生關係→白化→骨骼受侵→生態系崩解。<b style="color:#fff;">不是溫度自推，是生物結構崩潰。</b></td></tr>
+  </table>
+  <div class="info-box tip"><p>混為一談會判斷錯：A 是物理回饋、B 是質量/鹽度失衡、C 是生物生態崩潰——<b style="color:#fff;">閾值、速度、可救性都不一樣。</b></p></div>
+</div>
+
+<!-- 8 機制A dataviz -->
+<div class="slide dataviz acc-red tight" data-act="Part 2 · 崩潰">
+  <div class="tag-line" style="color:#ff6b5e;">機制 A · 物理自我強化迴路</div>
+  <h2>溫度自己推高自己</h2>
+  <div class="flow">
+    <div class="flow-box red">白冰融化</div><span class="flow-arrow">→</span>
+    <div class="flow-box red">深色海面吸熱</div><span class="flow-arrow">→</span>
+    <div class="flow-box red">更暖</div><span class="flow-arrow">→</span>
+    <div class="flow-box red">融更多冰</div><span class="flow-arrow" style="transform:scaleX(-1);">↺</span>
+  </div>
+  <div class="two-col" style="margin-top:1.2rem;">
+    <div class="col-panel red"><h3>反照率回饋</h3><p>冰雪反射陽光（高反照率）。一旦融化露出深色海面/地表，吸熱大增，加速暖化，融更多冰。</p></div>
+    <div class="col-panel red"><h3>永凍土甲烷</h3><p>凍土解凍釋放甲烷，暖化效應約為 CO₂ 的 25 倍，回頭再加速凍土解凍。</p></div>
+  </div>
+  <div class="info-box warning"><p>特徵：<b style="color:#fff;">不需要外力持續推</b>，迴路自己會跑。這是「難逆轉」最純粹的物理版本。</p></div>
+</div>
+
+<!-- 9 機制B dataviz -->
+<div class="slide dataviz acc-red tight" data-act="Part 2 · 崩潰">
+  <div class="tag-line" style="color:var(--gold);">機制 B · 冰蓋失衡型</div>
+  <h2>冰蓋是超級節點：一觸發，兩條下游</h2>
+  <div class="flow" style="flex-direction:column;align-items:center;gap:.4rem;">
+    <div class="flow-box red">冰蓋融化（機制 B 觸發）</div>
+    <span class="flow-arrow">↓ 兩條下游 ↓</span>
+  </div>
+  <div class="two-col">
+    <div class="col-panel red"><h3>下游一 · 鹽度</h3><p>淡水稀釋海水鹽度 → <b style="color:#fff;">AMOC 洋流崩潰</b> → 西北歐變冷、季風減弱等氣候異常。</p></div>
+    <div class="col-panel red"><h3>下游二 · 質量</h3><p>陸地冰入海 → <b style="color:#fff;">海平面上升</b> → 海岸帶衝擊，數百年不可逆。</p></div>
+  </div>
+  <div class="info-box tip"><p>同一個觸發（冰蓋融化），衝擊卻分兩路。這就帶出下一個關鍵分辨：<b style="color:#fff;">海冰 vs 陸地冰。</b></p></div>
+</div>
+
+<!-- 10 海冰vs陸地冰 clean -->
+<div class="slide clean" data-act="Part 2 · 崩潰">
+  <h2>海冰 vs 陸地冰：教學最常混淆的一點</h2>
+  <table class="compare-table" style="max-width:840px;color:var(--g800);">
+    <tr><th style="width:24%;"></th><th>海冰（北極浮冰）</th><th>陸地冰（格陵蘭/南極/冰川）</th></tr>
+    <tr><td><b>抬升海平面？</b></td><td style="color:var(--g800);"><b>不直接</b>（排水量已計入）</td><td style="color:var(--g800);"><b>會</b>，才是海平面上升來源</td></tr>
+    <tr><td><b>主要角色</b></td><td style="color:var(--g800);">反照率回饋（機制 A）</td><td style="color:var(--g800);">質量入海（機制 B）</td></tr>
+  </table>
+  <div class="info-box tip" style="max-width:840px;">
+    <h3>海平面上升的尺度（衝擊輸出端）</h3>
+    <p>已升 23 cm（20 世紀以來）；2100 前依情境再升 0.3–1.6 m（高排放近 2 m）。長期承諾量：格陵蘭全融 ≈ 7.4 m、南極理論上限 ≈ 58 m，未來數百年逾 10 m。2050 年約 10 億人住海岸帶，百年一遇水位將年年發生。</p>
+  </div>
+</div>
+
+<!-- 11 機制C 珊瑚礁四層 clean -->
+<div class="slide clean acc-green tight" data-act="Part 2 · 崩潰">
+  <h2>機制 C：珊瑚礁的四層級聯（已跨越）</h2>
+  <div class="step-list" style="max-width:880px;">
+    <div class="step"><div class="step-num" style="background:var(--red);">細胞</div><div class="step-content"><strong>共生破裂</strong><p>高溫使共生藻（蟲黃藻）光合產生氧化壓力 → 宿主把藻當成有毒夥伴排出 → 失去約 90% 能量＝白化</p></div></div>
+    <div class="step"><div class="step-num" style="background:var(--red);">個體</div><div class="step-content"><strong>飢餓與侵蝕</strong><p>白化非立即死，但骨骼易受疾病侵襲、陷入飢餓；酸化使骨骼溶解加倍。致命的是反覆白化、沒有恢復窗口</p></div></div>
+    <div class="step"><div class="step-num" style="background:var(--red);">生態</div><div class="step-content"><strong>生態系崩解</strong><p>珊瑚死→礁體崩解→依賴珊瑚礁的魚類兩年內最高流失 70%；珊瑚礁支撐約 1/4 海洋生物多樣性</p></div></div>
+    <div class="step"><div class="step-num" style="background:var(--red);">社會</div><div class="step-content"><strong>人類衝擊</strong><p>級聯到近 10 億人的漁業、糧食、海岸保護與觀光生計</p></div></div>
+  </div>
+  <p class="src-note" style="color:var(--g600);">重點：珊瑚礁的「不可逆」來自<b>生物與生態結構崩潰</b>，不是溫度自我推高的迴路（與機制 A/B 完全不同）。</p>
+</div>
+
+<!-- 12 珊瑚礁數字 dataviz -->
+<div class="slide dataviz acc-red" data-act="Part 2 · 崩潰">
+  <h2>珊瑚礁臨界點：現況數字</h2>
+  <div class="stat-grid">
+    <div class="stat-box"><div class="val">1.2°C</div><div class="label">珊瑚礁臨界點估值<br>（區間 1–1.5°C）</div></div>
+    <div class="stat-box"><div class="val">1.4°C</div><div class="label">目前全球升溫<br>已超過臨界點</div></div>
+    <div class="stat-box"><div class="val">90%</div><div class="label">蟲黃藻提供珊瑚的<br>能量比例（白化即失去）</div></div>
+    <div class="stat-box"><div class="val">84%</div><div class="label">受 2023–2025 第四次<br>全球白化事件影響的珊瑚礁</div></div>
+    <div class="stat-box"><div class="val">80+ 國</div><div class="label">受白化事件波及</div></div>
+    <div class="stat-box"><div class="val">-70%</div><div class="label">珊瑚死後兩年內<br>依賴魚類最高流失</div></div>
+  </div>
+  <div class="src-note">來源：GTPR 2025；NOAA 第四次全球珊瑚白化事件監測</div>
+</div>
+
+<!-- 13 負向骨牌 dataviz -->
+<div class="slide dataviz acc-red" data-act="Part 2 · 崩潰">
+  <h2>第三層：負向骨牌（臨界點互相觸發）</h2>
+  <div class="flow">
+    <div class="flow-box red">格陵蘭融冰</div><span class="flow-arrow">→</span>
+    <div class="flow-box red">擾動 AMOC</div>
+  </div>
+  <div class="flow">
+    <div class="flow-box red">亞馬遜枯死</div><span class="flow-arrow">→</span>
+    <div class="flow-box red">釋放碳</div><span class="flow-arrow">→</span>
+    <div class="flow-box red">升溫</div><span class="flow-arrow">→</span>
+    <div class="flow-box red">加速格陵蘭融冰</div>
+  </div>
+  <div class="info-box warning"><p>一個臨界點會去觸發另一個，形成連鎖。<b style="color:#fff;">記住這個結構——因為正面臨界點同樣會骨牌互相觸發，只是方向相反。</b></p></div>
+</div>
+
+<!-- 14 觸發vs衝擊 dataviz -->
+<div class="slide dataviz" data-act="Part 3 · 分析維度">
+  <div class="tag-line">Part 3 · 一個讓你不再混亂的分析維度</div>
+  <h2>觸發機制 ≠ 衝擊輸出</h2>
+  <div class="two-col">
+    <div class="col-panel red"><h3>珊瑚礁（機制 C）</h3><p><b style="color:#fff;">觸發：</b>高溫破壞共生</p><p><b style="color:#fff;">衝擊輸出：</b>漁業、糧食、生計</p></div>
+    <div class="col-panel red"><h3>冰蓋（機制 B）</h3><p><b style="color:#fff;">觸發：</b>冰蓋融化失衡</p><p><b style="color:#fff;">衝擊輸出：</b>洋流崩潰 ＋ 海平面上升</p></div>
+  </div>
+  <div class="bottom-line" style="background:rgba(26,115,232,.08);border-color:rgba(26,115,232,.28);">
+    <h3 style="color:var(--blue);">分析任一臨界點，都拆成兩件事</h3>
+    <p>先問「<b style="color:#fff;">觸發機制</b>是什麼」，再問「<b style="color:#fff;">衝擊輸出</b>到哪」。不拆，就會把融冰／海平面／洋流崩潰混成一團。</p>
+  </div>
+</div>
+
+<!-- 15 Part 4 cine green -->
+<div class="slide cine acc-green" data-act="Part 4 · 翻轉" style="background-image:url('img/s28/p4-flip.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Part 4</div>
+    <h1>同一套機制，<br>也站在我們這邊</h1>
+    <p class="ct-sub">把崩潰推下山的那套「自我強化」，反向運作就是讓乾淨技術一發不可收拾地翻轉。</p>
+  </div>
+</div>
+
+<!-- 16 學習曲線同構 dataviz -->
+<div class="slide dataviz acc-green" data-act="Part 4 · 翻轉">
+  <h2>正面臨界點：學習曲線降價迴路</h2>
+  <div class="flow">
+    <div class="flow-box green">裝機量翻倍</div><span class="flow-arrow">→</span>
+    <div class="flow-box green">價格降約 1/4</div><span class="flow-arrow">→</span>
+    <div class="flow-box green">更多人採用</div><span class="flow-arrow">→</span>
+    <div class="flow-box green">裝機量再翻倍</div><span class="flow-arrow" style="transform:scaleX(-1);">↺</span>
+  </div>
+  <div class="info-box success">
+    <p>注意這個迴路的形狀——<b style="color:#fff;">和北極融冰的自我強化迴路一模一樣，只是方向相反。</b>部署越多 → 越便宜 → 越好用 → 鼓勵更多部署。</p>
+  </div>
+  <div class="bottom-line"><h3>不可逆，這次是好事</h3><p>一旦乾淨技術更便宜也更好，污染技術就<b style="color:#fff;">不太可能回頭</b>——難逆轉站在我們這邊。</p></div>
+</div>
+
+<!-- 17 進度標註 防錯 dataviz -->
+<div class="slide dataviz acc-green" data-act="Part 4 · 翻轉">
+  <h2>進度：引用範圍務必精確</h2>
+  <table class="compare-table" style="max-width:820px;">
+    <tr><th>技術</th><th>狀態</th><th>範圍</th></tr>
+    <tr><td>太陽能 PV</td><td class="ok">已跨越正面臨界點</td><td><b style="color:#fff;">全球</b></td></tr>
+    <tr><td>風電</td><td class="ok">已跨越正面臨界點</td><td><b style="color:#fff;">全球</b></td></tr>
+    <tr><td>電動車</td><td class="warn">已跨越</td><td>領先市場（非全球）</td></tr>
+    <tr><td>電池儲能</td><td class="warn">已跨越</td><td>領先市場（非全球）</td></tr>
+    <tr><td>熱泵</td><td class="warn">已跨越</td><td>領先市場（非全球）</td></tr>
+  </table>
+  <div class="info-box warning"><p><b style="color:#fff;">教學防錯：</b>太陽能/風電是<b style="color:#fff;">全球</b>已跨越；EV/電池/熱泵只在<b style="color:#fff;">領先市場</b>。講成「全部全球翻轉」會被抓誇大。</p></div>
+</div>
+
+<!-- 18 不可逆是好事 clean -->
+<div class="slide clean acc-green" data-act="Part 4 · 翻轉">
+  <h2>核聚變也在加速：投資的正向訊號</h2>
+  <div class="two-col" style="max-width:820px;">
+    <div class="col-panel green" style="background:var(--green-lt);border-color:var(--green);"><h3 style="color:var(--green);">2021</h3><p style="color:var(--g800);">私人投資 $1.9bn<br>聚變公司 23 家</p></div>
+    <div class="col-panel green" style="background:var(--green-lt);border-color:var(--green);"><h3 style="color:var(--green);">2025</h3><p style="color:var(--g800);">私人投資 $9.7bn<br>聚變公司 53 家</p></div>
+  </div>
+  <div class="info-box tip" style="max-width:820px;">
+    <h3>但要小心「成長率敘事」的循環論證</h3>
+    <p>投資增加 ≠ 技術成熟。資金湧入是訊號，不是證明。教學時可拿這點練習批判判斷：把「投資翻倍」當「快成功了」就是把訊號當結論。</p>
+  </div>
+  <div class="src-note" style="color:var(--g600);">來源：Fusion Industry Association 2025 報告</div>
+</div>
+
+<!-- 19 Part 5 cine green -->
+<div class="slide cine acc-green" data-act="Part 5 · 一起動" style="background-image:url('img/s28/p5-together.png');">
+  <div class="cine-text">
+    <div class="ct-tag">Part 5</div>
+    <h1>為什麼<br>「全世界一起動」<br>不是口號</h1>
+    <p class="ct-sub">它是系統科學：少數能翻轉多數，正向骨牌會自己連鎖。你我先動，就有意義。</p>
+  </div>
+</div>
+
+<!-- 20 兩施力點 dataviz -->
+<div class="slide dataviz acc-green" data-act="Part 5 · 一起動">
+  <h2>兩個讓它可行的施力點（科學機制）</h2>
+  <div class="two-col">
+    <div class="col-panel green"><h3>① 少數可翻轉多數</h3><p>即使部分國家/產業承諾倒退，少數人仍能正向翻轉多數，產生自我放大。</p><p style="margin-top:.5rem;color:#fff;">→ 推翻「我一個人做沒用」的犬儒心態：不需全員到齊，只需足夠少數先到臨界比例。</p></div>
+    <div class="col-panel green"><h3>② 超級槓桿點 + 正向骨牌</h3><p>在 super-leverage points 協調政策，可釋放跨部門正向臨界骨牌（電力↔運輸↔供熱連動）。</p><p style="margin-top:.5rem;color:#fff;">→ 最有效是政策強制（如禁售燃油車），不是單靠呼籲。</p></div>
+  </div>
+  <div class="info-box success"><p>負向骨牌會連鎖，正向骨牌也會。差別在於——<b style="color:#fff;">我們可以選擇先去推哪一塊。</b></p></div>
+</div>
+
+<!-- 21 四條戰線 card-grid dataviz -->
+<div class="slide dataviz acc-green" data-act="Part 5 · 一起動">
+  <h2>人類正在努力的四條並行戰線</h2>
+  <div class="card-grid">
+    <div class="card"><div class="icon">技術</div><h3>太陽能 / 風電 / 電池</h3><p>已過成本臨界點，市場自己會跑。</p></div>
+    <div class="card"><div class="icon">政策</div><h3>推新 + 拉舊</h3><p>在超級槓桿點同時扶植新、淘汰舊。</p></div>
+    <div class="card"><div class="icon">社會</div><h3>態度翻轉</h3><p>氣候關注上升、氣候訴訟與復育呈傳染式擴散。</p></div>
+    <div class="card"><div class="icon">生態</div><h3>修復退化系統</h3><p>把退化生態推回健康，接本土案例。</p></div>
+  </div>
+  <div class="info-box success"><p>共同點：<b style="color:#fff;">每條單獨都不夠，但每條都在自我強化、且開始互相強化。</b>這就是「全世界一起動才有機會」的精確版。</p></div>
+</div>
+
+<!-- 22 本業連結 clean -->
+<div class="slide clean acc-green" data-act="Part 5 · 一起動">
+  <h2>本土案例：生態修復 × 經濟收益耦合</h2>
+  <div class="step-list" style="max-width:860px;">
+    <div class="step"><div class="step-num">海</div><div class="step-content"><strong>蜈支洲島：海洋牧場</strong><p>「生態 + 旅遊 + 碳匯」一體化。珊瑚覆蓋率從約 15% 回升至 37.08%（累計修復逾 5 萬株）——退化系統真的可以被推回健康</p></div></div>
+    <div class="step"><div class="step-num">電</div><div class="step-content"><strong>漁電共生</strong><p>同一套邏輯：把生態修復與經濟收益綁在一起，讓正向誘因自我強化</p></div></div>
+    <div class="step"><div class="step-num">S2</div><div class="step-content"><strong>接 IFRS S2 / CBAM</strong><p>負向骨牌可轉成課堂練習：選一個臨界點，推導它對某產業供應鏈的實體風險，對應 S2 氣候情境分析揭露</p></div></div>
+  </div>
+  <p class="src-note" style="color:var(--g600);">註：蜈支洲島覆蓋率數字大致屬實，不同官方來源株數（5萬/5.3萬/6.6萬）與起點（15%/18%）有出入，引用時取穩健版。</p>
+</div>
+
+<!-- 23 完整弧線 dataviz -->
+<div class="slide dataviz tight" data-act="收尾">
+  <h2>完整弧線（一句話收尾）</h2>
+  <div class="flow" style="flex-direction:column;gap:.5rem;max-width:820px;">
+    <div class="flow-box red" style="width:100%;">① 第一個負面臨界點已跨越（珊瑚礁）→ 證明地球真的會翻</div>
+    <span class="flow-arrow">↓</span>
+    <div class="flow-box" style="width:100%;border-color:rgba(255,255,255,.3);">② 但崩潰有三種邏輯（物理 / 冰蓋 / 生態）→ 理解機制才知哪些可救</div>
+    <span class="flow-arrow">↓</span>
+    <div class="flow-box green" style="width:100%;">③ 同一套自我強化也站在我們這邊（正面臨界點）</div>
+    <span class="flow-arrow">↓</span>
+    <div class="flow-box green" style="width:100%;">④ 機會是真的，但不會自己發生 → 技術/政策/社會/生態四面同時施力</div>
+    <span class="flow-arrow">↓</span>
+    <div class="flow-box green" style="width:100%;border-color:var(--green);">⑤ 少數能翻轉多數，所以你我先動就有意義</div>
+  </div>
+</div>
+
+<!-- 24 金句 poster -->
+<div class="slide poster acc-green" data-act="收尾" style="background-image:url('img/s28/p5-together.png');">
+  <div style="max-width:900px;">
+    <div class="quote-box" style="background:rgba(0,0,0,.35);"><div class="quote-text">「如果等到跨越臨界點才行動就太遲了。唯一可信的風險管理策略是提前行動——而這扇窗正在快速關閉。」</div><div class="quote-src">— Global Tipping Points Report 2025</div></div>
+    <div class="quote-box" style="background:rgba(0,0,0,.35);border-left-color:var(--gold);"><div class="quote-text">「我們正在拿地球當賭注……但事實上，我們掌控著方向盤。」</div><div class="quote-src">— 古特雷斯（聯合國秘書長）</div></div>
+  </div>
+</div>
+
+<!-- 25 引用防錯卡 + 查證 clean -->
+<div class="slide clean tight" data-act="收尾">
+  <h2>引用防錯：兩份報告務必分開</h2>
+  <div class="info-box warning" style="max-width:900px;background:var(--red-lt);">
+    <p style="color:var(--g900);"><b>CO₂ 創新高</b> 出自 <b>WMO《全球氣候狀況》</b>（2024 達 422–423.9 ppm，80 萬年最高）；<b>跨越珊瑚礁臨界點</b> 出自 <b>Exeter + Stockholm 的 GTPR 2025</b>。原文常把兩者綁一起講，易被抓引用錯誤。</p>
+  </div>
+  <div class="verdict-list">
+    <div class="verdict true"><div class="badge">✓</div><div class="vtext"><b>GTPR 2025</b>：160 科學家 / 23 國 / 87 機構；珊瑚礁為第一個跨越的臨界點。架構用 <b>9 個核心傾覆元素 + 高衝擊較小元素</b>，勿用「17 個系統」舊說法。</div></div>
+    <div class="verdict true"><div class="badge">✓</div><div class="vtext">太陽能/風電<b>全球</b>已跨正面臨界點；EV/電池/熱泵<b>領先市場</b>已跨。</div></div>
+    <div class="verdict half"><div class="badge">~</div><div class="vtext">蜈支洲島覆蓋率 15%→37.08%：<b>大致屬實</b>，但數字來源間有出入，取穩健版引用。</div></div>
+  </div>
+  <p class="src-note" style="color:var(--g600);">完整事實查證對照表見筆記：research/2026-05-29-氣候臨界點雙向框架GTP2025.md</p>
+</div>
+
+<!-- 26 結尾 CTA cine -->
+<div class="slide cine acc-green" data-act="收尾" style="background-image:url('img/s28/closing.png');">
+  <div class="cine-text">
+    <div class="ct-tag">課堂收尾</div>
+    <h1>我們<br>掌控著<br>方向盤</h1>
+    <p class="ct-sub">這套框架最大的價值，不是讓你更恐慌<br>而是給你一套思維工具<br><b style="color:#fff;">把恐慌情緒<br>轉成「機制分析 → 施力點識別」</b></p>
+    <p class="ct-foot">永續 100 講 · 氣候臨界點雙向框架</p>
+  </div>
+</div>
+
+</div><!-- /slides-wrap -->
+
+<div class="slide-counter" id="counterBtn" title="按 G 開啟快速導覽"><span id="current">1</span> / <span id="total"></span></div>
+<div class="progress" id="progress"></div>
+<div class="controls"><button id="prev" disabled>&larr;</button><button id="next">&rarr;</button></div>
+
+<!-- Quick Nav Overlay -->
+<div id="navOverlay" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.92);backdrop-filter:blur(8px);overflow-y:auto;padding:2rem;">
+  <div style="max-width:1000px;margin:0 auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <h2 style="color:#fff;font-size:1.3rem;font-weight:700;">快速導覽 <span style="color:rgba(255,255,255,.3);font-size:.85rem;font-weight:400;">（點擊跳頁 / 數字+Enter / ESC 關閉）</span></h2>
+      <button id="navClose" style="background:none;border:2px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;font-size:1rem;padding:.3rem .8rem;cursor:pointer;">✕</button>
+    </div>
+    <div id="navGrid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:.8rem;"></div>
+  </div>
+</div>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+const tot=slides.length;
+let idx=0;
+const elPrev=document.getElementById('prev'),elNext=document.getElementById('next');
+const elCur=document.getElementById('current'),elTot=document.getElementById('total'),elProg=document.getElementById('progress');
+elTot.textContent=tot;
+
+function go(n){
+  idx=Math.max(0,Math.min(tot-1,n));
+  slides.forEach((s,i)=>s.classList.toggle('active',i===idx));
+  elCur.textContent=idx+1;
+  elProg.style.width=((idx+1)/tot*100)+'%';
+  elPrev.disabled=idx===0;elNext.disabled=idx===tot-1;
+}
+elPrev.onclick=()=>go(idx-1);
+elNext.onclick=()=>go(idx+1);
+
+// Quick Nav
+const navOverlay=document.getElementById('navOverlay');
+const navGrid=document.getElementById('navGrid');
+function buildNav(){
+  navGrid.innerHTML='';
+  slides.forEach((s,i)=>{
+    const act=s.dataset.act||'';
+    const t=s.querySelector('h1,h2');
+    const label=t?t.textContent.replace(/\n/g,' ').trim().substring(0,22):'Slide '+(i+1);
+    const card=document.createElement('div');
+    card.style.cssText='cursor:pointer;border-radius:10px;overflow:hidden;border:2px solid '+(i===idx?'var(--green)':'rgba(255,255,255,.1)')+';transition:border-color .15s;';
+    card.innerHTML='<div style="height:54px;background:#16213e;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:rgba(255,255,255,.35);">'+(i+1)+'</div>'+
+      '<div style="padding:.5rem;background:rgba(255,255,255,.04);">'+
+      '<div style="font-size:.62rem;color:var(--green);font-weight:700;margin-bottom:.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+act+'</div>'+
+      '<div style="font-size:.7rem;color:rgba(255,255,255,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+label+'</div></div>';
+    card.onmouseenter=()=>card.style.borderColor='var(--gold)';
+    card.onmouseleave=()=>card.style.borderColor=i===idx?'var(--green)':'rgba(255,255,255,.1)';
+    card.onclick=()=>{go(i);closeNav();};
+    navGrid.appendChild(card);
+  });
+}
+function openNav(){buildNav();navOverlay.style.display='block';}
+function closeNav(){navOverlay.style.display='none';}
+document.getElementById('counterBtn').onclick=openNav;
+document.getElementById('navClose').onclick=closeNav;
+navOverlay.onclick=e=>{if(e.target===navOverlay)closeNav();};
+
+// Keyboard
+let numBuf='',numTimer=null;
+document.addEventListener('keydown',e=>{
+  if(navOverlay.style.display==='block'){
+    if(e.key==='Escape'||e.key==='g'||e.key==='G'){e.preventDefault();closeNav();}
+    return;
+  }
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(idx+1);}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(idx-1);}
+  else if(e.key==='Home'){e.preventDefault();go(0);}
+  else if(e.key==='End'){e.preventDefault();go(tot-1);}
+  else if(e.key==='g'||e.key==='G'){e.preventDefault();openNav();}
+  else if(e.key==='f'||e.key==='F'){e.preventDefault();if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}
+  else if(e.key>='0'&&e.key<='9'){numBuf+=e.key;clearTimeout(numTimer);numTimer=setTimeout(()=>numBuf='',1500);}
+  else if(e.key==='Enter'&&numBuf){e.preventDefault();go(parseInt(numBuf,10)-1);numBuf='';}
+});
+
+// Touch
+let tx=0;
+document.addEventListener('touchstart',e=>tx=e.changedTouches[0].clientX,{passive:true});
+document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50)go(idx+(dx<0?1:-1));},{passive:true});
+
+go(0);
+</script>
+</body>
+</html>
