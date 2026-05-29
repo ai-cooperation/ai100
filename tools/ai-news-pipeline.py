@@ -506,7 +506,15 @@ def git_commit_and_push(files: list[str]):
         subprocess.run(["git", "push"], check=True, capture_output=True)
         log.info("Git push 完成")
     except subprocess.CalledProcessError as e:
-        log.warning(f"Git 操作失敗: {e}")
+        stderr = (e.stderr.decode(errors="replace").strip()
+                  if isinstance(e.stderr, bytes) else str(e.stderr or "").strip())
+        log.warning(f"Git 操作失敗: {e}\n{stderr}")
+        # 防呆：git push 失敗不可靜默，發 TG 告警（沉默失敗會讓網站停更數天無人發現）
+        send_tg(
+            "[ai100 news] Git push 失敗，網站可能停止更新\n"
+            f"錯誤: {stderr[:500]}\n"
+            "修復: ssh ac-mac 'cd ~/ai100 && git status'"
+        )
 
 
 # ============================================================
