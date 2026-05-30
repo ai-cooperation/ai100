@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>Reflective Hub — 個人反思中樞</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600&family=Noto+Serif+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f1e8;
+    --hero-bg: #1a1916;
+    --hero-fg: #f0e6d2;
+    --accent: #e89a7a;
+    --red: #a8351b;
+    --amber: #c9621c;
+    --green: #5a6b3d;
+    --blue: #4a6b8a;
+    --muted: #7a6f5d;
+    --rule: #ddd2bc;
+    --body-fg: #2a2620;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #2a2620;
+    color: var(--body-fg);
+    font-family: "Noto Serif TC", "Source Han Serif TC", serif;
+    line-height: 1.6;
+  }
+  body {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    overflow-y: scroll;
+    height: 100vh;
+  }
+  .slide {
+    width: 100vw;
+    height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+  .slide-inner {
+    width: 1920px;
+    height: 1080px;
+    transform-origin: center center;
+    transform: scale(var(--fit, 1));
+    padding: 80px 100px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .slide-num {
+    position: absolute;
+    bottom: 40px; right: 60px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+  }
+  .kicker {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 16px;
+    color: var(--accent);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  h1.title {
+    font-family: "DM Serif Display", "Noto Serif TC", serif;
+    font-size: 120px;
+    line-height: 1.05;
+    margin: 0 0 20px;
+    color: var(--body-fg);
+    letter-spacing: -0.01em;
+  }
+  h1.title.small { font-size: 88px; }
+  h1.title.mid { font-size: 96px; }
+  .subtitle {
+    font-size: 36px;
+    line-height: 1.4;
+    color: var(--body-fg);
+    margin: 0 0 56px;
+    font-weight: 500;
+    max-width: 1500px;
+  }
+  .ex {
+    color: var(--muted);
+    font-size: 22px;
+    font-style: italic;
+  }
+
+  /* === Hero / dark === */
+  .hero-bg {
+    background: linear-gradient(135deg, var(--hero-bg), #2a2620);
+    color: var(--hero-fg);
+  }
+  .hero-bg h1.title, .hero-bg .subtitle { color: var(--hero-fg); }
+  .hero-bg .subtitle { opacity: 0.88; }
+  .hero-bg .kicker { color: var(--accent); }
+  .hero-bg .slide-num { color: var(--accent); opacity: 0.6; }
+  .exclude {
+    font-size: 30px;
+    line-height: 1.7;
+    color: var(--muted);
+    margin: 0 0 36px;
+    text-decoration: line-through;
+    opacity: 0.8;
+  }
+  .hero-bg .exclude { color: var(--hero-fg); opacity: 0.4; }
+  .punch {
+    font-family: "DM Serif Display", "Noto Serif TC", serif;
+    font-size: 64px;
+    line-height: 1.3;
+    margin: 0;
+    max-width: 1500px;
+  }
+  .punch .accent { color: var(--accent); }
+  .hero-spacer { flex: 1; }
+  .hero-foot {
+    margin-top: 40px;
+    font-size: 22px;
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+  }
+  .hero-bg .hero-foot { color: var(--accent); opacity: 0.6; }
+
+  /* === Cover (S00) — Reflective Hub === */
+  .cover-quote {
+    border-left: 4px solid var(--accent);
+    background: rgba(232, 113, 10, 0.06);
+    padding: 22px 28px;
+    margin: 8px 0 0;
+    font-family: "DM Serif Display", "Noto Serif TC", serif;
+    font-size: 32px;
+    line-height: 1.55;
+    color: var(--body-fg);
+    max-width: 1500px;
+  }
+  .cover-quote strong { color: var(--accent); }
+  .cover-quote-sub {
+    display: block;
+    margin-top: 6px;
+    font-family: "Noto Serif TC", serif;
+    font-size: 22px;
+    color: var(--muted);
+  }
+  .cover-mono {
+    margin-top: 28px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 18px;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .cover-meta {
+    position: absolute;
+    bottom: 40px;
+    left: 100px;
+    right: 100px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+  }
+
+  /* === Slide 01 — 散落 === */
+  .channels {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+    margin: 30px 0 50px;
+  }
+  .ch {
+    background: #fff;
+    padding: 22px 18px;
+    border-top: 4px solid var(--rule);
+    text-align: center;
+  }
+  .ch-name {
+    font-family: "DM Serif Display", "Noto Serif TC", serif;
+    font-size: 26px;
+    color: var(--body-fg);
+    margin: 0 0 6px;
+  }
+  .ch-type {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+  .ch.alt { border-top-color: var(--accent); }
+  .scatter-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-top: auto;
+  }
+  .stat {
+    border-top: 2px solid var(--body-fg);
+    padding-top: 16px;
+  }
+  .stat-num {
+    font-family: "DM Serif Display", "Noto Serif TC", serif;
+    font-size: 96px;
+    line-height: 1;
+    color: var(--red);
+  }
+  .stat-label {
+    font-size: 20px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-top: 8px;
+  }
+
+  /* === Slide 02 — 代價 === */
+  .cost-list {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    margin-top: 20px;
+    max-width: 1600px;
+  }
+  .cost-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 300px;
+    gap: 32px;
+    align-items: center;
+    background: #fff;
+    padding: 28px 36px;
+    border-left: 6px solid var(--red);
+  }
+  .cost-icon {
+    font-family: "DM Serif Display", "Noto Serif TC", serif;
+    font-size: 60px;
+    color: var(--red);
+    line-height: 1;
+  }
+  .cost-body p {
+    margin: 0;
+  }
+  .cost-headline {
+    font-size: 28px;
+    color: var(--body-fg);
+    line-height: 1.4;
+    font-weight: 700;
+  }
+  .cost-detail {
+    font-size: 18px;
+    color: var(--muted);
+    line-height: 1.55;
+    margin-top: 8px;
+  }
+  .cost-tag {
+    text-align: right;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+    color: var(--red);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* === Slide 04 — 4-step 流程 === */
+  .flow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    margin: 40px 0;
+    flex: 1;
+    align-items: stretch;
+  }
+  .flow-step {
+    background: #fff;
+    padding: 36px 30px;
+    border-top: 6px solid var(--accent);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .flow-step::after {
+    content: "→";
+    position: absolute;
+    right: -28px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 40px;
+    color: var(--accent);
+    font-family: "DM Serif Display", serif;
+  }
+  .flow-step:last-child::after { content: ""; }
+  .flow-num {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    margin: 0 0 8px;
+  }
+  .flow-verb {
+    font-family: "DM Serif Display", "Noto Serif TC", serif;
+    font-size: 42px;
+    color: var(--body-fg);
+    margin: 0 0 16px;
+  }
+  .flow-desc {
+    font-size: 18px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin: 0 0 16px;
+  }
+  .flow-mono {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    color: var(--accent);
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+    line-height: 1.5;
+  }
+
+  /* === Slide 05 — Live demo 月報爽點 === */
+  .demo-quote {
+    background: var(--hero-bg);
+    color: var(--hero-fg);
+    padding: 50px 60px;
+    margin: 32px 0;
+    font-family: "DM Serif Display", "Noto Serif TC", serif;
+    font-size: 42px;
+    line-height: 1.5;
+    border-left: 8px solid var(--accent);
+  }
+  .demo-quote .accent { color: var(--accent); }
+  .demo-meta {
+    display: flex;
+    gap: 50px;
+    margin: 24px 0 32px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 18px;
+    color: var(--muted);
+  }
+  .demo-meta strong { color: var(--body-fg); font-size: 28px; font-family: "DM Serif Display", serif; }
+  .demo-suggestions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: auto;
+  }
+  .demo-sg {
+    background: #fff;
+    padding: 22px 24px;
+    border-left: 4px solid var(--green);
+  }
+  .demo-sg-tag {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    color: var(--green);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin: 0 0 8px;
+  }
+  .demo-sg-text {
+    font-size: 18px;
+    color: var(--body-fg);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  /* === Slide 06 — Cron 推送 === */
+  .cron-rail {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin: 40px 0;
+  }
+  .cron-card {
+    background: #fff;
+    padding: 32px 30px;
+    border-top: 6px solid var(--accent);
+    display: flex;
+    flex-direction: column;
+  }
+  .cron-name {
+    font-family: "DM Serif Display", serif;
+    font-size: 36px;
+    color: var(--body-fg);
+    margin: 0 0 6px;
+  }
+  .cron-time {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 18px;
+    color: var(--accent);
+    margin: 0 0 20px;
+    letter-spacing: 0.05em;
+  }
+  .cron-what {
+    font-size: 18px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin: 0 0 16px;
+  }
+  .cron-content {
+    background: var(--bg);
+    padding: 14px 16px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    color: var(--body-fg);
+    margin-top: auto;
+    line-height: 1.6;
+  }
+  .cron-foot {
+    margin-top: 32px;
+    background: var(--hero-bg);
+    color: var(--hero-fg);
+    padding: 28px 36px;
+    font-family: "DM Serif Display", serif;
+    font-size: 32px;
+    line-height: 1.5;
+  }
+  .cron-foot .accent { color: var(--accent); }
+
+  /* === Slide 07 — 雙層思考 === */
+  .layers {
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    gap: 14px 24px;
+    margin: 20px 0 24px;
+    max-width: 1600px;
+  }
+  .layer-num {
+    font-family: "DM Serif Display", "Noto Serif TC", serif;
+    font-size: 40px;
+    color: var(--accent);
+    line-height: 1;
+    padding-top: 4px;
+  }
+  .layer-body {
+    border-left: 3px solid var(--rule);
+    padding: 4px 0 4px 22px;
+  }
+  .layer-role {
+    font-size: 23px;
+    font-weight: 700;
+    color: var(--body-fg);
+    margin: 0 0 4px;
+  }
+  .layer-desc {
+    font-size: 18px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 0;
+  }
+  .layer-body.highlight {
+    border-left-color: var(--accent);
+    background: #fff;
+    padding: 12px 22px;
+    margin-left: -3px;
+  }
+  .layer-body.highlight .layer-role { color: var(--red); }
+  .verbs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin: 18px 0;
+    max-width: 1600px;
+  }
+  .verb {
+    background: #fff;
+    padding: 16px 18px;
+    border-top: 3px solid var(--accent);
+  }
+  .verb-name {
+    font-family: "DM Serif Display", "Noto Serif TC", serif;
+    font-size: 24px;
+    color: var(--red);
+    margin: 0 0 6px;
+  }
+  .verb-ex {
+    font-size: 15px;
+    color: var(--body-fg);
+    line-height: 1.5;
+    margin: 0;
+    font-style: italic;
+  }
+  .punchline {
+    margin-top: 18px;
+    padding-top: 0;
+    font-family: "DM Serif Display", "Noto Serif TC", serif;
+    font-size: 44px;
+    color: var(--body-fg);
+    line-height: 1.25;
+  }
+  .punchline .em { color: var(--red); }
+
+  /* === Slide 08 — Body+Brain 架構 === */
+  .body-brain {
+    display: grid;
+    grid-template-columns: 1fr 80px 1fr;
+    gap: 24px;
+    margin: 30px 0 36px;
+    align-items: stretch;
+  }
+  .bb-col {
+    background: #fff;
+    padding: 32px 30px;
+    border-top: 6px solid var(--accent);
+    display: flex;
+    flex-direction: column;
+  }
+  .bb-col.brain { border-top-color: var(--green); }
+  .bb-col.body { border-top-color: var(--red); }
+  .bb-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin: 0 0 8px;
+  }
+  .bb-name {
+    font-family: "DM Serif Display", serif;
+    font-size: 56px;
+    color: var(--body-fg);
+    margin: 0 0 8px;
+    line-height: 1;
+  }
+  .bb-sub {
+    font-size: 18px;
+    color: var(--muted);
+    margin: 0 0 24px;
+  }
+  .bb-items {
+    list-style: none;
+    padding: 0; margin: 0;
+  }
+  .bb-items li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 18px;
+    color: var(--body-fg);
+  }
+  .bb-items li:last-child { border-bottom: none; }
+  .bb-items li .mono {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    color: var(--muted);
+    display: block;
+    margin-top: 2px;
+  }
+  .bb-bridge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+    font-family: "JetBrains Mono", monospace;
+    color: var(--accent);
+  }
+  .bb-bridge .arrow {
+    font-size: 60px;
+    font-family: "DM Serif Display", serif;
+  }
+  .bb-bridge .label {
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.5;
+  }
+  .bb-foot {
+    margin-top: auto;
+    background: var(--hero-bg);
+    color: var(--hero-fg);
+    padding: 20px 32px;
+    font-family: "DM Serif Display", serif;
+    font-size: 24px;
+    line-height: 1.5;
+  }
+  .bb-foot .accent { color: var(--accent); }
+
+  /* === Slide 09 — 4 個 KB (existing) === */
+  .kb-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin: 36px 0 40px;
+    flex: 1;
+  }
+  .kb-card {
+    background: #fff;
+    padding: 28px 26px;
+    border-top: 6px solid var(--accent);
+    display: flex;
+    flex-direction: column;
+  }
+  .kb-card:nth-child(1) { border-top-color: var(--red); }
+  .kb-card:nth-child(2) { border-top-color: var(--green); }
+  .kb-card:nth-child(3) { border-top-color: var(--amber); }
+  .kb-card:nth-child(4) { border-top-color: var(--blue); }
+  .kb-name {
+    font-family: "DM Serif Display", "Noto Serif TC", serif;
+    font-size: 30px;
+    color: var(--body-fg);
+    margin: 0 0 4px;
+    line-height: 1.15;
+  }
+  .kb-sub {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0 0 22px;
+    word-break: break-all;
+  }
+  .kb-row { margin-bottom: 18px; }
+  .kb-label {
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 4px;
+  }
+  .kb-val {
+    font-size: 17px;
+    color: var(--body-fg);
+    line-height: 1.5;
+    margin: 0;
+  }
+  .design-rule {
+    background: var(--hero-bg);
+    color: var(--hero-fg);
+    padding: 24px 32px;
+    font-family: "DM Serif Display", "Noto Serif TC", serif;
+    font-size: 28px;
+    line-height: 1.5;
+  }
+  .design-rule .accent { color: var(--accent); }
+
+  /* === Slide 10 — Tech Stack === */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin: 30px 0;
+    flex: 1;
+  }
+  .stack-cell {
+    background: #fff;
+    padding: 22px 24px;
+    border-top: 4px solid var(--accent);
+  }
+  .stack-cat {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin: 0 0 10px;
+  }
+  .stack-tools {
+    font-family: "DM Serif Display", serif;
+    font-size: 24px;
+    color: var(--body-fg);
+    margin: 0 0 8px;
+    line-height: 1.35;
+  }
+  .stack-note {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .cost-banner {
+    background: var(--hero-bg);
+    color: var(--hero-fg);
+    padding: 26px 50px;
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 50px;
+  }
+  .cost-banner .lhs {
+    font-family: "DM Serif Display", serif;
+    font-size: 32px;
+    line-height: 1.3;
+  }
+  .cost-banner .rhs {
+    font-family: "DM Serif Display", serif;
+    font-size: 96px;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .cost-banner .rhs small {
+    font-size: 24px;
+    color: var(--hero-fg);
+    opacity: 0.6;
+  }
+
+  /* === Slide 11 — 看得見的東西 === */
+  .big-numbers {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    margin: 50px 0;
+    flex: 1;
+  }
+  .bignum-cell {
+    background: #fff;
+    padding: 40px 32px;
+    border-top: 6px solid var(--accent);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .bignum {
+    font-family: "DM Serif Display", serif;
+    font-size: 140px;
+    line-height: 1;
+    color: var(--red);
+    margin: 0 0 16px;
+  }
+  .bignum-label {
+    font-size: 22px;
+    color: var(--body-fg);
+    font-weight: 700;
+    margin: 0 0 6px;
+  }
+  .bignum-sub {
+    font-size: 16px;
+    color: var(--muted);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* === Slide 12 — Surface Layer === */
+  .surface-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+    margin: 30px 0 36px;
+    flex: 1;
+  }
+  .surf-card {
+    background: #fff;
+    padding: 26px 28px;
+    border-left: 5px solid var(--accent);
+  }
+  .surf-name {
+    font-family: "DM Serif Display", serif;
+    font-size: 28px;
+    color: var(--body-fg);
+    margin: 0 0 8px;
+  }
+  .surf-desc {
+    font-size: 17px;
+    color: var(--muted);
+    line-height: 1.55;
+    margin: 0 0 10px;
+  }
+  .surf-status {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .surf-status.ok { color: var(--green); }
+  .surf-status.plan { color: var(--amber); }
+  .surf-tagline {
+    background: var(--hero-bg);
+    color: var(--hero-fg);
+    padding: 24px 32px;
+    font-family: "DM Serif Display", serif;
+    font-size: 30px;
+    line-height: 1.5;
+  }
+  .surf-tagline .accent { color: var(--accent); }
+
+  /* === Slide 13 — Roadmap === */
+  .road-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin: 30px 0;
+    flex: 1;
+  }
+  .road-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 200px;
+    gap: 30px;
+    align-items: center;
+    background: #fff;
+    padding: 30px 40px;
+    border-left: 6px solid var(--accent);
+  }
+  .road-pri {
+    font-family: "DM Serif Display", serif;
+    font-size: 56px;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .road-body p { margin: 0; }
+  .road-name {
+    font-size: 28px;
+    color: var(--body-fg);
+    font-weight: 700;
+    margin: 0 0 6px;
+  }
+  .road-why {
+    font-size: 18px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+  .road-when {
+    text-align: right;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    line-height: 1.5;
+  }
+
+  /* === Slide 14 — 反向篩選 === */
+  .unsuitable {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 20px 0 24px;
+    max-width: 1500px;
+  }
+  .unsuit-row {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 24px;
+    align-items: start;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .unsuit-x {
+    font-family: "DM Serif Display", serif;
+    font-size: 40px;
+    color: var(--red);
+    line-height: 1;
+    padding-top: 2px;
+  }
+  .unsuit-text {
+    font-size: 22px;
+    color: var(--body-fg);
+    line-height: 1.45;
+    margin: 0;
+  }
+  .unsuit-text .ex {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 16px;
+  }
+  .unsuit-foot {
+    margin-top: auto;
+    padding: 22px 32px;
+    background: var(--hero-bg);
+    color: var(--hero-fg);
+    font-family: "DM Serif Display", serif;
+    font-size: 26px;
+    line-height: 1.45;
+  }
+  .unsuit-foot .accent { color: var(--accent); }
+</style>
+<script>
+  function fitScale() {
+    const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    document.documentElement.style.setProperty("--fit", scale);
+  }
+  window.addEventListener("resize", fitScale);
+  window.addEventListener("DOMContentLoaded", fitScale);
+  fitScale();
+</script>
+</head>
+<body>
+
+<!-- ===== 00 — Cover · Reflective Hub ===== -->
+<section class="slide cover" id="s00">
+  <div class="slide-inner">
+    <div class="kicker">REFLECTIVE · HUB</div>
+    <h1 class="title mid">資訊變多，專案複雜<br>重點卻變<span class="accent">模糊</span></h1>
+    <p class="subtitle">一個 <strong>24 小時運作</strong>的反思中樞<br>持續在你的資訊草原裡　把躲起來的<strong>獅子</strong>標出來</p>
+    <div class="cover-quote">
+      還會提醒你　草原裡還有<strong>鬣狗　大象　蛇</strong>
+      <span class="cover-quote-sub">替你看見<strong>自己看不見的模式</strong></span>
+    </div>
+    <div class="hero-spacer"></div>
+    <div class="cover-mono">ALWAYS-ON · CROSS-TOOL · CROSS-SESSION · BRAIN-SWAPPABLE</div>
+    <div class="cover-meta">REFLECTIVE HUB · 14 SLIDES · ↓ scroll · 2026-05</div>
+  </div>
+</section>
+
+<!-- ===== 01 — 訊息散落 ===== -->
+<section class="slide" id="s01">
+  <div class="slide-inner">
+    <div class="kicker">01 · the pain</div>
+    <h1 class="title mid">你的訊息　散落各處</h1>
+    <div class="subtitle">路上的想法　會議的片段　LLM 的對話　外部訊息　筆記　通知　信件</div>
+
+    <div class="channels">
+      <div class="ch alt"><p class="ch-name">Claude</p><p class="ch-type">chat session</p></div>
+      <div class="ch alt"><p class="ch-name">ChatGPT</p><p class="ch-type">chat session</p></div>
+      <div class="ch alt"><p class="ch-name">Gemini</p><p class="ch-type">chat / CLI</p></div>
+      <div class="ch alt"><p class="ch-name">Claude Code</p><p class="ch-type">CLI</p></div>
+      <div class="ch alt"><p class="ch-name">Codex</p><p class="ch-type">CLI</p></div>
+      <div class="ch"><p class="ch-name">Notion</p><p class="ch-type">notes</p></div>
+      <div class="ch"><p class="ch-name">Obsidian</p><p class="ch-type">vault</p></div>
+      <div class="ch"><p class="ch-name">Telegram</p><p class="ch-type">chat / push</p></div>
+      <div class="ch"><p class="ch-name">Email</p><p class="ch-type">subscriptions</p></div>
+      <div class="ch"><p class="ch-name">Slack / Line</p><p class="ch-type">discussion</p></div>
+    </div>
+
+    <div class="scatter-summary">
+      <div class="stat"><div class="stat-num">5+</div><div class="stat-label">LLM 客戶端</div></div>
+      <div class="stat"><div class="stat-num">3</div><div class="stat-label">裝置（手機 / Mac / VM）</div></div>
+      <div class="stat"><div class="stat-num">20+</div><div class="stat-label">channel 訊息源</div></div>
+    </div>
+    <div class="slide-num">01 / 14</div>
+  </div>
+</section>
+
+<!-- ===== 02 — 不入庫的代價 ===== -->
+<section class="slide" id="s02">
+  <div class="slide-inner">
+    <div class="kicker">02 · the cost</div>
+    <h1 class="title mid">不入庫　就會付這些代價</h1>
+
+    <div class="cost-list">
+      <div class="cost-row">
+        <div class="cost-icon">A</div>
+        <div class="cost-body">
+          <p class="cost-headline">同一個 bug　你會 debug 三次</p>
+          <p class="cost-detail">上週跟 Claude 排完 OAuth flow，下週你問 ChatGPT 同問題　它什麼都不知道　你又從頭來</p>
+        </div>
+        <div class="cost-tag">cross-tool memory leak</div>
+      </div>
+      <div class="cost-row">
+        <div class="cost-icon">B</div>
+        <div class="cost-body">
+          <p class="cost-headline">6 個月後　你忘了自己寫的規則</p>
+          <p class="cost-detail">「動工前先 inventory」這條規則救你過 5 次　半年後再犯同樣的錯　因為你也記不得規則寫在哪</p>
+        </div>
+        <div class="cost-tag">rule decay</div>
+      </div>
+      <div class="cost-row">
+        <div class="cost-icon">C</div>
+        <div class="cost-body">
+          <p class="cost-headline">你花 4 小時寫的 SDD　agent 下次完全不知道</p>
+          <p class="cost-detail">寫完關掉視窗　寫了等於沒寫　下個 session 的 agent 不會主動 search 來看</p>
+        </div>
+        <div class="cost-tag">no surface</div>
+      </div>
+    </div>
+    <div class="slide-num">02 / 14</div>
+  </div>
+</section>
+
+<!-- ===== 03 — Hero 第二大腦 ===== -->
+<section class="slide hero-bg" id="s03">
+  <div class="slide-inner">
+    <div class="kicker">03 · 核心定位</div>
+    <h1 class="title">第二大腦</h1>
+    <div class="subtitle">替你思考　你來不及思考的部分</div>
+    <p class="exclude">不是 dashboard　不是 PKM tool　不是 chat memory service</p>
+    <p class="punch">
+      是 <span class="accent">AI 主動分析</span>「你沒注意到的事」
+    </p>
+    <div class="hero-spacer"></div>
+    <div class="hero-foot">Reflective Hub · always-on · cross-tool · brain-swappable</div>
+    <div class="slide-num">03 / 14</div>
+  </div>
+</section>
+
+<!-- ===== 04 — 4-step 流程 ===== -->
+<section class="slide" id="s04">
+  <div class="slide-inner">
+    <div class="kicker">04 · the flow</div>
+    <h1 class="title mid">手機是系統的延伸</h1>
+    <div class="subtitle">不是 trigger　是<strong style="color:var(--red);">捕捉介面</strong>　把散落各處的訊息變成可運算的 truth</div>
+
+    <div class="flow">
+      <div class="flow-step">
+        <p class="flow-num">STEP 01</p>
+        <p class="flow-verb">捕捉</p>
+        <p class="flow-desc">路上想法　會議片段　文章重點　跨 channel 訊息　手機 chat 即時收</p>
+        <p class="flow-mono">input: voice / paste / forward</p>
+      </div>
+      <div class="flow-step">
+        <p class="flow-num">STEP 02</p>
+        <p class="flow-verb">討論</p>
+        <p class="flow-desc">chat 端 LLM 先跟你對話　結構化　補上下文　決定該存哪　該怎麼分類</p>
+        <p class="flow-mono">interactive: question + clarify</p>
+      </div>
+      <div class="flow-step">
+        <p class="flow-num">STEP 03</p>
+        <p class="flow-verb">入庫</p>
+        <p class="flow-desc">Reflective Hub 自動寫到對的 category　月份檔流水紀錄　主題化筆記分類</p>
+        <p class="flow-mono">tool: append_note / create_note</p>
+      </div>
+      <div class="flow-step">
+        <p class="flow-num">STEP 04</p>
+        <p class="flow-verb">萃取</p>
+        <p class="flow-desc">cron 自動跑　日報蒸餾　週報敘事　月報戰略主軸 + 建議　PNG 推回手機</p>
+        <p class="flow-mono">pipeline: lions + themes</p>
+      </div>
+    </div>
+    <div class="slide-num">04 / 14</div>
+  </div>
+</section>
+
+<!-- ===== 05 — 月報爽點 ===== -->
+<section class="slide" id="s05">
+  <div class="slide-inner">
+    <div class="kicker">05 · live demo · monthly</div>
+    <h1 class="title small">月報的真正爽點</h1>
+    <div class="subtitle">不是「我做了多少筆」　是 <strong style="color:var(--red);">AI 主動發現你沒注意到的事</strong></div>
+
+    <div class="demo-meta">
+      <div>2026-05 真實月報 ／ <strong>90 sessions</strong></div>
+      <div>動量引擎 <strong>6 lions</strong></div>
+      <div>LLM 內容引擎 <strong>4 themes</strong></div>
+    </div>
+
+    <div class="demo-quote">
+      你以為自己同時推進 <span class="accent">10 條線</span>——<br>
+      實際上這個月你<span class="accent">放掉了 4 條</span>　金礦在地下卻沒挖<br>
+      <span style="font-size:30px; opacity:0.85;">這不是產能問題　是<span class="accent">注意力分配</span>的問題</span>
+    </div>
+
+    <div class="demo-suggestions">
+      <div class="demo-sg">
+        <p class="demo-sg-tag">main theme</p>
+        <p class="demo-sg-text">以 MCP 為核心的統一治理策略<br><span style="color:var(--muted);font-size:15px;">跨 4 個工作流的共用基礎</span></p>
+      </div>
+      <div class="demo-sg">
+        <p class="demo-sg-tag">missed focus</p>
+        <p class="demo-sg-text">Meeting Capture 7 次重工<br><span style="color:var(--muted);font-size:15px;">行動項目假造 → 缺事實驗證機制</span></p>
+      </div>
+      <div class="demo-sg">
+        <p class="demo-sg-tag">actionable</p>
+        <p class="demo-sg-text">建立 MCP Token 共用庫<br><span style="color:var(--muted);font-size:15px;">一次解決四個工作流的授權重複</span></p>
+      </div>
+    </div>
+    <div class="slide-num">05 / 14</div>
+  </div>
+</section>
+
+<!-- ===== 06 — Cron 推送 ===== -->
+<section class="slide" id="s06">
+  <div class="slide-inner">
+    <div class="kicker">06 · proactive · cron</div>
+    <h1 class="title small">系統自己會醒</h1>
+    <div class="subtitle">不靠你想起來才來看　時間到了　PNG 自動推到手機</div>
+
+    <div class="cron-rail">
+      <div class="cron-card">
+        <p class="cron-name">日報</p>
+        <p class="cron-time">每日 02:17 台北</p>
+        <p class="cron-what">昨天做了什麼<br>今天 ticket + 警報 + Today's Call</p>
+        <div class="cron-content">cron: 17 18 * * *<br>handles: yesterday</div>
+      </div>
+      <div class="cron-card">
+        <p class="cron-name">週報</p>
+        <p class="cron-time">週日 23:23 台北</p>
+        <p class="cron-what">本週敘事（LLM 萃）<br>最值得記住 3 件 / 下週優先 3 件</p>
+        <div class="cron-content">cron: 23 15 * * 0<br>narrative: real LLM</div>
+      </div>
+      <div class="cron-card">
+        <p class="cron-name">月報</p>
+        <p class="cron-time">每月 02:37 台北</p>
+        <p class="cron-what">完整戰略反思<br>主軸 + 結構 + 戰略主題 + 建議</p>
+        <div class="cron-content">cron: 37 18 1 * *<br>themes: real LLM + fact-check</div>
+      </div>
+    </div>
+
+    <div class="cron-foot">
+      失敗會 <span class="accent">if: failure() Telegram 告警</span> · 沉默失敗 = 設計缺陷
+    </div>
+    <div class="slide-num">06 / 14</div>
+  </div>
+</section>
+
+<!-- ===== 07 — 雙層思考 ===== -->
+<section class="slide" id="s07">
+  <div class="slide-inner">
+    <div class="kicker">07 · meta-cognition</div>
+    <h1 class="title small">反思 AI 的反思</h1>
+    <div class="subtitle" style="margin-bottom: 20px;">AI 已經幫你跑完反思　但 AI 看到的不一定全對</div>
+
+    <div class="layers">
+      <div class="layer-num">L0</div>
+      <div class="layer-body">
+        <p class="layer-role">你做事</p>
+        <p class="layer-desc">訊息進 chat-memory（手機 chat 捕捉　結構化　入庫）</p>
+      </div>
+      <div class="layer-num">L1</div>
+      <div class="layer-body">
+        <p class="layer-role">AI 反思你</p>
+        <p class="layer-desc">pipeline 自動跑　規則式 lions 偵測卡關　LLM 萃 themes 找主軸</p>
+      </div>
+      <div class="layer-num">L2</div>
+      <div class="layer-body highlight">
+        <p class="layer-role">你反思 AI 的反思</p>
+        <p class="layer-desc">跟那份報告對話　質疑　補充　反駁　延伸</p>
+      </div>
+      <div class="layer-num">L3</div>
+      <div class="layer-body">
+        <p class="layer-role">沉澱回 truth</p>
+        <p class="layer-desc">對話結論 append 回反思檔　下次 AI 反思時引用</p>
+      </div>
+    </div>
+
+    <div class="verbs">
+      <div class="verb">
+        <p class="verb-name">質疑</p>
+        <p class="verb-ex">「這條 lion 不對，5/21 那筆其實是探索不是滅火」</p>
+      </div>
+      <div class="verb">
+        <p class="verb-name">補充</p>
+        <p class="verb-ex">「LLM 沒看到的是那週其實在追 X 主軸」</p>
+      </div>
+      <div class="verb">
+        <p class="verb-name">反駁</p>
+        <p class="verb-ex">「這個建議不適合　因為現實限制是 ...」</p>
+      </div>
+      <div class="verb">
+        <p class="verb-name">延伸</p>
+        <p class="verb-ex">「順著這條思路　下個月該怎麼做？」</p>
+      </div>
+    </div>
+
+    <p class="punchline">
+      AI 是<span class="em">放大鏡</span>　不是<span class="em">裁判</span>
+    </p>
+    <div class="slide-num">07 / 14</div>
+  </div>
+</section>
+
+<!-- ===== 08 — Body+Brain 解耦 ===== -->
+<section class="slide" id="s08">
+  <div class="slide-inner">
+    <div class="kicker">08 · architecture</div>
+    <h1 class="title small">不要再讓 AI 每次都從<span style="color:var(--red);">失憶</span>開始</h1>
+    <div class="subtitle">brain 可換　surface 可串　hub 一直在運作 — 跨工具一致　獨立在線</div>
+
+    <div class="body-brain">
+      <div class="bb-col body">
+        <p class="bb-label">HUB · 永遠你的</p>
+        <p class="bb-name">Reflective Hub</p>
+        <p class="bb-sub">永遠在你手上 · 不會跟著 LLM 換</p>
+        <ul class="bb-items">
+          <li>knowledge-base private repo<span class="mono">markdown　git versioned</span></li>
+          <li>Cloudflare Worker (MCP server)<span class="mono">免費　kb-mcp.alan-chen75.workers.dev</span></li>
+          <li>16 tools<span class="mono">CRUD　reflection　discuss　save</span></li>
+          <li>GH Actions reflection pipeline<span class="mono">自動 cron · 不依賴 hosted service</span></li>
+        </ul>
+      </div>
+
+      <div class="bb-bridge">
+        <div class="arrow">↔</div>
+        <div class="label">MCP<br>standard<br>protocol</div>
+      </div>
+
+      <div class="bb-col brain">
+        <p class="bb-label">BRAIN · 你選的</p>
+        <p class="bb-name">任何 LLM</p>
+        <p class="bb-sub">升級 / 切換 / 並行 · 不丟資產</p>
+        <ul class="bb-items">
+          <li>Claude.ai (web / iOS)<span class="mono">chat session</span></li>
+          <li>ChatGPT (含 Connectors)<span class="mono">chat session</span></li>
+          <li>Gemini / Claude Code / Codex<span class="mono">chat · CLI</span></li>
+          <li>未來任何 MCP 兼容 client<span class="mono">標準介面　不鎖死</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="bb-foot">
+      LLM 升 Opus 5 / GPT-6 / Gemini 3 → <span class="accent">你的 hub 自動變強</span>　Hub 跨 brain 切換不丟資產
+    </div>
+    <div class="slide-num">08 / 14</div>
+  </div>
+</section>
+
+<!-- ===== 09 — 4 個 KB ===== -->
+<section class="slide" id="s09">
+  <div class="slide-inner">
+    <div class="kicker">09 · multi-kb architecture</div>
+    <h1 class="title small">4 個獨立 KB</h1>
+    <div class="subtitle">服務不同用戶　不同 access policy　<span style="color:var(--red);">獨立不互通</span></div>
+
+    <div class="kb-grid">
+      <div class="kb-card">
+        <p class="kb-name">SB</p>
+        <p class="kb-sub">個人 SecondBrain</p>
+        <div class="kb-row"><p class="kb-label">服務對象</p><p class="kb-val">只有你自己</p></div>
+        <div class="kb-row"><p class="kb-label">寫入者</p><p class="kb-val">你 · 跨工具 / 跨裝置</p></div>
+        <div class="kb-row"><p class="kb-label">用途</p><p class="kb-val">個人 truth source · 跨 LLM client memory · 反思自動化</p></div>
+      </div>
+      <div class="kb-card">
+        <p class="kb-name">agent-kb</p>
+        <p class="kb-sub">教學知識庫</p>
+        <div class="kb-row"><p class="kb-label">服務對象</p><p class="kb-val">vibe coding 學員（按 Stage 權限）</p></div>
+        <div class="kb-row"><p class="kb-label">寫入者</p><p class="kb-val">你 + 教學助理</p></div>
+        <div class="kb-row"><p class="kb-label">用途</p><p class="kb-val">cases · modules · docs · tasks · rules · skills · wiki</p></div>
+      </div>
+      <div class="kb-card">
+        <p class="kb-name">kb-vault</p>
+        <p class="kb-sub">Free Second Brain（開源）</p>
+        <div class="kb-row"><p class="kb-label">服務對象</p><p class="kb-val">任何 fork 它的人</p></div>
+        <div class="kb-row"><p class="kb-label">寫入者</p><p class="kb-val">open source 貢獻者</p></div>
+        <div class="kb-row"><p class="kb-label">用途</p><p class="kb-val">framework template · fork-your-own · 不是 hosted service</p></div>
+      </div>
+      <div class="kb-card">
+        <p class="kb-name">insurance-kb</p>
+        <p class="kb-sub">保險業界 VIP 研究</p>
+        <div class="kb-row"><p class="kb-label">服務對象</p><p class="kb-val">保險業 VIP 客戶（付費）</p></div>
+        <div class="kb-row"><p class="kb-label">寫入者</p><p class="kb-val">你 + 自動爬蟲</p></div>
+        <div class="kb-row"><p class="kb-label">用途</p><p class="kb-val">每日業界新聞 · 月度蒸餾 wiki · VIP 研究報告產出</p></div>
+      </div>
+    </div>
+
+    <div class="design-rule">
+      混在一起搜　會 leak <span class="accent">隱私邊界</span> — 個人 SB 內容不該流進保險 VIP 報告　每個 KB 各自 MCP server　各自 access scope
+    </div>
+    <div class="slide-num">09 / 14</div>
+  </div>
+</section>
+
+<!-- ===== 10 — Tech Stack 全免費 ===== -->
+<section class="slide" id="s10">
+  <div class="slide-inner">
+    <div class="kicker">10 · stack</div>
+    <h1 class="title small">全跑在免費額度</h1>
+    <div class="subtitle">沒綁卡　沒訂閱　沒 SaaS lock-in</div>
+
+    <div class="stack-grid">
+      <div class="stack-cell">
+        <p class="stack-cat">execution</p>
+        <p class="stack-tools">Cloudflare Worker<br>GitHub Actions</p>
+        <p class="stack-note">Worker 100K req/day 免費　GH Actions 3000 mins/月</p>
+      </div>
+      <div class="stack-cell">
+        <p class="stack-cat">storage</p>
+        <p class="stack-tools">GitHub Private Repo<br>Cloudflare KV</p>
+        <p class="stack-note">markdown + git history 當 truth source　KV 存 OAuth token</p>
+      </div>
+      <div class="stack-cell">
+        <p class="stack-cat">llm</p>
+        <p class="stack-tools">Workers AI<br>@cf/openai/gpt-oss-120b</p>
+        <p class="stack-note">每月用 ~5 次 monthly + 4 次 weekly　遠低於免費 daily neurons 額度</p>
+      </div>
+      <div class="stack-cell">
+        <p class="stack-cat">distribution</p>
+        <p class="stack-tools">Telegram Bot API<br>sendPhoto / sendDocument</p>
+        <p class="stack-note">個人 bot 無 rate limit　PNG 推送即時</p>
+      </div>
+      <div class="stack-cell">
+        <p class="stack-cat">rendering</p>
+        <p class="stack-tools">Playwright<br>Mermaid (CDN dual)</p>
+        <p class="stack-note">在 GH runner 跑 chromium headless 截圖　mermaid jsdelivr → unpkg fallback</p>
+      </div>
+      <div class="stack-cell">
+        <p class="stack-cat">protocol</p>
+        <p class="stack-tools">MCP (JSON-RPC)<br>GitHub OAuth</p>
+        <p class="stack-note">跨 LLM client 通用標準　不綁定特定 chat 介面</p>
+      </div>
+    </div>
+
+    <div class="cost-banner">
+      <div class="lhs">月度成本</div>
+      <div class="rhs">$0<small> / month</small></div>
+    </div>
+    <div class="slide-num">10 / 14</div>
+  </div>
+</section>
+
+<!-- ===== 11 — 看得見的東西 ===== -->
+<section class="slide" id="s11">
+  <div class="slide-inner">
+    <div class="kicker">11 · what's built</div>
+    <h1 class="title small">看得見的東西</h1>
+    <div class="subtitle">不是 roadmap PPT　已經跑起來的</div>
+
+    <div class="big-numbers">
+      <div class="bignum-cell">
+        <div class="bignum">16</div>
+        <p class="bignum-label">MCP tools</p>
+        <p class="bignum-sub">CRUD · reflection · discuss · save · 跨 repo 讀取</p>
+      </div>
+      <div class="bignum-cell">
+        <div class="bignum">7</div>
+        <p class="bignum-label">主題目錄</p>
+        <p class="bignum-sub">memory / tech / business / personal / research / reflections / 教材</p>
+      </div>
+      <div class="bignum-cell">
+        <div class="bignum">3</div>
+        <p class="bignum-label">層反思 pipeline</p>
+        <p class="bignum-sub">daily 動量 / weekly 敘事 / monthly 戰略主題</p>
+      </div>
+      <div class="bignum-cell">
+        <div class="bignum">50+</div>
+        <p class="bignum-label">已產反思報告</p>
+        <p class="bignum-sub">含 4-5 月日週月三層　全部 git tracked</p>
+      </div>
+    </div>
+    <div class="slide-num">11 / 14</div>
+  </div>
+</section>
+
+<!-- ===== 12 — Surface Layer ===== -->
+<section class="slide" id="s12">
+  <div class="slide-inner">
+    <div class="kicker">12 · surface layer</div>
+    <h1 class="title small">Surface 也解耦</h1>
+    <div class="subtitle">Truth = 一份 markdown repo　Surface = 你選自己舒服的讀法　互不干擾</div>
+
+    <div class="surface-grid">
+      <div class="surf-card">
+        <p class="surf-name">GitHub web</p>
+        <p class="surf-desc">直接看 markdown render　含 git diff 跟 history</p>
+        <p class="surf-status ok">already · default</p>
+      </div>
+      <div class="surf-card">
+        <p class="surf-name">Telegram PNG</p>
+        <p class="surf-desc">週月報自動推送到手機　路上掃過即看</p>
+        <p class="surf-status ok">already · cron auto</p>
+      </div>
+      <div class="surf-card">
+        <p class="surf-name">Notion sync</p>
+        <p class="surf-desc">部分內容自動同步進 Notion DB　專案管理 + 課程登記</p>
+        <p class="surf-status ok">already · notion-sync.py</p>
+      </div>
+      <div class="surf-card">
+        <p class="surf-name">Obsidian vault</p>
+        <p class="surf-desc">clone repo 進 vault　含 graph view · backlink · canvas</p>
+        <p class="surf-status plan">option · ready to enable</p>
+      </div>
+      <div class="surf-card">
+        <p class="surf-name">Web HTML 一頁式</p>
+        <p class="surf-desc">反思報告 publish 成 single page　已有 _base.html.j2 樣板</p>
+        <p class="surf-status plan">option · template ready</p>
+      </div>
+      <div class="surf-card">
+        <p class="surf-name">MCP chat</p>
+        <p class="surf-desc">任何 LLM client 即時 query　反思 · 討論 · 寫入</p>
+        <p class="surf-status ok">already · 16 tools</p>
+      </div>
+    </div>
+
+    <div class="surf-tagline">
+      不被任一 viewer 鎖死　Body 在你手上　<span class="accent">View 你自由切換</span>
+    </div>
+    <div class="slide-num">12 / 14</div>
+  </div>
+</section>
+
+<!-- ===== 13 — Roadmap ===== -->
+<section class="slide" id="s13">
+  <div class="slide-inner">
+    <div class="kicker">13 · roadmap</div>
+    <h1 class="title small">想做的方向</h1>
+    <div class="subtitle">不是急著做　是清楚知道下一步該往哪</div>
+
+    <div class="road-list">
+      <div class="road-row">
+        <div class="road-pri">P0</div>
+        <div class="road-body">
+          <p class="road-name">Push-based lesson surface</p>
+          <p class="road-why">月報結尾自動萃「下月最該注意的 3 條 lesson」→ 寫進 active-lessons.md → CLAUDE.md 自動載入　agent 啟動就看見</p>
+        </div>
+        <div class="road-when">priority<br>不限時程</div>
+      </div>
+      <div class="road-row">
+        <div class="road-pri">P0</div>
+        <div class="road-body">
+          <p class="road-name">Rule decay alarm</p>
+          <p class="road-why">每條 rule 加 last_validated frontmatter　超過 180 天沒被觸發的自動 surface 給人類 review　避免規則靜默過期</p>
+        </div>
+        <div class="road-when">priority<br>不限時程</div>
+      </div>
+      <div class="road-row">
+        <div class="road-pri">P1</div>
+        <div class="road-body">
+          <p class="road-name">Skill auto-suggest</p>
+          <p class="road-why">rework lion verdict 寫「抽 Skill」　pipeline 自動產出 skill template draft 丟回 SB　人 review 後存　變成可重複用工作流</p>
+        </div>
+        <div class="road-when">unblock<br>2026-06-01</div>
+      </div>
+      <div class="road-row">
+        <div class="road-pri">P1</div>
+        <div class="road-body">
+          <p class="road-name">SB-dreaming（跨月 pattern detection）</p>
+          <p class="road-why">獨立 cron 跨 6 月份 chat-memory 找重複出現的 pain pattern　寫進 reflections/dreams/</p>
+        </div>
+        <div class="road-when">explore<br>觀察</div>
+      </div>
+    </div>
+    <div class="slide-num">13 / 14</div>
+  </div>
+</section>
+
+<!-- ===== 14 — 反向篩選 ===== -->
+<section class="slide" id="s14">
+  <div class="slide-inner">
+    <div class="kicker">14 · who this is not for</div>
+    <h1 class="title small">這套不適合你</h1>
+    <div class="subtitle">如果你是——</div>
+
+    <div class="unsuitable">
+      <div class="unsuit-row">
+        <div class="unsuit-x">×</div>
+        <p class="unsuit-text">想要 SaaS 一鍵搞定的人<span class="ex">這套是 fork-your-own　不是 hosted service　你要設 PAT、設 Cloudflare token、跑 GH Actions</span></p>
+      </div>
+      <div class="unsuit-row">
+        <div class="unsuit-x">×</div>
+        <p class="unsuit-text">不寫 markdown 筆記的人<span class="ex">沒 chat-memory 進來　反思 pipeline 沒料　雙引擎跑出來都是 0</span></p>
+      </div>
+      <div class="unsuit-row">
+        <div class="unsuit-x">×</div>
+        <p class="unsuit-text">把 AI 當聊天視窗的人<span class="ex">沒有跨工具協作　就沒有跨工具 memory 痛點　這套架構對你沒意義</span></p>
+      </div>
+      <div class="unsuit-row">
+        <div class="unsuit-x">×</div>
+        <p class="unsuit-text">期待開箱即用 · 不想自架的人<span class="ex">雖然只要 30 分鐘 setup　但仍是「自架」　Body 在你手上意味著責任也在你手上</span></p>
+      </div>
+    </div>
+
+    <div class="unsuit-foot">
+      這套重視的是 <span class="accent">自己掌握 truth source</span> · agent 跨工具一致行為<br>
+      不是便宜方便的 hosted memory service
+    </div>
+    <div class="slide-num">14 / 14</div>
+  </div>
+</section>
+
+</body>
+</html>

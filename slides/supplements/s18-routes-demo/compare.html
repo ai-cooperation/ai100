@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>4 版本對比 — Reflective Hub deck</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{font-family:'Noto Sans TC',sans-serif;background:#d8d5cd;color:#1a1a1a;overflow-x:hidden}
+
+.header{
+  height:60px;position:sticky;top:0;z-index:50;
+  background:#fff;border-bottom:1px solid #d8d5cd;
+  padding:.7rem 1.4rem;display:flex;align-items:center;gap:1rem;
+}
+.header h1{font-size:1rem;font-weight:700}
+.header .meta{font-family:'Fira Code',monospace;font-size:.78rem;color:#6b6862}
+.header .open-btn{margin-left:auto;display:flex;gap:.5rem}
+.header .open-btn a{padding:.3rem .7rem;background:#e8710a;color:#fff;text-decoration:none;font-size:.75rem;border-radius:3px;font-weight:700;letter-spacing:.05em}
+.header .open-btn a.alt{background:#1a1a1a}
+
+.compare{
+  display:grid;
+  grid-template-columns:repeat(4, 25vw);
+  gap:0;
+  align-items:start;
+}
+
+.pane{
+  width:25vw;
+  position:relative;
+  background:#fff;
+  border-right:1px solid #d8d5cd;
+}
+
+.label{
+  position:sticky;top:60px;z-index:30;
+  height:32px;
+  display:flex;align-items:center;gap:.5rem;
+  padding:0 10px;
+  background:#1a1a1a;color:#fff;
+  font:700 12px 'Fira Code',monospace;
+  letter-spacing:.05em;
+}
+.label .style{font-weight:400;color:#e8710a;text-transform:uppercase}
+.label .full{margin-left:auto;font-size:11px;font-weight:400}
+.label .full a{color:#e8710a;text-decoration:none}
+
+.stage{
+  width:25vw;
+  overflow:hidden;
+  background:#fafafa;
+}
+.stage iframe{
+  width:1920px;
+  height:0; /* JS 動態算 */
+  border:0;
+  display:block;
+  transform-origin:0 0;
+}
+
+.debug{
+  font:11px/1.4 'Fira Code',monospace;
+  padding:.4rem .8rem;background:#f4f3ef;color:#6b6862;
+  border-top:1px solid #d8d5cd;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Reflective Hub deck</h1>
+  <span class="meta">4 版本對比 ・ 上下刷 ・ 2026-05-30</span>
+  <div class="open-btn">
+    <a href="v2.html" target="_blank">線上版 v2 ↗</a>
+    <a href="https://ai100.cooperation.tw/slides/supplements/S27_Reflective_Hub.html" target="_blank" class="alt">已上架 S27 ↗</a>
+  </div>
+</div>
+
+<div class="compare">
+
+  <section class="pane">
+    <div class="label">A · 米色 editorial <span class="full"><a href="index.html" target="_blank">獨立開啟 ↗</a></span></div>
+    <div class="stage"><iframe src="index.html" data-deck="A"></iframe></div>
+    <div class="debug" data-debug="A">loading…</div>
+  </section>
+
+  <section class="pane">
+    <div class="label">B · light theme <span class="style">(已上架)</span> <span class="full"><a href="v2.html" target="_blank">獨立開啟 ↗</a></span></div>
+    <div class="stage"><iframe src="v2.html" data-deck="B"></iframe></div>
+    <div class="debug" data-debug="B">loading…</div>
+  </section>
+
+  <section class="pane">
+    <div class="label">C · 藍圖系統感 <span class="style">(codex)</span> <span class="full"><a href="v3-codex.html" target="_blank">獨立開啟 ↗</a></span></div>
+    <div class="stage"><iframe src="v3-codex.html" data-deck="C"></iframe></div>
+    <div class="debug" data-debug="C">loading…</div>
+  </section>
+
+  <section class="pane">
+    <div class="label">D · 紫色毛玻璃 <span class="style">(agy)</span> <span class="full"><a href="v3-agy.html" target="_blank">獨立開啟 ↗</a></span></div>
+    <div class="stage"><iframe src="v3-agy.html" data-deck="D"></iframe></div>
+    <div class="debug" data-debug="D">loading…</div>
+  </section>
+
+</div>
+
+<script>
+const SLIDE_H = 1080;
+const GAP = 8;
+
+function inject(iframe){
+  const tag = iframe.dataset.deck;
+  const dbg = document.querySelector(`[data-debug="${tag}"]`);
+  let doc;
+  try { doc = iframe.contentDocument; } catch(e){
+    dbg.textContent = `[${tag}] cross-origin fail: ${e.message}`;
+    return false;
+  }
+  if(!doc || !doc.body){
+    dbg.textContent = `[${tag}] no body yet`;
+    return false;
+  }
+
+  // 注入 CSS 把所有 .slide 改 vertical stack
+  if(!doc.querySelector('style[data-stack]')){
+    const css = `
+      /* 不動 background，讓各 deck 保留 dark/light theme 自己的底色 */
+      html,body{overflow:visible !important;height:auto !important}
+      /* 外層 slides container：移除 absolute / fixed / transform，讓內容垂直 flow */
+      .slides,.slides-viewport,.slides-container,.deck,.slide-wrapper,[class*="deck-"]{
+        position:static !important;
+        top:auto !important;left:auto !important;right:auto !important;bottom:auto !important;
+        width:1920px !important;
+        height:auto !important;
+        min-height:0 !important;
+        max-height:none !important;
+        overflow:visible !important;
+        transform:none !important;
+        display:block !important;
+      }
+      /* slide 本身：強制 visible + flex layout (大部分 deck 用 flex；改 flex 對 block deck 不破壞) */
+      .slide{
+        display:flex !important;
+        flex-direction:column !important;
+        position:relative !important;
+        top:auto !important;left:auto !important;right:auto !important;bottom:auto !important;
+        opacity:1 !important;
+        visibility:visible !important;
+        transform:none !important;
+        width:1920px !important;
+        height:${SLIDE_H}px !important;
+        min-height:${SLIDE_H}px !important;
+        max-height:${SLIDE_H}px !important;
+        margin:0 0 ${GAP}px 0 !important;
+        flex-shrink:0 !important;
+        inset:auto !important;
+      }
+      /* hide nav / pager / progress / module-title */
+      .nav,.pager,.progress,.progress-bar,.controls,.control-bar,
+      #prev,#next,#counter,#progress,.slide-counter,.module-title,
+      button[id*="prev"],button[id*="next"]{display:none !important}
+      /* agy fragment + 任何 opacity:0 hide-by-default 機制全部 force show */
+      .fragment,[class*="fragment"]{opacity:1 !important;transform:none !important;visibility:visible !important}
+    `;
+    const style = doc.createElement('style');
+    style.setAttribute('data-stack', '1');
+    style.textContent = css;
+    doc.head.appendChild(style);
+  }
+
+  // count slides + 設 iframe height + scale
+  const slides = doc.querySelectorAll('.slide');
+  const n = slides.length;
+  if(n === 0){
+    dbg.textContent = `[${tag}] no .slide found`;
+    return false;
+  }
+  const innerH = n * (SLIDE_H + GAP);
+  const paneW = window.innerWidth * 0.25;
+  const scale = paneW / 1920;
+  iframe.style.height = innerH + 'px';
+  iframe.style.transform = `scale(${scale})`;
+  iframe.parentElement.style.height = (innerH * scale) + 'px';
+  dbg.textContent = `[${tag}] ${n} slides · scale ${scale.toFixed(3)} · stage ${Math.round(innerH*scale)}px`;
+  return true;
+}
+
+function tryInject(iframe){
+  // 立即試 + 若失敗 poll 直到成功（最多 5 秒）
+  if(inject(iframe)) return;
+  let attempts = 0;
+  const timer = setInterval(() => {
+    attempts++;
+    if(inject(iframe) || attempts > 50){
+      clearInterval(timer);
+    }
+  }, 100);
+}
+
+document.querySelectorAll('iframe').forEach(iframe => {
+  // race condition: iframe 可能已 load 完
+  iframe.addEventListener('load', () => tryInject(iframe));
+  // 也立即試一次（如果 load 已經過）
+  tryInject(iframe);
+});
+
+// resize 時重算
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    document.querySelectorAll('iframe').forEach(inject);
+  }, 200);
+});
+</script>
+
+</body>
+</html>

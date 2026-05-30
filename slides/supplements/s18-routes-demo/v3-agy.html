@@ -1,0 +1,2065 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reflective Hub — 個人第二大腦架構 (v3)</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* 品牌色彩系統 (Cooperation Design System - Light Theme) */
+  --bg: #F4F6F9;
+  --surface: rgba(255, 255, 255, 0.85);
+  --surface-opaque: #FFFFFF;
+  --border: rgba(124, 58, 237, 0.08);
+  --border-strong: rgba(124, 58, 237, 0.15);
+  --text: #202124;
+  --text-muted: #5F6368;
+  --text-light: #9AA0A6;
+  
+  --primary: #1A73E8;      /* Blue */
+  --primary-lt: #E8F0FE;
+  --secondary: #0F9D8A;    /* Green */
+  --secondary-lt: #E6F4F1;
+  --accent: #7C3AED;       /* Purple (主強調色) */
+  --accent-lt: #F3E8FF;
+  --warn: #F9AB00;         /* Gold */
+  --warn-lt: #FEF7E0;
+  --alert: #D93025;        /* Red */
+  --alert-lt: #FCE8E6;
+  
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-md: 0 8px 24px rgba(124, 58, 237, 0.04), 0 2px 6px rgba(0,0,0,0.02);
+  --shadow-lg: 0 16px 40px rgba(124, 58, 237, 0.08), 0 4px 12px rgba(0,0,0,0.03);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Noto Sans TC', sans-serif;
+  color: var(--text);
+  background: #0D0E12; /* 外層視窗背景，用深色烘托簡報主體 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 1920x1080 Viewport 鎖死容器 */
+.slides-viewport {
+  width: 1920px;
+  height: 1080px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center center;
+  transform: translate(-50%, -50%);
+  background: var(--bg);
+  overflow: hidden;
+  box-shadow: 0 25px 70px rgba(0,0,0,0.35);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 網格背景與漸層裝飾 */
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: 
+    linear-gradient(to right, rgba(124, 58, 237, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(124, 58, 237, 0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+  z-index: 1;
+}
+
+.radial-glow-1 {
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 70%;
+  height: 70%;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.07) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.radial-glow-2 {
+  position: absolute;
+  bottom: -20%;
+  left: -10%;
+  width: 70%;
+  height: 70%;
+  background: radial-gradient(circle, rgba(15, 157, 138, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Slides Core ── */
+.slides {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 5;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 5.5rem 5rem 4.5rem; /* 稍微縮小內距，挪出更多垂直空間給大字級 */
+  opacity: 0;
+  transform: scale(0.985);
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.slide.active {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.slide.prev {
+  opacity: 0;
+  transform: scale(1.015);
+}
+
+/* ── 三模式 ── */
+.slide.clean {
+  justify-content: flex-start;
+}
+
+.slide.dataviz {
+  justify-content: flex-start;
+}
+
+.slide.poster {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.9) 0%, rgba(244, 246, 249, 0.9) 100%);
+}
+
+/* ── Typography (Reading Glasses Style) ── */
+/* 內頁主標，強制符合 >= 64px 規格 (此處設為 80px) */
+h2 {
+  font-size: 80px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 0.8rem;
+  line-height: 1.3;
+  width: 100%;
+  text-align: center;
+  letter-spacing: -0.01em;
+}
+
+/* 內頁副標 / 章節標題，強制符合 >= 44px 規格 (此處設為 48px) */
+.subtitle {
+  font-size: 48px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+  text-align: center;
+  width: 100%;
+  line-height: 1.4;
+}
+
+/* 一般卡片標題 / 進階標題，強制符合 >= 28px 規格 (此處設為 30px) */
+h3 {
+  font-size: 30px;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+/* 正文 / list item，強制符合 >= 24px 規格 (此處設為 26px) */
+/* CJK 行高 >= 1.7，清單行高 >= 1.8 */
+p {
+  font-size: 26px;
+  line-height: 1.7;
+  color: var(--text-muted);
+}
+
+li {
+  font-size: 26px;
+  line-height: 1.8;
+  color: var(--text-muted);
+}
+
+.dim {
+  color: var(--text-light);
+}
+
+/* ── Fragment ── */
+.fragment {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fragment.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* 硬規則：預設全顯示，僅靠 .active 切換 slide (iframe compare 覆蓋) */
+.fragment {
+  opacity: 1 !important;
+  transform: none !important;
+  visibility: visible !important;
+}
+
+/* ── Glassmorphism Cards ── */
+.card-grid {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 1rem;
+  width: 100%;
+  max-width: 1650px; /* 寬度拉大至 1650px 以減少垂直排版高度 */
+}
+
+.card {
+  background: var(--surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 30px; /* 老花眼規格：卡片內距 24-32px */
+  flex: 1;
+  min-width: 280px;
+  box-shadow: var(--shadow-md);
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--accent);
+  opacity: 0.8;
+}
+
+.card.alert::before { background: var(--alert); }
+.card.secondary::before { background: var(--secondary); }
+.card.primary::before { background: var(--primary); }
+
+.card .icon-text {
+  font-family: 'Fira Code', monospace;
+  font-size: 44px; /* 原 1.8rem */
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 0.8rem;
+}
+
+.card.alert .icon-text { color: var(--alert); }
+.card.secondary .icon-text { color: var(--secondary); }
+.card.primary .icon-text { color: var(--primary); }
+
+.card h3 {
+  font-size: 30px;
+  margin-bottom: 0.6rem;
+  color: var(--text);
+}
+
+/* 卡片描述，強制符合 >= 20px 規格 (此處設為 22px) */
+.card p {
+  font-size: 22px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* ── Stat Grid ── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1650px; /* 寬度拉大 */
+  margin-top: 1rem;
+}
+
+.stat-box {
+  background: var(--surface);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 30px; /* 老花眼規格：卡片內距 24-32px */
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.stat-box:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.stat-box .val {
+  font-size: 80px; /* 原 3.2rem */
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1.1;
+  font-family: 'Fira Code', monospace;
+}
+
+.stat-box.primary .val { color: var(--primary); }
+.stat-box.secondary .val { color: var(--secondary); }
+.stat-box.alert .val { color: var(--alert); }
+
+.stat-box .label {
+  font-size: 28px; /* 原 1.05rem，強制符合 >= 28px */
+  color: var(--text);
+  margin-top: 0.5rem;
+  font-weight: 700;
+}
+
+.stat-box .sub {
+  font-size: 20px; /* 原 0.85rem，強制符合 >= 20px */
+  color: var(--text-muted);
+  margin-top: 0.4rem;
+  line-height: 1.4;
+}
+
+/* ── Lede Block (強調文字區) ── */
+.lede-block {
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.lede-line {
+  display: block;
+  font-size: 44px; /* 原 1.8rem */
+  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.lede-highlight {
+  display: inline-block;
+  font-size: 52px; /* 原 2.2rem */
+  font-weight: 900;
+  color: #FFFFFF;
+  background: linear-gradient(135deg, var(--accent), #9061F9);
+  padding: 0.4rem 1.4rem;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.2);
+  margin-top: 0.8rem;
+  letter-spacing: -0.01em;
+}
+
+/* ── Split Layout ── */
+.split-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  width: 100%;
+  max-width: 1650px; /* 寬度拉大 */
+  align-items: center;
+  margin-top: 1rem;
+}
+
+/* ── List Elements ── */
+.pill-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.8rem;
+}
+
+.pill-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.8rem 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.pill-item .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.pill-item.active .dot {
+  background: var(--secondary);
+}
+
+.pill-item span {
+  font-size: 24px; /* 原 1rem */
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pill-item .tag {
+  margin-left: auto;
+  font-size: 18px; /* 原 0.75rem，強制符合 >= 18px */
+  font-family: 'Fira Code', monospace;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+/* ── Step List ── */
+.step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 1400px;
+  margin-top: 0.5rem;
+}
+
+.step-row {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.2rem 1.8rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.25s ease;
+}
+
+.step-row:hover {
+  transform: translateX(6px);
+  border-color: var(--accent);
+}
+
+.step-index {
+  font-family: 'Fira Code', monospace;
+  font-size: 32px; /* 原 1.4rem */
+  font-weight: 900;
+  color: var(--accent);
+  width: 60px; /* 原 40px */
+  height: 60px;
+  border-radius: 50%;
+  background: var(--accent-lt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-body {
+  display: grid;
+  grid-template-columns: 240px 1fr; /* 擴展左側標題寬度 */
+  gap: 1.5rem;
+  align-items: center;
+  flex: 1;
+}
+
+.step-title {
+  font-size: 28px; /* 原 1.15rem，強制符合 >= 28px */
+  font-weight: 700;
+  color: var(--text);
+}
+
+.step-desc {
+  font-size: 22px; /* 原 1rem，強制符合 >= 20px */
+  color: var(--text-muted);
+}
+
+/* ── Step Horizontal Flow (Slide 04) ── */
+.flow-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  width: 100%;
+  max-width: 1650px; /* 寬度拉大 */
+  margin-top: 1.5rem;
+  position: relative;
+}
+
+.flow-card {
+  background: var(--surface);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.8rem 1.5rem;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  z-index: 2;
+  transition: all 0.25s ease;
+}
+
+.flow-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+}
+
+.flow-num {
+  font-family: 'Fira Code', monospace;
+  font-size: 28px; /* 原 1.2rem */
+  font-weight: 900;
+  color: var(--accent);
+  background: var(--accent-lt);
+  width: 50px; /* 原 36px */
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}
+
+.flow-card h3 {
+  font-size: 28px; /* 原 1.2rem */
+  color: var(--text);
+  margin-bottom: 0.6rem;
+}
+
+.flow-card p {
+  font-size: 20px; /* 原 0.9rem */
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.flow-arrow-text {
+  font-size: 36px; /* 原 1.5rem */
+  color: var(--accent);
+  font-weight: 900;
+  margin: 1rem auto;
+}
+
+/* ── Quote Box ── */
+.quote-box {
+  width: 100%;
+  background: var(--surface);
+  border-left: 5px solid var(--accent);
+  border-radius: 0 16px 16px 0;
+  padding: 2.2rem 2.5rem;
+  text-align: left;
+  box-shadow: var(--shadow-md);
+}
+
+.quote-box .quote-text {
+  font-size: 32px; /* 原 1.35rem */
+  font-weight: 700;
+  line-height: 1.7;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.quote-box .quote-text span.highlight {
+  color: var(--accent);
+}
+
+.quote-box .quote-src {
+  font-size: 18px; /* 原 0.9rem，強制符合 >= 18px */
+  color: var(--text-light);
+  margin-top: 0.8rem;
+  font-family: 'Fira Code', monospace;
+}
+
+/* ── Info Box ── */
+.info-box {
+  border-radius: 12px;
+  padding: 1.2rem 1.8rem;
+  width: 100%;
+  max-width: 1400px;
+  text-align: left;
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.info-box.warning {
+  background: var(--alert-lt);
+  border-left: 4px solid var(--alert);
+}
+
+.info-box.success {
+  background: var(--secondary-lt);
+  border-left: 4px solid var(--secondary);
+}
+
+.info-box .badge {
+  font-size: 18px; /* 原 0.85rem */
+  font-weight: 900;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  color: #FFFFFF;
+  text-transform: uppercase;
+}
+
+.info-box.warning .badge { background: var(--alert); }
+.info-box.success .badge { background: var(--secondary); }
+
+.info-box p {
+  color: var(--text);
+  font-size: 22px; /* 原 0.95rem，強制符合 >= 20px */
+  font-weight: 500;
+}
+
+/* ── Double Layer Reflection (Slide 07) ── */
+.reflect-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 1400px; /* 寬度拉大 */
+  margin-top: 0.5rem;
+}
+
+.reflect-row {
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.9rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.reflect-row.highlighted {
+  background: var(--accent-lt);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+}
+
+.reflect-layer {
+  font-family: 'Fira Code', monospace;
+  font-size: 22px; /* 原 1.05rem，強制符合 >= 18px */
+  font-weight: 900;
+  color: var(--text-light);
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.reflect-row.highlighted .reflect-layer {
+  color: var(--accent);
+}
+
+.reflect-role {
+  font-size: 26px; /* 原 1.1rem */
+  font-weight: 700;
+  color: var(--text);
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.reflect-action {
+  font-size: 22px; /* 原 0.95rem，強制符合 >= 20px */
+  color: var(--text-muted);
+  flex: 1;
+  line-height: 1.7;
+}
+
+.reflect-row.highlighted .reflect-action {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* ── Architecture Grid (Slide 08) ── */
+.arch-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1650px; /* 寬度拉大 */
+  align-items: stretch;
+  margin-top: 1rem;
+}
+
+.arch-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+}
+
+.arch-panel.brain-side { border-top: 4px solid var(--secondary); }
+.arch-panel.body-side { border-top: 4px solid var(--accent); }
+
+.arch-panel .tag {
+  font-family: 'Fira Code', monospace;
+  font-size: 18px; /* 原 0.75rem，強制符合 >= 18px */
+  color: var(--text-light);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.arch-panel h3 {
+  font-size: 32px; /* 原 1.5rem */
+  margin-bottom: 0.4rem;
+}
+
+.arch-panel .desc {
+  font-size: 20px; /* 原 0.9rem，強制符合 >= 20px */
+  color: var(--text-light);
+  margin-bottom: 1.5rem;
+}
+
+.arch-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.arch-list li {
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  font-size: 22px; /* 原 0.95rem */
+  color: var(--text-muted);
+  line-height: 1.8; /* 清單行高 >= 1.8 */
+}
+
+.arch-list li:last-child {
+  border-bottom: none;
+}
+
+.arch-list li strong {
+  color: var(--text);
+}
+
+.arch-bridge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+}
+
+.arch-bridge .protocol-box {
+  background: var(--surface-opaque);
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 1.2rem;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+}
+
+.arch-bridge .protocol-box p {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.arch-bridge .protocol-box span {
+  font-family: 'Fira Code', monospace;
+  font-size: 18px; /* 原 0.75rem */
+  color: var(--text-light);
+}
+
+.arch-bridge .arrow-left-right {
+  font-size: 52px; /* 原 2.2rem */
+  color: var(--accent);
+  margin: 1rem 0;
+  font-weight: 900;
+}
+
+/* ── 2x2 Grid (Slide 09) ── */
+.kb-layout {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1650px; /* 寬度拉大 */
+  margin-top: 0.5rem;
+}
+
+.kb-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem 1.8rem;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.kb-box::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background: var(--accent);
+}
+
+.kb-box:nth-child(1)::before { background: var(--primary); }
+.kb-box:nth-child(2)::before { background: var(--secondary); }
+.kb-box:nth-child(3)::before { background: var(--accent); }
+.kb-box:nth-child(4)::before { background: var(--warn); }
+
+.kb-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.kb-header h3 {
+  font-size: 30px; /* 原 1.3rem */
+  font-weight: 900;
+}
+
+.kb-header .path {
+  font-family: 'Fira Code', monospace;
+  font-size: 18px; /* 原 0.8rem */
+  color: var(--text-light);
+}
+
+.kb-details {
+  display: grid;
+  grid-template-columns: 140px 1fr; /* 寬度微增 */
+  gap: 0.5rem 1rem;
+}
+
+.kb-details .lbl {
+  font-size: 18px; /* 原 0.8rem */
+  color: var(--text-light);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.kb-details .val {
+  font-size: 22px; /* 原 0.95rem */
+  color: var(--text-muted);
+}
+
+/* ── Free Tier Grid (Slide 10) ── */
+.free-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 2.5rem;
+  width: 100%;
+  max-width: 1650px; /* 寬度拉大 */
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.free-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.free-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem 1.8rem;
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  grid-template-columns: 200px 1fr; /* 寬度微增 */
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.free-service {
+  font-size: 28px; /* 原 1.15rem */
+  font-weight: 900;
+  color: var(--text);
+  border-right: 2px solid var(--border);
+  padding-right: 1rem;
+}
+
+.free-details {
+  font-size: 22px; /* 原 0.95rem */
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.cost-card {
+  background: var(--surface-opaque);
+  border: 2px dashed var(--secondary);
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.cost-num {
+  font-size: 120px; /* 原 5.5rem */
+  font-weight: 900;
+  color: var(--secondary);
+  line-height: 1;
+  font-family: 'Fira Code', monospace;
+}
+
+.cost-label {
+  font-size: 30px; /* 原 1.3rem */
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 0.8rem;
+}
+
+.cost-sub {
+  font-size: 18px; /* 原 0.85rem */
+  color: var(--text-light);
+  margin-top: 0.4rem;
+}
+
+/* ── Surface Options (Slide 12) ── */
+.surface-layout {
+  display: grid;
+  grid-template-columns: 0.7fr 1.3fr;
+  gap: 2.5rem;
+  width: 100%;
+  max-width: 1650px; /* 寬度拉大 */
+  margin-top: 1rem;
+  align-items: center;
+}
+
+.truth-box {
+  background: var(--surface-opaque);
+  border: 2px solid var(--accent);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+}
+
+.truth-box h3 {
+  font-size: 36px; /* 原 1.6rem */
+  color: var(--accent);
+  margin-bottom: 0.8rem;
+}
+
+.truth-box p {
+  font-size: 24px; /* 原 1rem */
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.views-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.view-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.2rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.view-card h4 {
+  font-size: 24px; /* 原 1.05rem */
+  color: var(--text);
+  margin-bottom: 0.3rem;
+  font-weight: 700;
+}
+
+.view-card p {
+  font-size: 18px; /* 原 0.85rem */
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 0.6rem;
+}
+
+.view-status {
+  font-family: 'Fira Code', monospace;
+  font-size: 18px; /* 原 0.7rem */
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-top: auto;
+}
+
+.view-status.ready { color: var(--secondary); }
+.view-status.plan { color: var(--warn); }
+
+/* ── Timeline (Slide 13) ── */
+.roadmap-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.2rem;
+  width: 100%;
+  max-width: 1650px; /* 寬度拉大 */
+  margin-top: 1rem;
+}
+
+.roadmap-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.8rem;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.roadmap-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--accent);
+}
+
+.roadmap-card.p0::before { background: var(--alert); }
+.roadmap-card.p1::before { background: var(--accent); }
+
+.roadmap-priority {
+  font-family: 'Fira Code', monospace;
+  font-size: 18px; /* 原 0.85rem */
+  font-weight: 700;
+  color: var(--alert);
+  margin-bottom: 0.6rem;
+}
+
+.roadmap-card.p1 .roadmap-priority { color: var(--accent); }
+
+.roadmap-card h3 {
+  font-size: 28px; /* 原 1.2rem */
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.roadmap-card p {
+  font-size: 20px; /* 原 0.9rem */
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.roadmap-timeline {
+  font-family: 'Fira Code', monospace;
+  font-size: 18px; /* 原 0.75rem */
+  color: var(--text-light);
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+/* ── Bottom Line CTA ── */
+.bottom-line {
+  max-width: 1400px; /* 寬度拉大 */
+  width: 100%;
+  background: var(--accent-lt);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  border-radius: 16px;
+  padding: 1.5rem 2.5rem;
+  text-align: center;
+  margin-top: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.bottom-line h3 {
+  font-size: 32px; /* 原 1.35rem */
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  font-weight: 900;
+}
+
+.bottom-line p {
+  font-size: 22px; /* 原 0.95rem */
+  color: var(--text-muted);
+  max-width: 1000px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ── UI Controls ── */
+.progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 6px;
+  background: linear-gradient(to right, var(--accent), #9061F9);
+  transition: width 0.3s ease;
+  z-index: 100;
+}
+
+.controls {
+  position: absolute;
+  bottom: 2rem;
+  right: 4rem;
+  z-index: 100;
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.controls button {
+  width: 60px; /* 從 48px 加大至 60px 寬高，符合老花眼觸控規格 */
+  height: 60px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  color: var(--text);
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.controls button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.controls button:disabled {
+  opacity: 0.35;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
+
+.slide-counter {
+  position: absolute;
+  bottom: 2.7rem;
+  right: 13.5rem; /* 向左平移以防按鈕加大後重疊 */
+  z-index: 100;
+  color: var(--text-light);
+  font-size: 18px; /* 原 0.9rem */
+  font-weight: 700;
+  font-family: 'Fira Code', monospace;
+}
+
+.module-badge {
+  position: absolute;
+  top: 2rem;
+  right: 4rem;
+  z-index: 100;
+  background: var(--accent-lt);
+  color: var(--accent);
+  padding: 0.5rem 1.2rem;
+  border-radius: 100px;
+  font-size: 18px; /* 原 0.8rem */
+  font-weight: 700;
+  border: 1px solid rgba(124, 58, 237, 0.15);
+}
+
+.module-title {
+  position: absolute;
+  top: 2rem;
+  left: 4rem;
+  z-index: 100;
+  color: var(--text-light);
+  font-size: 18px; /* 原 0.9rem */
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* ── Chapter Menu ── */
+.chapter-menu {
+  position: absolute;
+  bottom: 2rem;
+  left: 4rem;
+  z-index: 150;
+}
+
+.chapter-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 18px; /* 原 0.85rem */
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.chapter-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.chapter-icon {
+  color: var(--accent);
+  font-weight: 900;
+}
+
+.chapter-list {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  min-width: 260px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  padding: 8px 0;
+  max-height: 50vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+}
+
+.chapter-menu.open .chapter-list {
+  display: block;
+}
+
+.chapter-item {
+  padding: 12px 20px;
+  color: var(--text-muted);
+  font-size: 18px; /* 原 0.85rem */
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chapter-item:hover {
+  background: var(--accent-lt);
+  color: var(--accent);
+}
+
+.chapter-item.active {
+  color: var(--accent);
+  font-weight: 700;
+  background: var(--accent-lt);
+}
+</style>
+</head>
+<body>
+
+<div class="slides-viewport">
+  <div class="grid-overlay"></div>
+  <div class="radial-glow-1"></div>
+  <div class="radial-glow-2"></div>
+  
+  <div class="module-title">Reflective Hub ・ 跨平台個人智慧中樞系統</div>
+  <div class="module-badge">Antigravity Design</div>
+
+  <div class="slides">
+
+    <!-- Slide 00: 封面 -->
+    <div class="slide poster active" data-act="封面" data-index="0">
+      <div style="font-family: 'Fira Code', monospace; font-size: 20px; color: var(--text-light); letter-spacing: 0.3em; margin-bottom: 2rem; font-weight: 700; text-transform: uppercase;">REFLECTIVE · HUB</div>
+      <h1 style="font-size: 120px; line-height: 1.3; margin-bottom: 2rem; font-weight: 800;">
+        資訊變多，專案複雜<br>
+        重點卻變<span style="color: var(--accent);">模糊</span>
+      </h1>
+      <p style="font-size: 32px; font-weight: 700; color: var(--text); margin-bottom: 2.5rem; line-height: 1.7;">
+        一個 <span style="color: var(--accent);">24 小時運作</span>的反思中樞<br>
+        持續在你的資訊草原裡　把躲起來的<span style="color: var(--secondary); font-weight: 900;">獅子</span>標出來
+      </p>
+      
+      <div class="quote-box" style="max-width: 1100px; margin: 0 auto 2.5rem; text-align: center; border-left: 5px solid var(--accent); background: var(--surface);">
+        <div class="quote-text" style="font-size: 30px; line-height: 1.7;">
+          還會提醒你　草原裡還有<span class="highlight">鬣狗　大象　蛇</span><br>
+          替你看見<span class="highlight">自己看不見的模式</span>
+        </div>
+      </div>
+      
+      <div style="font-family: 'Fira Code', monospace; font-size: 18px; color: var(--text-light); letter-spacing: 0.15em; font-weight: 700; margin-bottom: 1rem;">
+        ALWAYS-ON · CROSS-TOOL · CROSS-SESSION · BRAIN-SWAPPABLE
+      </div>
+      
+      <div style="font-size: 18px; color: var(--text-light); font-weight: 500;">
+        REFLECTIVE HUB · 14 SLIDES · ← → 切換 · 2026-05
+      </div>
+    </div>
+
+    <!-- Slide 01: 痛點：訊息散落各處 -->
+    <div class="slide dataviz" data-act="痛點" data-index="1">
+      <h2>你的訊息　散落各處</h2>
+      <div class="subtitle">路上的想法 ・ 會議片段 ・ LLM 對話 ・ 外部訊息 ・ 筆記 ・ 通知 ・ 信件</div>
+      
+      <div class="split-layout">
+        <div class="pill-grid">
+          <div class="pill-item active"><div class="dot"></div><span>Claude</span><div class="tag">LLM</div></div>
+          <div class="pill-item active"><div class="dot"></div><span>ChatGPT</span><div class="tag">LLM</div></div>
+          <div class="pill-item active"><div class="dot"></div><span>Gemini</span><div class="tag">LLM</div></div>
+          <div class="pill-item active"><div class="dot"></div><span>Claude Code</span><div class="tag">Agent</div></div>
+          <div class="pill-item active"><div class="dot"></div><span>Codex</span><div class="tag">Agent</div></div>
+          <div class="pill-item"><div class="dot"></div><span>Notion</span><div class="tag">KB</div></div>
+          <div class="pill-item"><div class="dot"></div><span>Obsidian</span><div class="tag">Vault</div></div>
+          <div class="pill-item"><div class="dot"></div><span>Telegram</span><div class="tag">Chat</div></div>
+          <div class="pill-item"><div class="dot"></div><span>Email</span><div class="tag">Mail</div></div>
+          <div class="pill-item"><div class="dot"></div><span>Slack</span><div class="tag">Notify</div></div>
+        </div>
+        
+        <div style="display:flex; flex-direction:column; gap:1.5rem;">
+          <div class="stat-box primary">
+            <div class="val">5+</div>
+            <div class="label">LLM 客戶端</div>
+            <div class="sub">日常對話分散在多個不同的 AI 介面中</div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="stat-box secondary">
+              <div class="val">3 裝置</div>
+              <div class="label">裝置環境</div>
+              <div class="sub">手機、Mac、VM 跨裝置運作</div>
+            </div>
+            <div class="stat-box alert">
+              <div class="val">20+</div>
+              <div class="label">管道訊息源</div>
+              <div class="sub">多個 channel 的動態訊息輸入</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 02: 不入庫的代價 -->
+    <div class="slide dataviz" data-act="痛點" data-index="2">
+      <h2>不入庫的代價</h2>
+      <div class="subtitle">散落的訊息與對話，正在悄悄偷走你的生產力與持久記憶</div>
+      
+      <div class="card-grid">
+        <div class="card alert fragment" data-order="0">
+          <div class="icon-text">A</div>
+          <h3>同一個 bug debug 三次</h3>
+          <p>上週剛與 Claude 梳理完複雜的 OAuth 認證流程<br>下週在 ChatGPT 遇到相同問題又必須從頭排查<br>缺乏全局的跨工具對話持久記憶</p>
+        </div>
+        
+        <div class="card alert fragment" data-order="1">
+          <div class="icon-text">B</div>
+          <h3>6 個月後忘記自己寫的規則</h3>
+          <p>「動工修改程式前先進行 inventory 清點」<br>這個核心警示曾幫你成功避坑 5 次以上<br>然而半年後因為缺乏系統自動浮現，又犯相同錯誤</p>
+        </div>
+        
+        <div class="card alert fragment" data-order="2">
+          <div class="icon-text">C</div>
+          <h3>4 小時寫的 SDD agent 看不到</h3>
+          <p>花了整個下午精心撰寫並調試的 SDD agent 提示詞<br>在關閉瀏覽器分頁的瞬間即宣告消失<br>無價的系統資產未能有效沉澱入庫</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 03: 第二大腦 -->
+    <div class="slide poster" data-act="定位" data-index="3">
+      <p style="font-size: 20px; color: var(--text-light); text-transform: uppercase; font-family: 'Fira Code', monospace; letter-spacing: 0.15em; margin-bottom: 1.5rem;">不是 Dashboard ・ 不是 PKM Tool ・ 不是 Chat Memory Service</p>
+      <h1>第二大腦</h1>
+      <div class="lede-block">
+        <span class="lede-line">替你思考</span>
+        <strong class="lede-highlight">你來不及思考的部分</strong>
+      </div>
+      <p class="subtitle" style="max-width: 1200px; margin: 1.5rem auto 0; font-size: 26px;">本系統的真正價值，是讓 AI 在背景主動分析並發掘「你所忽略的重要蛛絲馬跡」</p>
+    </div>
+
+    <!-- Slide 04: 手機是系統的延伸 — 4 step 流程 -->
+    <div class="slide clean" data-act="流程" data-index="4">
+      <h2>手機是系統的延伸</h2>
+      <div class="subtitle">不是觸發器的起點，而是最直覺的語境捕捉介面</div>
+      
+      <div class="flow-container">
+        <div class="flow-card fragment" data-order="0">
+          <div class="flow-num">1</div>
+          <h3>捕捉</h3>
+          <p>路上想法、會議片段、文章重點，隨時透過手機 Chat 即時收錄</p>
+        </div>
+        
+        <div class="flow-card fragment" data-order="1">
+          <div class="flow-num">2</div>
+          <h3>討論</h3>
+          <p>Chat 端 LLM 進行對話互動、自動結構化、補齊上下文、決定儲存位置</p>
+        </div>
+        
+        <div class="flow-card fragment" data-order="2">
+          <div class="flow-num">3</div>
+          <h3>入庫</h3>
+          <p>Reflective Hub 自動寫到對的 category 月份檔流水紀錄</p>
+        </div>
+        
+        <div class="flow-card fragment" data-order="3">
+          <div class="flow-num">4</div>
+          <h3>萃取</h3>
+          <p>排程 Cron 自動執行，產出日報蒸餾、週報敘事與月報戰略，PNG 圖檔推回手機</p>
+        </div>
+      </div>
+      
+      <div class="info-box success fragment" data-order="4">
+        <div class="badge">架構優勢</div>
+        <p>手機端不需複雜設定，只需作為輕量化語音與文字輸入端，重度運算與邏輯全部留給 MCP 後端處理</p>
+      </div>
+    </div>
+
+    <!-- Slide 05: 月報的真正爽點 — AI 主動發現你沒注意到的事 -->
+    <div class="slide dataviz" data-act="反思" data-index="5">
+      <h2>月報的真正爽點</h2>
+      <div class="subtitle">透過 AI 背景分析，看見大腦思維盲區中的隱藏動態</div>
+      
+      <div class="split-layout">
+        <div class="stat-grid" style="grid-template-columns: 1fr; gap: 1.2rem; margin: 0;">
+          <div class="stat-box primary" style="display: flex; align-items: center; justify-content: space-around; padding: 1.5rem;">
+            <div class="val" style="font-size: 64px;">90</div>
+            <div style="text-align: left;">
+              <div class="label" style="margin-top:0;">5 月 Session 總數</div>
+              <div class="sub">深度的思維對話次數</div>
+            </div>
+          </div>
+          <div class="stat-box secondary" style="display: flex; align-items: center; justify-content: space-around; padding: 1.5rem;">
+            <div class="val" style="font-size: 64px;">6 個</div>
+            <div style="text-align: left;">
+              <div class="label" style="margin-top:0;">動量 Lions</div>
+              <div class="sub">持續推進的關鍵動能核心</div>
+            </div>
+          </div>
+          <div class="stat-box alert" style="display: flex; align-items: center; justify-content: space-around; padding: 1.5rem;">
+            <div class="val" style="font-size: 64px;">4 大</div>
+            <div style="text-align: left;">
+              <div class="label" style="margin-top:0;">LLM Themes</div>
+              <div class="sub">由 Workers AI 運作模組分析之主題</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="quote-box">
+          <div class="quote-text">
+            「你以為自己同時推進 <span class="highlight">10 條線</span>，實際上這個月你放掉了 <span class="highlight">4 條</span>。<br>
+            金礦埋藏在地下卻沒有持續挖掘。<br>
+            這不是產能效率的問題，而是注意力分配不均的問題。」
+          </div>
+          <div class="quote-src">― Workers AI gpt-oss-120b 月度戰略反思報告</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 06: 系統自己會醒（cron 主動） -->
+    <div class="slide clean" data-act="流程" data-index="6">
+      <h2>系統自己會醒</h2>
+      <div class="subtitle">基於排程主動運行的背景反思管線，確保資訊持續被提煉</div>
+      
+      <div class="card-grid">
+        <div class="card fragment" data-order="0">
+          <div class="icon-text">Daily</div>
+          <h3>日報蒸餾</h3>
+          <p>台北時間 02:17<br><span style="font-family: 'Fira Code', monospace; font-size: 18px; color: var(--accent);">cron: 17 18 * * *</span><br>主動整理前一天的碎片想法與對話記錄</p>
+        </div>
+        
+        <div class="card fragment" data-order="1">
+          <div class="icon-text">Weekly</div>
+          <h3>週報敘事</h3>
+          <p>台北時間 週日 23:23<br><span style="font-family: 'Fira Code', monospace; font-size: 18px; color: var(--accent);">cron: 23 15 * * 0</span><br>提煉整週進展，重塑本週的實踐敘事</p>
+        </div>
+        
+        <div class="card fragment" data-order="2">
+          <div class="icon-text">Monthly</div>
+          <h3>月報戰略</h3>
+          <p>台北時間 每月一號 02:37<br><span style="font-family: 'Fira Code', monospace; font-size: 18px; color: var(--accent);">cron: 37 18 1 * *</span><br>全局檢視上月軌跡，產出宏觀戰略主軸</p>
+        </div>
+      </div>
+      
+      <div class="info-box warning fragment" data-order="3">
+        <div class="badge">告警機制</div>
+        <p>失敗時執行 if: failure() 自動觸發 Telegram 告警 ―― 沉默的失敗即是核心系統的設計缺陷</p>
+      </div>
+    </div>
+
+    <!-- Slide 07: 反思 AI 的反思 — 雙層思考 -->
+    <div class="slide clean" data-act="反思" data-index="7">
+      <h2>反思 AI 的反思</h2>
+      <div class="subtitle">AI 已經完成初步的管線反思，但它所觀察的不一定完全正確</div>
+      
+      <div class="reflect-container">
+        <div class="reflect-row fragment" data-order="0">
+          <div class="reflect-layer">Level 0</div>
+          <div class="reflect-role">你做事</div>
+          <div class="reflect-action">日常進行的跨工具對話與思考碎片，即時寫入對話記憶檔 (chat-memory)</div>
+        </div>
+        
+        <div class="reflect-row fragment" data-order="1">
+          <div class="reflect-layer">Level 1</div>
+          <div class="reflect-role">AI 反思你</div>
+          <div class="reflect-action">後端反思管線自動運行，分析並歸納出你的動量 Lions 與關鍵主題 Themes</div>
+        </div>
+        
+        <div class="reflect-row highlighted fragment" data-order="2">
+          <div class="reflect-layer">Level 2</div>
+          <div class="reflect-role">你反思 AI 的反思</div>
+          <div class="reflect-action">與 AI 的反思報告進行對話 ―― 進行質疑、補充、反駁或發散延伸</div>
+        </div>
+        
+        <div class="reflect-row fragment" data-order="3">
+          <div class="reflect-layer">Level 3</div>
+          <div class="reflect-role">沉澱回真實源</div>
+          <div class="reflect-action">對話的結論被追加至反思檔案中，並在下一次 AI 運行反思時作為先驗知識被引用</div>
+        </div>
+      </div>
+      
+      <div class="bottom-line fragment" style="margin-top: 1rem; padding: 1.2rem 2rem;" data-order="4">
+        <h3>AI 是放大鏡，不是裁判</h3>
+        <p>系統的終極價值，並非由 AI 給出你的行為定義，而是利用 AI 的整理成果，強迫自己進行更高維度的二次思考</p>
+      </div>
+    </div>
+
+    <!-- Slide 08: 不要再讓 AI 每次都從失憶開始 -->
+    <div class="slide dataviz" data-act="架構" data-index="8">
+      <h2>不要再讓 AI 每次都從<span style="color: var(--alert); font-weight: 900;">失憶</span>開始</h2>
+      <div class="subtitle">brain 可換　surface 可串　hub 一直在運作 — 跨工具一致　獨立在線</div>
+      
+      <div class="arch-grid">
+        <div class="arch-panel body-side">
+          <div class="tag">HUB ・ 永遠你的</div>
+          <h3>Reflective Hub</h3>
+          <div class="desc">穩固的數據儲存與工具中樞 (SB MCP)</div>
+          <ul class="arch-list">
+            <li><strong>knowledge-base private repo</strong> / markdown git versioned</li>
+            <li><strong>Cloudflare Worker (MCP server)</strong> / kb-mcp.alan-chen75.workers.dev</li>
+            <li><strong>16 tools</strong> / CRUD reflection discuss save</li>
+            <li><strong>GH Actions reflection pipeline</strong> / 自動 cron 不依賴 hosted</li>
+          </ul>
+        </div>
+        
+        <div class="arch-bridge">
+          <div class="protocol-box">
+            <p>MCP standard protocol</p>
+            <span>標準化通訊協議</span>
+          </div>
+          <div class="arrow-left-right">◂ ── ▸</div>
+          <div style="font-size: 18px; font-weight: 700; color: var(--accent); text-align: center;">工具與語境載入</div>
+        </div>
+        
+        <div class="arch-panel brain-side">
+          <div class="tag">BRAIN ・ 你選的</div>
+          <h3>任何 LLM</h3>
+          <div class="desc">隨時靈活切換的最強大腦</div>
+          <ul class="arch-list">
+            <li><strong>Claude.ai</strong> / 網頁端日常思意互動</li>
+            <li><strong>ChatGPT</strong> (含 Connectors) / 輔助分析與資料對比</li>
+            <li><strong>Gemini</strong> / 長文本處理與多模態</li>
+            <li><strong>Claude Code</strong> / 終端機開發與除錯</li>
+            <li><strong>Codex</strong> / 大模型協作與程式碼生成</li>
+            <li style="color: var(--text-light);">任何 MCP 兼容 client</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="info-box success" style="margin-top: 1.2rem;">
+        <div class="badge">跨代相容</div>
+        <p>LLM 升 Opus 5 / GPT-6 / Gemini 3 — 你的 <strong>hub</strong> 自動變強　<strong>Hub 跨 brain 切換不丟資產</strong></p>
+      </div>
+    </div>
+
+    <!-- Slide 09: 4 個獨立 KB 服務不同用戶 — 獨立不互通 -->
+    <div class="slide dataviz" data-act="架構" data-index="9">
+      <h2>4 個獨立 KB 服務不同用戶　獨立不互通</h2>
+      <div class="subtitle">避免隱私邊界洩漏，堅持獨立的存取權限</div>
+      
+      <div class="kb-layout">
+        <div class="kb-box">
+          <div class="kb-header">
+            <h3>SB</h3>
+            <span class="path">private/second-brain</span>
+          </div>
+          <div class="kb-details">
+            <div class="lbl">使用者</div><div class="val">只有你自己</div>
+            <div class="lbl">特色</div><div class="val">跨工具、跨裝置的個人真實源 (Truth Source)</div>
+          </div>
+        </div>
+        
+        <div class="kb-box">
+          <div class="kb-header">
+            <h3>agent-kb</h3>
+            <span class="path">edu/vibe-coding-agent</span>
+          </div>
+          <div class="kb-details">
+            <div class="lbl">使用者</div><div class="val">Vibe Coding 課程學員</div>
+            <div class="lbl">特色</div><div class="val">根據 Stage 階段權限，提供案例、工具與 Wiki 資源</div>
+          </div>
+        </div>
+        
+        <div class="kb-box">
+          <div class="kb-header">
+            <h3>kb-vault</h3>
+            <span class="path">open/free-second-brain</span>
+          </div>
+          <div class="kb-details">
+            <div class="lbl">使用者</div><div class="val">開源社群使用者</div>
+            <div class="lbl">特色</div><div class="val">任何 fork 它的人，皆可快速部署自用模板</div>
+          </div>
+        </div>
+        
+        <div class="kb-box">
+          <div class="kb-header">
+            <h3>insurance-kb</h3>
+            <span class="path">biz/insurance-vip</span>
+          </div>
+          <div class="kb-details">
+            <div class="lbl">使用者</div><div class="val">保險業界 VIP 研究</div>
+            <div class="lbl">特色</div><div class="val">提供 VIP 付費之業界情報蒸餾與專屬報告</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="info-box success" style="margin-top: 1rem;">
+        <div class="badge">安全防線</div>
+        <p>混在一起搜會 leak 隱私邊界，各 KB 各自 MCP server 各自 access scope，從底層物理隔離防範隱私洩漏</p>
+      </div>
+    </div>
+
+    <!-- Slide 10: 全跑在免費額度 -->
+    <div class="slide dataviz" data-act="架構" data-index="10">
+      <h2>全跑在免費額度</h2>
+      <div class="subtitle">完美的極客精神，基於雲端免費服務建立的企業級穩定架構</div>
+      
+      <div class="free-layout">
+        <div class="free-list">
+          <div class="free-item">
+            <div class="free-service">Cloudflare</div>
+            <div class="free-details">
+              Worker 每日提供 10 萬次免費請求<br>
+              免費的 KV 鍵值資料庫儲存對話上下文<br>
+              Workers AI 每日提供免費神經元，順暢執行 gpt-oss-120b 免費 neurons
+            </div>
+          </div>
+          
+          <div class="free-item">
+            <div class="free-service">GitHub</div>
+            <div class="free-details">
+              提供無限制儲存空間的私有知識庫 Repo<br>
+              GitHub Actions 每月提供 3000 分鐘免費執行額度，輕鬆應對排程反思
+            </div>
+          </div>
+          
+          <div class="free-item">
+            <div class="free-service">Telegram API</div>
+            <div class="free-details">
+              Telegram Bot API 提供無流量與發送頻率限制的穩定通道<br>
+              日報與告警的絕佳發送終端
+            </div>
+          </div>
+        </div>
+        
+        <div class="cost-card">
+          <div class="cost-num">$0</div>
+          <div class="cost-label">月度運作成本</div>
+          <div class="cost-sub">沒有隱藏費用，所有組件皆在免費額度內運行</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 11: 看得見的現成系統 -->
+    <div class="slide dataviz" data-act="成果" data-index="11">
+      <h2>看得見的現成系統</h2>
+      <div class="subtitle">這不是一份在簡報裡描繪的願景，而是已經上線且 git tracked 的實體系統</div>
+      
+      <div class="card-grid">
+        <div class="card primary">
+          <div class="icon-text">16</div>
+          <h3>MCP Tools</h3>
+          <p>提供 CRUD 操作、反思管線啟動、討論儲存等共 16 個標準化工具，實踐跨 Repo 協同控制（SB MCP）</p>
+        </div>
+        
+        <div class="card primary">
+          <div class="icon-text">7</div>
+          <h3>主題目錄</h3>
+          <p>精細劃分為 memory、tech、business、personal、research、reflections、教材等 7 大知識目錄</p>
+        </div>
+        
+        <div class="card primary">
+          <div class="icon-text">3</div>
+          <h3>反思層級</h3>
+          <p>透過日報動量整理、週報敘事重構與月報戰略主軸 3 層自動化管線，層層遞進提煉</p>
+        </div>
+        
+        <div class="card primary">
+          <div class="icon-text">50+</div>
+          <h3>已產報告</h3>
+          <p>已在 Repo 中生成超過 50 份以上的實際反思報告，全部經過 Git 追蹤與版本管理</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 12: Surface 也解耦 -->
+    <div class="slide dataviz" data-act="架構" data-index="12">
+      <h2>Surface 表面呈現解耦</h2>
+      <div class="subtitle">將唯一的真實知識源 (Truth)，與多樣化的使用者檢視介面 (View) 徹底分流</div>
+      
+      <div class="surface-layout">
+        <div class="truth-box">
+          <h3>Truth</h3>
+          <p style="font-family: 'Fira Code', monospace; font-size: 18px; font-weight: 700; color: var(--accent); margin-bottom: 0.6rem;">markdown-repo</p>
+          <p>唯一的真實知識源。<br>結構清晰的 Markdown 檔案夾，採用 Git 進行歷史追蹤與版本管理，完全排除專有格式鎖定</p>
+        </div>
+        
+        <div class="views-grid">
+          <div class="view-card">
+            <div>
+              <h4>GitHub Web</h4>
+              <p>利用網頁端的 Markdown 渲染，方便在電腦前直接查閱與編輯</p>
+            </div>
+            <div class="view-status ready">already</div>
+          </div>
+          
+          <div class="view-card">
+            <div>
+              <h4>Telegram PNG</h4>
+              <p>自動將排程 analysis report 繪製成 PNG 圖片，主動推播至手機 Telegram</p>
+            </div>
+            <div class="view-status ready">already</div>
+          </div>
+          
+          <div class="view-card">
+            <div>
+              <h4>Notion Sync</h4>
+              <p>將部分反思報告與進度同步寫入 Notion 視覺化資料庫看板</p>
+            </div>
+            <div class="view-status ready">already</div>
+          </div>
+          
+          <div class="view-card">
+            <div>
+              <h4>Obsidian Vault</h4>
+              <p>作為本地 Vault 進行雙向鏈結，利用知識圖譜看清思維結構</p>
+            </div>
+            <div class="view-status plan">option</div>
+          </div>
+          
+          <div class="view-card">
+            <div>
+              <h4>Web HTML 一頁式</h4>
+              <p>將已完成的反思報告發布為輕量、易於分享與閱讀的靜態網頁</p>
+            </div>
+            <div class="view-status plan">option</div>
+          </div>
+          
+          <div class="view-card">
+            <div>
+              <h4>MCP Chat</h4>
+              <p>允許 any 相容 MCP 的 LLM 客戶端對知識庫發起即時的語意查詢</p>
+            </div>
+            <div class="view-status ready">already</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 13: Roadmap 未來演進方向 -->
+    <div class="slide clean" data-act="計畫" data-index="13">
+      <h2>Roadmap 未來演進方向</h2>
+      <div class="subtitle">不急於一時，根據真實使用痛點逐步進行模組化升級</div>
+      
+      <div class="roadmap-grid">
+        <div class="roadmap-card p0">
+          <div class="roadmap-priority">P0 - Next Phase</div>
+          <h3>Push-based lesson surface</h3>
+          <p>自動將月報中萃取出的下月份 3 條關鍵 Lesson，自動寫入專案的 CLAUDE.md 中，對 AI 進行行為對齊</p>
+          <div class="roadmap-timeline">Timeline: 2026-06</div>
+        </div>
+        
+        <div class="roadmap-card p0">
+          <div class="roadmap-priority">P0 - Next Phase</div>
+          <h3>Rule decay alarm</h3>
+          <p>為每條規則加註 last_validated 驗證時間，若 180 天內未曾觸發，系統將自動提醒進行重構或歸檔</p>
+          <div class="roadmap-timeline">Timeline: 2026-07</div>
+        </div>
+        
+        <div class="roadmap-card p1">
+          <div class="roadmap-priority">P1 - Backlog</div>
+          <h3>Skill auto-suggest</h3>
+          <p>優化動量判定邏輯，當識別到重複出現的高價值操作時，自動提取並生成專用的 Skill 範本與說明檔</p>
+          <div class="roadmap-timeline">Timeline: Post 2026-08</div>
+        </div>
+        
+        <div class="roadmap-card p1">
+          <div class="roadmap-priority">P1 - Backlog</div>
+          <h3>SB-dreaming</h3>
+          <p>跨越 6 個月以上的 chat-memory 進行全局文本 analysis，尋找被你忽視的、重複出現的潛在痛點與思維模式</p>
+          <div class="roadmap-timeline">Timeline: Research</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 14: 反向篩選 — 這套不適合你 -->
+    <div class="slide clean" data-act="計畫" data-index="14">
+      <h2>反向篩選 ―― 這套系統並不適合所有人</h2>
+      <div class="subtitle">系統挑選它的主人：它要求主動的工程思維與寫作習慣</div>
+      
+      <div class="card-grid">
+        <div class="card alert" style="min-width: 250px;">
+          <div class="icon-text">X</div>
+          <h3>想要 SaaS 一鍵搞定的人</h3>
+          <p>這是一套高度個人客製化的自架系統 (Fork-your-own)，不是商業化的開箱即用 SaaS 服務</p>
+        </div>
+        
+        <div class="card alert" style="min-width: 250px;">
+          <div class="icon-text">X</div>
+          <h3>不寫 markdown 筆記的人</h3>
+          <p>若日常沒有編寫與閱讀 Markdown 筆記的習慣，系統將缺乏足夠的反思管線分析原料</p>
+        </div>
+        
+        <div class="card alert" style="min-width: 250px;">
+          <div class="icon-text">X</div>
+          <h3>把 AI 當聊天視窗的人</h3>
+          <p>如果不需要在多個不同的 AI 工具與多裝置間協作，就不會面臨跨工具持久記憶的痛點</p>
+        </div>
+        
+        <div class="card alert" style="min-width: 250px;">
+          <div class="icon-text">X</div>
+          <h3>期待開箱即用、不想自架的人</h3>
+          <p>雖然整個安裝流程僅需 30 分鐘，但仍要求具備基礎的 GitHub 與 Cloudflare 部署配置能力</p>
+        </div>
+      </div>
+      
+      <div class="bottom-line" style="margin-top: 1rem;">
+        <h3>掌握你自己的真實源</h3>
+        <p>這套重視的是『自己掌握 truth source ・ agent 跨工具一致行為』，不是便宜方便的 hosted memory service</p>
+      </div>
+    </div>
+
+  </div><!-- /slides -->
+
+  <!-- Progress and Controls -->
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="slide-counter"><span id="currentSlide">1</span> / <span id="totalSlides">15</span></div>
+  <div class="controls">
+    <button id="prevBtn" disabled>◂</button>
+    <button id="nextBtn">▸</button>
+  </div>
+
+  <!-- Chapter Menu -->
+  <div id="chapterMenu" class="chapter-menu">
+    <button class="chapter-btn" id="chapterBtn">
+      <span class="chapter-icon">☰</span> 章節跳轉
+    </button>
+    <div class="chapter-list" id="chapterList"></div>
+  </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const currentSpan = document.getElementById('currentSlide');
+  const totalSpan = document.getElementById('totalSlides');
+  const progressBar = document.getElementById('progressBar');
+  const chapterBtn = document.getElementById('chapterBtn');
+  const chapterList = document.getElementById('chapterList');
+  const chapterMenu = document.getElementById('chapterMenu');
+
+  let currentIdx = 0;
+  
+  // 初始化總頁數
+  totalSpan.textContent = slides.length;
+  
+  // 建立章節選單
+  const chapters = [];
+  slides.forEach((slide, idx) => {
+    const act = slide.getAttribute('data-act') || '未命名';
+    const title = slide.querySelector('h2')?.textContent || slide.querySelector('h1')?.textContent || '封面';
+    if (!chapters.find(c => c.act === act)) {
+      chapters.push({ act, idx, title });
+    }
+  });
+
+  chapters.forEach(ch => {
+    const item = document.createElement('div');
+    item.className = `chapter-item ${ch.idx === 0 ? 'active' : ''}`;
+    item.textContent = `${ch.act} ： ${ch.title}`;
+    item.addEventListener('click', () => {
+      goToSlide(ch.idx);
+      chapterMenu.classList.remove('open');
+    });
+    chapterList.appendChild(item);
+  });
+
+  chapterBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    chapterMenu.classList.toggle('open');
+  });
+
+  document.addEventListener('click', () => {
+    chapterMenu.classList.remove('open');
+  });
+
+  // 取得當前幻燈片的所有 fragments
+  function getFragments(slide) {
+    return Array.from(slide.querySelectorAll('.fragment')).sort((a, b) => {
+      return parseInt(a.getAttribute('data-order') || 0) - parseInt(b.getAttribute('data-order') || 0);
+    });
+  }
+
+  // 取得當前顯示的 fragments 數量
+  function getVisibleFragmentsCount(slide) {
+    return slide.querySelectorAll('.fragment.visible').length;
+  }
+
+  function goToSlide(targetIdx, showAllFragments = false) {
+    if (targetIdx < 0 || targetIdx >= slides.length) return;
+    
+    const prevIdx = currentIdx;
+    currentIdx = targetIdx;
+    
+    // 更新 Active 狀態
+    slides.forEach((slide, idx) => {
+      slide.classList.remove('active', 'prev');
+      if (idx === currentIdx) {
+        slide.classList.add('active');
+        
+        // fragment 控制
+        const frags = getFragments(slide);
+        if (showAllFragments) {
+          frags.forEach(f => f.classList.add('visible'));
+        } else {
+          frags.forEach(f => f.classList.remove('visible'));
+        }
+      } else if (idx < currentIdx) {
+        slide.classList.add('prev');
+      }
+    });
+
+    // 更新控制按鈕與計數器
+    prevBtn.disabled = currentIdx === 0;
+    nextBtn.disabled = currentIdx === slides.length - 1;
+    currentSpan.textContent = currentIdx + 1;
+    progressBar.style.width = `${((currentIdx + 1) / slides.length) * 100}%`;
+    
+    // 更新選單 Active 狀態
+    const menuItems = Array.from(chapterList.querySelectorAll('.chapter-item'));
+    menuItems.forEach((item, idx) => {
+      item.classList.remove('active');
+      const targetCh = chapters[idx];
+      if (targetCh && currentIdx >= targetCh.idx && (idx === chapters.length - 1 || currentIdx < chapters[idx+1].idx)) {
+        item.classList.add('active');
+      }
+    });
+  }
+
+  function navigate(dir) {
+    const currentSlide = slides[currentIdx];
+    const frags = getFragments(currentSlide);
+    const visibleFragsCount = getVisibleFragmentsCount(currentSlide);
+
+    if (dir > 0) {
+      // 前進：若當前頁面有 fragment 未展示，先展示 fragment
+      if (visibleFragsCount < frags.length) {
+        frags[visibleFragsCount].classList.add('visible');
+      } else {
+        // 切換到下一頁
+        goToSlide(currentIdx + 1, false);
+      }
+    } else {
+      // 後退：若當前頁面有已顯示的 fragment，逐一隱藏
+      if (visibleFragsCount > 0) {
+        frags[visibleFragsCount - 1].classList.remove('visible');
+      } else {
+        // 切換到前一頁，且前一頁的所有 fragments 必須全部呈現
+        goToSlide(currentIdx - 1, true);
+      }
+    }
+  }
+
+  // 按鈕事件
+  prevBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    navigate(-1);
+  });
+  nextBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    navigate(1);
+  });
+
+  // 鍵盤導航
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'Space') {
+      e.preventDefault();
+      navigate(1);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      navigate(-1);
+    } else if (e.key === 'PageDown') {
+      e.preventDefault();
+      goToSlide(currentIdx + 1, false);
+    } else if (e.key === 'PageUp') {
+      e.preventDefault();
+      goToSlide(currentIdx - 1, true); // 後退前一頁時，顯示全部 fragments
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      goToSlide(0, false);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      goToSlide(slides.length - 1, true); // 前往最後一頁，顯示全部 fragments
+    } else if (e.key === 'Escape') {
+      chapterMenu.classList.remove('open');
+    }
+  });
+
+  // 全螢幕切換鍵 (f)
+  document.addEventListener('keypress', (e) => {
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.error(`無法啟用全螢幕模式: ${err.message}`);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+  });
+
+  // 點擊 Slide 區域前進 (排除了 controls 與選單)
+  document.querySelector('.slides').addEventListener('click', (e) => {
+    navigate(1);
+  });
+
+  // ── Viewport 縮放適應 ──
+  function adjustScale() {
+    const viewport = document.querySelector('.slides-viewport');
+    const targetW = 1920;
+    const targetH = 1080;
+    const winW = window.innerWidth;
+    const winH = window.innerHeight;
+    
+    // 計算最小縮放比例以適應視窗大小
+    const scale = Math.min(winW / targetW, winH / targetH);
+    
+    viewport.style.transform = `scale(${scale}) translate(-50%, -50%)`;
+  }
+
+  window.addEventListener('resize', adjustScale);
+  window.addEventListener('load', adjustScale);
+  
+  // 立即執行一次縮放調整
+  adjustScale();
+});
+</script>
+</body>
+</html>
