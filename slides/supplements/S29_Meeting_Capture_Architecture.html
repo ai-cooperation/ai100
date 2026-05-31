@@ -1,0 +1,1418 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meeting Capture Studio Architecture v2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #f4f1e8;
+      --paper-2: #ebe6d8;
+      --ink: #15191c;
+      --muted: #667078;
+      --hair: rgba(21, 25, 28, .14);
+      --hair-strong: rgba(21, 25, 28, .28);
+      --panel: rgba(255, 255, 255, .58);
+      --accent: #008f9c;
+      --accent-2: #0b5563;
+      --warn: #b46a10;
+      --danger: #9f2d20;
+      --code: #263238;
+      --white: #fffdf7;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+      background: #07070d;
+      color: var(--ink);
+      font-family: "Noto Sans TC", sans-serif;
+      text-rendering: geometricPrecision;
+    }
+    .deck {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      transform-origin: center center;
+      transform: translate(-50%, -50%);
+      background: var(--paper);
+    }
+    .deck::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        linear-gradient(var(--hair) 1px, transparent 1px),
+        linear-gradient(90deg, var(--hair) 1px, transparent 1px),
+        linear-gradient(rgba(255,255,255,.36), rgba(255,255,255,.12));
+      background-size: 80px 80px, 80px 80px, auto;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      width: 1920px;
+      height: 1080px;
+      display: grid;
+      grid-template-rows: 92px 1fr 58px;
+      padding: 56px 86px 34px;
+      opacity: 0;
+      transform: translateX(28px);
+      pointer-events: none;
+      transition: opacity .28s ease, transform .28s ease;
+      overflow: hidden;
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    .slide.prev { transform: translateX(-28px); }
+
+    .slide::after {
+      content: "";
+      position: absolute;
+      left: 86px;
+      right: 86px;
+      top: 108px;
+      height: 1px;
+      background: var(--hair-strong);
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 116px 1fr auto;
+      align-items: start;
+      gap: 24px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .folio {
+      font: 700 30px/1 "IBM Plex Mono", monospace;
+      letter-spacing: 0;
+      color: var(--accent-2);
+      border-top: 5px solid var(--accent);
+      padding-top: 13px;
+    }
+
+    .kicker {
+      font: 700 18px/1.2 "IBM Plex Mono", monospace;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 9px;
+    }
+
+    h1, h2, h3, p {
+      margin: 0;
+      text-wrap: pretty;
+      overflow-wrap: break-word;
+    }
+
+    h1 {
+      font-size: 92px;
+      line-height: 1.03;
+      letter-spacing: 0;
+      font-weight: 900;
+    }
+
+    h2 {
+      font-size: 48px;
+      line-height: 1.12;
+      letter-spacing: 0;
+      font-weight: 900;
+      max-width: 1240px;
+    }
+
+    h3 {
+      font-size: 27px;
+      line-height: 1.22;
+      font-weight: 800;
+    }
+
+    p, li {
+      font-size: 24px;
+      line-height: 1.52;
+      font-weight: 500;
+    }
+
+    .mono {
+      font-family: "IBM Plex Mono", monospace;
+      letter-spacing: 0;
+    }
+
+    .tagline {
+      font-size: 31px;
+      line-height: 1.38;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .stage {
+      position: relative;
+      z-index: 1;
+      align-self: stretch;
+      min-height: 0;
+    }
+
+    footer {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      color: var(--muted);
+      font: 600 17px/1.2 "IBM Plex Mono", monospace;
+      position: relative;
+      z-index: 2;
+    }
+
+    .progress {
+      width: 360px;
+      height: 8px;
+      border: 1px solid var(--hair-strong);
+      background: rgba(255,255,255,.42);
+    }
+
+    .bar {
+      height: 100%;
+      width: 7.142%;
+      background: var(--accent);
+      transform-origin: left center;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 72px;
+      align-items: center;
+      height: 100%;
+    }
+
+    .hero-title {
+      display: grid;
+      gap: 28px;
+      align-content: center;
+      max-width: 930px;
+    }
+
+    .hero-title .slash {
+      display: inline-block;
+      color: var(--accent);
+    }
+
+    .hero-panel {
+      height: 650px;
+      border: 2px solid var(--ink);
+      background: linear-gradient(135deg, rgba(255,255,255,.62), rgba(244,241,232,.78));
+      box-shadow: 18px 18px 0 rgba(21,25,28,.08);
+      padding: 42px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 34px;
+    }
+
+    .rail-title {
+      font: 700 20px/1.2 "IBM Plex Mono", monospace;
+      color: var(--accent-2);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .big-stat {
+      display: grid;
+      align-content: center;
+      border-left: 8px solid var(--accent);
+      padding-left: 34px;
+    }
+
+    .big-stat strong {
+      font-size: 136px;
+      line-height: .95;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .big-stat span {
+      font-size: 30px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .route-line {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 46px;
+      padding: 8px 15px 9px;
+      border: 1.5px solid var(--hair-strong);
+      background: rgba(255,255,255,.52);
+      font: 700 20px/1.1 "IBM Plex Mono", monospace;
+      color: var(--code);
+    }
+
+    .arrow {
+      color: var(--accent-2);
+      font: 800 28px/1 "IBM Plex Mono", monospace;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 34px;
+      height: 100%;
+      align-items: center;
+    }
+
+    .three-col {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      height: 100%;
+      align-content: center;
+    }
+
+    .cards {
+      display: grid;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1.5px solid var(--hair-strong);
+      padding: 25px 28px;
+      min-height: 140px;
+      box-shadow: 0 1px 0 rgba(255,255,255,.8) inset;
+    }
+
+    .card.compact { min-height: 112px; padding: 21px 24px; }
+    .card.tall { min-height: 180px; }
+    .card.accent { border-left: 8px solid var(--accent); }
+    .card.warn { border-left: 8px solid var(--warn); }
+    .card.danger { border-left: 8px solid var(--danger); }
+
+    .label {
+      font: 700 17px/1.2 "IBM Plex Mono", monospace;
+      letter-spacing: .06em;
+      color: var(--accent-2);
+      text-transform: uppercase;
+      margin-bottom: 11px;
+    }
+
+    .card p {
+      color: #323b41;
+      font-size: 23px;
+      line-height: 1.45;
+    }
+
+    .goal {
+      background: var(--ink);
+      color: var(--white);
+      padding: 31px 34px;
+      display: grid;
+      gap: 8px;
+      align-self: end;
+    }
+
+    .goal .label { color: #7bd4dc; margin: 0; }
+    .goal p { color: var(--white); font-size: 28px; line-height: 1.42; font-weight: 800; }
+
+    .pain-layout {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 28px;
+      height: 100%;
+      align-items: stretch;
+      padding-top: 28px;
+      padding-bottom: 12px;
+    }
+
+    .pain-layout .three-col {
+      height: auto;
+      align-content: stretch;
+    }
+
+    .pain-layout .card {
+      min-height: 365px;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+    }
+
+    .pain-layout .card p {
+      font-size: 31px;
+      line-height: 1.42;
+      font-weight: 800;
+    }
+
+    .goal.banner {
+      grid-template-columns: 250px 1fr;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .market-sins {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      height: 100%;
+      align-content: center;
+    }
+
+    .sin-card {
+      min-height: 545px;
+      border-top: 10px solid var(--danger);
+      background: #fff8ed;
+      padding: 34px;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 18px;
+      box-shadow: 12px 12px 0 rgba(159,45,32,.08);
+    }
+
+    .sin-card.warn { border-top-color: var(--warn); }
+
+    .sin-card .num {
+      font: 900 62px/.9 "IBM Plex Mono", monospace;
+      color: var(--danger);
+    }
+
+    .sin-card.warn .num { color: var(--warn); }
+
+    .sin-card p {
+      color: #442a22;
+      font-size: 28px;
+      line-height: 1.48;
+      font-weight: 800;
+    }
+
+    .highlight-compare {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 22px;
+      height: 100%;
+      padding-top: 18px;
+    }
+
+    .highlight-columns {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 30px;
+      min-height: 0;
+    }
+
+    .contrast-panel {
+      border: 2px solid var(--hair-strong);
+      background: rgba(255,255,255,.54);
+      padding: 30px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 22px;
+    }
+
+    .contrast-panel.negative {
+      border-top: 10px solid var(--danger);
+      background: #fff8ed;
+    }
+
+    .contrast-panel.positive {
+      border-top: 10px solid var(--accent);
+      background: rgba(255,255,255,.68);
+      box-shadow: 16px 16px 0 rgba(0,143,156,.09);
+    }
+
+    .contrast-panel h3 {
+      font-size: 34px;
+      color: var(--accent-2);
+    }
+
+    .contrast-panel.negative h3 { color: var(--danger); }
+
+    .contrast-list {
+      display: grid;
+      gap: 15px;
+      align-content: start;
+    }
+
+    .contrast-item {
+      border: 1.5px solid var(--hair-strong);
+      background: rgba(255,255,255,.62);
+      padding: 20px 22px;
+    }
+
+    .contrast-item strong {
+      display: block;
+      font-size: 28px;
+      line-height: 1.18;
+      margin-bottom: 8px;
+    }
+
+    .contrast-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 22px;
+      line-height: 1.32;
+      font-weight: 700;
+    }
+
+    .positive .contrast-item {
+      border-left: 8px solid var(--accent);
+      padding: 23px 25px;
+    }
+
+    .positive .contrast-item strong {
+      font-size: 39px;
+      color: var(--accent-2);
+    }
+
+    .positive .contrast-item span {
+      color: #263238;
+      font-size: 25px;
+      font-weight: 800;
+    }
+
+    .highlight-note {
+      border: 2px solid var(--ink);
+      background: var(--ink);
+      color: var(--white);
+      padding: 24px 30px;
+      font-size: 27px;
+      line-height: 1.36;
+      font-weight: 900;
+    }
+
+    .conversation {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 42px;
+      height: 100%;
+      align-items: center;
+    }
+
+    .phone {
+      height: 705px;
+      border: 3px solid var(--ink);
+      background: #fbfaf4;
+      padding: 34px;
+      box-shadow: 16px 16px 0 rgba(21,25,28,.10);
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 24px;
+    }
+
+    .phone-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1.5px solid var(--hair-strong);
+      padding-bottom: 17px;
+      font: 700 21px/1.1 "IBM Plex Mono", monospace;
+    }
+
+    .thread {
+      display: grid;
+      align-content: start;
+      gap: 17px;
+    }
+
+    .bubble {
+      max-width: 88%;
+      border: 1.5px solid var(--hair-strong);
+      padding: 17px 20px;
+      font-size: 22px;
+      line-height: 1.38;
+      font-weight: 700;
+      background: #fff;
+    }
+
+    .bubble.user {
+      justify-self: end;
+      background: #dceff1;
+      border-color: rgba(0,143,156,.45);
+    }
+
+    .bubble.bot {
+      justify-self: start;
+      background: #fffaf0;
+    }
+
+    .side-notes {
+      display: grid;
+      gap: 24px;
+    }
+
+    .note-number {
+      font: 800 74px/.9 "IBM Plex Mono", monospace;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .map {
+      display: grid;
+      grid-template-columns: 280px 430px 620px 320px;
+      gap: 22px;
+      align-items: stretch;
+      height: 615px;
+      margin-top: 26px;
+    }
+
+    .lane {
+      border: 2px solid var(--hair-strong);
+      background: rgba(255,255,255,.48);
+      padding: 24px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 18px;
+    }
+
+    .lane h3 {
+      color: var(--accent-2);
+      font-size: 25px;
+      padding-bottom: 13px;
+      border-bottom: 2px solid var(--hair-strong);
+    }
+
+    .lane-list {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .node {
+      padding: 14px 16px;
+      border: 1.5px solid var(--hair-strong);
+      background: rgba(255,255,255,.65);
+      font-size: 20px;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+
+    .shape-flow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+      padding: 18px 20px;
+      border: 2px solid var(--ink);
+      background: rgba(255,255,255,.72);
+    }
+
+    .shape-flow .chip { font-size: 19px; }
+
+    .compare {
+      display: grid;
+      grid-template-columns: .95fr 1.05fr;
+      gap: 34px;
+      height: 100%;
+      align-items: center;
+    }
+
+    .bad-list, .good-list {
+      display: grid;
+      gap: 18px;
+    }
+
+    .verdict {
+      border: 2px solid var(--ink);
+      background: var(--ink);
+      color: var(--white);
+      padding: 36px;
+      box-shadow: 14px 14px 0 rgba(21,25,28,.10);
+    }
+
+    .verdict p { color: var(--white); font-size: 31px; line-height: 1.42; font-weight: 900; }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 18px;
+      height: 555px;
+      align-items: stretch;
+      margin-top: 42px;
+    }
+
+    .pipe-card {
+      border: 2px solid var(--hair-strong);
+      background: rgba(255,255,255,.56);
+      padding: 22px;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 15px;
+      position: relative;
+    }
+
+    .pipe-card::before {
+      content: attr(data-step);
+      position: absolute;
+      top: -22px;
+      left: 20px;
+      background: var(--accent);
+      color: #fff;
+      font: 700 21px/1 "IBM Plex Mono", monospace;
+      padding: 9px 12px;
+    }
+
+    .io {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+      font-size: 21px;
+      line-height: 1.36;
+      font-weight: 700;
+    }
+
+    .io span {
+      display: block;
+      padding: 12px;
+      background: rgba(255,255,255,.7);
+      border: 1px solid var(--hair);
+    }
+
+    .axis {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      height: 100%;
+      align-content: center;
+    }
+
+    .fallback {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 22px;
+      align-items: stretch;
+      margin-top: 40px;
+    }
+
+    .fallback .card {
+      min-height: 255px;
+      display: grid;
+      align-content: center;
+    }
+
+    .metric {
+      font: 900 63px/.95 "IBM Plex Mono", monospace;
+      color: var(--accent);
+      margin: 12px 0 16px;
+    }
+
+    .rule-strip {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 24px;
+      margin-top: 28px;
+    }
+
+    .loop {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-top: 24px;
+    }
+
+    .mini {
+      border: 1.5px solid var(--hair-strong);
+      background: rgba(255,255,255,.55);
+      padding: 20px;
+      min-height: 116px;
+    }
+
+    .mini strong {
+      display: block;
+      font-size: 25px;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .mini span {
+      display: block;
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      height: 100%;
+      align-items: center;
+    }
+
+    .stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .quote-panel {
+      border-left: 10px solid var(--danger);
+      background: #fff8ed;
+      padding: 34px 40px;
+      box-shadow: 13px 13px 0 rgba(21,25,28,.08);
+    }
+
+    .quote-panel blockquote {
+      margin: 0;
+      font-size: 42px;
+      line-height: 1.35;
+      font-weight: 900;
+      text-wrap: pretty;
+    }
+
+    .principles {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      height: 100%;
+      align-content: center;
+    }
+
+    .principle {
+      min-height: 245px;
+      border: 2px solid var(--hair-strong);
+      background: rgba(255,255,255,.55);
+      padding: 30px;
+      display: grid;
+      grid-template-columns: 82px 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .principle .num {
+      font: 800 58px/.9 "IBM Plex Mono", monospace;
+      color: var(--accent);
+    }
+
+    .stat-wall {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 38px;
+    }
+
+    .stat-tile {
+      min-height: 172px;
+      border: 2px solid var(--hair-strong);
+      background: rgba(255,255,255,.58);
+      padding: 26px;
+      display: grid;
+      align-content: center;
+    }
+
+    .stat-tile strong {
+      font: 900 51px/.95 "IBM Plex Mono", monospace;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .stat-tile span {
+      font-size: 23px;
+      line-height: 1.34;
+      font-weight: 800;
+    }
+
+    .closing-line {
+      margin-top: 32px;
+      border: 2px solid var(--ink);
+      background: var(--ink);
+      color: var(--white);
+      padding: 28px 32px;
+      font-size: 31px;
+      line-height: 1.42;
+      font-weight: 900;
+      text-wrap: pretty;
+    }
+
+    .link-footer {
+      font: 700 27px/1.1 "IBM Plex Mono", monospace;
+      color: var(--accent-2);
+      margin-top: 24px;
+    }
+
+    .seal {
+      width: 104px;
+      height: 104px;
+      border: 3px solid var(--accent);
+      display: grid;
+      place-items: center;
+    }
+
+    .seal svg { width: 62px; height: 62px; stroke: var(--accent-2); }
+
+    .dense p { font-size: 22px; line-height: 1.42; }
+    .small p, .small li { font-size: 21px; line-height: 1.38; }
+    .nowrap { white-space: nowrap; }
+
+    /* ===== Cinematic 前兩頁（暗色電影海報，覆蓋明亮 grid 底） ===== */
+    .slide.cine{display:flex;padding:0;background-size:cover;background-position:center;align-items:stretch;}
+    .slide.cine::after{display:none;}
+    .slide.cine::before{content:"";position:absolute;inset:0;z-index:1;
+      background:linear-gradient(90deg,rgba(18,23,34,.93) 0%,rgba(18,23,34,.78) 28%,rgba(18,23,34,.38) 50%,transparent 70%);}
+    .slide.cine>*{position:relative;z-index:2;}
+    .cine-text{width:56%;padding:0 86px;display:flex;flex-direction:column;justify-content:center;color:#fff;}
+    .cine-folio{font:700 26px/1 "IBM Plex Mono",monospace;color:#fff;opacity:.55;margin-bottom:14px;}
+    .ct-tag{font-family:"IBM Plex Mono",monospace;font-size:22px;letter-spacing:.2em;color:#F9AB00;font-weight:700;margin-bottom:18px;}
+    .cine-h1{font-size:84px;font-weight:900;line-height:1.14;color:#fff;letter-spacing:-.01em;}
+    .cine-h1 .accent{color:#16c0aa;}
+    .ct-sub{font-size:28px;color:rgba(255,255,255,.8);margin-top:24px;font-weight:500;line-height:1.55;}
+    .ct-meta{margin-top:32px;display:flex;gap:12px;flex-wrap:wrap;}
+    .ct-chip{font-size:19px;font-weight:700;padding:8px 18px;border:1.5px solid rgba(255,255,255,.3);border-radius:100px;color:rgba(255,255,255,.9);}
+    .pain-list{margin-top:26px;display:flex;flex-direction:column;gap:18px;}
+    .pain-item{border-left:4px solid #ff5a4d;padding-left:18px;}
+    .pain-item .pi-en{font-family:"IBM Plex Mono",monospace;font-size:15px;letter-spacing:.14em;color:rgba(255,255,255,.48);}
+    .pain-item .pi-tx{font-size:27px;font-weight:700;color:#fff;line-height:1.4;margin-top:4px;}
+    .pain-goal{margin-top:26px;background:rgba(22,192,170,.14);border:1.5px solid rgba(22,192,170,.45);border-radius:12px;padding:18px 24px;}
+    .pain-goal .pg-l{font-family:"IBM Plex Mono",monospace;font-size:15px;letter-spacing:.14em;color:#16c0aa;font-weight:700;}
+    .pain-goal .pg-t{font-size:25px;color:#fff;font-weight:700;margin-top:6px;line-height:1.5;}
+
+    /* P3 暗沉過渡（原 sin-card 明亮設計 + 暗沉底，非全黑） */
+    .slide.trans{background:#2a2f3d;}
+    .slide.trans::after{display:none;}
+    .slide.trans header .folio{color:#9fb4cc;border-top-color:#16c0aa;}
+    .slide.trans header .kicker{color:rgba(255,255,255,.5);}
+    .slide.trans header h2{color:#fff;}
+    .slide.trans .sin-card{background:#f3ede0;box-shadow:12px 12px 0 rgba(0,0,0,.22);}
+    .pipeline .pipe-card h3{font-size:64px;line-height:1.04;}
+    .slide.trans .sin-card h3{font-size:64px;line-height:1.05;}
+
+    /* ===== P3/P4 暗色海報過渡（三宗罪 / 亮點） ===== */
+    .slide.poster{display:flex;flex-direction:column;justify-content:center;padding:48px 86px;
+      background:radial-gradient(ellipse at 72% -5%,#241526 0%,#0c0c14 58%);}
+    .slide.poster.good{background:radial-gradient(ellipse at 28% 105%,#0d2a26 0%,#0c0c14 60%);}
+    .slide.poster::after{display:none;}
+    .slide.poster>*{position:relative;z-index:2;}
+    .p-head{margin-bottom:34px;}
+    .p-kicker{font-family:"IBM Plex Mono",monospace;font-size:15px;letter-spacing:.2em;font-weight:700;margin-bottom:12px;}
+    .slide.poster .p-h2{font-size:46px;font-weight:900;color:#fff;line-height:1.16;}
+    .sin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+    .sin{background:rgba(255,255,255,.03);border:1.5px solid rgba(255,255,255,.08);border-top:5px solid #ff5a4d;border-radius:14px;padding:32px;}
+    .sin:nth-child(2){border-top-color:#F9AB00;}
+    .sin .num{font-family:"IBM Plex Mono",monospace;font-size:44px;font-weight:900;color:#ff5a4d;line-height:1;}
+    .sin:nth-child(2) .num{color:#F9AB00;}
+    .sin h3{font-size:26px;font-weight:900;color:#fff;margin:10px 0 12px;}
+    .sin p{font-size:18px;color:rgba(255,255,255,.62);line-height:1.6;}
+    .vs2{display:grid;grid-template-columns:1fr 1.25fr;gap:34px;align-items:stretch;}
+    .vs-left{background:rgba(255,255,255,.02);border:1.5px solid rgba(255,255,255,.07);border-radius:14px;padding:30px;}
+    .vs-left .vl-h{font-family:"IBM Plex Mono",monospace;font-size:15px;letter-spacing:.13em;color:rgba(255,255,255,.45);font-weight:700;margin-bottom:18px;}
+    .vs-left .vl-row{padding:13px 0;border-bottom:1px solid rgba(255,255,255,.06);color:rgba(255,255,255,.5);font-size:17px;}
+    .vs-left .vl-row:last-child{border:none;}
+    .vs-left .vl-row b{color:rgba(255,255,255,.78);font-weight:700;display:block;font-size:16px;margin-bottom:2px;}
+    .hi-grid{display:flex;flex-direction:column;gap:18px;}
+    .hi{background:rgba(22,192,170,.07);border:1.5px solid rgba(22,192,170,.3);border-left:5px solid #16c0aa;border-radius:12px;padding:18px 24px;}
+    .hi .hi-t{font-size:28px;font-weight:900;color:#16c0aa;}
+    .hi .hi-d{font-size:17px;color:rgba(255,255,255,.72);margin-top:3px;}
+    .hi-foot{margin-top:18px;font-size:15px;color:rgba(255,255,255,.5);font-family:"IBM Plex Mono",monospace;}
+
+    @page { size: 1920px 1080px; margin: 0; }
+  </style>
+</head>
+<body>
+  <main class="deck" aria-live="polite">
+    <section class="slide cine active" data-index="1" data-title="Cover" style="background-image:url('img/s29/cover.png');">
+      <div class="cine-text">
+        <div class="cine-folio">01/14</div>
+        <div class="ct-tag">ARCHITECTURE BRIEF</div>
+        <h1 class="cine-h1">會議散場的那一刻<br><span class="accent">紀錄才正要誕生</span></h1>
+        <p class="ct-sub">Meeting Capture Studio — 手機錄音分享到 LINE，90 秒後在你自己的 repo 拿到結構化會議紀錄。</p>
+        <div class="ct-meta"><span class="ct-chip">全雲端</span><span class="ct-chip">零實體機器</span><span class="ct-chip">全免費 tier</span></div>
+      </div>
+    </section>
+
+    <section class="slide cine" data-index="2" data-title="Pain" style="background-image:url('img/s29/pain.png');">
+      <div class="cine-text">
+        <div class="cine-folio">02/14</div>
+        <div class="ct-tag" style="color:#ff5a4d;">THE DEAD END</div>
+        <h1 class="cine-h1" style="font-size:62px;">會議錄音的死局</h1>
+        <div class="pain-list">
+          <div class="pain-item"><div class="pi-en">SPLIT ATTENTION</div><div class="pi-tx">每天 3 場會議，你只能二選一：專心開會漏細節，或低頭打字漏重點</div></div>
+          <div class="pain-item"><div class="pi-en">UNCLAIMED HOMEWORK</div><div class="pi-tx">會議記錄變成沒人認領的家庭作業</div></div>
+          <div class="pain-item"><div class="pi-en">DECISION DRIFT</div><div class="pi-tx">散會那一刻，follow-up 和決策就開始往海底沉</div></div>
+        </div>
+        <div class="pain-goal"><div class="pg-l">TARGET STATE</div><div class="pg-t">丟一個音檔，90 秒後在自己的 repo 拿到結構化紀錄<br>音檔不留存、零成本</div></div>
+      </div>
+    </section>
+
+    <section class="slide trans" data-index="3" data-title="Paid Tool Sins">
+      <header>
+        <div class="folio">03/14</div>
+        <div>
+          <div class="kicker">Market Reality</div>
+          <h2>市面付費工具的三宗罪</h2>
+        </div>
+      </header>
+      <div class="stage market-sins">
+        <article class="sin-card">
+          <div class="num">01</div>
+          <h3>隱私</h3>
+          <p>音檔和逐字稿上傳到它的雲、變成它的訓練資料；你刪了，它可能還留著。</p>
+        </article>
+        <article class="sin-card warn">
+          <div class="num">02</div>
+          <h3>月租</h3>
+          <p>每人每月 <span class="mono">$8–35</span>，還會撞「分鐘上限」就停，或要加買 credit 才有完整功能。</p>
+        </article>
+        <article class="sin-card">
+          <div class="num">03</div>
+          <h3>黑箱</h3>
+          <p>專業術語一直聽錯你改不了、平台綁定、想換工具資料帶不走。</p>
+        </article>
+      </div>
+      <footer><span>market pain</span><div class="progress"><div class="bar" style="width:21.428%"></div></div></footer>
+    </section>
+
+    <section class="slide" data-index="4" data-title="Highlight">
+      <header>
+        <div class="folio">04/14</div>
+        <div>
+          <div class="kicker">Sharp Contrast</div>
+          <h2>亮點高光：把工具主權拿回來</h2>
+        </div>
+      </header>
+      <div class="stage highlight-compare">
+        <div class="highlight-columns">
+          <section class="contrast-panel negative">
+            <h3>市面付費工具</h3>
+            <div class="contrast-list">
+              <div class="contrast-item"><strong>付費月租 + 撞上限</strong><span>分鐘牆、credit 加價、功能分層。</span></div>
+              <div class="contrast-item"><strong>雲端留存 + 拿去訓練</strong><span>音檔與逐字稿離開你的 domain。</span></div>
+              <div class="contrast-item"><strong>黑箱不可改</strong><span>術語錯誤、平台綁定、資料帶不走。</span></div>
+            </div>
+          </section>
+          <section class="contrast-panel positive">
+            <h3>Meeting Capture Studio</h3>
+            <div class="contrast-list">
+              <div class="contrast-item"><strong>全開源</strong><span>完全透明、可客製、不綁任何廠商。</span></div>
+              <div class="contrast-item"><strong>零月租 · $0</strong><span>沒有分鐘牆、沒有 credit 加價。</span></div>
+              <div class="contrast-item"><strong>資料主權</strong><span>音檔不留存，逐字稿/摘要全進你自己的 GitHub repo。</span></div>
+            </div>
+          </section>
+        </div>
+        <div class="highlight-note">次要優勢：越用越準（自學習術語）、不編造責任歸屬。</div>
+      </div>
+      <footer><span>open source capture stack</span><div class="progress"><div class="bar" style="width:28.571%"></div></div></footer>
+    </section>
+
+    <section class="slide" data-index="5" data-title="Magic Moment">
+      <header>
+        <div class="folio">05/14</div>
+        <div>
+          <div class="kicker">Magic Moment</div>
+          <h2>使用者只做一件事：把錄音分享到 LINE@</h2>
+        </div>
+      </header>
+      <div class="stage conversation">
+        <div class="phone">
+          <div class="phone-top"><span>LINE@ Bot</span><span class="mono">per-user lock</span></div>
+          <div class="thread">
+            <div class="bubble user">使用者送出「語音訊息 33:30」</div>
+            <div class="bubble bot">收到，開始處理（約 60-90 秒）</div>
+            <div class="bubble bot">會議紀錄已完成：主題 AI 國際業務開發系統，議題 8/決議 2/待辦 2，已存入 GitHub repo</div>
+            <div class="bubble user">使用者送出「第二個音檔」</div>
+            <div class="bubble bot">上一個任務還在處理中（已開始 1 分鐘）</div>
+          </div>
+        </div>
+        <div class="side-notes">
+          <article class="card accent tall">
+            <div class="note-number">90</div>
+            <h3>90 秒是體感邊界</h3>
+            <p>使用者不等檔案處理細節，只等一份可讀會議紀錄。</p>
+          </article>
+          <article class="card accent tall">
+            <h3>回推的不是檔案</h3>
+            <p>回推的是已分議題、附原文引用的會議紀錄。</p>
+          </article>
+          <article class="card warn tall">
+            <h3>per-user lock</h3>
+            <p>擋同一個使用者同時丟兩檔，避免任務互相打架。</p>
+          </article>
+        </div>
+      </div>
+      <footer><span>one action interface</span><div class="progress"><div class="bar" style="width:35.714%"></div></div></footer>
+    </section>
+
+    <section class="slide" data-index="6" data-title="Architecture">
+      <header>
+        <div class="folio">06/14</div>
+        <div>
+          <div class="kicker">System Map</div>
+          <h2>架構全景：入口秒回，重活後送</h2>
+        </div>
+      </header>
+      <div class="stage">
+        <div class="map">
+          <div class="lane">
+            <h3>兩入口</h3>
+            <div class="lane-list">
+              <div class="node">LINE@ Bot<br>已上線</div>
+              <div class="node">Chrome Extension<br>下一階段</div>
+            </div>
+          </div>
+          <div class="lane">
+            <h3>Cloudflare Worker</h3>
+            <div class="lane-list">
+              <div class="node">驗簽</div>
+              <div class="node">白名單</div>
+              <div class="node">KV in-flight lock</div>
+              <div class="node">repository_dispatch</div>
+            </div>
+          </div>
+          <div class="lane">
+            <h3>GitHub Actions Pipeline</h3>
+            <div class="lane-list">
+              <div class="node">免費 2000 min/月</div>
+              <div class="node">Stage 1 STT 三層</div>
+              <div class="node">Stage 2 四層校正</div>
+              <div class="node">Stage 3 摘要 summarize.py</div>
+              <div class="node">Stage 5 分發</div>
+            </div>
+          </div>
+          <div class="lane">
+            <h3>輸出</h3>
+            <div class="lane-list">
+              <div class="node">GitHub repo<br>meetings/ + _logs + terms</div>
+              <div class="node">LINE 推播</div>
+              <div class="node">Notion 鏡像可選</div>
+            </div>
+          </div>
+        </div>
+        <div class="shape-flow">
+          <span class="chip">音檔</span><span class="arrow">→</span>
+          <span class="chip">簡體逐字稿</span><span class="arrow">→</span>
+          <span class="chip">校正稿</span><span class="arrow">→</span>
+          <span class="chip">結構化摘要</span><span class="arrow">→</span>
+          <span class="chip">meeting note</span>
+        </div>
+      </div>
+      <footer><span>data shape changes at every boundary</span><div class="progress"><div class="bar" style="width:42.857%"></div></div></footer>
+    </section>
+
+    <section class="slide" data-index="7" data-title="Why Worker GA">
+      <header>
+        <div class="folio">07/14</div>
+        <div>
+          <div class="kicker">Platform Decision</div>
+          <h2>為什麼是 Worker + GitHub Actions</h2>
+        </div>
+      </header>
+      <div class="stage compare">
+        <div class="bad-list">
+          <article class="card danger compact"><h3>GAS</h3><p>6 分鐘執行上限，STT + 摘要遠超時。</p></article>
+          <article class="card danger compact"><h3>n8n / Zapier</h3><p>要 self-host 或付費。</p></article>
+          <article class="card danger compact"><h3>自架 VM</h3><p>要顧機器，也要錢。</p></article>
+        </div>
+        <div class="good-list">
+          <article class="card accent tall">
+            <h3>Cloudflare Worker</h3>
+            <p>edge dispatcher，免費 100K req/天，秒回避免 timeout。</p>
+          </article>
+          <article class="card accent tall">
+            <h3>GitHub Actions</h3>
+            <p>30 分 timeout 扛重活，免費 2000 min/月，產物直接進 repo。</p>
+          </article>
+          <div class="verdict">
+            <p>Worker 只做秒級事：驗簽 + lock + dispatch。<br>重活全丟 Actions。</p>
+          </div>
+        </div>
+      </div>
+      <footer><span>dispatcher vs workload</span><div class="progress"><div class="bar" style="width:50%"></div></div></footer>
+    </section>
+
+    <section class="slide" data-index="8" data-title="Pipeline">
+      <header>
+        <div class="folio">08/14</div>
+        <div>
+          <div class="kicker">Pipeline</div>
+          <h2>五節點資料流轉：重點不是呼叫 AI</h2>
+        </div>
+      </header>
+      <div class="stage">
+        <div class="pipeline">
+          <article class="pipe-card" data-step="01">
+            <h3>STT</h3>
+            <div class="label">speech to text</div>
+            <div class="io"><span>輸入：LINE m4a 音檔</span><span>輸出：簡體逐字稿</span></div>
+          </article>
+          <article class="pipe-card" data-step="02">
+            <h3>校正</h3>
+            <div class="label">normalization</div>
+            <div class="io"><span>輸入：簡體逐字稿</span><span>輸出：繁中校正稿</span></div>
+          </article>
+          <article class="pipe-card" data-step="03">
+            <h3>摘要</h3>
+            <div class="label">structure</div>
+            <div class="io"><span>輸入：校正稿</span><span>輸出：議題/決議/行動 JSON</span></div>
+          </article>
+          <article class="pipe-card" data-step="04">
+            <h3>驗證</h3>
+            <div class="label">grounding</div>
+            <div class="io"><span>輸入：摘要 JSON + transcript</span><span>輸出：通過引用的內容</span></div>
+          </article>
+          <article class="pipe-card" data-step="05">
+            <h3>分發</h3>
+            <div class="label">delivery</div>
+            <div class="io"><span>輸入：結構化摘要</span><span>輸出：meeting note + LINE 回推</span></div>
+          </article>
+        </div>
+        <div class="closing-line">每段都明確改變資料形態，AI 呼叫只是其中一種加工方式。</div>
+      </div>
+      <footer><span>input to output contract</span><div class="progress"><div class="bar" style="width:57.142%"></div></div></footer>
+    </section>
+
+    <section class="slide" data-index="9" data-title="Stage 1 STT">
+      <header>
+        <div class="folio">09/14</div>
+        <div>
+          <div class="kicker">Stage 1</div>
+          <h2>STT 三層 fallback：快、免費、守住上限</h2>
+        </div>
+      </header>
+      <div class="stage">
+        <div class="fallback">
+          <article class="card accent">
+            <div class="label">Primary</div>
+            <h3>Groq Whisper Turbo</h3>
+            <div class="metric">206x</div>
+            <p>realtime，免費 8hr/天。</p>
+          </article>
+          <article class="card">
+            <div class="label">Fallback</div>
+            <h3>Groq Large v3</h3>
+            <div class="metric">L2</div>
+            <p>Turbo 失敗時接手，維持 STT 路徑。</p>
+          </article>
+          <article class="card">
+            <div class="label">Fallback</div>
+            <h3>CF Whisper</h3>
+            <div class="metric">L3</div>
+            <p>最後保底，避免整條 pipeline 中斷。</p>
+          </article>
+        </div>
+        <div class="rule-strip">
+          <article class="card compact warn">
+            <h3>m4a 直傳</h3>
+            <p>跳過 LINE 重壓，更準還省約 15 秒。</p>
+          </article>
+          <article class="card compact warn">
+            <h3>大檔守門</h3>
+            <p>大檔 &gt;24MB 自動 ffmpeg 降採樣到 16kbps mono，守 Groq 25MB 上限。</p>
+          </article>
+        </div>
+      </div>
+      <footer><span>latency and quota control</span><div class="progress"><div class="bar" style="width:64.285%"></div></div></footer>
+    </section>
+
+    <section class="slide" data-index="10" data-title="Stage 2 Correction">
+      <header>
+        <div class="folio">10/14</div>
+        <div>
+          <div class="kicker">Stage 2</div>
+          <h2>四層校正 + 自學習迴圈</h2>
+        </div>
+      </header>
+      <div class="stage">
+        <div class="pipeline" style="grid-template-columns:repeat(4,1fr);height:395px">
+          <article class="pipe-card" data-step="L3">
+            <h3>字典</h3>
+            <div class="label">deterministic</div>
+            <div class="io"><span>opencc 簡→繁</span><span>領域 yaml</span></div>
+          </article>
+          <article class="pipe-card" data-step="L2">
+            <h3>jieba</h3>
+            <div class="label">fuzzy match</div>
+            <div class="io"><span>編輯距離</span><span>模糊比對</span></div>
+          </article>
+          <article class="pipe-card" data-step="v4">
+            <h3>LLM discovery</h3>
+            <div class="label">weak signal</div>
+            <div class="io"><span>弱權重挖詞</span><span>只提案不放行</span></div>
+          </article>
+          <article class="pipe-card" data-step="Gate">
+            <h3>deterministic gate</h3>
+            <div class="label">strong verify</div>
+            <div class="io"><span>拼音 / 長度</span><span>whitelist</span></div>
+          </article>
+        </div>
+        <div class="loop">
+          <div class="mini"><strong>candidates</strong><span>候選詞先進暫存池</span></div>
+          <div class="mini"><strong>learned</strong><span>通過 deterministic gate 才學會</span></div>
+          <div class="mini"><strong>blacklist</strong><span>錯誤模式明確封鎖</span></div>
+        </div>
+        <div class="closing-line">LLM 弱權重提案，deterministic 強驗證；學得慢，但不學錯。</div>
+      </div>
+      <footer><span>learn slowly, learn correctly</span><div class="progress"><div class="bar" style="width:71.428%"></div></div></footer>
+    </section>
+
+    <section class="slide" data-index="11" data-title="Stage 3 Summary">
+      <header>
+        <div class="folio">11/14</div>
+        <div>
+          <div class="kicker">Stage 3</div>
+          <h2>結構化摘要：先切議題，再抽責任</h2>
+        </div>
+      </header>
+      <div class="stage summary-grid">
+        <div class="stack">
+          <article class="card accent compact"><h3>議題 outline JSON</h3><p>先建立會議骨架。</p></article>
+          <article class="card accent compact"><h3>單次 JSON 全議題</h3><p>互斥，不重述。</p></article>
+          <article class="card accent compact"><h3>決議 / 未解 / 行動</h3><p>3a / 3b / 3c，每條附原文 quote。</p></article>
+          <article class="card warn compact"><h3>Layer 3/5 引用驗證</h3><p>再做指派二次審核。</p></article>
+        </div>
+        <div class="verdict">
+          <div class="label">Hard Gate</div>
+          <p>quote 不在逐字稿就丟。</p>
+          <p style="margin-top:24px;font-size:25px;font-weight:700;color:#d8e8ea">摘要可以少一條，但不能多一條假的。</p>
+        </div>
+      </div>
+      <footer><span>structured summary with evidence</span><div class="progress"><div class="bar" style="width:78.571%"></div></div></footer>
+    </section>
+
+    <section class="slide" data-index="12" data-title="Anti Hallucination">
+      <header>
+        <div class="folio">12/14</div>
+        <div>
+          <div class="kicker">Anti-Hallucination</div>
+          <h2>責任歸屬不能編造</h2>
+        </div>
+      </header>
+      <div class="stage two-col">
+        <div class="quote-panel">
+          <blockquote>「會議摘要不可假造，尤其是任務安排，這會有責任歸屬的問題」</blockquote>
+        </div>
+        <div class="cards">
+          <article class="card accent compact">
+            <h3>引用強制</h3>
+            <p>每條決議/行動附 transcript quote。</p>
+          </article>
+          <article class="card accent compact">
+            <h3>指派 vs 提及</h3>
+            <p>請 X 做 Y ≠ 跟 X 對這題。</p>
+          </article>
+          <article class="card warn compact">
+            <h3>fail-loud</h3>
+            <p>不確定標「待確認指派」；寧可漏記，不可錯記。</p>
+          </article>
+        </div>
+      </div>
+      <footer><span>ownership requires evidence</span><div class="progress"><div class="bar" style="width:85.714%"></div></div></footer>
+    </section>
+
+    <section class="slide" data-index="13" data-title="Principles">
+      <header>
+        <div class="folio">13/14</div>
+        <div>
+          <div class="kicker">Design Philosophy</div>
+          <h2>設計哲學四原則</h2>
+        </div>
+      </header>
+      <div class="stage principles">
+        <article class="principle">
+          <div class="num">01</div>
+          <div><h3>入口秒回</h3><p>Worker 只做驗簽、白名單、lock、dispatch。</p></div>
+        </article>
+        <article class="principle">
+          <div class="num">02</div>
+          <div><h3>重活後送</h3><p>STT、校正、摘要、驗證都交給 Actions pipeline。</p></div>
+        </article>
+        <article class="principle">
+          <div class="num">03</div>
+          <div><h3>資料契約清楚</h3><p>每段都明確定義輸入、輸出與失敗處理。</p></div>
+        </article>
+        <article class="principle">
+          <div class="num">04</div>
+          <div><h3>invariant 寫進會被讀的文件</h3><p>重要約束放程式註解 + 架構文件，不只 commit message。</p></div>
+        </article>
+      </div>
+      <footer><span>principles become constraints</span><div class="progress"><div class="bar" style="width:92.857%"></div></div></footer>
+    </section>
+
+    <section class="slide" data-index="14" data-title="Closing">
+      <header>
+        <div class="folio">14/14</div>
+        <div>
+          <div class="kicker">Capability Summary</div>
+          <h2>系統能力收束</h2>
+        </div>
+      </header>
+      <div class="stage">
+        <div class="stat-wall">
+          <div class="stat-tile"><strong>90s</strong><span>音檔 → 紀錄</span></div>
+          <div class="stat-tile"><strong>206x</strong><span>STT realtime</span></div>
+          <div class="stat-tile"><strong>3 層</strong><span>STT fallback</span></div>
+          <div class="stat-tile"><strong>8 議題</strong><span>自動切分</span></div>
+          <div class="stat-tile"><strong>quote</strong><span>原文引用驗證</span></div>
+          <div class="stat-tile"><strong>5-stage</strong><span>pipeline</span></div>
+        </div>
+        <div class="closing-line">把 LINE@ / Worker / GitHub Actions / 5-stage 串成一條清楚資料流：入口秒回、三層轉寫保底、議題切分、quote 驗證，再回推可讀紀錄。</div>
+        <div class="link-footer">全雲端 · 零實體機器 · 全免費 tier 的會議紀錄 pipeline</div>
+      </div>
+      <footer><span>meeting capture studio</span><div class="progress"><div class="bar" style="width:100%"></div></div></footer>
+    </section>
+  </main>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    let current = 0;
+
+    function showSlide(index) {
+      const next = Math.max(0, Math.min(slides.length - 1, index));
+      slides.forEach((slide, i) => {
+        slide.classList.toggle("active", i === next);
+        slide.classList.toggle("prev", i < next);
+      });
+      current = next;
+      window.location.hash = String(next + 1).padStart(2, "0");
+      document.title = `${String(next + 1).padStart(2, "0")} / ${slides.length} - ${slides[next].dataset.title}`;
+    }
+
+    function nextSlide() { showSlide(current + 1); }
+    function prevSlide() { showSlide(current - 1); }
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight" || event.key === " ") {
+        event.preventDefault();
+        nextSlide();
+      }
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        prevSlide();
+      }
+    });
+
+    const initial = Number.parseInt(window.location.hash.replace("#", ""), 10);
+    if (Number.isFinite(initial) && initial >= 1 && initial <= slides.length) {
+      showSlide(initial - 1);
+    } else {
+      showSlide(0);
+    }
+
+    // Fit 1920x1080 deck to any viewport（解決小螢幕要手動縮放）
+    function fitDeck() {
+      const deck = document.querySelector(".deck");
+      const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+      deck.style.transform = "translate(-50%, -50%) scale(" + s + ")";
+    }
+    window.addEventListener("resize", fitDeck);
+    fitDeck();
+  </script>
+</body>
+</html>
