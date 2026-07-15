@@ -27,7 +27,7 @@ var materials = [
   { title: 'S24 AI \u4E03\u5C64\u67B6\u69CB', icon: '\uD83C\uDFD7\uFE0F', url: '/slides/supplements/S24_AI_Seven_Layer_Stack.html', desc: '\u5F9E\u6A21\u578B\u5230\u61C9\u7528\u00B730\u9801' },
   { title: 'S25 AI \u56DB\u9762\u5411\u80FD\u529B', icon: '\uD83C\uDFAF', url: '/slides/supplements/S25_Four_Aspects.html', desc: '\u8D85\u7D1A\u500B\u9AD4\u00D7\u8EAB\u4EFD\u905E\u8B8A\u00B723\u9801' },
   { title: 'S26 AI \u5B78\u7FD2\u8DEF\u5F91 L1-L4', icon: '\uD83E\uDDED', url: '/slides/supplements/S26_AI_Learning_Path.html', desc: '\u5F9E\u4F7F\u7528\u8005\u5230\u6539\u9769\u8005\u00B723\u9801' },
-  { title: 'S27 Reflective Hub', icon: '\uD83D\uDEF0\uFE0F', url: '/slides/supplements/S27_Reflective_Hub.html', desc: '14\u9801\u00B724\u5C0F\u6642\u53CD\u601D\u4E2D\u6A1E\u00B7\u8DE8\u5DE5\u5177\u4E00\u81F4' },
+  { title: 'S27 Reflective Hub', icon: '\uD83D\uDEF0\uFE0F', url: '/slides/supplements/S27_Reflective_Hub.html', desc: '19\u9801\u00b7AI\u6642\u4ee3\u6ce8\u610f\u529b\u7a00\u7f3a\u7684\u7cfb\u7d71\u89e3\u00b7\u4e09\u5c64\u53cd\u601d\uff0b\u610f\u5716\u9589\u74b0' },
   { title: 'S28 \u6C23\u5019\u81E8\u754C\u9EDE\u96D9\u5411\u6846\u67B6', icon: '\uD83C\uDF0A', url: '/slides/supplements/S28_Climate_Tipping_Points.html', desc: '27\u9801\u00B7\u5D29\u6F70\u8207\u7FFB\u8F49\u540C\u4E00\u5957\u6578\u5B78' },
   { title: 'S29 \u6703\u8B70\u7D00\u9304\u7CFB\u7D71\u67B6\u69CB', icon: '\uD83C\uDF99\uFE0F', url: '/slides/supplements/S29_Meeting_Capture_Architecture.html', desc: '14\u9801\u00B7\u5168\u96F2\u7AEF\u6703\u8B70\u9304\u97F3\u2192\u7D50\u69CB\u5316\u7D00\u9304 pipeline' },
   // --- Talks T01-T04 ---

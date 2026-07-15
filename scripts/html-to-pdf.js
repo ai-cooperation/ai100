@@ -123,13 +123,18 @@ async function convertToPdf(browser, htmlFile) {
     screenshots.push(screenshot);
   }
 
-  // Create PDF from screenshots using a new page
-  const pdfPage = await browser.newPage();
-
-  // Build HTML with all slide images
+  // Create PDF from screenshots via a temp assembly page.
+  // ⚠️ 2026-07-15 空白頁修復：舊法 base64 + setContent 在 20 張 × ~1MB 規模下，
+  // 'load' 會先於全部 data: 圖片解碼完成，page.pdf() 印出整本空白（12KB PDF）。
+  // 單張可過、整批必翻車（S27 v4 實測；Chrome 146 / puppeteer 24.40）。
+  // 修法：截圖落地成實體 PNG，組裝頁走 file:// 引用，並明確 await 所有 img.decode()
+  // 之後才印。不要改回 base64 內嵌。
+  const os = require('os');
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'slides-pdf-'));
   const imgTags = screenshots.map((buf, i) => {
-    const b64 = buf.toString('base64');
-    return `<div class="page"><img src="data:image/png;base64,${b64}"></div>`;
+    const imgName = `s${String(i).padStart(2, '0')}.png`;
+    fs.writeFileSync(path.join(tmpDir, imgName), buf);
+    return `<div class="page"><img src="${imgName}"></div>`;
   }).join('\n');
 
   const pdfHtml = `<!DOCTYPE html>
@@ -141,7 +146,14 @@ async function convertToPdf(browser, htmlFile) {
   img { width: 100%; height: 100%; object-fit: contain; }
 </style></head><body>${imgTags}</body></html>`;
 
-  await pdfPage.setContent(pdfHtml, { waitUntil: 'load' });
+  const asmPath = path.join(tmpDir, 'assembly.html');
+  fs.writeFileSync(asmPath, pdfHtml);
+
+  const pdfPage = await browser.newPage();
+  await pdfPage.goto('file://' + asmPath, { waitUntil: 'networkidle0', timeout: 60000 });
+  await pdfPage.evaluate(() => Promise.all(
+    Array.from(document.images).map(img => img.decode())
+  ));
   await pdfPage.pdf({
     path: pdfPath,
     width: '1920px',
@@ -151,6 +163,7 @@ async function convertToPdf(browser, htmlFile) {
   });
 
   await pdfPage.close();
+  fs.rmSync(tmpDir, { recursive: true, force: true });
   await page.close();
 
   const size = (fs.statSync(pdfPath).size / 1024 / 1024).toFixed(1);

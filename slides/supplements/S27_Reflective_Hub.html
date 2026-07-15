@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1920, height=1080">
-<title>Reflective Hub — v3 Codex</title>
+<title>Reflective Hub — v4（2026-07 對齊）</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=IBM+Plex+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -280,6 +280,46 @@ h3{font-size:32px;font-weight:800;line-height:1.2}
   margin-top:auto;background:var(--ink);color:#fff;padding:30px 40px;
   font-size:35px;font-weight:900;width:1390px
 }
+/* 2026-07 update: 理論鏈 / 四區塊 / 閉環 / 迷你九宮格 */
+.chain{display:grid;grid-template-columns:1fr 84px 1fr 84px 1fr;gap:0;align-items:stretch;margin-top:44px}
+.chain .node{background:#fff;border:1px solid var(--line);padding:30px 28px;min-height:440px;box-shadow:var(--shadow)}
+.chain .node .scale{font:700 17px/1 "IBM Plex Mono",monospace;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.chain .node .big{font-size:52px;font-weight:900;line-height:1.05;margin-top:14px;color:var(--blue)}
+.chain .node p{font-size:25px;color:var(--muted);line-height:1.5;margin-top:16px}
+.chain .node .theory{margin-top:20px;font:700 17px/1.7 "IBM Plex Mono",monospace;color:var(--green);letter-spacing:.03em}
+.chain .lk{display:flex;align-items:center;justify-content:center;font-size:54px;color:var(--red);font-weight:900}
+.loop4{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:42px}
+.loop4 .ln{background:#fff;border:1px solid var(--line);padding:28px 26px;min-height:410px;position:relative;box-shadow:var(--shadow)}
+.loop4 .ln:before{content:attr(data-n);font:800 64px/.9 "IBM Plex Mono",monospace;color:rgba(36,111,145,.16)}
+.loop4 .ln h3{margin-top:22px;color:var(--blue);font-size:30px}
+.loop4 .ln p{font-size:24px;color:var(--muted);line-height:1.52;margin-top:14px}
+.loop4 .ln.veto{border:4px solid var(--gold);background:#fffdf4}
+.loopback{margin-top:28px;font:800 26px/1 "IBM Plex Mono",monospace;color:var(--red);text-align:center}
+.ng3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:560px;margin-left:auto}
+.ng3 .c{background:#fff;border:1px solid var(--line);min-height:126px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px}
+.ng3 .c b{font-size:36px;line-height:1}
+.ng3 .c span{font:600 17px/1.25 "IBM Plex Mono",monospace;color:var(--muted);margin-top:10px;text-align:center}
+.ng3 .c.center{border:3px solid var(--red)}
+.ng3 .c.dim{border-style:dashed;background:transparent}
+.ng3 .c.dim b{font-size:22px;color:var(--muted);font-weight:600}
+.fourb{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;margin-top:34px}
+.fourb .fb{background:#fff;border:1px solid var(--line);padding:26px 30px 56px;min-height:270px;box-shadow:var(--shadow);position:relative}
+.fourb .fb h3{color:var(--blue);font-size:31px}
+.fourb .fb .mono{font:700 21px/1.7 "IBM Plex Mono",monospace;margin-top:14px;color:var(--ink)}
+.fourb .fb p{font-size:24px;color:var(--muted);margin-top:12px;line-height:1.5}
+.fourb .fb .th{position:absolute;right:24px;bottom:16px;font:700 17px/1.4 "IBM Plex Mono",monospace;color:var(--green);letter-spacing:.05em;text-align:right}
+.card .echo{margin-top:24px;font:700 20px/1.5 "IBM Plex Mono",monospace;color:var(--green)}
+.ttable{width:100%;border-collapse:collapse;margin-top:36px;background:#fff;box-shadow:var(--shadow)}
+.ttable th{font:800 24px/1.3 "IBM Plex Sans TC";text-align:left;padding:16px 20px;border-bottom:3px solid var(--ink);color:var(--blue)}
+.ttable td{font-size:24px;line-height:1.4;padding:12px 20px;border-bottom:1px solid var(--line);vertical-align:top}
+.ttable td:first-child{font-weight:800;white-space:nowrap}
+.ttable td:first-child span{display:block;font:600 17px/1.3 "IBM Plex Mono",monospace;color:var(--muted);margin-top:4px;letter-spacing:.04em}
+.ttable td:last-child{font:700 19px/1.4 "IBM Plex Mono",monospace;color:var(--green)}
+.cex{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-top:40px}
+.cex .no{min-height:250px;padding:30px 34px}
+.cex .no h3{font-size:32px}
+.cex .no p{font-size:25px;line-height:1.5;margin-top:14px}
+.cex .no .fact{margin-top:16px;font:700 19px/1.5 "IBM Plex Mono",monospace;color:var(--red)}
 .controls{position:fixed;right:36px;bottom:30px;z-index:10;display:flex;gap:10px}
 button{
   width:56px;height:56px;border:1px solid var(--line);background:#fff;color:var(--ink);
@@ -315,12 +355,12 @@ html:has(head style[data-stack]) .slide{
     <p class="cover-sub">一個 <strong>24 小時運作</strong>的反思中樞<br>持續在你的資訊草原裡　把躲起來的<strong>獅子</strong>標出來</p>
     <div class="cover-quote">還會提醒你　草原裡還有<strong>鬣狗　大象　蛇</strong><br>替你看見<strong>自己看不見的模式</strong></div>
     <div class="cover-mono">ALWAYS-ON · CROSS-TOOL · CROSS-SESSION · BRAIN-SWAPPABLE</div>
-    <div class="cover-meta">REFLECTIVE HUB · 14 SLIDES · 2026-05</div>
+    <div class="cover-meta">REFLECTIVE HUB · 19 SLIDES · 2026-07</div>
   </div>
 </section>
 
 <section class="slide">
-  <div class="chrome"><span class="section">Reflective Hub / scatter</span><span class="page">01 / 14</span></div>
+  <div class="chrome"><span class="section">Reflective Hub / scatter</span><span class="page">01 / 19</span></div>
   <div class="content">
     <h1>你的訊息<br><span class="accent">散落各處</span></h1>
     <p class="sub">路上的想法、會議片段、LLM 對話、外部訊息、筆記、通知、信件</p>
@@ -345,19 +385,35 @@ html:has(head style[data-stack]) .slide{
 </section>
 
 <section class="slide alt">
-  <div class="chrome"><span class="section">Reflective Hub / cost of not saving</span><span class="page">02 / 14</span></div>
+  <div class="chrome"><span class="section">Reflective Hub / attention scarcity</span><span class="page">02 / 19</span></div>
   <div class="content">
-    <h2>不入庫的代價</h2>
+    <h2>這些痛　你中了<span class="accent">幾個</span>？</h2>
     <div class="cards">
-      <article class="card"><div class="mark">A</div><h3>同一個 bug debug 三次</h3><p>上週跟 Claude 排完 OAuth，下週問 ChatGPT 又從頭來。</p></article>
-      <article class="card"><div class="mark">B</div><h3>6 個月後忘了自己寫的規則</h3><p>「動工前先 inventory」救你過 5 次，半年後又犯同錯。</p></article>
-      <article class="card"><div class="mark">C</div><h3>4 小時寫的 SDD agent 看不到</h3><p>寫完關掉視窗，等於沒寫。</p></article>
+      <article class="card">
+        <div class="mark">1</div>
+        <h3>打算週末整理筆記<br>有那個週末做過？</h3>
+        <p>社群叫它 deferral：<br>把整理推給未來的自己<br>「那個自己　從未到達」</p>
+        <div class="echo">▸ 回顧不靠未來的你　排程自己跑</div>
+      </article>
+      <article class="card">
+        <div class="mark">2</div>
+        <h3>存了幾千條 AI 對話<br>哪一條自己回來找過你？</h3>
+        <p>第二大腦圈 2025 集體幻滅：<br>write-only 墳場<br>捕捉很強　resurface 全失敗</p>
+        <div class="echo">▸ 該看的主動推到你面前　不等你去翻</div>
+      </article>
+      <article class="card">
+        <div class="mark">3</div>
+        <h3>同時開五條 AI 線<br>誰幫你看全局？</h3>
+        <p>心理學領域新名詞：<br>AI 認知過載<br>腦霧、決策變慢　監督本身成了新瓶頸</p>
+        <div class="echo">▸ 三層報告當你的管制台　跨線模式自動浮出</div>
+      </article>
     </div>
+    <div class="closing" style="margin-top:auto">AI 產出過載＋資訊爆炸　加總成下一階段的新議題：<br><span class="gold">注意力稀缺</span>——這套系統補的就是這一塊</div>
   </div>
 </section>
 
 <section class="slide hero">
-  <div class="chrome"><span class="section">Reflective Hub / positioning</span><span class="page">03 / 14</span></div>
+  <div class="chrome"><span class="section">Reflective Hub / positioning</span><span class="page">03 / 19</span></div>
   <div class="content">
     <div class="neg-row">
       <div class="neg">不是 dashboard</div>
@@ -370,38 +426,145 @@ html:has(head style[data-stack]) .slide{
   </div>
 </section>
 
+<section class="slide band">
+  <div class="chrome"><span class="section">Reflective Hub / theory chain</span><span class="page">04 / 19</span></div>
+  <div class="content">
+    <h2>從工具升格為<span class="accent">方法論</span></h2>
+    <p class="sub">三層報告不是三種頻率的流水帳<br>每層回答一個上層答不了的問題，分層是數學必然（Ashby）</p>
+    <div class="chain">
+      <article class="node">
+        <div class="scale">Daily · 24-48hr</div>
+        <div class="big">事件</div>
+        <p>今天有沒有留下<br>未閉環的地雷</p>
+        <div class="theory">GTD open loops<br>豐田 Andon 當班拉繩</div>
+      </article>
+      <div class="lk">▸</div>
+      <article class="node">
+        <div class="scale">Weekly · 7d</div>
+        <div class="big">模式</div>
+        <p>哪些事出現第二次了<br>注意力流向跟宣稱一致嗎</p>
+        <div class="theory">Shewhart 製程管制<br>Klein premortem · AAR</div>
+      </article>
+      <div class="lk">▸</div>
+      <article class="node">
+        <div class="scale">Monthly · 30d</div>
+        <div class="big">結構</div>
+        <p>是不是系統本身<br>在製造這些獅子</p>
+        <div class="theory">Goldratt TOC 唯一制約<br>Argyris 雙迴圈 · 九宮格</div>
+      </article>
+    </div>
+    <div class="punch">獅子沿頻率上流：今天的事件　下週的模式　下月的結構</div>
+  </div>
+</section>
+
 <section class="slide">
-  <div class="chrome"><span class="section">Reflective Hub / mobile extension</span><span class="page">04 / 14</span></div>
+  <div class="chrome"><span class="section">Reflective Hub / mobile extension</span><span class="page">05 / 19</span></div>
   <div class="content">
     <h2>手機是系統的延伸</h2>
     <p class="sub">不是 trigger，是捕捉介面</p>
     <div class="steps">
-      <article class="step" data-n="1"><h3>捕捉</h3><p>路上想法、會議片段、文章重點，手機 chat 即時收。</p></article>
-      <article class="step" data-n="2"><h3>討論</h3><p>chat 端 LLM 先對話、結構化、補上下文、決定該存哪。</p></article>
-      <article class="step" data-n="3"><h3>入庫</h3><p>Reflective Hub 自動寫到對的 category，月份檔流水紀錄。</p></article>
-      <article class="step" data-n="4"><h3>萃取</h3><p>cron 自動跑，日報蒸餾、週報敘事、月報戰略主軸，PNG 推回手機。</p></article>
+      <article class="step" data-n="1"><h3>捕捉</h3><p>路上想法、會議片段、文章重點，手機 chat 即時收</p></article>
+      <article class="step" data-n="2"><h3>討論</h3><p>chat 端 LLM 先對話、結構化、補上下文、決定該存哪</p></article>
+      <article class="step" data-n="3"><h3>入庫</h3><p>Reflective Hub 自動寫到對的 category，月份檔流水紀錄</p></article>
+      <article class="step" data-n="4"><h3>萃取</h3><p>cron 自動跑，日報蒸餾、週報敘事、月報戰略主軸，PNG 推回手機</p></article>
     </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="chrome"><span class="section">Reflective Hub / weekly four blocks</span><span class="page">06 / 19</span></div>
+  <div class="content">
+    <h2>週報不再只是<span class="accent">回顧</span></h2>
+    <p class="sub">四個區塊——每一格都對照你的真實紀錄</p>
+    <div class="fourb">
+      <article class="fb">
+        <h3>說要做的 vs 實際做的</h3>
+        <p>週初寫下這週要做什麼<br>週末自動對照：做了沒、差在哪、為什麼</p>
+        <p>沒寫計畫就誠實空著　不裝懂</p>
+        <div class="th">AFTER ACTION REVIEW</div>
+      </article>
+      <article class="fb">
+        <h3>上週的雷　這週拆了沒</h3>
+        <div class="mono">✓ 拆了　彈窗問題（哪天修的、有紀錄）<br>○ 還在　授權衝突（沒證據就不算解決）</div>
+        <div class="th">GTD 閉環 · ESCALATION CHAIN</div>
+      </article>
+      <article class="fb">
+        <h3>下週哪裡會出事</h3>
+        <p>事故來之前先寫好劇本<br>如果廠商還卡著　就自己動手不等了</p>
+        <div class="th">KLEIN PREMORTEM</div>
+      </article>
+      <article class="fb">
+        <h3>下週只做三件事</h3>
+        <p>每件兩層：至少做到哪（保底）<br>順利的話做到哪（精彩）</p>
+        <p>第四件事　就是決定不做的事</p>
+        <div class="th">KANBAN WIP · FLOOR/STRETCH</div>
+      </article>
+    </div>
+    <div class="punch">說「解決了」要有證據——AI 說了不算</div>
   </div>
 </section>
 
 <section class="slide alt">
-  <div class="chrome"><span class="section">Reflective Hub / monthly reflection</span><span class="page">05 / 14</span></div>
+  <div class="chrome"><span class="section">Reflective Hub / monthly reflection</span><span class="page">07 / 19</span></div>
   <div class="content">
-    <h2>月報的真正爽點</h2>
-    <p class="sub">AI 主動發現你沒注意到的事</p>
-    <div class="metric-row">
-      <div class="metric"><strong>90</strong><span>5 月 sessions</span></div>
-      <div class="metric"><strong>6</strong><span>動量 lions</span></div>
-      <div class="metric"><strong>4</strong><span>LLM themes<br>Workers AI gpt-oss-120b 跑出來</span></div>
-    </div>
-    <div class="quote">
-      <p>「你以為自己同時推進 10 條線，實際上這個月你放掉了 4 條。<br>金礦在地下卻沒挖。這不是產能問題，是注意力分配的問題。」</p>
+    <h2>月報的真正價值</h2>
+    <p class="sub">不是摘要，是判決——2026-06 真實報告</p>
+    <div class="split">
+      <div>
+        <div class="metric-row" style="grid-template-columns:repeat(3,1fr);max-width:100%">
+          <div class="metric"><strong>79</strong><span>6 月 sessions</span></div>
+          <div class="metric"><strong>×7</strong><span>重工獅子<br>KB 基礎建設</span></div>
+          <div class="metric"><strong>1</strong><span>唯一制約點判決<br>不再四條建議平均給</span></div>
+        </div>
+        <div class="quote" style="width:100%;margin-top:34px">
+          <p>「本月的主要瓶頸<br>是資料與任務的<span class="accent">跨來源連續性</span>」</p>
+        </div>
+        <p class="sub" style="margin-top:26px;font-size:26px">TOC：非瓶頸處的改善是假改善——全月只指認一個</p>
+      </div>
+      <div class="ng3">
+        <div class="c"><b>13</b><span>研究論文</span></div>
+        <div class="c"><b>16</b><span>教學課程</span></div>
+        <div class="c" style="background:rgba(36,111,145,.16)"><b>30</b><span>KB/系統</span></div>
+        <div class="c"><b>0</b><span>商業經營</span></div>
+        <div class="c center"><b>79</b><span>主軸：KB 建設</span></div>
+        <div class="c"><b>2</b><span>內容產出</span></div>
+        <div class="c dim"><b>無觀測</b><span>健康</span></div>
+        <div class="c dim"><b>無觀測</b><span>家人朋友</span></div>
+        <div class="c dim"><b>無觀測</b><span>休閒充電</span></div>
+      </div>
     </div>
   </div>
 </section>
 
+<section class="slide hero">
+  <div class="chrome"><span class="section">Reflective Hub / intent loop</span><span class="page">08 / 19</span></div>
+  <div class="content">
+    <h2>不用介入的<span class="accent">反思系統</span></h2>
+    <p class="sub">你唯一的工作：看週報圖卡，想改才開口</p>
+    <div class="loop4">
+      <article class="ln" data-n="1">
+        <h3>週日夜 · 週報產出</h3>
+        <p>系統從你的實際工作<br>算出「下週三張卡建議」</p>
+      </article>
+      <article class="ln" data-n="2">
+        <h3>自動延續</h3>
+        <p>建議直接寫成下週意圖檔<br>標注：延續建議、未經確認</p>
+      </article>
+      <article class="ln veto" data-n="3">
+        <h3>你有否決權</h3>
+        <p>回一句話就改卡<br>沉默＝採用<br>改過的卡系統永不覆蓋</p>
+      </article>
+      <article class="ln" data-n="4">
+        <h3>下週日 · AAR 對照</h3>
+        <p>意圖 vs 實際自動對照<br>並產出再下週的建議</p>
+      </article>
+    </div>
+    <div class="loopback">▸ 迴圈回到 1　零強制人工　否決權本身就是意圖的表達</div>
+  </div>
+</section>
+
 <section class="slide band">
-  <div class="chrome"><span class="section">Reflective Hub / cron wakes up</span><span class="page">06 / 14</span></div>
+  <div class="chrome"><span class="section">Reflective Hub / cron wakes up</span><span class="page">09 / 19</span></div>
   <div class="content">
     <h2>系統自己會醒</h2>
     <div class="schedule">
@@ -414,22 +577,22 @@ html:has(head style[data-stack]) .slide{
 </section>
 
 <section class="slide">
-  <div class="chrome"><span class="section">Reflective Hub / meta reflection</span><span class="page">07 / 14</span></div>
+  <div class="chrome"><span class="section">Reflective Hub / meta reflection</span><span class="page">10 / 19</span></div>
   <div class="content">
     <h2>反思 AI 的反思</h2>
     <p class="sub">AI 已經幫你跑完反思，但 AI 看到的不一定全對</p>
     <div class="layers">
-      <article class="layer"><div class="lvl">L0</div><h3>你做事</h3><p>訊息進 chat-memory。</p></article>
-      <article class="layer"><div class="lvl">L1</div><h3>AI 反思你</h3><p>pipeline 跑 lions + themes。</p></article>
-      <article class="layer hot"><div class="lvl">L2</div><h3>你反思 AI 的反思</h3><p>跟報告對話：質疑、補充、反駁、延伸。</p></article>
-      <article class="layer"><div class="lvl">L3</div><h3>沉澱回 truth</h3><p>對話結論 append 回反思檔，下次 AI 反思時引用。</p></article>
+      <article class="layer"><div class="lvl">0</div><h3>你做事</h3><p>訊息走單一路徑入庫<br>不用想存哪</p></article>
+      <article class="layer"><div class="lvl">1</div><h3>AI 反思你</h3><p>daily 獅子<br>weekly 四區塊<br>monthly 判決</p></article>
+      <article class="layer hot"><div class="lvl">2</div><h3>你反思 AI 的反思</h3><p>質疑獅子：「這隻是誤讀」<br>你的裁決有效力——<br>假 closed 會被降回 open</p></article>
+      <article class="layer"><div class="lvl">3</div><h3>沉澱回 truth</h3><p>裁決進校準種子庫<br>下一輪偵測器因此更準</p></article>
     </div>
-    <div class="punch">AI 是放大鏡，不是裁判</div>
+    <div class="punch">AI 是放大鏡，不是裁判<span class="gold">　——　你質疑的每一隻獅子，都在訓練下一輪的偵測器</span></div>
   </div>
 </section>
 
 <section class="slide alt">
-  <div class="chrome"><span class="section">Reflective Hub / architecture</span><span class="page">08 / 14</span></div>
+  <div class="chrome"><span class="section">Reflective Hub / architecture</span><span class="page">11 / 19</span></div>
   <div class="content">
     <h2>不要再讓 AI 每次都從<span class="accent">失憶</span>開始</h2>
     <p class="sub">brain 可換　surface 可串　hub 一直在運作 — 跨工具一致　獨立在線</p>
@@ -462,22 +625,22 @@ html:has(head style[data-stack]) .slide{
 </section>
 
 <section class="slide">
-  <div class="chrome"><span class="section">Reflective Hub / kb boundaries</span><span class="page">09 / 14</span></div>
+  <div class="chrome"><span class="section">Reflective Hub / kb boundaries</span><span class="page">12 / 19</span></div>
   <div class="content">
     <h2>4 個獨立 KB 服務不同用戶<br><span class="accent">獨立不互通</span></h2>
     <p class="sub">各 KB 各自 MCP server，各自 access scope</p>
     <div class="kb-grid">
-      <article class="kb"><h3>SB</h3><p>個人 SecondBrain。只有你自己，跨工具跨裝置，truth source。</p></article>
-      <article class="kb"><h3>agent-kb</h3><p>教學知識庫。vibe coding 學員按 Stage 權限，cases docs tasks rules skills wiki。</p></article>
-      <article class="kb"><h3>kb-vault</h3><p>Free Second Brain 開源。任何 fork 它的人，framework template，fork-your-own。</p></article>
-      <article class="kb"><h3>insurance-kb</h3><p>保險業界 VIP 研究。VIP 付費，業界新聞月度蒸餾，VIP 研究報告。</p></article>
+      <article class="kb"><h3>SB</h3><p>個人 SecondBrain。只有你自己，跨工具跨裝置，truth source</p></article>
+      <article class="kb"><h3>agent-kb</h3><p>教學知識庫。vibe coding 學員按 Stage 權限，cases docs tasks rules skills wiki</p></article>
+      <article class="kb"><h3>kb-vault</h3><p>Free Second Brain 開源。任何 fork 它的人，framework template，fork-your-own</p></article>
+      <article class="kb"><h3>insurance-kb</h3><p>保險業界 VIP 研究。VIP 付費，業界新聞月度蒸餾，VIP 研究報告</p></article>
     </div>
-    <div class="warn">混在一起搜會 leak 隱私邊界。每個 KB 各自 MCP server、各自 access scope。</div>
+    <div class="warn">混在一起搜會 leak 隱私邊界。每個 KB 各自 MCP server、各自 access scope</div>
   </div>
 </section>
 
 <section class="slide hero">
-  <div class="chrome"><span class="section">Reflective Hub / free tier</span><span class="page">10 / 14</span></div>
+  <div class="chrome"><span class="section">Reflective Hub / free tier</span><span class="page">13 / 19</span></div>
   <div class="content">
     <h2>全跑在免費額度</h2>
     <div class="free-grid">
@@ -490,7 +653,7 @@ html:has(head style[data-stack]) .slide{
 </section>
 
 <section class="slide alt">
-  <div class="chrome"><span class="section">Reflective Hub / visible proof</span><span class="page">11 / 14</span></div>
+  <div class="chrome"><span class="section">Reflective Hub / visible proof</span><span class="page">14 / 19</span></div>
   <div class="content">
     <h2>看得見的東西</h2>
     <p class="sub">不是 roadmap PPT</p>
@@ -504,11 +667,11 @@ html:has(head style[data-stack]) .slide{
 </section>
 
 <section class="slide">
-  <div class="chrome"><span class="section">Reflective Hub / surface decoupled</span><span class="page">12 / 14</span></div>
+  <div class="chrome"><span class="section">Reflective Hub / surface decoupled</span><span class="page">15 / 19</span></div>
   <div class="content">
     <h2>Surface 也解耦</h2>
     <div class="surface">
-      <article class="truth"><div class="tiny">truth source</div><h3>一份 markdown repo</h3><p>View 可以自由切換，互不干擾。</p></article>
+      <article class="truth"><div class="tiny">truth source</div><h3>一份 markdown repo</h3><p>View 可以自由切換，互不干擾</p></article>
       <div class="views">
         <article class="view"><h3>GitHub web</h3><p>markdown render</p><span class="tag">already</span></article>
         <article class="view"><h3>Telegram PNG</h3><p>週月報自動推送</p><span class="tag">already</span></article>
@@ -522,30 +685,81 @@ html:has(head style[data-stack]) .slide{
 </section>
 
 <section class="slide band">
-  <div class="chrome"><span class="section">Reflective Hub / roadmap</span><span class="page">13 / 14</span></div>
+  <div class="chrome"><span class="section">Reflective Hub / roadmap</span><span class="page">16 / 19</span></div>
   <div class="content">
-    <h2>Roadmap — 想做的方向</h2>
-    <p class="sub">不急著做</p>
+    <h2>Roadmap — 從這裡到<span class="accent">開源</span></h2>
+    <p class="sub">前半已經上線，不是願望清單</p>
     <div class="road">
-      <article class="item"><div class="prio">P0</div><h3>Push-based lesson surface</h3><p>月報萃下月 3 條 lesson → CLAUDE.md auto-load。</p></article>
-      <article class="item"><div class="prio">P0</div><h3>Rule decay alarm</h3><p>每條 rule 加 last_validated，180 天沒觸發的自動 surface。</p></article>
-      <article class="item p1"><div class="prio">P1</div><h3>Skill auto-suggest</h3><p>rework lion verdict「抽 Skill」自動產 skill template。</p><p class="tiny">after 2026-06-01</p></article>
-      <article class="item p1"><div class="prio">P1</div><h3>SB-dreaming</h3><p>跨 6 月份 chat-memory 找重複 pain pattern。</p><p class="tiny">explore</p></article>
+      <article class="item"><div class="prio" style="color:var(--green)">DONE · 2026-07</div><h3>理論版三層報告</h3><p>四區塊週報 · TOC 唯一判決 · 九宮格<br>意圖檔自動閉環 · 告警全覆蓋</p></article>
+      <article class="item"><div class="prio">NEXT · L1</div><h3>獅子戶口（registry）</h3><p>每隻獅子有身分證：出生、幾次、解決沒<br>追蹤靠查戶口，不靠 AI 回想</p></article>
+      <article class="item p1"><div class="prio">L2 + L3</div><h3>自我校準 + 緊急直通</h3><p>警報準確率回頭調偵測器<br>致命訊號不排隊，直推手機</p></article>
+      <article class="item"><div class="prio">終點 · P0</div><h3>LionView 開源</h3><p>驗證過的引擎抽 generic 給人 fork<br>Most tools help you store more —<br>this helps you notice what matters</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="chrome"><span class="section">Reflective Hub / theory reference</span><span class="page">17 / 19</span></div>
+  <div class="content">
+    <h2>理論不是<span class="accent">裝飾</span></h2>
+    <p class="sub">每一個機制背後　都有一個被它擋掉的失敗模式</p>
+    <table class="ttable">
+      <thead><tr><th>理論</th><th>理論核心價值</th><th>擋掉的失敗模式</th><th>落在系統哪裡</th></tr></thead>
+      <tbody>
+        <tr><td>Kolb 學習循環<span>教育心理學</span></td><td>反思要走到「主動實驗」才算完成</td><td>流水帳——只記錄不改行為</td><td>每條獅子必附決定</td></tr>
+        <tr><td>GTD ＋ Zeigarnik<span>認知心理學</span></td><td>未閉環的事持續佔用工作記憶</td><td>雷不追蹤　就一直耗你</td><td>獅子閉環追蹤</td></tr>
+        <tr><td>Klein 三源＋premortem<span>決策心理學 NDM</span></td><td>洞察只來自矛盾／異常／連結</td><td>感想文＋事後諸葛</td><td>AAR 差距＋下週失控點</td></tr>
+        <tr><td>Goldratt TOC<span>作業管理</span></td><td>非瓶頸處的改善是假改善</td><td>建議清單化　四條平均給</td><td>月報唯一制約點判決</td></tr>
+        <tr><td>Kanban ＋ Fogg<span>精實生產＋行為設計</span></td><td>限制在製品　保底版守住可完成</td><td>目標通膨　二十條全滅</td><td>三張卡硬限＋保底／精彩</td></tr>
+        <tr style="color:var(--muted)"><td>Ashby 必要多樣性<span>模控學</span></td><td>調節器要匹配被調節系統的複雜度</td><td>一份報告吞所有頻率的訊號</td><td>架構依據：為何分三層</td></tr>
+        <tr style="color:var(--muted)"><td>Shewhart 管制<span>統計學／品質工程</span></td><td>分辨雜訊與訊號需要約一週樣本</td><td>單日波動被當成趨勢</td><td>架構依據：為何週＝模式層</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:14px;font:600 20px/1.5 'IBM Plex Mono',monospace;color:var(--muted)">上 5 條＝系統裡跑著的機制　下 2 條＝分層架構的理論依據　不混為一談</div>
+  </div>
+</section>
+
+<section class="slide band">
+  <div class="chrome"><span class="section">Reflective Hub / counter examples</span><span class="page">18 / 19</span></div>
+  <div class="content">
+    <h2>沒有它　會怎樣？</h2>
+    <p class="sub">反例不是假設——每一條都真實發生過</p>
+    <div class="cex">
+      <article class="no">
+        <h3>沒有 TOC 唯一判決</h3>
+        <p>月報四條建議平均給<br>建議越多　動得越少</p>
+        <div class="fact">實錄：六月 48 場討論　只有 6 場有決策</div>
+      </article>
+      <article class="no">
+        <h3>沒有閉環追蹤</h3>
+        <p>系統壞了自己不知道<br>還蓋章「一切正常」</p>
+        <div class="fact">實錄：W27 週報空殼　照樣回報「無紅燈」</div>
+      </article>
+      <article class="no">
+        <h3>沒有 WIP 硬限</h3>
+        <p>待辦二十條等於零條<br>每條都重要　就沒有一條重要</p>
+        <div class="fact">實錄：「下週優先」欄連續數週空白沉底</div>
+      </article>
+      <article class="no">
+        <h3>沒有意圖對照</h3>
+        <p>忙了一週很有產出感<br>說要做 A　整週在做 B　事後才發現</p>
+        <div class="fact">實錄：AAR 上線前　忙與有效在報告裡長一樣</div>
+      </article>
     </div>
   </div>
 </section>
 
 <section class="slide alt">
-  <div class="chrome"><span class="section">Reflective Hub / reverse filter</span><span class="page">14 / 14</span></div>
+  <div class="chrome"><span class="section">Reflective Hub / reverse filter</span><span class="page">19 / 19</span></div>
   <div class="content">
     <h2>反向篩選 — 這套不適合你</h2>
     <div class="filter">
-      <article class="no"><h3>× 想要 SaaS 一鍵搞定的人</h3><p>這套是 fork-your-own，不是 hosted。</p></article>
-      <article class="no"><h3>× 不寫 markdown 筆記的人</h3><p>沒 chat-memory，pipeline 沒料。</p></article>
-      <article class="no"><h3>× 把 AI 當聊天視窗的人</h3><p>沒有跨工具協作，就沒有跨工具 memory 痛點。</p></article>
-      <article class="no"><h3>× 期待開箱即用、不想自架的人</h3><p>雖然只要 30 分鐘 setup，但仍是「自架」。</p></article>
+      <article class="no"><h3>× 想要 SaaS 一鍵搞定的人</h3><p>這套是 fork-your-own，不是 hosted</p></article>
+      <article class="no"><h3>× 不寫 markdown 筆記的人</h3><p>沒 chat-memory，pipeline 沒料</p></article>
+      <article class="no"><h3>× 把 AI 當聊天視窗的人</h3><p>沒有跨工具協作，就沒有跨工具 memory 痛點</p></article>
+      <article class="no"><h3>× 期待開箱即用、不想自架的人</h3><p>雖然只要 30 分鐘 setup，但仍是「自架」</p></article>
     </div>
-    <div class="closing">這套重視的是「自己掌握 truth source · agent 跨工具一致行為」，不是便宜方便的 hosted memory service</div>
+    <div class="closing">這套重視的是「自己掌握 truth source · agent 跨工具一致行為」<br>不是便宜方便的 hosted memory service</div>
   </div>
 </section>
 
