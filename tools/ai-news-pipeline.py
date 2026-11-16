@@ -522,24 +522,15 @@ def git_commit_and_push(files: list[str]):
 # ============================================================
 
 def send_tg(message: str):
-    """發送 Telegram 通知。"""
-    if not TG_BOT_TOKEN:
-        log.warning("TG_BOT_TOKEN 未設定，跳過通知")
-        return
+    """送出告警。2026-11-16 起 Telegram 已停用，訊息經 legacy shim 轉送 ops-inbox
+    （ai-cooperation/ops-inbox）。只用於失敗與異常；例行新聞摘要不再通知。
+    不要改回 api.telegram.org。函式名保留以免動到呼叫端。"""
+    import subprocess
     try:
-        httpx.post(
-            f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage",
-            json={
-                "chat_id": TG_CHAT_ID,
-                "text": message,
-                "parse_mode": "HTML",
-                "disable_web_page_preview": False,
-            },
-            timeout=10,
-        )
-        log.info("TG 通知已發送")
+        subprocess.run(["/usr/local/bin/telegram-notify.sh", str(message)], timeout=40, check=False,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except Exception as e:
-        log.warning(f"TG 發送失敗: {e}")
+        log.warning(f"ops-inbox 通知失敗: {e}")
 
 
 # ============================================================
@@ -686,7 +677,9 @@ def run_pipeline(dry_run: bool = False, no_image: bool = False, no_push: bool = 
             lines.append(f"⚠️ {len(image_failures)} 篇圖片生成失敗")
 
         lines.append(f'🔗 <a href="{news_url}">查看完整報導</a>')
-        send_tg("\n".join(lines))
+        # 2026-11-16：例行摘要不再通知；只有圖片生成失敗才送 ops-inbox
+        if image_failures:
+            send_tg(f"[ai100 news] 圖片生成失敗\n{len(image_failures)} 篇圖片生成失敗（{today}）")
 
     log.info(f"\n完成！產出 {len(created_files)} 個檔案")
 
